@@ -1,0 +1,6 @@
+#Mapping (one field will not be mapped)
+#Format is <CSV Column Name> = <Salesforce API field name>
+"California" = ShippingState
+#Industry = Industry
+Name=Name
+NumEmp=NumberOfEmployees

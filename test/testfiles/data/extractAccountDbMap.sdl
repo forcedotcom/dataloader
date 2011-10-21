@@ -1,0 +1,9 @@
+# extract account mapping values for query from salesforce (left) and update to database (right)
+# salesforceFieldName=databaseFieldName
+Id=sfdc_account_id
+Oracle_Id__c=account_ext_id
+Name=account_name
+Phone=business_phone
+AnnualRevenue=annual_revenue
+AccountNumber__c=account_number
+LastModifiedDate=last_updated

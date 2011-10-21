@@ -1,0 +1,7 @@
+#Mapping values
+#Mon May 16 17:24:40 PDT 2011
+Name=Name
+NumEmployees = NumberOfEmployees
+Industry=Industry
+"Aerospace"=Industry
+"California"=BillingState, ShippingState

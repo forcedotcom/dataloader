@@ -1,0 +1,9 @@
+# upsert account mapping values for query from database (left) and upsert to Salesforce (right)
+# databaseFieldName=salesforceFieldName
+account_ext_id=Oracle_Id__c
+account_name=Name
+business_phone=Phone
+"valid"=Integration_Status__c
+annual_revenue=AnnualRevenue
+account_number=AccountNumber__c
+last_updated=CustomDateTime__c

@@ -1,0 +1,8 @@
+#Mapping values
+#Mon May 16 17:24:40 PDT 2011
+Name=Name
+NumEmployees = NumberOfEmployees
+""=Industry
+" " = Description
+=AnnualRevenue
+"California"=BillingState, ShippingState

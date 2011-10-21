@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="classes" path="src"/>
+	<classpathentry kind="src" output="test/java/classes" path="test/java/src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/commons-beanutils-core.jar"/>
+	<classpathentry kind="lib" path="lib/commons-dbcp-1.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/jface.jar"/>
+	<classpathentry kind="lib" path="lib/jfacetext.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.8.jar"/>
+	<classpathentry kind="lib" path="lib/osgi.jar"/>
+	<classpathentry kind="lib" path="lib/runtime.jar"/>
+	<classpathentry kind="lib" path="lib/@OS@/swt.jar"/>
+	<classpathentry kind="lib" path="lib/text.jar"/>
+	<classpathentry kind="lib" path="lib/wsc.jar" sourcepath="lib/wsc.jar"/>
+	<classpathentry kind="lib" path="lib/commons-pool-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/spring-beans.jar"/>
+	<classpathentry kind="lib" path="lib/spring-core.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="lib/oracle.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections-3.1.jar"/>
+	<classpathentry kind="lib" path="lib/spring.jar"/>
+	<classpathentry kind="lib" path="lib/quartz-1.5.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
+	<classpathentry kind="lib" path="lib/partnerwsdl.jar" sourcepath="lib/partnerwsdl.jar"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>

@@ -1,0 +1,6 @@
+# extract account mapping values for query from salesforce (left) and update to csv file (right)
+# salesforceFieldName=csvFieldName
+Id = Contact_Id
+Name = Contact_Name
+Account.Name = Account_Name
+Account.Id = Account_Id
