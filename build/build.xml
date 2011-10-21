@@ -107,7 +107,7 @@
     </target>
 
     <target name="clean_dist">
-        <delete file="${dist.zip}" failonerror="false"/>
+        <delete file="${dist.dir}" failonerror="false"/>
     </target>
 
     <target name="clean_javadoc">
@@ -188,7 +188,7 @@
 
     <target name="compile" depends="pre" description="Compile java only">
         <mkdir dir="${classes.dir}"/>
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" deprecation="on" debug="on" classpathref="dataloader.classpath" source="1.5" target="1.5"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" deprecation="${javac.deprecation}" debug="on" classpathref="dataloader.classpath" source="1.5" target="1.5"/>
 
         <copy todir="${classes.dir}">
             <fileset dir="${src.dir}" includes="*.dll **/*.gif **/*.bmp **/*.properties" />
@@ -197,7 +197,7 @@
 
     <target name="compile_test" depends="compile" description="Compile tests">
         <mkdir dir="${test.classes.dir}"/>
-        <javac srcdir="${test.src.dir}" destdir="${test.classes.dir}" deprecation="on" debug="on" classpathref="test.classpath" source="1.5" target="1.5"/>
+        <javac srcdir="${test.src.dir}" destdir="${test.classes.dir}" deprecation="${javac.deprecation}" debug="on" classpathref="test.classpath" source="1.5" target="1.5"/>
         <copy todir="${test.classes.dir}">
             <fileset dir="${test.src.dir}">
                 <include name="**/*.properties" />
