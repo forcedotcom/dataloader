@@ -649,8 +649,14 @@ abstract public class ProcessTestBase extends ConfigTestBase {
     protected static final boolean DEBUG_MESSAGES = false;
 
     protected final Map<String, String> getTestConfig(OperationInfo op, String daoName, boolean isExtraction) {
+        return getTestConfig(op, daoName, new File(getTestDataDir(), this.baseName + "Map.sdl").getAbsolutePath(),
+                isExtraction);
+    }
+
+    protected final Map<String, String> getTestConfig(OperationInfo op, String daoName, String mappingFile,
+            boolean isExtraction) {
         Map<String, String> res = super.getTestConfig();
-        res.put(Config.MAPPING_FILE, new File(getTestDataDir(), this.baseName + "Map.sdl").getAbsolutePath());
+        res.put(Config.MAPPING_FILE, mappingFile);
         res.put(Config.OPERATION, op.name());
         res.put(Config.DAO_NAME, daoName);
         res.put(Config.DAO_TYPE, isExtraction ? DataAccessObjectFactory.CSV_WRITE_TYPE
@@ -1040,7 +1046,25 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         return Config.TRUE.equalsIgnoreCase(argMap.get(configKey));
     }
 
-    protected Map<String, String> getUpdateTestConfig(boolean isUpsert, String extIdField, int numAccountsToInsert) throws DataAccessObjectException {
+    protected Map<String, String> getUpdateTestConfig(boolean isUpsert, String extIdField, int numAccountsToInsert)
+            throws DataAccessObjectException {
+        return getUpdateTestConfig(this.baseName, isUpsert, extIdField, numAccountsToInsert);
+    }
+
+    /**
+     * Get a config map for use with update/upsert operations
+     *
+     * @param fileNameBase This method will expect a file named <fileNameBase>Template.csv to exist.
+     *        The template file will be filled in using freshly inserted accounts (if numAccountsToInsert is 
+     *        greater than zero). This will generate <fileNameBase>.csv for the DAO, and the mapping file will be
+     *        set to <fileNameBase>Map.sdl.
+     * @param isUpsert True for upsert process configuration false for update process configuration.
+     * @param extIdField The name of the external id field (for upsert)
+     * @param numAccountsToInsert Number of accounts to create right now and use to fill in the template file.
+     * @return Map of dataloader settings for running an update/upsert operation.
+     */
+    protected Map<String, String> getUpdateTestConfig(String fileNameBase, boolean isUpsert, String extIdField,
+            int numAccountsToInsert) throws DataAccessObjectException {
         final boolean hasExtId = isUpsert && extIdField != null;
         TemplateListener[] listeners = null;
         if (hasExtId) {
@@ -1048,10 +1072,10 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         } else {
             listeners = new TemplateListener[] { new AccountIdTemplateListener(numAccountsToInsert) };
         }
-        final String updateFileName = convertTemplateToInput(this.baseName + "Template.csv", this.baseName + ".csv",
-                listeners);
+        final String updateFileName = convertTemplateToInput(fileNameBase + "Template.csv", fileNameBase + ".csv", listeners);
+        final File mappingFile = new File(getTestDataDir(), fileNameBase + "Map.sdl");
         final Map<String, String> argMap = getTestConfig(isUpsert ? OperationInfo.upsert : OperationInfo.update,
-                updateFileName, false);
+                updateFileName, mappingFile.getAbsolutePath(), false);
         if (hasExtId) argMap.put(Config.EXTERNAL_ID_FIELD, extIdField);
         return argMap;
     }

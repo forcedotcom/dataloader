@@ -2,7 +2,7 @@
 
 
 <!--
-Salesforce.com Partner Web Services API Version 22.0
+Salesforce.com Partner Web Services API Version 23.0
 Generated on (Used notimestamp option).
 
 Copyright 1999-2011 salesforce.com, inc.
@@ -1646,6 +1646,8 @@ All Rights Reserved
                 <restriction base="xsd:string">
                     <enumeration value="API_CURRENTLY_DISABLED"/>
                     <enumeration value="API_DISABLED_FOR_ORG"/>
+                    <enumeration value="ARGUMENT_OBJECT_PARSE_ERROR"/>
+                    <enumeration value="CANNOT_DELETE_OWNER"/>
                     <enumeration value="CANT_ADD_STANDADRD_PORTAL_USER_TO_TERRITORY"/>
                     <enumeration value="CANT_ADD_STANDARD_PORTAL_USER_TO_TERRITORY"/>
                     <enumeration value="CIRCULAR_OBJECT_GRAPH"/>
@@ -1653,8 +1655,10 @@ All Rights Reserved
                     <enumeration value="CLIENT_REQUIRE_UPDATE_FOR_USER"/>
                     <enumeration value="CUSTOM_METADATA_LIMIT_EXCEEDED"/>
                     <enumeration value="DATACLOUD_API_CLIENT_EXCEPTION"/>
+                    <enumeration value="DATACLOUD_API_SERVER_BUSY_EXCEPTION"/>
                     <enumeration value="DATACLOUD_API_SERVER_EXCEPTION"/>
                     <enumeration value="DATACLOUD_API_UNAVAILABLE"/>
+                    <enumeration value="DUPLICATE_ARGUMENT_VALUE"/>
                     <enumeration value="DUPLICATE_VALUE"/>
                     <enumeration value="EMAIL_BATCH_SIZE_LIMIT_EXCEEDED"/>
                     <enumeration value="EMAIL_TO_CASE_INVALID_ROUTING"/>
@@ -1665,6 +1669,7 @@ All Rights Reserved
                     <enumeration value="EXCEEDED_MAX_SIZE_REQUEST"/>
                     <enumeration value="EXCEEDED_MAX_TYPES_LIMIT"/>
                     <enumeration value="EXCEEDED_QUOTA"/>
+                    <enumeration value="FEED_NOT_ENABLED_FOR_OBJECT"/>
                     <enumeration value="FUNCTIONALITY_NOT_ENABLED"/>
                     <enumeration value="FUNCTIONALITY_TEMPORARILY_UNAVAILABLE"/>
                     <enumeration value="INACTIVE_OWNER_OR_USER"/>
@@ -1681,9 +1686,11 @@ All Rights Reserved
                     <enumeration value="INVALID_LOCALE_LANGUAGE"/>
                     <enumeration value="INVALID_LOCATOR"/>
                     <enumeration value="INVALID_LOGIN"/>
+                    <enumeration value="INVALID_MULTIPART_REQUEST"/>
                     <enumeration value="INVALID_NEW_PASSWORD"/>
                     <enumeration value="INVALID_OPERATION"/>
                     <enumeration value="INVALID_OPERATION_WITH_EXPIRED_PASSWORD"/>
+                    <enumeration value="INVALID_PAGING_OPTION"/>
                     <enumeration value="INVALID_QUERY_FILTER_OPERATOR"/>
                     <enumeration value="INVALID_QUERY_LOCATOR"/>
                     <enumeration value="INVALID_QUERY_SCOPE"/>
@@ -1692,12 +1699,14 @@ All Rights Reserved
                     <enumeration value="INVALID_SEARCH_SCOPE"/>
                     <enumeration value="INVALID_SESSION_ID"/>
                     <enumeration value="INVALID_SOAP_HEADER"/>
+                    <enumeration value="INVALID_SORT_OPTION"/>
                     <enumeration value="INVALID_SSO_GATEWAY_URL"/>
                     <enumeration value="INVALID_TYPE"/>
                     <enumeration value="INVALID_TYPE_FOR_OPERATION"/>
                     <enumeration value="JIGSAW_IMPORT_LIMIT_EXCEEDED"/>
                     <enumeration value="JIGSAW_REQUEST_NOT_SUPPORTED"/>
                     <enumeration value="JSON_PARSER_ERROR"/>
+                    <enumeration value="LICENSING_UNKNOWN_ERROR"/>
                     <enumeration value="LIMIT_EXCEEDED"/>
                     <enumeration value="LOGIN_CHALLENGE_ISSUED"/>
                     <enumeration value="LOGIN_CHALLENGE_PENDING"/>
@@ -1718,6 +1727,7 @@ All Rights Reserved
                     <enumeration value="ORG_NOT_OWNED_BY_INSTANCE"/>
                     <enumeration value="PASSWORD_LOCKOUT"/>
                     <enumeration value="PORTAL_NO_ACCESS"/>
+                    <enumeration value="POST_BODY_PARSE_ERROR"/>
                     <enumeration value="QUERY_TIMEOUT"/>
                     <enumeration value="QUERY_TOO_COMPLICATED"/>
                     <enumeration value="REQUEST_LIMIT_EXCEEDED"/>
@@ -1728,9 +1738,12 @@ All Rights Reserved
                     <enumeration value="SOCIALCRM_FEEDSERVICE_API_UNAVAILABLE"/>
                     <enumeration value="SSO_SERVICE_DOWN"/>
                     <enumeration value="TOO_MANY_APEX_REQUESTS"/>
+                    <enumeration value="TOO_MANY_RECIPIENTS"/>
                     <enumeration value="TRIAL_EXPIRED"/>
+                    <enumeration value="UNKNOWN_ATTACHMENT_EXCEPTION"/>
                     <enumeration value="UNKNOWN_EXCEPTION"/>
                     <enumeration value="UNSUPPORTED_API_VERSION"/>
+                    <enumeration value="UNSUPPORTED_ATTACHMENT_ENCODING"/>
                     <enumeration value="UNSUPPORTED_CLIENT"/>
                     <enumeration value="UNSUPPORTED_MEDIA_TYPE"/>
                     <enumeration value="XML_PARSER_ERROR"/>
@@ -1741,6 +1754,8 @@ All Rights Reserved
                 <restriction base="xsd:QName">
                     <enumeration value="fns:API_CURRENTLY_DISABLED"/>
                     <enumeration value="fns:API_DISABLED_FOR_ORG"/>
+                    <enumeration value="fns:ARGUMENT_OBJECT_PARSE_ERROR"/>
+                    <enumeration value="fns:CANNOT_DELETE_OWNER"/>
                     <enumeration value="fns:CANT_ADD_STANDADRD_PORTAL_USER_TO_TERRITORY"/>
                     <enumeration value="fns:CANT_ADD_STANDARD_PORTAL_USER_TO_TERRITORY"/>
                     <enumeration value="fns:CIRCULAR_OBJECT_GRAPH"/>
@@ -1748,8 +1763,10 @@ All Rights Reserved
                     <enumeration value="fns:CLIENT_REQUIRE_UPDATE_FOR_USER"/>
                     <enumeration value="fns:CUSTOM_METADATA_LIMIT_EXCEEDED"/>
                     <enumeration value="fns:DATACLOUD_API_CLIENT_EXCEPTION"/>
+                    <enumeration value="fns:DATACLOUD_API_SERVER_BUSY_EXCEPTION"/>
                     <enumeration value="fns:DATACLOUD_API_SERVER_EXCEPTION"/>
                     <enumeration value="fns:DATACLOUD_API_UNAVAILABLE"/>
+                    <enumeration value="fns:DUPLICATE_ARGUMENT_VALUE"/>
                     <enumeration value="fns:DUPLICATE_VALUE"/>
                     <enumeration value="fns:EMAIL_BATCH_SIZE_LIMIT_EXCEEDED"/>
                     <enumeration value="fns:EMAIL_TO_CASE_INVALID_ROUTING"/>
@@ -1760,6 +1777,7 @@ All Rights Reserved
                     <enumeration value="fns:EXCEEDED_MAX_SIZE_REQUEST"/>
                     <enumeration value="fns:EXCEEDED_MAX_TYPES_LIMIT"/>
                     <enumeration value="fns:EXCEEDED_QUOTA"/>
+                    <enumeration value="fns:FEED_NOT_ENABLED_FOR_OBJECT"/>
                     <enumeration value="fns:FUNCTIONALITY_NOT_ENABLED"/>
                     <enumeration value="fns:FUNCTIONALITY_TEMPORARILY_UNAVAILABLE"/>
                     <enumeration value="fns:INACTIVE_OWNER_OR_USER"/>
@@ -1776,9 +1794,11 @@ All Rights Reserved
                     <enumeration value="fns:INVALID_LOCALE_LANGUAGE"/>
                     <enumeration value="fns:INVALID_LOCATOR"/>
                     <enumeration value="fns:INVALID_LOGIN"/>
+                    <enumeration value="fns:INVALID_MULTIPART_REQUEST"/>
                     <enumeration value="fns:INVALID_NEW_PASSWORD"/>
                     <enumeration value="fns:INVALID_OPERATION"/>
                     <enumeration value="fns:INVALID_OPERATION_WITH_EXPIRED_PASSWORD"/>
+                    <enumeration value="fns:INVALID_PAGING_OPTION"/>
                     <enumeration value="fns:INVALID_QUERY_FILTER_OPERATOR"/>
                     <enumeration value="fns:INVALID_QUERY_LOCATOR"/>
                     <enumeration value="fns:INVALID_QUERY_SCOPE"/>
@@ -1787,12 +1807,14 @@ All Rights Reserved
                     <enumeration value="fns:INVALID_SEARCH_SCOPE"/>
                     <enumeration value="fns:INVALID_SESSION_ID"/>
                     <enumeration value="fns:INVALID_SOAP_HEADER"/>
+                    <enumeration value="fns:INVALID_SORT_OPTION"/>
                     <enumeration value="fns:INVALID_SSO_GATEWAY_URL"/>
                     <enumeration value="fns:INVALID_TYPE"/>
                     <enumeration value="fns:INVALID_TYPE_FOR_OPERATION"/>
                     <enumeration value="fns:JIGSAW_IMPORT_LIMIT_EXCEEDED"/>
                     <enumeration value="fns:JIGSAW_REQUEST_NOT_SUPPORTED"/>
                     <enumeration value="fns:JSON_PARSER_ERROR"/>
+                    <enumeration value="fns:LICENSING_UNKNOWN_ERROR"/>
                     <enumeration value="fns:LIMIT_EXCEEDED"/>
                     <enumeration value="fns:LOGIN_CHALLENGE_ISSUED"/>
                     <enumeration value="fns:LOGIN_CHALLENGE_PENDING"/>
@@ -1813,6 +1835,7 @@ All Rights Reserved
                     <enumeration value="fns:ORG_NOT_OWNED_BY_INSTANCE"/>
                     <enumeration value="fns:PASSWORD_LOCKOUT"/>
                     <enumeration value="fns:PORTAL_NO_ACCESS"/>
+                    <enumeration value="fns:POST_BODY_PARSE_ERROR"/>
                     <enumeration value="fns:QUERY_TIMEOUT"/>
                     <enumeration value="fns:QUERY_TOO_COMPLICATED"/>
                     <enumeration value="fns:REQUEST_LIMIT_EXCEEDED"/>
@@ -1823,9 +1846,12 @@ All Rights Reserved
                     <enumeration value="fns:SOCIALCRM_FEEDSERVICE_API_UNAVAILABLE"/>
                     <enumeration value="fns:SSO_SERVICE_DOWN"/>
                     <enumeration value="fns:TOO_MANY_APEX_REQUESTS"/>
+                    <enumeration value="fns:TOO_MANY_RECIPIENTS"/>
                     <enumeration value="fns:TRIAL_EXPIRED"/>
+                    <enumeration value="fns:UNKNOWN_ATTACHMENT_EXCEPTION"/>
                     <enumeration value="fns:UNKNOWN_EXCEPTION"/>
                     <enumeration value="fns:UNSUPPORTED_API_VERSION"/>
+                    <enumeration value="fns:UNSUPPORTED_ATTACHMENT_ENCODING"/>
                     <enumeration value="fns:UNSUPPORTED_CLIENT"/>
                     <enumeration value="fns:UNSUPPORTED_MEDIA_TYPE"/>
                     <enumeration value="fns:XML_PARSER_ERROR"/>
@@ -3157,7 +3183,7 @@ All Rights Reserved
     <service name="SforceService">
         <documentation>Sforce SOAP API</documentation>
         <port binding="tns:SoapBinding" name="Soap">
-            <soap:address location="http://(someAppServerPool)/services/Soap/u/22.0"/>
+            <soap:address location="http://(someAppServerPool)/services/Soap/u/23.0"/>
         </port>
     </service>
 </definitions>

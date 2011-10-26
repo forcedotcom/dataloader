@@ -49,11 +49,12 @@ public class CsvUpsertProcessTest extends ProcessTestBase {
     public static ConfigGenerator getConfigGenerator() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
         final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.USE_BULK_API,
-                Boolean.TRUE.toString());
+                Config.TRUE);
 
         return new UnionConfigGenerator(parent, withBulkApi);
     }
 
+    
     public CsvUpsertProcessTest(String name, Map<String, String> config) {
         super(name, config);
     }
@@ -65,7 +66,7 @@ public class CsvUpsertProcessTest extends ProcessTestBase {
         // define properties
         Map<String, String> argMap = getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 10);
 
-        // start at 1, not 0!!
+        // start at 3, not 0!!
         argMap.put(Config.LOAD_ROW_TO_START_AT, "3");
 
         // perform the upsert

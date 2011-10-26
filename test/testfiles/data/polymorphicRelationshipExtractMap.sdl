@@ -1,0 +1,7 @@
+# extract account mapping values for query from salesforce (left) and update to csv file (right)
+# salesforceFieldName=csvFieldName
+Id=LID
+Owner.Name=NAME__RESULT
+Owner.Id=OWNID
+OwnerId=OID
+owner.LASTNAME=lName

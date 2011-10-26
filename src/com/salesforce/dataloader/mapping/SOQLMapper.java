@@ -186,21 +186,22 @@ public class SOQLMapper extends Mapper {
     }
 
     private String evalSfdcField(DescribeSObjectResult describeResult, String fieldExpr) {
-        int splitIdx = fieldExpr.indexOf('.');
+        final int splitIdx = fieldExpr.indexOf('.');
         if (splitIdx >= 0) {
-            Field field = getReferenceField(describeResult, fieldExpr.substring(0, splitIdx));
-            String newFieldExpr;
+          final   Field field = getReferenceField(describeResult, fieldExpr.substring(0, splitIdx));
+
             try {
-                newFieldExpr = fieldExpr.substring(splitIdx + 1);
+                fieldExpr = fieldExpr.substring(splitIdx + 1);
             } catch (IndexOutOfBoundsException e) {
                 throw new InvalidMappingException("Failed to parse field expression " + fieldExpr);
             }
-            String[] refs = field.getReferenceTo();
-            if (refs == null || refs.length != 1)
-                throw new InvalidMappingException("Internal error.  Cannot parse field expression " + fieldExpr);
+            
+            assert field.getReferenceTo() != null && field.getReferenceTo().length>0;  // this should never happen
             try {
-                return field.getRelationshipName() + "."
-                        + evalSfdcField(getClient().describeSObject(refs[0]), newFieldExpr);
+                // if the reference is polymorphic we need to lookup the next field on the Name object
+                final String relEntityName = field.isNamePointing() ? "Name" : field.getReferenceTo()[0];
+                describeResult = getClient().describeSObject(relEntityName);
+                return field.getRelationshipName() + "." + evalSfdcField(describeResult, fieldExpr);
             } catch (ConnectionException e) {
                 throw new InvalidMappingException("Connection error while parsing field expression " + fieldExpr, e);
             }

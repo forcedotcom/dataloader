@@ -408,21 +408,39 @@ public class CsvProcessTest extends ProcessTestBase {
      */
     public void testErrorsGeneratedOnInvalidDateMatching() throws Exception {
 
-        //examine the error file and verify that the row in question failed
-        final int numberOfRows = 6;
+    	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(0, 3,3);
+    }
+
+    /**
+     * Verify that the controller reports that errors occurred on invalid dates and works with row offsets.
+     *
+     * @expectedResults Assert that the correct number of errors and successes are returned.
+     *
+     * @throws Exception
+     */
+    public void testErrorsGeneratedOnInvalidDateMatchingWithOffset() throws Exception {
+    	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(2, 2, 2);
+    }
+    
+    private void runTestErrorsGeneratedOnInvalidDateMatchWithOffset(Integer rowOffset, final int numSuccesses, final int numFailures) throws Exception {
+    	
+    	//examine the error file and verify that the row in question failed
+    	final int numberOfRows = 6;
         final int targetDate = 14;
         final String dateField = "CustomDateField__c";
-        final int numFailures = 3;
-
+        
+        assertEquals("Invalid testing configuration", numberOfRows, rowOffset + numFailures + numSuccesses);
+        
         TimeZone TZ = TimeZone.getTimeZone("GMT");
-
+        
         DateConverter converter = new DateConverter(TZ, false);
         //find the csv file
         Map<String, String> argumentMap = getTestConfig(OperationInfo.insert, getTestDataDir()
                 + "/timeZoneFormatTestingWithErrors.csv", false);
+        argumentMap.put(Config.LOAD_ROW_TO_START_AT, rowOffset.toString());
 
         // insert into the account on the custom fields specified
-        Controller controller = runProcessWithErrors(argumentMap, numberOfRows - numFailures, numFailures);
+        Controller controller = runProcessWithErrors(argumentMap, numSuccesses, numFailures);
 
         verifyErrors(controller, "Error converting value to correct data type: Failed to parse date: ");
 
@@ -442,8 +460,7 @@ public class CsvProcessTest extends ProcessTestBase {
             // The calendar adjusts for the offset so we have to correct for that do a GMT comparison
             assertEquals("Timezone not correctly interpreted or sent", targetDate - timeZoneOffset,
                     calFromString.get(Calendar.DATE));
-        }
+        }    	
     }
-
 }
 

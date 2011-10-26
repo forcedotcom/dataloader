@@ -71,7 +71,7 @@ public class Controller {
     private static final String LOG_STDOUT_FILE = "sdl_out.log"; //$NON-NLS-1$
     private static final String CONFIG_DIR = "conf"; //$NON-NLS-1$
     private static final String APP_NAME = "Apex Data Loader"; //$NON-NLS-1$
-    public static final String APP_VERSION = "22.0"; //$NON-NLS-1$
+    public static final String APP_VERSION = "23.0"; //$NON-NLS-1$
     private static final String APP_VENDOR = "salesforce.com"; //$NON-NLS-1$
 
     /**
