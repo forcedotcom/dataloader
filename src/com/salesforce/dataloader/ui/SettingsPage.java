@@ -79,8 +79,6 @@ public class SettingsPage extends WizardPage {
     public void createControl(Composite parent) {
         getShell().setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
 
-        GridData data;
-
         Config config = controller.getConfig();
 
         Composite comp = new Composite(parent, SWT.NONE);
@@ -95,7 +93,7 @@ public class SettingsPage extends WizardPage {
 
         textUsername = new Text(comp, SWT.BORDER);
         textUsername.setText(config.getString(Config.USERNAME));
-        data = new GridData();
+        GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false);
         data.widthHint = 150;
         textUsername.setLayoutData(data);
 
@@ -112,7 +110,7 @@ public class SettingsPage extends WizardPage {
         config.setValue(Config.PASSWORD, ""); //$NON-NLS-1$
         textPassword.setText(config.getString(Config.PASSWORD));
 
-        data = new GridData();
+        data = new GridData(SWT.FILL, SWT.CENTER, true, false);
         data.widthHint = 150;
         textPassword.setLayoutData(data);
 
@@ -146,10 +144,15 @@ public class SettingsPage extends WizardPage {
 
             textSessionId = new Text(comp, SWT.BORDER);
             textSessionId.setText(config.getString(Config.SFDC_INTERNAL_SESSION_ID));
-            data = new GridData();
+            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
             data.widthHint = 150;
-            data.horizontalSpan = 2;
             textSessionId.setLayoutData(data);
+
+            // consume the 2 cells to the right of textSessionId & textEndpoint
+            composite2 = new Composite(comp, SWT.NONE);
+            data = new GridData();
+            data.verticalSpan = 2;
+            composite2.setLayoutData(data);
 
             //endpoint
             Label labelEndpoint = new Label(comp, SWT.RIGHT);
@@ -157,18 +160,12 @@ public class SettingsPage extends WizardPage {
 
             textEndpoint = new Text(comp, SWT.BORDER);
             textEndpoint.setText(config.getString(Config.ENDPOINT));
-            data = new GridData();
+            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
             data.widthHint = 150;
             textEndpoint.setLayoutData(data);
 
             reconcileLoginCredentialFieldsEnablement();
         }
-
-        Label clearLabel = new Label(comp, SWT.NONE);
-        data = new GridData();
-        data.horizontalSpan = 3;
-        data.widthHint = 15;
-        clearLabel.setLayoutData(data);
 
         loginLabel = new Label(comp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
