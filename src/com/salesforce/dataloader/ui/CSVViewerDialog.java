@@ -234,7 +234,7 @@ public class CSVViewerDialog extends Dialog {
         try {
             csvReader.open();
 
-            List header = csvReader.getColumnNames();
+            List<String> header = csvReader.getColumnNames();
 
             //sforce field table viewer
             csvTblViewer = new TableViewer(shell, SWT.FULL_SELECTION);
@@ -247,7 +247,7 @@ public class CSVViewerDialog extends Dialog {
             data.heightHint = 300;
             csvTable.setLayoutData(data);
 
-            Iterator iter = header.iterator();
+            Iterator<String> iter = header.iterator();
 
             new TableColumn(csvTable, SWT.LEFT).setText(Labels.getString("CSVViewerDialog.rowNumber")); //$NON-NLS-1$
 

@@ -92,7 +92,7 @@ public class DAORowUtil {
      * @param row
      * @return true if row is valid
      */
-    public static boolean isValidRow(List row) {
+    public static boolean isValidRow(List<?> row) {
         if (row == null) { return false; }
         if (row.size() == 1 && ("".equals(row.get(0)))) { return false; }
         return true;
