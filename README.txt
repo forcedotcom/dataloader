@@ -6,7 +6,7 @@ I.  Building the apex dataloader
 
 There are two "out of the box" ways to build the apex dataloader.
 
-The first is to use Eclipse to build the apex dataloader.  Go to File->Import->Import Existing Project.  Choose the base directory and it should find the dataloader project.
+The first is to use Eclipse to build the apex dataloader.  Go to File->Import->Import Existing Project.  Choose the base directory and it should find the dataloader project. Before you do this you need to follow the instruction below for the ant build and run the "ant pre" target.
 
 The second way to build the data loader is through apache ant.  This requires that you have ant and perl installed.  Go to the build directory and edit the build.properties file.
 Set values for ANT_HOME, JAVA_HOME, and app.home.  Also if you files are not on c: then you'll need to set home.dir as well.  Open a command prompt and from the build directory
