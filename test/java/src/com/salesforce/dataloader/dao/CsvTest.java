@@ -61,7 +61,7 @@ public class CsvTest extends TestBase {
         }
 
         // check that the header row is correctly returned.
-        List headerRow = csv.getColumnNames();
+        List<String> headerRow = csv.getColumnNames();
         assertEquals("column1", (String) headerRow.get(0));
         assertEquals("column2", (String) headerRow.get(1));
         assertEquals("column3", (String) headerRow.get(2));

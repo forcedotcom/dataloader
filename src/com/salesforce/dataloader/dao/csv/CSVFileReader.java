@@ -375,11 +375,11 @@ public class CSVFileReader implements DataReader {
         return map;
     }
 
-    private synchronized void checkLineExceptions(ArrayList line) throws IOException {
+    private synchronized void checkLineExceptions(ArrayList<String> line) throws IOException {
         int rowSizeInCharacters = 0;
         if (line != null) {
             for (int j = 0; j < line.size(); ++j) {
-                String value = (String)line.get(j);
+                String value = line.get(j);
                 if (value != null) {
                     rowSizeInCharacters += value.length();
                 }

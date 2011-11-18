@@ -102,8 +102,8 @@ public class SforceDynaBean {
      * @param field
      * @return class to perform conversion
      */
-    public static Class getTypeClass(Field field) {
-        Class classType;
+    public static Class<?> getTypeClass(Field field) {
+        Class<?> classType;
         SoapType soapType = field.getSoapType();
 
         switch(soapType) {
@@ -145,8 +145,8 @@ public class SforceDynaBean {
      * @param field
      * @return class to perform conversion
      */
-    public static Class getConverterClass(Field field) {
-        Class classType;
+    public static Class<?> getConverterClass(Field field) {
+        Class<?> classType;
         SoapType soapType = field.getSoapType();
 
         switch(soapType) {
