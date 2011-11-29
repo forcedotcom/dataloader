@@ -1,0 +1,7 @@
+.classpath
+.settings
+.project
+jar/
+classes/
+test/testfiles/results/
+test/testfiles/status/
