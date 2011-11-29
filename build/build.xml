@@ -314,6 +314,7 @@
                <include name="**/*"/>
             </fileset>
         </delete>
+        <mkdir dir="${test.status.dir}"/>
 		<mkdir dir="${test.results.dir}" />
 		<property name="testcase" value="AllTests" />
         <echo message="*** Running test ${testcase} from source directory ${test.src.dir}"/>
