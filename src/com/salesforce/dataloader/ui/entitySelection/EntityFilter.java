@@ -32,7 +32,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 
 /**
- * This class filters the
+ * This class filters the entity list
  */
 public class EntityFilter extends ViewerFilter {
     /**

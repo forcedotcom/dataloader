@@ -65,14 +65,13 @@ public class ExtractionDataSelectionPage extends WizardPage {
     private final EntityFilter filter = new EntityFilter();
     private ListViewer lv;
     private Text fileText;
-
     public Composite comp;
-
     private boolean success;
 
     public ExtractionDataSelectionPage(Controller controller) {
-        super(
-                Labels.getString("ExtractionDataSelectionPage.title"), Labels.getString("ExtractionDataSelectionPage.titleMsg"), UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$ //$NON-NLS-2$
+        super(	Labels.getString("ExtractionDataSelectionPage.title"), 
+                Labels.getString("ExtractionDataSelectionPage.titleMsg"), 
+                UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$ //$NON-NLS-2$
 
         this.controller = controller;
 
@@ -85,20 +84,18 @@ public class ExtractionDataSelectionPage extends WizardPage {
     public void createControl(Composite parent) {
         getShell().setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
 
-        GridData data;
-
-        comp = new Composite(parent, SWT.NONE);
-
         GridLayout gridLayout = new GridLayout(1, false);
         gridLayout.horizontalSpacing = 10;
         gridLayout.marginHeight = 15;
         gridLayout.verticalSpacing = 5;
+        gridLayout.marginRight = 5;
 
+        comp = new Composite(parent, SWT.NONE);
         comp.setLayout(gridLayout);
 
         Label label = new Label(comp, SWT.RIGHT);
         label.setText(Labels.getString("ExtractionDataSelectionPage.selectSforce")); //$NON-NLS-1$
-        data = new GridData();
+        GridData data = new GridData();
         label.setLayoutData(data);
 
         // Add a checkbox to toggle filter
@@ -111,7 +108,7 @@ public class ExtractionDataSelectionPage extends WizardPage {
         lv.setContentProvider(new EntityContentProvider());
         lv.setLabelProvider(new EntityLabelProvider());
         lv.setInput(null);
-        data = new GridData(GridData.FILL_VERTICAL);
+        data = new GridData(GridData.FILL, GridData.FILL, true, true);
         data.heightHint = 140;
         data.widthHint = 140;
         lv.getControl().setLayoutData(data);
