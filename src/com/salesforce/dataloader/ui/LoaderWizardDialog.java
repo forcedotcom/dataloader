@@ -998,13 +998,13 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     private void showStartingPage() {
         currentPage = wizard.getStartingPage();
         if (currentPage == null) {
-            // something must have happend getting the page
+            // something must have happened getting the page
             return;
         }
         // ensure the page control has been created
         if (currentPage.getControl() == null) {
             currentPage.createControl(pageContainer);
-            // the page is responsible for ensuring the created control is accessable
+            // the page is responsible for ensuring the created control is accessible
             // via getControl.
             Assert.isNotNull(currentPage.getControl());
             // we do not need to update the size since the call
