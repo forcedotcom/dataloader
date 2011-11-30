@@ -1,0 +1,8 @@
+bin/
+.classpath
+classes/
+lib/partnerwsdl.jar
+test/testfiles/conf/database-conf.xml
+test/testfiles/conf/log-conf.xml
+test/testfiles/conf/process-conf.xml
+test/java/src/com/salesforce/dataloader/test.properties

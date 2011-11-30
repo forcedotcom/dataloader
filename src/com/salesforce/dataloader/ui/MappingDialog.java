@@ -502,7 +502,7 @@ public class MappingDialog extends Dialog {
 
         LinkedList<Field> fieldList = new LinkedList<Field>(Arrays.asList(fields));
         //first match on name, then label
-        ListIterator iterator = fieldList.listIterator();
+        ListIterator<Field> iterator = fieldList.listIterator();
         Field field;
         while (iterator.hasNext()) {
             field = (Field)iterator.next();
