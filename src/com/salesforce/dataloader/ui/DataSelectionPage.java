@@ -82,20 +82,18 @@ public class DataSelectionPage extends LoadPage {
     public void createControl(Composite parent) {
         getShell().setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
 
-        GridData data;
-
-        Composite comp = new Composite(parent, SWT.NONE);
-
         GridLayout gridLayout = new GridLayout(1, false);
         gridLayout.horizontalSpacing = 10;
-        gridLayout.marginHeight = 20;
-        gridLayout.verticalSpacing = 7;
+        gridLayout.marginHeight = 15;
+        gridLayout.verticalSpacing = 5;
+        gridLayout.marginRight = 5;
 
+        Composite comp = new Composite(parent, SWT.NONE);
         comp.setLayout(gridLayout);
 
         Label label = new Label(comp, SWT.RIGHT);
         label.setText(Labels.getString("DataSelectionPage.selectObject")); //$NON-NLS-1$
-        data = new GridData();
+        GridData data = new GridData();
         label.setLayoutData(data);
 
         // Add a checkbox to toggle filter
@@ -108,9 +106,9 @@ public class DataSelectionPage extends LoadPage {
         lv.setContentProvider(new EntityContentProvider());
         lv.setLabelProvider(new EntityLabelProvider());
         lv.setInput(null);
-        data = new GridData(GridData.FILL_VERTICAL);
-        data.heightHint = 120;
-        data.widthHint = 150;
+        data = new GridData(GridData.FILL, GridData.FILL, true, true);
+        data.heightHint = 140;
+        data.widthHint = 140;
         lv.getControl().setLayoutData(data);
         lv.addFilter(filter);
         lv.setSorter(new EntityViewerSorter());
