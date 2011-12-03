@@ -1,4 +1,4 @@
----APEX DATALOADER README ----
+## APEX DATALOADER README 
 
 ---------------------------------------------
 I.  Building the apex dataloader
@@ -32,7 +32,7 @@ ant test - Runs a JUnit test, -Dtestcase can be used to specify test file or cla
 
 ant autobuild - Compiles and runs JUnit test suite and sends email specified by test.emailToList property via mailhost in testEmail target, look at autobuildWeekly example of that.
 
----------------------------------------------
+
 II. Running the apex dataloader
 ---------------------------------------------
 
@@ -63,8 +63,8 @@ process-conf.xml file can be used to define properties for multiple processes.  
 
 java -Xms256m -Xmx384m -Dsalesforce.config.dir=CONFIG_DIR -classpath DataLoader.jar com.salesforce.dataloader.process.ProcessRunner process.name=opportunityUpsertProcess
 
-For more information, look at http://wiki.apexdevnet.com/index.php/Tools or the Apex Dataloader Manual at https://na1.salesforce.com/help/doc/en/salesforce_data_loader.pdf 
+For more information see the [wiki](http://wiki.apexdevnet.com/index.php/Tools), or the [Apex Dataloader Manual](https://na1.salesforce.com/help/doc/en/salesforce_data_loader.pdf) 
 
-Questions can be directed to the open source forum at www.sforce.com.
+Questions can be directed to the [open source forum](http://boards.developerforce.com/t5/Open-Source/bd-p/sforceExplorer)
 
 
