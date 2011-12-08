@@ -1,0 +1,127 @@
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+    <!-- For the absolute paths below, replace with a better mechanism, eg. config.properties param for base location -->
+    <bean id="maximumBatchRowsDbProcess"
+          class="com.salesforce.dataloader.process.ProcessRunner"
+          singleton="false">
+        <description>maximumBatchRowsDb job gets the Account updates from database and uploads them to salesforce using 'upsert'.</description>
+        <property name="name" value="maximumBatchRowsDbProcess"/>
+        <property name="configOverrideMap">
+            <map>
+                <entry key="process.outputSuccess" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/maximumBatchRowsDbSuccess.csv"/>
+                <entry key="process.outputError" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/maximumBatchRowsDbError.csv"/>
+                <entry key="sfdc.debugMessagesFile" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/maximumBatchRowsDbSoapTrace.log"/>
+                <entry key="sfdc.externalIdField" value="Oracle_Id__c"/>
+                <entry key="process.operation" value="upsert"/>
+                <entry key="process.mappingFile" value="/home/jeffrey.lai/github/dataloader/test/testfiles/data/maximumBatchRowsDbMap.sdl"/>
+                <entry key="dataAccess.name" value="queryAccount"/>
+                <entry key="dataAccess.type" value="databaseRead"/>
+                <entry key="dataAccess.readBatchSize" value="750"/>
+                <entry key="process.initialLastRunDate" value="2005-12-01T00:00:00.000-0800"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="upsertAccountDbProcess"
+          class="com.salesforce.dataloader.process.ProcessRunner"
+          singleton="false">
+        <description>upsertAccountDb job gets the Account updates from database and uploads them to salesforce using 'upsert'.</description>
+        <property name="name" value="upsertAccountDbProcess"/>
+        <property name="configOverrideMap">
+            <map>
+                <entry key="sfdc.extractionSOQL" value="Select Id, Name, Type, Phone, AccountNumber__c, Website, AnnualRevenue, 
+                    LastModifiedDate, Oracle_Id__c, CustomDateTime__c FROM Account where AccountNumber__c like 'ACCT%'" />
+                <entry key="process.outputSuccess" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/upsertAccountDbSuccess.csv"/>
+                <entry key="process.outputError" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/upsertAccountDbError.csv"/>
+                <entry key="sfdc.debugMessagesFile" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/upsertAccountDbSoapTrace.log"/>
+                <!-- password below has been encrypted using key file, therefore it will not work without the key setting: process.encryptionKeyFile -->
+                <entry key="sfdc.password" value="3a4f908d34a43f2b"/>
+                <entry key="sfdc.externalIdField" value="Oracle_Id__c"/>
+                <entry key="process.encryptionKeyFile" value="/home/jeffrey.lai/github/dataloader/test/testfiles/conf/test.key"/>
+                <entry key="process.operation" value="upsert"/>
+                <entry key="process.mappingFile" value="/home/jeffrey.lai/github/dataloader/test/testfiles/data/upsertAccountDbMap.sdl"/>
+                <entry key="dataAccess.name" value="queryAccount"/>
+                <entry key="dataAccess.type" value="databaseRead"/>
+                <entry key="dataAccess.readBatchSize" value="750"/>
+                <entry key="process.initialLastRunDate" value="2005-12-01T00:00:00.000-0800"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="extractAccountDbProcess"
+          class="com.salesforce.dataloader.process.ProcessRunner"
+          singleton="false">
+        <description>extractAccountDb job gets account info from salesforce and updates or inserts info into database."</description>
+        <property name="name" value="extractAccountDbProcess"/>
+        <property name="configOverrideMap">
+            <map>
+                <entry key="sfdc.extractionSOQL" value="Select Id, Name, Type, Phone, AccountNumber__c, Website, AnnualRevenue, 
+                    LastModifiedDate, Oracle_Id__c, CustomDateTime__c FROM Account where AccountNumber__c like 'ACCT%'" />
+                <entry key="process.outputSuccess" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/extractAccountDbSuccess.csv"/>
+                <entry key="process.outputError" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/extractAccountDbError.csv"/>
+                <entry key="sfdc.debugMessagesFile" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/extractAccountDbSoapTrace.log"/>
+                <entry key="sfdc.extractionRequestSize" value="1000"/>
+                <entry key="process.operation" value="extract"/>
+                <entry key="process.mappingFile" value="/home/jeffrey.lai/github/dataloader/test/testfiles/data/extractAccountDbMap.sdl"/>
+                <entry key="dataAccess.type" value="databaseWrite"/>
+                <!--<entry key="dataAccess.name" value="insertAccount"/>-->
+                <entry key="dataAccess.name" value="updateAccount"/>
+                <entry key="dataAccess.writeBatchSize" value="750"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="extractAccountCsvProcess"
+          class="com.salesforce.dataloader.process.ProcessRunner"
+          singleton="false">
+      <description>extractAccountCsv job gets account info from salesforce and saves info into a CSV file."</description>
+        <property name="name" value="extractAccountCsvProcess"/>
+        <property name="configOverrideMap">
+            <map>
+                <entry key="sfdc.extractionSOQL" value="Select Id, Name, Type, Phone, AccountNumber__c, Website, AnnualRevenue, 
+                    LastModifiedDate, Oracle_Id__c, CustomDateTime__c FROM Account where AccountNumber__c like 'ACCT%'" />
+                <entry key="process.outputSuccess" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/extractAccountCsvSuccess.csv"/>
+                <entry key="process.outputError" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/extractAccountCsvError.csv"/>
+                <entry key="sfdc.debugMessagesFile" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/extractAccountCsvSoapTrace.log"/>
+                <entry key="process.operation" value="extract"/>
+                <!-- <entry key="process.mappingFile" value="/home/jeffrey.lai/github/dataloader/test/testfiles/data/extractAccountCsvMap.sdl"/> -->
+                <entry key="dataAccess.type" value="csvWrite"/>
+                <entry key="dataAccess.name" value="/home/jeffrey.lai/github/dataloader/test/testfiles/data/extractAccountCsv.csv"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="updateAccountCsvProcess"
+          class="com.salesforce.dataloader.process.ProcessRunner"
+          singleton="false">
+      <description>updateAccountCsv job gets account info to salesforce and saves from a CSV file."</description>
+        <property name="name" value="updateAccountCsvProcess"/>
+        <property name="configOverrideMap">
+            <map>
+                <entry key="process.outputSuccess" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/updateAccountCsvSuccess.csv"/>
+                <entry key="process.outputError" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/updateAccountCsvError.csv"/>
+                <entry key="sfdc.debugMessagesFile" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/updateAccountCsvSoapTrace.log"/>
+                <entry key="process.operation" value="update"/>
+                <entry key="dataAccess.type" value="csvRead"/>
+                <entry key="dataAccess.name" value="/home/jeffrey.lai/github/dataloader/test/testfiles/data/extractAccountCsv.csv"/>
+                <entry key="process.mappingFile" value="/home/jeffrey.lai/github/dataloader/test/testfiles/data/updateAccountCsvMap.sdl"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="insertNullsDBProcess"
+          class="com.salesforce.dataloader.process.ProcessRunner"
+          singleton="false">
+        <description>insertNullsDBProcess job gets the Account updates from database and uploads them to salesforce using 'upsert'.</description>
+        <property name="name" value="insertNullsDBProcess"/>
+        <property name="configOverrideMap">
+            <map>
+                <entry key="process.outputSuccess" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/insertNullsDBSuccess.csv"/>
+                <entry key="process.outputError" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/insertNullsDBError.csv"/>
+                <entry key="sfdc.debugMessagesFile" value="/home/jeffrey.lai/github/dataloader/test/testfiles/status/insertNullsDBSoapTrace.log"/>
+                <entry key="sfdc.externalIdField" value="Oracle_Id__c"/>
+                <entry key="process.operation" value="upsert"/>
+                <entry key="process.mappingFile" value="/home/jeffrey.lai/github/dataloader/test/testfiles/data/insertNullsDBMap.sdl"/>
+                <entry key="dataAccess.name" value="queryAccount"/>
+                <entry key="dataAccess.type" value="databaseRead"/>
+                <entry key="dataAccess.readBatchSize" value="750"/>
+                <entry key="process.initialLastRunDate" value="2005-12-01T00:00:00.000-0800"/>
+            </map>
+        </property>
+    </bean>
+</beans>

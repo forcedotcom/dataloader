@@ -1,0 +1,243 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.force</groupId>
+  <artifactId>dataloader</artifactId>
+  <packaging>jar</packaging>
+  <version>22.0.0-SNAPSHOT</version>
+  <name>dataloader</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <java.compile.version>1.6</java.compile.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>eclipse</id>
+      <name>Eclipse Repository</name>
+      <layout>default</layout>
+      <url>http://maven.eclipse.org/nexus/content/repositories/testing</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.force.api</groupId>
+      <artifactId>force-wsc</artifactId>
+      <version>22.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.force.api</groupId>
+      <artifactId>force-partner-api</artifactId>
+      <version>22.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>1.8.3</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-dbcp</groupId>
+      <artifactId>commons-dbcp</artifactId>
+      <version>1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.16</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.squirrel-sql.plugins</groupId>
+      <artifactId>oracle</artifactId>
+      <version>3.2.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.equinox</groupId>
+      <artifactId>org.eclipse.equinox.common</artifactId>
+      <version>3.6.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jface</groupId>
+      <artifactId>org.eclipse.jface</artifactId>
+      <version>3.6.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.osgi</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
+      <version>3.6.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.swt</groupId>
+      <artifactId>${swt.artifact.id}</artifactId>
+      <version>3.6.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+      <version>3.0.5.RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>3.0.5.RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>net.officefloor.eclipse</groupId>
+      <artifactId>net.officefloor.core</artifactId>
+      <version>1.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>quartz</groupId>
+      <artifactId>quartz</artifactId>
+      <version>1.5.2</version>
+    </dependency>
+
+
+  </dependencies>
+
+
+  <build>
+    <defaultGoal>install</defaultGoal>
+
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
+            </manifest>
+          </archive>
+
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-my-jar-with-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${java.compile.version}</source>
+          <target>${java.compile.version}</target>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <profiles>
+    <profile>
+      <id>linux32</id>
+      <activation>
+        <property>
+          <name>env</name>
+          <value>linux32</value>
+        </property>
+      </activation>
+      <properties>
+        <swt.artifact.id>org.eclipse.swt.gtk.linux.x86</swt.artifact.id>
+      </properties>
+    </profile>
+    <profile>
+      <id>linux64</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>env</name>
+          <value>linux32</value>
+        </property>
+      </activation>
+      <properties>
+        <swt.artifact.id>org.eclipse.swt.gtk.linux.x86_64</swt.artifact.id>
+      </properties>
+    </profile>
+    <profile>
+      <id>mac32</id>
+      <activation>
+        <property>
+          <name>env</name>
+          <value>mac32</value>
+        </property>
+      </activation>
+      <properties>
+        <swt.artifact.id>org.eclipse.swt.cocoa.macosx</swt.artifact.id>
+      </properties>
+    </profile>
+    <profile>
+      <id>mac64</id>
+      <activation>
+        <property>
+          <name>env</name>
+          <value>mac64</value>
+        </property>
+      </activation>
+      <properties>
+        <swt.artifact.id>org.eclipse.swt.cocoa.macosx.x86_64</swt.artifact.id>
+      </properties>
+    </profile>
+    <profile>
+      <id>win32</id>
+      <activation>
+        <property>
+          <name>env</name>
+          <value>win32</value>
+        </property>
+      </activation>
+      <properties>
+        <swt.artifact.id>org.eclipse.swt.win32.win32.x86</swt.artifact.id>
+      </properties>
+    </profile>
+    <profile>
+      <id>win64</id>
+      <activation>
+        <property>
+          <name>env</name>
+          <value>win64</value>
+        </property>
+      </activation>
+      <properties>
+        <swt.artifact.id>org.eclipse.swt.win32.win32.x86_64</swt.artifact.id>
+      </properties>
+    </profile>
+  </profiles>
+
+
+</project>

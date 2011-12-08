@@ -1,12 +1,4 @@
-bin/
-classes/
-jar/
+target/
+.project
 .classpath
-.settings
-lib/partnerwsdl.jar
-test/testfiles/results/
-test/testfiles/status/
-test/testfiles/conf/database-conf.xml
-test/testfiles/conf/log-conf.xml
-test/testfiles/conf/process-conf.xml
-test/java/src/com/salesforce/dataloader/test.properties
+.settings/
