@@ -53,14 +53,15 @@ import com.sforce.ws.ConnectorConfig;
  */
 abstract public class TestBase extends TestCase {
 
-    private static final String DATALOADER_DIR_SYSPROP = "dataloader.dir";
+    // the basedir property is set by maven
+    private static final String DATALOADER_DIR_SYSPROP = "basedir";
 
     private static final String API_CLIENT_NAME = "DataLoaderBatch/" + Controller.APP_VERSION;
 
-    private static final String TEST_FILES_DIR = "test/testfiles";
-    private static final String TEST_CONF_DIR = "test/testfiles/conf";
-    private static final String TEST_DATA_DIR = "test/testfiles/data";
-    private static final String TEST_STATUS_DIR = "test/testfiles/status";
+    private static final String TEST_FILES_DIR = "src/test/resources/testfiles";
+    private static final String TEST_CONF_DIR = TEST_FILES_DIR + "/conf";
+    private static final String TEST_DATA_DIR = TEST_FILES_DIR + "/data";
+    private static final String TEST_STATUS_DIR = TEST_FILES_DIR + "/status";
 
     protected static final String DEFAULT_ACCOUNT_EXT_ID_FIELD = "Oracle_Id__c";
     protected static final String DEFAULT_CONTACT_EXT_ID_FIELD = "NumberId__c";
