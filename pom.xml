@@ -9,7 +9,9 @@
   <url>http://maven.apache.org</url>
 
   <properties>
+    <force.version>22.0.0</force.version>
     <java.compile.version>1.6</java.compile.version>
+    <spring.version>3.0.6.RELEASE</spring.version>
   </properties>
 
   <repositories>
@@ -28,12 +30,12 @@
     <dependency>
       <groupId>com.force.api</groupId>
       <artifactId>force-wsc</artifactId>
-      <version>22.0.0</version>
+      <version>${force.version}</version>
     </dependency>
     <dependency>
       <groupId>com.force.api</groupId>
       <artifactId>force-partner-api</artifactId>
-      <version>22.0.0</version>
+      <version>${force.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-beanutils</groupId>
@@ -84,13 +86,11 @@
       <artifactId>org.eclipse.jface</artifactId>
       <version>3.6.2</version>
     </dependency>
-
     <dependency>
       <groupId>org.eclipse.osgi</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
       <version>3.6.2</version>
     </dependency>
-
     <dependency>
       <groupId>org.eclipse.swt</groupId>
       <artifactId>${swt.artifact.id}</artifactId>
@@ -100,12 +100,12 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-beans</artifactId>
-      <version>3.0.5.RELEASE</version>
+      <version>${spring.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
-      <version>3.0.5.RELEASE</version>
+      <version>${spring.version}</version>
     </dependency>
     <dependency>
       <groupId>net.officefloor.eclipse</groupId>
@@ -156,6 +156,18 @@
         <configuration>
           <source>${java.compile.version}</source>
           <target>${java.compile.version}</target>
+        </configuration>
+      </plugin>
+
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- exclude TestRecordsUtil class which inherit from TestCase -->
+            <exclude>**/TestRecordsUtil.java</exclude>
+          </excludes>
         </configuration>
       </plugin>
 

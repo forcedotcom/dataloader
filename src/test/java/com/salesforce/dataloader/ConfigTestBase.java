@@ -54,7 +54,7 @@ public abstract class ConfigTestBase extends TestBase {
         }
 
         private static void loadTestProperties() {
-            final URL url = TestBase.class.getResource("test.properties");
+            final URL url = TestBase.class.getClassLoader().getResource("test.properties");
             if (url == null)
                 throw new IllegalStateException("Failed to locate test.properties.  Is it in the classpath?");
             try {
