@@ -13,3 +13,5 @@ Use the command below to execute on Mac
     java -jar target/dataloader-22.0.0-SNAPSHOT-jar-with-dependencies.jar -XstartOnFirstThread
 
 # Test dataloader
+
+    mvn verify -fn
