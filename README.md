@@ -1,36 +1,36 @@
-## APEX DATALOADER README 
+## DATA LOADER README 
 
 ---------------------------------------------
-I.  Building the apex dataloader
+I.  Building Data Loader
 ---------------------------------------------
 
-There are two "out of the box" ways to build the apex dataloader.
+There are two "out of the box" ways to build Data Loader.
 
-The first is to use Eclipse to build the apex dataloader.  Go to File->Import->Import Existing Project.  Choose the base directory and it should find the dataloader project. Before you do this you need to follow the instruction below for the ant build and run the "ant pre" target.
+1. The first way is to use Eclipse to build Data Loader.  Go to File->Import->Import Existing Project.  Choose the base directory and it should find the dataloader project. Before you do this you need to follow the instruction below for the ant build and run the "ant pre" target.
 
-The second way to build the data loader is through apache ant.  This requires that you have ant and perl installed.  Go to the build directory and edit the build.properties file.
-Set values for ANT_HOME, JAVA_HOME, and app.home.  Also if you files are not on c: then you'll need to set home.dir as well.  Open a command prompt and from the build directory
-you can issue ant commands to build the dataloader.  The current commands are
+2. The second way to build Data Loader is through apache ant.  This requires that you have ant and perl installed.  Go to the build directory and edit the build.properties file.
+Set the values for ANT_HOME, JAVA_HOME, and app.home.  Also, if your files are not on the c: drive, then you'll need to set the home.dir as well.  Open a command prompt, and from the build directory
+you can issue ant commands to build Data Loader.  The current commands are:
 
-ant partnerwsdl  - 
+* ant partnerwsdl  - 
 
-ant jar_partnerwsdl - Generates the java src from the partner.wsdl, compilers, and jars the partnerwsdl code.  Use this task if you need to use a new wsdl.
+* ant jar_partnerwsdl - Generates the Java src from the partner.wsdl, compilers, and jars the partnerwsdl code.  Use this task if you need to use a new WSDL.
 
-ant compile - Compiles the dataloader src.
+* ant compile - Compiles the Data Loader src.
 
-ant compile_test - Compiles the dataloader JUnit test src.
+* ant compile_test - Compiles the Data Loader JUnit test src.
 
-ant compile_all - Compiles all the dataloader src, including the WSDL jar.
+* ant compile_all - Compiles all the Data Loader src, including the WSDL jar.
 
-ant jar_dataloader - Creates one jar with all the necessary classes.  Most of the time you will only want to run this command.
+* ant jar_dataloader - Creates one jar with all the necessary classes.  Most of the time you will only want to run this command.
 
-ant run_dataloader - Runs the Gui Version of the dataloader
+* ant run_dataloader - Runs the GUI Version of Data Loader
 
-ant run_process - Runs the command line version of the dataloader, using config.properties file
+* ant run_process - Runs the command-line version of Data Loader and uses the config.properties file
 
-ant test - Runs a JUnit test, -Dtestcase can be used to specify test file or class to execute.
+* ant test - Runs a JUnit test. The -Dtestcase switch can be used to specify the test file or class to execute.
 
-ant autobuild - Compiles and runs JUnit test suite and sends email specified by test.emailToList property via mailhost in testEmail target, look at autobuildWeekly example of that.
+* ant autobuild - Compiles and runs a JUnit test suite and sends email specified by the test.emailToList property via mailhost in testEmail target. See autobuildWeekly for an example of how to do that.
 
 
 II. Running the apex dataloader
