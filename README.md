@@ -6,9 +6,9 @@ I.  Building Data Loader
 
 There are two "out of the box" ways to build Data Loader.
 
-1. The first way is to use Eclipse to build Data Loader.  Go to File->Import->Import Existing Project.  Choose the base directory and it should find the dataloader project. Before you do this you need to follow the instruction below for the ant build and run the "ant pre" target.
+The first way is to use Eclipse to build Data Loader.  Go to File->Import->Import Existing Project.  Choose the base directory and it should find the dataloader project. Before you do this you need to follow the instruction below for the ant build and run the "ant pre" target.
 
-2. The second way to build Data Loader is through apache ant.  This requires that you have ant and perl installed.  Go to the build directory and edit the build.properties file.
+The second way to build Data Loader is through apache ant.  This requires that you have ant and perl installed.  Go to the build directory and edit the build.properties file.
 Set the values for ANT_HOME, JAVA_HOME, and app.home.  Also, if your files are not on the c: drive, then you'll need to set the home.dir as well.  Open a command prompt, and from the build directory
 you can issue ant commands to build Data Loader.  The current commands are:
 
