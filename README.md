@@ -42,7 +42,7 @@ Put the dataloader jar and the swt libs - swt-awt-win32-3063.dll, swt-awt-win32-
 
 To run the Data Loader GUI, use the command:
 
-java -Xms64m -Xmx512m -DentityExpansionLimit=128000 -Dsalesforce.config.dir=CONFIG_DIR -classpath "%cd%\DataLoader.jar" com.salesforce.dataloader.process.DataLoaderRunner
+`java -Xms64m -Xmx512m -DentityExpansionLimit=128000 -Dsalesforce.config.dir=CONFIG_DIR -classpath "%cd%\DataLoader.jar" com.salesforce.dataloader.process.DataLoaderRunner`
 
 If you don't specify the salesforce.config.dir, then Data Loader looks in the base dir.  The config files are log-conf.xml, process-conf.xml, database-conf.xml, and config.properties.
 
