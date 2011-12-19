@@ -6,7 +6,7 @@ I.  Building Data Loader
 
 There are two "out of the box" ways to build Data Loader.
 
-The first way is to use Eclipse to build Data Loader.  Go to File->Import->Import Existing Project.  Choose the base directory and it should find the dataloader project. Before you do this you need to follow the instruction below for the ant build and run the "ant pre" target.
+The first way is to use Eclipse to build Data Loader.  Go to File->Import->Import Existing Project.  Choose the base directory and it should find the Data Loader project. Before you do this you need to follow the instruction below for the ant build and run the "ant pre" target.
 
 The second way to build Data Loader is through apache ant.  This requires that you have ant and perl installed.  Go to the build directory and edit the build.properties file.
 Set the values for ANT_HOME, JAVA_HOME, and app.home.  Also, if your files are not on the c: drive, then you'll need to set the home.dir as well.  Open a command prompt, and from the build directory
@@ -47,7 +47,7 @@ To run the Data Loader GUI, use the command:
 If you don't specify the salesforce.config.dir, then Data Loader looks in the base dir.  The config files are log-conf.xml, process-conf.xml, database-conf.xml, and config.properties.
 
 
-To run the Data Loader from the command line, use the command:
+To run Data Loader from the command line, use the command:
 
 `java -Xms256m -Xmx384m -Dsalesforce.config.dir=CONFIG_DIR -classpath DataLoader.jar com.salesforce.dataloader.process.ProcessRunner`
 
@@ -64,8 +64,8 @@ The process-conf.xml file can be used to define properties for multiple processe
 
 III. Resources
 ---------------------------------------------
-For more information see the [wiki](http://wiki.apexdevnet.com/index.php/Tools), or the [Data Loader Developer's Guide](https://na1.salesforce.com/help/doc/en/salesforce_data_loader.pdf) 
+For more information, see the [wiki](http://wiki.apexdevnet.com/index.php/Tools), or the [Data Loader Developer's Guide](https://na1.salesforce.com/help/doc/en/salesforce_data_loader.pdf). 
 
-Questions can be directed to the [open source forum](http://boards.developerforce.com/t5/Open-Source/bd-p/sforceExplorer)
+Questions can be directed to the [open source forum](http://boards.developerforce.com/t5/Open-Source/bd-p/sforceExplorer).
 
 
