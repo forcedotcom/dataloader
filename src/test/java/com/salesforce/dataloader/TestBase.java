@@ -52,10 +52,7 @@ import com.sforce.ws.ConnectorConfig;
  * @since 8.0
  */
 abstract public class TestBase extends TestCase {
-
-    // the basedir property is set by maven
-    private static final String DATALOADER_DIR_SYSPROP = "basedir";
-
+    
     private static final String API_CLIENT_NAME = "DataLoaderBatch/" + Controller.APP_VERSION;
 
     private static final String TEST_FILES_DIR = "src/test/resources/testfiles";
@@ -107,9 +104,20 @@ abstract public class TestBase extends TestCase {
             // ignore, just leave the default thread name intact
         }
 
-        String dataloaderDirProp = System.getProperty(DATALOADER_DIR_SYSPROP);
+        String dataloaderDirSysProp = null;
+        if (System.getProperty("basedir") != null) {
+            // the basedir propety is set by maven
+            dataloaderDirSysProp = "basedir";
+        } else {
+            // we are running in eclipse 
+            dataloaderDirSysProp = "user.dir";
+        }
+        
+        String dataloaderDirProp = System.getProperty(dataloaderDirSysProp);
+        
         if (dataloaderDirProp == null || dataloaderDirProp.length() == 0)
-            throw new IllegalStateException("Property must be set: " + DATALOADER_DIR_SYSPROP);
+            throw new IllegalStateException("Property must be set: " + dataloaderDirSysProp);
+        
         this.dataloaderHome = new File(dataloaderDirProp);
         if (!this.dataloaderHome.isDirectory())
             throw new IllegalStateException("Invalid dataloader home: " + this.dataloaderHome);

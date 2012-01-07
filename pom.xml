@@ -9,7 +9,7 @@
   <url>http://maven.apache.org</url>
 
   <properties>
-    <force.version>22.0.0</force.version>
+    <force.version>23.0.0</force.version>
     <java.compile.version>1.6</java.compile.version>
     <spring.version>3.0.6.RELEASE</spring.version>
   </properties>

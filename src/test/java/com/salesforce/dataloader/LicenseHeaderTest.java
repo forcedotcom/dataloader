@@ -60,8 +60,8 @@ public class LicenseHeaderTest extends TestBase {
             fail("the following files do not have the correct license header" + failures);
     }
 
-    private static final String DATALOADER_SRC = "src";
-    private static final String TEST_SRC = "test/java/src";
+    private static final String DATALOADER_SRC = "src/main/java";
+    private static final String TEST_SRC = "src/test/java";
 
     /** @returns A list containing all files in dataloader source folders */
     private List<File> getSourceFiles() {

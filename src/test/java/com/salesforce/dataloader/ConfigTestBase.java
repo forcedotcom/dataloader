@@ -31,14 +31,12 @@ import java.net.URL;
 import java.util.*;
 
 import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.exception.ConfigInitializationException;
-import com.salesforce.dataloader.exception.ParameterLoadException;
 
 public abstract class ConfigTestBase extends TestBase {
 
     /** Each enum represents a property that we read from test.properties and use as dataloader config settings. */
     protected static enum TestProperties {
-        USER_ADMIN(Config.USERNAME),
+//        USER_ADMIN(Config.USERNAME),
         USER_STANDARD(Config.USERNAME),
         PASSWORD(Config.PASSWORD),
         REDIRECT(Config.RESET_URL_ON_LOGIN),
@@ -187,7 +185,7 @@ public abstract class ConfigTestBase extends TestBase {
 
     protected Set<TestProperties> getDefaultTestPropertiesSet() {
         Set<TestProperties> propSet = EnumSet.noneOf(TestProperties.class);
-        propSet.add(TestProperties.USER_ADMIN);
+        propSet.add(TestProperties.USER_STANDARD);
         propSet.add(TestProperties.PASSWORD);
         propSet.add(TestProperties.ENDPOINT);
         propSet.add(TestProperties.REDIRECT);
@@ -210,7 +208,7 @@ public abstract class ConfigTestBase extends TestBase {
     public void setUp() {
         super.setUp();
         try {
-            getController().getConfig().loadParameterOverrides(getTestConfig());
+//            getController().getConfig().loadParameterOverrides(getTestConfig());
         } catch (Exception e) {
             fail(e);
         }
@@ -219,13 +217,13 @@ public abstract class ConfigTestBase extends TestBase {
     @Override
     protected void initController() {
         super.initController();
-        try {
-            getController().getConfig().loadParameterOverrides(getTestConfig());
-        } catch (ParameterLoadException e) {
-            fail(e);
-        } catch (ConfigInitializationException e) {
-            fail(e);
-        }
+//        try {
+//            getController().getConfig().loadParameterOverrides(getTestConfig());
+//        } catch (ParameterLoadException e) {
+//            fail(e);
+//        } catch (ConfigInitializationException e) {
+//            fail(e);
+//        }
     }
 
 }
