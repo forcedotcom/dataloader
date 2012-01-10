@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, salesforce.com, inc.
+ * Copyright (c) 2012, salesforce.com, inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided
@@ -31,6 +31,7 @@ import java.net.URISyntaxException;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.config.Config;
@@ -121,9 +122,19 @@ abstract public class TestBase extends TestCase {
         this.dataloaderHome = new File(dataloaderDirProp);
         if (!this.dataloaderHome.isDirectory())
             throw new IllegalStateException("Invalid dataloader home: " + this.dataloaderHome);
-
+       
+        // copy test config properties into target directory 
+        String configFileName = "config.properties";
+        String targetPath = dataloaderDirProp + File.separator +  "target";
+        String configFilePath = getTestConfDir()  + File.separator + configFileName;   
+        try {
+            FileUtils.copyFileToDirectory(new File(configFilePath), new File(targetPath), true);
+        } catch (IOException e) {
+            fail(e);
+        }
+        
         // configure the Controller to point to our testing config
-        System.setProperty(Config.LOADER_CONFIG_DIR_SYSPROP, getTestConfDir());
+        System.setProperty(Config.LOADER_CONFIG_DIR_SYSPROP, targetPath);
         initController();
     }
 

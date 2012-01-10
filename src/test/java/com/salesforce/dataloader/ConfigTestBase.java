@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, salesforce.com, inc.
+ * Copyright (c) 2012, salesforce.com, inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided
@@ -25,67 +25,9 @@
  */
 package com.salesforce.dataloader;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.*;
 
-import com.salesforce.dataloader.config.Config;
-
 public abstract class ConfigTestBase extends TestBase {
-
-    /** Each enum represents a property that we read from test.properties and use as dataloader config settings. */
-    protected static enum TestProperties {
-//        USER_ADMIN(Config.USERNAME),
-        USER_STANDARD(Config.USERNAME),
-        PASSWORD(Config.PASSWORD),
-        REDIRECT(Config.RESET_URL_ON_LOGIN),
-        ENDPOINT(Config.ENDPOINT),
-        ENTITY_DEFAULT(Config.ENTITY),
-        ACCOUNT_EXTID(Config.EXTERNAL_ID_FIELD);
-
-        private static final Properties TEST_PROPS;
-
-        static {
-            TEST_PROPS = new Properties();
-            loadTestProperties();
-        }
-
-        private static void loadTestProperties() {
-            final URL url = TestBase.class.getClassLoader().getResource("test.properties");
-            if (url == null)
-                throw new IllegalStateException("Failed to locate test.properties.  Is it in the classpath?");
-            try {
-                final InputStream propStream = url.openStream();
-                try {
-                    TEST_PROPS.load(propStream);
-                } finally {
-                    propStream.close();
-                }
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to load test properties from resource: " + url, e);
-            }
-        }
-
-        private final String configName;
-
-        TestProperties(String configName) {
-            this.configName = configName;
-        }
-
-        /**
-         * Translates the enum name into a property name found in test.properties.
-         * 
-         * @return A property name in the test.properties file. EG USER_ADMIN becomes "test.user.admin"
-         */
-        private String getPropertyName() {
-            return "test." + name().toLowerCase().replace('_', '.');
-        }
-
-        public void putConfigSetting(Map<String, String> destConfig) {
-            destConfig.put(this.configName, TEST_PROPS.getProperty(getPropertyName()));
-        }
-    }
 
     public static ConfigGenerator DEFAULT_CONFIG_GEN = new ConfigGenerator() {
 
@@ -175,40 +117,25 @@ public abstract class ConfigTestBase extends TestBase {
     private final Map<String, String> testConfig;
 
     protected Map<String, String> getTestConfig() {
-        final HashMap<String, String> configBase = new HashMap<String, String>(this.testConfig);
-        configBase.put(Config.LAST_RUN_OUTPUT_DIR, getTestStatusDir());
-        for (TestProperties prop : getDefaultTestPropertiesSet()) {
-            prop.putConfigSetting(configBase);
-        }
-        return configBase;
-    }
-
-    protected Set<TestProperties> getDefaultTestPropertiesSet() {
-        Set<TestProperties> propSet = EnumSet.noneOf(TestProperties.class);
-        propSet.add(TestProperties.USER_STANDARD);
-        propSet.add(TestProperties.PASSWORD);
-        propSet.add(TestProperties.ENDPOINT);
-        propSet.add(TestProperties.REDIRECT);
-        propSet.add(TestProperties.ENTITY_DEFAULT);
-        propSet.add(TestProperties.ACCOUNT_EXTID);
-        return propSet;
+        return testConfig;
     }
 
     protected ConfigTestBase(String name, Map<String, String> testConfig) {
         super(name);
-        if (testConfig == null) testConfig = new HashMap<String, String>();
         this.testConfig = testConfig;
     }
 
     protected ConfigTestBase(String name) {
         this(name, null);
     }
-
+    
     @Override
     public void setUp() {
         super.setUp();
         try {
-//            getController().getConfig().loadParameterOverrides(getTestConfig());
+            if (getTestConfig() != null) {
+                getController().getConfig().loadParameterOverrides(getTestConfig());
+            }
         } catch (Exception e) {
             fail(e);
         }
@@ -217,13 +144,13 @@ public abstract class ConfigTestBase extends TestBase {
     @Override
     protected void initController() {
         super.initController();
-//        try {
-//            getController().getConfig().loadParameterOverrides(getTestConfig());
-//        } catch (ParameterLoadException e) {
-//            fail(e);
-//        } catch (ConfigInitializationException e) {
-//            fail(e);
-//        }
+        try {
+            if (getTestConfig() != null) {
+                getController().getConfig().loadParameterOverrides(getTestConfig());
+            }
+        } catch (Exception e) {
+            fail(e);
+        }
     }
 
 }

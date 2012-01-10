@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, salesforce.com, inc.
+ * Copyright (c) 2012, salesforce.com, inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided
@@ -91,7 +91,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         // attempt to hard delete 100 accounts as a user without the "Bulk API Hard Delete" user perm enabled
         final Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(100));
         // change the configured user to be the standard user (ie without the perm)
-        TestProperties.USER_STANDARD.putConfigSetting(argMap);
+        getController().getConfig().loadParameterOverrides(argMap);
 
         runProcessNegative(argMap, "You need the Bulk API Hard Delete user permission to permanently delete records.");
     }
