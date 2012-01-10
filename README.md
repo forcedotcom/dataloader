@@ -6,11 +6,11 @@ The Linux 64 bit profile is used by default.  In order to use the windows profil
     
 # Execute dataloader
 
-    java -jar target/dataloader-22.0.0-SNAPSHOT-jar-with-dependencies.jar
+    java -jar target/dataloader-23.0.0-SNAPSHOT-jar-with-dependencies.jar
     
 Use the command below to execute on Mac
 
-    java -jar target/dataloader-22.0.0-SNAPSHOT-jar-with-dependencies.jar -XstartOnFirstThread
+    java -jar target/dataloader-23.0.0-SNAPSHOT-jar-with-dependencies.jar -XstartOnFirstThread
 
 # Test dataloader
 

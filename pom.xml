@@ -200,7 +200,7 @@
         <activeByDefault>true</activeByDefault>
         <property>
           <name>env</name>
-          <value>linux32</value>
+          <value>linux64</value>
         </property>
       </activation>
       <properties>
