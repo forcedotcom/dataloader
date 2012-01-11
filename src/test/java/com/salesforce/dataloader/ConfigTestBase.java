@@ -122,7 +122,12 @@ public abstract class ConfigTestBase extends TestBase {
 
     protected ConfigTestBase(String name, Map<String, String> testConfig) {
         super(name);
-        this.testConfig = testConfig;
+        if (testConfig == null) {
+            this.testConfig = new HashMap<String,String>();
+        } else {
+            this.testConfig = testConfig;
+        }
+        
     }
 
     protected ConfigTestBase(String name) {
@@ -133,7 +138,7 @@ public abstract class ConfigTestBase extends TestBase {
     public void setUp() {
         super.setUp();
         try {
-            if (getTestConfig() != null) {
+            if (!getTestConfig().isEmpty()) {
                 getController().getConfig().loadParameterOverrides(getTestConfig());
             }
         } catch (Exception e) {
@@ -145,7 +150,7 @@ public abstract class ConfigTestBase extends TestBase {
     protected void initController() {
         super.initController();
         try {
-            if (getTestConfig() != null) {
+            if (!getTestConfig().isEmpty()) {
                 getController().getConfig().loadParameterOverrides(getTestConfig());
             }
         } catch (Exception e) {

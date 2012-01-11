@@ -30,11 +30,13 @@ import java.util.*;
 
 import com.salesforce.dataloader.ConfigGenerator;
 import com.salesforce.dataloader.action.OperationInfo;
+import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.*;
+import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
@@ -331,10 +333,15 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                 assertEquals(5,row.size());
                 // validate the extract results are correct.
                 assertEquals(leadidArr[0], row.get("LID"));
-                assertEquals("loader", row.get("LNAME"));
-                assertEquals("data loader", row.get("NAME__RESULT"));
+                
+                QueryResult qr = new PartnerClient(getController()).query("select Name, LastName from User where Id ='" + uid +"'");
+                assertEquals(1, qr.getSize());
+                String expectedLastName = (String) qr.getRecords()[0].getField("LastName");
+                assertEquals(expectedLastName, row.get("LNAME"));
+                String expectedName = (String) qr.getRecords()[0].getField("Name");
+                assertEquals(expectedName, row.get("NAME__RESULT"));
                 assertEquals(uid, row.get("OID"));
-                assertEquals(uid,row.get("OWNID"));
+                assertEquals(uid, row.get("OWNID"));
                 // validate that we have read the only result. there should be only one.
                 assertNull(rdr.readRow());
 
