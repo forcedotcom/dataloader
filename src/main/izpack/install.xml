@@ -29,32 +29,18 @@
     <panel classname="TargetPanel" />
     <panel classname="PacksPanel" />
     <panel classname="InstallPanel" />
+    <panel classname="ShortcutPanel"/>
     <panel classname="SimpleFinishPanel" />
   </panels>
 
   <packs>
     <pack name="Data Loader" required="yes">
       <description>Data Loader</description>
-      <file src="../dataloader-23.0.0-SNAPSHOT.jar" targetdir="$INSTALL_PATH" />
-      <file src="icon_SforceDL16x16.ico" />
+      <file src="../dataloader-23.0.0-SNAPSHOT-jar-with-dependencies.jar" targetdir="$INSTALL_PATH" />
+      <file src="icon_SforceDL16x16.ico" targetdir="$INSTALL_PATH" />
     </pack>
   </packs>
 
-  <shortcuts>
-    <skipIfNotSupported />
-    <programGroup defaultName="salesforce.com\Data Loader"
-      location="applications||startMenu" />
-    <shortcut name="Start MyApplication"
-      target="$INSTALL_PATH\dataloader-23.0.0-SNAPSHOT.jar"
-      commandLine="" workingDirectory="$INSTALL_PATH"
-      description="This starts MyApplication" iconFile="$INSTALL_PATH\icon_SforceDL16x16.ico"
-      iconIndex="0" initialState="noShow||normal||maximized||minimized"
-      programGroup="yes||no" desktop="yes||no" applications="yes||no"
-      startMenu="yes||no" startup="yes||no">
-
-      <createForPack name="MyApplication Binaries" />
-      <createForPack name="MyApplication Batchfiles" />
-    </shortcut>
-  </shortcuts>
+ 
 
 </installation>
