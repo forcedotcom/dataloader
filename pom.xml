@@ -177,6 +177,79 @@
         </configuration>
       </plugin>
 
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.4.2</version>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <encoding>UTF-8</encoding>
+              <outputDirectory>${project.build.directory}/staging</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/izpack</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.izpack</groupId>
+        <artifactId>izpack-maven-plugin</artifactId>
+        <version>5.0.0-beta9</version>
+        <configuration>
+          <kind>installer</kind>
+          <izpackBasedir>${project.build.directory}/staging</izpackBasedir>
+        </configuration>
+        <executions>
+          <execution>
+            <id>izpack-installer</id>
+            <phase>package</phase>
+            <goals>
+              <goal>izpack</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+    <groupId>org.bluestemsoftware.open.maven.plugin</groupId>
+    <artifactId>launch4j-plugin</artifactId>
+    <version>1.5.0.0</version>
+        <executions>
+          <execution>
+            <id>launch4j</id>
+            <phase>package</phase>
+            <goals>
+              <goal>launch4j</goal>
+            </goals>
+            <configuration>
+              <dontWrapJar>false</dontWrapJar>
+              <headerType>gui</headerType>
+              <outfile>target/dataloader-${project.version}-installer.exe</outfile>
+              <jar>target/dataloader-${project.version}-installer.jar</jar>
+              <errTitle>dataloader</errTitle>
+              <jre>
+                <minVersion>1.6.0</minVersion>
+              </jre>
+<!--               <splash>
+                <file>${basedir}/src/main/installer/images/splash.bmp</file>
+                <waitForWindow>true</waitForWindow>
+                <timeout>60</timeout>
+                <timeoutErr>false</timeoutErr>
+              </splash>-->
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
 
   </build>

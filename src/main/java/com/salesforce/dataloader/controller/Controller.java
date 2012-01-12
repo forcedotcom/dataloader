@@ -34,6 +34,7 @@ import java.util.Map;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
@@ -308,13 +309,22 @@ public class Controller {
         } else {
             // nope we are running commandline
 
-            String configDir = System.getProperty(Config.LOADER_CONFIG_DIR_SYSPROP);
+            String configDirPath = System.getProperty(Config.LOADER_CONFIG_DIR_SYSPROP);
             // if configDir is null, set it to target, which is the maven build output directory
-            if (configDir == null ) configDir = "target";
-            appPath = configDir;
+            if (configDirPath == null ) configDirPath = "target";
+            appPath = configDirPath;
             
+           File configDir = new File(configDirPath);
+           if (!configDir.exists()) {
+                try {
+                    FileUtils.forceMkdir(configDir);
+                } catch (IOException e) {
+                    throw new ControllerInitializationException(e);
+                }
+            }
+           
             // let the File class combine the dir and file names
-            File configFile = new File(configDir, CONFIG_FILE);
+            File configFile = new File(configDirPath, CONFIG_FILE);
             
             if (!configFile.exists()) try {
                 configFile.createNewFile();

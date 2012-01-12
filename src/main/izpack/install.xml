@@ -1,0 +1,60 @@
+<installation version="1.0">
+
+  <info>
+    <appname>dataloader</appname>
+    <appversion>23.0</appversion>
+    <appsubpath>salesforce.com/dataloader</appsubpath>
+    <javaversion>1.6</javaversion>
+    <url>https://github.com/forcedotcom/dataloader</url>
+  </info>
+
+  <locale>
+    <langpack iso3="eng" />
+  </locale>
+
+  <guiprefs width="800" height="600" resizable="no">
+  </guiprefs>
+
+  <resources>
+    <res src="splashscreens.gif" id="splash" />
+    <res src="welcome.html" id="HTMLHelloPanel.info" />
+    <res src="license.html" id="HTMLLicencePanel.licence" />
+  </resources>
+
+  <panels>
+    <!-- <panel classname="HTMLHelloPanel"/> -->
+    <panel classname="HTMLLicencePanel" />
+    <!-- <panel classname="HTMLInfoPanel"/> <panel classname="LicencePanel" 
+      /> -->
+    <panel classname="TargetPanel" />
+    <panel classname="PacksPanel" />
+    <panel classname="InstallPanel" />
+    <panel classname="SimpleFinishPanel" />
+  </panels>
+
+  <packs>
+    <pack name="Data Loader" required="yes">
+      <description>Data Loader</description>
+      <file src="../dataloader-23.0.0-SNAPSHOT.jar" targetdir="$INSTALL_PATH" />
+      <file src="icon_SforceDL16x16.ico" />
+    </pack>
+  </packs>
+
+  <shortcuts>
+    <skipIfNotSupported />
+    <programGroup defaultName="salesforce.com\Data Loader"
+      location="applications||startMenu" />
+    <shortcut name="Start MyApplication"
+      target="$INSTALL_PATH\dataloader-23.0.0-SNAPSHOT.jar"
+      commandLine="" workingDirectory="$INSTALL_PATH"
+      description="This starts MyApplication" iconFile="$INSTALL_PATH\icon_SforceDL16x16.ico"
+      iconIndex="0" initialState="noShow||normal||maximized||minimized"
+      programGroup="yes||no" desktop="yes||no" applications="yes||no"
+      startMenu="yes||no" startup="yes||no">
+
+      <createForPack name="MyApplication Binaries" />
+      <createForPack name="MyApplication Batchfiles" />
+    </shortcut>
+  </shortcuts>
+
+</installation>

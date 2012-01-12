@@ -59,7 +59,7 @@ abstract public class TestBase extends TestCase {
     private static final String TEST_FILES_DIR = "src/test/resources/testfiles";
     private static final String TEST_CONF_DIR = TEST_FILES_DIR + "/conf";
     private static final String TEST_DATA_DIR = TEST_FILES_DIR + "/data";
-    private static final String TEST_STATUS_DIR = TEST_FILES_DIR + "/status";
+    private static final String TEST_STATUS_DIR = "target/status";
 
     protected static final String DEFAULT_ACCOUNT_EXT_ID_FIELD = "Oracle_Id__c";
     protected static final String DEFAULT_CONTACT_EXT_ID_FIELD = "NumberId__c";
