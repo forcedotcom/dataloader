@@ -7,10 +7,15 @@
   <version>23.0.0-SNAPSHOT</version>
   <name>dataloader</name>
   <url>http://maven.apache.org</url>
+  <organization>
+    <name>salesforce.com</name>
+    <url>http://salesforce.com</url>
+  </organization>
 
   <properties>
     <force.version>23.0.0</force.version>
     <java.compile.version>1.6</java.compile.version>
+	<nsis.version>2.46</nsis.version>
     <spring.version>3.0.6.RELEASE</spring.version>
   </properties>
 
@@ -25,6 +30,16 @@
       </snapshots>
     </repository>
   </repositories>
+  
+  <pluginRepositories>
+<pluginRepository>
+<id>codehaus-mojo</id>
+<name>Codehaus Mojo</name>
+<url>https://nexus.codehaus.org/content/repositories/snapshots</url>
+<releases><enabled>false</enabled></releases>
+<snapshots><enabled>true</enabled></snapshots>
+</pluginRepository>
+</pluginRepositories>
 
   <dependencies>
     <dependency>
@@ -128,9 +143,20 @@
   </dependencies>
 
 
+
   <build>
     <defaultGoal>install</defaultGoal>
-
+      <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>nsis-maven-plugin</artifactId>
+          <version>1.0-SNAPSHOT</version>
+        </plugin>
+        
+      </plugins>
+    </pluginManagement>
+	
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -175,79 +201,6 @@
             <exclude>**/TestRecordsUtil.java</exclude>
           </excludes>
         </configuration>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.4.2</version>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <encoding>UTF-8</encoding>
-              <outputDirectory>${project.build.directory}/staging</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>src/main/izpack</directory>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.izpack</groupId>
-        <artifactId>izpack-maven-plugin</artifactId>
-        <version>5.0.0-beta9</version>
-        <configuration>
-          <kind>installer</kind>
-          <izpackBasedir>${project.build.directory}/staging</izpackBasedir>
-        </configuration>
-        <executions>
-          <execution>
-            <id>izpack-installer</id>
-            <phase>package</phase>
-            <goals>
-              <goal>izpack</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-    <groupId>org.bluestemsoftware.open.maven.plugin</groupId>
-    <artifactId>launch4j-plugin</artifactId>
-    <version>1.5.0.0</version>
-        <executions>
-          <execution>
-            <id>launch4j</id>
-            <phase>package</phase>
-            <goals>
-              <goal>launch4j</goal>
-            </goals>
-            <configuration>
-              <dontWrapJar>false</dontWrapJar>
-              <headerType>gui</headerType>
-              <outfile>target/dataloader-${project.version}-installer.exe</outfile>
-              <jar>target/dataloader-${project.version}-installer.jar</jar>
-              <errTitle>dataloader</errTitle>
-              <jre>
-                <minVersion>1.6.0</minVersion>
-              </jre>
-<!--               <splash>
-                <file>${basedir}/src/main/installer/images/splash.bmp</file>
-                <waitForWindow>true</waitForWindow>
-                <timeout>60</timeout>
-                <timeoutErr>false</timeoutErr>
-              </splash>-->
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
     </plugins>
@@ -328,6 +281,60 @@
         <swt.artifact.id>org.eclipse.swt.win32.win32.x86_64</swt.artifact.id>
       </properties>
     </profile>
+	
+<profile>
+<id>NSIS</id>
+<activation>
+      <os>
+        <family>Windows</family>
+        <arch>x86</arch>
+      </os>
+</activation>
+<build>
+<plugins>
+
+<plugin>
+<artifactId>maven-antrun-plugin</artifactId>
+<version>1.6</version>
+<executions>
+<execution>
+<phase> prepare-package </phase>
+<configuration>
+<target>
+<!-- Download NSIS and unpack -->
+<get
+src="http://dfn.dl.sourceforge.net/project/nsis/NSIS%202/${nsis.version}/nsis-${nsis.version}.zip"
+dest="target/nsis.zip" verbose="true" usetimestamp="true" />
+<unzip src="target/nsis.zip" dest="target" />
+</target>
+</configuration>
+<goals>
+<goal>run</goal>
+</goals>
+</execution>
+</executions>
+</plugin>
+<plugin>
+<groupId>org.codehaus.mojo</groupId>
+<artifactId>nsis-maven-plugin</artifactId>
+<version>1.0-SNAPSHOT</version>
+<executions>
+<execution>
+<phase>package</phase>
+<goals>
+<goal>generate-project</goal> <!-- create target/project.nsh -->
+<goal>compile</goal> <!-- compile setup.nsi into exe -->
+</goals>
+<configuration>
+<makensisBin>target/nsis-${nsis.version}/makensis.exe</makensisBin>
+</configuration>
+</execution>
+</executions>
+</plugin>
+</plugins>
+</build>
+</profile>	
+	
   </profiles>
 
 
