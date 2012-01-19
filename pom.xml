@@ -15,8 +15,9 @@
   <properties>
     <force.version>23.0.0</force.version>
     <java.compile.version>1.6</java.compile.version>
-	<nsis.version>2.46</nsis.version>
-    <spring.version>3.0.6.RELEASE</spring.version>
+    <nsis.version>2.46</nsis.version>
+    <spring.version>
+      3.0.6.RELEASE</spring.version>
   </properties>
 
   <repositories>
@@ -30,16 +31,20 @@
       </snapshots>
     </repository>
   </repositories>
-  
+
   <pluginRepositories>
-<pluginRepository>
-<id>codehaus-mojo</id>
-<name>Codehaus Mojo</name>
-<url>https://nexus.codehaus.org/content/repositories/snapshots</url>
-<releases><enabled>false</enabled></releases>
-<snapshots><enabled>true</enabled></snapshots>
-</pluginRepository>
-</pluginRepositories>
+    <pluginRepository>
+      <id>codehaus-mojo</id>
+      <name>Codehaus Mojo</name>
+      <url>https://nexus.codehaus.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 
   <dependencies>
     <dependency>
@@ -146,17 +151,17 @@
 
   <build>
     <defaultGoal>install</defaultGoal>
-      <pluginManagement>
+    <pluginManagement>
       <plugins>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>nsis-maven-plugin</artifactId>
           <version>1.0-SNAPSHOT</version>
         </plugin>
-        
+
       </plugins>
     </pluginManagement>
-	
+
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -281,60 +286,61 @@
         <swt.artifact.id>org.eclipse.swt.win32.win32.x86_64</swt.artifact.id>
       </properties>
     </profile>
-	
-<profile>
-<id>NSIS</id>
-<activation>
-      <os>
-        <family>Windows</family>
-        <arch>x86</arch>
-      </os>
-</activation>
-<build>
-<plugins>
 
-<plugin>
-<artifactId>maven-antrun-plugin</artifactId>
-<version>1.6</version>
-<executions>
-<execution>
-<phase> prepare-package </phase>
-<configuration>
-<target>
-<!-- Download NSIS and unpack -->
-<get
-src="http://dfn.dl.sourceforge.net/project/nsis/NSIS%202/${nsis.version}/nsis-${nsis.version}.zip"
-dest="target/nsis.zip" verbose="true" usetimestamp="true" />
-<unzip src="target/nsis.zip" dest="target" />
-</target>
-</configuration>
-<goals>
-<goal>run</goal>
-</goals>
-</execution>
-</executions>
-</plugin>
-<plugin>
-<groupId>org.codehaus.mojo</groupId>
-<artifactId>nsis-maven-plugin</artifactId>
-<version>1.0-SNAPSHOT</version>
-<executions>
-<execution>
-<phase>package</phase>
-<goals>
-<goal>generate-project</goal> <!-- create target/project.nsh -->
-<goal>compile</goal> <!-- compile setup.nsi into exe -->
-</goals>
-<configuration>
-<makensisBin>target/nsis-${nsis.version}/makensis.exe</makensisBin>
-</configuration>
-</execution>
-</executions>
-</plugin>
-</plugins>
-</build>
-</profile>	
-	
+    <profile>
+      <id>NSIS</id>
+      <activation>
+        <os>
+          <family>Windows</family>
+          <arch>x86</arch>
+        </os>
+      </activation>
+      <build>
+        <plugins>
+
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <phase> prepare-package </phase>
+                <configuration>
+                  <target>
+                    <!-- Download NSIS and unpack -->
+                    <get
+                      src="http://dfn.dl.sourceforge.net/project/nsis/NSIS%202/${nsis.version}/nsis-${nsis.version}.zip"
+                      dest="target/nsis.zip" verbose="true"
+                      usetimestamp="true" />
+                    <unzip src="target/nsis.zip" dest="target" />
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>nsis-maven-plugin</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>generate-project</goal> <!-- create target/project.nsh -->
+                  <goal>compile</goal> <!-- compile setup.nsi into exe -->
+                </goals>
+                <configuration>
+                  <makensisBin>target/nsis-${nsis.version}/makensis.exe</makensisBin>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
   </profiles>
 
 
