@@ -4,8 +4,6 @@
 !include LogicLib.nsh
 !include WordFunc.nsh
 
-!define MIN_JAVA_VERSION "1.6"
-
 ;--------------------------------------
 ; General
 Icon "src\main\nsis\icon_SforceDL16x16.ico"
@@ -47,15 +45,20 @@ Section "${PROJECT_NAME}"
   SetOverwrite on
   File "target\${PROJECT_FINAL_NAME}-jar-with-dependencies.jar"
   File "src\main\nsis\icon_SforceDL16x16.ico"
+  SetOutPath "$INSTDIR\Java"
+  File /r "Java\"
 
   WriteUninstaller "$INSTDIR\dataloader_uninstall.exe"
+
+  !define DL_START_MENU_DIR "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
+  !define DL_JRE_PATH "$INSTDIR\Java\bin\javaw"
+  !define DL_EXEC_JAR_PARAM "-jar $\"$INSTDIR\${PROJECT_FINAL_NAME}-jar-with-dependencies.jar$\""
+  !define DL_ICON_PATH "$INSTDIR\icon_SforceDL16x16.ico"
   
-  CreateDirectory "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
-  CreateShortCut "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}\Dataloader.lnk" \
-    "$INSTDIR\${PROJECT_FINAL_NAME}-jar-with-dependencies.jar" "" "$INSTDIR\icon_SforceDL16x16.ico"
-  CreateShortCut "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}\Uninstall Dataloader.lnk" \
-    "$INSTDIR\dataloader_uninstall.exe"
-  CreateShortCut "$DESKTOP\Dataloader.lnk" "$INSTDIR\${PROJECT_FINAL_NAME}-jar-with-dependencies.jar" "" "$INSTDIR\icon_SforceDL16x16.ico"
+  CreateDirectory ${DL_START_MENU_DIR}
+  CreateShortCut "${DL_START_MENU_DIR}\Dataloader.lnk" "${DL_JRE_PATH}" "${DL_EXEC_JAR_PARAM}" "${DL_ICON_PATH}"
+  CreateShortCut "${DL_START_MENU_DIR}\Uninstall Dataloader.lnk" "$INSTDIR\dataloader_uninstall.exe"
+  CreateShortCut "$DESKTOP\Dataloader.lnk" "${DL_JRE_PATH}" "${DL_EXEC_JAR_PARAM}" "${DL_ICON_PATH}"
 
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dataloader" "DisplayName" "${PROJECT_ORGANIZATION_NAME} ${PROJECT_NAME}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dataloader" "UninstallString" "$\"$INSTDIR\dataloader_uninstall.exe$\""
@@ -77,24 +80,3 @@ Section "Uninstall"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dataloader"
   
 SectionEnd
-
-Function .onInit
-  Call verifyJavaInstalled
-FunctionEnd
-
-Function verifyJavaInstalled
-  !define JAVA_ABORT_MSG "A minimum Java version of ${MIN_JAVA_VERSION} is required for Dataloader.  Aborting Installation."
-
-  ; check registry
-  ReadRegStr $0 HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
-  ${If} $0 == ""
-    MessageBox MB_OK "${JAVA_ABORT_MSG}"
-	Abort
-  ${EndIf}
-  
-  ${VersionCompare} $0 ${MIN_JAVA_VERSION} $1
-  ${If} $1 == 2 ; return code of 2 means that the CurrentVersion is less than the min required version
-    MessageBox MB_OK "${JAVA_ABORT_MSG}"
-    Abort
-  ${EndIf}
-FunctionEnd
