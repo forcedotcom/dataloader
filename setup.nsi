@@ -1,11 +1,16 @@
 !include target\project.nsh
 !include MUI2.nsh
 !include Sections.nsh
+!include LogicLib.nsh
+!include WordFunc.nsh
+
+!define MIN_JAVA_VERSION "1.6"
 
 ;--------------------------------------
 ; General
 Icon "src\main\nsis\icon_SforceDL16x16.ico"
 Name "${PROJECT_NAME}"
+BrandingText "${PROJECT_ORGANIZATION_NAME}"
 
 ; Default install directory
 InstallDir "$PROGRAMFILES\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}\"
@@ -19,15 +24,12 @@ RequestExecutionLevel user
 ;--------------------------------------
 ;Interface Settings
 !define MUI_ABORTWARNING
-!define MUI_ICON "src\main\nsis\icon_SforceDL16x16.ico"
-!define MUI_WELCOMEPAGE_TEXT "Welcome to the installer for ${PROJECT_ORGANIZATION_NAME} ${PROJECT_NAME} ${PROJECT_VERSION}"
-!define MUI_FINISHPAGE_TEXT "${PROJECT_ORGANIZATION_NAME} ${PROJECT_NAME} ${PROJECT_VERSION} has been successfully installed"
+!define MUI_ICON "src\main\nsis\icon_SforceDL32x32.ico"
 
 ;--------------------------------------
 ;Pages
 
-!insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "src\main\resources\licenses\wsc-license.rtf"
+!insertmacro MUI_PAGE_LICENSE "src\main\nsis\license.rtf"
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
@@ -75,3 +77,24 @@ Section "Uninstall"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dataloader"
   
 SectionEnd
+
+Function .onInit
+  Call verifyJavaInstalled
+FunctionEnd
+
+Function verifyJavaInstalled
+  !define JAVA_ABORT_MSG "A minimum Java version of ${MIN_JAVA_VERSION} is required for Dataloader.  Aborting Installation."
+
+  ; check registry
+  ReadRegStr $0 HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
+  ${If} $0 == ""
+    MessageBox MB_OK "${JAVA_ABORT_MSG}"
+	Abort
+  ${EndIf}
+  
+  ${VersionCompare} $0 ${MIN_JAVA_VERSION} $1
+  ${If} $1 == 2 ; return code of 2 means that the CurrentVersion is less than the min required version
+    MessageBox MB_OK "${JAVA_ABORT_MSG}"
+    Abort
+  ${EndIf}
+FunctionEnd
