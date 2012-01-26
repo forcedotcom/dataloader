@@ -1,0 +1,1 @@
+IsNumber(42)

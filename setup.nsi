@@ -46,7 +46,7 @@ Section "${PROJECT_NAME}"
   File "target\${PROJECT_FINAL_NAME}-jar-with-dependencies.jar"
   File "src\main\nsis\icon_SforceDL16x16.ico"
   SetOutPath "$INSTDIR\Java"
-  File /r "Java\"
+  File /r "windows-dependencies\Java\"
 
   WriteUninstaller "$INSTDIR\dataloader_uninstall.exe"
 
