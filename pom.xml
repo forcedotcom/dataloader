@@ -292,7 +292,6 @@
       <activation>
         <os>
           <family>Windows</family>
-          <arch>x86</arch>
         </os>
       </activation>
       <build>
