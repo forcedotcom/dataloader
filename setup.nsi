@@ -42,7 +42,7 @@ RequestExecutionLevel user
 Section "${PROJECT_NAME}"
   SetOutPath "$INSTDIR"
   SectionIn RO
-  SetOverwrite on
+  SetOverwrite try
   File "target\${PROJECT_FINAL_NAME}-jar-with-dependencies.jar"
   File "src\main\nsis\icon_SforceDL16x16.ico"
   SetOutPath "$INSTDIR\Java"
