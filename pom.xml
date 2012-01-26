@@ -47,7 +47,7 @@
   </pluginRepositories>
 
   <dependencies>
-  
+
     <dependency>
       <groupId>autoitx4java</groupId>
       <artifactId>autoitx4java</artifactId>
@@ -55,7 +55,7 @@
       <scope>system</scope>
       <systemPath>${basedir}/windows-dependencies/AutoItX4Java.jar</systemPath>
     </dependency>
-  
+
     <dependency>
       <groupId>com.force.api</groupId>
       <artifactId>force-wsc</artifactId>
@@ -373,6 +373,28 @@
                 </configuration>
               </execution>
             </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>installer-test</id>
+      <activation>
+        <os>
+          <family>Windows</family>
+        </os>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <suiteXmlFiles>
+                <suiteXmlFile>itest.xml</suiteXmlFile>
+              </suiteXmlFiles>
+            </configuration>
           </plugin>
         </plugins>
       </build>
