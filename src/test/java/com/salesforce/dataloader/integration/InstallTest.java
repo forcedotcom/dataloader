@@ -4,6 +4,7 @@ import java.io.File;
 
 import autoitx4java.AutoItX;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -23,7 +24,12 @@ public class InstallTest {
     @Test
     public void testRunInstaller() {
         AutoItX autoIt = new AutoItX();
-        autoIt.run("notepad.exe");
+        autoIt.run(System.getProperty("basedir") + File.separator + "target" + File.separator
+                + System.getProperty("project.name") + "-" + System.getProperty("project.version") + ".exe");
+        String dataloaderSetup = "dataloader Setup";
+        autoIt.winActivate(dataloaderSetup);
+        autoIt.winWaitActive(dataloaderSetup);
+        Assert.assertTrue(autoIt.winExists(dataloaderSetup), "dataloader setup window not found");
     }
 
 }
