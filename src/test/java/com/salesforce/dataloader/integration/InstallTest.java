@@ -8,12 +8,17 @@ import autoitx4java.AutoItX;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.annotations.DataProvider;
 
 import com.jacob.com.LibraryLoader;
 
 public class InstallTest {
 
     private AutoItX autoIt;
+	private static final String startMenuDirPath = System.getProperty("user.home") + File.separator + "Start Menu" 
+		+ File.separator + "Programs" + File.separator + "salesforce.com" + File.separator + "dataloader";
+	private static final String desktopDirPath = System.getProperty("user.home") + File.separator + "Desktop";
+	private String installPath;
     
     @BeforeClass
     public void classSetup() {
@@ -39,6 +44,8 @@ public class InstallTest {
 		Assert.assertTrue(click, "failed to click the I Agree button");
 		click = autoIt.controlClick(dataloaderSetup, "&Next >", "1");
 		Assert.assertTrue(click, "failed to click on the Next button");
+		String fullWinText = autoIt.winGetText(dataloaderSetup);
+		installPath = getInstallPathFromWinText(fullWinText);
 		click = autoIt.controlClick(dataloaderSetup, "&Install", "1");
 		Assert.assertTrue(click, "failed to click on the Install button");
 		waitForControlActive(dataloaderSetup, "&Close", "1", 120000);
@@ -47,15 +54,78 @@ public class InstallTest {
 		Assert.assertFalse(autoIt.winExists(dataloaderSetup), "dataloader setup window not closed");
     }
 	
-    @Test(dependsOnMethods = {"testRunInstaller"})
-    public void testStartMenuDataloaderShortCut() throws IOException {
-	    String shortcutPath = System.getProperty("user.home") + File.separator + "Start Menu" 
-			+ File.separator + "Programs" + File.separator + "salesforce.com" + File.separator + "dataloader"
-			+ File.separator + "Dataloader.lnk";
+	public String getInstallPathFromWinText(String fullWinText) {
+	    String[] lines = fullWinText.split("\n");
+		for (String line : lines) {
+		  if (line.contains("salesforce.com\\dataloader")) return line;
+		}
+		return null;
+	}
+	
+	@DataProvider(name = "dataloaderShortcutPaths")
+	public String[][] dataloaderShortcutPaths() {
+	    return new String[][] {
+		    { startMenuDirPath + File.separator + "Dataloader.lnk" },
+			{ desktopDirPath + File.separator + "Dataloader.lnk" }
+		};
+	}
+	
+    @Test(dependsOnMethods = {"testRunInstaller"}, groups = {"shortcut"}, dataProvider = "dataloaderShortcutPaths")
+    public void testDataloaderShortcut(String shortcutPath) throws IOException, InterruptedException {
 		Assert.assertTrue(new File(shortcutPath).exists(), "dataloader start menu shortcut does not exist at "
 			+ shortcutPath);
-		Runtime.getRuntime().exec(shortcutPath);
-//		Assert.assertTrue(autoIt.winExists("[CLASS:#32770]"), "dataloader welcome window does not found");
+		openShortcut(shortcutPath);
+		String welcomeWindow = "[CLASS:#32770]";
+		String dataloaderWindow = "[CLASS:SWT_Window0]";
+		autoIt.winWaitActive(welcomeWindow);
+		String welcomeWindowHandle = autoIt.winGetHandle(welcomeWindow);
+		Assert.assertTrue(autoIt.winExists(welcomeWindow), "dataloader welcome window not found");
+		Assert.assertTrue(autoIt.winExists(dataloaderWindow), "dataloader window not found");
+		autoIt.winClose(welcomeWindow);
+		autoIt.winClose(dataloaderWindow);		
+		Thread.sleep(3000L);
+		Assert.assertFalse(autoIt.winExists(welcomeWindowHandle), "dataloader welcome window not closed");
+		Assert.assertFalse(autoIt.winExists(dataloaderWindow), "dataloader window not closed");
+	}
+	
+	@Test(dependsOnMethods = {"testRunInstaller"}, groups = {"shortcut"})
+	public void testUninstallShortcut() throws IOException, InterruptedException {
+		String dataloaderUninstall = openUninstaller();
+		autoIt.winClose(dataloaderUninstall);
+		Thread.sleep(3000L);
+		Assert.assertFalse(autoIt.winExists(dataloaderUninstall), "dataloader uninstall window not closed");
+	}
+	
+	@Test(dependsOnGroups = {"shortcut"})
+	public void testRunUninstaller() throws IOException, InterruptedException {
+		String dataloaderUninstall = openUninstaller();
+		boolean click = autoIt.controlClick(dataloaderUninstall, "&Next >", "1");
+		Assert.assertTrue(click, "failed to click on the Next button");
+		click = autoIt.controlClick(dataloaderUninstall, "&Uninstall", "1");
+		Assert.assertTrue(click, "failed to click on the Uninstall button");
+		waitForControlActive(dataloaderUninstall, "&Close", "1", 120000);
+		click = autoIt.controlClick(dataloaderUninstall, "&Close", "1");
+		Assert.assertTrue(click, "failed to click on the Close button");
+		Assert.assertFalse(autoIt.winExists(dataloaderUninstall), "dataloader uninstall window not closed");
+		Assert.assertFalse(new File(startMenuDirPath).exists(), "start menu shortcuts not deleted");
+		Assert.assertFalse(new File(desktopDirPath + File.separator + "Dataloader.lnk").exists(), "desktop shortcut not deleted");
+		Assert.assertFalse(new File(installPath).exists(), "program files directory not deleted");
+	}
+	
+	private String openUninstaller() throws IOException {
+	    String shortcutPath = startMenuDirPath + File.separator + "Uninstall Dataloader.lnk";
+		Assert.assertTrue(new File(shortcutPath).exists(), "uninstall start menu shortcut does not exist at "
+			+ shortcutPath);
+		openShortcut(shortcutPath);
+		String dataloaderUninstall = "dataloader Uninstall";
+		autoIt.winActivate(dataloaderUninstall);
+		autoIt.winWaitActive(dataloaderUninstall);
+		Assert.assertTrue(autoIt.winExists(dataloaderUninstall), "dataloader uninstall window not found");
+		return dataloaderUninstall;
+	}
+	
+	private void openShortcut(String shortcutPath) throws IOException {
+		Runtime.getRuntime().exec("cmd /c \"" + shortcutPath + "\"");
 	}
 	
 	private void waitForControlActive(String title, String text, String control, long maxWaitTime) throws InterruptedException {
@@ -66,8 +136,8 @@ public class InstallTest {
 		    } else if (autoIt.controlCommandIsEnabled(title, text, control)) {
 			    break;
 			} else {
-			    Thread.sleep(5000L);
-				timeWaited += 5000L;
+			    Thread.sleep(2000L);
+				timeWaited += 2000L;
 			}
 		}
 	}
