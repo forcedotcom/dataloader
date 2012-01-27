@@ -2,7 +2,7 @@
 <suite name="Suite1" verbose="1" >
   <test name="Install" >
     <classes>
-       <class name="InstallTest" />
+       <class name="com.salesforce.dataloader.integration.InstallTest" />
     </classes>
   </test>
   

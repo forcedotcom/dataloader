@@ -13,10 +13,10 @@ public class InstallTest {
     
     @BeforeClass
     public void classSetup() {
-        File dll = new File(System.getProperty("user.home") + File.pathSeparator + ".m2"
-               + File.pathSeparator + "repository" + File.pathSeparator + "net" + File.pathSeparator + "sf"
-               + File.pathSeparator + "jacob-project" + File.pathSeparator + "jacob" + File.pathSeparator + "1.14.3"
-               + File.pathSeparator + "jacob-1.14.3-x86.dll");
+        File dll = new File(System.getProperty("user.home") + File.separator + ".m2"
+               + File.separator + "repository" + File.separator + "net" + File.separator + "sf"
+               + File.separator + "jacob-project" + File.separator + "jacob" + File.separator + "1.14.3"
+               + File.separator + "jacob-1.14.3-x86.dll");
         System.setProperty(LibraryLoader.JACOB_DLL_PATH, dll.getAbsolutePath());
     }
     

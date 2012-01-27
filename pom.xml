@@ -387,6 +387,44 @@
       </activation>
       <build>
         <plugins>
+		  <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <executions>
+          <execution>
+		    <id>register-dll</id>
+		    <phase>pre-integration-test</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+        <configuration>
+          <executable>regsvr32</executable>
+          <arguments>
+            <argument>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3.dll</argument>
+			<argument>-s</argument>
+          </arguments>
+        </configuration>
+          </execution>
+		  <execution>
+		    <id>unregister-dll</id>
+		    <phase>post-integration-test</phase>
+			<goals>
+			  <goal>exec</goal>
+			</goals>
+			<configuration>
+			  <executable>regsvr32</executable>
+			  <arguments>
+			    <argument>-u</argument>
+				<argument>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3.dll</argument>
+				<argument>-s</argument>
+			  </arguments>
+			</configuration>
+		  </execution>
+        </executions>
+
+      </plugin>
+		
+		
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
