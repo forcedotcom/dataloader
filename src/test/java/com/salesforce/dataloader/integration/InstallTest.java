@@ -1,7 +1,8 @@
 package com.salesforce.dataloader.integration;
 
 import java.io.File;
-import java.lang.Runtime;
+import java.io.IOException;
+
 import autoitx4java.AutoItX;
 
 import org.testng.Assert;
@@ -52,7 +53,7 @@ public class InstallTest {
 			+ File.separator + "Programs" + File.separator + "salesforce.com" + File.separator + "dataloader"
 			+ File.separator + "Dataloader.lnk";
 		Assert.assertTrue(new File(shortcutPath).exists(), "dataloader start menu shortcut does not exist at "
-			+ dataloaderPath);
+			+ shortcutPath);
 		Runtime.getRuntime().exec(shortcutPath);
 //		Assert.assertTrue(autoIt.winExists("[CLASS:#32770]"), "dataloader welcome window does not found");
 	}
