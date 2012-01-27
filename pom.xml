@@ -447,6 +447,10 @@
               <suiteXmlFiles>
                 <suiteXmlFile>${basedir}/src/test/resources/itest.xml</suiteXmlFile>
               </suiteXmlFiles>
+			  	  <systemPropertyVariables>
+	    <exeName>${project.name}-${project.version}.exe</exeName>
+	  </systemPropertyVariables>
+
             </configuration>
           </plugin>
         </plugins>
