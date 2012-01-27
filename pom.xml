@@ -232,6 +232,8 @@
             <exclude>**/TestRecordsUtil.java</exclude>
             <exclude>**/itest/**</exclude>
           </excludes>
+
+          <skip>true</skip>
         </configuration>
       </plugin>
 
@@ -317,9 +319,9 @@
     <profile>
       <id>NSIS</id>
       <activation>
-        <os>
+<!--        <os>
           <family>Windows</family>
-        </os>
+        </os>-->
       </activation>
       <build>
 
@@ -390,10 +392,27 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
+			        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>integration-test</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>verify</id>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
             <configuration>
               <suiteXmlFiles>
-                <suiteXmlFile>itest.xml</suiteXmlFile>
+                <suiteXmlFile>${basedir}/src/itest/resources/itest.xml</suiteXmlFile>
               </suiteXmlFiles>
+<!--			  <additionalClasspathElements>
+			    <additionalClasspathElement>${basedir}/src/itest/resources/itest.xml</additionalClasspathElement>
+			  </additionalClasspathElements>-->
             </configuration>
           </plugin>
         </plugins>
