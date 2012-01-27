@@ -1,4 +1,4 @@
-package com.salesforce.dataloader;
+package com.salesforce.dataloader.integration;
 
 import java.io.File;
 

@@ -230,7 +230,7 @@
           <excludes>
             <!-- exclude TestRecordsUtil class which inherit from TestCase -->
             <exclude>**/TestRecordsUtil.java</exclude>
-            <exclude>**/itest/**</exclude>
+            <exclude>**/integration/**</exclude>
           </excludes>
 
           <skip>true</skip>
@@ -319,9 +319,7 @@
     <profile>
       <id>NSIS</id>
       <activation>
-<!--        <os>
-          <family>Windows</family>
-        </os>-->
+        <!-- <os> <family>Windows</family> </os> -->
       </activation>
       <build>
 
@@ -392,27 +390,24 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-			        <executions>
-          <execution>
-            <id>integration-test</id>
-            <goals>
-              <goal>integration-test</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>verify</id>
-            <goals>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
+            <executions>
+              <execution>
+                <id>integration-test</id>
+                <goals>
+                  <goal>integration-test</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>verify</id>
+                <goals>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
             <configuration>
               <suiteXmlFiles>
-                <suiteXmlFile>${basedir}/src/itest/resources/itest.xml</suiteXmlFile>
+                <suiteXmlFile>${basedir}/src/test/resources/itest.xml</suiteXmlFile>
               </suiteXmlFiles>
-<!--			  <additionalClasspathElements>
-			    <additionalClasspathElement>${basedir}/src/itest/resources/itest.xml</additionalClasspathElement>
-			  </additionalClasspathElements>-->
             </configuration>
           </plugin>
         </plugins>
