@@ -17,7 +17,7 @@ ShowInstDetails show
 AutoCloseWindow false
 
 ;Request application privileges for Windows Vista
-RequestExecutionLevel user
+;RequestExecutionLevel user
 
 ;--------------------------------------
 ;Interface Settings
@@ -80,3 +80,13 @@ Section "Uninstall"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dataloader"
   
 SectionEnd
+
+Function .onInit
+UserInfo::GetAccountType
+pop $0
+${If} $0 != "admin" ;Require admin rights on NT4+
+    MessageBox mb_iconstop "Administrator rights required!"
+    SetErrorLevel 740 ;ERROR_ELEVATION_REQUIRED
+    Quit
+${EndIf}
+FunctionEnd
