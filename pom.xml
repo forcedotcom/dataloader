@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>23.0.0-SNAPSHOT</version>
+  <version>23.0</version>
   <name>dataloader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -187,6 +187,13 @@
 
   <build>
     <defaultGoal>install</defaultGoal>
+    
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
 
     <plugins>
       <plugin>

@@ -29,8 +29,7 @@ package com.salesforce.dataloader.controller;
 import java.io.*;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
@@ -71,9 +70,9 @@ public class Controller {
     private static final String LOG_CONFIG_FILE = "log-conf.xml"; //$NON-NLS-1$
     private static final String LOG_STDOUT_FILE = "sdl_out.log"; //$NON-NLS-1$
     private static final String CONFIG_DIR = "conf"; //$NON-NLS-1$
-    private static final String APP_NAME = "Apex Data Loader"; //$NON-NLS-1$
-    public static final String APP_VERSION = "23.0"; //$NON-NLS-1$
-    private static final String APP_VENDOR = "salesforce.com"; //$NON-NLS-1$
+    private static String APP_NAME; //$NON-NLS-1$
+    public static String APP_VERSION; //$NON-NLS-1$
+    private static String APP_VENDOR; //$NON-NLS-1$
 
     /**
      * <code>config</code> is an instance of configuration that's tied to this instance of controller in a multithreaded
@@ -94,6 +93,17 @@ public class Controller {
     private Controller(String name, boolean isBatchMode) throws ControllerInitializationException {
         // if name is passed to controller, use it to create a unique run file name
         initConfig(name, isBatchMode);
+        
+        // load app version properties
+        Properties versionProps = new Properties();
+        try {
+            versionProps.load(this.getClass().getClassLoader().getResourceAsStream("version.properties"));
+        } catch (IOException e) {
+            throw new ControllerInitializationException(e);
+        }
+        APP_NAME = versionProps.getProperty("app.name");
+        APP_VERSION = versionProps.getProperty("app.version");
+        APP_VENDOR = versionProps.getProperty("app.vendor");
     }
 
     public void setConfigDefaults() {
