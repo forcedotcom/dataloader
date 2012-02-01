@@ -91,9 +91,6 @@ public class Controller {
     private String appPath;
 
     private Controller(String name, boolean isBatchMode) throws ControllerInitializationException {
-        // if name is passed to controller, use it to create a unique run file name
-        initConfig(name, isBatchMode);
-        
         // load app version properties
         Properties versionProps = new Properties();
         try {
@@ -104,6 +101,9 @@ public class Controller {
         APP_NAME = versionProps.getProperty("app.name");
         APP_VERSION = versionProps.getProperty("app.version");
         APP_VENDOR = versionProps.getProperty("app.vendor");
+
+        // if name is passed to controller, use it to create a unique run file name
+        initConfig(name, isBatchMode);
     }
 
     public void setConfigDefaults() {

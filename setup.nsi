@@ -40,6 +40,14 @@ RequestExecutionLevel admin
 ;Installer Section
 
 Section "${PROJECT_NAME}"
+  !define DL_START_MENU_DIR "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
+  !define DL_JRE_PATH "$INSTDIR\Java\bin\javaw.exe"
+  !define DL_EXEC_JAR_PARAM "-Dappdata.dir=$\"$APPDATA$\" -jar $\"$INSTDIR\${PROJECT_FINAL_NAME}-jar-with-dependencies.jar$\""
+  !define DL_SMALL_ICON_PATH "$INSTDIR\icon_SforceDL16x16.ico"
+  !define DL_LARGE_ICON_PATH "$INSTDIR\icon_SforceDL32x32.ico"
+  !define DL_UNINSTALLER_PATH "$INSTDIR\dataloader_uninstall.exe"
+  !define DL_CONFIG_DIR "$APPDATA\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME} ${PROJECT_VERSION}"
+
   SetOutPath "$INSTDIR"
   SectionIn RO
   SetOverwrite try
@@ -48,17 +56,10 @@ Section "${PROJECT_NAME}"
   File "src\main\nsis\icon_SforceDL32x32.ico"
   SetOutPath "$INSTDIR\Java"
   File /r "windows-dependencies\Java\"
-
-  WriteUninstaller "$INSTDIR\dataloader_uninstall.exe"
   
-  !define DL_START_MENU_DIR "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
-  !define DL_JRE_PATH "$INSTDIR\Java\bin\javaw"
-  !define DL_EXEC_JAR_PARAM "-Dappdata.dir=$\"$APPDATA$\" -jar $\"$INSTDIR\${PROJECT_FINAL_NAME}-jar-with-dependencies.jar$\""
-  !define DL_SMALL_ICON_PATH "$INSTDIR\icon_SforceDL16x16.ico"
-  !define DL_LARGE_ICON_PATH "$INSTDIR\icon_SforceDL32x32.ico"
+  WriteUninstaller ${DL_UNINSTALLER_PATH}
     
   ; copy config files to appdata dir
-  !define DL_CONFIG_DIR "$APPDATA\salesforce.com\Apex Data Loader 23.0"
   CreateDirectory "${DL_CONFIG_DIR}"
   SetOutPath "${DL_CONFIG_DIR}"
   File "src\main\nsis\config.properties"
@@ -66,11 +67,11 @@ Section "${PROJECT_NAME}"
   
   CreateDirectory ${DL_START_MENU_DIR}
   CreateShortCut "${DL_START_MENU_DIR}\Dataloader.lnk" "${DL_JRE_PATH}" "${DL_EXEC_JAR_PARAM}" "${DL_SMALL_ICON_PATH}"
-  CreateShortCut "${DL_START_MENU_DIR}\Uninstall Dataloader.lnk" "$INSTDIR\dataloader_uninstall.exe"
+  CreateShortCut "${DL_START_MENU_DIR}\Uninstall Dataloader.lnk" "${DL_UNINSTALLER_PATH}"
   CreateShortCut "$DESKTOP\Dataloader.lnk" "${DL_JRE_PATH}" "${DL_EXEC_JAR_PARAM}" "${DL_LARGE_ICON_PATH}"
 
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dataloader" "DisplayName" "${PROJECT_ORGANIZATION_NAME} ${PROJECT_NAME}"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dataloader" "UninstallString" "$\"$INSTDIR\dataloader_uninstall.exe$\""
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dataloader" "UninstallString" "$\"${DL_UNINSTALLER_PATH}$\""
   
 SectionEnd
 
@@ -82,7 +83,7 @@ Section "Uninstall"
   RMDir /r "$INSTDIR"
   RMDir /r "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
   Delete "$DESKTOP\Dataloader.lnk"
-  RMDir /r "$APPDATA\salesforce.com"
+  RMDir /r "$APPDATA\${PROJECT_ORGANIZATION_NAME}"
   
   ; delete salesforce.com directory only if it's empty
   RMDir "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}"
