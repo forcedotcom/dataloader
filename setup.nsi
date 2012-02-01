@@ -16,8 +16,8 @@ InstallDir "$PROGRAMFILES\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}\"
 ShowInstDetails show
 AutoCloseWindow false
 
-;Request application privileges for Windows Vista
-;RequestExecutionLevel user
+;Request application privileges for Windows 7
+RequestExecutionLevel admin
 
 ;--------------------------------------
 ;Interface Settings
@@ -47,6 +47,7 @@ Section "${PROJECT_NAME}"
   File "src\main\nsis\icon_SforceDL16x16.ico"
   SetOutPath "$INSTDIR\Java"
   File /r "windows-dependencies\Java\"
+  CreateDirectory "$INSTDIR\target"
 
   WriteUninstaller "$INSTDIR\dataloader_uninstall.exe"
 
@@ -82,11 +83,11 @@ Section "Uninstall"
 SectionEnd
 
 Function .onInit
-UserInfo::GetAccountType
-pop $0
-${If} $0 != "admin" ;Require admin rights on NT4+
-    MessageBox mb_iconstop "Administrator rights required!"
+  UserInfo::GetAccountType
+  pop $0
+  ${If} $0 != "admin" ;Require admin rights on NT4+
+    MessageBox mb_iconstop "Administrator rights are required to run this installer."
     SetErrorLevel 740 ;ERROR_ELEVATION_REQUIRED
     Quit
-${EndIf}
+  ${EndIf}
 FunctionEnd
