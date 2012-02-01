@@ -48,15 +48,21 @@ Section "${PROJECT_NAME}"
   File "src\main\nsis\icon_SforceDL32x32.ico"
   SetOutPath "$INSTDIR\Java"
   File /r "windows-dependencies\Java\"
-  CreateDirectory "$INSTDIR\target"
 
   WriteUninstaller "$INSTDIR\dataloader_uninstall.exe"
-
+  
   !define DL_START_MENU_DIR "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
   !define DL_JRE_PATH "$INSTDIR\Java\bin\javaw"
-  !define DL_EXEC_JAR_PARAM "-jar $\"$INSTDIR\${PROJECT_FINAL_NAME}-jar-with-dependencies.jar$\""
+  !define DL_EXEC_JAR_PARAM "-Dappdata.dir=$\"$APPDATA$\" -jar $\"$INSTDIR\${PROJECT_FINAL_NAME}-jar-with-dependencies.jar$\""
   !define DL_SMALL_ICON_PATH "$INSTDIR\icon_SforceDL16x16.ico"
   !define DL_LARGE_ICON_PATH "$INSTDIR\icon_SforceDL32x32.ico"
+    
+  ; copy config files to appdata dir
+  !define DL_CONFIG_DIR "$APPDATA\salesforce.com\Apex Data Loader 23.0"
+  CreateDirectory "${DL_CONFIG_DIR}"
+  SetOutPath "${DL_CONFIG_DIR}"
+  File "src\main\nsis\config.properties"
+  File "src\main\nsis\log-conf.xml"
   
   CreateDirectory ${DL_START_MENU_DIR}
   CreateShortCut "${DL_START_MENU_DIR}\Dataloader.lnk" "${DL_JRE_PATH}" "${DL_EXEC_JAR_PARAM}" "${DL_SMALL_ICON_PATH}"
@@ -76,6 +82,7 @@ Section "Uninstall"
   RMDir /r "$INSTDIR"
   RMDir /r "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
   Delete "$DESKTOP\Dataloader.lnk"
+  RMDir /r "$APPDATA\salesforce.com"
   
   ; delete salesforce.com directory only if it's empty
   RMDir "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}"
