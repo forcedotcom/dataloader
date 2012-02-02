@@ -258,7 +258,7 @@
             <exclude>**/TestRecordsUtil.java</exclude>
             <exclude>**/integration/**</exclude>
           </excludes>
-          <skip>true</skip>
+<!--          <skip>true</skip>-->
         </configuration>
       </plugin>
 
