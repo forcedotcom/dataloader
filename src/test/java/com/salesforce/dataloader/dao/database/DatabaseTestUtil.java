@@ -68,9 +68,7 @@ public class DatabaseTestUtil {
         String dbConfigName = isInsert ? "insertAccount" : "updateAccount";
         logger.info("Preparing to write " + numAccounts + " accounts to the database using db config: " + dbConfigName);
         try {
-            String dbConfigFilename = theController.getConfig().constructConfigFilePath(
-                    DatabaseContext.DEFAULT_CONFIG_FILENAME);
-            DatabaseConfig dbConfig = DatabaseConfig.getInstance(dbConfigFilename, dbConfigName);
+            DatabaseConfig dbConfig = getDatabaseConfig(theController, dbConfigName);
             BasicDataSource dataSource = dbConfig.getDataSource();
             SqlConfig sqlConfig = dbConfig.getSqlConfig();
             // override the configured sqltype for the last_update column
@@ -101,6 +99,12 @@ public class DatabaseTestUtil {
 
     public static Map<String, Object> getInsertOrUpdateAccountRow(boolean isInsert, int seqNum, DateType dateType) {
         return getInsertOrUpdateAccountRow(isInsert, seqNum, dateType, false);
+    }
+    
+    public static DatabaseConfig getDatabaseConfig(Controller controller, String dbConfigName) {
+        String dbConfigFilename = controller.getConfig().constructConfigFilePath(
+                DatabaseContext.DEFAULT_CONFIG_FILENAME);
+        return DatabaseConfig.getInstance(dbConfigFilename, dbConfigName);
     }
 
     /**

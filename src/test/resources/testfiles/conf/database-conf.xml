@@ -3,10 +3,10 @@
 <bean id="testDbDataSource"
       class="org.apache.commons.dbcp.BasicDataSource"
       destroy-method="close">
-    <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
-    <property name="url" value="jdbc:oracle:thin:@${test.database.url}"/>
-    <property name="username" value="dataloader"/>
-    <property name="password" value="dataloader"/>
+    <property name="driverClassName" value="org.h2.Driver" />
+    <property name="url" value="jdbc:h2:file:target/h2"/>
+    <property name="username" value="sa"/>
+    <property name="password" value=""/>
 </bean>
 <bean id="queryAccountAll"
       class="com.salesforce.dataloader.dao.database.DatabaseConfig"
@@ -49,7 +49,7 @@
     <property name="sqlString">
         <value>
             SELECT ACCOUNT_NAME, BUSINESS_PHONE, SFDC_ACCOUNT_ID, ACCOUNT_EXT_ID, ANNUAL_REVENUE, LAST_UPDATED, ACCOUNT_NUMBER
-            FROM DATALOADER.INT_ACCOUNTS
+            FROM DATALOADER
             ORDER BY ACCOUNT_EXT_ID ASC
         </value>
     </property>
@@ -70,7 +70,7 @@
     <property name="sqlString">
         <value>
             SELECT ACCOUNT_NAME, BUSINESS_PHONE, SFDC_ACCOUNT_ID, ACCOUNT_EXT_ID, ANNUAL_REVENUE, LAST_UPDATED, ACCOUNT_NUMBER
-            FROM DATALOADER.INT_ACCOUNTS
+            FROM DATALOADER
             WHERE SYSTEM_MODSTAMP > @compare_date@
         </value>
     </property>
@@ -96,7 +96,7 @@
     <property name="sqlString">
         <value>
             SELECT ACCOUNT_NAME, BUSINESS_PHONE, ACCOUNT_EXT_ID, ANNUAL_REVENUE, LAST_UPDATED, ACCOUNT_NUMBER
-            FROM DATALOADER.INT_ACCOUNTS
+            FROM DATALOADER
             WHERE SYSTEM_MODSTAMP > @process.lastRunDate@
         </value>
     </property>
@@ -121,7 +121,7 @@
       class="com.salesforce.dataloader.dao.database.SqlConfig" singleton="true">
     <property name="sqlString">
         <value>
-            update DATALOADER.int_accounts accounts
+            update DATALOADER accounts
                set accounts.account_name = @account_name@,
                    accounts.business_phone = @business_phone@,
                    accounts.sfdc_account_id = @sfdc_account_id@,
@@ -148,7 +148,7 @@
       class="com.salesforce.dataloader.dao.database.SqlConfig" singleton="true">
     <property name="sqlString">
         <value>
-            INSERT INTO DATALOADER.INT_ACCOUNTS (
+            INSERT INTO DATALOADER (
                ACCOUNT_NAME, BUSINESS_PHONE, SFDC_ACCOUNT_ID, ANNUAL_REVENUE, ACCOUNT_EXT_ID, ACCOUNT_NUMBER, LAST_UPDATED)
             VALUES (@account_name@, @business_phone@, @sfdc_account_id@, @annual_revenue@, @account_ext_id@, @account_number@, @last_updated@)
         </value>
@@ -169,7 +169,7 @@
       class="com.salesforce.dataloader.dao.database.SqlConfig" singleton="true">
     <property name="sqlString">
         <value>
-            DELETE FROM DATALOADER.INT_ACCOUNTS
+            DELETE FROM DATALOADER
         </value>
     </property>
 </bean>
