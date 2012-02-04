@@ -25,6 +25,7 @@
  */
 package com.salesforce.dataloader.dao.database;
 
+import java.io.IOException;
 import java.util.*;
 
 import javax.sql.DataSource;
@@ -64,7 +65,7 @@ public class DatabaseTest extends TestBase {
      * @see junit.framework.TestCase#setUp()
      */
     @Override
-    public void setUp() {
+    public void setUp() throws IOException {
         super.setUp();
 
         createTable("dataloader");

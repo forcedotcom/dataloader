@@ -25,6 +25,7 @@
  */
 package com.salesforce.dataloader;
 
+import java.io.IOException;
 import java.util.*;
 
 public abstract class ConfigTestBase extends TestBase {
@@ -135,7 +136,7 @@ public abstract class ConfigTestBase extends TestBase {
     }
     
     @Override
-    public void setUp() {
+    public void setUp() throws IOException {
         super.setUp();
         try {
             if (!getTestConfig().isEmpty()) {

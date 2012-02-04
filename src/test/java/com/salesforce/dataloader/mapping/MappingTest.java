@@ -26,6 +26,7 @@
 package com.salesforce.dataloader.mapping;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import com.salesforce.dataloader.ConfigTestBase;
@@ -58,7 +59,7 @@ public class MappingTest extends ConfigTestBase {
     private Map<String, Object> sourceValueMap;
 
     @Override
-    public void setUp() {
+    public void setUp() throws IOException {
         super.setUp();
 
         sourceValueMap = new HashMap<String, Object>();

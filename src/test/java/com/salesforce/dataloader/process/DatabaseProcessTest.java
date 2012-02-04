@@ -26,6 +26,7 @@
 package com.salesforce.dataloader.process;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
 
@@ -79,7 +80,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
      * @see junit.framework.TestCase#setUp()
      */
     @Override
-    public void setUp() {
+    public void setUp() throws IOException {
         super.setUp();
         // delete accounts from database to start fresh
         DatabaseTestUtil.deleteAllAccountsDb(getController());

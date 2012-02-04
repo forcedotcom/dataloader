@@ -57,9 +57,9 @@ abstract public class TestBase extends TestCase {
     private static final String API_CLIENT_NAME = "DataLoaderBatch/" + Controller.APP_VERSION;
 
     private static final String TEST_FILES_DIR = "src/test/resources/testfiles";
-    private static final String TEST_CONF_DIR = TEST_FILES_DIR + "/conf";
+    private static final String TEST_CONF_DIR = "target" + File.separator + "conf";
     private static final String TEST_DATA_DIR = TEST_FILES_DIR + "/data";
-    private static final String TEST_STATUS_DIR = "target/status";
+    private static final String TEST_STATUS_DIR = "target" + File.separator + "status";
 
     protected static final String DEFAULT_ACCOUNT_EXT_ID_FIELD = "Oracle_Id__c";
     protected static final String DEFAULT_CONTACT_EXT_ID_FIELD = "NumberId__c";
@@ -89,7 +89,7 @@ abstract public class TestBase extends TestCase {
      * @see junit.framework.TestCase#setUp()
      */
     @Override
-    public void setUp() {
+    public void setUp() throws IOException {
         // reset binding
         binding = null;
 
@@ -104,39 +104,12 @@ abstract public class TestBase extends TestCase {
         } catch (Exception e) {
             // ignore, just leave the default thread name intact
         }
+        
+        FileUtils.copyDirectory(new File(TEST_FILES_DIR + File.separator + "conf"), new File(TEST_CONF_DIR));
 
-        String dataloaderDirSysProp = null;
-        if (System.getProperty("basedir") != null) {
-            // the basedir propety is set by maven
-            dataloaderDirSysProp = "basedir";
-        } else {
-            // we are running in eclipse 
-            dataloaderDirSysProp = "user.dir";
-        }
-        
-        String dataloaderDirProp = System.getProperty(dataloaderDirSysProp);
-        
-        if (dataloaderDirProp == null || dataloaderDirProp.length() == 0)
-            throw new IllegalStateException("Property must be set: " + dataloaderDirSysProp);
-        
-        this.dataloaderHome = new File(dataloaderDirProp);
-        if (!this.dataloaderHome.isDirectory())
-            throw new IllegalStateException("Invalid dataloader home: " + this.dataloaderHome);
-       
-        // copy test config properties into target directory 
-        String targetPath = dataloaderDirProp + File.separator +  "target";
-        String[] configFileNames = {"config.properties", "database-conf.xml", "process-conf.xml" };
-        try {
-            for (String file : configFileNames) {
-                FileUtils.copyFileToDirectory(new File(getTestConfDir()  + File.separator + file), 
-                        new File(targetPath), true);
-            }            
-        } catch (IOException e) {
-            fail(e);
-        }
-        
         // configure the Controller to point to our testing config
-        System.setProperty(Config.LOADER_CONFIG_DIR_SYSPROP, targetPath);
+        System.setProperty(Config.LOADER_CONFIG_DIR_SYSPROP, TEST_CONF_DIR);
+
         initController();
     }
 
