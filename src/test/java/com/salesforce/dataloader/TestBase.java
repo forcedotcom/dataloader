@@ -124,14 +124,13 @@ abstract public class TestBase extends TestCase {
             throw new IllegalStateException("Invalid dataloader home: " + this.dataloaderHome);
        
         // copy test config properties into target directory 
-        String configFileName = "config.properties";
         String targetPath = dataloaderDirProp + File.separator +  "target";
-        String configFilePath = getTestConfDir()  + File.separator + configFileName;  
-        String dbConfigFileName = "database-conf.xml";
-        String dbConfigFilePath = getTestConfDir() + File.separator + dbConfigFileName;
+        String[] configFileNames = {"config.properties", "database-conf.xml", "process-conf.xml" };
         try {
-            FileUtils.copyFileToDirectory(new File(configFilePath), new File(targetPath), true);
-            FileUtils.copyFileToDirectory(new File(dbConfigFilePath), new File(targetPath), true);
+            for (String file : configFileNames) {
+                FileUtils.copyFileToDirectory(new File(getTestConfDir()  + File.separator + file), 
+                        new File(targetPath), true);
+            }            
         } catch (IOException e) {
             fail(e);
         }

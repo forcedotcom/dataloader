@@ -80,6 +80,7 @@ public class DatabaseTest extends TestBase {
         while (tables.next()) {
             if (tables.getString("TABLE_NAME").equals(tableName.toUpperCase())) {
                 tableExists = true;
+                break;
             }
         }
         
@@ -98,8 +99,6 @@ public class DatabaseTest extends TestBase {
 
             jdbcTemplate.execute(createTableSql);
         }
-        
-
     }
 
     /* (non-Javadoc)
