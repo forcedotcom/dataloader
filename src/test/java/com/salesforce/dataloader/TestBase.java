@@ -56,9 +56,10 @@ abstract public class TestBase extends TestCase {
     
     private static final String API_CLIENT_NAME = "DataLoaderBatch/" + Controller.APP_VERSION;
 
-    private static final String TEST_FILES_DIR = "src/test/resources/testfiles";
+    private static final String TEST_FILES_DIR = "src" + File.separator + "test" 
+            + File.separator + "resources" + File.separator + "testfiles";
     private static final String TEST_CONF_DIR = "target" + File.separator + "conf";
-    private static final String TEST_DATA_DIR = TEST_FILES_DIR + "/data";
+    private static final String TEST_DATA_DIR = "target" + File.separator + "data";
     private static final String TEST_STATUS_DIR = "target" + File.separator + "status";
 
     protected static final String DEFAULT_ACCOUNT_EXT_ID_FIELD = "Oracle_Id__c";
@@ -105,7 +106,7 @@ abstract public class TestBase extends TestCase {
             // ignore, just leave the default thread name intact
         }
         
-        FileUtils.copyDirectory(new File(TEST_FILES_DIR + File.separator + "conf"), new File(TEST_CONF_DIR));
+        FileUtils.copyDirectory(new File(TEST_FILES_DIR), new File("target"));
 
         // configure the Controller to point to our testing config
         System.setProperty(Config.LOADER_CONFIG_DIR_SYSPROP, TEST_CONF_DIR);

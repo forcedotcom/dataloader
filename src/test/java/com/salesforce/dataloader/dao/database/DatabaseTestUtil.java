@@ -30,10 +30,14 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import javax.sql.DataSource;
+
 import junit.framework.TestCase;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -197,5 +201,44 @@ public class DatabaseTestUtil {
     public static final String REVENUE_COL = "annual_revenue";
     public static final String LAST_UPDATED_COL = "last_updated";
     public static final String ACCOUNT_NUMBER_COL = "account_number";
+    
+    public static final Map<String, String> ALL_COLS = new HashMap<String, String>() {{
+        put(NAME_COL, "varchar(100)");
+        put(PHONE_COL, "varchar(100)");
+        put(EXT_ID_COL, "varchar(100)");
+        put(SFDC_ID_COL, "varchar(100)");
+        put(REVENUE_COL, "decimal");
+        put(LAST_UPDATED_COL, "date");
+        put(ACCOUNT_NUMBER_COL, "varchar(100)");
+        put("system_modstamp", "date default sysdate not null");
+    }};
+    
+    public static void createTable(Controller controller, String tableName) {
+        DataSource dataSource = DatabaseTestUtil.getDatabaseConfig(controller, "insertAccount").getDataSource();
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        SqlRowSet tables = jdbcTemplate.queryForRowSet("show tables");
+        boolean tableExists = false;
+        while (tables.next()) {
+            if (tables.getString("TABLE_NAME").equals(tableName.toUpperCase())) {
+                tableExists = true;
+                break;
+            }
+        }
+        
+        // create table if it doesn't exist
+        if (!tableExists) {
+            String createTableSql = "create table "+ tableName + " (";
+            List<String> keys = new ArrayList<String>(ALL_COLS.keySet());
+            for (int i = 0; i < keys.size(); i++ ) {
+                createTableSql += keys.get(i) + " " + ALL_COLS.get(keys.get(i));
+                if (i == keys.size() - 1) {
+                    createTableSql += ")";
+                } else {
+                    createTableSql += ", ";
+                }
+            }
+            jdbcTemplate.execute(createTableSql);
+        }
+    }
 
 }

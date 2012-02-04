@@ -28,11 +28,7 @@ package com.salesforce.dataloader.dao.database;
 import java.io.IOException;
 import java.util.*;
 
-import javax.sql.DataSource;
-
 import org.apache.log4j.Logger;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import com.salesforce.dataloader.TestBase;
 import com.salesforce.dataloader.controller.Controller;
@@ -55,7 +51,7 @@ public class DatabaseTest extends TestBase {
 
     // logger
     private static Logger logger = Logger.getLogger(DatabaseReader.class);
-
+    
     private static final String[] VALIDATE_COLS = { DatabaseTestUtil.EXT_ID_COL, DatabaseTestUtil.SFDC_ID_COL,
         DatabaseTestUtil.NAME_COL, DatabaseTestUtil.PHONE_COL, DatabaseTestUtil.REVENUE_COL,
         DatabaseTestUtil.ACCOUNT_NUMBER_COL };
@@ -68,40 +64,13 @@ public class DatabaseTest extends TestBase {
     public void setUp() throws IOException {
         super.setUp();
 
-        createTable("dataloader");
+        DatabaseTestUtil.createTable(getController(), "dataloader");
         
         // delete accounts from database to start fresh
         DatabaseTestUtil.deleteAllAccountsDb(getController());
     }
     
-    private void createTable(String tableName) {
-        DataSource dataSource = DatabaseTestUtil.getDatabaseConfig(getController(), "insertAccount").getDataSource();
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        SqlRowSet tables = jdbcTemplate.queryForRowSet("show tables");
-        boolean tableExists = false;
-        while (tables.next()) {
-            if (tables.getString("TABLE_NAME").equals(tableName.toUpperCase())) {
-                tableExists = true;
-                break;
-            }
-        }
-        
-        // create table if it doesn't exist
-        if (!tableExists) {
-            String createTableSql = "create table "+ tableName + " (";
-            for (int i = 0; i < VALIDATE_COLS.length; i++ ) {
-                createTableSql += VALIDATE_COLS[i];
-                if (VALIDATE_COLS[i].equals(DatabaseTestUtil.REVENUE_COL)) {
-                    createTableSql +=  " decimal, ";
-                } else {
-                    createTableSql +=  " varchar(100), ";
-                }
-            }
-            createTableSql += DatabaseTestUtil.LAST_UPDATED_COL + " date)";
 
-            jdbcTemplate.execute(createTableSql);
-        }
-    }
 
     /* (non-Javadoc)
      * @see junit.framework.TestCase#tearDown()

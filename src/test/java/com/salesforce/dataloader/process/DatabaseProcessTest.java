@@ -82,6 +82,9 @@ public class DatabaseProcessTest extends ProcessTestBase {
     @Override
     public void setUp() throws IOException {
         super.setUp();
+        
+        DatabaseTestUtil.createTable(getController(), "dataloader");
+        
         // delete accounts from database to start fresh
         DatabaseTestUtil.deleteAllAccountsDb(getController());
     }
@@ -203,7 +206,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         argMap.put(Config.ENABLE_EXTRACT_STATUS_OUTPUT, Config.TRUE);
         argMap.put(Config.DAO_WRITE_BATCH_SIZE, String.valueOf(BATCH_SIZE));
 
-        Date startTime = new Date();
+        Date startTime = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000));
 
         Controller theController = runProcessWithErrors(argMap, expectedSuccesses, expectedFailures);
 
