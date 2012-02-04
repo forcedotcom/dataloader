@@ -148,8 +148,8 @@ public class DatabaseTestUtil {
         Object dateValue;
         Calendar cal = Calendar.getInstance();
         // set the time a function of a given date so that the value is predictable
-        cal.set(seqNum % 100 + 1900, 2, 4, 0, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+//        cal.set(seqNum % 100 + 1900, 2, 4, 0, 0, 0);
+//        cal.set(Calendar.MILLISECOND, 0);
         switch(dateType) {
         case STRING:
             DateFormat formatter = new SimpleDateFormat("yyyyMMdd'T'HH:mm:ss'Z'Z");

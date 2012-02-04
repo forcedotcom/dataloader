@@ -35,6 +35,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import com.salesforce.dataloader.TestBase;
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.dao.database.DatabaseTestUtil.DateType;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.util.AccountRowComparator;
@@ -57,7 +58,7 @@ public class DatabaseTest extends TestBase {
     private static final String[] VALIDATE_COLS = { DatabaseTestUtil.EXT_ID_COL, DatabaseTestUtil.SFDC_ID_COL,
         DatabaseTestUtil.NAME_COL, DatabaseTestUtil.PHONE_COL, DatabaseTestUtil.REVENUE_COL,
         DatabaseTestUtil.ACCOUNT_NUMBER_COL };
-    private static final int NUM_ROWS = 10000;
+    private static final int NUM_ROWS = 10;
 
     /* (non-Javadoc)
      * @see junit.framework.TestCase#setUp()
@@ -152,7 +153,7 @@ public class DatabaseTest extends TestBase {
         for (String sqlType : new String[] { "java.sql.Date", "java.sql.Time", "java.sql.Timestamp" }) {
             try {
                 // insert some data
-                DatabaseTestUtil.insertOrUpdateAccountsDb(getController(), true/* insert */, 10, dateType, false,
+                DatabaseTestUtil.insertOrUpdateAccountsDb(getController(), true/* insert */, 1, dateType, false,
                         sqlType);
                 // query and verify the results
                 verifyDbInsertOrUpdate(getController(), true, verifyDates);
@@ -190,11 +191,13 @@ public class DatabaseTest extends TestBase {
                     Map<String,Object> expectedRow = DatabaseTestUtil.getInsertOrUpdateAccountRow(isInsert, rowsProcessed, DatabaseTestUtil.DateType.VALIDATION);
                     // verify all expected data
                     for(String colName : VALIDATE_COLS) {
-                        verifyCol(colName, readRow, expectedRow);
+                        if(validateDates && colName.equals(DateType.DATE)) {
+                            verifyCol(DatabaseTestUtil.LAST_UPDATED_COL, readRow, expectedRow);
+                        } else {
+                            verifyCol(colName, readRow, expectedRow);
+                        }
                     }
-                    if(validateDates) {
-                        verifyCol(DatabaseTestUtil.LAST_UPDATED_COL, readRow, expectedRow);
-                    }
+
                     rowsProcessed++;
                 }
                 readRowList = reader.readRowList(readBatchSize);
@@ -217,9 +220,11 @@ public class DatabaseTest extends TestBase {
     private static void verifyCol(String colName, Map<String, Object> row, Map<String, Object> expectedRow) {
         Object actualValue = row.get(colName);
         Object expectedValue = expectedRow.get(colName);
-        Class<?> expectedClass = expectedValue == null ? null : expectedValue.getClass();
-        Class<?> actualClass = actualValue == null ? null : actualValue.getClass();
+        assertNotNull("actual value is null", actualValue);
+        assertNotNull("expected value is null", expectedValue);
+        Class<?> expectedClass = expectedValue.getClass();
+        Class<?> actualClass = actualValue.getClass();
         assertEquals("Data validation failed for column: " + colName + ", expected type: " + expectedClass
-                + ", actual type: " + actualClass, expectedValue, actualValue);
+                + ", actual type: " + actualClass, expectedValue.toString(), actualValue.toString());
     }
 }
