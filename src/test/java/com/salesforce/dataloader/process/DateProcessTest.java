@@ -95,7 +95,7 @@ public class DateProcessTest extends ProcessTestBase {
         QueryResult qr = getBinding().query("select CustomDateTime__c from Account where AccountNumber__c='ACCT_0'");
         assertEquals(qr.getSize(), 1);
 
-        Date expectedDate = parseDateWithTimezone("2010-10-14T12:00:00.000PDT");
+        Date expectedDate = parseDateWithTimezone("2010-10-14T12:00:00.000GMT");
         assertEquals(expectedDate, parseDateFromPartnerApi((String)qr.getRecords()[0].getField("CustomDateTime__c")));
     }
 
