@@ -70,8 +70,6 @@ public class DatabaseTest extends TestBase {
         DatabaseTestUtil.deleteAllAccountsDb(getController());
     }
     
-
-
     /* (non-Javadoc)
      * @see junit.framework.TestCase#tearDown()
      */

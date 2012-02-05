@@ -204,12 +204,12 @@ public class DatabaseTestUtil {
     
     public static final Map<String, String> ALL_COLS = new HashMap<String, String>() {{
         put(NAME_COL, "varchar(100)");
-        put(PHONE_COL, "varchar(100)");
-        put(EXT_ID_COL, "varchar(100)");
-        put(SFDC_ID_COL, "varchar(100)");
+        put(PHONE_COL, "varchar(20)");
+        put(EXT_ID_COL, "varchar(20)");
+        put(SFDC_ID_COL, "varchar(20)");
         put(REVENUE_COL, "decimal");
         put(LAST_UPDATED_COL, "date");
-        put(ACCOUNT_NUMBER_COL, "varchar(100)");
+        put(ACCOUNT_NUMBER_COL, "varchar(20)");
         put("system_modstamp", "date default sysdate not null");
     }};
     

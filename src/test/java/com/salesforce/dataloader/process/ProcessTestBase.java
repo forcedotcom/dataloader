@@ -26,7 +26,6 @@
 
 package com.salesforce.dataloader.process;
 
-
 import java.io.*;
 import java.util.*;
 
@@ -48,10 +47,6 @@ import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.util.FileUtil;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
-
-
-
-//import common.api.*;
 
 /**
  * Base class for batch process tests
