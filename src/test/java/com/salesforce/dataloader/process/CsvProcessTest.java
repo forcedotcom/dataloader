@@ -26,7 +26,6 @@
 
 package com.salesforce.dataloader.process;
 
-import java.io.File;
 import java.util.*;
 
 import junit.framework.TestSuite;
@@ -41,7 +40,6 @@ import com.salesforce.dataloader.dyna.DateConverter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.sforce.soap.partner.sobject.SObject;
-import com.sforce.ws.ConnectionException;
 
 /**
  * Test for dataloader batch interface, also known as "integration framework"
@@ -270,68 +268,6 @@ public class CsvProcessTest extends ProcessTestBase {
         Map<String, String> argMap = getTestConfig(OperationInfo.delete, deleteFileName, false);
         Controller theController = runProcess(argMap, 100);
         verifySuccessIds(theController, listener.getAccountIds());
-    }
-
-    public class AttachmentTemplateListener extends AccountIdTemplateListener {
-        public AttachmentTemplateListener() {
-            super(1);
-        }
-
-        @Override
-        public void updateRow(int idx, Map<String, Object> row) {
-            // set parent account id
-            row.put("ParentId", getAccountIds()[0]);
-            // make body pathname absolute
-            String filePath = (String)row.get("Body");
-            row.put("Body", getTestDataDir() + File.separator + filePath);
-        }
-    }
-
-    public void testCreateAttachment() throws ProcessInitializationException, DataAccessObjectException {
-        // convert the template using the parent account id
-        final String fileName = convertTemplateToInput(this.baseName + "Template.csv", this.baseName + ".csv",
-                new AttachmentTemplateListener());
-
-        final Map<String, String> argMap = getTestConfig(OperationInfo.insert, fileName, false);
-        argMap.put(Config.ENTITY, "Attachment");
-
-        // this feature does not work when bulk api is enabled but the zip content type is not
-        final boolean bulkApi = isBulkAPIEnabled(argMap);
-        final boolean zipContent = isSettingEnabled(argMap, Config.BULK_API_ZIP_CONTENT);
-        if (bulkApi && !zipContent) {
-            final String failureMessage = "Data Loader cannot map \"Body\" field using Bulk API and CSV content type.  Please enable the ZIP_CSV content type for Bulk API.";
-            runProcessNegative(argMap, failureMessage);
-        } else {
-            runProcess(argMap, 1);
-        }
-    }
-
-
-    /**
-     * Verify that multiple binary files can be correctly zipped up and inserted into a record.
-     *
-     * @expectedResults Assert that the binaries of input and queried files are equal.
-     */
-    public void testCreateAttachmentMultipleFiles() throws ProcessInitializationException, DataAccessObjectException,
-    ConnectionException {
-
-        AttachmentTemplateListener myAttachmentTemplateListener = new AttachmentTemplateListener();
-
-        final String fileName = convertTemplateToInput(this.baseName + "Template.csv", this.baseName + ".csv",
-                myAttachmentTemplateListener);
-
-        final Map<String, String> argMap = getTestConfig(OperationInfo.insert, fileName, false);
-        argMap.put(Config.ENTITY, "Attachment");
-
-        // this feature does not work when bulk api is enabled but the zip content type is not
-        final boolean bulkApi = isBulkAPIEnabled(argMap);
-        final boolean zipContent = isSettingEnabled(argMap, Config.BULK_API_ZIP_CONTENT);
-        if (bulkApi && !zipContent) {
-            final String failureMessage = "Data Loader cannot map \"Body\" field using Bulk API and CSV content type.  Please enable the ZIP_CSV content type for Bulk API.";
-            runProcessNegative(argMap, failureMessage);
-        } else {
-            runProcessWithAttachmentListener(argMap, 3, myAttachmentTemplateListener,"Bay-Bridge.jpg", "BayBridgeBW.jpg", "BayBridgeFromTreasureIsland.jpg");
-        }
     }
 
     /**

@@ -41,7 +41,7 @@ import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
-import com.salesforce.dataloader.process.CsvProcessTest.AttachmentTemplateListener;
+import com.salesforce.dataloader.process.CsvProcessAttachmentTest.AttachmentTemplateListener;
 import com.sforce.soap.partner.*;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.soap.partner.sobject.SObject;
@@ -698,12 +698,6 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         return runProcessWithErrors(argMap, numRows, 0, emptyId);
     }
 
-
-    protected Controller runProcessWithAttachmentListener(Map<String, String> argMap, int numRows, AttachmentTemplateListener myAttachmentTemplateListener, String... files) throws ProcessInitializationException,
-    DataAccessObjectException, ConnectionException {
-        return runProcessWithErrorsWithAttachmentListener(argMap, numRows, 0, myAttachmentTemplateListener,files);
-    }
-
     protected Controller runProcessWithErrors(Map<String, String> argMap, int numSuccesses, int numFailures)
             throws ProcessInitializationException, DataAccessObjectException {
         return runProcessWithErrors(argMap, numSuccesses, numFailures, false);
@@ -722,22 +716,6 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         else
             throw new UnsupportedOperationException(op + " not supported");
         return runProcess(argMap, true, null, numInserts, numUpdates, numFailures, emptyId);
-    }
-
-
-    protected Controller runProcessWithErrorsWithAttachmentListener(Map<String, String> argMap, int numSuccesses, int numFailures, AttachmentTemplateListener myAttachmentTemplateListener, String... files)
-            throws ProcessInitializationException, DataAccessObjectException, ConnectionException {
-        int numInserts = 0;
-        int numUpdates = 0;
-
-        OperationInfo op = OperationInfo.valueOf(argMap.get(Config.OPERATION));
-        if (op == OperationInfo.insert)
-            numInserts = numSuccesses;
-        else if (op != null && op != OperationInfo.upsert)
-            numUpdates = numSuccesses;
-        else
-            throw new UnsupportedOperationException(op + " not supported");
-        return runProcessWithAttachmentListener(argMap, true, null, numInserts, numUpdates, numFailures, myAttachmentTemplateListener, files);
     }
 
     protected Controller runUpsertProcess(Map<String, String> args, int numInserts, int numUpdates)
@@ -784,41 +762,6 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         // return the controller used by the process so that the tests can validate success/error output files, etc
         return controller;
     }
-
-    private Controller runProcessWithAttachmentListener(Map<String, String> argMap, boolean expectProcessSuccess, String failMessage,
-            int numInserts, int numUpdates, int numFailures, AttachmentTemplateListener myAttachmentTemplateListener, String... files) throws ProcessInitializationException,
-            DataAccessObjectException, ConnectionException {
-
-        if (argMap == null) argMap = getTestConfig();
-
-        final ProcessRunner runner = ProcessRunner.getInstance(argMap);
-        runner.setName(this.baseName);
-
-        final TestProgressMontitor monitor = new TestProgressMontitor();
-        runner.run(monitor);
-        Controller controller = runner.getController();
-
-        // verify process completed as expected
-        if (expectProcessSuccess) {
-
-            verifyInsertCorrectByContent(controller, createAttachmentFileMap(files), myAttachmentTemplateListener);
-            //this should also still work
-            assertTrue("Process failed: " + monitor.getMessage(), monitor.isSuccess());
-            verifyFailureFile(controller, numFailures);        //A.S.: To be removed and replaced
-            verifySuccessFile(controller, numInserts, numUpdates, false);
-
-        } else {
-            assertFalse("Expected process to fail but got success: " + monitor.getMessage(), monitor.isSuccess());
-        }
-        // TODO: validate all messages, including nulls if those exist
-        if (failMessage != null) {
-            assertEquals("wrong message: ", failMessage, monitor.getMessage());
-        }
-
-        // return the controller used by the process so that the tests can validate success/error output files, etc
-        return controller;
-    }
-
 
     private static final String INSERT_MSG = "Item Created";
     private static final Map<OperationInfo, String> UPDATE_MSGS;
