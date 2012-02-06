@@ -224,7 +224,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
      */
     public void testHardDeleteIDFromOtherObjectFails() throws ProcessInitializationException, DataAccessObjectException {
         // set batch process parameters
-        Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(1));
+        Map<String, String> argMap = getHardDeleteTestConfig(new HeterogeneousIdTemplateListener(0,1));
         argMap.put(Config.ENTITY, "Contact");
         Controller theController = runProcessWithErrors(argMap, 0, 1);
 
