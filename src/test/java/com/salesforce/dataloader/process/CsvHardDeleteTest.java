@@ -83,6 +83,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         // set batch process parameters
         Map<String, String> argMap = getHardDeleteTestConfig(listener);
         Controller theController = runProcess(argMap, 100);
+
         verifySuccessIds(theController, listener.getAccountIds());
     }
 
@@ -191,6 +192,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         Map<String, String> argMap = getHardDeleteTestConfig(new InvalidIdTemplateListener(0));
         
         Controller theController = runProcessWithErrors(argMap, 0, 1);
+
 
         // verify there were errors during operation
         verifyErrors(theController, "MALFORMED_ID:malformed id abcde0123456789XYZ");
