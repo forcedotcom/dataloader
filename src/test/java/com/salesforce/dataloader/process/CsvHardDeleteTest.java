@@ -262,11 +262,11 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         Controller theController = runProcessWithErrors(argMap, 1, 1);
 
         // verify there were errors during operation
-        verifyErrors(theController, "INVALID_ID_FIELD:Invalid Id for entity type 'Account'");
+        verifyErrors(theController, "INVALID_ID_FIELD:Invalid Id for entity type 'Contact'");
 
         // verify the id value matches the input id value for the 1 successful
         // records
-        verifySuccessIds(theController, listener.getAccountIds());
+        verifySuccessIds(theController, listener.contactIds);
     }
 
     private Map<String, String> getHardDeleteTestConfig(TemplateListener listener) throws DataAccessObjectException {
