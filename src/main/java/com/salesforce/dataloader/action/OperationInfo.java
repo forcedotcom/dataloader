@@ -93,7 +93,7 @@ public enum OperationInfo {
 
     public IAction instantiateAction(Controller ctl, ILoaderProgress loaderProgress) {
         logger.info(Messages.getMessage(getClass(), "createAction", this));
-        final Class<? extends IAction> cls = /*ctl.getConfig().isBulkAPIEnabled() &&*/ bulkAPIEnabled() ? this.bulkAPIActionClass
+        final Class<? extends IAction> cls = ctl.getConfig().isBulkAPIEnabled() && bulkAPIEnabled() ? this.bulkAPIActionClass
                 : this.partnerAPIActionClass;
         try {
             return cls.getConstructor(Controller.class, ILoaderProgress.class).newInstance(ctl, loaderProgress);
