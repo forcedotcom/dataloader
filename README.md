@@ -1,4 +1,4 @@
-# Build dataloader
+# Build Data Loader
 
     mvn clean install -DskipTests
     
@@ -8,7 +8,7 @@ Note: salesforce.com officially supports dataloader on Windows XP and Windows 7.
 
 The build will generate a windows installer exe when executing the build in a windows environment.
     
-# Execute dataloader
+# Execute Data Loader
 
     java -jar target/dataloader-24.0.0-jar-with-dependencies.jar
     
@@ -16,6 +16,6 @@ Use the command below to execute on Mac
 
     java -jar target/dataloader-24.0.0-jar-with-dependencies.jar -XstartOnFirstThread
 
-# Test dataloader
+# Test Data Loader
 
     mvn verify -fn
