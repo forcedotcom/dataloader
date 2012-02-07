@@ -72,6 +72,7 @@ public class Controller {
     private static final String CONFIG_DIR = "conf"; //$NON-NLS-1$
     private static String APP_NAME; //$NON-NLS-1$
     public static String APP_VERSION; //$NON-NLS-1$
+	public static String API_VERSION;
     private static String APP_VENDOR; //$NON-NLS-1$
 
     /**
@@ -102,8 +103,9 @@ public class Controller {
         APP_VENDOR = versionProps.getProperty("dataloader.vendor");
 
         // dataloader version has 3 parts, salesforce app api version should match first two parts
-        String[] dataloaderVersion = versionProps.getProperty("dataloader.version").split("\\.");
-        APP_VERSION = dataloaderVersion[0] + "." + dataloaderVersion[1];
+		APP_VERSION = versionProps.getProperty("dataloader.version");
+        String[] dataloaderVersion = APP_VERSION.split("\\.");
+        API_VERSION = dataloaderVersion[0] + "." + dataloaderVersion[1];
 
         
         // if name is passed to controller, use it to create a unique run file name

@@ -61,7 +61,7 @@ public abstract class ClientBase<ClientType> {
         DEFAULT_AUTH_ENDPOINT_URL = loginUrl;
     }
 
-    private static final String REST_ENDPOINT = "/services/async/" + Controller.APP_VERSION;
+    private static final String REST_ENDPOINT = "/services/async/" + Controller.API_VERSION;
 
     protected final Logger logger;
     protected final Controller controller;
@@ -94,7 +94,7 @@ public abstract class ClientBase<ClientType> {
         final String apiType = cfg.isBulkAPIEnabled() ? BULK_API_CLIENT_TYPE : PARTNER_API_CLIENT_TYPE;
         final String interfaceType = cfg.isBatchMode() ? BATCH_CLIENT_STRING : UI_CLIENT_STRING;
         return new StringBuilder(32).append(BASE_CLIENT_NAME).append(apiType).append(interfaceType)
-                .append("/").append(Controller.APP_VERSION).toString(); //$NON-NLS-1$
+                .append("/").append(Controller.API_VERSION).toString(); //$NON-NLS-1$
     }
 
     protected ConnectorConfig getConnectorConfig() {

@@ -261,7 +261,7 @@
             <exclude>**/TestRecordsUtil.java</exclude>
             <exclude>**/integration/**</exclude>
           </excludes>
-          <!-- <skip>true</skip> -->
+          <!--<skip>true</skip>-->
         </configuration>
       </plugin>
 
@@ -502,7 +502,7 @@
                 <suiteXmlFile>${basedir}/src/test/resources/itest.xml</suiteXmlFile>
               </suiteXmlFiles>
               <systemPropertyVariables>
-                <exeName>${project.name}-${project.version}.exe</exeName>
+                <exeName>${project.build.finalName}.exe</exeName>
               </systemPropertyVariables>
 
             </configuration>

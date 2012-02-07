@@ -35,8 +35,9 @@ import com.jacob.com.LibraryLoader;
 public class InstallTest {
 
     private AutoItX autoIt;
+	private static final String dataloaderName = "Data Loader";
     private static final String startMenuDirPath = System.getProperty("user.home") + File.separator + "Start Menu"
-            + File.separator + "Programs" + File.separator + "salesforce.com" + File.separator + "dataloader";
+            + File.separator + "Programs" + File.separator + "salesforce.com" + File.separator + dataloaderName;
     private static final String desktopDirPath = System.getProperty("user.home") + File.separator + "Desktop";
     private String installPath;
 
@@ -64,7 +65,7 @@ public class InstallTest {
                 + System.getProperty("exeName");
         Assert.assertTrue(new File(installerPath).exists(), "dataloader installer does not exist at " + installerPath);
         autoIt.run(installerPath);
-        String dataloaderSetup = "dataloader Setup";
+        String dataloaderSetup = dataloaderName + " Setup";
         autoIt.winActivate(dataloaderSetup);
         autoIt.winWaitActive(dataloaderSetup);
         Assert.assertTrue(autoIt.winExists(dataloaderSetup), "dataloader setup window not found");
@@ -86,15 +87,15 @@ public class InstallTest {
     public String getInstallPathFromWinText(String fullWinText) {
         String[] lines = fullWinText.split("\n");
         for (String line : lines) {
-            if (line.contains("salesforce.com\\dataloader")) return line;
+            if (line.contains("salesforce.com\\")) return line;
         }
         return null;
     }
 
     @DataProvider(name = "dataloaderShortcutPaths")
     public String[][] dataloaderShortcutPaths() {
-        return new String[][] { { startMenuDirPath + File.separator + "Dataloader.lnk" },
-                { desktopDirPath + File.separator + "Dataloader.lnk" } };
+        return new String[][] { { startMenuDirPath + File.separator + dataloaderName + ".lnk" },
+                { desktopDirPath + File.separator + dataloaderName + ".lnk" } };
     }
 
     @Test(dependsOnMethods = { "testRunInstaller" }, groups = { "shortcut" }, dataProvider = "dataloaderShortcutPaths")
@@ -144,11 +145,11 @@ public class InstallTest {
     }
 
     private String openUninstaller() throws IOException {
-        String shortcutPath = startMenuDirPath + File.separator + "Uninstall Dataloader.lnk";
+        String shortcutPath = startMenuDirPath + File.separator + "Uninstall " + dataloaderName + ".lnk";
         Assert.assertTrue(new File(shortcutPath).exists(), "uninstall start menu shortcut does not exist at "
                 + shortcutPath);
         openShortcut(shortcutPath);
-        String dataloaderUninstall = "dataloader Uninstall";
+        String dataloaderUninstall = dataloaderName + " Uninstall";
         autoIt.winActivate(dataloaderUninstall);
         autoIt.winWaitActive(dataloaderUninstall);
         Assert.assertTrue(autoIt.winExists(dataloaderUninstall), "dataloader uninstall window not found");

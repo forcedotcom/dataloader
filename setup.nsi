@@ -76,13 +76,13 @@ Section "${PROJECT_NAME}"
   File "src\main\nsis\config.properties"
   File "src\main\nsis\log-conf.xml"
   
-  CreateDirectory ${DL_START_MENU_DIR}
-  CreateShortCut "${DL_START_MENU_DIR}\Dataloader.lnk" "${DL_JRE_PATH}" "${DL_EXEC_JAR_PARAM}" "${DL_SMALL_ICON_PATH}"
-  CreateShortCut "${DL_START_MENU_DIR}\Uninstall Dataloader.lnk" "${DL_UNINSTALLER_PATH}"
-  CreateShortCut "$DESKTOP\Dataloader.lnk" "${DL_JRE_PATH}" "${DL_EXEC_JAR_PARAM}" "${DL_LARGE_ICON_PATH}"
+  CreateDirectory "${DL_START_MENU_DIR}"
+  CreateShortCut "${DL_START_MENU_DIR}\${PROJECT_NAME}.lnk" "${DL_JRE_PATH}" "${DL_EXEC_JAR_PARAM}" "${DL_SMALL_ICON_PATH}"
+  CreateShortCut "${DL_START_MENU_DIR}\Uninstall ${PROJECT_NAME}.lnk" "${DL_UNINSTALLER_PATH}"
+  CreateShortCut "$DESKTOP\${PROJECT_NAME}.lnk" "${DL_JRE_PATH}" "${DL_EXEC_JAR_PARAM}" "${DL_LARGE_ICON_PATH}"
 
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dataloader" "DisplayName" "${PROJECT_ORGANIZATION_NAME} ${PROJECT_NAME}"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dataloader" "UninstallString" "$\"${DL_UNINSTALLER_PATH}$\""
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROJECT_NAME}" "DisplayName" "${PROJECT_ORGANIZATION_NAME} ${PROJECT_NAME}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROJECT_NAME}" "UninstallString" "$\"${DL_UNINSTALLER_PATH}$\""
   
 SectionEnd
 
@@ -93,13 +93,13 @@ Section "Uninstall"
   SectionIn RO
   RMDir /r "$INSTDIR"
   RMDir /r "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
-  Delete "$DESKTOP\Dataloader.lnk"
+  Delete "$DESKTOP\${PROJECT_NAME}.lnk"
   RMDir /r "$APPDATA\${PROJECT_ORGANIZATION_NAME}"
   
   ; delete salesforce.com directory only if it's empty
   RMDir "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}"
   
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dataloader"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROJECT_NAME}"
   
 SectionEnd
 
