@@ -206,6 +206,10 @@
         <directory>src/main/resources</directory>
         <filtering>true</filtering>
       </resource>
+	  <resource>
+	    <directory>src/main/nsis/bin</directory>
+		<filtering>true</filtering>
+	  </resource>
     </resources>
     <testResources>
       <testResource>
@@ -223,7 +227,6 @@
               <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
             </manifest>
           </archive>
-
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>

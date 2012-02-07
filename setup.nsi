@@ -54,6 +54,17 @@ Section "${PROJECT_NAME}"
   File "target\${PROJECT_FINAL_NAME}-jar-with-dependencies.jar"
   File "src\main\nsis\icon_SforceDL16x16.ico"
   File "src\main\nsis\icon_SforceDL32x32.ico"
+  
+  SetOutPath "$INSTDIR\licenses"
+  File /r "src\main\nsis\licenses\"
+  
+  SetOutPath "$INSTDIR\samples"
+  File /r "src\main\nsis\samples\"
+  
+  SetOutPath "$INSTDIR\bin"
+  File "target\classes\encrypt.bat"
+  File "target\classes\process.bat"
+  
   SetOutPath "$INSTDIR\Java"
   File /r "windows-dependencies\Java\"
   
