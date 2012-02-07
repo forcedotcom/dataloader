@@ -10,11 +10,11 @@ The build will generate a windows installer exe when executing the build in a wi
     
 # Execute dataloader
 
-    java -jar target/dataloader-23.0.0-SNAPSHOT-jar-with-dependencies.jar
+    java -jar target/dataloader-24.0.0-jar-with-dependencies.jar
     
 Use the command below to execute on Mac
 
-    java -jar target/dataloader-23.0.0-SNAPSHOT-jar-with-dependencies.jar -XstartOnFirstThread
+    java -jar target/dataloader-24.0.0-jar-with-dependencies.jar -XstartOnFirstThread
 
 # Test dataloader
 
