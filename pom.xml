@@ -5,7 +5,7 @@
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
   <version>24.0.0</version>
-  <name>dataloader</name>
+  <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
     <name>salesforce.com</name>
@@ -206,10 +206,10 @@
         <directory>src/main/resources</directory>
         <filtering>true</filtering>
       </resource>
-	  <resource>
-	    <directory>src/main/nsis/bin</directory>
-		<filtering>true</filtering>
-	  </resource>
+      <resource>
+        <directory>src/main/nsis/bin</directory>
+        <filtering>true</filtering>
+      </resource>
     </resources>
     <testResources>
       <testResource>
@@ -261,7 +261,7 @@
             <exclude>**/TestRecordsUtil.java</exclude>
             <exclude>**/integration/**</exclude>
           </excludes>
-<!--          <skip>true</skip>-->
+          <!-- <skip>true</skip> -->
         </configuration>
       </plugin>
 
@@ -407,32 +407,32 @@
         </plugins>
       </build>
     </profile>
-	
-	<profile>
-	  <id>installer-test-x86</id>
-	  <activation>
-	    <os>
-		  <family>Windows</family>
-		  <arch>x86</arch>
-		</os>
-	  </activation>
-	  <properties>
-	      <autoit.dll.path>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3.dll</autoit.dll.path>
-	  </properties>
-	</profile>
-	
-	<profile>
-	  <id>installer-test-amd64</id>
-	  <activation>
-	    <os>
-		  <family>Windows</family>
-		  <arch>amd64</arch>
-		</os>
-	  </activation>
-	  <properties>
-	      <autoit.dll.path>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3_x64.dll</autoit.dll.path>
-	  </properties>
-	</profile>
+
+    <profile>
+      <id>installer-test-x86</id>
+      <activation>
+        <os>
+          <family>Windows</family>
+          <arch>x86</arch>
+        </os>
+      </activation>
+      <properties>
+        <autoit.dll.path>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3.dll</autoit.dll.path>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>installer-test-amd64</id>
+      <activation>
+        <os>
+          <family>Windows</family>
+          <arch>amd64</arch>
+        </os>
+      </activation>
+      <properties>
+        <autoit.dll.path>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3_x64.dll</autoit.dll.path>
+      </properties>
+    </profile>
 
     <profile>
       <id>installer-test</id>
