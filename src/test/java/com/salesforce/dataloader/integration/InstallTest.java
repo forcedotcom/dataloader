@@ -53,10 +53,19 @@ public class InstallTest {
     
     @BeforeClass
     public void classSetup() {
+	    String osArch = System.getProperty("os.arch");
+		String jacobDllFileName = null;
+		if (osArch.equals("x86")) {
+		    jacobDllFileName = "jacob-1.14.3-x86.dll";
+		} else if (osArch.equals("amd64")) {
+			jacobDllFileName = "jacob-1.14.3-x64.dll";
+		} else {
+		    Assert.fail("unsupported os architecture: " + osArch);
+		}
         File dll = new File(System.getProperty("user.home") + File.separator + ".m2"
                + File.separator + "repository" + File.separator + "net" + File.separator + "sf"
                + File.separator + "jacob-project" + File.separator + "jacob" + File.separator + "1.14.3"
-               + File.separator + "jacob-1.14.3-x86.dll");
+               + File.separator + jacobDllFileName);
         System.setProperty(LibraryLoader.JACOB_DLL_PATH, dll.getAbsolutePath());
 		autoIt = new AutoItX();
     }

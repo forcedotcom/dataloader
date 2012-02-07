@@ -261,7 +261,7 @@
             <exclude>**/TestRecordsUtil.java</exclude>
             <exclude>**/integration/**</exclude>
           </excludes>
-<!--          <skip>true</skip>-->
+          <skip>true</skip>
         </configuration>
       </plugin>
 
@@ -407,6 +407,32 @@
         </plugins>
       </build>
     </profile>
+	
+	<profile>
+	  <id>installer-test-x86</id>
+	  <activation>
+	    <os>
+		  <family>Windows</family>
+		  <arch>x86</arch>
+		</os>
+	  </activation>
+	  <properties>
+	      <autoit.dll.path>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3.dll</autoit.dll.path>
+	  </properties>
+	</profile>
+	
+	<profile>
+	  <id>installer-test-amd64</id>
+	  <activation>
+	    <os>
+		  <family>Windows</family>
+		  <arch>amd64</arch>
+		</os>
+	  </activation>
+	  <properties>
+	      <autoit.dll.path>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3_x64.dll</autoit.dll.path>
+	  </properties>
+	</profile>
 
     <profile>
       <id>installer-test</id>
@@ -430,7 +456,7 @@
                 <configuration>
                   <executable>regsvr32</executable>
                   <arguments>
-                    <argument>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3.dll</argument>
+                    <argument>${autoit.dll.path}</argument>
                     <argument>-s</argument>
                   </arguments>
                 </configuration>
@@ -445,7 +471,7 @@
                   <executable>regsvr32</executable>
                   <arguments>
                     <argument>-u</argument>
-                    <argument>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3.dll</argument>
+                    <argument>${autoit.dll.path}</argument>
                     <argument>-s</argument>
                   </arguments>
                 </configuration>
