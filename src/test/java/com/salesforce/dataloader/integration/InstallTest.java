@@ -81,6 +81,7 @@ public class InstallTest {
 		Assert.assertTrue(click, "failed to click on the Install button");
 		waitForControlActive(dataloaderSetup, "&Close", "1", 120000);
 		click = autoIt.controlClick(dataloaderSetup, "&Close", "1");
+		Thread.sleep(3000L);
 		Assert.assertTrue(click, "failed to click on the Close button");
 		Assert.assertFalse(autoIt.winExists(dataloaderSetup), "dataloader setup window not closed");
     }
@@ -106,13 +107,15 @@ public class InstallTest {
 		Assert.assertTrue(new File(shortcutPath).exists(), "dataloader start menu shortcut does not exist at "
 			+ shortcutPath);
 		openShortcut(shortcutPath);
+		Thread.sleep(3000L);
 		String welcomeWindow = "[CLASS:#32770]";
 		String dataloaderWindow = "[CLASS:SWT_Window0]";
-		autoIt.winWaitActive(welcomeWindow);
 		String welcomeWindowHandle = autoIt.winGetHandle(welcomeWindow);
 		Assert.assertTrue(autoIt.winExists(welcomeWindow), "dataloader welcome window not found");
 		Assert.assertTrue(autoIt.winExists(dataloaderWindow), "dataloader window not found");
-		autoIt.winClose(welcomeWindow);
+        boolean click = autoIt.controlClick(welcomeWindow, "Cancel", "[CLASS:Button; INSTANCE:8]");
+		Assert.assertTrue(click, "failed to click the Cancel button");
+		Thread.sleep(3000L);
 		autoIt.winClose(dataloaderWindow);		
 		Thread.sleep(3000L);
 		Assert.assertFalse(autoIt.winExists(welcomeWindowHandle), "dataloader welcome window not closed");
@@ -136,6 +139,7 @@ public class InstallTest {
 		Assert.assertTrue(click, "failed to click on the Uninstall button");
 		waitForControlActive(dataloaderUninstall, "&Close", "1", 120000);
 		click = autoIt.controlClick(dataloaderUninstall, "&Close", "1");
+		Thread.sleep(3000L);
 		Assert.assertTrue(click, "failed to click on the Close button");
 		Assert.assertFalse(autoIt.winExists(dataloaderUninstall), "dataloader uninstall window not closed");
 		Assert.assertFalse(new File(startMenuDirPath).exists(), "start menu shortcuts not deleted");
