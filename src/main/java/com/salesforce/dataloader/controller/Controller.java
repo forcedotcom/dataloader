@@ -98,10 +98,14 @@ public class Controller {
         } catch (IOException e) {
             throw new ControllerInitializationException(e);
         }
-        APP_NAME = versionProps.getProperty("app.name");
-        APP_VERSION = versionProps.getProperty("app.version");
-        APP_VENDOR = versionProps.getProperty("app.vendor");
+        APP_NAME = versionProps.getProperty("dataloader.name");
+        APP_VENDOR = versionProps.getProperty("dataloader.vendor");
 
+        // dataloader version has 3 parts, salesforce app api version should match first two parts
+        String[] dataloaderVersion = versionProps.getProperty("dataloader.version").split("\\.");
+        APP_VERSION = dataloaderVersion[0] + "." + dataloaderVersion[1];
+
+        
         // if name is passed to controller, use it to create a unique run file name
         initConfig(name, isBatchMode);
     }
