@@ -1,0 +1,1 @@
+SoundSetWaveVolume(50)
