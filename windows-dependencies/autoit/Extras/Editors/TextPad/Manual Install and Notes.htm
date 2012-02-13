@@ -1,0 +1,56 @@
+
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<link href="../../../css/default.css" rel="stylesheet" type="text/css">
+</head>
+
+<h1>Using Textpad with Syntax Highlighting and Context Sensitive Help</h1>
+<p>&quot;Description from Trids&quot;</p>
+<p>Some tips for integrating TextPad and Autoit:<br>
+<br>
+<b><span style="COLOR: blue">Setup an &quot;Execute&quot; tool in TextPad</span></b></p>
+<ul>
+	<li>In TP: <b>Configure \ Preferences \ Tools \ Add \ Programs \ </b>&lt;Navigate to Autoit3.exe&gt; <b>\ Apply</b>.
+	<li>This will create a tool called &quot;Autoit3&quot; in TP's [Tools] menu. You can rename this if you want - see TP helpfile if necessary.</li>
+</ul>
+<br>
+<b><span style="COLOR: blue">Set Hotkey for the Execute tool</span></b>
+
+<ul>
+	<li>In TP: <b>Configure \ Preferences \ Keyboard \ Tools \</b> &lt;select your execute tool you just created above&gt; <b>\ Press new Shortcut key:</b>&lt;I
+	use F5&gt; <b>\ Apply</b>.</li>
+	<li>This will enable you to simply press F5 to execute a script you have open
+	in TextPad.</li>
+</ul>
+
+<br>
+<b><span style="COLOR: blue">Setup Context Sensitive Help for Autoit in TP</span></b>
+
+<ul>
+	<li><b>METHOD-1</b><br>
+		<i>This method applies to TP version 4.7.2 and later (and possibly some earlier versions too)<BR><BR></i>
+		<ul>
+			<li>In TP: <b>Configure \ Preferences \ Tools \ Add \ Online Help File \ </b>&lt;Navigate to your AutoIt.chm file&gt; <b>\ Apply</b>. If your version of TextPad does not have an Online Help File tool type, then see METHOD-2 below.</li>
+			<li>Setup a Hotkey for this tool: see Hotkey procedure above - I use ALT+F2.</li>
+			<li>This enables you to select an interesting function in a script that you
+			have open in TP, and press ALT+F2 to get instant gratification.</li>
+		</ul>
+		<br>
+	</li>
+
+	<li><b>METHOD-2</b> .. (thanks to CyberSlug and JdeB)<br>
+	<i>Use this method if your version of TextPad does NOT have the <b>Online Help File</b> tool type referred to in METHOD-1<BR><BR></i>
+		<ul>
+			<li>Download and install the <a href="http://www.keyworks.net/keyhh.htm" target="_blank">free KeyHH.exe</a></li>
+			<li>For the purposes of this explanation, assume you place it in <span style="COLOR: purple">C:\Program Files\Autoit3</span>.</li>
+			<li>Setup another TP tool: <b>Configure \ Preferences \ Tools \ Add \ Programs \ </b>&lt;Navigate to KeyHH.exe&gt; <b>\ Apply</b>.</li>
+			<li>Then edit this tool and replace [Parameters] with <b>-#klink $SelWord &quot;</b><span style="COLOR: purple">C:\Program Files\Autoit3</span><b><span style="COLOR: purple">\AutoIt.chm</span>&quot;</b></li>
+			<li>Setup a Hotkey for this tool: see Hotkey procedure above - I use ALT+F2.</li>
+			<li>This enables you to select an interesting function in a script that you
+			have open in TP, and press ALT+F2 to get instant gratification.</li>
+		</ul>
+
+	</li>
+</UL>
