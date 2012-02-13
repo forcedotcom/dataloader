@@ -1,0 +1,72 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+  <title>Crimson Editor Setup</title>
+  <meta content="text/html; charset=iso-8859-1"
+ http-equiv="Content-Type">
+  <link type="text/css" rel="stylesheet" href="../../css/default.css">
+</HEAD>
+<BODY>
+
+<FONT SIZE=5>
+
+<B><U><h1>Using AutoIt3 and the Crimson Editor</h1>
+</U>
+</B></FONT><p align="left"><font size="2">Lastupdated:</font><FONT SIZE=5><FONT SIZE=2>&nbsp;&nbsp;
+<!--webbot bot="Timestamp" startspan S-Type="EDITED" S-Format="%m/%d/%Y" -->01/30/2004<!--webbot
+bot="Timestamp" I-CheckSum="12510" endspan -->
+&nbsp;&nbsp;
+</FONT></p>
+</FONT><FONT SIZE=2>
+<P><b>Install AutoIt3 Syntax Highlighting and Context sensitive Help in the Crimson
+Editor.<br>
+(up to date for AutoIt3 ver: 3.0.91)</b> </P>
+<OL>
+
+<LI>First get the Crimson editor installed: <a href="http://www.crimsoneditor.com/">http://www.crimsoneditor.com/</a></LI>
+  <LI>Copy these 2 files <a href="autoit3.key">autoit3.key</a> &amp; <a href="autoit3.spc">autoit3.spc</a>&nbsp; 
+    to "C:\Program Files\Crimson Editor\spec"</LI>
+  <LI>Copy this file <a href="extension.au3">extension.au3</a>&nbsp; to "C:\Program 
+    Files\Crimson Editor\link"</LI>
+<LI>Start the Crimson editor program.</LI>
+<LI>To enable Context sensitive Help do:</LI>
+<P>1. Open Preferences dialog box and select User Tools page<BR>
+2. Select an empty slot and fill with the following arguments.<BR>
+- Menu Text: AutoIT Context Help<BR>
+- Command: <i>Your-AutoIt-Dir</i>\AutoIt.chm<BR>
+- Argument: $(CurrWord)<BR>
+- Initial dir: $(FileDir)<BR>
+- Hot key: F1<BR>
+- Close on exit: Yes<BR>
+- Save before execute: No<BR>
+Now click <b><i> F1</i></b> on any keyword and it will jump right to its
+description in the helpfile.<BR>
+</P>
+<LI>To enable running the script your working on from within Crimson:</LI>
+<P>1. Open Preferences dialog box and select User Tools page<BR>
+2. Select an empty slot and fill with the following arguments.<BR>
+- Menu Text: AutoIT Run Script<br>
+- Command: <i>Your-AutoIt-Dir</i>\AutoIt3.exe<BR>
+- Argument: $(FileTitle).au3<br>
+- Initial dir: $(FileDir)<BR>
+- Hot key: CTRL + 1<BR>
+- Close on exit: Yes<BR>
+- Save before execute: Yes<BR>
+Now click <b><i> CTRL+1</i></b> Will save and Run your script</P>
+<LI>To enable Compiling the script your working on from within Crimson:</LI></OL>
+<DIR>
+
+<P>1. Open Preferences dialog box and select User Tools page<BR>
+2. Select an empty slot and fill with the following arguments.<BR>
+- Menu Text: AutoIT Compile Script<br>
+- Command: <i>Your-AutoIt-Dir</i>\ Aut2Exe\Aut2Exe<br>
+- Argument: /in $(FileTitle).au3<br>
+- Initial dir: $(FileDir)<BR>
+- Hot key: CTRL + 2<BR>
+- Close on exit: Yes<BR>
+- Save before execute: Yes<BR>
+Now click <b><i> CTRL+2</i></b> will save and Compile your script.</P>
+
+</DIR>
+</FONT></BODY>
+</HTML>

@@ -1,0 +1,1 @@
+FileRecycle("C:\*.tmp")

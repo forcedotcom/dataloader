@@ -1,0 +1,5 @@
+ControlListView(@ProgramFilesDir & "\AutoIt3", "", "SysListView321", "SelectAll")
+ControlListView(@ProgramFilesDir & "\AutoIt3", "", "SysListView321", "Deselect", 2, 5)
+MsgBox(0, "", ControlListView(@ProgramFilesDir & "\AutoIt3", "", "SysListView321", "GetText", 9, 0))
+MsgBox(0, "", ControlListView(@ProgramFilesDir & "\AutoIt3", "", "SysListView321", "FindItem", "14 KB", 1))
+MsgBox(0, "", ControlListView(@ProgramFilesDir & "\AutoIt3", "", "SysListView321", "GetSelected", 1))

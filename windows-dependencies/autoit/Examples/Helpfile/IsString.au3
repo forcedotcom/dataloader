@@ -1,0 +1,1 @@
+Local $x = IsString("foo")

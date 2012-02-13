@@ -1,0 +1,1 @@
+WinKill("[CLASS:Notepad] ", "")
