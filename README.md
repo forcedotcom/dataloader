@@ -36,3 +36,10 @@ The process-conf.xml file can be used to define properties for multiple processe
 # Test Data Loader
 
     mvn verify -fn
+
+# Resources
+
+For more information, see the [wiki](http://wiki.apexdevnet.com/index.php/Tools), or the [Data Loader Developer's Guide](https://na1.salesforce.com/help/doc/en/salesforce_data_loader.pdf). 
+
+Questions can be directed to the [open source forum](http://boards.developerforce.com/t5/Open-Source/bd-p/sforceExplorer).
+
