@@ -36,6 +36,12 @@ The process-conf.xml file can be used to define properties for multiple processe
 # Test Data Loader
 
     mvn verify -fn
+    
+To run installer tests on windows, you can add the skip parameter in the pom.xml under the maven-surefire-plugin configuration to skip functional tests.  To run installer tests on windows use the command
+
+    mvn verify -Denv=win32
+    
+If you are running on Windows 7, you will need to run cmd.exe as Administrator for the tests to work properly.
 
 # Resources
 
