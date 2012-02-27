@@ -26,6 +26,7 @@
 
 package com.salesforce.dataloader.process;
 
+import java.io.File;
 import java.util.*;
 
 import junit.framework.TestSuite;
@@ -270,6 +271,40 @@ public class CsvProcessTest extends ProcessTestBase {
         verifySuccessIds(theController, listener.getAccountIds());
     }
 
+    public class AttachmentTemplateListener extends AccountIdTemplateListener {
+        public AttachmentTemplateListener() {
+            super(1);
+        }
+
+        @Override
+        public void updateRow(int idx, Map<String, Object> row) {
+            // set parent account id
+            row.put("ParentId", getAccountIds()[0]);
+            // make body pathname absolute
+            String filePath = (String)row.get("Body");
+            row.put("Body", getTestDataDir() + File.separator + filePath);
+        }
+    }
+
+    public void testCreateAttachment() throws ProcessInitializationException, DataAccessObjectException {
+        // convert the template using the parent account id
+        final String fileName = convertTemplateToInput(this.baseName + "Template.csv", this.baseName + ".csv",
+                new AttachmentTemplateListener());
+
+        final Map<String, String> argMap = getTestConfig(OperationInfo.insert, fileName, false);
+        argMap.put(Config.ENTITY, "Attachment");
+
+        // this feature does not work when bulk api is enabled but the zip content type is not
+        final boolean bulkApi = isBulkAPIEnabled(argMap);
+        final boolean zipContent = isSettingEnabled(argMap, Config.BULK_API_ZIP_CONTENT);
+        if (bulkApi && !zipContent) {
+            final String failureMessage = "Data Loader cannot map \"Body\" field using Bulk API and CSV content type.  Please enable the ZIP_CSV content type for Bulk API.";
+            runProcessNegative(argMap, failureMessage);
+        } else {
+            runProcess(argMap, 1);
+        }
+    }
+
     /**
      * Verify that if not all columns are matched, that the DL operation cannot go forward.
      *
@@ -357,18 +392,18 @@ public class CsvProcessTest extends ProcessTestBase {
     public void testErrorsGeneratedOnInvalidDateMatchingWithOffset() throws Exception {
     	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(2, 2, 2);
     }
-    
+
     private void runTestErrorsGeneratedOnInvalidDateMatchWithOffset(Integer rowOffset, final int numSuccesses, final int numFailures) throws Exception {
-    	
+
     	//examine the error file and verify that the row in question failed
     	final int numberOfRows = 6;
         final int targetDate = 14;
         final String dateField = "CustomDateField__c";
-        
+
         assertEquals("Invalid testing configuration", numberOfRows, rowOffset + numFailures + numSuccesses);
-        
+
         TimeZone TZ = TimeZone.getTimeZone("GMT");
-        
+
         DateConverter converter = new DateConverter(TZ, false);
         //find the csv file
         Map<String, String> argumentMap = getTestConfig(OperationInfo.insert, getTestDataDir()
@@ -396,7 +431,7 @@ public class CsvProcessTest extends ProcessTestBase {
             // The calendar adjusts for the offset so we have to correct for that do a GMT comparison
             assertEquals("Timezone not correctly interpreted or sent", targetDate - timeZoneOffset,
                     calFromString.get(Calendar.DATE));
-        }    	
+        }
     }
 }
 

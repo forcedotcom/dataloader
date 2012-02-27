@@ -26,14 +26,14 @@
 package com.salesforce.dataloader;
 
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.*;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
+import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
@@ -54,13 +54,34 @@ import com.sforce.ws.ConnectorConfig;
  */
 abstract public class TestBase extends TestCase {
     
+    protected static final Properties TEST_PROPS;
+
+    static {
+        TEST_PROPS = new Properties();
+        loadTestProperties();
+    }
+
+    private static void loadTestProperties() {
+        final URL url = TestBase.class.getClassLoader().getResource("test.properties");
+        if (url == null) throw new IllegalStateException("Failed to locate test.properties.  Is it in the classpath?");
+        try {
+            final InputStream propStream = url.openStream();
+            try {
+                TEST_PROPS.load(propStream);
+            } finally {
+                propStream.close();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load test properties from resource: " + url, e);
+        }
+    }
+
     private static final String API_CLIENT_NAME = "DataLoaderBatch/" + Controller.APP_VERSION;
 
-    private static final String TEST_FILES_DIR = "src" + File.separator + "test" 
-            + File.separator + "resources" + File.separator + "testfiles";
-    private static final String TEST_CONF_DIR = "target" + File.separator + "conf";
-    private static final String TEST_DATA_DIR = "target" + File.separator + "data";
-    private static final String TEST_STATUS_DIR = "target" + File.separator + "status";
+    private static final String TEST_FILES_DIR = TEST_PROPS.getProperty("testfiles.dir");
+    private static final String TEST_CONF_DIR = TEST_FILES_DIR + File.separator + "conf";
+    private static final String TEST_DATA_DIR = TEST_FILES_DIR + File.separator + "data";
+    private static final String TEST_STATUS_DIR = TEST_FILES_DIR + File.separator + "status";
 
     protected static final String DEFAULT_ACCOUNT_EXT_ID_FIELD = "Oracle_Id__c";
     protected static final String DEFAULT_CONTACT_EXT_ID_FIELD = "NumberId__c";
@@ -76,7 +97,6 @@ abstract public class TestBase extends TestCase {
 
     protected String baseName; // / base name of the test (without the "test")
     private Controller controller;
-    private File dataloaderHome;
     String oldThreadName;
     PartnerConnection binding;
 
@@ -84,37 +104,30 @@ abstract public class TestBase extends TestCase {
         super(name);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see junit.framework.TestCase#setUp()
-     */
     @Override
-    public void setUp() throws IOException {
+    protected void setUp() {
         // reset binding
-        binding = null;
+        this.binding = null;
 
+        setupTestName();
+        setupController();
+    }
+
+    private void setupTestName() {
         // get the test name and lowercase the 1st letter of the name for file for readability
         String baseNameOrig = getName().substring(4);
         this.baseName = baseNameOrig.substring(0, 1).toLowerCase() + baseNameOrig.substring(1);
 
-        // name the current thread.  useful for test logging
-        try {
-            this.oldThreadName = Thread.currentThread().getName();
-            Thread.currentThread().setName(getName());
-        } catch (Exception e) {
-            // ignore, just leave the default thread name intact
-        }
-        
-        FileUtils.copyDirectory(new File(TEST_FILES_DIR), new File("target"));
-
-        // configure the Controller to point to our testing config
-        System.setProperty(Config.LOADER_CONFIG_DIR_SYSPROP, TEST_CONF_DIR);
-
-        initController();
+        // name the current thread. useful for test logging
+        this.oldThreadName = Thread.currentThread().getName();
+        Thread.currentThread().setName(getName());
     }
 
-    protected void initController() {
+    protected void setupController() {
+        // configure the Controller to point to our testing config
+        if (!System.getProperties().contains(Controller.CONFIG_DIR_PROP))
+            System.setProperty(Controller.CONFIG_DIR_PROP, getTestConfDir());
+
         if (controller == null) {
             try {
                 controller = Controller.getInstance(getName(), true);
@@ -147,6 +160,13 @@ abstract public class TestBase extends TestCase {
         if(binding != null) {
             return binding;
         }
+        ConnectorConfig bindingConfig = getWSCConfig();
+        logger.info("Getting binding for URL: " + bindingConfig.getAuthEndpoint());
+        binding = newConnection(bindingConfig, 0);
+        return binding;
+    }
+
+    protected ConnectorConfig getWSCConfig() {
         ConnectorConfig bindingConfig = new ConnectorConfig();
         bindingConfig.setUsername(getController().getConfig().getString(Config.USERNAME));
         bindingConfig.setPassword(getController().getConfig().getString(Config.PASSWORD));
@@ -157,6 +177,7 @@ abstract public class TestBase extends TestCase {
                 serverPath = new URI(Connector.END_POINT).getPath();
                 bindingConfig.setAuthEndpoint(configEndpoint + serverPath);
                 bindingConfig.setServiceEndpoint(configEndpoint + serverPath);
+                bindingConfig.setRestEndpoint(configEndpoint + ClientBase.REST_ENDPOINT);
                 bindingConfig.setManualLogin(true);
                 // set long timeout for tests with larger data sets
                 bindingConfig.setReadTimeout(5 * 60 * 1000);
@@ -176,9 +197,7 @@ abstract public class TestBase extends TestCase {
                 fail("Error parsing endpoint URL: " + Connector.END_POINT + ", error: " + e.getMessage());
             }
         }
-        logger.info("Getting binding for URL: " + bindingConfig.getAuthEndpoint());
-        binding = newConnection(bindingConfig, 0);
-        return binding;
+        return bindingConfig;
     }
 
     /**
@@ -216,28 +235,28 @@ abstract public class TestBase extends TestCase {
         return null;
     }
 
-    protected File getResource(String path) {
-        return new File(this.dataloaderHome, path);
+    protected File getTestFile(String path) {
+        return new File(TEST_FILES_DIR, path);
     }
-    
+
     protected String getResourcePath(String path) {
-        return getResource(path).getAbsolutePath();
+        return getTestFile(path).getAbsolutePath();
     }
 
     protected String getTestConfDir() {
-        return getResourcePath(TEST_CONF_DIR);
+        return TEST_CONF_DIR;
     }
 
     protected String getTestFilesDir() {
-        return getResourcePath(TEST_FILES_DIR);
+        return TEST_FILES_DIR;
     }
 
     protected String getTestDataDir() {
-        return getResourcePath(TEST_DATA_DIR);
+        return TEST_DATA_DIR;
     }
 
     protected String getTestStatusDir() {
-        return getResourcePath(TEST_STATUS_DIR);
+        return TEST_STATUS_DIR;
     }
 
     /**

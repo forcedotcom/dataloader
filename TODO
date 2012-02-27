@@ -1,0 +1,4 @@
+fixup CsvProcessAttachmentTest
+fix warnings, todos, and fixmes
+make tests work with h2 database
+cleanup .gitignore

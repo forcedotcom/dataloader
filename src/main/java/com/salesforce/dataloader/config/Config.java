@@ -191,12 +191,6 @@ public class Config {
     private final String configDir;
 
     /**
-     * <code>LOADER_CONFIG_DIR</code> is setting that has to be be passed in or set as environment variable to tell
-     * loader where to look for the config files
-     */
-    public static final String LOADER_CONFIG_DIR_SYSPROP = "salesforce.config.dir";
-
-    /**
      * <code>dateFormatter</code> will be used for getting dates in/out of the configuration file(s)
      */
     public static final DateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
