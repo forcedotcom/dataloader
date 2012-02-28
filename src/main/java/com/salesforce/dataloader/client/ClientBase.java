@@ -61,7 +61,7 @@ public abstract class ClientBase<ClientType> {
         DEFAULT_AUTH_ENDPOINT_URL = loginUrl;
     }
 
-    private static final String REST_ENDPOINT = "/services/async/" + Controller.API_VERSION;
+    public static final String REST_ENDPOINT = "/services/async/" + Controller.API_VERSION;
 
     protected final Logger logger;
     protected final Controller controller;

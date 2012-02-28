@@ -32,12 +32,9 @@ import junit.framework.TestSuite;
 import com.salesforce.dataloader.ConfigGenerator;
 import com.salesforce.dataloader.ConfigTestSuite;
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.*;
-import com.sforce.soap.partner.QueryResult;
-import com.sforce.ws.ConnectionException;
 
 /**
  * Test for dataloader hard delete feature
@@ -83,7 +80,6 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         // set batch process parameters
         Map<String, String> argMap = getHardDeleteTestConfig(listener);
         Controller theController = runProcess(argMap, 100);
-
         verifySuccessIds(theController, listener.getAccountIds());
     }
 
@@ -91,24 +87,13 @@ public class CsvHardDeleteTest extends ProcessTestBase {
      * Hard Delete - negative test. Login with user who has bulk api hard delete user permission disabled and
      * verify that hard delete operation cannot be performed
      */
-    public void testHardDeleteUserPermOff() throws ProcessInitializationException, DataAccessObjectException, ConnectionException {
+    public void testHardDeleteUserPermOff() throws ProcessInitializationException, DataAccessObjectException {
         // attempt to hard delete 100 accounts as a user without the "Bulk API Hard Delete" user perm enabled
         final Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(100));
-        
-        String soql = "select username from user where profileId in (select id from profile where name like 'Standard User') limit 1";
-        QueryResult qr = new PartnerClient(getController()).query(soql);
-        String standardUserName = (String) qr.getRecords()[0].getField("Username");
-        String originalUserName = getController().getConfig().getString(Config.USERNAME);
-        
-        try {
-            // change the configured user to be the standard user (ie without the perm)
-            argMap.put(Config.USERNAME, standardUserName);
-            getController().getConfig().loadParameterOverrides(argMap);
-            runProcessNegative(argMap, "You need the Bulk API Hard Delete user permission to permanently delete records.");
-        } finally {
-            argMap.put(Config.USERNAME, originalUserName);
-            getController().getConfig().loadParameterOverrides(argMap);
-        }
+        // change the configured user to be the standard user (ie without the perm)
+        TestProperties.USER_RESTRICTED.putConfigSetting(argMap);
+
+        runProcessNegative(argMap, "You need the Bulk API Hard Delete user permission to permanently delete records.");
     }
 
     /**
@@ -190,9 +175,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         // do an insert of some account records to ensure there is some data
         // to hard delete
         Map<String, String> argMap = getHardDeleteTestConfig(new InvalidIdTemplateListener(0));
-        
         Controller theController = runProcessWithErrors(argMap, 0, 1);
-
 
         // verify there were errors during operation
         verifyErrors(theController, "MALFORMED_ID:malformed id abcde0123456789XYZ");
@@ -262,11 +245,11 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         Controller theController = runProcessWithErrors(argMap, 1, 1);
 
         // verify there were errors during operation
-        verifyErrors(theController, "INVALID_ID_FIELD:Invalid Id for entity type 'Contact'");
+        verifyErrors(theController, "INVALID_ID_FIELD:Invalid Id for entity type 'Account'");
 
         // verify the id value matches the input id value for the 1 successful
         // records
-        verifySuccessIds(theController, listener.contactIds);
+        verifySuccessIds(theController, listener.getAccountIds());
     }
 
     private Map<String, String> getHardDeleteTestConfig(TemplateListener listener) throws DataAccessObjectException {

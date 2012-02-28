@@ -211,9 +211,13 @@
         <filtering>true</filtering>
       </resource>
     </resources>
+
+    <filters>
+      <filter>src/test/filters/test.properties</filter>
+    </filters>
     <testResources>
       <testResource>
-        <directory>src/main/resources</directory>
+        <directory>src/test/resources</directory>
         <filtering>true</filtering>
       </testResource>
     </testResources>
