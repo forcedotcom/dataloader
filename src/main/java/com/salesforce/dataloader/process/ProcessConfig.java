@@ -58,8 +58,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.FileSystemResource;
 
-import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
+import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 
 /**
@@ -80,7 +80,7 @@ public class ProcessConfig {
     }
 
     private static String getConfigFileLocation() {
-        File confFile = new File(System.getProperty(Config.LOADER_CONFIG_DIR_SYSPROP), DEFAULT_CONFIG_FILENAME);
+        File confFile = new File(Controller.getConfigDir(), DEFAULT_CONFIG_FILENAME);
         return confFile.getAbsolutePath();
     }
 

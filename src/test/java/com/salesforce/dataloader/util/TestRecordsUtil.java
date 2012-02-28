@@ -74,7 +74,7 @@ public class TestRecordsUtil extends ProcessTestBase {
             whereClause = TestBase.ACCOUNT_WHERE_CLAUSE;
         }
 
-        initController();
+        setupController();
         if("insert".equals(operation)) {
             insertSfdcAccounts(numRecords, true);
         } else if("upsert".equals(operation)) {
