@@ -34,7 +34,6 @@ import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.operation.ModalContext;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.wizard.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -868,7 +867,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      * @see #setMinimumPageSize(Point)
      */
     public void setMinimumPageSize(int minWidth, int minHeight) {
-        Assert.isTrue(minWidth >= 0 && minHeight >= 0);
+        assert minWidth >= 0 && minHeight >= 0;
         pageContainerLayout.minimumWidth = minWidth;
         pageContainerLayout.minimumHeight = minHeight;
     }
@@ -984,7 +983,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
             page.createControl(pageContainer);
             // the page is responsible for ensuring the created control is accessable
             // via getControl.
-            Assert.isNotNull(page.getControl());
+            assert page.getControl() != null;
             // ensure the dialog is large enough for this page
             updateSize(page);
         }
@@ -1011,7 +1010,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
             currentPage.createControl(pageContainer);
             // the page is responsible for ensuring the created control is accessible
             // via getControl.
-            Assert.isNotNull(currentPage.getControl());
+            assert currentPage.getControl() != null;
             // we do not need to update the size since the call
             // to initialize bounds has not been made yet.
         }
