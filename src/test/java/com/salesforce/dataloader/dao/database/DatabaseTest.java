@@ -61,7 +61,7 @@ public class DatabaseTest extends TestBase {
      * @see junit.framework.TestCase#setUp()
      */
     @Override
-    public void setUp() throws IOException {
+    protected void setUp() throws Exception {
         super.setUp();
 
         DatabaseTestUtil.createTable(getController(), "dataloader");

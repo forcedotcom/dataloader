@@ -32,12 +32,10 @@ import java.util.*;
 import com.sforce.ws.util.FileUtil;
 
 /**
- * 
  * Test class to validate that all sources files have the license header comment.
  *
  * @author Colin Jarvis
  * @since 23.0
- * 
  */
 public class LicenseHeaderTest extends TestBase {
 
@@ -48,26 +46,25 @@ public class LicenseHeaderTest extends TestBase {
     public void testSourcesHaveLicense() throws IOException {
         // get a list of all the files in our source directories
         final List<File> sourceFiles = getSourceFiles();
-        
+
         // check each source file and add it to the failure set if it doesn't contain the license header comment
         final Set<String> failures = new HashSet<String>();
         for (File src : sourceFiles) {
             if (src.getPath().toLowerCase().endsWith(".java") && !sourceHasLicense(src)) failures.add(src.getPath());
         }
-        
+
         // fail if there were failures
-        if (!failures.isEmpty())
-            fail("the following files do not have the correct license header" + failures);
+        if (!failures.isEmpty()) fail("the following files do not have the correct license header" + failures);
     }
 
-    private static final String DATALOADER_SRC = "src/main/java";
-    private static final String TEST_SRC = "src/test/java";
+    private static final String DATALOADER_SRC = TEST_PROPS.getProperty("main.src.dir");
+    private static final String TEST_SRC = TEST_PROPS.getProperty("test.src.dir");
 
     /** @returns A list containing all files in dataloader source folders */
     private List<File> getSourceFiles() {
         final List<File> allFiles = new ArrayList<File>();
-        allFiles.addAll(FileUtil.listFilesRecursive(getResource(DATALOADER_SRC), false));
-        allFiles.addAll(FileUtil.listFilesRecursive(getResource(TEST_SRC), false));
+        allFiles.addAll(FileUtil.listFilesRecursive(new File(DATALOADER_SRC), false));
+        allFiles.addAll(FileUtil.listFilesRecursive(new File(TEST_SRC), false));
         return allFiles;
     }
 
@@ -99,12 +96,12 @@ public class LicenseHeaderTest extends TestBase {
 
     private boolean sourceHasLicense(File src) throws IOException {
         final BufferedReader rdr = new BufferedReader(new InputStreamReader(new FileInputStream(src)));
-        
+
         // Read the block comment opener
         String line = rdr.readLine();
         if (!"/*".equals(line)) return false;
 
-        // read the header comment, and compare line by line with the expected text 
+        // read the header comment, and compare line by line with the expected text
         int i = 0;
         while ((line = rdr.readLine()) != null) {
             // stop reading lines with we have reached the end of the block comment
