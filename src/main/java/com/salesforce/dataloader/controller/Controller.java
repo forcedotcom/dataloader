@@ -33,7 +33,6 @@ import java.util.*;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
@@ -65,14 +64,17 @@ public class Controller {
 
     private static boolean isLogInitialized = false; // make sure log is initialized only once
 
-    private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
+    /** the system property name used to determine the config directory */
+    public static final String CONFIG_DIR_PROP = "salesforce.config.dir";
+
+    public static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
     private static final String LOG_CONFIG_FILE = "log-conf.xml"; //$NON-NLS-1$
     private static final String LOG_STDOUT_FILE = "sdl_out.log"; //$NON-NLS-1$
     private static final String CONFIG_DIR = "conf"; //$NON-NLS-1$
     private static String APP_NAME; //$NON-NLS-1$
     public static String APP_VERSION; //$NON-NLS-1$
-	public static String API_VERSION;
+    public static String API_VERSION;
     private static String APP_VENDOR; //$NON-NLS-1$
 
     /**
@@ -101,13 +103,12 @@ public class Controller {
         }
         APP_NAME = versionProps.getProperty("dataloader.name");
         APP_VENDOR = versionProps.getProperty("dataloader.vendor");
-
+        // FIXME clean this up, make static
         // dataloader version has 3 parts, salesforce app api version should match first two parts
 		APP_VERSION = versionProps.getProperty("dataloader.version");
         String[] dataloaderVersion = APP_VERSION.split("\\.");
         API_VERSION = dataloaderVersion[0] + "." + dataloaderVersion[1];
 
-        
         // if name is passed to controller, use it to create a unique run file name
         initConfig(name, isBatchMode);
     }
@@ -325,31 +326,32 @@ public class Controller {
         } else {
             // nope we are running commandline
 
-            String configDirPath = System.getProperty(Config.LOADER_CONFIG_DIR_SYSPROP);
+            // FIXME PLEASE
+            String configDirPath = getConfigDir();
+            logger.debug("config dir: " + configDirPath);
             // if configDir is null, set it to target, which is the maven build output directory
-            if (configDirPath == null ) configDirPath = "target";
-            appPath = configDirPath;
-            
-           File configDir = new File(configDirPath);
-           if (!configDir.exists()) {
-                try {
-                    FileUtils.forceMkdir(configDir);
-                } catch (IOException e) {
-                    throw new ControllerInitializationException(e);
-                }
-            }
-           
+            // TODO: FIXME
+            // if (configDirPath == null) configDirPath = "target";
+
+            // TODO: we should log creating new files/directories
+            // TODO: why did we add this?
+            File configDir = new File(configDirPath);
+            if (!(configDir.isDirectory() || configDir.mkdirs()))
+                throw new ControllerInitializationException("could not create configuration directory: " + configDir);
+
             // let the File class combine the dir and file names
             File configFile = new File(configDirPath, CONFIG_FILE);
-            
-            if (!configFile.exists()) try {
-                configFile.createNewFile();
-                configFile.setWritable(true);
-                configFile.setReadable(true);
-            } catch (IOException e) {
-                throw new ControllerInitializationException(e);
-            }
-                
+
+            // TODO: why did we add this?
+            // if (!configFile.exists()) try {
+            // configFile.createNewFile();
+            // configFile.setWritable(true);
+            // configFile.setReadable(true);
+            // } catch (IOException e) {
+            // throw new ControllerInitializationException(e);
+            // }
+
+            this.appPath = configDirPath;
             configPath = configFile.getAbsolutePath();
             logConfigPath = getDefaultLogConfigPath();
         }
@@ -418,8 +420,12 @@ public class Controller {
      * 
      * @return Default log configuration path
      */
-    static public String getDefaultLogConfigPath() {
-        return new File(System.getProperty(Config.LOADER_CONFIG_DIR_SYSPROP), LOG_CONFIG_FILE).getAbsolutePath();
+    public static String getDefaultLogConfigPath() {
+        return new File(getConfigDir(), LOG_CONFIG_FILE).getAbsolutePath();
+    }
+
+    public static String getConfigDir() {
+        return System.getProperty(CONFIG_DIR_PROP);
     }
 
     public PartnerClient getPartnerClient() {
