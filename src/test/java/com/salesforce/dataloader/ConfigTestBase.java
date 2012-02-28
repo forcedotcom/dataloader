@@ -174,7 +174,7 @@ public abstract class ConfigTestBase extends TestBase {
     }
 
     @Override
-    public void setUp() {
+    protected void setUp() throws Exception {
         super.setUp();
         try {
             getController().getConfig().loadParameterOverrides(getTestConfig());

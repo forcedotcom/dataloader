@@ -105,7 +105,7 @@ abstract public class TestBase extends TestCase {
     }
 
     @Override
-    protected void setUp() {
+    protected void setUp() throws Exception {
         // reset binding
         this.binding = null;
 

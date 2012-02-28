@@ -58,7 +58,7 @@ public class MappingTest extends ConfigTestBase {
     private Map<String, Object> sourceValueMap;
 
     @Override
-    public void setUp() {
+    protected void setUp() throws Exception {
         super.setUp();
 
         sourceValueMap = new HashMap<String, Object>();
