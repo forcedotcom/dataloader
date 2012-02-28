@@ -79,7 +79,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
      * @see junit.framework.TestCase#setUp()
      */
     @Override
-    public void setUp() {
+    protected void setUp() throws Exception {
         super.setUp();
         
         DatabaseTestUtil.createTable(getController(), "dataloader");

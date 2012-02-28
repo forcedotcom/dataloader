@@ -71,7 +71,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
     private static Logger logger = Logger.getLogger(TestBase.class);
 
     @Override
-    public void setUp() {
+    protected void setUp() throws Exception {
         super.setUp();
         cleanRecords();
     }
