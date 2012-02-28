@@ -25,7 +25,6 @@
  */
 package com.salesforce.dataloader.dao.database;
 
-import java.io.IOException;
 import java.util.*;
 
 import org.apache.log4j.Logger;
