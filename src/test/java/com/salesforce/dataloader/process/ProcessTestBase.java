@@ -40,13 +40,12 @@ import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
-import com.salesforce.dataloader.process.CsvProcessAttachmentTest.AttachmentTemplateListener;
+import com.salesforce.dataloader.util.Base64;
 import com.sforce.soap.partner.*;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.util.FileUtil;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 /**
  * Base class for batch process tests
@@ -72,7 +71,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
     private static Logger logger = Logger.getLogger(TestBase.class);
 
     @Override
-    public void setUp() throws IOException {
+    protected void setUp() throws Exception {
         super.setUp();
         cleanRecords();
     }
@@ -538,7 +537,6 @@ abstract public class ProcessTestBase extends ConfigTestBase {
             List<String> toDeleteIds = new ArrayList<String>();
             for (int i = 0; i < qryResult.getRecords().length; i++) {
                 SObject record = qryResult.getRecords()[i];
-                logger.debug("Deleting record id:" + record.getId());
                 toDeleteIds.add(record.getId());
                 // when SAVE_RECORD_LIMIT records are reached or
                 // if we're on the last query result record, do the delete
@@ -803,7 +801,6 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         assertTrue("Invalid id: " + id, id != null && id.length() == 18);
     }
 
-
     /**
      * To create a mapping between the name of the objects being inserted and their base-64 encoded data.
      *
@@ -811,16 +808,14 @@ abstract public class ProcessTestBase extends ConfigTestBase {
      * @return The mapping of String to String -- Map<String,String>
      *
      */
+    protected Map<String, String> createAttachmentFileMap(String... fileNames) throws IOException {
 
-    protected Map<String,String> createAttachmentFileMap(String... fileNames) {
+        final Map<String, String> resultMap = new HashMap<String, String>();
 
-        Map<String,String> resultMap = new HashMap<String,String>();
-
-        for(String fn : fileNames) {
-
-            String fileContents = Base64.encode(importFileToBinary(getTestDataDir() + File.separator + fn));
-            resultMap.put(fn, fileContents);
-
+        for (String fn : fileNames) {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            FileUtil.copy(new FileInputStream(getTestDataDir() + File.separator + fn), bytes);
+            resultMap.put(fn, Base64.encodeBytes(bytes.toByteArray()));
         }
 
         return resultMap;
@@ -837,91 +832,6 @@ abstract public class ProcessTestBase extends ConfigTestBase {
 
     protected File getStatusFile(String apiType, String fnEnd) {
         return new File(getTestStatusDir(), this.baseName + "-" + apiType + "-" + fnEnd);
-    }
-
-    /**
-     * To import a file and place it into program memory by inputing it as a byte array
-     *
-     * @param fileName String - The name of the file in the system
-     * @return byte[] - The byte array of the file
-     *
-     */
-
-    protected byte[] importFileToBinary(String fileName) {
-
-        if(fileName==null || fileName.length()==0) {
-            return null;
-        }
-
-        try {
-
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            FileUtil.copy(new FileInputStream(fileName), bytes);
-            return bytes.toByteArray();
-
-
-        } catch (IOException e) {
-
-            System.out.println("IO Exception =: " + e);
-            return null;
-        }
-
-    }
-
-    /**
-     * To verify that the insertion is done correctly
-     *
-     * @param The
-     *            controller ctl - Controller
-     * @param Mapping
-     *            of filename to base-64 encodings Map<String,String>
-     * @param The
-     *            listener - myAttachmentTemplateListener - AttachmentTemplateListener
-     */
-    protected void verifyInsertCorrectByContent(Controller ctl, Map<String, String> expectedMapping,
-            AttachmentTemplateListener myAttachmentTemplateListener) throws ConnectionException {
-        // expectedMapping should have the expected base-64 encodings of the files
-        //now get the actual encodings of the files and their filenames
-
-        Map<String,String> dbaseFileCorrespondence = getActualAttachmentMap(myAttachmentTemplateListener, expectedMapping.keySet());
-
-        if(dbaseFileCorrespondence==null) {
-            fail("verifyInsertCorrectByContent: retrieved actual attachment information unsuccessfully, as it is null");
-        } else {
-            verifyAttachmentObjects(dbaseFileCorrespondence, expectedMapping);
-        }
-        return;
-    }
-
-    /**
-     * Get the actual attachment names and their respective base-64 encodings.
-     *
-     * @param myAttachmentTemplateListener
-     *            - AttachmentTemplateListener
-     *
-     * @param fileNames
-     *             The set of filesnames that we expect to find
-     * @return Map<String,String>
-     */
-    protected Map<String, String> getActualAttachmentMap(AttachmentTemplateListener myAttachmentTemplateListener, Set<String> fileNames)
-            throws ConnectionException {
-
-        HashMap<String, String> resultMap = new HashMap<String,String>();
-
-        String soql = "select Name, Body from Attachment where ParentId=\'"+ myAttachmentTemplateListener.getAccountIds()[0] + "\'";
-
-        for (QueryResult qr = getBinding().query(soql); qr!=null;qr=qr.isDone() ? null : getBinding().queryMore(qr.getQueryLocator())) {
-            for(SObject myRecord : qr.getRecords()) {
-                resultMap.put(myRecord.getField("Name").toString(), myRecord.getField("Body").toString());
-            }
-        }
-        assertEquals("wrong number of results returned", fileNames.size(), resultMap.size());
-
-        for (String fn: fileNames) {
-            assertTrue("Missing file in results: " + fn, resultMap.containsKey(fn));
-        }
-
-        return resultMap;
     }
 
     /**
@@ -1000,7 +910,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
      * Get a config map for use with update/upsert operations
      *
      * @param fileNameBase This method will expect a file named <fileNameBase>Template.csv to exist.
-     *        The template file will be filled in using freshly inserted accounts (if numAccountsToInsert is 
+     *        The template file will be filled in using freshly inserted accounts (if numAccountsToInsert is
      *        greater than zero). This will generate <fileNameBase>.csv for the DAO, and the mapping file will be
      *        set to <fileNameBase>Map.sdl.
      * @param isUpsert True for upsert process configuration false for update process configuration.
