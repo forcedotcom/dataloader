@@ -31,7 +31,6 @@ import com.salesforce.dataloader.action.visitor.IVisitor;
 import com.salesforce.dataloader.action.visitor.PartnerQueryAllVisitor;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
-import com.salesforce.dataloader.exception.ExtractException;
 
 /**
  * Dataloader action which does a partner api query all operation.
@@ -42,7 +41,7 @@ import com.salesforce.dataloader.exception.ExtractException;
 class PartnerExtractAllAction extends AbstractExtractAction {
 
     public PartnerExtractAllAction(Controller controller, ILoaderProgress monitor)
-            throws DataAccessObjectInitializationException, ExtractException {
+            throws DataAccessObjectInitializationException {
         super(controller, monitor);
     }
 

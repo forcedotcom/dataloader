@@ -151,8 +151,7 @@ public class DAORowUtil {
     /**
      * Set the dataReader to point to the row where load has to be started
      */
-    private void rowToStart(Config cfg, DataReader daoReader) throws LoadException, DataAccessObjectException,
-    IOException {
+    private void rowToStart(Config cfg, DataReader daoReader) throws DataAccessObjectException {
         // start at the correct row
         final int rowToStart;
         try {

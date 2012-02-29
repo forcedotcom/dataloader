@@ -165,7 +165,7 @@ public class SoqlInfoTest extends TestBase {
                 "Nested queries are not supported");
     }
 
-    public void testMissingTableName() throws SOQLParserException {
+    public void testMissingTableName() {
         runInvalidQueryTest("select id from where Name='sometext'", "Failed to parse table name");
         runInvalidQueryTest("select id from", "No sobject specified after 'FROM' keyword");
     }

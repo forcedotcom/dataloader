@@ -32,11 +32,15 @@ import java.util.Map;
 
 /**
  * Comparator for the account rows from the database reader.
- *
+ * 
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class AccountRowComparator implements Comparator<Map<String,Object>> {
+public class AccountRowComparator implements Comparator<Map<String, Object>> {
+
+    private static String getName(Map<String, Object> o1) {
+        return o1.get(NAME_COL).toString();
+    }
 
     private boolean isReverse = false;
 
@@ -51,18 +55,10 @@ public class AccountRowComparator implements Comparator<Map<String,Object>> {
         this.isReverse = isReverse;
     }
 
-    /* (non-Javadoc)
-     * @see java.util.Comparator#compare(T, T)
-     */
     @Override
     public int compare(Map<String, Object> o1, Map<String, Object> o2) {
-        String name1 = o1.get(NAME_COL).toString();
-        String name2 = o2.get(NAME_COL).toString();
-        if(!isReverse) {
-            return name1.compareTo(name2);
-        } else {
-            return name2.compareTo(name1);
-        }
+        final int result = getName(o1).compareTo(getName(o2));
+        return isReverse ? -result : result;
     }
 
 }

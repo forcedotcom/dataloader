@@ -91,7 +91,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         // attempt to hard delete 100 accounts as a user without the "Bulk API Hard Delete" user perm enabled
         final Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(100));
         // change the configured user to be the standard user (ie without the perm)
-        TestProperties.USER_RESTRICTED.putConfigSetting(argMap);
+        argMap.put(Config.USERNAME, getProperty("test.user.restricted"));
 
         runProcessNegative(argMap, "You need the Bulk API Hard Delete user permission to permanently delete records.");
     }
@@ -135,7 +135,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
      * Hard Delete - Negative test. Uncheck Bull Api setting in data loader to verify that Hard Delete operation cannot
      * be done.
      */
-    public void testHardDeleteBulkApiSetToFalse() throws ProcessInitializationException, DataAccessObjectException {
+    public void testHardDeleteBulkApiSetToFalse() throws DataAccessObjectException {
         // do an insert of some account records to ensure there is some data
         // to hard delete
 

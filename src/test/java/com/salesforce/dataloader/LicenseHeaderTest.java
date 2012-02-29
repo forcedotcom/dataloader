@@ -57,8 +57,8 @@ public class LicenseHeaderTest extends TestBase {
         if (!failures.isEmpty()) fail("the following files do not have the correct license header" + failures);
     }
 
-    private static final String DATALOADER_SRC = TEST_PROPS.getProperty("main.src.dir");
-    private static final String TEST_SRC = TEST_PROPS.getProperty("test.src.dir");
+    private static final String DATALOADER_SRC = getProperty("main.src.dir");
+    private static final String TEST_SRC = getProperty("test.src.dir");
 
     /** @returns A list containing all files in dataloader source folders */
     private List<File> getSourceFiles() {
