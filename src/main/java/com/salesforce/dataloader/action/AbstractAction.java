@@ -121,7 +121,6 @@ abstract class AbstractAction implements IAction {
                 openErrorWriter(statusColumns);
             }
 
-
             while (!getMonitor().isCanceled() && visit()) {}
 
             flush();

@@ -553,9 +553,8 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 logger.fatal("Unexpected error", e);
                 throw new RuntimeException(e);
             }
-        } else {
-            return getDefaultServer();
         }
+        return getDefaultServer();
     }
 
     public boolean logout() {
@@ -694,7 +693,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         return cc;
     }
 
-    private ConnectorConfig getLoginConnectorConfig() throws ConnectionException {
+    private ConnectorConfig getLoginConnectorConfig() {
         ConnectorConfig cc = getConnectorConfig();
         String serverUrl = getDefaultServer();
         cc.setAuthEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());

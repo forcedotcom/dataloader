@@ -806,7 +806,6 @@ abstract public class ProcessTestBase extends ConfigTestBase {
      *
      * @param None
      * @return The mapping of String to String -- Map<String,String>
-     *
      */
     protected Map<String, String> createAttachmentFileMap(String... fileNames) throws IOException {
 
