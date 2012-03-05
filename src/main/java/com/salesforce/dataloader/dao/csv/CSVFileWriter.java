@@ -72,10 +72,12 @@ public class CSVFileWriter implements DataWriter {
      */
     private boolean capitalizedHeadings = true;
 
+    @Deprecated
     public CSVFileWriter(Config config) {
         this(config.getString(Config.DAO_NAME), config.getBoolean(Config.WRITE_UTF8), true);
     }
 
+    @Deprecated
     public CSVFileWriter(String fileName, boolean writeUtf8, boolean capitalizedHeadings) {
         this(fileName, writeUtf8 ? "UTF-8" : "", capitalizedHeadings);
     }
@@ -95,6 +97,7 @@ public class CSVFileWriter implements DataWriter {
      * Default writer inteface, with default encoding and capitalized headings
      * @param fileName
      */
+    @Deprecated
     public CSVFileWriter(String fileName) {
         this(fileName, true);
     }
