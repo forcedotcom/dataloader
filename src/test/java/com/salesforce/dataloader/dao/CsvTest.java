@@ -98,7 +98,7 @@ public class CsvTest extends TestBase {
     public synchronized void testCSVWriteBasic() {
         File f = new File(getTestDataDir(), "csvtestTemp.csv");
         String path = f.getAbsolutePath();
-        CSVFileWriter writer = new CSVFileWriter(path);
+        CSVFileWriter writer = new CSVFileWriter(path, DEFAULT_CHARSET);
         List<Map<String,Object>> rowList = new ArrayList<Map<String,Object>>();
 
         rowList.add(row1);

@@ -632,7 +632,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
                 idx++;
             }
             final String inputPath = new File(getTestDataDir(), inputFileName).getAbsolutePath();
-            final CSVFileWriter inputWriter = new CSVFileWriter(inputPath);
+            final CSVFileWriter inputWriter = new CSVFileWriter(inputPath, DEFAULT_CHARSET);
             try {
                 inputWriter.open();
                 inputWriter.setColumnNames(templateReader.getColumnNames());

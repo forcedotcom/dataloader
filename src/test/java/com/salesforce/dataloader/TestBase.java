@@ -27,6 +27,7 @@ package com.salesforce.dataloader;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.Charset;
 import java.util.Properties;
 
 import junit.framework.TestCase;
@@ -96,6 +97,8 @@ public abstract class TestBase extends TestCase {
     protected static final String CONTACT_TITLE_PREFIX = "CONTTL";
     protected static final String CONTACT_WHERE_CLAUSE = "Title like '" + CONTACT_TITLE_PREFIX + "%'";
     protected static final int SAVE_RECORD_LIMIT = 200;
+
+    protected static final String DEFAULT_CHARSET = Charset.defaultCharset().name();
 
     // logger
     private static Logger logger = Logger.getLogger(TestBase.class);
