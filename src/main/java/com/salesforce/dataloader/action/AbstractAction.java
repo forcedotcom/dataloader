@@ -209,7 +209,7 @@ abstract class AbstractAction implements IAction {
         if (filename == null || filename.length() == 0)
             throw new DataAccessObjectInitializationException(getMessage("errorMissingErrorFile"));
         // TODO: Make sure that specific DAO is not mentioned: use DataReader, DataWriter, or DataAccessObject
-        return new CSVFileWriter(filename, getConfig().getCsvWriteEncoding(), true);
+        return new CSVFileWriter(filename, getConfig().getCsvWriteEncoding());
     }
 
     /**
@@ -221,7 +221,7 @@ abstract class AbstractAction implements IAction {
         if (filename == null || filename.length() == 0)
             throw new DataAccessObjectInitializationException(getMessage("errorMissingSuccessFile"));
         // TODO: Make sure that specific DAO is not mentioned: use DataReader, DataWriter, or DataAccessObject
-        return new CSVFileWriter(filename, getConfig().getCsvWriteEncoding(), true);
+        return new CSVFileWriter(filename, getConfig().getCsvWriteEncoding());
     }
 
     private void openErrorWriter(List<String> headers) throws OperationException {

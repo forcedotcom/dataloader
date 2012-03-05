@@ -31,7 +31,6 @@ import java.util.*;
 
 import org.apache.log4j.Logger;
 
-import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -61,57 +60,18 @@ public class CSVFileWriter implements DataWriter {
     /**
      * <code>encoding</code> contains a value for output character encoding, blank indicates "use default"
      */
-    private String encoding;
-    /**
-     * When <code>useEncoding</code> is true, encoding value will be used for writing
-     */
-    private boolean useDefaultEncoding = true;
+    private final String encoding;
 
     /**
      * If <code>capitalizedHeadings</code> is true, output header row in caps
      */
-    private boolean capitalizedHeadings = true;
+    private final boolean capitalizedHeadings;
 
-    @Deprecated
-    public CSVFileWriter(Config config) {
-        this(config.getString(Config.DAO_NAME), config.getBoolean(Config.WRITE_UTF8), true);
-    }
-
-    @Deprecated
-    public CSVFileWriter(String fileName, boolean writeUtf8, boolean capitalizedHeadings) {
-        this(fileName, writeUtf8 ? "UTF-8" : "", capitalizedHeadings);
-    }
-
-    public CSVFileWriter(String fileName, String encoding, boolean capitalizedHeadings) {
+    public CSVFileWriter(String fileName, String encoding) {
         this.fileName = fileName;
-        this.capitalizedHeadings = capitalizedHeadings;
-        if(encoding != null && !"".equals(encoding)) {
-            this.encoding = encoding;
-            this.useDefaultEncoding = false;
-        } else {
-            this.useDefaultEncoding = true;
-        }
+        this.capitalizedHeadings = true;
+        this.encoding = (encoding == null || encoding.isEmpty()) ? null : encoding;
     }
-
-    /**
-     * Default writer inteface, with default encoding and capitalized headings
-     * @param fileName
-     */
-    @Deprecated
-    public CSVFileWriter(String fileName) {
-        this(fileName, true);
-    }
-
-    /**
-     * Default writer inteface, with default encoding
-     * @param fileName
-     */
-    public CSVFileWriter(String fileName, boolean capitalizedHeadings) {
-        this.fileName = fileName;
-        this.useDefaultEncoding = true;
-        this.capitalizedHeadings = capitalizedHeadings;
-    }
-
 
     /**
      * Check if writing can be performed successfully
@@ -130,15 +90,15 @@ public class CSVFileWriter implements DataWriter {
     @Override
     public void open() throws DataAccessObjectInitializationException {
         try {
-            if(!useDefaultEncoding) {
-                fileOut = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), encoding));
+            if (this.encoding != null) {
+                fileOut = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(this.fileName), this.encoding));
             } else {
-                fileOut = new BufferedWriter(new FileWriter(fileName));
+                fileOut = new BufferedWriter(new FileWriter(this.fileName));
             }
             currentRowNumber = 0;
             setOpen(true);
         } catch (IOException e) {
-            String errMsg = Messages.getFormattedString("CSVWriter.errorOpening", fileName);
+            String errMsg = Messages.getFormattedString("CSVWriter.errorOpening", this.fileName);
             logger.error(errMsg, e);
             throw new DataAccessObjectInitializationException(errMsg, e);
         }
