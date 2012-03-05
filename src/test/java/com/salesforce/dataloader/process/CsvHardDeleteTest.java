@@ -60,7 +60,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
 
     public static ConfigGenerator getConfigGenerator() {
         final ConfigGenerator withBulkApi = new ConfigSettingGenerator(ProcessTestBase.getConfigGenerator(),
-                Config.USE_BULK_API, Boolean.TRUE.toString());
+                Config.BULK_API_ENABLED, Boolean.TRUE.toString());
         final ConfigGenerator bulkApiZipContent = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_ZIP_CONTENT,
                 Boolean.TRUE.toString());
         final ConfigGenerator bulkApiSerialMode = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_SERIAL_MODE,
@@ -141,7 +141,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
 
         // set batch process parameters
         Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(1));
-        argMap.remove(Config.USE_BULK_API);
+        argMap.remove(Config.BULK_API_ENABLED);
         try {
             runProcess(argMap, 889);
             fail("hard delete should not succeed if bulk api is turned off");

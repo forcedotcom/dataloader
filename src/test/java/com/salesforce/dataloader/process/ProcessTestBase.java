@@ -893,7 +893,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
     }
 
     protected boolean isBulkAPIEnabled(Map<String, String> argMap) {
-        return isSettingEnabled(argMap, Config.USE_BULK_API);
+        return isSettingEnabled(argMap, Config.BULK_API_ENABLED);
     }
 
     protected boolean isSettingEnabled(Map<String, String> argMap, String configKey) {

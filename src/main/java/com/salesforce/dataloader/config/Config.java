@@ -118,7 +118,7 @@ public class Config {
     public static final String DEBUG_MESSAGES_FILE = "sfdc.debugMessagesFile"; //$NON-NLS-1$
     public static final String RESET_URL_ON_LOGIN = "sfdc.resetUrlOnLogin"; //$NON-NLS-1$
     public static final String TRUNCATE_FIELDS = "sfdc.truncateFields";//$NON-NLS-1$
-    public static final String USE_BULK_API  = "sfdc.useBulkApi";
+    public static final String BULK_API_ENABLED  = "sfdc.useBulkApi";
     public static final String BULK_API_SERIAL_MODE = "sfdc.bulkApiSerialMode";
     public static final String BULK_API_CHECK_STATUS_INTERVAL = "sfdc.bulkApiCheckStatusInterval";
     public static final String BULK_API_ZIP_CONTENT = "sfdc.bulkApiZipContent";
@@ -271,7 +271,7 @@ public class Config {
         setValue(DAO_READ_BATCH_SIZE, DEFAULT_DAO_READ_BATCH_SIZE);
         setValue(TRUNCATE_FIELDS, true);
         // TODO: When we're ready, make Bulk API turned on by default.
-        setValue(USE_BULK_API, useBulkApiByDefault());
+        setValue(BULK_API_ENABLED, useBulkApiByDefault());
         setValue(BULK_API_SERIAL_MODE, false);
         setValue(BULK_API_ZIP_CONTENT, false);
         setValue(BULK_API_CHECK_STATUS_INTERVAL, DEFAULT_BULK_API_CHECK_STATUS_INTERVAL);
@@ -964,7 +964,7 @@ public class Config {
     }
 
     public boolean isBulkAPIEnabled() {
-        return getBoolean(USE_BULK_API);
+        return getBoolean(BULK_API_ENABLED);
     }
 
     private boolean isBulkApiOperation() {
