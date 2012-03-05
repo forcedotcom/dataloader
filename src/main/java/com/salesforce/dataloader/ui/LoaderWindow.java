@@ -103,7 +103,7 @@ public class LoaderWindow extends ApplicationWindow {
         final ConfigListener listener = new ConfigListener() {
             @Override
             public void configValueChanged(String key, String oldValue, String newValue) {
-                if (Config.USE_BULK_API.equals(key)) {
+                if (Config.BULK_API_ENABLED.equals(key)) {
                     boolean boolVal = false;
                     if (newValue != null) boolVal = Boolean.valueOf(newValue);
                     LoaderWindow.this.operationButtonsByIndex.get(OperationInfo.hard_delete).setEnabled(boolVal);
