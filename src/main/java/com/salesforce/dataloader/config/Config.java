@@ -27,6 +27,7 @@
 package com.salesforce.dataloader.config;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.text.*;
 import java.util.*;
@@ -973,6 +974,13 @@ public class Config {
 
     public OperationInfo getOperationInfo() {
         return getEnum(OperationInfo.class, OPERATION);
+    }
+
+    private static final Charset UTF8 = Charset.forName("UTF-8");
+
+    public String getCsvWriteEncoding() {
+        if (Charset.defaultCharset().equals(UTF8) || getBoolean(WRITE_UTF8)) return UTF8.name();
+        return Charset.defaultCharset().name();
     }
 
     private final List<ConfigListener> listeners = new ArrayList<ConfigListener>();
