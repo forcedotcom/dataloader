@@ -33,6 +33,7 @@ import java.util.*;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
+import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
@@ -43,7 +44,6 @@ import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.util.DAORowUtil;
 import com.sforce.async.*;
-import com.sforce.ws.ConnectionException;
 
 /**
  * Visitor for operations using the bulk API client
@@ -52,6 +52,8 @@ import com.sforce.ws.ConnectionException;
  * @since 17.0
  */
 public class BulkLoadVisitor extends DAOLoadVisitor {
+
+    private static final Logger logger = Logger.getLogger(BulkLoadVisitor.class);
 
     private static final Object BULK_API_NULL_VALUE = new Object() {
         @Override
@@ -155,8 +157,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         doOneBatch(out, os, this.dynaArray);
     }
 
-    private void doOneBatch(PrintStream out, ByteArrayOutputStream os, List<DynaBean> rows)
-            throws IOException, OperationException, AsyncApiException {
+    private void doOneBatch(PrintStream out, ByteArrayOutputStream os, List<DynaBean> rows) throws OperationException,
+            AsyncApiException {
         int recordsInBatch = 0;
         final List<String> userColumns = getController().getDao().getColumnNames();
         List<String> headerColumns = null;
@@ -179,7 +181,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     private void writeRow(DynaBean row, PrintStream out, ByteArrayOutputStream os, int recordsInBatch,
-            List<String> header) throws IOException, LoadException {
+            List<String> header) throws LoadException {
         boolean notFirst = false;
         for (final String column : header) {
             if (notFirst) {
@@ -219,7 +221,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     private List<String> addHeader(PrintStream out, ByteArrayOutputStream os, DynaBean row, List<String> columns)
-            throws IOException, LoadException {
+            throws LoadException {
         boolean first = true;
         final List<String> cols = new ArrayList<String>();
         final Set<String> addedCols = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
@@ -258,8 +260,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         addedCols.add(sfdcColumn);
     }
 
-    private void createBatch(ByteArrayOutputStream os, int numRecords) throws AsyncApiException,
-    OperationException {
+    private void createBatch(ByteArrayOutputStream os, int numRecords) throws AsyncApiException {
         if (numRecords <= 0) return;
         final byte[] request = os.toByteArray();
         os.reset();
@@ -273,13 +274,18 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         if (this.jobUtil.hasJob()) {
             try {
                 this.jobUtil.closeJob();
+            } catch (final AsyncApiException e) {
+                logger.warn("Failed to close job", e);
+            }
+            try {
                 getResults();
-            } catch (final AsyncApiException e) {} catch (final ConnectionException e) {} catch (final IOException e) {}
+            } catch (AsyncApiException e) {
+                throw new LoadException("Failed to get batch results", e);
+            }
         }
     }
 
-    private void getResults() throws ConnectionException, AsyncApiException, OperationException,
-    DataAccessObjectException, IOException {
+    private void getResults() throws AsyncApiException, OperationException, DataAccessObjectException {
 
         getProgressMonitor().setSubTask(Messages.getMessage(getClass(), "retrievingResults"));
 
@@ -300,7 +306,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     private void processResults(final DataReader dataReader, final BatchInfo batch, BatchData clientBatchInfo)
-            throws LoadException, DataAccessObjectException, AsyncApiException, IOException {
+            throws LoadException, DataAccessObjectException, AsyncApiException {
         // For Bulk API, we don't save any success or error until the end,
         // so we have to go through the original CSV from the beginning while
         // we go through the results from the server.
@@ -316,7 +322,11 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
         final List<Map<String, Object>> rows = dataReader.readRowList(clientBatchInfo.numRows);
         if (batch.getState() == BatchStateEnum.Completed || batch.getNumberRecordsProcessed() > 0) {
-            processBatchResults(batch, errorMessage, batch.getState(), rows);
+            try {
+                processBatchResults(batch, errorMessage, batch.getState(), rows);
+            } catch (IOException e) {
+                throw new LoadException("IOException while reading batch results", e);
+            }
         } else {
             for (final Map<String, Object> row : rows) {
                 writeError(row, errorMessage);
@@ -330,8 +340,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     private void processBatchResults(final BatchInfo batch, final String errorMessage, final BatchStateEnum state,
-            final List<Map<String, Object>> rows) throws AsyncApiException, IOException, LoadException,
-            DataAccessObjectException {
+            final List<Map<String, Object>> rows) throws DataAccessObjectException, IOException, AsyncApiException {
 
         // get the batch csv result stream from sfdc
         final CSVReader resultRdr = this.jobUtil.getBatchResults(batch.getId());
@@ -448,10 +457,9 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             final String start = errString.substring(0, lastSep);
             if (fields != null && fields.length() > 0)
                 return new StringBuilder(start).append("\n").append("Error fields: ").append(fields).toString();
-            else
-                return start;
-        } else
-            return errString;
+            return start;
+        }
+        return errString;
     }
 
     @Override
@@ -465,7 +473,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
     @Override
     protected void conversionFailed(Map<String, Object> row, String errMsg) throws DataAccessObjectException,
-    OperationException {
+            OperationException {
         super.conversionFailed(row, errMsg);
         this.rowsToSkip++;
         // in order for this to work correctly we must flush any rows that have already been converted

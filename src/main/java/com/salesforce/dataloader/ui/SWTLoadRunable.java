@@ -33,7 +33,8 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import com.salesforce.dataloader.action.progress.SWTProgressAdapter;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.exception.*;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.OperationException;
 
 /**
  * @author Lexi Viripaeff
@@ -55,8 +56,6 @@ public class SWTLoadRunable implements IRunnableWithProgress {
         SWTProgressAdapter adapter = new SWTProgressAdapter(monitor, controller);
         try {
             controller.executeAction(adapter);
-        } catch (OperationInitializationException e) {
-            throw new InvocationTargetException(e);
         } catch (DataAccessObjectException e) {
             throw new InvocationTargetException(e);
         } catch (OperationException e) {

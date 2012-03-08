@@ -141,8 +141,9 @@ public abstract class Mapper {
     }
 
     protected static boolean isConstant(String name) {
+        if (name == null) return false;
         int len = name.length();
-        if (name == null || len < 2) return false;
+        if (len < 2) return false;
         return name.charAt(0) == '"' && name.charAt(len - 1) == '"';
     }
 

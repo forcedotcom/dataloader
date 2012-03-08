@@ -64,7 +64,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
 
     public static ConfigGenerator getConfigGenerator() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
-        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.USE_BULK_API,
+        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
                 Boolean.TRUE.toString());
         final ConfigGenerator bulkApiZipContent = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_ZIP_CONTENT,
                 Boolean.TRUE.toString());
@@ -94,7 +94,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
 
     /**
      * Verify that multiple binary files can be correctly zipped up and inserted into a record.
-     * 
+     *
      * @expectedResults Assert that the binaries of input and queried files are equal.
      */
     public void testCreateAttachmentMultipleFiles() throws Exception {
@@ -114,8 +114,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
             final String failureMessage = "Data Loader cannot map \"Body\" field using Bulk API and CSV content type.  Please enable the ZIP_CSV content type for Bulk API.";
             runProcessNegative(argMap, failureMessage);
         } else {
-            runProcessWithAttachmentListener(argMap, 3, myAttachmentTemplateListener, "Bay-Bridge.jpg",
-                    "BayBridgeBW.jpg", "BayBridgeFromTreasureIsland.jpg");
+            runProcessWithAttachmentListener(argMap, 3, myAttachmentTemplateListener,"Bay-Bridge.jpg", "BayBridgeBW.jpg", "BayBridgeFromTreasureIsland.jpg");
         }
     }
 
