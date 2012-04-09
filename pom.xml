@@ -132,11 +132,6 @@
       <artifactId>org.eclipse.osgi</artifactId>
       <version>3.6.2</version>
     </dependency>
-    <dependency>
-      <groupId>org.eclipse.swt</groupId>
-      <artifactId>${swt.artifact.id}</artifactId>
-      <version>3.6.2</version>
-    </dependency>
 
     <dependency>
       <groupId>org.springframework</groupId>
@@ -246,7 +241,6 @@
         </executions>
       </plugin>
 
-
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
@@ -254,7 +248,6 @@
           <target>${java.compile.version}</target>
         </configuration>
       </plugin>
-
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -265,87 +258,108 @@
             <exclude>**/TestRecordsUtil.java</exclude>
             <exclude>**/integration/**</exclude>
           </excludes>
-          <!--<skip>true</skip>-->
+          <!--<skip>true</skip> -->
         </configuration>
       </plugin>
-
     </plugins>
-
   </build>
 
   <profiles>
     <profile>
       <id>linux32</id>
       <activation>
-        <property>
-          <name>env</name>
-          <value>linux32</value>
-        </property>
+        <os>
+          <family>Unix</family>
+          <arch>x86</arch>
+        </os>
       </activation>
-      <properties>
-        <swt.artifact.id>org.eclipse.swt.gtk.linux.x86</swt.artifact.id>
-      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.gtk.linux.x86</artifactId>
+          <version>3.6.2</version>
+        </dependency>
+      </dependencies>
     </profile>
     <profile>
       <id>linux64</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
-        <property>
-          <name>env</name>
-          <value>linux64</value>
-        </property>
+        <os>
+          <family>Unix</family>
+          <arch>amd64</arch>
+        </os>
       </activation>
-      <properties>
-        <swt.artifact.id>org.eclipse.swt.gtk.linux.x86_64</swt.artifact.id>
-      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
+          <version>3.6.2</version>
+        </dependency>
+      </dependencies>
     </profile>
     <profile>
       <id>mac32</id>
       <activation>
-        <property>
-          <name>env</name>
-          <value>mac32</value>
-        </property>
+        <os>
+          <family>Mac</family>
+          <arch>x86</arch>
+        </os>
       </activation>
-      <properties>
-        <swt.artifact.id>org.eclipse.swt.cocoa.macosx</swt.artifact.id>
-      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.cocoa.macosx</artifactId>
+          <version>3.6.2</version>
+        </dependency>
+      </dependencies>
     </profile>
     <profile>
       <id>mac64</id>
       <activation>
-        <property>
-          <name>env</name>
-          <value>mac64</value>
-        </property>
+        <os>
+          <family>Mac</family>
+          <arch>amd64</arch>
+        </os>
       </activation>
-      <properties>
-        <swt.artifact.id>org.eclipse.swt.cocoa.macosx.x86_64</swt.artifact.id>
-      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
+          <version>3.6.2</version>
+        </dependency>
+      </dependencies>
     </profile>
     <profile>
       <id>win32</id>
       <activation>
-        <property>
-          <name>env</name>
-          <value>win32</value>
-        </property>
+        <os>
+          <family>Windows</family>
+          <arch>x86</arch>
+        </os>
       </activation>
-      <properties>
-        <swt.artifact.id>org.eclipse.swt.win32.win32.x86</swt.artifact.id>
-      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
+          <version>3.6.2</version>
+        </dependency>
+      </dependencies>
     </profile>
     <profile>
       <id>win64</id>
       <activation>
-        <property>
-          <name>env</name>
-          <value>win64</value>
-        </property>
+        <os>
+          <family>Windows</family>
+          <arch>amd64</arch>
+        </os>
       </activation>
-      <properties>
-        <swt.artifact.id>org.eclipse.swt.win32.win32.x86_64</swt.artifact.id>
-      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+          <version>3.6.2</version>
+        </dependency>
+      </dependencies>
     </profile>
 
     <profile>
