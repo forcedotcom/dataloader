@@ -6,7 +6,9 @@ The build will include the appropriate eclipse swt jar by detecting the operatin
 
 Note: salesforce.com officially supports dataloader on Windows XP and Windows 7.  The other platforms that dataloader can be compiled for are unofficial.
 
-The build will generate a windows installer exe in the target directory when executing the build in a windows environment.  You must use the <code>-Denv=win32</code> parameter if you are building the windows installer.
+The build will generate a windows installer exe in the target directory when executing the build in a windows environment.  If you are packaging the windows installer for distribution, you must use the following command to specify the win32 profile because the installer is packaged with a 32-bit JRE.
+
+    mvn clean install -P win32,!win64 -DskipTests
     
 # Execute Data Loader
 
