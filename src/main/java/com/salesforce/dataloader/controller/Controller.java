@@ -331,25 +331,32 @@ public class Controller {
             logger.debug("config dir: " + configDirPath);
             // if configDir is null, set it to target, which is the maven build output directory
             // TODO: FIXME
-            // if (configDirPath == null) configDirPath = "target";
+	        if (configDirPath == null) {
+	        	configDirPath = "target";
+	        	logger.warn("config dir was null, so config dir has been set to " + configDirPath);
+	        }
 
             // TODO: we should log creating new files/directories
             // TODO: why did we add this?
             File configDir = new File(configDirPath);
-            if (!(configDir.isDirectory() || configDir.mkdirs()))
-                throw new ControllerInitializationException("could not create configuration directory: " + configDir);
-
+            if (!(configDir.isDirectory() || configDir.mkdirs())) {
+            	throw new ControllerInitializationException("could not create configuration directory: " + configDir);
+            } else {
+            	logger.info("config dir created at " + configDir.getAbsolutePath());
+            }
+                
             // let the File class combine the dir and file names
             File configFile = new File(configDirPath, CONFIG_FILE);
 
             // TODO: why did we add this?
-            // if (!configFile.exists()) try {
-            // configFile.createNewFile();
-            // configFile.setWritable(true);
-            // configFile.setReadable(true);
-            // } catch (IOException e) {
-            // throw new ControllerInitializationException(e);
-            // }
+             if (!configFile.exists()) try {
+	             configFile.createNewFile();
+	             configFile.setWritable(true);
+	             configFile.setReadable(true);
+	             logger.info("config file created at " + configFile.getAbsolutePath());
+             } catch (IOException e) {
+            	 throw new ControllerInitializationException(e);
+             }
 
             this.appPath = configDirPath;
             configPath = configFile.getAbsolutePath();
