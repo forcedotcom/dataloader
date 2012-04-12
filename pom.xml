@@ -301,7 +301,7 @@
       <id>mac32</id>
       <activation>
         <os>
-          <family>Mac</family>
+          <family>mac</family>
           <arch>x86</arch>
         </os>
       </activation>
@@ -317,8 +317,8 @@
       <id>mac64</id>
       <activation>
         <os>
-          <family>Mac</family>
-          <arch>amd64</arch>
+          <family>mac</family>
+          <arch>x86_64</arch>
         </os>
       </activation>
       <dependencies>
