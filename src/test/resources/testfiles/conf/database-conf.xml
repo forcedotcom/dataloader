@@ -97,7 +97,6 @@
         <value>
             SELECT ACCOUNT_NAME, BUSINESS_PHONE, ACCOUNT_EXT_ID, ANNUAL_REVENUE, LAST_UPDATED, ACCOUNT_NUMBER
             FROM DATALOADER
-            WHERE SYSTEM_MODSTAMP > @process.lastRunDate@
         </value>
     </property>
     <property name="columnNames">
