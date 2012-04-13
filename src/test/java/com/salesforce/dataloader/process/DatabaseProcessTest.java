@@ -212,19 +212,19 @@ public class DatabaseProcessTest extends ProcessTestBase {
         // verify there were no errors during extract
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("compare_date", startTime);
-        verifyDbSuccess(theController, "queryAccountSince", params, expectedSuccesses);
+        verifyDbSuccess(theController, "queryAccount", expectedSuccesses);
     }
 
     /**
      * @param theController
      * @param startTime
      */
-    private void verifyDbSuccess(Controller theController, String dbConfigName, Map<String,Object> params, int expectedSuccesses) {
+    private void verifyDbSuccess(Controller theController, String dbConfigName, int expectedSuccesses) {
         DatabaseReader reader = null;
         logger.info("Verifying database success for database configuration: " + dbConfigName);
         try {
             reader = new DatabaseReader(theController.getConfig(), dbConfigName);
-            reader.open(params);
+            reader.open();
             int readBatchSize = theController.getConfig().getInt(Config.DAO_READ_BATCH_SIZE);
             List<Map<String,Object>> successRows = reader.readRowList(readBatchSize);
             int rowsProcessed = 0;
