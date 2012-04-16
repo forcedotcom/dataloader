@@ -31,7 +31,6 @@ import com.salesforce.dataloader.action.visitor.BulkQueryVisitor;
 import com.salesforce.dataloader.action.visitor.IVisitor;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
-import com.salesforce.dataloader.exception.ExtractException;
 
 /**
  * Bulk api extract action.
@@ -42,7 +41,7 @@ import com.salesforce.dataloader.exception.ExtractException;
 class BulkExtractAction extends AbstractExtractAction {
 
     public BulkExtractAction(Controller controller, ILoaderProgress monitor)
-            throws DataAccessObjectInitializationException, ExtractException {
+            throws DataAccessObjectInitializationException {
         super(controller, monitor);
     }
 

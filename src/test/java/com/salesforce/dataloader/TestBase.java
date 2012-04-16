@@ -27,6 +27,7 @@ package com.salesforce.dataloader;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.Charset;
 import java.util.Properties;
 
 import junit.framework.TestCase;
@@ -52,38 +53,43 @@ import com.sforce.ws.ConnectorConfig;
  * @author Alex Warshavsky
  * @since 8.0
  */
-abstract public class TestBase extends TestCase {
+public abstract class TestBase extends TestCase {
     
-    protected static final Properties TEST_PROPS;
+    private static final Properties TEST_PROPS;
 
     static {
-        TEST_PROPS = new Properties();
-        loadTestProperties();
+        TEST_PROPS = loadTestProperties();
     }
 
-    private static void loadTestProperties() {
+    private static Properties loadTestProperties() {
+        final Properties p = new Properties();
         final URL url = TestBase.class.getClassLoader().getResource("test.properties");
         if (url == null) throw new IllegalStateException("Failed to locate test.properties.  Is it in the classpath?");
         try {
             final InputStream propStream = url.openStream();
             try {
-                TEST_PROPS.load(propStream);
+                p.load(propStream);
             } finally {
                 propStream.close();
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to load test properties from resource: " + url, e);
         }
+        return p;
+    }
+
+    protected static String getProperty(String testProperty) {
+        return TEST_PROPS.getProperty(testProperty);
     }
 
     private static final String API_CLIENT_NAME = "DataLoaderBatch/" + Controller.APP_VERSION;
 
-    private static final String TEST_FILES_DIR = TEST_PROPS.getProperty("testfiles.dir");
+    private static final String TEST_FILES_DIR = getProperty("testfiles.dir");
     private static final String TEST_CONF_DIR = TEST_FILES_DIR + File.separator + "conf";
     private static final String TEST_DATA_DIR = TEST_FILES_DIR + File.separator + "data";
     private static final String TEST_STATUS_DIR = TEST_FILES_DIR + File.separator + "status";
 
-    protected static final String DEFAULT_ACCOUNT_EXT_ID_FIELD = "Oracle_Id__c";
+    protected static final String DEFAULT_ACCOUNT_EXT_ID_FIELD = getProperty("test.account.extid");
     protected static final String DEFAULT_CONTACT_EXT_ID_FIELD = "NumberId__c";
 
     protected static final String ACCOUNT_NUMBER_PREFIX = "ACCT";
@@ -91,6 +97,8 @@ abstract public class TestBase extends TestCase {
     protected static final String CONTACT_TITLE_PREFIX = "CONTTL";
     protected static final String CONTACT_WHERE_CLAUSE = "Title like '" + CONTACT_TITLE_PREFIX + "%'";
     protected static final int SAVE_RECORD_LIMIT = 200;
+
+    protected static final String DEFAULT_CHARSET = Charset.defaultCharset().name();
 
     // logger
     private static Logger logger = Logger.getLogger(TestBase.class);
@@ -185,7 +193,7 @@ abstract public class TestBase extends TestCase {
                     bindingConfig.setTraceMessage(true);
                     bindingConfig.setPrettyPrintXml(true);
                     String filename = getController().getConfig().getString(Config.DEBUG_MESSAGES_FILE);
-                    if (filename.length() > 0) {
+                    if (!filename.isEmpty()) {
                         try {
                             bindingConfig.setTraceFile(filename);
                         } catch (FileNotFoundException e) {
@@ -265,11 +273,10 @@ abstract public class TestBase extends TestCase {
     protected PartnerConnection checkBinding(int retries, ApiFault e) {
         logger.info("Retry#" + retries + " getting a binding after an error.  Code: " + e.getExceptionCode().toString()
                 + ", detail: " + e.getExceptionMessage());
-        if(retries < 3) { // && (e.getExceptionCode() == ExceptionCode.INVALID_SESSION_ID || e.getExceptionMessage().indexOf("Invalid Session ID") != -1)) {
+        if (retries < 3) // && (e.getExceptionCode() == ExceptionCode.INVALID_SESSION_ID ||
+                         // e.getExceptionMessage().indexOf("Invalid Session ID") != -1)) {
             return getBinding();
-        } else {
-            return null;
-        }
+        return null;
     }
 
     protected void fail(String m, Throwable t) {

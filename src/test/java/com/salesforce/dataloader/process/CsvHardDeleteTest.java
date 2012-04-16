@@ -60,7 +60,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
 
     public static ConfigGenerator getConfigGenerator() {
         final ConfigGenerator withBulkApi = new ConfigSettingGenerator(ProcessTestBase.getConfigGenerator(),
-                Config.USE_BULK_API, Boolean.TRUE.toString());
+                Config.BULK_API_ENABLED, Boolean.TRUE.toString());
         final ConfigGenerator bulkApiZipContent = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_ZIP_CONTENT,
                 Boolean.TRUE.toString());
         final ConfigGenerator bulkApiSerialMode = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_SERIAL_MODE,
@@ -91,7 +91,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         // attempt to hard delete 100 accounts as a user without the "Bulk API Hard Delete" user perm enabled
         final Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(100));
         // change the configured user to be the standard user (ie without the perm)
-        TestProperties.USER_RESTRICTED.putConfigSetting(argMap);
+        argMap.put(Config.USERNAME, getProperty("test.user.restricted"));
 
         runProcessNegative(argMap, "You need the Bulk API Hard Delete user permission to permanently delete records.");
     }
@@ -135,13 +135,13 @@ public class CsvHardDeleteTest extends ProcessTestBase {
      * Hard Delete - Negative test. Uncheck Bull Api setting in data loader to verify that Hard Delete operation cannot
      * be done.
      */
-    public void testHardDeleteBulkApiSetToFalse() throws ProcessInitializationException, DataAccessObjectException {
+    public void testHardDeleteBulkApiSetToFalse() throws DataAccessObjectException {
         // do an insert of some account records to ensure there is some data
         // to hard delete
 
         // set batch process parameters
         Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(1));
-        argMap.remove(Config.USE_BULK_API);
+        argMap.remove(Config.BULK_API_ENABLED);
         try {
             runProcess(argMap, 889);
             fail("hard delete should not succeed if bulk api is turned off");

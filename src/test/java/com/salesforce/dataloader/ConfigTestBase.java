@@ -34,11 +34,11 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 public abstract class ConfigTestBase extends TestBase {
 
     /** Each enum represents a property that we read from test.properties and use as dataloader config settings. */
+    @Deprecated
     protected static enum TestProperties {
-        USER_RESTRICTED(Config.USERNAME),
-        ENTITY_DEFAULT(Config.ENTITY),
+        @Deprecated
+        ENTITY_DEFAULT(Config.ENTITY), @Deprecated
         ACCOUNT_EXTID(Config.EXTERNAL_ID_FIELD);
-
 
         private final String configName;
 
@@ -56,7 +56,7 @@ public abstract class ConfigTestBase extends TestBase {
         }
 
         public void putConfigSetting(Map<String, String> destConfig) {
-            destConfig.put(this.configName, TEST_PROPS.getProperty(getPropertyName()));
+            destConfig.put(this.configName, getProperty(getPropertyName()));
         }
     }
 
@@ -176,11 +176,7 @@ public abstract class ConfigTestBase extends TestBase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        try {
-            getController().getConfig().loadParameterOverrides(getTestConfig());
-        } catch (Exception e) {
-            fail(e);
-        }
+        getController().getConfig().loadParameterOverrides(getTestConfig());
     }
 
     @Override

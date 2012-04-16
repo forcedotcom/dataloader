@@ -105,8 +105,14 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         }
     }
 
+    /**
+     * @param row
+     * @param errMsg
+     * @throws DataAccessObjectException
+     * @throws OperationException
+     */
     protected void conversionFailed(Map<String, Object> row, String errMsg) throws DataAccessObjectException,
-    LoadException, OperationException {
+            OperationException {
         writeError(row, errMsg);
     }
 

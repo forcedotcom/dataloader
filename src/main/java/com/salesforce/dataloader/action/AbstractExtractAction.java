@@ -48,7 +48,7 @@ import com.salesforce.dataloader.mapping.SOQLMapper;
 abstract class AbstractExtractAction extends AbstractAction {
 
     protected AbstractExtractAction(Controller controller, ILoaderProgress monitor)
-            throws DataAccessObjectInitializationException, ExtractException {
+            throws DataAccessObjectInitializationException {
         super(controller, monitor);
     }
 
