@@ -31,7 +31,6 @@ import com.salesforce.dataloader.action.visitor.IQueryVisitor;
 import com.salesforce.dataloader.action.visitor.PartnerQueryVisitor;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
-import com.salesforce.dataloader.exception.ExtractException;
 
 /**
  * @author Lexi Viripaeff
@@ -40,8 +39,7 @@ import com.salesforce.dataloader.exception.ExtractException;
 class PartnerExtractAction extends AbstractExtractAction {
 
     public PartnerExtractAction(Controller controller, ILoaderProgress monitor)
-            throws DataAccessObjectInitializationException,
-            ExtractException {
+            throws DataAccessObjectInitializationException {
         super(controller, monitor);
     }
 

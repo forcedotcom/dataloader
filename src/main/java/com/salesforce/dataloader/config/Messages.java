@@ -49,11 +49,11 @@ public class Messages {
 
     private static String getString(String key, boolean nullOk, Object... args) {
         assert key.contains(".");
-        for (int i = 0; i < args.length; i++)
-            if (args[i] == null) args[i] = "";
         try {
-            String val = RESOURCE_BUNDLE.getString(key);
-            return args == null ? val : MessageFormat.format(val, args);
+            if (args == null) return RESOURCE_BUNDLE.getString(key);
+            for (int i = 0; i < args.length; i++)
+                if (args[i] == null) args[i] = "";
+            return MessageFormat.format(RESOURCE_BUNDLE.getString(key), args);
         } catch (MissingResourceException e) {
             return nullOk ? null : '!' + key + '!';
         }

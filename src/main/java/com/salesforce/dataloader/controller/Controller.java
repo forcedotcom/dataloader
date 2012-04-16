@@ -104,8 +104,7 @@ public class Controller {
         config.setDefaults();
     }
 
-    public synchronized void executeAction(ILoaderProgress monitor) throws DataAccessObjectException,
-            OperationInitializationException, OperationException {
+    public synchronized void executeAction(ILoaderProgress monitor) throws DataAccessObjectException, OperationException {
         OperationInfo operation = this.config.getOperationInfo();
         IAction action = operation.instantiateAction(this, monitor);
         logger.info(Messages.getFormattedString("Controller.executeStart", operation)); //$NON-NLS-1$

@@ -89,7 +89,7 @@ public class DatabaseContext {
         }
     }
 
-    public void closeConnection() throws DataAccessObjectInitializationException {
+    public void closeConnection() {
         try {
             // close connection only if necessary
             if (dataConnection != null && !dataConnection.isClosed()) {

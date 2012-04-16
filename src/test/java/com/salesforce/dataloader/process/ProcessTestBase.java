@@ -632,7 +632,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
                 idx++;
             }
             final String inputPath = new File(getTestDataDir(), inputFileName).getAbsolutePath();
-            final CSVFileWriter inputWriter = new CSVFileWriter(inputPath);
+            final CSVFileWriter inputWriter = new CSVFileWriter(inputPath, DEFAULT_CHARSET);
             try {
                 inputWriter.open();
                 inputWriter.setColumnNames(templateReader.getColumnNames());
@@ -806,7 +806,6 @@ abstract public class ProcessTestBase extends ConfigTestBase {
      *
      * @param None
      * @return The mapping of String to String -- Map<String,String>
-     *
      */
     protected Map<String, String> createAttachmentFileMap(String... fileNames) throws IOException {
 
@@ -894,7 +893,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
     }
 
     protected boolean isBulkAPIEnabled(Map<String, String> argMap) {
-        return isSettingEnabled(argMap, Config.USE_BULK_API);
+        return isSettingEnabled(argMap, Config.BULK_API_ENABLED);
     }
 
     protected boolean isSettingEnabled(Map<String, String> argMap, String configKey) {
