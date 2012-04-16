@@ -1,27 +1,17 @@
 /*
- * Copyright (c) 2012, salesforce.com, inc.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided
- * that the following conditions are met:
- *
- *    Redistributions of source code must retain the above copyright notice, this list of conditions and the
- *    following disclaimer.
- *
- *    Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
- *    the following disclaimer in the documentation and/or other materials provided with the distribution.
- *
- *    Neither the name of salesforce.com, inc. nor the names of its contributors may be used to endorse or
- *    promote products derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
- * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
- * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012, salesforce.com, inc. All rights reserved. Redistribution and use in source and binary forms, with
+ * or without modification, are permitted provided that the following conditions are met: Redistributions of source code
+ * must retain the above copyright notice, this list of conditions and the following disclaimer. Redistributions in
+ * binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution. Neither the name of salesforce.com, inc. nor the
+ * names of its contributors may be used to endorse or promote products derived from this software without specific
+ * prior written permission. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package com.salesforce.dataloader.controller;
@@ -33,9 +23,7 @@ import java.util.*;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 
 import com.salesforce.dataloader.action.IAction;
 import com.salesforce.dataloader.action.OperationInfo;
@@ -69,7 +57,6 @@ public class Controller {
 
     public static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
-    private static final String LOG_CONFIG_FILE = "log-conf.xml"; //$NON-NLS-1$
     private static final String LOG_STDOUT_FILE = "sdl_out.log"; //$NON-NLS-1$
     private static final String CONFIG_DIR = "conf"; //$NON-NLS-1$
     private static String APP_NAME; //$NON-NLS-1$
@@ -105,7 +92,7 @@ public class Controller {
         APP_VENDOR = versionProps.getProperty("dataloader.vendor");
         // FIXME clean this up, make static
         // dataloader version has 3 parts, salesforce app api version should match first two parts
-		APP_VERSION = versionProps.getProperty("dataloader.version");
+        APP_VERSION = versionProps.getProperty("dataloader.version");
         String[] dataloaderVersion = APP_VERSION.split("\\.");
         API_VERSION = dataloaderVersion[0] + "." + dataloaderVersion[1];
 
@@ -118,7 +105,7 @@ public class Controller {
     }
 
     public synchronized void executeAction(ILoaderProgress monitor) throws DataAccessObjectException,
-    OperationInitializationException, OperationException {
+            OperationInitializationException, OperationException {
         OperationInfo operation = this.config.getOperationInfo();
         IAction action = operation.instantiateAction(this, monitor);
         logger.info(Messages.getFormattedString("Controller.executeStart", operation)); //$NON-NLS-1$
@@ -195,9 +182,8 @@ public class Controller {
     public void createMapper() throws MappingInitializationException {
         String mappingFile = config.getString(Config.MAPPING_FILE);
         this.mapper = getConfig().getOperationInfo().isExtraction() ? new SOQLMapper(getPartnerClient(),
-                dao.getColumnNames(), mappingFile) : new LoadMapper(
-                        getPartnerClient(), dao.getColumnNames(),
-                        mappingFile);
+                dao.getColumnNames(), mappingFile) : new LoadMapper(getPartnerClient(), dao.getColumnNames(),
+                mappingFile);
     }
 
     public void createAndShowGUI() throws ControllerInitializationException {
@@ -282,7 +268,6 @@ public class Controller {
         // see if we are ui based
         String appdataDir = System.getProperty("appdata.dir");
         String configPath;
-        String logConfigPath;
         String lastRunFileName = name + LAST_RUN_FILE_SUFFIX;
         if (appdataDir != null && appdataDir.length() > 0) {
 
@@ -311,18 +296,6 @@ public class Controller {
                 }
             }
 
-            // figure out log config
-            File log = new File(appDir, LOG_CONFIG_FILE);
-            logConfigPath = log.getAbsolutePath();
-            if (!log.exists()) {
-                File oldLog = new File(oldConfigDir, LOG_CONFIG_FILE);
-                if (!oldLog.exists()) {
-                    System.out.println("Cannot find default log configuration file");
-                } else {
-                    copyFile(oldLog, log);
-                }
-            }
-
         } else {
             // nope we are running commandline
 
@@ -331,39 +304,38 @@ public class Controller {
             logger.debug("config dir: " + configDirPath);
             // if configDir is null, set it to target, which is the maven build output directory
             // TODO: FIXME
-	        if (configDirPath == null) {
-	        	configDirPath = "target";
-	        	logger.warn("config dir was null, so config dir has been set to " + configDirPath);
-	        }
+            if (configDirPath == null) {
+                configDirPath = "target";
+                logger.warn("config dir was null, so config dir has been set to " + configDirPath);
+            }
 
             // TODO: we should log creating new files/directories
             // TODO: why did we add this?
             File configDir = new File(configDirPath);
             if (!(configDir.isDirectory() || configDir.mkdirs())) {
-            	throw new ControllerInitializationException("could not create configuration directory: " + configDir);
+                throw new ControllerInitializationException("could not create configuration directory: " + configDir);
             } else {
-            	logger.info("config dir created at " + configDir.getAbsolutePath());
+                logger.info("config dir created at " + configDir.getAbsolutePath());
             }
-                
+
             // let the File class combine the dir and file names
             File configFile = new File(configDirPath, CONFIG_FILE);
 
             // TODO: why did we add this?
-             if (!configFile.exists()) try {
-	             configFile.createNewFile();
-	             configFile.setWritable(true);
-	             configFile.setReadable(true);
-	             logger.info("config file created at " + configFile.getAbsolutePath());
-             } catch (IOException e) {
-            	 throw new ControllerInitializationException(e);
-             }
+            if (!configFile.exists()) try {
+                configFile.createNewFile();
+                configFile.setWritable(true);
+                configFile.setReadable(true);
+                logger.info("config file created at " + configFile.getAbsolutePath());
+            } catch (IOException e) {
+                throw new ControllerInitializationException(e);
+            }
 
             this.appPath = configDirPath;
             configPath = configFile.getAbsolutePath();
-            logConfigPath = getDefaultLogConfigPath();
         }
 
-        initLog(logConfigPath);
+        initLog();
 
         try {
             config = new Config(getAppPath(), configPath, lastRunFileName);
@@ -394,41 +366,24 @@ public class Controller {
     }
 
     /**
-     * @param logConfigPath
      * @throws FactoryConfigurationError
      */
-    static synchronized public void initLog(String logConfigPath) throws FactoryConfigurationError {
+    static synchronized public void initLog() throws FactoryConfigurationError {
         // init the log if not initialized already
         if (Controller.isLogInitialized) { return; }
-        File logCheck = new File(logConfigPath);
-        if (logCheck.exists() && logCheck.canRead()) {
-            try {
-                DOMConfigurator.configure(logConfigPath);
-
-                String logFilename = new File(System.getProperty("java.io.tmpdir"), LOG_STDOUT_FILE).getAbsolutePath();
-                if (logFilename != null && logFilename.length() > 0) {
-                    System.setErr(new PrintStream(new BufferedOutputStream(new FileOutputStream(logFilename)), true));
-                    System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream(logFilename)), true));
-                }
-                logger.info(Messages.getString("Controller.logInit")); //$NON-NLS-1$
-            } catch (Exception ex) {
-                System.out.println(Messages.getString("Controller.errorLogInit")); //$NON-NLS-1$
-                System.out.println(ex.toString());
-                System.exit(1);
+        try {
+            String logFilename = new File(System.getProperty("java.io.tmpdir"), LOG_STDOUT_FILE).getAbsolutePath();
+            if (logFilename != null && logFilename.length() > 0) {
+                System.setErr(new PrintStream(new BufferedOutputStream(new FileOutputStream(logFilename)), true));
+                System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream(logFilename)), true));
             }
-        } else {
-            BasicConfigurator.configure();
+            logger.info(Messages.getString("Controller.logInit")); //$NON-NLS-1$
+        } catch (Exception ex) {
+            System.out.println(Messages.getString("Controller.errorLogInit")); //$NON-NLS-1$
+            System.out.println(ex.toString());
+            System.exit(1);
         }
         Controller.isLogInitialized = true;
-    }
-
-    /**
-     * Get default log config path. Based on system property specifying the config directory
-     * 
-     * @return Default log configuration path
-     */
-    public static String getDefaultLogConfigPath() {
-        return new File(getConfigDir(), LOG_CONFIG_FILE).getAbsolutePath();
     }
 
     public static String getConfigDir() {

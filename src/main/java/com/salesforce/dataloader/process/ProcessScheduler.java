@@ -70,7 +70,7 @@ public class ProcessScheduler extends Timer {
     private static Logger logger = Logger.getLogger(ProcessScheduler.class);
 
     public ProcessScheduler() {
-        Controller.initLog(Controller.getDefaultLogConfigPath());
+        Controller.initLog();
     }
 
     /**

@@ -74,7 +74,6 @@ Section "${PROJECT_NAME}"
   CreateDirectory "${DL_CONFIG_DIR}"
   SetOutPath "${DL_CONFIG_DIR}"
   File "src\main\nsis\config.properties"
-  File "src\main\nsis\log-conf.xml"
   
   CreateDirectory "${DL_START_MENU_DIR}"
   CreateShortCut "${DL_START_MENU_DIR}\${PROJECT_NAME}.lnk" "${DL_JRE_PATH}" "${DL_EXEC_JAR_PARAM}" "${DL_SMALL_ICON_PATH}"
