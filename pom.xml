@@ -17,7 +17,7 @@
     <jacob.version>1.14.3</jacob.version>
     <java.compile.version>1.6</java.compile.version>
     <nsis.version>2.46</nsis.version>
-    <spring.version>3.0.6.RELEASE</spring.version>
+    <spring.version>3.1.1.RELEASE</spring.version>
   </properties>
 
   <repositories>
@@ -200,6 +200,16 @@
       <resource>
         <directory>src/main/resources</directory>
         <filtering>true</filtering>
+        <includes>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>**/*.properties</exclude>
+        </excludes>
       </resource>
       <resource>
         <directory>src/main/nsis/bin</directory>
@@ -229,6 +239,7 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
+          
         </configuration>
         <executions>
           <execution>
