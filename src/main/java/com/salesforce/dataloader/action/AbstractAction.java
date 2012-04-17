@@ -30,7 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.apache.maven.wagon.ConnectionException;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.IVisitor;
@@ -43,6 +42,7 @@ import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.*;
 import com.sforce.async.AsyncApiException;
 import com.sforce.soap.partner.fault.ApiFault;
+import com.sforce.ws.ConnectionException;
 
 /**
  * Abstract class for all dataloader actions.

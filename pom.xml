@@ -80,24 +80,9 @@
       <version>1.8.3</version>
     </dependency>
     <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-      <version>3.2.1</version>
-    </dependency>
-    <dependency>
       <groupId>commons-dbcp</groupId>
       <artifactId>commons-dbcp</artifactId>
       <version>1.4</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.1</version>
     </dependency>
 
     <dependency>
@@ -112,11 +97,6 @@
       <artifactId>log4j</artifactId>
       <version>1.2.16</version>
     </dependency>
-    <dependency>
-      <groupId>net.sf.squirrel-sql.plugins</groupId>
-      <artifactId>oracle</artifactId>
-      <version>3.2.1</version>
-    </dependency>
 
     <dependency>
       <groupId>org.eclipse.equinox</groupId>
@@ -126,11 +106,6 @@
     <dependency>
       <groupId>org.eclipse.jface</groupId>
       <artifactId>org.eclipse.jface</artifactId>
-      <version>3.6.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.osgi</groupId>
-      <artifactId>org.eclipse.osgi</artifactId>
       <version>3.6.2</version>
     </dependency>
 
@@ -181,11 +156,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>net.officefloor.eclipse</groupId>
-      <artifactId>net.officefloor.core</artifactId>
-      <version>1.2.0</version>
-    </dependency>
     <dependency>
       <groupId>quartz</groupId>
       <artifactId>quartz</artifactId>
