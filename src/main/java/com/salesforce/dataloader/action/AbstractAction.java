@@ -30,7 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.apache.maven.wagon.ConnectionException;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.IVisitor;
@@ -43,6 +42,7 @@ import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.*;
 import com.sforce.async.AsyncApiException;
 import com.sforce.soap.partner.fault.ApiFault;
+import com.sforce.ws.ConnectionException;
 
 /**
  * Abstract class for all dataloader actions.
@@ -70,8 +70,8 @@ abstract class AbstractAction implements IAction {
         checkDao(getController().getDao());
         this.dao = getController().getDao();
         if (writeStatus()) {
-            this.successWriter = getSuccessWriter(getConfig().getBoolean(Config.WRITE_UTF8));
-            this.errorWriter = getErrorWriter(getConfig().getBoolean(Config.WRITE_UTF8));
+            this.successWriter = createSuccesWriter();
+            this.errorWriter = createErrorWriter();
         } else {
             this.successWriter = null;
             this.errorWriter = null;
@@ -120,7 +120,6 @@ abstract class AbstractAction implements IAction {
                 openSuccessWriter(statusColumns);
                 openErrorWriter(statusColumns);
             }
-
 
             while (!getMonitor().isCanceled() && visit()) {}
 
@@ -205,24 +204,24 @@ abstract class AbstractAction implements IAction {
      * @return Error Writer
      * @throws DataAccessObjectInitializationException
      */
-    private DataWriter getErrorWriter(boolean writeUtf8) throws DataAccessObjectInitializationException {
+    private DataWriter createErrorWriter() throws DataAccessObjectInitializationException {
         final String filename = getConfig().getString(Config.OUTPUT_ERROR);
         if (filename == null || filename.length() == 0)
             throw new DataAccessObjectInitializationException(getMessage("errorMissingErrorFile"));
         // TODO: Make sure that specific DAO is not mentioned: use DataReader, DataWriter, or DataAccessObject
-        return new CSVFileWriter(filename, writeUtf8, true);
+        return new CSVFileWriter(filename, getConfig().getCsvWriteEncoding());
     }
 
     /**
      * @return Success Writer
      * @throws DataAccessObjectInitializationException
      */
-    private DataWriter getSuccessWriter(boolean writeUtf8) throws DataAccessObjectInitializationException {
+    private DataWriter createSuccesWriter() throws DataAccessObjectInitializationException {
         final String filename = getConfig().getString(Config.OUTPUT_SUCCESS);
         if (filename == null || filename.length() == 0)
             throw new DataAccessObjectInitializationException(getMessage("errorMissingSuccessFile"));
         // TODO: Make sure that specific DAO is not mentioned: use DataReader, DataWriter, or DataAccessObject
-        return new CSVFileWriter(filename, writeUtf8, true);
+        return new CSVFileWriter(filename, getConfig().getCsvWriteEncoding());
     }
 
     private void openErrorWriter(List<String> headers) throws OperationException {

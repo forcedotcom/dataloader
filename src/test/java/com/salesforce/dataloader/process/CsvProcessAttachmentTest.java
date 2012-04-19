@@ -27,7 +27,8 @@
 package com.salesforce.dataloader.process;
 
 import java.io.File;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 import junit.framework.TestSuite;
 
@@ -37,21 +38,22 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
+import com.sforce.soap.partner.QueryResult;
+import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 
 /**
- * 
  * Test uploading attachments.
- *
- * @author 
- * @since 
+ * 
+ * @author
+ * @since
  */
 public class CsvProcessAttachmentTest extends ProcessTestBase {
 
     protected CsvProcessAttachmentTest(String name) {
         super(name);
     }
-    
+
     public CsvProcessAttachmentTest(String name, Map<String, String> config) {
         super(name, config);
     }
@@ -62,7 +64,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
 
     public static ConfigGenerator getConfigGenerator() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
-        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.USE_BULK_API,
+        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
                 Boolean.TRUE.toString());
         final ConfigGenerator bulkApiZipContent = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_ZIP_CONTENT,
                 Boolean.TRUE.toString());
@@ -70,7 +72,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
                 Boolean.TRUE.toString());
         return new UnionConfigGenerator(parent, withBulkApi, bulkApiSerialMode, bulkApiZipContent);
     }
-    
+
     public void testCreateAttachment() throws ProcessInitializationException, DataAccessObjectException {
         // convert the template using the parent account id
         final String fileName = convertTemplateToInput(this.baseName + "Template.csv", this.baseName + ".csv",
@@ -90,14 +92,12 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         }
     }
 
-
     /**
      * Verify that multiple binary files can be correctly zipped up and inserted into a record.
      *
      * @expectedResults Assert that the binaries of input and queried files are equal.
      */
-    public void testCreateAttachmentMultipleFiles() throws ProcessInitializationException, DataAccessObjectException,
-    ConnectionException {
+    public void testCreateAttachmentMultipleFiles() throws Exception {
 
         AttachmentTemplateListener myAttachmentTemplateListener = new AttachmentTemplateListener();
 
@@ -117,7 +117,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
             runProcessWithAttachmentListener(argMap, 3, myAttachmentTemplateListener,"Bay-Bridge.jpg", "BayBridgeBW.jpg", "BayBridgeFromTreasureIsland.jpg");
         }
     }
-    
+
     public class AttachmentTemplateListener extends AccountIdTemplateListener {
         public AttachmentTemplateListener() {
             super(1);
@@ -133,9 +133,10 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         }
     }
 
-    private Controller runProcessWithAttachmentListener(Map<String, String> argMap, boolean expectProcessSuccess, String failMessage,
-            int numInserts, int numUpdates, int numFailures, AttachmentTemplateListener myAttachmentTemplateListener, String... files) throws ProcessInitializationException,
-            DataAccessObjectException, ConnectionException {
+    private Controller runProcessWithAttachmentListener(Map<String, String> argMap, boolean expectProcessSuccess,
+            String failMessage, int numInserts, int numUpdates, int numFailures,
+            AttachmentTemplateListener myAttachmentTemplateListener, String... files)
+            throws ProcessInitializationException, DataAccessObjectException, ConnectionException, IOException {
 
         if (argMap == null) argMap = getTestConfig();
 
@@ -150,9 +151,9 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         if (expectProcessSuccess) {
 
             verifyInsertCorrectByContent(controller, createAttachmentFileMap(files), myAttachmentTemplateListener);
-            //this should also still work
+            // this should also still work
             assertTrue("Process failed: " + monitor.getMessage(), monitor.isSuccess());
-            verifyFailureFile(controller, numFailures);        //A.S.: To be removed and replaced
+            verifyFailureFile(controller, numFailures); // A.S.: To be removed and replaced
             verifySuccessFile(controller, numInserts, numUpdates, false);
 
         } else {
@@ -166,14 +167,16 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         // return the controller used by the process so that the tests can validate success/error output files, etc
         return controller;
     }
-    
-    protected Controller runProcessWithAttachmentListener(Map<String, String> argMap, int numRows, AttachmentTemplateListener myAttachmentTemplateListener, String... files) throws ProcessInitializationException,
-    DataAccessObjectException, ConnectionException {
-        return runProcessWithErrorsWithAttachmentListener(argMap, numRows, 0, myAttachmentTemplateListener,files);
+
+    protected Controller runProcessWithAttachmentListener(Map<String, String> argMap, int numRows,
+            AttachmentTemplateListener myAttachmentTemplateListener, String... files)
+            throws ProcessInitializationException, DataAccessObjectException, ConnectionException, IOException {
+        return runProcessWithErrorsWithAttachmentListener(argMap, numRows, 0, myAttachmentTemplateListener, files);
     }
-    
-    protected Controller runProcessWithErrorsWithAttachmentListener(Map<String, String> argMap, int numSuccesses, int numFailures, AttachmentTemplateListener myAttachmentTemplateListener, String... files)
-            throws ProcessInitializationException, DataAccessObjectException, ConnectionException {
+
+    protected Controller runProcessWithErrorsWithAttachmentListener(Map<String, String> argMap, int numSuccesses,
+            int numFailures, AttachmentTemplateListener myAttachmentTemplateListener, String... files)
+            throws ProcessInitializationException, DataAccessObjectException, ConnectionException, IOException {
         int numInserts = 0;
         int numUpdates = 0;
 
@@ -184,7 +187,66 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
             numUpdates = numSuccesses;
         else
             throw new UnsupportedOperationException(op + " not supported");
-        return runProcessWithAttachmentListener(argMap, true, null, numInserts, numUpdates, numFailures, myAttachmentTemplateListener, files);
+        return runProcessWithAttachmentListener(argMap, true, null, numInserts, numUpdates, numFailures,
+                myAttachmentTemplateListener, files);
     }
-    
+
+    /**
+     * To verify that the insertion is done correctly
+     * 
+     * @param The
+     *            controller ctl - Controller
+     * @param Mapping
+     *            of filename to base-64 encodings Map<String,String>
+     * @param The
+     *            listener - myAttachmentTemplateListener - AttachmentTemplateListener
+     */
+    protected void verifyInsertCorrectByContent(Controller ctl, Map<String, String> expectedMapping,
+            AttachmentTemplateListener myAttachmentTemplateListener) throws ConnectionException {
+        // expectedMapping should have the expected base-64 encodings of the files
+        // now get the actual encodings of the files and their filenames
+
+        Map<String, String> dbaseFileCorrespondence = getActualAttachmentMap(myAttachmentTemplateListener,
+                expectedMapping.keySet());
+
+        if (dbaseFileCorrespondence == null) {
+            fail("verifyInsertCorrectByContent: retrieved actual attachment information unsuccessfully, as it is null");
+        } else {
+            verifyAttachmentObjects(dbaseFileCorrespondence, expectedMapping);
+        }
+        return;
+    }
+
+    /**
+     * Get the actual attachment names and their respective base-64 encodings.
+     * 
+     * @param myAttachmentTemplateListener
+     *            - AttachmentTemplateListener
+     * @param fileNames
+     *            The set of filenames that we expect to find
+     * @return Map<String,String>
+     */
+    protected Map<String, String> getActualAttachmentMap(AttachmentTemplateListener myAttachmentTemplateListener,
+            Set<String> fileNames) throws ConnectionException {
+
+        HashMap<String, String> resultMap = new HashMap<String, String>();
+
+        String soql = "select Name, Body from Attachment where ParentId=\'"
+                + myAttachmentTemplateListener.getAccountIds()[0] + "\'";
+
+        for (QueryResult qr = getBinding().query(soql); qr != null; qr = qr.isDone() ? null : getBinding().queryMore(
+                qr.getQueryLocator())) {
+            for (SObject myRecord : qr.getRecords()) {
+                resultMap.put(myRecord.getField("Name").toString(), myRecord.getField("Body").toString());
+            }
+        }
+        assertEquals("wrong number of results returned", fileNames.size(), resultMap.size());
+
+        for (String fn : fileNames) {
+            assertTrue("Missing file in results: " + fn, resultMap.containsKey(fn));
+        }
+
+        return resultMap;
+    }
+
 }

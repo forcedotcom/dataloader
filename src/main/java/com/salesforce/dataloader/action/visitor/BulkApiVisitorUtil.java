@@ -43,6 +43,7 @@ import com.sforce.async.*;
 
 class BulkApiVisitorUtil {
 
+    /** communications with bulk api always use UTF8 */
     public static final String ENCODING = "UTF-8";
 
     private static final Logger logger = Logger.getLogger(BulkApiVisitorUtil.class);

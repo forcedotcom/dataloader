@@ -170,7 +170,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
     }
 
     private static void ensureLogging() throws FactoryConfigurationError {
-        Controller.initLog(Controller.getDefaultLogConfigPath());
+        Controller.initLog();
     }
 
     private void setThreadName(final String name) {

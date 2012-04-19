@@ -8,12 +8,12 @@
         <property name="name" value="maximumBatchRowsDbProcess"/>
         <property name="configOverrideMap">
             <map>
-                <entry key="process.outputSuccess" value="target/status/maximumBatchRowsDbSuccess.csv"/>
-                <entry key="process.outputError" value="target/status/maximumBatchRowsDbError.csv"/>
-                <entry key="sfdc.debugMessagesFile" value="target/status/maximumBatchRowsDbSoapTrace.log"/>
+                <entry key="process.outputSuccess" value="${testfiles.dir}/status/maximumBatchRowsDbSuccess.csv"/>
+                <entry key="process.outputError" value="${testfiles.dir}/status/maximumBatchRowsDbError.csv"/>
+                <entry key="sfdc.debugMessagesFile" value="${testfiles.dir}/status/maximumBatchRowsDbSoapTrace.log"/>
                 <entry key="sfdc.externalIdField" value="Oracle_Id__c"/>
                 <entry key="process.operation" value="upsert"/>
-                <entry key="process.mappingFile" value="target/data/maximumBatchRowsDbMap.sdl"/>
+                <entry key="process.mappingFile" value="${testfiles.dir}/data/maximumBatchRowsDbMap.sdl"/>
                 <entry key="dataAccess.name" value="queryAccount"/>
                 <entry key="dataAccess.type" value="databaseRead"/>
                 <entry key="dataAccess.readBatchSize" value="750"/>
@@ -30,15 +30,15 @@
             <map>
                 <entry key="sfdc.extractionSOQL" value="Select Id, Name, Type, Phone, AccountNumber__c, Website, AnnualRevenue, 
                     LastModifiedDate, Oracle_Id__c, CustomDateTime__c FROM Account where AccountNumber__c like 'ACCT%'" />
-                <entry key="process.outputSuccess" value="target/status/upsertAccountDbSuccess.csv"/>
-                <entry key="process.outputError" value="target/status/upsertAccountDbError.csv"/>
-                <entry key="sfdc.debugMessagesFile" value="target/status/upsertAccountDbSoapTrace.log"/>
+                <entry key="process.outputSuccess" value="${testfiles.dir}/status/upsertAccountDbSuccess.csv"/>
+                <entry key="process.outputError" value="${testfiles.dir}/status/upsertAccountDbError.csv"/>
+                <entry key="sfdc.debugMessagesFile" value="${testfiles.dir}/status/upsertAccountDbSoapTrace.log"/>
                 <!-- password below has been encrypted using key file, therefore it will not work without the key setting: process.encryptionKeyFile -->
                 <entry key="sfdc.password" value="3a4f908d34a43f2b"/>
                 <entry key="sfdc.externalIdField" value="Oracle_Id__c"/>
-                <entry key="process.encryptionKeyFile" value="target/conf/test.key"/>
+                <entry key="process.encryptionKeyFile" value="${testfiles.dir}/conf/test.key"/>
                 <entry key="process.operation" value="upsert"/>
-                <entry key="process.mappingFile" value="target/data/upsertAccountDbMap.sdl"/>
+                <entry key="process.mappingFile" value="${testfiles.dir}/data/upsertAccountDbMap.sdl"/>
                 <entry key="dataAccess.name" value="queryAccount"/>
                 <entry key="dataAccess.type" value="databaseRead"/>
                 <entry key="dataAccess.readBatchSize" value="750"/>
@@ -55,12 +55,12 @@
             <map>
                 <entry key="sfdc.extractionSOQL" value="Select Id, Name, Type, Phone, AccountNumber__c, Website, AnnualRevenue, 
                     LastModifiedDate, Oracle_Id__c, CustomDateTime__c FROM Account where AccountNumber__c like 'ACCT%'" />
-                <entry key="process.outputSuccess" value="target/status/extractAccountDbSuccess.csv"/>
-                <entry key="process.outputError" value="target/status/extractAccountDbError.csv"/>
-                <entry key="sfdc.debugMessagesFile" value="target/status/extractAccountDbSoapTrace.log"/>
+                <entry key="process.outputSuccess" value="${testfiles.dir}/status/extractAccountDbSuccess.csv"/>
+                <entry key="process.outputError" value="${testfiles.dir}/status/extractAccountDbError.csv"/>
+                <entry key="sfdc.debugMessagesFile" value="${testfiles.dir}/status/extractAccountDbSoapTrace.log"/>
                 <entry key="sfdc.extractionRequestSize" value="1000"/>
                 <entry key="process.operation" value="extract"/>
-                <entry key="process.mappingFile" value="target/data/extractAccountDbMap.sdl"/>
+                <entry key="process.mappingFile" value="${testfiles.dir}/data/extractAccountDbMap.sdl"/>
                 <entry key="dataAccess.type" value="databaseWrite"/>
                 <!--<entry key="dataAccess.name" value="insertAccount"/>-->
                 <entry key="dataAccess.name" value="updateAccount"/>
@@ -77,13 +77,13 @@
             <map>
                 <entry key="sfdc.extractionSOQL" value="Select Id, Name, Type, Phone, AccountNumber__c, Website, AnnualRevenue, 
                     LastModifiedDate, Oracle_Id__c, CustomDateTime__c FROM Account where AccountNumber__c like 'ACCT%'" />
-                <entry key="process.outputSuccess" value="target/status/extractAccountCsvSuccess.csv"/>
-                <entry key="process.outputError" value="target/status/extractAccountCsvError.csv"/>
-                <entry key="sfdc.debugMessagesFile" value="target/status/extractAccountCsvSoapTrace.log"/>
+                <entry key="process.outputSuccess" value="${testfiles.dir}/status/extractAccountCsvSuccess.csv"/>
+                <entry key="process.outputError" value="${testfiles.dir}/status/extractAccountCsvError.csv"/>
+                <entry key="sfdc.debugMessagesFile" value="${testfiles.dir}/status/extractAccountCsvSoapTrace.log"/>
                 <entry key="process.operation" value="extract"/>
-                <!-- <entry key="process.mappingFile" value="target/data/extractAccountCsvMap.sdl"/> -->
+                <!-- <entry key="process.mappingFile" value="${testfiles.dir}/data/extractAccountCsvMap.sdl"/> -->
                 <entry key="dataAccess.type" value="csvWrite"/>
-                <entry key="dataAccess.name" value="target/data/extractAccountCsv.csv"/>
+                <entry key="dataAccess.name" value="${testfiles.dir}/data/extractAccountCsv.csv"/>
             </map>
         </property>
     </bean>
@@ -94,13 +94,13 @@
         <property name="name" value="updateAccountCsvProcess"/>
         <property name="configOverrideMap">
             <map>
-                <entry key="process.outputSuccess" value="target/status/updateAccountCsvSuccess.csv"/>
-                <entry key="process.outputError" value="target/status/updateAccountCsvError.csv"/>
-                <entry key="sfdc.debugMessagesFile" value="target/status/updateAccountCsvSoapTrace.log"/>
+                <entry key="process.outputSuccess" value="${testfiles.dir}/status/updateAccountCsvSuccess.csv"/>
+                <entry key="process.outputError" value="${testfiles.dir}/status/updateAccountCsvError.csv"/>
+                <entry key="sfdc.debugMessagesFile" value="${testfiles.dir}/status/updateAccountCsvSoapTrace.log"/>
                 <entry key="process.operation" value="update"/>
                 <entry key="dataAccess.type" value="csvRead"/>
-                <entry key="dataAccess.name" value="target/data/extractAccountCsv.csv"/>
-                <entry key="process.mappingFile" value="target/data/updateAccountCsvMap.sdl"/>
+                <entry key="dataAccess.name" value="${testfiles.dir}/data/extractAccountCsv.csv"/>
+                <entry key="process.mappingFile" value="${testfiles.dir}/data/updateAccountCsvMap.sdl"/>
             </map>
         </property>
     </bean>
@@ -111,12 +111,12 @@
         <property name="name" value="insertNullsDBProcess"/>
         <property name="configOverrideMap">
             <map>
-                <entry key="process.outputSuccess" value="target/status/insertNullsDBSuccess.csv"/>
-                <entry key="process.outputError" value="target/status/insertNullsDBError.csv"/>
-                <entry key="sfdc.debugMessagesFile" value="target/status/insertNullsDBSoapTrace.log"/>
+                <entry key="process.outputSuccess" value="${testfiles.dir}/status/insertNullsDBSuccess.csv"/>
+                <entry key="process.outputError" value="${testfiles.dir}/status/insertNullsDBError.csv"/>
+                <entry key="sfdc.debugMessagesFile" value="${testfiles.dir}/status/insertNullsDBSoapTrace.log"/>
                 <entry key="sfdc.externalIdField" value="Oracle_Id__c"/>
                 <entry key="process.operation" value="upsert"/>
-                <entry key="process.mappingFile" value="target/data/insertNullsDBMap.sdl"/>
+                <entry key="process.mappingFile" value="${testfiles.dir}/data/insertNullsDBMap.sdl"/>
                 <entry key="dataAccess.name" value="queryAccount"/>
                 <entry key="dataAccess.type" value="databaseRead"/>
                 <entry key="dataAccess.readBatchSize" value="750"/>

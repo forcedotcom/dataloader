@@ -30,13 +30,12 @@ import java.util.*;
 
 import com.salesforce.dataloader.ConfigGenerator;
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
-import com.salesforce.dataloader.exception.*;
-import com.sforce.soap.partner.QueryResult;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
@@ -105,7 +104,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
 
     public static ConfigGenerator getConfigGenerator() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
-        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.USE_BULK_API,
+        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
                 Boolean.TRUE.toString());
         return new UnionConfigGenerator(parent, withBulkApi);
     }
@@ -128,8 +127,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
 
     // Utility functions
 
-    protected void verifyIdsInCSV(Controller control, String[] ids) throws DataAccessObjectException,
-    ParameterLoadException {
+    protected void verifyIdsInCSV(Controller control, String[] ids) throws DataAccessObjectException {
 
         // assert that it's a CSV...if not fail
         final Set<String> unexpectedIds = new HashSet<String>();
@@ -185,7 +183,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
      * Tests that SOQL queries with relationships work as expected. This is a utility function originally obtained from
      * CsvExtractProcessTest and then retrofitted with an argument as to whether it's extract or extractAll.
      */
-    protected void runTestSoqlWithRelationships() throws ConnectionException, ProcessInitializationException,
+    protected void runTestSoqlWithRelationships() throws ProcessInitializationException,
     DataAccessObjectException {
 
         final String accountId = insertSfdcAccounts(1, false)[0];
@@ -333,15 +331,10 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                 assertEquals(5,row.size());
                 // validate the extract results are correct.
                 assertEquals(leadidArr[0], row.get("LID"));
-                
-                QueryResult qr = new PartnerClient(getController()).query("select Name, LastName from User where Id ='" + uid +"'");
-                assertEquals(1, qr.getSize());
-                String expectedLastName = (String) qr.getRecords()[0].getField("LastName");
-                assertEquals(expectedLastName, row.get("LNAME"));
-                String expectedName = (String) qr.getRecords()[0].getField("Name");
-                assertEquals(expectedName, row.get("NAME__RESULT"));
+                assertEquals("loader", row.get("LNAME"));
+                assertEquals("data loader", row.get("NAME__RESULT"));
                 assertEquals(uid, row.get("OID"));
-                assertEquals(uid, row.get("OWNID"));
+                assertEquals(uid,row.get("OWNID"));
                 // validate that we have read the only result. there should be only one.
                 assertNull(rdr.readRow());
 

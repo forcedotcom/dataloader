@@ -42,7 +42,7 @@ RequestExecutionLevel admin
 Section "${PROJECT_NAME}"
   !define DL_START_MENU_DIR "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
   !define DL_JRE_PATH "$INSTDIR\Java\bin\javaw.exe"
-  !define DL_EXEC_JAR_PARAM "-Dappdata.dir=$\"$APPDATA$\" -jar $\"$INSTDIR\${PROJECT_FINAL_NAME}-jar-with-dependencies.jar$\""
+  !define DL_EXEC_JAR_PARAM "-Dappdata.dir=$\"$APPDATA$\" -jar $\"$INSTDIR\${PROJECT_FINAL_NAME}-uber.jar$\""
   !define DL_SMALL_ICON_PATH "$INSTDIR\icon_SforceDL16x16.ico"
   !define DL_LARGE_ICON_PATH "$INSTDIR\icon_SforceDL32x32.ico"
   !define DL_UNINSTALLER_PATH "$INSTDIR\dataloader_uninstall.exe"
@@ -51,7 +51,7 @@ Section "${PROJECT_NAME}"
   SetOutPath "$INSTDIR"
   SectionIn RO
   SetOverwrite try
-  File "target\${PROJECT_FINAL_NAME}-jar-with-dependencies.jar"
+  File "target\${PROJECT_FINAL_NAME}-uber.jar"
   File "src\main\nsis\icon_SforceDL16x16.ico"
   File "src\main\nsis\icon_SforceDL32x32.ico"
   
@@ -74,7 +74,6 @@ Section "${PROJECT_NAME}"
   CreateDirectory "${DL_CONFIG_DIR}"
   SetOutPath "${DL_CONFIG_DIR}"
   File "src\main\nsis\config.properties"
-  File "src\main\nsis\log-conf.xml"
   
   CreateDirectory "${DL_START_MENU_DIR}"
   CreateShortCut "${DL_START_MENU_DIR}\${PROJECT_NAME}.lnk" "${DL_JRE_PATH}" "${DL_EXEC_JAR_PARAM}" "${DL_SMALL_ICON_PATH}"

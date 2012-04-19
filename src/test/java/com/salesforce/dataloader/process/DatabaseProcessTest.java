@@ -26,7 +26,6 @@
 package com.salesforce.dataloader.process;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
 
@@ -58,7 +57,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
 
     public static ConfigGenerator getConfigGenerator() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
-        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.USE_BULK_API, Boolean.TRUE
+        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED, Boolean.TRUE
                 .toString());
         final ConfigGenerator bulkApiZipContent = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_ZIP_CONTENT,
                 Boolean.TRUE.toString());
@@ -80,7 +79,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
      * @see junit.framework.TestCase#setUp()
      */
     @Override
-    public void setUp() throws IOException {
+    protected void setUp() throws Exception {
         super.setUp();
         
         DatabaseTestUtil.createTable(getController(), "dataloader");
@@ -206,26 +205,26 @@ public class DatabaseProcessTest extends ProcessTestBase {
         argMap.put(Config.ENABLE_EXTRACT_STATUS_OUTPUT, Config.TRUE);
         argMap.put(Config.DAO_WRITE_BATCH_SIZE, String.valueOf(BATCH_SIZE));
 
-        Date startTime = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000));
+        Date startTime = new Date();
 
         Controller theController = runProcessWithErrors(argMap, expectedSuccesses, expectedFailures);
 
         // verify there were no errors during extract
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("compare_date", startTime);
-        verifyDbSuccess(theController, "queryAccountSince", params, expectedSuccesses);
+        verifyDbSuccess(theController, "queryAccount", expectedSuccesses);
     }
 
     /**
      * @param theController
      * @param startTime
      */
-    private void verifyDbSuccess(Controller theController, String dbConfigName, Map<String,Object> params, int expectedSuccesses) {
+    private void verifyDbSuccess(Controller theController, String dbConfigName, int expectedSuccesses) {
         DatabaseReader reader = null;
         logger.info("Verifying database success for database configuration: " + dbConfigName);
         try {
             reader = new DatabaseReader(theController.getConfig(), dbConfigName);
-            reader.open(params);
+            reader.open();
             int readBatchSize = theController.getConfig().getInt(Config.DAO_READ_BATCH_SIZE);
             List<Map<String,Object>> successRows = reader.readRowList(readBatchSize);
             int rowsProcessed = 0;

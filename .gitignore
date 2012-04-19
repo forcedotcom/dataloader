@@ -1,7 +1,11 @@
+## build output
 target/
+
+## eclipse files
 .project
 .classpath
 .settings/
+
+## Mac directory files
 .DS_Store
-test-output/
 Thumbs.db
