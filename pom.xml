@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>24.0.0</version>
+  <version>25.0.0</version>
   <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -13,11 +13,12 @@
   </organization>
 
   <properties>
-    <force.version>24.0.0</force.version>
+    <force.version>25.0.0</force.version>
     <jacob.version>1.14.3</jacob.version>
     <java.compile.version>1.6</java.compile.version>
     <nsis.version>2.46</nsis.version>
-    <spring.version>3.0.6.RELEASE</spring.version>
+    <spring.version>3.1.1.RELEASE</spring.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <repositories>
@@ -79,24 +80,9 @@
       <version>1.8.3</version>
     </dependency>
     <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-      <version>3.2.1</version>
-    </dependency>
-    <dependency>
       <groupId>commons-dbcp</groupId>
       <artifactId>commons-dbcp</artifactId>
       <version>1.4</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.1</version>
     </dependency>
 
     <dependency>
@@ -111,11 +97,6 @@
       <artifactId>log4j</artifactId>
       <version>1.2.16</version>
     </dependency>
-    <dependency>
-      <groupId>net.sf.squirrel-sql.plugins</groupId>
-      <artifactId>oracle</artifactId>
-      <version>3.2.1</version>
-    </dependency>
 
     <dependency>
       <groupId>org.eclipse.equinox</groupId>
@@ -125,16 +106,6 @@
     <dependency>
       <groupId>org.eclipse.jface</groupId>
       <artifactId>org.eclipse.jface</artifactId>
-      <version>3.6.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.osgi</groupId>
-      <artifactId>org.eclipse.osgi</artifactId>
-      <version>3.6.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.swt</groupId>
-      <artifactId>${swt.artifact.id}</artifactId>
       <version>3.6.2</version>
     </dependency>
 
@@ -186,11 +157,6 @@
     </dependency>
 
     <dependency>
-      <groupId>net.officefloor.eclipse</groupId>
-      <artifactId>net.officefloor.core</artifactId>
-      <version>1.2.0</version>
-    </dependency>
-    <dependency>
       <groupId>quartz</groupId>
       <artifactId>quartz</artifactId>
       <version>1.5.2</version>
@@ -205,20 +171,36 @@
       <resource>
         <directory>src/main/resources</directory>
         <filtering>true</filtering>
+        <includes>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>**/*.properties</exclude>
+        </excludes>
       </resource>
       <resource>
         <directory>src/main/nsis/bin</directory>
         <filtering>true</filtering>
       </resource>
     </resources>
+
+    <filters>
+      <filter>src/test/filters/test.properties</filter>
+    </filters>
     <testResources>
       <testResource>
-        <directory>src/main/resources</directory>
+        <directory>src/test/resources</directory>
         <filtering>true</filtering>
       </testResource>
     </testResources>
 
     <plugins>
+
+      <!-- we might want to use the maven-shade-plugin in the future instead of maven-assembly-plugin -->
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
@@ -227,13 +209,13 @@
               <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
             </manifest>
           </archive>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
+          <descriptors>
+            <descriptor>src/main/assembly/uber.xml</descriptor>
+          </descriptors>
         </configuration>
         <executions>
           <execution>
-            <id>make-my-jar-with-dependencies</id>
+            <id>make-uber-jar</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
@@ -242,19 +224,26 @@
         </executions>
       </plugin>
 
-
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
         <configuration>
           <source>${java.compile.version}</source>
           <target>${java.compile.version}</target>
         </configuration>
       </plugin>
 
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.12</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.surefire</groupId>
+            <artifactId>surefire-junit3</artifactId>
+            <version>2.12</version>
+          </dependency>
+        </dependencies>
         <configuration>
           <excludes>
             <!-- exclude TestRecordsUtil class which inherit from TestCase -->
@@ -262,86 +251,114 @@
             <exclude>**/integration/**</exclude>
           </excludes>
           <!--<skip>true</skip>-->
+          <environmentVariables>
+            <!--test locale setup -->
+            <LANG></LANG>
+            <LC_ALL></LC_ALL>
+            <TZ>America/Los_Angeles</TZ>
+          </environmentVariables>
+          <systemPropertiesFile>src/test/resources/system.properties</systemPropertiesFile>
         </configuration>
       </plugin>
-
     </plugins>
-
   </build>
 
   <profiles>
     <profile>
       <id>linux32</id>
       <activation>
-        <property>
-          <name>env</name>
-          <value>linux32</value>
-        </property>
+        <os>
+          <family>Unix</family>
+          <arch>x86</arch>
+        </os>
       </activation>
-      <properties>
-        <swt.artifact.id>org.eclipse.swt.gtk.linux.x86</swt.artifact.id>
-      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.gtk.linux.x86</artifactId>
+          <version>3.6.2</version>
+        </dependency>
+      </dependencies>
     </profile>
     <profile>
       <id>linux64</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
-        <property>
-          <name>env</name>
-          <value>linux64</value>
-        </property>
+        <os>
+          <family>Unix</family>
+          <arch>amd64</arch>
+        </os>
       </activation>
-      <properties>
-        <swt.artifact.id>org.eclipse.swt.gtk.linux.x86_64</swt.artifact.id>
-      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
+          <version>3.6.2</version>
+        </dependency>
+      </dependencies>
     </profile>
     <profile>
       <id>mac32</id>
       <activation>
-        <property>
-          <name>env</name>
-          <value>mac32</value>
-        </property>
+        <os>
+          <family>mac</family>
+          <arch>x86</arch>
+        </os>
       </activation>
-      <properties>
-        <swt.artifact.id>org.eclipse.swt.cocoa.macosx</swt.artifact.id>
-      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.cocoa.macosx</artifactId>
+          <version>3.6.2</version>
+        </dependency>
+      </dependencies>
     </profile>
     <profile>
       <id>mac64</id>
       <activation>
-        <property>
-          <name>env</name>
-          <value>mac64</value>
-        </property>
+        <os>
+          <family>mac</family>
+          <arch>x86_64</arch>
+        </os>
       </activation>
-      <properties>
-        <swt.artifact.id>org.eclipse.swt.cocoa.macosx.x86_64</swt.artifact.id>
-      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
+          <version>3.6.2</version>
+        </dependency>
+      </dependencies>
     </profile>
     <profile>
       <id>win32</id>
       <activation>
-        <property>
-          <name>env</name>
-          <value>win32</value>
-        </property>
+        <os>
+          <family>Windows</family>
+          <arch>x86</arch>
+        </os>
       </activation>
-      <properties>
-        <swt.artifact.id>org.eclipse.swt.win32.win32.x86</swt.artifact.id>
-      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
+          <version>3.6.2</version>
+        </dependency>
+      </dependencies>
     </profile>
     <profile>
       <id>win64</id>
       <activation>
-        <property>
-          <name>env</name>
-          <value>win64</value>
-        </property>
+        <os>
+          <family>Windows</family>
+          <arch>amd64</arch>
+        </os>
       </activation>
-      <properties>
-        <swt.artifact.id>org.eclipse.swt.win32.win32.x86_64</swt.artifact.id>
-      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+          <version>3.6.2</version>
+        </dependency>
+      </dependencies>
     </profile>
 
     <profile>
@@ -446,6 +463,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
+            <version>1.2.1</version>
             <executions>
               <execution>
                 <id>register-dll</id>
@@ -477,12 +495,12 @@
                 </configuration>
               </execution>
             </executions>
-
           </plugin>
 
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
+            <version>2.12</version>
             <executions>
               <execution>
                 <id>integration-test</id>
@@ -504,9 +522,9 @@
               <systemPropertyVariables>
                 <exeName>${project.build.finalName}.exe</exeName>
               </systemPropertyVariables>
-
             </configuration>
           </plugin>
+
         </plugins>
       </build>
     </profile>

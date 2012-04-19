@@ -32,7 +32,6 @@ import org.apache.commons.beanutils.*;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.dyna.ObjectField;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
-import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.process.ProcessTestBase;
 import com.sforce.soap.partner.*;
 import com.sforce.soap.partner.fault.LoginFault;
@@ -257,8 +256,6 @@ public class PartnerClientTest extends ProcessTestBase {
         BasicDynaClass dynaClass = null;
         try {
             dynaClass = setupDynaClass("Account");
-        } catch (ControllerInitializationException e) {
-            fail(e);
         } catch (ConnectionException e) {
             fail(e);
         }
@@ -307,8 +304,6 @@ public class PartnerClientTest extends ProcessTestBase {
         BasicDynaClass dynaClass = null;
         try {
             dynaClass = setupDynaClass("Account");
-        } catch (ControllerInitializationException e) {
-            fail(e);
         } catch (ConnectionException e) {
             fail(e);
         }
@@ -361,8 +356,6 @@ public class PartnerClientTest extends ProcessTestBase {
         BasicDynaClass dynaClass = null;
         try {
             dynaClass = setupDynaClass("Account");
-        } catch (ControllerInitializationException e) {
-            fail(e);
         } catch (ConnectionException e) {
             fail(e);
         }
@@ -530,8 +523,6 @@ public class PartnerClientTest extends ProcessTestBase {
             BasicDynaClass dynaClass = null;
             try {
                 dynaClass = setupDynaClass(entity);
-            } catch (ControllerInitializationException e) {
-                fail(e);
             } catch (ConnectionException e) {
                 fail(e);
             }
@@ -570,8 +561,6 @@ public class PartnerClientTest extends ProcessTestBase {
         BasicDynaClass dynaClass = null;
         try {
             dynaClass = setupDynaClass("Account");
-        } catch (ControllerInitializationException e) {
-            fail(e);
         } catch (ConnectionException e) {
             fail(e);
         }
@@ -626,8 +615,6 @@ public class PartnerClientTest extends ProcessTestBase {
         BasicDynaClass dynaClass = null;
         try {
             dynaClass = setupDynaClass("Account");
-        } catch (ControllerInitializationException e) {
-            fail(e);
         } catch (ConnectionException e) {
             fail(e);
         }
@@ -678,8 +665,6 @@ public class PartnerClientTest extends ProcessTestBase {
         BasicDynaClass dynaClass = null;
         try {
             dynaClass = setupDynaClass("Account");
-        } catch (ControllerInitializationException e) {
-            fail(e);
         } catch (ConnectionException e) {
             fail(e);
         }
@@ -830,7 +815,7 @@ public class PartnerClientTest extends ProcessTestBase {
         return null;
     }
 
-    private BasicDynaClass setupDynaClass(String entity) throws ControllerInitializationException, ConnectionException {
+    private BasicDynaClass setupDynaClass(String entity) throws ConnectionException {
         getController().getConfig().setValue(Config.ENTITY, entity);
         PartnerClient client = getController().getPartnerClient();
         if (!client.isLoggedIn()) {

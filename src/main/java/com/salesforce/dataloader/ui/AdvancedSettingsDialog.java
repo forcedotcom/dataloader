@@ -410,7 +410,7 @@ public class AdvancedSettingsDialog extends Dialog {
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelUseBulkApi.setLayoutData(data);
 
-        boolean useBulkAPI = config.getBoolean(Config.USE_BULK_API);
+        boolean useBulkAPI = config.getBoolean(Config.BULK_API_ENABLED);
         buttonUseBulkApi = new Button(restComp, SWT.CHECK);
         buttonUseBulkApi.setSelection(useBulkAPI);
         buttonUseBulkApi.addSelectionListener(new SelectionAdapter() {
@@ -606,7 +606,7 @@ public class AdvancedSettingsDialog extends Dialog {
                 config.setValue(Config.PROXY_PORT, textProxyPort.getText());
                 config.setValue(Config.PROXY_USERNAME, textProxyUsername.getText());
                 config.setValue(Config.PROXY_NTLM_DOMAIN, textProxyNtlmDomain.getText());
-                config.setValue(Config.USE_BULK_API, buttonUseBulkApi.getSelection());
+                config.setValue(Config.BULK_API_ENABLED, buttonUseBulkApi.getSelection());
                 config.setValue(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode.getSelection());
                 config.setValue(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
 

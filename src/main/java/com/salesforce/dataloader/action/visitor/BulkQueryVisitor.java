@@ -81,7 +81,7 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
                 final InputStream resultStream = getController().getBulkClient().getClient()
                         .getQueryResultStream(this.batch.getJobId(), this.batch.getId(), resultId);
                 try {
-                    final CSVReader rdr = new CSVReader(resultStream);
+                    final CSVReader rdr = new CSVReader(resultStream, getConfig().getCsvWriteEncoding());
                     rdr.setMaxCharsInFile(Integer.MAX_VALUE);
                     rdr.setMaxRowsInFile(Integer.MAX_VALUE);
                     List<String> headers;

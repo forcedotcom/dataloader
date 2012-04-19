@@ -24,6 +24,6 @@ goto end
 set PROCESS_OPTION=
 if not [%2]==[] set PROCESS_OPTION=process.name=%2
 
-..\Java\bin\java.exe -cp ..\${pom.build.finalName}-jar-with-dependencies.jar -Dsalesforce.config.dir=%1 com.salesforce.dataloader.process.ProcessRunner %PROCESS_OPTION%
+..\Java\bin\java.exe -cp ..\${pom.build.finalName}-uber.jar -Dsalesforce.config.dir=%1 com.salesforce.dataloader.process.ProcessRunner %PROCESS_OPTION%
 
 :end

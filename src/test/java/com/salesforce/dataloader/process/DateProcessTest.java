@@ -51,7 +51,7 @@ public class DateProcessTest extends ProcessTestBase {
 
     public static ConfigGenerator getConfigGenerator() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
-        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.USE_BULK_API,
+        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
                 Boolean.TRUE.toString());
         return new UnionConfigGenerator(parent, withBulkApi);
     }
@@ -95,7 +95,7 @@ public class DateProcessTest extends ProcessTestBase {
         QueryResult qr = getBinding().query("select CustomDateTime__c from Account where AccountNumber__c='ACCT_0'");
         assertEquals(qr.getSize(), 1);
 
-        Date expectedDate = parseDateWithTimezone("2010-10-14T12:00:00.000GMT");
+        Date expectedDate = parseDateWithTimezone("2010-10-14T12:00:00.000PDT");
         assertEquals(expectedDate, parseDateFromPartnerApi((String)qr.getRecords()[0].getField("CustomDateTime__c")));
     }
 

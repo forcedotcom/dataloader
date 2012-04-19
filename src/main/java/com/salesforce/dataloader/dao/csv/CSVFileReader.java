@@ -361,16 +361,18 @@ public class CSVFileReader implements DataReader {
             if (!DAORowUtil.isValidRow(line)) {
                 --currentRowNumber;
                 return null;
-            } else {
-                if(line.size() > headerRow.size()) {
-                    String errMsg = Messages.getFormattedString("CSVFileDAO.errorRowTooLarge", new String[] { //$NON-NLS-1$
-                            String.valueOf(currentRowNumber), String.valueOf(line.size()), String.valueOf(headerRow.size()) });
-                    throw new DataAccessRowException(errMsg);
-                }
-                map = new HashMap<String, Object>();
-                for (int i = 0; i < line.size(); i++) {
-                    map.put(headerRow.get(i), line.get(i));
-                }
+            }
+            if (line.size() > headerRow.size()) {
+                String errMsg = Messages
+                        .getFormattedString(
+                                "CSVFileDAO.errorRowTooLarge", new String[] { //$NON-NLS-1$
+                                String.valueOf(currentRowNumber), String.valueOf(line.size()),
+                                        String.valueOf(headerRow.size()) });
+                throw new DataAccessRowException(errMsg);
+            }
+            map = new HashMap<String, Object>();
+            for (int i = 0; i < line.size(); i++) {
+                map.put(headerRow.get(i), line.get(i));
             }
             checkLineExceptions(line);
         } catch (IOException ioe) {
