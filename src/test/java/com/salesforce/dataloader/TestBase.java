@@ -114,6 +114,9 @@ public abstract class TestBase extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
+        File testStatusDir = new File(TEST_STATUS_DIR);
+        if (!testStatusDir.exists()) testStatusDir.mkdirs();
+        
         // reset binding
         this.binding = null;
 
