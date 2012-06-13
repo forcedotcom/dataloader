@@ -188,8 +188,8 @@
       </resource>
     </resources>
 
-    <filters>
-      <filter>src/test/resources/test.properties</filter>
+     <filters>
+      <filter>src/test/resources/testfilter.properties</filter>
     </filters>
     <testResources>
       <testResource>
