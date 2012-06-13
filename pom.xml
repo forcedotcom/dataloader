@@ -189,7 +189,7 @@
     </resources>
 
     <filters>
-      <filter>src/test/filters/test.properties</filter>
+      <filter>src/test/resources/test.properties</filter>
     </filters>
     <testResources>
       <testResource>
