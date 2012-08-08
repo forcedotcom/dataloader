@@ -22,7 +22,7 @@
   </properties>
 
   <repositories>
-<!--    <repository>
+   <repository>
       <id>eclipse</id>
       <name>Eclipse Repository</name>
       <layout>default</layout>
@@ -30,7 +30,7 @@
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
-    </repository> -->
+    </repository> 
   </repositories>
 
   <pluginRepositories>
@@ -189,7 +189,7 @@
     </resources>
 
     <filters>
-      <filter>src/test/filters/test.properties</filter>
+      <filter>src/test/resources/testfilter.properties</filter>
     </filters>
     <testResources>
       <testResource>
