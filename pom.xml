@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>25.0.0</version>
+  <version>25.0.2</version>
   <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -22,7 +22,7 @@
   </properties>
 
   <repositories>
-    <repository>
+<!--    <repository>
       <id>eclipse</id>
       <name>Eclipse Repository</name>
       <layout>default</layout>
@@ -30,7 +30,7 @@
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
-    </repository>
+    </repository> -->
   </repositories>
 
   <pluginRepositories>
@@ -188,8 +188,8 @@
       </resource>
     </resources>
 
-     <filters>
-      <filter>src/test/resources/testfilter.properties</filter>
+    <filters>
+      <filter>src/test/filters/test.properties</filter>
     </filters>
     <testResources>
       <testResource>
@@ -200,8 +200,7 @@
 
     <plugins>
 
-      <!-- we might want to use the maven-shade-plugin in the future instead 
-        of maven-assembly-plugin -->
+      <!-- we might want to use the maven-shade-plugin in the future instead of maven-assembly-plugin -->
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
@@ -251,7 +250,7 @@
             <exclude>**/TestRecordsUtil.java</exclude>
             <exclude>**/integration/**</exclude>
           </excludes>
-          <!--<skip>true</skip> -->
+          <!--<skip>true</skip>-->
           <systemPropertiesFile>src/test/resources/system.properties</systemPropertiesFile>
         </configuration>
       </plugin>
