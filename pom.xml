@@ -13,7 +13,7 @@
   </organization>
 
   <properties>
-    <force.version>25.0.0</force.version>
+    <force.version>25.0.1</force.version>
     <jacob.version>1.14.3</jacob.version>
     <java.compile.version>1.6</java.compile.version>
     <nsis.version>2.46</nsis.version>
@@ -22,15 +22,12 @@
   </properties>
 
   <repositories>
-   <repository>
-      <id>eclipse</id>
-      <name>Eclipse Repository</name>
-      <layout>default</layout>
-      <url>http://maven.eclipse.org/nexus/content/repositories/testing</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository> 
+    <repository>
+        <id>local-proj-repo</id>
+        <name>Project Local Repository</name>
+        <layout>default</layout>
+        <url>file://${basedir}/local-proj-repo/</url>
+    </repository>
   </repositories>
 
   <pluginRepositories>
@@ -53,8 +50,7 @@
       <groupId>autoitx4java</groupId>
       <artifactId>autoitx4java</artifactId>
       <version>1</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/windows-dependencies/AutoItX4Java.jar</systemPath>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -99,14 +95,19 @@
     </dependency>
 
     <dependency>
-      <groupId>org.eclipse.equinox</groupId>
-      <artifactId>org.eclipse.equinox.common</artifactId>
-      <version>3.6.0</version>
+      <groupId>org.eclipse</groupId>
+      <artifactId>core.commands</artifactId>
+      <version>3.6.1.v20120521-2329</version>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jface</groupId>
-      <artifactId>org.eclipse.jface</artifactId>
-      <version>3.6.2</version>
+      <groupId>org.eclipse</groupId>
+      <artifactId>equinox.common</artifactId>
+      <version>3.6.100.v20120522-1841</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>jface</artifactId>
+      <version>3.8.0.v20120521-2329</version>
     </dependency>
 
     <dependency>
@@ -268,9 +269,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.gtk.linux.x86</artifactId>
-          <version>3.6.2</version>
+          <groupId>org.eclipse</groupId>
+          <artifactId>swt-gtk-linux-x86</artifactId>
+          <version>4.2</version>
         </dependency>
       </dependencies>
     </profile>
@@ -284,9 +285,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
-          <version>3.6.2</version>
+          <groupId>org.eclipse</groupId>
+          <artifactId>swt-gtk-linux-x86_64</artifactId>
+          <version>4.2</version>
         </dependency>
       </dependencies>
     </profile>
@@ -300,9 +301,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.cocoa.macosx</artifactId>
-          <version>3.6.2</version>
+          <groupId>org.eclipse</groupId>
+          <artifactId>swt-cocoa-macosx</artifactId>
+          <version>4.2</version>
         </dependency>
       </dependencies>
     </profile>
@@ -316,9 +317,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
-          <version>3.6.2</version>
+          <groupId>org.eclipse</groupId>
+          <artifactId>swt-cocoa-macosx-x86_64</artifactId>
+          <version>4.2</version>
         </dependency>
       </dependencies>
     </profile>
@@ -332,9 +333,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
-          <version>3.6.2</version>
+          <groupId>org.eclipse</groupId>
+          <artifactId>swt-win32-win32-x86</artifactId>
+          <version>4.2</version>
         </dependency>
       </dependencies>
     </profile>
@@ -348,9 +349,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
-          <version>3.6.2</version>
+          <groupId>org.eclipse</groupId>
+          <artifactId>swt-win32-win32-x86_64</artifactId>
+          <version>4.2</version>
         </dependency>
       </dependencies>
     </profile>
