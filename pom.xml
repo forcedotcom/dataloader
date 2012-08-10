@@ -13,7 +13,7 @@
   </organization>
 
   <properties>
-    <force.version>25.0.0</force.version>
+    <force.version>25.0.1</force.version>
     <jacob.version>1.14.3</jacob.version>
     <java.compile.version>1.6</java.compile.version>
     <nsis.version>2.46</nsis.version>
@@ -23,10 +23,10 @@
 
   <repositories>
     <repository>
-        <id>local-proj-repo</id>
-        <name>Project Local Repository</name>
-        <layout>default</layout>
-        <url>file://${basedir}/local-proj-repo/</url>
+      <id>local-proj-repo</id>
+      <name>Project Local Repository</name>
+      <layout>default</layout>
+      <url>file://${basedir}/local-proj-repo/</url>
     </repository>
   </repositories>
 
@@ -80,6 +80,11 @@
       <artifactId>commons-dbcp</artifactId>
       <version>1.4</version>
     </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.4</version>
+    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
@@ -92,6 +97,11 @@
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.16</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.2.1</version>
     </dependency>
 
     <dependency>
@@ -201,7 +211,8 @@
 
     <plugins>
 
-      <!-- we might want to use the maven-shade-plugin in the future instead of maven-assembly-plugin -->
+      <!-- we might want to use the maven-shade-plugin in the future instead 
+        of maven-assembly-plugin -->
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
@@ -251,8 +262,7 @@
             <exclude>**/TestRecordsUtil.java</exclude>
             <exclude>**/integration/**</exclude>
           </excludes>
-          <!--<skip>true</skip>-->
-          <systemPropertiesFile>src/test/resources/system.properties</systemPropertiesFile>
+          <!--<skip>true</skip> -->
         </configuration>
       </plugin>
     </plugins>
