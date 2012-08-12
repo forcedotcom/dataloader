@@ -27,12 +27,19 @@ package com.salesforce.dataloader.client;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.sforce.ws.ConnectorConfig;
+import com.sforce.ws.tools.VersionInfo;
+import com.sforce.ws.transport.JdkHttpTransport;
 import com.sforce.ws.transport.Transport;
 
 /**
@@ -42,10 +49,13 @@ import com.sforce.ws.transport.Transport;
  * @author Jeff Lai
  * @since 25.0.2
  */
-public class HttpClientTransport implements Transport {
+public class HttpClientTransport extends JdkHttpTransport implements Transport {
     
     private ConnectorConfig config;
     private boolean successful;
+    private HttpPost post;
+    private OutputStream output;
+    private ByteArrayOutputStream bOut;
     
     public HttpClientTransport() {
     }
@@ -61,14 +71,27 @@ public class HttpClientTransport implements Transport {
 
     @Override
     public OutputStream connect(String url, String soapAction) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        if (soapAction == null) {
+            soapAction = "";
+        }
+
+        HashMap<String, String> header = new HashMap<String, String>();
+
+        header.put("SOAPAction", "\"" + soapAction + "\"");
+        header.put("Content-Type", "text/xml; charset=UTF-8");
+        header.put("Accept", "text/xml");
+        
+        return connect(url, header);
     }
 
     @Override
     public InputStream getContent() throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        InputStream in = null;
+
+            in = executeRequest();
+     
+        
+        return in;
     }
 
     @Override
@@ -77,37 +100,75 @@ public class HttpClientTransport implements Transport {
     }
 
     @Override
-    public OutputStream connect(String endpoint, HashMap<String, String> headers) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+    public OutputStream connect(String endpoint, HashMap<String, String> httpHeaders) throws IOException {
+        return connect(endpoint, httpHeaders, true);
     }
 
     @Override
     public OutputStream connect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression) throws IOException {
-        HttpClient client = new DefaultHttpClient();
-
-        HttpPost post = null;
-        try {
-            post = new HttpPost(endpoint);
-            
-            for (String name : httpHeaders.keySet()) {
-                post.addHeader(name, httpHeaders.get(name));
-            }
-            
-            if (enableCompression) {
-                post.addHeader("Content-Encoding", "gzip");
-                post.addHeader("Accept-Encoding", "gzip");
-            }
-            
-            client.execute(post);
-            
-            
-        } finally {
-            if (post != null) post.releaseConnection();
+        post = new HttpPost(endpoint);
+        
+        for (String name : httpHeaders.keySet()) {
+            post.addHeader(name, httpHeaders.get(name));
         }
         
-        // TODO Auto-generated method stub
-        return null;
+        post.addHeader("User-Agent", VersionInfo.info());
+        
+        if (enableCompression) {
+            post.addHeader("Content-Encoding", "gzip");
+            post.addHeader("Accept-Encoding", "gzip");
+        }
+
+        bOut = new ByteArrayOutputStream();
+        output = bOut;
+        
+        if (config.getMaxRequestSize() > 0) {
+            output = new LimitingOutputStream(config.getMaxRequestSize(), output);
+        }
+
+        // when we are writing a zip file we don't bother with compression
+        if (enableCompression && config.isCompression()) {
+            output = new GZIPOutputStream(output);
+        }
+
+        if (config.isTraceMessage()) {
+            output = config.teeOutputStream(output);
+        }
+
+        if (config.hasMessageHandlers()) {
+            output = new MessageHandlerOutputStream(output);
+        }
+
+        return output;
     }
+    
+    private InputStream executeRequest() throws IOException {
+        HttpClient client = new DefaultHttpClient();
+        InputStream input = null;
+        
+        byte[] entityBytes = bOut.toByteArray();
+        HttpEntity entity = new ByteArrayEntity(entityBytes);
+        post.setEntity(entity);
+        
+        try {
+            HttpResponse response = client.execute(post);
+            
+            if (response.getStatusLine().getStatusCode() > 399) {
+                successful = false;
+            } else {
+                successful = true;
+            }
+            
+            input = response.getEntity().getContent();
+            if (response.containsHeader("Content-Encoding") && response.getHeaders("Content-Encoding")[0].getValue().equals("gzip")) {
+                input = new GZIPInputStream(input);
+            }
+   
+        } finally {
+            post.releaseConnection();
+        }
+        return input;
+    }
+
 
 }
