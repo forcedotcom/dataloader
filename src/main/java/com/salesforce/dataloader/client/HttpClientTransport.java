@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -55,7 +56,7 @@ public class HttpClientTransport extends JdkHttpTransport implements Transport {
     private boolean successful;
     private HttpPost post;
     private OutputStream output;
-    private ByteArrayOutputStream bOut;
+    private ByteArrayOutputStream entityByteOut;
     
     public HttpClientTransport() {
     }
@@ -119,8 +120,8 @@ public class HttpClientTransport extends JdkHttpTransport implements Transport {
             post.addHeader("Accept-Encoding", "gzip");
         }
 
-        bOut = new ByteArrayOutputStream();
-        output = bOut;
+        entityByteOut = new ByteArrayOutputStream();
+        output = entityByteOut;
         
         if (config.getMaxRequestSize() > 0) {
             output = new LimitingOutputStream(config.getMaxRequestSize(), output);
@@ -146,7 +147,7 @@ public class HttpClientTransport extends JdkHttpTransport implements Transport {
         HttpClient client = new DefaultHttpClient();
         InputStream input = null;
         
-        byte[] entityBytes = bOut.toByteArray();
+        byte[] entityBytes = entityByteOut.toByteArray();
         HttpEntity entity = new ByteArrayEntity(entityBytes);
         post.setEntity(entity);
         
@@ -159,7 +160,11 @@ public class HttpClientTransport extends JdkHttpTransport implements Transport {
                 successful = true;
             }
             
-            input = response.getEntity().getContent();
+            // copy input stream data into a new input stream because releasing the connection will close the input stream
+            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+            IOUtils.copy(response.getEntity().getContent(), bOut);
+            input = new ByteArrayInputStream(bOut.toByteArray());
+
             if (response.containsHeader("Content-Encoding") && response.getHeaders("Content-Encoding")[0].getValue().equals("gzip")) {
                 input = new GZIPInputStream(input);
             }
@@ -167,6 +172,7 @@ public class HttpClientTransport extends JdkHttpTransport implements Transport {
         } finally {
             post.releaseConnection();
         }
+        
         return input;
     }
 
