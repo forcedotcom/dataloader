@@ -45,7 +45,9 @@ import com.sforce.ws.transport.Transport;
 
 /**
  * 
- * Describe your class here.
+ * This class implements the Transport interface for WSC with HttpClient in order to properly 
+ * work with NTLM proxies.  The existing JdkHttpTransport in WSC does not work with NTLM 
+ * proxies when compiled on Java 1.6
  *
  * @author Jeff Lai
  * @since 25.0.2
@@ -87,12 +89,44 @@ public class HttpClientTransport extends JdkHttpTransport implements Transport {
 
     @Override
     public InputStream getContent() throws IOException {
-        InputStream in = null;
-
-            in = executeRequest();
-     
+        HttpClient client = new DefaultHttpClient();
         
-        return in;
+        if (config.getProxyUsername() != null && !config.getUsername().equals("")) {
+            String proxyPassword = config.getProxyPassword() == null ? "" : config.getProxyPassword();
+            
+            // TODO: need to make NTLM domain value in config accessible to complete code for handling proxies
+            
+        }
+        
+        InputStream input = null;
+        
+        byte[] entityBytes = entityByteOut.toByteArray();
+        HttpEntity entity = new ByteArrayEntity(entityBytes);
+        post.setEntity(entity);
+        
+        try {
+            HttpResponse response = client.execute(post);
+            
+            if (response.getStatusLine().getStatusCode() > 399) {
+                successful = false;
+            } else {
+                successful = true;
+            }
+            
+            // copy input stream data into a new input stream because releasing the connection will close the input stream
+            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+            IOUtils.copy(response.getEntity().getContent(), bOut);
+            input = new ByteArrayInputStream(bOut.toByteArray());
+
+            if (response.containsHeader("Content-Encoding") && response.getHeaders("Content-Encoding")[0].getValue().equals("gzip")) {
+                input = new GZIPInputStream(input);
+            }
+   
+        } finally {
+            post.releaseConnection();
+        }
+        
+        return input;
     }
 
     @Override
@@ -127,7 +161,6 @@ public class HttpClientTransport extends JdkHttpTransport implements Transport {
             output = new LimitingOutputStream(config.getMaxRequestSize(), output);
         }
 
-        // when we are writing a zip file we don't bother with compression
         if (enableCompression && config.isCompression()) {
             output = new GZIPOutputStream(output);
         }
@@ -142,39 +175,5 @@ public class HttpClientTransport extends JdkHttpTransport implements Transport {
 
         return output;
     }
-    
-    private InputStream executeRequest() throws IOException {
-        HttpClient client = new DefaultHttpClient();
-        InputStream input = null;
-        
-        byte[] entityBytes = entityByteOut.toByteArray();
-        HttpEntity entity = new ByteArrayEntity(entityBytes);
-        post.setEntity(entity);
-        
-        try {
-            HttpResponse response = client.execute(post);
-            
-            if (response.getStatusLine().getStatusCode() > 399) {
-                successful = false;
-            } else {
-                successful = true;
-            }
-            
-            // copy input stream data into a new input stream because releasing the connection will close the input stream
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            IOUtils.copy(response.getEntity().getContent(), bOut);
-            input = new ByteArrayInputStream(bOut.toByteArray());
-
-            if (response.containsHeader("Content-Encoding") && response.getHeaders("Content-Encoding")[0].getValue().equals("gzip")) {
-                input = new GZIPInputStream(input);
-            }
-   
-        } finally {
-            post.releaseConnection();
-        }
-        
-        return input;
-    }
-
 
 }
