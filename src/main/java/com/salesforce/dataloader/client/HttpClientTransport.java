@@ -26,6 +26,8 @@
 package com.salesforce.dataloader.client;
 
 import java.io.*;
+import java.net.InetAddress;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -33,15 +35,14 @@ import java.util.zip.GZIPOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.auth.*;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.tools.VersionInfo;
-import com.sforce.ws.transport.JdkHttpTransport;
-import com.sforce.ws.transport.Transport;
+import com.sforce.ws.transport.*;
 
 /**
  * 
@@ -52,7 +53,7 @@ import com.sforce.ws.transport.Transport;
  * @author Jeff Lai
  * @since 25.0.2
  */
-public class HttpClientTransport extends JdkHttpTransport implements Transport {
+public class HttpClientTransport implements Transport {
     
     private ConnectorConfig config;
     private boolean successful;
@@ -89,13 +90,21 @@ public class HttpClientTransport extends JdkHttpTransport implements Transport {
 
     @Override
     public InputStream getContent() throws IOException {
-        HttpClient client = new DefaultHttpClient();
+        DefaultHttpClient client = new DefaultHttpClient();
         
         if (config.getProxyUsername() != null && !config.getUsername().equals("")) {
             String proxyPassword = config.getProxyPassword() == null ? "" : config.getProxyPassword();
             
-            // TODO: need to make NTLM domain value in config accessible to complete code for handling proxies
+            Credentials credentials;
             
+            if (config.getNtlmDomain() != null && !config.getNtlmDomain().equals("")) {
+                String computerName = InetAddress.getLocalHost().getCanonicalHostName();
+                credentials = new NTCredentials(config.getProxyUsername(), proxyPassword, computerName, config.getNtlmDomain());
+            } else {
+                credentials = new UsernamePasswordCredentials(config.getProxyUsername(), proxyPassword);
+            }
+            
+            client.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
         }
         
         InputStream input = null;
@@ -170,7 +179,8 @@ public class HttpClientTransport extends JdkHttpTransport implements Transport {
         }
 
         if (config.hasMessageHandlers()) {
-            output = new MessageHandlerOutputStream(output);
+            URL url = new URL(endpoint);
+            output = new MessageHandlerOutputStream(config, url, output);
         }
 
         return output;
