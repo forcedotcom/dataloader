@@ -90,7 +90,15 @@ SectionEnd
 
 Section "Uninstall"
   SectionIn RO
-  RMDir /r "$INSTDIR"
+  Delete "$INSTDIR\${PROJECT_FINAL_NAME}-uber.jar"
+  Delete "$INSTDIR\dataloader-25.0.0-uber.jar"
+  Delete "$INSTDIR\icon_SforceDL16x16.ico"
+  Delete "$INSTDIR\icon_SforceDL32x32.ico"
+  Delete "$INSTDIR\dataloader_uninstall.exe"
+  RMDir /r "$INSTDIR\licenses"
+  RMDir /r "$INSTDIR\samples"
+  RMDir /r "$INSTDIR\bin"
+  RMDir /r "$INSTDIR\Java"
   RMDir /r "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
   Delete "$DESKTOP\${PROJECT_NAME}.lnk"
   RMDir /r "$APPDATA\${PROJECT_ORGANIZATION_NAME}"
