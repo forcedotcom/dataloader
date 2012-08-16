@@ -117,8 +117,8 @@ public final class DateConverter implements Converter {
 
     @Override
     public Object convert(Class type, Object value) {
-        if (value == null) { return null; }
-
+        if (value == null)  return null;
+        
         Calendar cal = Calendar.getInstance(this.timeZone);
 
         if (value instanceof Date) {
