@@ -101,6 +101,7 @@ public abstract class ClientBase<ClientType> {
         ConnectorConfig cc = new ConnectorConfig();
         cc.setTransport(HttpClientTransport.class);
         cc.setSessionId(getSessionId());
+        
         // set authentication credentials
         // blank username is not acceptible
         String username = config.getString(Config.USERNAME);
