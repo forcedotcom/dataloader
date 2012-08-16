@@ -52,11 +52,6 @@ public class CsvUnicodeProcessTest extends ProcessTestBase {
         super(name);
     }
 
-    public void testDefaultCharacterSet() throws Exception {
-        // the tests should use ascii encoding by default, or else we may get a false positive for unicode tests
-        assertEquals("US-ASCII", DEFAULT_CHARSET);
-    }
-
     public void testUnicodeExtraction() throws Exception {
         final String name = System.nanoTime() + "☠";
         final String accountId = insertAccount(name);

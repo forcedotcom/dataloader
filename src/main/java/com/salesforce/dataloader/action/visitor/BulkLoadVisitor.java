@@ -47,22 +47,15 @@ import com.sforce.async.*;
 
 /**
  * Visitor for operations using the bulk API client
- *
+ * 
  * @author Jesper Joergensen, Colin Jarvis
  * @since 17.0
  */
 public class BulkLoadVisitor extends DAOLoadVisitor {
 
     private static final Logger logger = Logger.getLogger(BulkLoadVisitor.class);
-
-    private static final Object BULK_API_NULL_VALUE = new Object() {
-        @Override
-        public String toString() {
-            return NULL_STRING;
-        };
-    };
+    
     private static final String NULL_STRING = "#N/A";
-
     private static final String SUCCESS_RESULT_COL = "Success";
     private static final String ERROR_RESULT_COL = "Error";
     private static final String ID_RESULT_COL = "Id";
@@ -107,8 +100,6 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final String error;
     }
 
-
-
     public BulkLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
@@ -128,7 +119,6 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             handleException(e);
         }
     }
-
 
     /**
      * Throws a load exception
@@ -210,7 +200,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             // TODO: we should be more strict about this
             // perhaps we should have a "Strict" setting that makes us more picky about the input
             getLogger().warn(Messages.getMessage(getClass(), "noFieldVal", fieldName));
-            writeColumnToCsv(out, "");
+            writeColumnToCsv(out, NULL_STRING);
         }
     }
 
@@ -237,8 +227,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             if (this.isDelete && (!first || !"id".equalsIgnoreCase(sfdcColumn)))
                 throw new LoadException(Messages.getMessage(getClass(), "deleteCsvError"));
             addFieldToHeader(out, sfdcColumn, cols, addedCols, first);
-            if (first)
-                first = false;
+            if (first) first = false;
         }
         for (DynaProperty dynaProperty : row.getDynaClass().getDynaProperties()) {
             final String name = dynaProperty.getName();
@@ -250,8 +239,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         return Collections.unmodifiableList(cols);
     }
 
-    private static void addFieldToHeader(PrintStream out, String sfdcColumn,
-            List<String> cols, Set<String> addedCols, boolean first) {
+    private static void addFieldToHeader(PrintStream out, String sfdcColumn, List<String> cols, Set<String> addedCols,
+            boolean first) {
         if (!first) {
             out.print(',');
         }
@@ -367,9 +356,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 getLogger().warn(msg);
             } else {
                 // convert the row into a RowResults so its easy to inspect
-                final RowResult rowResult = new RowResult(Boolean.valueOf(res.get(successIdx)),
-                        isDelete ? false : Boolean.valueOf(res.get(createdIdx)), res.get(idIdx),
-                                res.get(errIdx));
+                final RowResult rowResult = new RowResult(Boolean.valueOf(res.get(successIdx)), isDelete ? false
+                        : Boolean.valueOf(res.get(createdIdx)), res.get(idIdx), res.get(errIdx));
                 writeRowResult(row, rowResult);
             }
         }
@@ -467,8 +455,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final HashSet<String> nullColumns = new HashSet<String>();
         for (final Map.Entry<String, Object> ent : row.entrySet())
             if (NULL_STRING.equals(String.valueOf(ent.getValue()))) nullColumns.add(ent.getKey());
-                for (final String key : nullColumns)
-                    row.put(key, BULK_API_NULL_VALUE);
+        for (final String key : nullColumns)
+            row.put(key, null);
     }
 
     @Override
@@ -484,7 +472,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     private void rememberEmptyRows() {
-        if (this.rowsToSkip>0){
+        if (this.rowsToSkip > 0) {
             getLogger().warn(
                     "Skipping results for " + this.rowsToSkip + " rows which failed before upload to Saleforce.com");
             this.allBatchesInOrder.add(new BatchData(SKIP_BATCH_ID, this.rowsToSkip));
