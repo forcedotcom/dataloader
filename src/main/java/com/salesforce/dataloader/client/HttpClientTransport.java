@@ -92,7 +92,7 @@ public class HttpClientTransport implements Transport {
     public InputStream getContent() throws IOException {
         DefaultHttpClient client = new DefaultHttpClient();
         
-        if (config.getProxy() != null) {
+        if (config.getProxy().address() != null) {
             String proxyUser = config.getProxyUsername() == null ? "" : config.getProxyUsername();
             String proxyPassword = config.getProxyPassword() == null ? "" : config.getProxyPassword();
             
@@ -124,11 +124,13 @@ public class HttpClientTransport implements Transport {
                 // need to send a HEAD request to trigger NTLM authentication
                 HttpHead head = new HttpHead("http://salesforce.com");
                 client.execute(head);
+                head.releaseConnection();
             }
             HttpResponse response = client.execute(post);
             
             if (response.getStatusLine().getStatusCode() > 399) {
                 successful = false;
+                throw new RuntimeException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
             } else {
                 successful = true;
             }
