@@ -130,7 +130,9 @@ public class HttpClientTransport implements Transport {
             
             if (response.getStatusLine().getStatusCode() > 399) {
                 successful = false;
-                throw new RuntimeException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+                if (response.getStatusLine().getStatusCode() == 407) {
+                    throw new RuntimeException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+                }
             } else {
                 successful = true;
             }
