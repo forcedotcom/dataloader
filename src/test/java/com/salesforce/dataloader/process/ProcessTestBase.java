@@ -85,7 +85,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         }
     }
 
-    private void cleanRecords() {
+    protected void cleanRecords() {
         // cleanup the records that might've been created on previous tests
         deleteSfdcRecords("Account", ACCOUNT_WHERE_CLAUSE, 0);
         deleteSfdcRecords("Contact", CONTACT_WHERE_CLAUSE, 0);
@@ -721,7 +721,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         return runProcess(args, false, failureMessage, 0, 0, 0, false);
     }
 
-    private Controller runProcess(Map<String, String> argMap, boolean expectProcessSuccess, String failMessage,
+    protected Controller runProcess(Map<String, String> argMap, boolean expectProcessSuccess, String failMessage,
             int numInserts, int numUpdates, int numFailures, boolean emptyId) throws ProcessInitializationException,
             DataAccessObjectException {
 
