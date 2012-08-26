@@ -8,7 +8,7 @@ Note: salesforce.com officially supports dataloader on Windows XP and Windows 7.
 
 The build will generate a windows installer exe in the target directory when executing the build in a windows environment.  If you are packaging the windows installer for distribution, you must use the following command to specify the win32 profile because the installer is packaged with a 32-bit JRE.
 
-    mvn clean package -P win32,!win64 -DskipTests
+    mvn clean package -P win32,-win64 -DskipTests
     
 # Execute Data Loader
 
@@ -41,7 +41,7 @@ The process-conf.xml file can be used to define properties for multiple processe
     
 To run installer tests on windows, you can add the skip parameter in the pom.xml under the maven-surefire-plugin configuration to skip functional tests.  To run installer tests on windows use the command
 
-    mvn verify -P win32,!win64
+    mvn verify -P win32,-win64
     
 If you are running on Windows 7, you will need to run cmd.exe as Administrator for the tests to work properly.
 
