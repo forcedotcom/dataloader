@@ -395,12 +395,8 @@
                 <phase> prepare-package </phase>
                 <configuration>
                   <target>
-                    <!-- Download NSIS and unpack -->
-                    <get
-                      src="http://dfn.dl.sourceforge.net/project/nsis/NSIS%202/${nsis.version}/nsis-${nsis.version}.zip"
-                      dest="target/nsis.zip" verbose="true"
-                      usetimestamp="true" />
-                    <unzip src="target/nsis.zip" dest="target" />
+                    <!-- unpack NSIS -->
+                    <unzip src="windows-dependencies/nsis-${nsis.version}.zip" dest="target" />
                   </target>
                 </configuration>
                 <goals>
