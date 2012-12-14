@@ -91,7 +91,6 @@ SectionEnd
 Section "Uninstall"
   SectionIn RO
   Delete "$INSTDIR\${PROJECT_FINAL_NAME}-uber.jar"
-  Delete "$INSTDIR\dataloader-25.0.0-uber.jar"
   Delete "$INSTDIR\icon_SforceDL16x16.ico"
   Delete "$INSTDIR\icon_SforceDL32x32.ico"
   Delete "$INSTDIR\dataloader_uninstall.exe"
