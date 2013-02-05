@@ -221,12 +221,12 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if ("-help".equals(arg) ) {
-                logger.info(Messages.getString("Process.help1"));
-                logger.info(Messages.getString("Process.help2"));
-                logger.info(Messages.getString("Process.help3"));
-                logger.info(Messages.getString("Process.help4"));
-                logger.info(Messages.getString("Process.help5"));
-                logger.info(Messages.getString("Process.help6"));
+                System.out.println(Messages.getString("Process.help1"));
+                System.out.println(Messages.getString("Process.help2"));
+                System.out.println(Messages.getString("Process.help3"));
+                System.out.println(Messages.getString("Process.help4"));
+                System.out.println(Messages.getString("Process.help5"));
+                System.out.println(Messages.getString("Process.help6"));
                 return false;
             }
         }

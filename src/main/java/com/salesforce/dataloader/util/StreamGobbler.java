@@ -38,7 +38,6 @@ import java.io.*;
  */
 public class StreamGobbler extends Thread {
 
-    private static final Logger LOGGER = Logger.getLogger(StreamGobbler.class);
     private InputStream is;
     private String type;
     private OutputStream os;
@@ -64,7 +63,7 @@ public class StreamGobbler extends Thread {
             String line = null;
             while ((line = br.readLine()) != null) {
                 if (pw != null) pw.println(line);
-                LOGGER.info(type + ">" + line);
+                System.out.println(type + ">" + line);
 
             }
             if (pw != null) pw.flush();
