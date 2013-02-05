@@ -25,6 +25,8 @@
  */
 package com.salesforce.dataloader.security;
 
+import org.apache.log4j.Logger;
+
 import java.io.*;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
@@ -34,6 +36,7 @@ import javax.crypto.spec.DESKeySpec;
 
 public class EncryptionUtil {
 
+    private static final Logger LOGGER = Logger.getLogger(EncryptionUtil.class);
     private Key gKey = null;
     private String gCipherSeed = "namastearrigato";
     private String gCipherKey = "51dda30be226233d";
@@ -265,8 +268,8 @@ public class EncryptionUtil {
     }
 
     private static void printUsage() {
-        System.out.println("\nUtility to encrypt a string based on a static or a provided key");
-        System.out.println("Options (mutually exclusive - use one at a time): \n"
+        LOGGER.info("\nUtility to encrypt a string based on a static or a provided key");
+        LOGGER.info("Options (mutually exclusive - use one at a time): \n"
                 + "\t-g <seed text>                                 Generate key based on seed\n"
                 + "\t-v <encrypted> <decrypted value> [Path to Key] Validate whether decryption of encrypted value matches the decrypted value, optionally provide key file\n"
                 + "\t-e <plain text> [Path to Key]                  Encrypt a plain text value, optionally provide key file (generate key using option -g)");
@@ -283,97 +286,93 @@ public class EncryptionUtil {
         int i = 0;
         String option = args[i];
         if (option.length() < 2 || option.charAt(0) != '-') {
-            System.out.println("Invalid option format: " + args[i]);
+            LOGGER.info("Invalid option format: " + args[i]);
             System.exit(-1);
         }
         // make sure enough arguments are provided
         if (arrayTooSmall(args, i)) {
-            System.out
-            .println("Option '"
-                    + option
-                    + "' requires at least one parameter.  Please check usage.\n");
+            LOGGER.info("Option '" + option + "' requires at least one parameter.  Please check usage.\n");
             printUsage();
             System.exit(-1);
         }
         // advance index to param and save the param value
         String param = args[++i];
         switch (option.charAt(1)) {
-        case 'g':
-            try {
-                String key = generateKey(param);
-                System.out.println(key);
-            } catch (NoSuchAlgorithmException e) {
-                System.out.println("Error generating key: " + e.getMessage());
-                System.exit(-1);
-            }
-            break;
-        case 'v':
-            // verify if encrypted value matches the encrypted the encrypted
-            // cleartext
-            // if optional key file is provided, use it
-            if (arrayTooSmall(args, i)) {
-                System.out
-                .println("Please provide decrypted value to validate against");
-                printUsage();
-                System.exit(-1);
-            }
-            String decryptExpected = args[++i];
-            EncryptionUtil dec = new EncryptionUtil();
-            if (!arrayTooSmall(args, i)) {
+            case 'g':
                 try {
-                    dec.setCipherKeyFromFilePath(args[++i]);
-                } catch (IOException e) {
-                    System.out.println("Error setting the key from file: "
-                            + args[i] + ", error: " + e.getMessage());
+                    String key = generateKey(param);
+                    LOGGER.info(key);
+                } catch (NoSuchAlgorithmException e) {
+                    LOGGER.error("Error generating key: " + e.getMessage());
                     System.exit(-1);
                 }
-            }
-            try {
-                String decrypted = dec.decryptString(param);
-                System.out.println("Decryption of encrypted value "
-                        + (decryptExpected.equals(decrypted) ? "MATCHES"
-                                : "DOES NOT MATCH") + " the expected value");
-            } catch (GeneralSecurityException e) {
-                System.out.println("Error decrypting string: " + param
-                        + ", error: " + e.getMessage());
-                System.exit(-1);
-            }
-            break;
-        case 'e':
-            // if optional key file is provided, use it
-            EncryptionUtil enc = new EncryptionUtil();
-            if (!arrayTooSmall(args, i)) {
-                String keyFilename = args[++i];
-                File keyFile = new File(keyFilename);
-                if (!keyFile.exists() && !keyFile.canRead()) {
-                    System.out.println("Please ensure that the key file '"
-                            + keyFilename + "' exists and is readable");
+                break;
+            case 'v':
+                // verify if encrypted value matches the encrypted the encrypted
+                // cleartext
+                // if optional key file is provided, use it
+                if (arrayTooSmall(args, i)) {
+                    LOGGER.info("Please provide decrypted value to validate against");
                     printUsage();
                     System.exit(-1);
                 }
+                String decryptExpected = args[++i];
+                EncryptionUtil dec = new EncryptionUtil();
+                if (!arrayTooSmall(args, i)) {
+                    try {
+                        dec.setCipherKeyFromFilePath(args[++i]);
+                    } catch (IOException e) {
+                        LOGGER.error("Error setting the key from file: "
+                                + args[i] + ", error: " + e.getMessage());
+                        System.exit(-1);
+                    }
+                }
                 try {
-                    enc.setCipherKeyFromFilePath(keyFilename);
-                } catch (IOException e) {
-                    System.out.println("Error setting the key from file: "
-                            + keyFilename + ", error: " + e.getMessage());
+                    String decrypted = dec.decryptString(param);
+                    LOGGER.info("Decryption of encrypted value "
+                            + (decryptExpected.equals(decrypted) ? "MATCHES"
+                            : "DOES NOT MATCH") + " the expected value");
+                } catch (GeneralSecurityException e) {
+                    LOGGER.error("Error decrypting string: " + param
+                            + ", error: " + e.getMessage());
                     System.exit(-1);
                 }
-            }
-            try {
-                // encrypt the given string and output to STDOUT
-                String encrypted;
-                encrypted = enc.encryptString(param);
-                System.out.println(encrypted);
-            } catch (GeneralSecurityException e) {
-                System.out.println("Error encrypting string: " + param
-                        + ", error: " + e.getMessage());
+                break;
+            case 'e':
+                // if optional key file is provided, use it
+                EncryptionUtil enc = new EncryptionUtil();
+                if (!arrayTooSmall(args, i)) {
+                    String keyFilename = args[++i];
+                    File keyFile = new File(keyFilename);
+                    if (!keyFile.exists() && !keyFile.canRead()) {
+                        LOGGER.warn("Please ensure that the key file '"
+                                + keyFilename + "' exists and is readable");
+                        printUsage();
+                        System.exit(-1);
+                    }
+                    try {
+                        enc.setCipherKeyFromFilePath(keyFilename);
+                    } catch (IOException e) {
+                        LOGGER.error("Error setting the key from file: "
+                                + keyFilename + ", error: " + e.getMessage());
+                        System.exit(-1);
+                    }
+                }
+                try {
+                    // encrypt the given string and output to STDOUT
+                    String encrypted;
+                    encrypted = enc.encryptString(param);
+                    LOGGER.info(encrypted);
+                } catch (GeneralSecurityException e) {
+                    LOGGER.error("Error encrypting string: " + param
+                            + ", error: " + e.getMessage());
+                    System.exit(-1);
+                }
+                break;
+            default:
+                LOGGER.error("Unsupported option: " + option);
+                printUsage();
                 System.exit(-1);
-            }
-            break;
-        default:
-            System.out.println("Unsupported option: " + option);
-            printUsage();
-            System.exit(-1);
         }
     }
 
