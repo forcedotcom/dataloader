@@ -26,6 +26,8 @@
 
 package com.salesforce.dataloader.util;
 
+import org.apache.log4j.Logger;
+
 import java.io.*;
 
 /**
@@ -35,9 +37,11 @@ import java.io.*;
  * @since 6.0
  */
 public class StreamGobbler extends Thread {
-    InputStream is;
-    String type;
-    OutputStream os;
+
+    private static final Logger LOGGER = Logger.getLogger(StreamGobbler.class);
+    private InputStream is;
+    private String type;
+    private OutputStream os;
 
     public StreamGobbler(InputStream is, String type) {
         this(is, type, null);
@@ -60,7 +64,7 @@ public class StreamGobbler extends Thread {
             String line = null;
             while ((line = br.readLine()) != null) {
                 if (pw != null) pw.println(line);
-                System.out.println(type + ">" + line);
+                LOGGER.info(type + ">" + line);
 
             }
             if (pw != null) pw.flush();

@@ -48,17 +48,19 @@ import com.salesforce.dataloader.ui.LoaderWindow;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.ws.ConnectionException;
+import org.apache.log4j.xml.DOMConfigurator;
 
 /**
  * The class that controls dataloader engine (config, salesforce communication, mapping, dao). For UI, this is the
  * controller for all the underlying data access.
- * 
+ *
  * @author Lexi Viripaeff
  * @author Alex Warshavsky
  * @since 6.0
  */
 public class Controller {
 
+    private static final String LOG_CONF_OVERRIDE = "log-conf.xml";
     private static boolean isLogInitialized = false; // make sure log is initialized only once
 
     /** the system property name used to determine the config directory */
@@ -66,7 +68,6 @@ public class Controller {
 
     public static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
-    private static final String LOG_STDOUT_FILE = "sdl_out.log"; //$NON-NLS-1$
     private static final String CONFIG_DIR = "conf"; //$NON-NLS-1$
     private static String APP_NAME; //$NON-NLS-1$
     public static String APP_VERSION; //$NON-NLS-1$
@@ -227,7 +228,7 @@ public class Controller {
 
     /**
      * Copies a file
-     * 
+     *
      * @param file
      *            the file to copy from
      * @param destFile
@@ -254,7 +255,7 @@ public class Controller {
             out.flush();
 
         } catch (IOException ioe) {
-            System.out.println("Cannot copy file " + file.getAbsolutePath());
+            logger.error("Cannot copy file " + file.getAbsolutePath());
         } finally {
             if (in != null) try {
                 in.close();
@@ -267,7 +268,7 @@ public class Controller {
 
     /**
      * Get the current config.properties and load it into the config bean.
-     * 
+     *
      * @param isBatchMode
      * @throws ControllerInitializationException
      */
@@ -285,7 +286,7 @@ public class Controller {
             appPath = appDir.getAbsolutePath();
             if (!appDir.exists() || !appDir.isDirectory()) {
                 if (!appDir.mkdirs()) {
-                    System.out.println("Unable to create configuration directory");
+                    logger.warn("Unable to create configuration directory");
                 }
             }
 
@@ -298,7 +299,7 @@ public class Controller {
             if (!configFile.exists()) {
                 File oldConfig = new File(oldConfigDir, CONFIG_FILE);
                 if (!oldConfig.exists()) {
-                    System.out.println("Cannot find default configuration file");
+                    logger.warn("Cannot find default configuration file");
                 } else {
                     copyFile(oldConfig, configFile);
                 }
@@ -369,26 +370,28 @@ public class Controller {
      * @return product name
      */
     private String getProductName() {
-        String productName = APP_NAME + " " + APP_VERSION;
-        return productName;
+        return APP_NAME + " " + APP_VERSION;
     }
 
-    /**
-     * @throws FactoryConfigurationError
-     */
-    static synchronized public void initLog() throws FactoryConfigurationError {
+    public static synchronized void initLog() throws FactoryConfigurationError {
         // init the log if not initialized already
         if (Controller.isLogInitialized) { return; }
         try {
-            String logFilename = new File(System.getProperty("java.io.tmpdir"), LOG_STDOUT_FILE).getAbsolutePath();
-            if (logFilename != null && logFilename.length() > 0) {
-                System.setErr(new PrintStream(new BufferedOutputStream(new FileOutputStream(logFilename)), true));
-                System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream(logFilename)), true));
+            File logConfXml = new File(System.getProperty("user.dir"), LOG_CONF_OVERRIDE);
+            if(logConfXml.exists()) {
+                logger.info("Reading log-conf.xml in " + logConfXml.getAbsolutePath());
+                if(logConfXml.canRead()) {
+                    DOMConfigurator.configure(logConfXml.getAbsolutePath());
+                } else {
+                    logger.warn("Unable to read log-conf.xml in " + logConfXml.getAbsolutePath());
+                }
+            } else {
+                logger.info("Using built-in logging configuration, no log-conf.xml in " + logConfXml.getAbsolutePath());
             }
             logger.info(Messages.getString("Controller.logInit")); //$NON-NLS-1$
         } catch (Exception ex) {
-            System.out.println(Messages.getString("Controller.errorLogInit")); //$NON-NLS-1$
-            System.out.println(ex.toString());
+            logger.error(Messages.getString("Controller.errorLogInit")); //$NON-NLS-1$
+            logger.error(ex.toString());
             System.exit(1);
         }
         Controller.isLogInitialized = true;
