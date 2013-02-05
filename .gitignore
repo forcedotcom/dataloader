@@ -9,3 +9,9 @@ target/
 ## Mac directory files
 .DS_Store
 Thumbs.db
+
+## IntelliJ Files
+.idea
+*.ipr
+*.iws
+*.iml
