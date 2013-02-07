@@ -46,7 +46,7 @@ Section "${PROJECT_NAME}"
   !define DL_SMALL_ICON_PATH "$INSTDIR\icon_SforceDL16x16.ico"
   !define DL_LARGE_ICON_PATH "$INSTDIR\icon_SforceDL32x32.ico"
   !define DL_UNINSTALLER_PATH "$INSTDIR\dataloader_uninstall.exe"
-  !define DL_CONFIG_DIR "$INSTDIR\conf"
+  !define DL_CONFIG_DIR "$APPDATA\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME} ${PROJECT_VERSION}"
 
   SetOutPath "$INSTDIR"
   SectionIn RO
