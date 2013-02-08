@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>27.0.0</version>
+  <version>27.0.1</version>
   <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -265,6 +265,36 @@
           <!--<skip>true</skip> -->
         </configuration>
       </plugin>
+
+        <plugin>
+            <groupId>com.mycila.maven-license-plugin</groupId>
+            <artifactId>maven-license-plugin</artifactId>
+            <version>1.8.0</version>
+            <configuration>
+                <header>license.txt</header>
+                <excludes>
+                    <exclude>**/*.html</exclude>
+                    <exclude>**/*.txt</exclude>
+                    <exclude>**/*.xml</exclude>
+                    <exclude>**/*.md</exclude>
+                    <exclude>**/*.nsi</exclude>
+                    <exclude>windows-dependencies/**</exclude>
+                    <exclude>local-proj-repo/**</exclude>
+                    <exclude>src/main/resources/**</exclude>
+                    <exclude>src/main/nsis/**</exclude>
+                    <exclude>src/test/resources/**</exclude>
+                    <exclude>.gitignore</exclude>
+                </excludes>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>check</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
     </plugins>
   </build>
 
