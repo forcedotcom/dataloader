@@ -220,9 +220,10 @@ public class SOQLMapper extends Mapper {
 
     private Field getReferenceField(DescribeSObjectResult describeResult, String relName) {
         for (Field f : describeResult.getFields()) {
-            if (FieldType.reference == f.getType() && f.getRelationshipName().equalsIgnoreCase(relName)) return f;
+            if (FieldType.reference == f.getType() && relName.equalsIgnoreCase(f.getRelationshipName())) {
+                return f;
+            }
         }
         throw new InvalidMappingException("No reference field " + relName + " on entity " + describeResult.getName());
     }
-
 }
