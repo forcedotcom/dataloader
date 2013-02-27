@@ -612,18 +612,22 @@ public class DateConverterTest extends ConfigTestBase {
         Calendar result = (Calendar) dateConverter.convert(null, "6/7/2012");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("Asia/Tokyo"), result.getTimeZone());
 
         result = (Calendar) dateConverter.convert(null, "6/7/2012 0:00");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("Asia/Tokyo"), result.getTimeZone());
 
         result = (Calendar) dateConverter.convert(null, "2012-06-07 00:00:00JST");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("Asia/Tokyo"), result.getTimeZone());
 
         result = (Calendar) dateConverter.convert(null, "2012-06-07 00:00:00JST");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("Asia/Tokyo"), result.getTimeZone());
     }
 
     private void assertValidDate(String msg, String strDate, Calendar expCalDate, boolean useEuropean) {
