@@ -25,92 +25,20 @@
  */
 package com.salesforce.dataloader.dyna;
 
-import java.util.*;
-
+import com.salesforce.dataloader.ConfigTestBase;
 import org.apache.commons.beanutils.ConversionException;
 
-import com.salesforce.dataloader.ConfigTestBase;
-import com.sforce.soap.partner.sobject.SObject;
-import com.sforce.ws.ConnectionException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
-/**
- * Tests the various dynabean type converters
- *
- * @author Lexi Viripaeff
- */
-
-public class ConverterTest extends ConfigTestBase {
+public class DateConverterTest extends ConfigTestBase {
 
     private static final TimeZone TZ = TimeZone.getTimeZone("GMT");
 
-    public ConverterTest(String name) {
+    public DateConverterTest(String name) {
         super(name);
     }
-
-    public void testBooleanConverter() {
-        BooleanConverter converter = new BooleanConverter();
-        Boolean result;
-
-        // test null and empty string, should return null
-        result = (Boolean)converter.convert(null, null);
-        assertNull(result);
-        result = (Boolean)converter.convert(null, "");
-        assertNull(result);
-
-        // if we pass in a boolean, we should get the same one back
-        result = (Boolean)converter.convert(null, Boolean.TRUE);
-        assertEquals(Boolean.TRUE, result);
-
-        result = (Boolean)converter.convert(null, Boolean.FALSE);
-        assertEquals(Boolean.FALSE, result);
-
-        // //////////////////////////
-        // test the valid true values
-        // //////////////////////////.
-        result = (Boolean)converter.convert(null, "yes");
-        assertEquals(Boolean.TRUE, result);
-
-        result = (Boolean)converter.convert(null, "y");
-        assertEquals(Boolean.TRUE, result);
-
-        result = (Boolean)converter.convert(null, "true");
-        assertEquals(Boolean.TRUE, result);
-
-        result = (Boolean)converter.convert(null, "on");
-        assertEquals(Boolean.TRUE, result);
-
-        result = (Boolean)converter.convert(null, "1");
-        assertEquals(Boolean.TRUE, result);
-
-        // ///////////////////////////
-        // Test the valid false values
-        // ///////////////////////////
-        result = (Boolean)converter.convert(null, "no");
-        assertEquals(Boolean.FALSE, result);
-
-        result = (Boolean)converter.convert(null, "n");
-        assertEquals(Boolean.FALSE, result);
-
-        result = (Boolean)converter.convert(null, "false");
-        assertEquals(Boolean.FALSE, result);
-
-        result = (Boolean)converter.convert(null, "off");
-        assertEquals(Boolean.FALSE, result);
-
-        result = (Boolean)converter.convert(null, "0");
-        assertEquals(Boolean.FALSE, result);
-
-        // For garbage, we throw a conversion Exception
-
-        try {
-            result = (Boolean)converter.convert(null, "qweorijo");
-            fail();
-        } catch (ConversionException e) {
-
-        }
-    }
-
-
 
     /**
      * Verify that equivalent instances in time (string form) but written in different time zones
@@ -678,41 +606,6 @@ public class ConverterTest extends ConfigTestBase {
         assertInvalidDate("20A4-11-08", null, false);
     }
 
-    public void testSObjectReferenceConverter() throws ConnectionException {
-        SObjectReferenceConverter refConverter = new SObjectReferenceConverter();
-        SObjectReference ref;
-
-        getController().login();
-        getController().setReferenceDescribes();
-
-        // null test
-        ref = (SObjectReference)refConverter.convert(null, null);
-        assertTrue(ref.isNull());
-
-        // empty test
-        ref = (SObjectReference)refConverter.convert(null, "");
-        assertTrue(ref.isNull());
-
-        // test getting SObjectReference back - string
-        SObjectReference testRefStr = new SObjectReference("12345");
-        ref = (SObjectReference)refConverter.convert(null, testRefStr.getReferenceExtIdValue());
-        assertEquals(testRefStr, ref);
-
-        // test getting SObjectReference back - number
-        SObjectReference testRefNbr = new SObjectReference(12345);
-        ref = (SObjectReference)refConverter.convert(null, testRefNbr.getReferenceExtIdValue());
-        assertEquals(testRefNbr, ref);
-
-        // test getting SObjectReference back - date
-        SObjectReference testRefDate = new SObjectReference(Calendar.getInstance().getTime());
-        ref = (SObjectReference)refConverter.convert(null, testRefDate.getReferenceExtIdValue());
-        assertEquals(testRefDate, ref);
-
-        // test validity of creating XML structure for foreign key ref
-        testValidSObjectReference("12345", "Parent", true);
-        testValidSObjectReference("12345", "Bogus", false);
-    }
-
     public void testUserSpecifiedTimeZoneIsUsed() throws Exception {
         DateConverter dateConverter = new DateConverter(TimeZone.getTimeZone("Asia/Tokyo"));
 
@@ -731,32 +624,6 @@ public class ConverterTest extends ConfigTestBase {
         result = (Calendar) dateConverter.convert(null, "2012-06-07 00:00:00JST");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
-    }
-    /**
-     * @param refValue
-     * @param relationshipName
-     * @param expectSuccess
-     */
-    private void testValidSObjectReference(String refValue, String relationshipName, boolean expectSuccess) {
-        SObjectReference ref = new SObjectReference(refValue);
-        SObject sObj = new SObject();
-        String fkFieldName = DEFAULT_ACCOUNT_EXT_ID_FIELD;
-
-        try {
-            ref.addReferenceToSObject(getController(), sObj, ObjectField.formatAsString("Parent",
-                    DEFAULT_ACCOUNT_EXT_ID_FIELD));
-
-            SObject child = (SObject)sObj.getChild(relationshipName);
-            boolean succeeded = child != null && child.getField(fkFieldName) != null && child.getField(fkFieldName)
-                    .equals(refValue);
-            if (expectSuccess && !succeeded || !expectSuccess && succeeded) {
-                fail();
-            }
-        } catch (Exception e) {
-            if (expectSuccess) {
-                fail();
-            }
-        }
     }
 
     private void assertValidDate(String msg, String strDate, Calendar expCalDate, boolean useEuropean) {
