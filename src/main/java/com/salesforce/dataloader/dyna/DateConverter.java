@@ -89,7 +89,7 @@ public final class DateConverter implements Converter {
         final Date date = fmt.parse(dateString, pos);
         // we only want to use the date if parsing succeeded and used the entire string
         if (date != null && pos.getIndex() == dateString.length()) {
-            Calendar cal = Calendar.getInstance();
+            Calendar cal = Calendar.getInstance(timeZone);
             cal.setTime(date);
             return cal;
         }
