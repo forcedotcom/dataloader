@@ -713,6 +713,25 @@ public class ConverterTest extends ConfigTestBase {
         testValidSObjectReference("12345", "Bogus", false);
     }
 
+    public void testUserSpecifiedTimeZoneIsUsed() throws Exception {
+        DateConverter dateConverter = new DateConverter(TimeZone.getTimeZone("Asia/Tokyo"));
+
+        Calendar result = (Calendar) dateConverter.convert(null, "6/7/2012");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+
+        result = (Calendar) dateConverter.convert(null, "6/7/2012 0:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+
+        result = (Calendar) dateConverter.convert(null, "2012-06-07 00:00:00JST");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+
+        result = (Calendar) dateConverter.convert(null, "2012-06-07 00:00:00JST");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+    }
     /**
      * @param refValue
      * @param relationshipName
