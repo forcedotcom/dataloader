@@ -230,6 +230,23 @@ public class MappingTest extends ConfigTestBase {
         assertEquals(constantValue, result.get(sfdcField));
     }
 
+    public void testMapDataEmptyEntriesIgnored() throws Exception {
+        LoadMapper loadMapper = new LoadMapper(null, null, null);
+        loadMapper.putMapping("SOURCE_COL", "");
+
+        Map<String, Object> inputData = new HashMap<String, Object>(1);
+        inputData.put("SOURCE_COL", "123");
+
+        Map<String, Object> result = loadMapper.mapData(inputData);
+
+        assertTrue("Empty destination column should have not been mapped", result.isEmpty());
+    }
+
+    public void testVerifyMappingsAreValidEmptyEntries() throws Exception {
+        LoadMapper loadMapper = new LoadMapper(null, null, null);
+        loadMapper.putMapping("SOURCE_COL", "");
+        loadMapper.verifyMappingsAreValid();
+    }
 
     /**
      * Verify that when the query does not match up to the column, an exception is thrown.
