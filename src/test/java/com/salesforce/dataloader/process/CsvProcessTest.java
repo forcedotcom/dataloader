@@ -362,11 +362,7 @@ public class CsvProcessTest extends ProcessTestBase {
             String dateString = (String)acct.getField(dateField);
             Calendar calFromString = (Calendar) converter.convert(null, dateString);
 
-            //all dates should map to the 14th.
-            int timeZoneOffset = calFromString.get(Calendar.ZONE_OFFSET/1000/60/60);
-
-            //The calendar adjusts for the offset so we have to correct for that do a GMT comparison
-            assertEquals("Timezone not correctly interpreted or sent", targetDate - timeZoneOffset,calFromString.get(Calendar.DATE));
+            assertEquals("Day field does not match", targetDate, calFromString.get(Calendar.DAY_OF_MONTH));
         }
     }
 
@@ -425,12 +421,7 @@ public class CsvProcessTest extends ProcessTestBase {
             Calendar.getInstance(TZ);
             Calendar calFromString = (Calendar)converter.convert(null, dateString);
 
-            // all dates should map to the 14th.
-            int timeZoneOffset = calFromString.get(Calendar.ZONE_OFFSET / 1000 / 60 / 60);
-
-            // The calendar adjusts for the offset so we have to correct for that do a GMT comparison
-            assertEquals("Timezone not correctly interpreted or sent", targetDate - timeZoneOffset,
-                    calFromString.get(Calendar.DATE));
+            assertEquals("Day field does not match", targetDate, calFromString.get(Calendar.DAY_OF_MONTH));
         }
     }
 }
