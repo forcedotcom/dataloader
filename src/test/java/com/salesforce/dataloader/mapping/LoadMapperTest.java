@@ -244,7 +244,18 @@ public class LoadMapperTest extends ConfigTestBase {
     public void testVerifyMappingsAreValidEmptyEntries() throws Exception {
         LoadMapper loadMapper = new LoadMapper(null, null, null);
         loadMapper.putMapping("SOURCE_COL", "");
-        loadMapper.verifyMappingsAreValid();
+        loadMapper.verifyMappingsAreValid(); // no exception expected
+    }
+
+    public void testVerifyMappingsAreValidUnknownColumn() throws Exception {
+        LoadMapper loadMapper = new LoadMapper(getController().getPartnerClient(), null, null);
+        loadMapper.putMapping(SOURCE_NAMES[0], "non_existing_col_aa");
+        try {
+            loadMapper.verifyMappingsAreValid();
+            fail("An exception should have been thrown since destination column does not exist");
+        } catch (MappingInitializationException ignored) {
+            // expected
+        }
     }
 
     /**
