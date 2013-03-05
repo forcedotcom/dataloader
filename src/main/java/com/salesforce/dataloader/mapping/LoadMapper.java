@@ -32,6 +32,8 @@ import java.util.Map.Entry;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.sforce.soap.partner.Field;
+import org.apache.log4j.Logger;
+import org.springframework.util.StringUtils;
 
 /**
  * Mapper which maps field names for loading operations. Field names are mapped from dao (local) name to sfdc name.
@@ -40,6 +42,8 @@ import com.sforce.soap.partner.Field;
  * @since 21.0
  */
 public class LoadMapper extends Mapper {
+
+    private static final Logger logger = Logger.getLogger(Mapper.class);
 
     public LoadMapper(PartnerClient client, Collection<String> columnNames, String mappingFileName)
             throws MappingInitializationException {
@@ -56,7 +60,7 @@ public class LoadMapper extends Mapper {
     }
 
     public Map<String, String> getMappingWithUnmappedColumns(boolean includeUnmapped) {
-        final HashMap<String, String> result = new HashMap<String, String>(getMap());
+        final Map<String, String> result = new HashMap<String, String>(getMap());
         if (includeUnmapped) {
             for (String daoColumn : getDaoColumns()) {
                 if (getMapping(daoColumn) == null) result.put(daoColumn, null);
@@ -69,24 +73,25 @@ public class LoadMapper extends Mapper {
         Map<String, Object> mappedData = new HashMap<String, Object>();
         for (Map.Entry<String, Object> entry : localRow.entrySet()) {
             String sfdcName = getMapping(entry.getKey());
-            // TODO: maybe we should warn about unmapped input columns?
-            if (sfdcName != null) mappedData.put(sfdcName, entry.getValue());
+            if (StringUtils.hasText(sfdcName)) {
+                mappedData.put(sfdcName, entry.getValue());
+            } else {
+                logger.info("Mapping for field " + entry.getKey() + " will be ignored since destination column is empty");
+            }
         }
         mapConstants(mappedData);
         return mappedData;
     }
 
-    public Map<String, Field> resolveMappedFieldsForDataLoad() throws MappingInitializationException {
-        final Map<String, Field> fields = new HashMap<String, Field>();
+    public void verifyMappingsAreValid() throws MappingInitializationException {
         for (Map.Entry<String, String> entry : getMappingWithUnmappedColumns(false).entrySet()) {
             String sfdcName = entry.getValue();
-            final Field f = getClient().getField(sfdcName);
-            if (f == null)
-                throw new MappingInitializationException("Field mapping is invalid: " + entry.getKey() + " => "
-                        + sfdcName);
-            fields.put(entry.getKey(), f);
+            if(StringUtils.hasText(sfdcName)) {
+                final Field f = getClient().getField(sfdcName);
+                if (f == null)
+                    throw new MappingInitializationException("Field mapping is invalid: " + entry.getKey() + " => " + sfdcName);
+            }
         }
-        return fields;
     }
 
 }
