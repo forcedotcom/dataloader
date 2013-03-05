@@ -121,7 +121,7 @@ public class FinishPage extends LoadPage {
 
     private void verifySettings() throws MappingInitializationException {
         if (!getController().getConfig().getOperationInfo().isExtraction())
-            ((LoadMapper)getController().getMapper()).resolveMappedFieldsForDataLoad();
+            ((LoadMapper)getController().getMapper()).verifyMappingsAreValid();
     }
 
     public boolean finishAllowed() {
