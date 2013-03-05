@@ -29,10 +29,18 @@ package com.salesforce.dataloader.mapping;
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.exception.MappingInitializationException;
+import com.sforce.ws.ConnectionException;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ *
+ * @author Federico Recio
+ * @since 27.0
+ */
 public class SOQLMapperTest extends ConfigTestBase {
 
     private SOQLMapper soqlMapper;
@@ -56,5 +64,45 @@ public class SOQLMapperTest extends ConfigTestBase {
         assertEquals(2, daoColumnsForSoql.size());
         assertTrue(daoColumnsForSoql.contains("Id"));
         assertTrue(daoColumnsForSoql.contains("Contact.Accountid"));
+    }
+
+    /**
+     * Verify that when the query does not match up to the column, an exception is thrown.
+     *
+     * @expectedResults Assert that an exception is thrown with the correct error message.
+     *
+     * @throws Exception
+     */
+    public void testMapAutoMatchFail() throws Exception {
+        try {
+            doAutoMatchTest("Select id, account.parent.id, A.numberofemployees from account a");
+        } catch (Mapper.InvalidMappingException e) {
+            assertEquals(
+                    "The following dao columns could not be mapped: [NAME]",
+                    e.getMessage());
+        }
+    }
+
+    /**
+     * Verify that the correct columns are mapped from a query.
+     *
+     * @expectedResults Assert that the returned map of columns is the same as what the SOQLMapper returns.
+     *
+     * @throws Exception
+     */
+    public void testMapAutoMatch() throws Exception {
+        doAutoMatchTest("Select AccOUNT.NamE, id, account.parent.id, A.numberofemployees from account a");
+    }
+
+    private void doAutoMatchTest(String soql) throws ConnectionException,
+            MappingInitializationException {
+        getController().login();
+        List<String> daoCols = Arrays.asList("NAME", "ID", "Parent.Id",
+                "NumberOfEMPLOYEES");
+        SOQLMapper mapper = new SOQLMapper(getController().getPartnerClient(),
+                daoCols, null);
+        mapper.initSoqlMapping(soql);
+        List<String> actual = mapper.getDaoColumnsForSoql();
+        assertEquals(daoCols, actual);
     }
 }
