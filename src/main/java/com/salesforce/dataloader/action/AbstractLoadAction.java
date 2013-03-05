@@ -89,7 +89,7 @@ abstract class AbstractLoadAction extends AbstractAction {
     @Override
     protected void initOperation() throws MappingInitializationException, DataAccessObjectException, OperationException {
         // ensure all field mappings are valid before data load
-        ((LoadMapper)this.getController().getMapper()).resolveMappedFieldsForDataLoad();
+        ((LoadMapper)this.getController().getMapper()).verifyMappingsAreValid();
         // start the Progress Monitor
         getMonitor().beginTask(getMessage("loading", getConfig().getString(Config.OPERATION)), getDao().getTotalRows());
         // set the starting row
