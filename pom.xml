@@ -278,6 +278,7 @@
                     <exclude>**/*.xml</exclude>
                     <exclude>**/*.md</exclude>
                     <exclude>**/*.nsi</exclude>
+                    <exclude>**/*.properties</exclude>
                     <exclude>windows-dependencies/**</exclude>
                     <exclude>local-proj-repo/**</exclude>
                     <exclude>src/main/resources/**</exclude>
