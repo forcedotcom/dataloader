@@ -25,37 +25,36 @@
  */
 package com.salesforce.dataloader.mapping;
 
-import java.io.File;
-import java.util.*;
-
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.exception.MappingInitializationException;
-import com.salesforce.dataloader.mapping.Mapper.InvalidMappingException;
-import com.sforce.ws.ConnectionException;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Set of unit tests for the data mapper
  * 
  * @author Alex Warshavsky
+ * @author Federico Recio
  * @since 8.0
  */
-public class MappingTest extends ConfigTestBase {
+public class LoadMapperTest extends ConfigTestBase {
 
-    public MappingTest(String name) {
+    private static final String[] SOURCE_NAMES = { "sourceOne", "sourceTwo", "sourceThree" };
+    private static final String[] SOURCE_VALUES = { "valueOne", "valueTwo", "valueThree" };
+    private static final String[] DEST_NAMES = { "destinationOne", "destinationTwo", "destinationThree" };
+    private static final String DEST_CONSTANT_NAME = "destinationConstant";
+    private static final String CONSTANT_VALUE = "constantValue123";
+    private Map<String, Object> sourceValueMap;
+
+    public LoadMapperTest(String name) {
         super(name);
     }
-
-    static final String[] SOURCE_NAMES = new String[] { "sourceOne",
-        "sourceTwo", "sourceThree" };
-    static final String[] SOURCE_NAMES_CASE = new String[] { "SoUrCeOne",
-        "SOURCEtwo", "sourcethree" };
-    static final String[] SOURCE_VALUES = new String[] { "valueOne",
-        "valueTwo", "valueThree" };
-    static final String[] DEST_NAMES = new String[] { "destinationOne",
-        "destinationTwo", "destinationThree" };
-    static final String DEST_CONSTANT_NAME = "destinationConstant";
-    static final String CONSTANT_VALUE = "constantValue123";
-    private Map<String, Object> sourceValueMap;
 
     @Override
     protected void setUp() throws Exception {
@@ -115,9 +114,9 @@ public class MappingTest extends ConfigTestBase {
         // prepopulate properties map
         Properties mappings = new Properties();
         for (int i = 0; i < SOURCE_NAMES.length; i++) {
-            mappings.put(SOURCE_NAMES[i], DEST_NAMES[i]);
+            mappings.setProperty(SOURCE_NAMES[i], DEST_NAMES[i]);
         }
-        mappings.put("\"" + CONSTANT_VALUE + "\"", DEST_CONSTANT_NAME);
+        mappings.setProperty("\"" + CONSTANT_VALUE + "\"", DEST_CONSTANT_NAME);
 
         LoadMapper mapper = new LoadMapper(null, Arrays.asList(SOURCE_NAMES),
                 null);
@@ -139,8 +138,8 @@ public class MappingTest extends ConfigTestBase {
         String wrappedConstantValue = "\"" + constantValue + "\"";
 
         final String value = wrappedConstantValue;
-        mappings.put(value, "Name, field1__c,field2__c,   field3__c,\n\tfield4__c");
-        mappings.put("", "Value6");
+        mappings.setProperty(value, "Name, field1__c,field2__c,   field3__c,\n\tfield4__c");
+        mappings.setProperty("", "Value6");
         LoadMapper mapper = new LoadMapper(null, null, null);
         mapper.putPropertyFileMappings(mappings);
         Map<String, Object> result = mapper.mapData(Collections.<String, Object> emptyMap());
@@ -179,7 +178,7 @@ public class MappingTest extends ConfigTestBase {
         final String csvFieldName = "NotAbc";
 
         //place a constant mapping into the LoadMapper.
-        mappings.put(wrappedConstantValue, sfdcField);
+        mappings.setProperty(wrappedConstantValue, sfdcField);
         LoadMapper mapper = new LoadMapper(null, null, null);
         mapper.putPropertyFileMappings(mappings);
 
@@ -218,7 +217,7 @@ public class MappingTest extends ConfigTestBase {
         mapper.putMapping(csvFieldName, sfdcField);
 
         //place a constant mapping into the LoadMapper.
-        mappings.put(wrappedConstantValue, sfdcField);
+        mappings.setProperty(wrappedConstantValue, sfdcField);
         mapper.putPropertyFileMappings(mappings);
 
         Map<String, Object> input = new HashMap<String, Object>(1);
@@ -230,45 +229,33 @@ public class MappingTest extends ConfigTestBase {
         assertEquals(constantValue, result.get(sfdcField));
     }
 
+    public void testMapDataEmptyEntriesIgnored() throws Exception {
+        LoadMapper loadMapper = new LoadMapper(null, null, null);
+        loadMapper.putMapping("SOURCE_COL", "");
 
-    /**
-     * Verify that when the query does not match up to the column, an exception is thrown.
-     * 
-     * @expectedResults Assert that an exception is thrown with the correct error message.
-     * 
-     * @throws Exception
-     */
-    public void testMapAutoMatchFail() throws Exception {
+        Map<String, Object> inputData = new HashMap<String, Object>(1);
+        inputData.put("SOURCE_COL", "123");
+
+        Map<String, Object> result = loadMapper.mapData(inputData);
+
+        assertTrue("Empty destination column should have not been mapped", result.isEmpty());
+    }
+
+    public void testVerifyMappingsAreValidEmptyEntries() throws Exception {
+        LoadMapper loadMapper = new LoadMapper(null, null, null);
+        loadMapper.putMapping("SOURCE_COL", "");
+        loadMapper.verifyMappingsAreValid(); // no exception expected
+    }
+
+    public void testVerifyMappingsAreValidUnknownColumn() throws Exception {
+        LoadMapper loadMapper = new LoadMapper(getController().getPartnerClient(), null, null);
+        loadMapper.putMapping(SOURCE_NAMES[0], "non_existing_col_aa");
         try {
-            doAutoMatchTest("Select id, account.parent.id, A.numberofemployees from account a");
-        } catch (InvalidMappingException e) {
-            assertEquals(
-                    "The following dao columns could not be mapped: [NAME]",
-                    e.getMessage());
+            loadMapper.verifyMappingsAreValid();
+            fail("An exception should have been thrown since destination column does not exist");
+        } catch (MappingInitializationException ignored) {
+            // expected
         }
-    }
-
-    /**
-     * Verify that the correct columns are mapped from a query.
-     * 
-     * @expectedResults Assert that the returned map of columns is the same as what the SOQLMapper returns.
-     * 
-     * @throws Exception
-     */
-    public void testMapAutoMatch() throws Exception {
-        doAutoMatchTest("Select AccOUNT.NamE, id, account.parent.id, A.numberofemployees from account a");
-    }
-
-    private void doAutoMatchTest(String soql) throws ConnectionException,
-    MappingInitializationException {
-        getController().login();
-        List<String> daoCols = Arrays.asList("NAME", "ID", "Parent.Id",
-                "NumberOfEMPLOYEES");
-        SOQLMapper mapper = new SOQLMapper(getController().getPartnerClient(),
-                daoCols, null);
-        mapper.initSoqlMapping(soql);
-        List<String> actual = mapper.getDaoColumnsForSoql();
-        assertEquals(daoCols, actual);
     }
 
     /**

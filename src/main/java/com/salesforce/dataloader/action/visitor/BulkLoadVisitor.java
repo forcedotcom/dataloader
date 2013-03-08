@@ -64,7 +64,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
     private final boolean isDelete;
     private static final DateFormat DATE_FMT;
-    private int rowsToSkip;
+
     static {
         DATE_FMT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         DATE_FMT.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -463,21 +463,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     protected void conversionFailed(Map<String, Object> row, String errMsg) throws DataAccessObjectException,
             OperationException {
         super.conversionFailed(row, errMsg);
-        this.rowsToSkip++;
-        // in order for this to work correctly we must flush any rows that have already been converted
-        if (!this.dynaArray.isEmpty()) {
-            rememberEmptyRows();
-            loadBatch();
-        }
+        getLogger().warn("Skipping results for row " + row + " which failed before upload to Saleforce.com");
+        allBatchesInOrder.add(new BatchData(SKIP_BATCH_ID, 1));
     }
-
-    private void rememberEmptyRows() {
-        if (this.rowsToSkip > 0) {
-            getLogger().warn(
-                    "Skipping results for " + this.rowsToSkip + " rows which failed before upload to Saleforce.com");
-            this.allBatchesInOrder.add(new BatchData(SKIP_BATCH_ID, this.rowsToSkip));
-            this.rowsToSkip = 0;
-        }
-    }
-
 }
