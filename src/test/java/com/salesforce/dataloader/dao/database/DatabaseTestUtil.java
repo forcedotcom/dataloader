@@ -32,6 +32,7 @@ import java.util.*;
 
 import javax.sql.DataSource;
 
+import com.salesforce.dataloader.model.Row;
 import junit.framework.TestCase;
 
 import org.apache.commons.dbcp.BasicDataSource;
@@ -79,16 +80,16 @@ public class DatabaseTestUtil {
             sqlConfig.getSqlParams().put(LAST_UPDATED_COL, sqlDateClass);
             writer = new DatabaseWriter(theController.getConfig(), dbConfigName, dataSource, sqlConfig);
             writer.open();
-            List<Map<String, Object>> accountRowList = new ArrayList<Map<String, Object>>();
+            List<Row> accountRowList = new ArrayList<Row>();
             int rowsProcessed = 0;
             for(int i=0; i < numAccounts; i++) {
-                Map<String, Object> accountRow = getInsertOrUpdateAccountRow(isInsert, i, dateType, insertNulls);
+                Row accountRow = getInsertOrUpdateAccountRow(isInsert, i, dateType, insertNulls);
                 accountRowList.add(accountRow);
                 if(accountRowList.size() >= 1000 || i == (numAccounts-1)) {
                     rowsProcessed += accountRowList.size();
                     writer.writeRowList(accountRowList);
                     logger.info("Written " + rowsProcessed + " of " + numAccounts + " total accounts using database config: " + dbConfigName);
-                    accountRowList = new ArrayList<Map<String,Object>>();
+                    accountRowList = new ArrayList<Row>();
                 }
             }
         } catch (DataAccessObjectInitializationException e) {
@@ -101,7 +102,7 @@ public class DatabaseTestUtil {
         }
     }
 
-    public static Map<String, Object> getInsertOrUpdateAccountRow(boolean isInsert, int seqNum, DateType dateType) {
+    public static Row getInsertOrUpdateAccountRow(boolean isInsert, int seqNum, DateType dateType) {
         return getInsertOrUpdateAccountRow(isInsert, seqNum, dateType, false);
     }
     
@@ -120,11 +121,11 @@ public class DatabaseTestUtil {
      * @param seqNum
      *            Account sequence in set of generated accounts
      * @param dateType Type for the date field values
-     * @return Map<String,Object> containing account data based on seqNum
+     * @return Row containing account data based on seqNum
      */
-    public static Map<String, Object> getInsertOrUpdateAccountRow(boolean isInsert, int seqNum, DateType dateType,
+    public static Row getInsertOrUpdateAccountRow(boolean isInsert, int seqNum, DateType dateType,
             boolean insertNulls) {
-        Map<String,Object> row = new HashMap<String,Object>();
+        Row row = new Row();
         String operation;
         int seqInt;
         // external id is the key, use normal sequencing for update so the same set of records gets updated as inserted

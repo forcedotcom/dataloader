@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
+import com.salesforce.dataloader.model.Row;
 import org.apache.log4j.Logger;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -284,7 +285,7 @@ public class CSVViewerDialog extends Dialog {
 
         List<List<Object>> rowList = new LinkedList<List<Object>>();
         for (int i = 0; i < numberOfRows; i++) {
-            Map<String, Object> rowMap;
+            Row rowMap;
             try {
                 rowMap = csvReader.readRow();
             } catch (DataAccessObjectException e) {

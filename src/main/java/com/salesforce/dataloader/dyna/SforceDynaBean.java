@@ -28,6 +28,7 @@ package com.salesforce.dataloader.dyna;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import com.salesforce.dataloader.model.Row;
 import org.apache.commons.beanutils.*;
 import org.apache.log4j.Logger;
 
@@ -199,7 +200,7 @@ public class SforceDynaBean {
      * @throws ConversionException
      * @throws LoadException
      */
-    static public DynaBean convertToDynaBean(BasicDynaClass dynaClass, Map<String, Object> sforceDataRow)
+    static public DynaBean convertToDynaBean(BasicDynaClass dynaClass, Row sforceDataRow)
             throws ConversionException, LoadException {
         //now convert the data types, through our strongly typed bean
         DynaBean sforceObj = null;

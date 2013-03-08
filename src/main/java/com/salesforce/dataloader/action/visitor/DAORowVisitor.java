@@ -26,10 +26,9 @@
 
 package com.salesforce.dataloader.action.visitor;
 
-import java.util.Map;
-
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.OperationException;
+import com.salesforce.dataloader.model.Row;
 import com.sforce.ws.ConnectionException;
 
 /**
@@ -39,6 +38,6 @@ import com.sforce.ws.ConnectionException;
  */
 public interface DAORowVisitor {
 
-    public void visit(Map<String, Object> row) throws OperationException, DataAccessObjectException, ConnectionException;
+    public void visit(Row row) throws OperationException, DataAccessObjectException, ConnectionException;
 
 }

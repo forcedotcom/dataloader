@@ -28,6 +28,7 @@ package com.salesforce.dataloader.process;
 import java.io.File;
 import java.util.*;
 
+import com.salesforce.dataloader.model.Row;
 import junit.framework.TestSuite;
 
 import com.salesforce.dataloader.ConfigGenerator;
@@ -175,18 +176,18 @@ public class NAProcessTest extends ProcessTestBase {
         File csvFile = new File(CSV_FILE_PATH);
         if (csvFile.exists()) csvFile.delete();
 
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("OwnerId", userId);
-        map.put("Subject", TASK_SUBJECT);
-        map.put(nullFieldName, "#N/A");
-        if (id != null) map.put("Id", id);
+        Row row = new Row();
+        row.put("OwnerId", userId);
+        row.put("Subject", TASK_SUBJECT);
+        row.put(nullFieldName, "#N/A");
+        if (id != null) row.put("Id", id);
 
         CSVFileWriter writer = null;
         try {
             writer = new CSVFileWriter(CSV_FILE_PATH, DEFAULT_CHARSET);
             writer.open();
-            writer.setColumnNames(new ArrayList<String>(map.keySet()));
-            writer.writeRow(map);
+            writer.setColumnNames(new ArrayList<String>(row.keySet()));
+            writer.writeRow(row);
         } finally {
             if (writer != null) writer.close();
         }

@@ -30,6 +30,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.salesforce.dataloader.model.Row;
 import junit.framework.TestSuite;
 
 import com.salesforce.dataloader.ConfigGenerator;
@@ -210,12 +211,12 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
         }
 
         // Initializations of row results
-        Map<String, String> firstInputOffsetAdjustedRow = new HashMap<String, String>();
-        Map<String, String> lastInputRow = new HashMap<String, String>();
-        Map<String, String> firstSuccessRow = new HashMap<String, String>();
-        Map<String, String> lastSuccessRow = new HashMap<String, String>();
-        Map<String, String> firstErrorRow = new HashMap<String, String>();
-        Map<String, String> lastErrorRow = new HashMap<String, String>();
+        Row firstInputOffsetAdjustedRow = new Row();
+        Row lastInputRow = new Row();
+        Row firstSuccessRow = new Row();
+        Row lastSuccessRow = new Row();
+        Row firstErrorRow = new Row();
+        Row lastErrorRow = new Row();
 
         // The next few if statements deal with the edge statements on file size...(i.e. suppose that there are no
         // errors)
@@ -263,9 +264,9 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
         return rdr;
     }
 
-    private void getFirstRow(Map<String, String> rowResult, CSVFileReader reader, boolean isSuccessFile, int rowOffset)
+    private void getFirstRow(Row rowResult, CSVFileReader reader, boolean isSuccessFile, int rowOffset)
             throws Exception {
-        Map<String, Object> firstRow = reader.readRow();
+        Row firstRow = reader.readRow();
 
         for (int i = 0; i < rowOffset; i++) {
             firstRow = reader.readRow(); // then, for each, move down one row
@@ -280,11 +281,11 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
         }
     }
 
-    private void getLastRow(Map<String, String> rowResult, CSVFileReader reader, boolean isSuccessFile)
+    private void getLastRow(Row rowResult, CSVFileReader reader, boolean isSuccessFile)
             throws Exception {
 
-        Map<String, Object> tempRow = new HashMap<String, Object>();
-        Map<String, Object> lastRow = new HashMap<String, Object>();
+        Row tempRow = new Row();
+        Row lastRow = new Row();
 
         // get to the last row:
         while ((tempRow = reader.readRow()) != null) {

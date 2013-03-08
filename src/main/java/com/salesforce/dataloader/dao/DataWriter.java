@@ -31,6 +31,7 @@ import java.util.Map;
 
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.model.Row;
 
 /**
  * Interface to be implemented for data writers -- data access objects that are used for writing rows of data.
@@ -53,12 +54,12 @@ public interface DataWriter extends DataAccessObject {
      * @return Any data columns generated as a result of writing
      * @throws DataAccessObjectException
      */
-    boolean writeRow(Map<String,Object> inputRow) throws DataAccessObjectException;
+    boolean writeRow(Row inputRow) throws DataAccessObjectException;
 
     /**
      * @param inputRowList
      * @return List of data rows with generated data columns as a result of writing
      * @throws DataAccessObjectException
      */
-    boolean writeRowList(List<Map<String, Object>> inputRowList) throws DataAccessObjectException;
+    boolean writeRowList(List<Row> inputRowList) throws DataAccessObjectException;
 }

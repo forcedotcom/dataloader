@@ -29,6 +29,7 @@ import java.io.File;
 import java.text.ParseException;
 import java.util.*;
 
+import com.salesforce.dataloader.model.Row;
 import junit.framework.TestSuite;
 
 import org.apache.log4j.Logger;
@@ -226,7 +227,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
             reader = new DatabaseReader(theController.getConfig(), dbConfigName);
             reader.open();
             int readBatchSize = theController.getConfig().getInt(Config.DAO_READ_BATCH_SIZE);
-            List<Map<String,Object>> successRows = reader.readRowList(readBatchSize);
+            List<Row> successRows = reader.readRowList(readBatchSize);
             int rowsProcessed = 0;
             assertNotNull("Error reading " + readBatchSize + " rows", successRows);
             while(successRows.size() > 0) {

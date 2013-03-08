@@ -27,6 +27,7 @@ package com.salesforce.dataloader.dao.database;
 
 import java.util.*;
 
+import com.salesforce.dataloader.model.Row;
 import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.TestBase;
@@ -143,7 +144,7 @@ public class DatabaseTest extends TestBase {
             reader = new DatabaseReader(theController.getConfig(), "queryAccountAll");
             reader.open();
             int readBatchSize = 1000;
-            List<Map<String,Object>> readRowList = reader.readRowList(readBatchSize);
+            List<Row> readRowList = reader.readRowList(readBatchSize);
             int rowsProcessed = 0;
             assertNotNull("Error reading " + readBatchSize + " rows", readRowList);
             while(readRowList.size() > 0) {
@@ -152,10 +153,10 @@ public class DatabaseTest extends TestBase {
                 Collections.sort(readRowList, new AccountRowComparator(!isInsert));
                 logger.info("Verifying database success for next " + (rowsProcessed + readRowList.size()) + " rows");
                 for (int i=0; i < readRowList.size(); i++) {
-                    Map<String,Object> readRow = readRowList.get(i);
+                    Row readRow = readRowList.get(i);
                     assertNotNull("Error reading data row #" + i + ": the row shouldn't be null", readRow);
                     assertTrue("Error reading data row #" + i + ": the row shouldn't be empty", readRow.size()>0);
-                    Map<String,Object> expectedRow = DatabaseTestUtil.getInsertOrUpdateAccountRow(isInsert, rowsProcessed, DatabaseTestUtil.DateType.VALIDATION);
+                    Row expectedRow = DatabaseTestUtil.getInsertOrUpdateAccountRow(isInsert, rowsProcessed, DatabaseTestUtil.DateType.VALIDATION);
                     // verify all expected data
                     for(String colName : VALIDATE_COLS) {
                         if(validateDates && colName.equals(DateType.DATE)) {
@@ -184,7 +185,7 @@ public class DatabaseTest extends TestBase {
      * @param col
      * @param colExpected
      */
-    private static void verifyCol(String colName, Map<String, Object> row, Map<String, Object> expectedRow) {
+    private static void verifyCol(String colName, Row row, Row expectedRow) {
         Object actualValue = row.get(colName);
         Object expectedValue = expectedRow.get(colName);
         assertNotNull("actual value is null", actualValue);

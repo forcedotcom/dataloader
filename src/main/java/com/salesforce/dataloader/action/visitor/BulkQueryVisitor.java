@@ -34,6 +34,7 @@ import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.*;
+import com.salesforce.dataloader.model.Row;
 import com.sforce.async.*;
 
 /**
@@ -89,7 +90,7 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
                     List<String> csvRow;
                     while ((csvRow = rdr.nextRecord()) != null) {
                         final StringBuilder id = new StringBuilder();
-                        final Map<String, Object> daoRow = getDaoRow(headers, csvRow, id);
+                        final Row daoRow = getDaoRow(headers, csvRow, id);
                         addResultRow(daoRow, id.toString());
                     }
                 } finally {
@@ -101,7 +102,7 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
         }
     }
 
-    private Map<String, Object> getDaoRow(List<String> headers, List<String> csvRow, StringBuilder id) {
+    private Row getDaoRow(List<String> headers, List<String> csvRow, StringBuilder id) {
         return getMapper().mapCsvRowSfdcToLocal(headers, csvRow, id);
     }
 
