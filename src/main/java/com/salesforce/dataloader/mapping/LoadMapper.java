@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.exception.MappingInitializationException;
+import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.Field;
 import org.apache.log4j.Logger;
 import org.springframework.util.StringUtils;
@@ -69,8 +70,8 @@ public class LoadMapper extends Mapper {
         return result;
     }
 
-    public Map<String, Object> mapData(Map<String, Object> localRow) {
-        Map<String, Object> mappedData = new HashMap<String, Object>();
+    public Row mapData(Row localRow) {
+        Row mappedData = new Row();
         for (Map.Entry<String, Object> entry : localRow.entrySet()) {
             String sfdcName = getMapping(entry.getKey());
             if (StringUtils.hasText(sfdcName)) {

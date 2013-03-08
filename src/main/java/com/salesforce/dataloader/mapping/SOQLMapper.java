@@ -29,6 +29,7 @@ package com.salesforce.dataloader.mapping;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.salesforce.dataloader.model.Row;
 import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.client.PartnerClient;
@@ -66,14 +67,14 @@ public class SOQLMapper extends Mapper {
         return daoColumns;
     }
 
-    public Map<String, Object> mapPartnerSObjectSfdcToLocal(SObject sobj) {
-        Map<String, Object> map = new HashMap<String, Object>();
+    public Row mapPartnerSObjectSfdcToLocal(SObject sobj) {
+        Row map = new Row();
         mapPartnerSObject(map, "", sobj);
         mapConstants(map);
         return map;
     }
 
-    private void mapPartnerSObject(Map<String, Object> map, String prefix, XmlObject sobj) {
+    private void mapPartnerSObject(Row map, String prefix, XmlObject sobj) {
         Iterator<XmlObject> fields = sobj.getChildren();
         if (fields == null) return;
         while (fields.hasNext()) {
@@ -101,8 +102,8 @@ public class SOQLMapper extends Mapper {
         }
     }
 
-    public Map<String, Object> mapCsvRowSfdcToLocal(List<String> headers, List<String> values, StringBuilder id) {
-        Map<String, Object> resultRow = new HashMap<String, Object>();
+    public Row mapCsvRowSfdcToLocal(List<String> headers, List<String> values, StringBuilder id) {
+        Row resultRow = new Row();
         Iterator<String> headerIter = headers.listIterator();
         for (String val : values) {
             String sfdcName = headerIter.next();

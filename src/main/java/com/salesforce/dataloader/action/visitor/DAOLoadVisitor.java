@@ -28,6 +28,7 @@ package com.salesforce.dataloader.action.visitor;
 
 import java.util.*;
 
+import com.salesforce.dataloader.model.Row;
 import org.apache.commons.beanutils.*;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
@@ -54,7 +55,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
     // this stores the dynabeans, which convert types correctly
     protected final List<DynaBean> dynaArray;
-    protected final List<Map<String, Object>> dataArray;
+    protected final List<Row> dataArray;
 
     protected final BasicDynaClass dynaClass;
     protected final DynaProperty[] dynaProps;
@@ -68,7 +69,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         this.columnNames = ((DataReader)controller.getDao()).getColumnNames();
 
         dynaArray = new LinkedList<DynaBean>();
-        dataArray = new LinkedList<Map<String, Object>>();
+        dataArray = new LinkedList<Row>();
 
         SforceDynaBean.registerConverters(getConfig());
 
@@ -79,11 +80,11 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     }
 
     @Override
-    public final void visit(Map<String, Object> row) throws OperationException, DataAccessObjectException,
+    public final void visit(Row row) throws OperationException, DataAccessObjectException,
     ConnectionException {
         initLoadRateCalculator();
         // the result are sforce fields mapped to data
-        Map<String, Object> sforceDataRow = getMapper().mapData(row);
+        Row sforceDataRow = getMapper().mapData(row);
         try {
             convertBulkAPINulls(sforceDataRow);
             dynaArray.add(SforceDynaBean.convertToDynaBean(dynaClass, sforceDataRow));
@@ -111,12 +112,12 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
      * @throws DataAccessObjectException
      * @throws OperationException
      */
-    protected void conversionFailed(Map<String, Object> row, String errMsg) throws DataAccessObjectException,
+    protected void conversionFailed(Row row, String errMsg) throws DataAccessObjectException,
             OperationException {
         writeError(row, errMsg);
     }
 
-    protected void convertBulkAPINulls(Map<String, Object> row) {}
+    protected void convertBulkAPINulls(Row row) {}
 
     public void flushRemaining() throws OperationException, DataAccessObjectException {
         // check if there are any entities left
