@@ -137,12 +137,16 @@ public abstract class TestBase {
     }
 
     private void setupTestName() {
-        String methodNameWithoutTest = testName.getMethodName().replace("test", "");
-        baseName = StringUtils.capitalize(INSIDE_BRACKETS_TEST_PARAMETERS.matcher(methodNameWithoutTest).replaceAll(""));
+        baseName = testName.getMethodName();
+        if(baseName.startsWith("test")) {
+            baseName = baseName.substring(4);
+        }
+        baseName = StringUtils.uncapitalize(baseName);
+        baseName = INSIDE_BRACKETS_TEST_PARAMETERS.matcher(baseName).replaceAll("");
 
         // name the current thread. useful for test logging
         this.oldThreadName = Thread.currentThread().getName();
-        Thread.currentThread().setName(methodNameWithoutTest);
+        Thread.currentThread().setName(testName.getMethodName());
     }
 
     protected void setupController() {
