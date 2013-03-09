@@ -94,7 +94,7 @@ public class ExtractTest {
             Assert.fail("The parse should have failed with an error, instead of getting fields: " + fields.toString());
         } catch (ExtractException e) {
             assertNotNull("The parse error message should not be null", e.getMessage());
-            assertTrue("The parse error message should not be empty", e.getMessage().length() > 0);
+            assertTrue("The parse error message should not be empty", !e.getMessage().isEmpty());
         }
     }
 

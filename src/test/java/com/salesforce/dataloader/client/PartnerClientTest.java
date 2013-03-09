@@ -35,7 +35,6 @@ import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.UpsertResult;
-import com.sforce.soap.partner.fault.LoginFault;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 import org.apache.commons.beanutils.BasicDynaClass;
@@ -48,6 +47,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -64,19 +64,15 @@ import static org.junit.Assert.assertTrue;
 public class PartnerClientTest extends ProcessTestBase {
 
     @Test
-    public void testPartnerClientConnect() {
-        try {
-            PartnerClient client = new PartnerClient(getController());
-            assertFalse(getController().getConfig().getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN));
-            boolean connect = client.connect();
-            assertTrue(connect);
-            assertNotNull(client.getClient());
+    public void testPartnerClientConnect() throws Exception {
+        PartnerClient client = new PartnerClient(getController());
+        assertFalse(getController().getConfig().getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN));
+        boolean connect = client.connect();
+        assertTrue(connect);
+        assertNotNull(client.getClient());
 
-            client.connect(client.getSession());
-            assertTrue(client.getClient().getDisableFeedTrackingHeader().isDisableFeedTracking());
-        } catch (ConnectionException e) {
-            fail("Failed to connect to sfdc server", e);
-        }
+        client.connect(client.getSession());
+        assertTrue(client.getClient().getDisableFeedTrackingHeader().isDisableFeedTracking());
     }
 
     @Test
@@ -202,135 +198,92 @@ public class PartnerClientTest extends ProcessTestBase {
     }
 
     @Test
-    public void testSetEntityDescribe() {
+    public void testSetEntityDescribe() throws Exception{
         PartnerClient client = new PartnerClient(getController());
-        try {
-            assertTrue(client.setEntityDescribes());
-        } catch (ConnectionException e) {
-            fail(e);
-        }
+        assertTrue(client.setEntityDescribes());
         assertNotNull(client.getDescribeGlobalResults());
         assertEquals(client.getEntityTypes().getSobjects().length, client
                 .getDescribeGlobalResults().size());
     }
 
     @Test
-    public void testDescribeSObjects() {
+    public void testDescribeSObjects() throws Exception {
         PartnerClient client = new PartnerClient(getController());
         assertTrue(client.getEntityDescribeMap().isEmpty());
-        try {
-            client.setEntityDescribes();
-        } catch (ConnectionException e) {
-            fail(e);
-        }
+        client.setEntityDescribes();
+
         int numDescribes = 0;
         for (String objectType : client.getDescribeGlobalResults().keySet()){
-            try {
-                DescribeSObjectResult describeResult = client.describeSObject(objectType);
-                numDescribes++;
-                assertNotNull(describeResult);
-                assertEquals(objectType, describeResult.getName());
-            } catch (ConnectionException e) {
-                fail(e);
-            }
+            DescribeSObjectResult describeResult = client.describeSObject(objectType);
+            numDescribes++;
+            assertNotNull(describeResult);
+            assertEquals(objectType, describeResult.getName());
             assertEquals(numDescribes, client.getEntityDescribeMap().size());
         }
     }
 
     @Test
-    public void testSetFieldTypes() {
-        try {
-            PartnerClient client = new PartnerClient(getController());
-            client.setFieldTypes();
-            assertNotNull(client.getFieldTypes());
-        } catch (ConnectionException e) {
-            fail(e);
-        }
+    public void testSetFieldTypes() throws Exception {
+        PartnerClient client = new PartnerClient(getController());
+        client.setFieldTypes();
+        assertNotNull(client.getFieldTypes());
     }
 
     @Test
-    public void testGetSforceField() {
+    public void testGetSforceField() throws Exception {
         // test for account name as a default test case
-        try {
-            PartnerClient client = new PartnerClient(getController());
-            DescribeSObjectResult forceFields = client.describeSObject("account");
-            Field[] fields = forceFields.getFields();
-            assertNotNull(fields);
-            Field f;
-            boolean hasName = false;
-            for (int i = 0; i < fields.length; i++) {
-                f = fields[i];
-                if (f.getName().equals("Name")) {
-                    hasName = true;
-                }
+        PartnerClient client = new PartnerClient(getController());
+        DescribeSObjectResult forceFields = client.describeSObject("account");
+        Field[] fields = forceFields.getFields();
+        assertNotNull(fields);
+        boolean hasName = false;
+        for (Field field : fields) {
+            Field f = field;
+            if (f.getName().equals("Name")) {
+                hasName = true;
             }
-            assertTrue("Account Name not found ", hasName);
-        } catch (ConnectionException e) {
-            fail(e);
         }
-
+        assertTrue("Account Name not found ", hasName);
     }
 
     @Test
-    public void testInsertBasic() {
+    public void testInsertBasic() throws Exception {
         // setup our dynabeans
-        BasicDynaClass dynaClass = null;
-        try {
-            dynaClass = setupDynaClass("Account");
-        } catch (ConnectionException e) {
-            fail(e);
-        }
+        BasicDynaClass dynaClass = setupDynaClass("Account");
 
-        HashMap<String, Object> sforceMapping = new HashMap<String, Object>();
+        Map<String, Object> sforceMapping = new HashMap<String, Object>();
         sforceMapping.put("Name", "name" + System.currentTimeMillis());
         sforceMapping.put("Description", "the description");
         // Account number is set for easier test data cleanup
         sforceMapping.put("AccountNumber", ACCOUNT_NUMBER_PREFIX + System.currentTimeMillis());
 
         // now convert to a dynabean array for the client
-        DynaBean sforceObj = null;
-        try {
+        DynaBean sforceObj = dynaClass.newInstance();
 
-            sforceObj = dynaClass.newInstance();
-
-            // This does an automatic conversion of types.
-            BeanUtils.copyProperties(sforceObj, sforceMapping);
-        } catch (Exception e) {
-            fail(e);
-        }
+        // This does an automatic conversion of types.
+        BeanUtils.copyProperties(sforceObj, sforceMapping);
 
         List<DynaBean> beanList = new ArrayList<DynaBean>();
         beanList.add(sforceObj);
 
         // get the client and make the insert call
-        try {
-            PartnerClient client = new PartnerClient(getController());
-            SaveResult[] results = client.loadInserts(beanList);
-            for (int i = 0; i < results.length; i++) {
-                SaveResult result = results[i];
-                if (!result.getSuccess()) {
-                    Assert.fail("Insert returned an error: " + result.getErrors()[0].getMessage());
-                }
+        PartnerClient client = new PartnerClient(getController());
+        SaveResult[] results = client.loadInserts(beanList);
+        for (SaveResult result : results) {
+            if (!result.getSuccess()) {
+                Assert.fail("Insert returned an error: " + result.getErrors()[0].getMessage());
             }
-        } catch (ConnectionException e) {
-            fail(e);
         }
-
     }
 
     @Test
-    public void testUpdateBasic() {
+    public void testUpdateBasic() throws Exception {
         String id = getRandomAccountId();
 
         // setup our dynabeans
-        BasicDynaClass dynaClass = null;
-        try {
-            dynaClass = setupDynaClass("Account");
-        } catch (ConnectionException e) {
-            fail(e);
-        }
+        BasicDynaClass dynaClass = setupDynaClass("Account");
 
-        HashMap<String, Object> sforceMapping = new HashMap<String, Object>();
+        Map<String, Object> sforceMapping = new HashMap<String, Object>();
         sforceMapping.put("Id", id);
         sforceMapping.put("Name", "newname" + System.currentTimeMillis());
         sforceMapping.put("Description", "the new description");
@@ -338,83 +291,54 @@ public class PartnerClientTest extends ProcessTestBase {
         sforceMapping.put("AccountNumber", ACCOUNT_NUMBER_PREFIX + System.currentTimeMillis());
 
         // now convert to a dynabean array for the client
-        DynaBean sforceObj = null;
-        try {
+        DynaBean sforceObj = dynaClass.newInstance();
 
-            sforceObj = dynaClass.newInstance();
-
-            // This does an automatic conversion of types.
-            BeanUtils.copyProperties(sforceObj, sforceMapping);
-        } catch (Exception e) {
-            fail(e);
-        }
+        // This does an automatic conversion of types.
+        BeanUtils.copyProperties(sforceObj, sforceMapping);
 
         List<DynaBean> beanList = new ArrayList<DynaBean>();
         beanList.add(sforceObj);
 
         // get the client and make the insert call
-        try {
-            PartnerClient client = new PartnerClient(getController());
-            SaveResult[] results = client.loadUpdates(beanList);
-            for (int i = 0; i < results.length; i++) {
-                SaveResult result = results[i];
-                if (!result.getSuccess()) {
-                    Assert.fail("Update returned an error" + result.getErrors()[0].getMessage());
-                }
+        PartnerClient client = new PartnerClient(getController());
+        SaveResult[] results = client.loadUpdates(beanList);
+        for (SaveResult result : results) {
+            if (!result.getSuccess()) {
+                Assert.fail("Update returned an error" + result.getErrors()[0].getMessage());
             }
-        } catch (ConnectionException e) {
-            fail(e);
         }
-
     }
 
     /**
      * Basic failing - forgetting the id
      */
     @Test
-    public void testUpdateFailBasic() {
+    public void testUpdateFailBasic() throws Exception {
 
         // setup our dynabeans
-        BasicDynaClass dynaClass = null;
-        try {
-            dynaClass = setupDynaClass("Account");
-        } catch (ConnectionException e) {
-            fail(e);
-        }
+        BasicDynaClass dynaClass = setupDynaClass("Account");
 
-        HashMap<String, Object> sforceMapping = new HashMap<String, Object>();
+        Map<String, Object> sforceMapping = new HashMap<String, Object>();
         sforceMapping.put("Name", "newname" + System.currentTimeMillis());
         sforceMapping.put("Description", "the new description");
         // Account number is set for easier test data cleanup
         sforceMapping.put("AccountNumber", ACCOUNT_NUMBER_PREFIX + System.currentTimeMillis());
 
         // now convert to a dynabean array for the client
-        DynaBean sforceObj = null;
-        try {
-
-            sforceObj = dynaClass.newInstance();
-
-            // This does an automatic conversion of types.
-            BeanUtils.copyProperties(sforceObj, sforceMapping);
-        } catch (Exception e) {
-            fail(e);
-        }
+        DynaBean sforceObj = dynaClass.newInstance();
+        // This does an automatic conversion of types.
+        BeanUtils.copyProperties(sforceObj, sforceMapping);
 
         List<DynaBean> beanList = new ArrayList<DynaBean>();
         beanList.add(sforceObj);
 
         // get the client and make the insert call
-        try {
-            PartnerClient client = new PartnerClient(getController());
-            SaveResult[] results = client.loadUpdates(beanList);
-            for (int i = 0; i < results.length; i++) {
-                SaveResult result = results[i];
-                if (result.getSuccess()) {
-                    Assert.fail("Update should not have been a success.");
-                }
+        PartnerClient client = new PartnerClient(getController());
+        SaveResult[] results = client.loadUpdates(beanList);
+        for (SaveResult result : results) {
+            if (result.getSuccess()) {
+                Assert.fail("Update should not have been a success.");
             }
-        } catch (ConnectionException e) {
-            fail(e);
         }
     }
 
@@ -422,7 +346,7 @@ public class PartnerClientTest extends ProcessTestBase {
      * Test basic upsert operation
      */
     @Test
-    public void testUpsertAccountBasic() {
+    public void testUpsertAccountBasic() throws Exception {
         doUpsertAccount(false);
     }
 
@@ -430,7 +354,7 @@ public class PartnerClientTest extends ProcessTestBase {
      * Test basic upsert operation
      */
     @Test
-    public void testUpsertContactBasic() {
+    public void testUpsertContactBasic() throws Exception {
         doUpsertContact(false);
     }
 
@@ -438,7 +362,7 @@ public class PartnerClientTest extends ProcessTestBase {
      * Test basic upsert on foreign key
      */
     @Test
-    public void testUpsertAccountFkBasic() {
+    public void testUpsertAccountFkBasic() throws Exception {
         doUpsertAccount(true);
     }
 
@@ -446,7 +370,7 @@ public class PartnerClientTest extends ProcessTestBase {
      * Test basic upsert on foreign key
      */
     @Test
-    public void testUpsertContactFkBasic() {
+    public void testUpsertContactFkBasic() throws Exception {
         doUpsertContact(true);
     }
 
@@ -454,7 +378,7 @@ public class PartnerClientTest extends ProcessTestBase {
      * Test basic failure to upsert - no external id specified
      */
     @Test
-    public void testUpsertFailBasic() {
+    public void testUpsertFailBasic() throws Exception {
         doUpsertFailBasic(false);
     }
 
@@ -462,11 +386,11 @@ public class PartnerClientTest extends ProcessTestBase {
      * Test basic failure to upsert on foreign key - no foreign key external id specified (blank value)
      */
     @Test
-    public void testUpsertFkFailBasic() {
+    public void testUpsertFkFailBasic() throws Exception {
         doUpsertFailBasic(true);
     }
 
-    private void doUpsertAccount(boolean upsertFk) {
+    private void doUpsertAccount(boolean upsertFk) throws Exception {
         String origExtIdField = getController().getConfig().getString(Config.EXTERNAL_ID_FIELD);
 
         try {
@@ -474,7 +398,7 @@ public class PartnerClientTest extends ProcessTestBase {
             String extIdField = setExtIdField(DEFAULT_ACCOUNT_EXT_ID_FIELD);
             Object extIdValue = getRandomExtId("Account", ACCOUNT_WHERE_CLAUSE, null);
 
-            HashMap<String, Object> sforceMapping = new HashMap<String, Object>();
+            Map<String, Object> sforceMapping = new HashMap<String, Object>();
             sforceMapping.put(extIdField, extIdValue);
             sforceMapping.put("Name", "newname" + System.currentTimeMillis());
             sforceMapping.put("Description", "the new description");
@@ -499,7 +423,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
-    private void doUpsertContact(boolean upsertFk) {
+    private void doUpsertContact(boolean upsertFk) throws Exception {
         String origExtIdField = getController().getConfig().getString(Config.EXTERNAL_ID_FIELD);
 
         try {
@@ -507,7 +431,7 @@ public class PartnerClientTest extends ProcessTestBase {
             String extIdField = setExtIdField(DEFAULT_CONTACT_EXT_ID_FIELD);
             Object extIdValue = getRandomExtId("Contact", CONTACT_WHERE_CLAUSE, null);
 
-            HashMap<String, Object> sforceMapping = new HashMap<String, Object>();
+            Map<String, Object> sforceMapping = new HashMap<String, Object>();
             sforceMapping.put(extIdField, extIdValue);
             sforceMapping.put("FirstName", "newFirstName" + System.currentTimeMillis());
             sforceMapping.put("LastName", "newLastName" + System.currentTimeMillis());
@@ -540,60 +464,38 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
-    /**
-     * @param sforceMapping
-     */
-    private void doUpsert(String entity, HashMap<String, Object> sforceMapping) {
-        DynaBean sforceObj = null;
-        try {
-            // now convert to a dynabean array for the client
-            // setup our dynabeans
-            BasicDynaClass dynaClass = null;
-            try {
-                dynaClass = setupDynaClass(entity);
-            } catch (ConnectionException e) {
-                fail(e);
-            }
+    private void doUpsert(String entity, Map<String, Object> sforceMapping) throws Exception {
+        // now convert to a dynabean array for the client
+        // setup our dynabeans
+        BasicDynaClass dynaClass = setupDynaClass(entity);
 
-            sforceObj = dynaClass.newInstance();
+        DynaBean sforceObj = dynaClass.newInstance();
 
-            // This does an automatic conversion of types.
-            BeanUtils.copyProperties(sforceObj, sforceMapping);
-        } catch (Exception e) {
-            fail(e);
-        }
+        // This does an automatic conversion of types.
+        BeanUtils.copyProperties(sforceObj, sforceMapping);
 
         List<DynaBean> beanList = new ArrayList<DynaBean>();
         beanList.add(sforceObj);
 
         // get the client and make the insert call
-        try {
-            PartnerClient client = new PartnerClient(getController());
-            UpsertResult[] results = client.loadUpserts(beanList);
-            for (UpsertResult result : results) {
-                if (!result.getSuccess()) {
-                    Assert.fail("Upsert returned an error: " + result.getErrors()[0].getMessage());
-                }
+        PartnerClient client = new PartnerClient(getController());
+        UpsertResult[] results = client.loadUpserts(beanList);
+        for (UpsertResult result : results) {
+            if (!result.getSuccess()) {
+                Assert.fail("Upsert returned an error: " + result.getErrors()[0].getMessage());
             }
-        } catch (ConnectionException e) {
-            fail(e);
         }
     }
 
     /**
      * Basic failing - forgetting the external id or foreign key external id
      */
-    private void doUpsertFailBasic(boolean upsertFk) {
+    private void doUpsertFailBasic(boolean upsertFk) throws Exception {
 
         // setup our dynabeans
-        BasicDynaClass dynaClass = null;
-        try {
-            dynaClass = setupDynaClass("Account");
-        } catch (ConnectionException e) {
-            fail(e);
-        }
+        BasicDynaClass dynaClass = setupDynaClass("Account");
 
-        HashMap<String, Object> sforceMapping = new HashMap<String, Object>();
+        Map<String, Object> sforceMapping = new HashMap<String, Object>();
         sforceMapping.put("Name", "newname" + System.currentTimeMillis());
         sforceMapping.put("Description", "the new description");
         // Account number is set for easier test data cleanup
@@ -609,46 +511,31 @@ public class PartnerClientTest extends ProcessTestBase {
         }
 
         // now convert to a dynabean array for the client
-        DynaBean sforceObj = null;
-        try {
+        DynaBean sforceObj = dynaClass.newInstance();
 
-            sforceObj = dynaClass.newInstance();
-
-            // This does an automatic conversion of types.
-            BeanUtils.copyProperties(sforceObj, sforceMapping);
-        } catch (Exception e) {
-            fail(e);
-        }
+        // This does an automatic conversion of types.
+        BeanUtils.copyProperties(sforceObj, sforceMapping);
 
         List<DynaBean> beanList = new ArrayList<DynaBean>();
         beanList.add(sforceObj);
 
-        try {
-            PartnerClient client = new PartnerClient(getController());
-            UpsertResult[] results = client.loadUpserts(beanList);
-            for (UpsertResult result : results) {
-                if (result.getSuccess()) {
-                    Assert.fail("Upsert should not have been a success.");
-                }
+        PartnerClient client = new PartnerClient(getController());
+        UpsertResult[] results = client.loadUpserts(beanList);
+        for (UpsertResult result : results) {
+            if (result.getSuccess()) {
+                Assert.fail("Upsert should not have been a success.");
             }
-        } catch (ConnectionException e) {
-            fail(e);
         }
     }
 
     @Test
-    public void testDeleteBasic() {
+    public void testDeleteBasic() throws Exception {
         String id = getRandomAccountId();
 
         // setup our dynabeans
-        BasicDynaClass dynaClass = null;
-        try {
-            dynaClass = setupDynaClass("Account");
-        } catch (ConnectionException e) {
-            fail(e);
-        }
+        BasicDynaClass dynaClass = setupDynaClass("Account");
 
-        HashMap<String, Object> sforceMapping = new HashMap<String, Object>();
+        Map<String, Object> sforceMapping = new HashMap<String, Object>();
         sforceMapping.put("Id", id);
         sforceMapping.put("Name", "name" + System.currentTimeMillis());
         sforceMapping.put("Description", "the description");
@@ -656,32 +543,21 @@ public class PartnerClientTest extends ProcessTestBase {
         sforceMapping.put("AccountNumber", ACCOUNT_NUMBER_PREFIX + System.currentTimeMillis());
 
         // now convert to a dynabean array for the client
-        DynaBean sforceObj = null;
-        try {
+        DynaBean sforceObj = dynaClass.newInstance();
 
-            sforceObj = dynaClass.newInstance();
-
-            // This does an automatic conversion of types.
-            BeanUtils.copyProperties(sforceObj, sforceMapping);
-        } catch (Exception e) {
-            fail(e);
-        }
+        // This does an automatic conversion of types.
+        BeanUtils.copyProperties(sforceObj, sforceMapping);
 
         List<DynaBean> beanList = new ArrayList<DynaBean>();
         beanList.add(sforceObj);
 
         // get the client and make the insert call
-        try {
-            PartnerClient client = new PartnerClient(getController());
-            DeleteResult[] results = client.loadDeletes(beanList);
-            for (int i = 0; i < results.length; i++) {
-                DeleteResult result = results[i];
-                if (!result.getSuccess()) {
-                    Assert.fail("Delete returned an error: " + result.getErrors()[0].getMessage());
-                }
+        PartnerClient client = new PartnerClient(getController());
+        DeleteResult[] results = client.loadDeletes(beanList);
+        for (DeleteResult result : results) {
+            if (!result.getSuccess()) {
+                Assert.fail("Delete returned an error: " + result.getErrors()[0].getMessage());
             }
-        } catch (ConnectionException e) {
-            fail(e);
         }
     }
 
@@ -689,78 +565,56 @@ public class PartnerClientTest extends ProcessTestBase {
      * Test a delete missing the id
      */
     @Test
-    public void testDeleteFailBasic() {
+    public void testDeleteFailBasic() throws Exception {
 
         // setup our dynabeans
-        BasicDynaClass dynaClass = null;
-        try {
-            dynaClass = setupDynaClass("Account");
-        } catch (ConnectionException e) {
-            fail(e);
-        }
+        BasicDynaClass dynaClass = setupDynaClass("Account");
 
-        HashMap<String, Object> sforceMapping = new HashMap<String, Object>();
+        Map<String, Object> sforceMapping = new HashMap<String, Object>();
         sforceMapping.put("name", "name" + System.currentTimeMillis());
         sforceMapping.put("description", "the description");
         // Account number is set for easier test data cleanup
         sforceMapping.put("AccountNumber", ACCOUNT_NUMBER_PREFIX + System.currentTimeMillis());
 
         // now convert to a dynabean array for the client
-        DynaBean sforceObj = null;
-        try {
+        DynaBean sforceObj = dynaClass.newInstance();
 
-            sforceObj = dynaClass.newInstance();
-
-            // This does an automatic conversion of types.
-            BeanUtils.copyProperties(sforceObj, sforceMapping);
-        } catch (Exception e) {
-            fail(e);
-        }
+        // This does an automatic conversion of types.
+        BeanUtils.copyProperties(sforceObj, sforceMapping);
 
         List<DynaBean> beanList = new ArrayList<DynaBean>();
         beanList.add(sforceObj);
 
         // get the client and make the insert call
-        try {
-            PartnerClient client = new PartnerClient(getController());
-            DeleteResult[] results = client.loadDeletes(beanList);
-            for (int i = 0; i < results.length; i++) {
-                DeleteResult result = results[i];
-                if (result.getSuccess()) {
-                    Assert.fail("Delete should have returned an error");
-                }
+        PartnerClient client = new PartnerClient(getController());
+        DeleteResult[] results = client.loadDeletes(beanList);
+        for (DeleteResult result : results) {
+            if (result.getSuccess()) {
+                Assert.fail("Delete should have returned an error");
             }
-        } catch (ConnectionException e) {
-            fail(e);
         }
     }
 
     @Test
-    public void testQueryBasic() {
+    public void testQueryBasic() throws Exception {
         // make sure there're some records to test with
         upsertSfdcAccounts(10);
 
         // get the client and make the query call
-        try {
-            PartnerClient client = new PartnerClient(getController());
-            QueryResult result = client.query("select id from account where " + ACCOUNT_WHERE_CLAUSE);
-            SObject[] records = result.getRecords();
-            assertNotNull(records);
+        PartnerClient client = new PartnerClient(getController());
+        QueryResult result = client.query("select id from account where " + ACCOUNT_WHERE_CLAUSE);
+        SObject[] records = result.getRecords();
+        assertNotNull(records);
+        assertTrue(records.length > 0);
+
+        // test query more if we have more records
+        if (!result.getDone()) {
+            QueryResult result2 = client.queryMore(result.getQueryLocator());
+
+            // if we are not done, we should get some records back
+            assertNotNull(result2.getRecords());
             assertTrue(records.length > 0);
-
-            // test query more if we have more records
-            if (!result.getDone()) {
-                QueryResult result2 = client.queryMore(result.getQueryLocator());
-
-                // if we are not done, we should get some records back
-                assertNotNull(result2.getRecords());
-                assertTrue(records.length > 0);
-            }
-
-        } catch (ConnectionException e) {
-            fail(e);
         }
-
     }
 
     /**
@@ -768,26 +622,18 @@ public class PartnerClientTest extends ProcessTestBase {
      * 
      * @return String account id
      */
-    private String getRandomAccountId() {
+    private String getRandomAccountId() throws ConnectionException {
         // make sure there're some records to get
         upsertSfdcAccounts(10);
 
-        String id = "";
-
         // get the client and make the query call
-        try {
-            PartnerClient client = new PartnerClient(getController());
-            QueryResult result = client.query("select id from account where " + ACCOUNT_WHERE_CLAUSE);
-            SObject[] records = result.getRecords();
-            assertNotNull(records);
-            assertTrue(records.length > 0);
+        PartnerClient client = new PartnerClient(getController());
+        QueryResult result = client.query("select id from account where " + ACCOUNT_WHERE_CLAUSE);
+        SObject[] records = result.getRecords();
+        assertNotNull(records);
+        assertTrue(records.length > 0);
 
-            id = records[0].getId().toString();
-        } catch (ConnectionException e) {
-            fail(e);
-        }
-
-        return id;
+        return records[0].getId();
     }
 
     /**
@@ -810,59 +656,44 @@ public class PartnerClientTest extends ProcessTestBase {
      *            value or null if uniqueness not required
      * @return String Account external id value
      */
-    private Object getRandomExtId(String entity, String whereClause, Object prevValue) {
-        Object extIdValue;
+    private Object getRandomExtId(String entity, String whereClause, Object prevValue) throws ConnectionException {
 
         // insert couple of accounts so there're at least two records to work with
         upsertSfdcRecords(entity, 2);
 
         // get the client and make the query call
-        try {
-            String extIdField = getController().getConfig().getString(Config.EXTERNAL_ID_FIELD);
-            PartnerClient client = new PartnerClient(getController());
-            // only get the records that have external id set, avoid nulls
-            String soql = "select " + extIdField + " from " + entity + " where " + whereClause + " and " + extIdField
-                    + " != null";
-            if (prevValue != null) {
-                soql += " and "
-                        + extIdField
-                        + "!= "
-                        + (prevValue.getClass().equals(String.class) ? ("'" + prevValue + "'") : String
-                                .valueOf(prevValue));
-            }
-            QueryResult result = client.query(soql);
-            SObject[] records = result.getRecords();
-            assertNotNull("Operation should return non-null values", records);
-            assertTrue("Operation should return 1 or more records", records.length > 0);
-            assertNotNull("Records should have non-null field: " + extIdField + " values", records[0]
-                    .getField(extIdField));
-
-            extIdValue = records[0].getField(extIdField);
-
-            return extIdValue;
-        } catch (ConnectionException e) {
-            fail(e);
+        String extIdField = getController().getConfig().getString(Config.EXTERNAL_ID_FIELD);
+        PartnerClient client = new PartnerClient(getController());
+        // only get the records that have external id set, avoid nulls
+        String soql = "select " + extIdField + " from " + entity + " where " + whereClause + " and " + extIdField
+                + " != null";
+        if (prevValue != null) {
+            soql += " and "
+                    + extIdField
+                    + "!= "
+                    + (prevValue.getClass().equals(String.class) ? ("'" + prevValue + "'") : String
+                            .valueOf(prevValue));
         }
-        return null;
+        QueryResult result = client.query(soql);
+        SObject[] records = result.getRecords();
+        assertNotNull("Operation should return non-null values", records);
+        assertTrue("Operation should return 1 or more records", records.length > 0);
+        assertNotNull("Records should have non-null field: " + extIdField + " values", records[0]
+                .getField(extIdField));
+
+        return records[0].getField(extIdField);
     }
 
     private BasicDynaClass setupDynaClass(String entity) throws ConnectionException {
         getController().getConfig().setValue(Config.ENTITY, entity);
         PartnerClient client = getController().getPartnerClient();
         if (!client.isLoggedIn()) {
-            try {
-                client.connect();
-            } catch (LoginFault e) {
-                fail(e);
-            } catch (ConnectionException e) {
-                fail(e);
-            }
+            client.connect();
         }
 
         getController().setFieldTypes();
         getController().setReferenceDescribes();
-        DynaProperty[] dynaProps;
-        dynaProps = SforceDynaBean.createDynaProps(getController().getPartnerClient().getFieldTypes(), getController());
+        DynaProperty[] dynaProps = SforceDynaBean.createDynaProps(getController().getPartnerClient().getFieldTypes(), getController());
         BasicDynaClass dynaClass = SforceDynaBean.getDynaBeanInstance(dynaProps);
         SforceDynaBean.registerConverters(getController().getConfig());
         return dynaClass;

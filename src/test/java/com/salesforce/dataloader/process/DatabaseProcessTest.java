@@ -67,6 +67,14 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class DatabaseProcessTest extends ProcessTestBase {
 
+    private static final Logger logger = Logger.getLogger(DatabaseReader.class);
+    private static final int NUM_ROWS = 1000;
+    private static final int BATCH_SIZE = 100;
+
+    public DatabaseProcessTest(Map<String, String> config) {
+        super(config);
+    }
+
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getTestParameters() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
@@ -80,15 +88,6 @@ public class DatabaseProcessTest extends ProcessTestBase {
                 new Object[] {withBulkApi.getConfigurations().get(0)},
                 new Object[] {bulkApiSerialMode.getConfigurations().get(0)},
                 new Object[] {bulkApiZipContent.getConfigurations().get(0)});
-    }
-
-    // logger
-    private static Logger logger = Logger.getLogger(DatabaseReader.class);
-    private static final int NUM_ROWS = 1000;
-    private static final int BATCH_SIZE = 100;
-
-    public DatabaseProcessTest(Map<String, String> config) {
-        super(config);
     }
 
     @Before
@@ -118,7 +117,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
     }
 
     @Test
-    public void testExtractAccountDbNegative() throws ProcessInitializationException, DataAccessObjectException {
+    public void testExtractAccountDbNegative() throws Exception {
         // upsert accounts into salesforce so there's something to query
         upsertSfdcAccounts(500);
         // upsert one bad record causing only one of the database write batches to fail
@@ -129,7 +128,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
     }
 
     @Test
-    public void testExtractMultipleBadAccounts() throws ProcessInitializationException, DataAccessObjectException {
+    public void testExtractMultipleBadAccounts() throws Exception {
         // upsert many accounts which will fail to be written to the database on extract
         // the sql exceptions should be logged
         upsertBadSfdcAccounts(555, 777);
@@ -139,7 +138,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
     }
 
     @Test
-    public void testUpsertAccountDb() throws ParseException, ProcessInitializationException, DataAccessObjectException {
+    public void testUpsertAccountDb() throws Exception {
 	// This test happens to configure its own encryption file and encrypted password
         // so we need to remove the default test password from the config
         final Map<String, String> argMap = getTestConfig();
@@ -151,8 +150,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
     }
 
     @Test
-    public void testMaximumBatchRowsDb() throws ParseException, ProcessInitializationException,
-    DataAccessObjectException {
+    public void testMaximumBatchRowsDb() throws Exception {
         final int numRows = isBulkAPIEnabled(getTestConfig()) ? Config.MAX_BULK_API_BATCH_SIZE
                 : Config.MAX_LOAD_BATCH_SIZE;
         // insert
@@ -184,7 +182,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
     }
 
     @Test
-    public void testInsertNullsDB() throws ParseException, ProcessInitializationException, DataAccessObjectException {
+    public void testInsertNullsDB() throws Exception {
         Map<String, String> args = getTestConfig();
         if (isBulkAPIEnabled(args)) {
             logger.info("testInsertNulls is disabled for bulk api");
@@ -227,10 +225,6 @@ public class DatabaseProcessTest extends ProcessTestBase {
         verifyDbSuccess(theController, "queryAccount", expectedSuccesses);
     }
 
-    /**
-     * @param theController
-     * @param startTime
-     */
     private void verifyDbSuccess(Controller theController, String dbConfigName, int expectedSuccesses) {
         DatabaseReader reader = null;
         logger.info("Verifying database success for database configuration: " + dbConfigName);

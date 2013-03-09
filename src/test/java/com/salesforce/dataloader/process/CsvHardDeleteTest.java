@@ -31,7 +31,6 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
-import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.model.Row;
 import org.junit.Assert;
 import org.junit.Test;
@@ -77,7 +76,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
      * was returned. This operation permanently deletes records from the org.
      */
     @Test
-    public void testHardDeleteAccountCsv() throws ProcessInitializationException, DataAccessObjectException {
+    public void testHardDeleteAccountCsv() throws Exception {
 
         // do an insert of some account records to ensure there is some data to
         // hard delete
@@ -94,7 +93,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
      * verify that hard delete operation cannot be performed
      */
     @Test
-    public void testHardDeleteUserPermOff() throws ProcessInitializationException, DataAccessObjectException {
+    public void testHardDeleteUserPermOff() throws Exception {
         // attempt to hard delete 100 accounts as a user without the "Bulk API Hard Delete" user perm enabled
         final Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(100));
         // change the configured user to be the standard user (ie without the perm)
@@ -109,7 +108,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
      * org.
      */
     @Test
-    public void testHardDelete1AccountCsv() throws ProcessInitializationException, DataAccessObjectException {
+    public void testHardDelete1AccountCsv() throws Exception {
         // do an insert of 1 account record to ensure there is some data to
         // hard delete
         // set batch process parameters
@@ -121,7 +120,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
      * Hard Delete - Negative test. An empty input csv file is used to verify that error message is thrown to user.
      */
     @Test
-    public void testHardDeleteEmptyCsvFile() throws ProcessInitializationException, DataAccessObjectException {
+    public void testHardDeleteEmptyCsvFile() throws Exception {
         // set batch process parameters
         Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(0));
 
@@ -182,7 +181,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
      * Hard Delete - Negative test. Input a csv file with invalid id to verify that the test fails.
      */
     @Test
-    public void testHardDeleteInvalidInput() throws ProcessInitializationException, DataAccessObjectException {
+    public void testHardDeleteInvalidInput() throws Exception {
         // do an insert of some account records to ensure there is some data
         // to hard delete
         Map<String, String> argMap = getHardDeleteTestConfig(new InvalidIdTemplateListener(0));
@@ -197,8 +196,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
      * fails for the invalid id and passes for the valid id.
      */
     @Test
-    public void testHardDeleteInvalidIDFailsOtherValidIDPasses() throws ProcessInitializationException,
-    DataAccessObjectException {
+    public void testHardDeleteInvalidIDFailsOtherValidIDPasses() throws Exception {
         // do an insert of some account records to ensure there is some data to
         // hard delete
         InvalidIdTemplateListener listener = new InvalidIdTemplateListener(2);
@@ -217,7 +215,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
      * Hard Delete - Negative test. Hard delete should fail when other object's ID is used.
      */
     @Test
-    public void testHardDeleteIDFromOtherObjectFails() throws ProcessInitializationException, DataAccessObjectException {
+    public void testHardDeleteIDFromOtherObjectFails() throws Exception {
         // set batch process parameters
         Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(1));
         argMap.put(Config.ENTITY, "Contact");
@@ -249,8 +247,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
      * Hard Delete - Negative test. Hard delete succeeds for same object ID and fails for other object ID in same csv.
      */
     @Test
-    public void testHardDeleteSameObjectIDSucceedsOtherObjectIDFails() throws ProcessInitializationException,
-    DataAccessObjectException {
+    public void testHardDeleteSameObjectIDSucceedsOtherObjectIDFails() throws Exception {
         // do an insert of some account records to ensure there is some data to
         // hard delete
         HeterogeneousIdTemplateListener listener = new HeterogeneousIdTemplateListener(1, 1);
@@ -267,8 +264,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
 
     private Map<String, String> getHardDeleteTestConfig(TemplateListener listener) throws DataAccessObjectException {
         final String deleteFn = convertTemplateToInput(this.baseName + "Template.csv", this.baseName + ".csv", listener);
-        final Map<String, String> configMap = getTestConfig(OperationInfo.hard_delete, deleteFn, false);
-        return configMap;
+        return getTestConfig(OperationInfo.hard_delete, deleteFn, false);
     }
 
 }
