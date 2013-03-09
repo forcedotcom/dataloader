@@ -249,6 +249,13 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.13</version>
+          <dependencies>
+              <dependency>
+                  <groupId>org.apache.maven.surefire</groupId>
+                  <artifactId>surefire-junit4</artifactId>
+                  <version>2.13</version>
+              </dependency>
+          </dependencies>
         <configuration>
           <excludes>
             <!-- exclude TestRecordsUtil class which inherit from TestCase -->
