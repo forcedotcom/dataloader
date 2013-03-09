@@ -31,6 +31,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.salesforce.dataloader.model.NACalendarValue;
+import com.salesforce.dataloader.model.NATextValue;
 import com.salesforce.dataloader.model.Row;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
@@ -55,8 +57,7 @@ import com.sforce.async.*;
 public class BulkLoadVisitor extends DAOLoadVisitor {
 
     private static final Logger logger = Logger.getLogger(BulkLoadVisitor.class);
-    
-    private static final String NULL_STRING = "#N/A";
+
     private static final String SUCCESS_RESULT_COL = "Success";
     private static final String ERROR_RESULT_COL = "Error";
     private static final String ID_RESULT_COL = "Id";
@@ -186,11 +187,12 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     private void writeSingleColumn(PrintStream out, String fieldName, Object fieldValue) throws LoadException {
-
         if (fieldValue != null) {
             Object col = fieldValue;
-            if (fieldValue instanceof Calendar) {
-                col = DATE_FMT.format(((Calendar)fieldValue).getTime());
+            if (fieldValue instanceof NACalendarValue) {
+                col = fieldValue.toString();
+            } else if (fieldValue instanceof Calendar) {
+                col = DATE_FMT.format(((Calendar) fieldValue).getTime());
             } else if (fieldValue instanceof byte[]) {
                 if (!getController().attachmentsEnabled())
                     throw new LoadException(Messages.getMessage("FinishPage", "cannotMapBase64ForBulkApi", fieldName));
@@ -198,10 +200,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             }
             writeColumnToCsv(out, col);
         } else {
-            // TODO: we should be more strict about this
-            // perhaps we should have a "Strict" setting that makes us more picky about the input
+            // all null values should be ignored when using bulk API
             getLogger().warn(Messages.getMessage(getClass(), "noFieldVal", fieldName));
-            writeColumnToCsv(out, NULL_STRING);
         }
     }
 
@@ -453,11 +453,11 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
     @Override
     protected void convertBulkAPINulls(Row row) {
-        final HashSet<String> nullColumns = new HashSet<String>();
-        for (final Map.Entry<String, Object> ent : row.entrySet())
-            if (NULL_STRING.equals(String.valueOf(ent.getValue()))) nullColumns.add(ent.getKey());
-        for (final String key : nullColumns)
-            row.put(key, null);
+        for (final Map.Entry<String, Object> entry : row.entrySet()) {
+            if (NATextValue.isNA(entry.getValue())) {
+                entry.setValue(NATextValue.getInstance());
+            }
+        }
     }
 
     @Override
