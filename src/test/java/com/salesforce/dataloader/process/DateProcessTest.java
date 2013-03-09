@@ -54,16 +54,23 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class DateProcessTest extends ProcessTestBase {
 
+    private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone("GMT");
+    private final DateFormat partnerApiDateFormat;
+    private final DateFormat dateFormatWithTimezone;
+
     public DateProcessTest(Map<String, String> config) {
         super(config);
+        partnerApiDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        partnerApiDateFormat.setTimeZone(GMT_TIME_ZONE);
+        dateFormatWithTimezone = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSz");
     }
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getTestParameters() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
-        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
-                Boolean.TRUE.toString());
-        return Arrays.asList(new Object[] {parent.getConfigurations().get(0)}, new Object[] {withBulkApi.getConfigurations().get(0)});
+        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED, Boolean.TRUE.toString());
+        return Arrays.asList(new Object[] {parent.getConfigurations().get(0)},
+                new Object[] {withBulkApi.getConfigurations().get(0)});
     }
 
     @Override
@@ -74,20 +81,12 @@ public class DateProcessTest extends ProcessTestBase {
         return cfg;
     }
 
-    private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone("GMT");
-    private static final DateFormat PARTNER_API_FMT;
-    private static final DateFormat DATE_FMT_WITH_TZ = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSz");
-    static {
-        PARTNER_API_FMT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        PARTNER_API_FMT.setTimeZone(GMT_TIME_ZONE);
-    }
-
     @Test
     public void testDateEndingInZ() throws Exception {
         runProcess(getTestConfig(OperationInfo.insert, false), 1);
 
         QueryResult qr = getBinding().query("select CustomDateTime__c from Account where AccountNumber__c='ACCT_0'");
-        assertEquals(qr.getSize(), 1);
+        assertEquals(1, qr.getSize());
 
         Date expectedDate = parseDateWithTimezone("2010-10-14T12:00:00.000GMT");
         assertEquals(expectedDate, parseDateFromPartnerApi((String)qr.getRecords()[0].getField("CustomDateTime__c")));
@@ -97,7 +96,7 @@ public class DateProcessTest extends ProcessTestBase {
     public void testDateUsingDefaultTimeZone() throws Exception {
         runProcess(getTestConfig(OperationInfo.insert, false), 1);
         QueryResult qr = getBinding().query("select CustomDateTime__c from Account where AccountNumber__c='ACCT_0'");
-        assertEquals(qr.getSize(), 1);
+        assertEquals(1, qr.getSize());
 
         Date expectedDate = parseDateWithTimezone("2010-10-14T12:00:00.000PDT");
         assertEquals(expectedDate, parseDateFromPartnerApi((String)qr.getRecords()[0].getField("CustomDateTime__c")));
@@ -107,18 +106,18 @@ public class DateProcessTest extends ProcessTestBase {
     public void testDateWithTimeZone() throws Exception {
         runProcess(getTestConfig(OperationInfo.insert, false), 1);
         QueryResult qr = getBinding().query("select CustomDateTime__c from Account where AccountNumber__c='ACCT_0'");
-        assertEquals(qr.getSize(), 1);
+        assertEquals(1, qr.getSize());
 
         Date expectedDate = parseDateWithTimezone("2010-10-14T12:00:00.000-0300");
         assertEquals(expectedDate, parseDateFromPartnerApi((String)qr.getRecords()[0].getField("CustomDateTime__c")));
     }
 
     private Date parseDateFromPartnerApi(String dateString) throws ParseException {
-        return PARTNER_API_FMT.parse(dateString);
+        return partnerApiDateFormat.parse(dateString);
     }
 
     private Date parseDateWithTimezone(String dateString) throws ParseException {
-        return DATE_FMT_WITH_TZ.parse(dateString);
+        return dateFormatWithTimezone.parse(dateString);
     }
 
 }

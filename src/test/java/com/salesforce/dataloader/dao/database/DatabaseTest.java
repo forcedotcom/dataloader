@@ -29,16 +29,18 @@ import com.salesforce.dataloader.TestBase;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.database.DatabaseTestUtil.DateType;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.AccountRowComparator;
 import org.apache.log4j.Logger;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -53,7 +55,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class DatabaseTest extends TestBase {
 
-    private static Logger logger = Logger.getLogger(DatabaseReader.class);
+    private static final Logger logger = Logger.getLogger(DatabaseReader.class);
     
     private static final String[] VALIDATE_COLS = { DatabaseTestUtil.EXT_ID_COL, DatabaseTestUtil.SFDC_ID_COL,
         DatabaseTestUtil.NAME_COL, DatabaseTestUtil.PHONE_COL, DatabaseTestUtil.REVENUE_COL,
@@ -75,7 +77,7 @@ public class DatabaseTest extends TestBase {
     }
 
     @Test
-    public void testDatabaseInsertQuery() {
+    public void testDatabaseInsertQuery() throws Exception {
         // insert some data
         DatabaseTestUtil.insertOrUpdateAccountsDb(getController(), true/* insert */, NUM_ROWS, false);
 
@@ -84,7 +86,7 @@ public class DatabaseTest extends TestBase {
     }
 
     @Test
-    public void testDatabaseUpdateQuery() {
+    public void testDatabaseUpdateQuery() throws Exception {
         // insert some data
         DatabaseTestUtil.insertOrUpdateAccountsDb(getController(), true/* insert */, NUM_ROWS, false);
 
@@ -96,32 +98,32 @@ public class DatabaseTest extends TestBase {
     }
 
     @Test
-    public void testDatabaseDateMappingDate() {
+    public void testDatabaseDateMappingDate() throws Exception {
         doTestDatabaseDateMapping(DatabaseTestUtil.DateType.DATE, true);
     }
 
     @Test
-    public void testDatabaseDateMappingCalendar() {
+    public void testDatabaseDateMappingCalendar() throws Exception {
         doTestDatabaseDateMapping(DatabaseTestUtil.DateType.CALENDAR, true);
     }
 
     @Test
-    public void testDatabaseDateMappingString() {
+    public void testDatabaseDateMappingString() throws Exception {
         doTestDatabaseDateMapping(DatabaseTestUtil.DateType.STRING, true);
     }
 
     @Test
-    public void testDatabaseDateMappingNull() {
+    public void testDatabaseDateMappingNull() throws Exception {
         // just make sure that this works.  Used to crash.
         doTestDatabaseDateMapping(DatabaseTestUtil.DateType.NULL, false);
     }
 
-    private void doTestDatabaseDateMapping(DatabaseTestUtil.DateType dateType, boolean verifyDates) {
-        for (String sqlType : new String[] { "java.sql.Date", "java.sql.Time", "java.sql.Timestamp" }) {
+    private void doTestDatabaseDateMapping(DatabaseTestUtil.DateType dateType, boolean verifyDates) throws Exception {
+        List<Class<? extends Date>> dateClass = Arrays.asList(java.sql.Date.class, Time.class, Timestamp.class);
+        for (Class<? extends Date> sqlType : dateClass) {
             try {
                 // insert some data
-                DatabaseTestUtil.insertOrUpdateAccountsDb(getController(), true/* insert */, 1, dateType, false,
-                        sqlType);
+                DatabaseTestUtil.insertOrUpdateAccountsDb(getController(), true/* insert */, 1, dateType, false, sqlType);
                 // query and verify the results
                 verifyDbInsertOrUpdate(getController(), true, verifyDates);
             } finally {
@@ -130,12 +132,7 @@ public class DatabaseTest extends TestBase {
         }
     }
 
-    /**
-     * @param theController
-     * @param validateDates TODO
-     * 
-     */
-    private static void verifyDbInsertOrUpdate(Controller theController, boolean isInsert, boolean validateDates) {
+    private static void verifyDbInsertOrUpdate(Controller theController, boolean isInsert, boolean validateDates) throws DataAccessObjectException {
         DatabaseReader reader = null;
         logger.info("Verifying database success for '" + (isInsert ? "insert" : "update") + "' operation");
         try {
@@ -170,20 +167,11 @@ public class DatabaseTest extends TestBase {
                 readRowList = reader.readRowList(readBatchSize);
                 assertNotNull("Error reading " + readBatchSize + " rows", readRowList);
             }
-        } catch (DataAccessObjectInitializationException e) {
-            Assert.fail("Error initializing database reader for db config: " + "queryAccountAll");
-        } catch (DataAccessObjectException e) {
-            Assert.fail("Error getting database from the database using db config: " + "queryAccountAll");
         } finally {
             if(reader != null) reader.close();
         }
     }
 
-    /**
-     * @param colName
-     * @param col
-     * @param colExpected
-     */
     private static void verifyCol(String colName, Row row, Row expectedRow) {
         Object actualValue = row.get(colName);
         Object expectedValue = expectedRow.get(colName);

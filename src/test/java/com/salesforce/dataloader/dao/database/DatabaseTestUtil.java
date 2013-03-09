@@ -25,24 +25,27 @@
  */
 package com.salesforce.dataloader.dao.database;
 
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import javax.sql.DataSource;
-
+import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.model.Row;
 import junit.framework.TestCase;
-
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import javax.sql.DataSource;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Utilities for database connectivity testing
@@ -51,24 +54,36 @@ import com.salesforce.dataloader.exception.DataAccessObjectInitializationExcepti
  * @since 8.0
  */
 public class DatabaseTestUtil {
-    // logger
-    private static Logger logger = Logger.getLogger(DatabaseTestUtil.class);
 
-    public enum DateType {CALENDAR, DATE, STRING, VALIDATION, NULL};
+    private static final Logger logger = Logger.getLogger(DatabaseTestUtil.class);
 
-    public static void insertOrUpdateAccountsDb(Controller theController, boolean isInsert, int numAccounts,
-            boolean insertNulls) {
-        insertOrUpdateAccountsDb(theController, isInsert, numAccounts, DateType.CALENDAR, insertNulls,
-                "java.sql.Timestamp");
+    public enum DateType {CALENDAR, DATE, STRING, VALIDATION, NULL;};
+
+    public static final String NAME_COL = "account_name";
+
+    public static final String PHONE_COL = "business_phone";
+    public static final String EXT_ID_COL = "account_ext_id";
+    public static final String SFDC_ID_COL = "sfdc_account_id";
+    public static final String REVENUE_COL = "annual_revenue";
+    public static final String LAST_UPDATED_COL = "last_updated";
+    public static final String ACCOUNT_NUMBER_COL = "account_number";
+    public static final Map<String, String> ALL_COLS = new HashMap<String, String>() {{
+        put(NAME_COL, "varchar(100)");
+        put(PHONE_COL, "varchar(20)");
+        put(EXT_ID_COL, "varchar(20)");
+        put(SFDC_ID_COL, "varchar(20)");
+        put(REVENUE_COL, "decimal");
+        put(LAST_UPDATED_COL, "date");
+        put(ACCOUNT_NUMBER_COL, "varchar(20)");
+        put("system_modstamp", "date default sysdate not null");
+    }};
+
+    public static void insertOrUpdateAccountsDb(Controller theController, boolean isInsert, int numAccounts, boolean insertNulls) {
+        insertOrUpdateAccountsDb(theController, isInsert, numAccounts, DateType.CALENDAR, insertNulls, Timestamp.class);
     }
 
-    /**
-     * @param theController
-     * @param isInsert
-     * @param numAccounts
-     */
     public static void insertOrUpdateAccountsDb(Controller theController, boolean isInsert, int numAccounts,
-            DateType dateType, boolean insertNulls, String sqlDateClass) {
+            DateType dateType, boolean insertNulls, Class<? extends Date> dateClass) {
         DatabaseWriter writer = null;
         String dbConfigName = isInsert ? "insertAccount" : "updateAccount";
         logger.info("Preparing to write " + numAccounts + " accounts to the database using db config: " + dbConfigName);
@@ -77,7 +92,7 @@ public class DatabaseTestUtil {
             BasicDataSource dataSource = dbConfig.getDataSource();
             SqlConfig sqlConfig = dbConfig.getSqlConfig();
             // override the configured sqltype for the last_update column
-            sqlConfig.getSqlParams().put(LAST_UPDATED_COL, sqlDateClass);
+            sqlConfig.getSqlParams().put(LAST_UPDATED_COL, dateClass.getName());
             writer = new DatabaseWriter(theController.getConfig(), dbConfigName, dataSource, sqlConfig);
             writer.open();
             List<Row> accountRowList = new ArrayList<Row>();
@@ -105,7 +120,7 @@ public class DatabaseTestUtil {
     public static Row getInsertOrUpdateAccountRow(boolean isInsert, int seqNum, DateType dateType) {
         return getInsertOrUpdateAccountRow(isInsert, seqNum, dateType, false);
     }
-    
+
     public static DatabaseConfig getDatabaseConfig(Controller controller, String dbConfigName) {
         String dbConfigFilename = controller.getConfig().constructConfigFilePath(
                 DatabaseContext.DEFAULT_CONFIG_FILENAME);
@@ -115,7 +130,7 @@ public class DatabaseTestUtil {
     /**
      * Generate data for one account row based on the seqNum passed in. If insert is desired, text data is based on
      * seqNum, if update, text data is based on 9999-seqNum
-     * 
+     *
      * @param isInsert
      *            if true, account is for insert, otherwise - for update
      * @param seqNum
@@ -123,8 +138,7 @@ public class DatabaseTestUtil {
      * @param dateType Type for the date field values
      * @return Row containing account data based on seqNum
      */
-    public static Row getInsertOrUpdateAccountRow(boolean isInsert, int seqNum, DateType dateType,
-            boolean insertNulls) {
+    public static Row getInsertOrUpdateAccountRow(boolean isInsert, int seqNum, DateType dateType, boolean insertNulls) {
         Row row = new Row();
         String operation;
         int seqInt;
@@ -179,41 +193,20 @@ public class DatabaseTestUtil {
     /**
      * Delete all accounts from account table. Useful as a cleanup step
      */
-    public static void deleteAllAccountsDb(Controller theController) {
+    public static void deleteAllAccountsDb(Controller theController) throws Exception {
         DatabaseWriter writer = null;
         try {
             writer = new DatabaseWriter(theController.getConfig(), "deleteAccountAll");
             writer.open();
             logger.info("Deleting all Accounts from database, using configuration: " + "deleteAccountAll");
             writer.writeRow(null);
-        } catch (DataAccessObjectInitializationException e) {
-            TestCase.fail("Error initializing database writer for db config: " + "deleteAccountAll");
-        } catch (DataAccessObjectException e) {
-            TestCase.fail("error deleting accounts from the database using db config: " + "deleteAccountAll");
         } finally {
-            if(writer != null) writer.close();
+            if(writer != null) {
+                writer.close();
+            }
         }
     }
 
-    public static final String NAME_COL = "account_name";
-    public static final String PHONE_COL = "business_phone";
-    public static final String EXT_ID_COL = "account_ext_id";
-    public static final String SFDC_ID_COL = "sfdc_account_id";
-    public static final String REVENUE_COL = "annual_revenue";
-    public static final String LAST_UPDATED_COL = "last_updated";
-    public static final String ACCOUNT_NUMBER_COL = "account_number";
-    
-    public static final Map<String, String> ALL_COLS = new HashMap<String, String>() {{
-        put(NAME_COL, "varchar(100)");
-        put(PHONE_COL, "varchar(20)");
-        put(EXT_ID_COL, "varchar(20)");
-        put(SFDC_ID_COL, "varchar(20)");
-        put(REVENUE_COL, "decimal");
-        put(LAST_UPDATED_COL, "date");
-        put(ACCOUNT_NUMBER_COL, "varchar(20)");
-        put("system_modstamp", "date default sysdate not null");
-    }};
-    
     public static void createTable(Controller controller, String tableName) {
         DataSource dataSource = DatabaseTestUtil.getDatabaseConfig(controller, "insertAccount").getDataSource();
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
@@ -228,17 +221,18 @@ public class DatabaseTestUtil {
         
         // create table if it doesn't exist
         if (!tableExists) {
-            String createTableSql = "create table "+ tableName + " (";
+            StringBuilder createTableSql = new StringBuilder(50);
+            createTableSql.append("create table ").append(tableName).append(" (");
             List<String> keys = new ArrayList<String>(ALL_COLS.keySet());
             for (int i = 0; i < keys.size(); i++ ) {
-                createTableSql += keys.get(i) + " " + ALL_COLS.get(keys.get(i));
+                createTableSql.append(keys.get(i)).append(" ").append(ALL_COLS.get(keys.get(i)));
                 if (i == keys.size() - 1) {
-                    createTableSql += ")";
+                    createTableSql.append(")");
                 } else {
-                    createTableSql += ", ";
+                    createTableSql.append(", ");
                 }
             }
-            jdbcTemplate.execute(createTableSql);
+            jdbcTemplate.execute(createTableSql.toString());
         }
     }
 

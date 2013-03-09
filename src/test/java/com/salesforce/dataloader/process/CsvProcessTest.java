@@ -32,8 +32,6 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dyna.DateConverter;
-import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.sobject.SObject;
 import org.junit.Test;
@@ -86,7 +84,7 @@ public class CsvProcessTest extends ProcessTestBase {
      * Tests the insert operation on Account - Positive test.
      */
     @Test
-    public void testInsertAccountCsv() throws ProcessInitializationException, DataAccessObjectException {
+    public void testInsertAccountCsv() throws Exception {
         runProcess(getTestConfig(OperationInfo.insert, false), 100);
     }
 
@@ -94,7 +92,7 @@ public class CsvProcessTest extends ProcessTestBase {
      * Tests update operation with input coming from a CSV file. Relies on the id's in the CSV on being in the database
      */
     @Test
-    public void testUpdateAccountCsv() throws ProcessInitializationException, Throwable {
+    public void testUpdateAccountCsv() throws Exception {
         runProcess(getUpdateTestConfig(false, null, 100), 100);
     }
 
@@ -102,7 +100,7 @@ public class CsvProcessTest extends ProcessTestBase {
      * Upsert the records from CSV file
      */
     @Test
-    public void testUpsertAccountCsv() throws ProcessInitializationException, DataAccessObjectException {
+    public void testUpsertAccountCsv() throws Exception {
         // manually inserts 50 accounts, then upserts 100 accounts (50 inserts and 50 updates)
         runUpsertProcess(getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 50), 50, 50);
     }
@@ -256,20 +254,21 @@ public class CsvProcessTest extends ProcessTestBase {
 
 
         // query them and verify that they have the values
-        StringBuffer fields = new StringBuffer("id");
-        for(String field : accountFieldsToReturn)
-            fields.append("," + field);
+        StringBuilder fields = new StringBuilder("id");
+        for(String field : accountFieldsToReturn) {
+            fields.append(",").append(field);
+        }
 
-                SObject[] sobjects = getBinding().retrieve(fields.toString(), "Account", ids.toArray(new String[ids.size()]));
-                assertEquals("Wrong number of accounts created", ids.size(), sobjects.length);
-                return sobjects;
+        SObject[] sobjects = getBinding().retrieve(fields.toString(), "Account", ids.toArray(new String[ids.size()]));
+        assertEquals("Wrong number of accounts created", ids.size(), sobjects.length);
+        return sobjects;
     }
 
     /**
      * Tests Upsert on foreign key for the records based on the CSV file
      */
     @Test
-    public void testUpsertFkAccountCsv() throws ProcessInitializationException, DataAccessObjectException {
+    public void testUpsertFkAccountCsv() throws Exception {
         // manually inserts 100 accounts, then upserts specifying account parent for 50 accounts
         runUpsertProcess(getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 100), 0, 50);
     }
@@ -278,7 +277,7 @@ public class CsvProcessTest extends ProcessTestBase {
      * Tests that Deleting the records based on a CSV file works
      */
     @Test
-    public void testDeleteAccountCsv() throws ProcessInitializationException, DataAccessObjectException {
+    public void testDeleteAccountCsv() throws Exception {
         AccountIdTemplateListener listener = new AccountIdTemplateListener(100);
         String deleteFileName = convertTemplateToInput(baseName + "Template.csv", baseName + ".csv", listener);
         Map<String, String> argMap = getTestConfig(OperationInfo.delete, deleteFileName, false);
@@ -302,7 +301,7 @@ public class CsvProcessTest extends ProcessTestBase {
     }
 
     @Test
-    public void testCreateAttachment() throws ProcessInitializationException, DataAccessObjectException {
+    public void testCreateAttachment() throws Exception {
         // convert the template using the parent account id
         final String fileName = convertTemplateToInput(this.baseName + "Template.csv", this.baseName + ".csv",
                 new AttachmentTemplateListener());
