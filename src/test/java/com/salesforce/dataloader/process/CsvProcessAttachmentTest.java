@@ -67,8 +67,8 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         super(config);
     }
 
-    @Parameterized.Parameters
-    public Collection<Object[]> getTestParameters() {
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getTestParameters() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
         final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
                 Boolean.TRUE.toString());
@@ -139,14 +139,14 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
             // set parent account id
             row.put("ParentId", getAccountIds()[0]);
             // make body pathname absolute
-            String filePath = (String)row.get("Body");
+            String filePath = (String) row.get("Body");
             row.put("Body", getTestDataDir() + File.separator + filePath);
         }
     }
 
     private Controller runProcessWithAttachmentListener(Map<String, String> argMap, boolean expectProcessSuccess,
-            String failMessage, int numInserts, int numUpdates, int numFailures,
-            AttachmentTemplateListener myAttachmentTemplateListener, String... files)
+                                                        String failMessage, int numInserts, int numUpdates, int numFailures,
+                                                        AttachmentTemplateListener myAttachmentTemplateListener, String... files)
             throws ProcessInitializationException, DataAccessObjectException, ConnectionException, IOException {
 
         if (argMap == null) argMap = getTestConfig();
