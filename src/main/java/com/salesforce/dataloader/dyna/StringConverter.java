@@ -95,7 +95,7 @@ public final class StringConverter implements Converter {
     @Override
     public Object convert(Class type, Object value) {
 
-        if (value == null || String.valueOf(value).length()==0) {
+        if (value == null || String.valueOf(value).isEmpty()) {
             return null;
         }
         if (value instanceof Clob) {
