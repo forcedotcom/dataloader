@@ -31,10 +31,15 @@ import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.sforce.ws.ConnectionException;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -45,17 +50,13 @@ public class SOQLMapperTest extends ConfigTestBase {
 
     private SOQLMapper soqlMapper;
 
-    public SOQLMapperTest(String name) {
-        super(name);
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void createSoqlMapper() throws Exception {
         PartnerClient partnerClient = new PartnerClient(getController());
         soqlMapper = new SOQLMapper(partnerClient, Collections.<String>emptyList(), "");
     }
 
+    @Test
     public void testRelationshipQuery() throws Exception {
         getController().getConfig().setValue(Config.ENTITY, "User");
         soqlMapper.initSoqlMapping("select Id, Contact.Accountid from User");
@@ -73,6 +74,7 @@ public class SOQLMapperTest extends ConfigTestBase {
      *
      * @throws Exception
      */
+    @Test
     public void testMapAutoMatchFail() throws Exception {
         try {
             doAutoMatchTest("Select id, account.parent.id, A.numberofemployees from account a");
@@ -90,6 +92,7 @@ public class SOQLMapperTest extends ConfigTestBase {
      *
      * @throws Exception
      */
+    @Test
     public void testMapAutoMatch() throws Exception {
         doAutoMatchTest("Select AccOUNT.NamE, id, account.parent.id, A.numberofemployees from account a");
     }

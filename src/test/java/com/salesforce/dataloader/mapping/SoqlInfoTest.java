@@ -26,11 +26,15 @@
 
 package com.salesforce.dataloader.mapping;
 
-import java.util.List;
-
-import com.salesforce.dataloader.TestBase;
 import com.salesforce.dataloader.mapping.SOQLInfo.SOQLFieldInfo;
 import com.salesforce.dataloader.mapping.SOQLInfo.SOQLParserException;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Tests parsing SOQLInfo
@@ -38,11 +42,9 @@ import com.salesforce.dataloader.mapping.SOQLInfo.SOQLParserException;
  * @author Colin Jarvis
  * @since 21.0
  */
-public class SoqlInfoTest extends TestBase {
-    public SoqlInfoTest(String name) {
-        super(name);
-    }
+public class SoqlInfoTest {
 
+    @Test
     public void testParseSoql() throws SOQLParserException {
         SOQLInfo soqlInfo = new SOQLInfo("select account.id, blarney.name from account blarney");
         assertEquals("blarney", soqlInfo.getTableAlias());
@@ -52,6 +54,7 @@ public class SoqlInfoTest extends TestBase {
         doFieldAssertions(soqlInfo.getSelectedFields().get(1), "blarney.name");
     }
 
+    @Test
     public void testParseSoql3() throws SOQLParserException {
         SOQLInfo soqlInfo = new SOQLInfo("Select Id, Name From Account Blarney");
         assertEquals("Blarney", soqlInfo.getTableAlias());
@@ -61,6 +64,7 @@ public class SoqlInfoTest extends TestBase {
         doFieldAssertions(soqlInfo.getSelectedFields().get(1), "Name");
     }
 
+    @Test
     public void testParseSoql1() throws SOQLParserException {
         SOQLInfo soqlInfo = new SOQLInfo("select id, name from account blarney where id = ''");
         assertEquals("blarney", soqlInfo.getTableAlias());
@@ -70,6 +74,7 @@ public class SoqlInfoTest extends TestBase {
         doFieldAssertions(soqlInfo.getSelectedFields().get(1), "name");
     }
 
+    @Test
     public void testParseSoql2() throws SOQLParserException {
         SOQLInfo soqlInfo = new SOQLInfo("select id, name from account  where id = ''");
         assertEquals("", soqlInfo.getTableAlias());
@@ -85,15 +90,17 @@ public class SoqlInfoTest extends TestBase {
         assertEquals(expectedFieldName, fieldInfo.getFieldName());
     }
 
+    @Test
     public void testNoFields() throws SOQLParserException {
         try {
             new SOQLInfo("select  from account  where id = ''");
-            fail("should not be able to parse query");
+            Assert.fail("should not be able to parse query");
         } catch (IllegalArgumentException e) {
             assertEquals("Cannot parse empty string", e.getMessage());
         }
     }
 
+    @Test
     public void testParseAggregateFields() throws SOQLParserException {
         SOQLInfo info = new SOQLInfo("SELECT max(fld) xXx FROM account blarney");
         assertEquals("blarney", info.getTableAlias());
@@ -105,6 +112,7 @@ public class SoqlInfoTest extends TestBase {
         assertEquals("fld", fieldInfo.getFieldName());
     }
 
+    @Test
     public void testParseAggregateFields1() throws SOQLParserException {
         SOQLInfo info = new SOQLInfo("select max(fld)  from account blarney");
         assertEquals("blarney", info.getTableAlias());
@@ -116,6 +124,7 @@ public class SoqlInfoTest extends TestBase {
         assertEquals("fld", fieldInfo.getFieldName());
     }
 
+    @Test
     public void testAggregateExpressionAliases() throws SOQLParserException {
         SOQLInfo info = new SOQLInfo("select max(fld1), min(fld2) fld2_min, max(fld3)  from account blarney");
         doSoqlInfoAssertions(info, "account", "blarney", 3);
@@ -138,46 +147,54 @@ public class SoqlInfoTest extends TestBase {
         assertEquals(expectedAlias, fieldInfo.getAlias());
     }
 
+    @Test
     public void testParseAggregateMissingField() throws SOQLParserException {
         try {
             new SOQLInfo("select max() xxx from account blarney");
-            fail("should not be able to parse query");
+            Assert.fail("should not be able to parse query");
         } catch (IllegalArgumentException e) {
             assertEquals("Cannot parse empty string", e.getMessage());
         }
     }
 
+    @Test
     public void testNoSelect() {
         runInvalidQueryTest("id, name from account blarney", "No 'SELECT' keyword");
     }
 
+    @Test
     public void testNoFrom() {
         try {
             new SOQLInfo("select id, name account blarney");
-            fail("should not be able to parse query");
+            Assert.fail("should not be able to parse query");
         } catch (SOQLParserException e) {
             assertEquals("Invalid soql: No 'FROM' keyword", e.getMessage());
         }
     }
 
+    @Test
     public void testNestedQuery() {
         runInvalidQueryTest("select id, (select name from contacts) from account blarney",
                 "Nested queries are not supported");
     }
 
+    @Test
     public void testMissingTableName() {
         runInvalidQueryTest("select id from where Name='sometext'", "Failed to parse table name");
         runInvalidQueryTest("select id from", "No sobject specified after 'FROM' keyword");
     }
 
+    @Test
     public void testGroupQuery() throws SOQLParserException {
         new SOQLInfo("select id from group");
     }
 
+    @Test
     public void testOrderQuery() throws SOQLParserException {
         new SOQLInfo("select id from order");
     }
 
+    @Test
     public void testWhereValidation() throws Exception {
         SOQLInfo info = runValidQueryTest("select id from account WHERE id != null");
         assertEquals("", info.getTableAlias());
@@ -185,6 +202,7 @@ public class SoqlInfoTest extends TestBase {
         runInvalidQueryTest("select id FrOm wHeRe id != null", "Failed to parse table name");
     }
 
+    @Test
     public void testReservedKeywords() throws Exception {
         runValidQueryTest("select id from from__c");
         runValidQueryTest("select from__c from from__c");
@@ -201,7 +219,7 @@ public class SoqlInfoTest extends TestBase {
     private void runInvalidQueryTest(String query, String expectedMessage) {
         try {
             new SOQLInfo(query);
-            fail("should not be able to parse query: " + query);
+            Assert.fail("should not be able to parse query: " + query);
         } catch (SOQLParserException e) {
             assertEquals("Invalid soql: " + expectedMessage, e.getMessage());
         }

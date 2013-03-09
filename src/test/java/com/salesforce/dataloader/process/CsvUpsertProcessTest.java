@@ -26,13 +26,15 @@
 
 package com.salesforce.dataloader.process;
 
-import java.util.Map;
-
-import junit.framework.TestSuite;
-
 import com.salesforce.dataloader.ConfigGenerator;
-import com.salesforce.dataloader.ConfigTestSuite;
 import com.salesforce.dataloader.config.Config;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Describe your class here.
@@ -40,28 +42,26 @@ import com.salesforce.dataloader.config.Config;
  * @author Colin Jarvis, Aleksandr Shulman
  * @since 22.0
  */
+@RunWith(Parameterized.class)
 public class CsvUpsertProcessTest extends ProcessTestBase {
 
-    public static TestSuite suite() {
-        return ConfigTestSuite.createSuite(CsvUpsertProcessTest.class);
+    public CsvUpsertProcessTest(Map<String, String> config) {
+        super(config);
     }
 
-    public static ConfigGenerator getConfigGenerator() {
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getTestParameters() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
         final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
                 Config.TRUE);
 
-        return new UnionConfigGenerator(parent, withBulkApi);
-    }
-
-    
-    public CsvUpsertProcessTest(String name, Map<String, String> config) {
-        super(name, config);
+        return Arrays.asList(new Object[] {parent.getConfigurations().get(0)}, new Object[] {withBulkApi.getConfigurations().get(0)});
     }
 
     /**
      * Verify that a row offset will produce the correct effects and success file for a small set of rows (<5).
      */
+    @Test
     public void testUpsertWithRowOffset() throws Exception {
         // define properties
         Map<String, String> argMap = getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 10);

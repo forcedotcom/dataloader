@@ -25,17 +25,25 @@
  */
 package com.salesforce.dataloader.dao.database;
 
-import java.util.*;
-
-import com.salesforce.dataloader.model.Row;
-import org.apache.log4j.Logger;
-
 import com.salesforce.dataloader.TestBase;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.database.DatabaseTestUtil.DateType;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.AccountRowComparator;
+import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test for database operations
@@ -45,11 +53,6 @@ import com.salesforce.dataloader.util.AccountRowComparator;
  */
 public class DatabaseTest extends TestBase {
 
-    public DatabaseTest(String name) {
-        super(name);
-    }
-
-    // logger
     private static Logger logger = Logger.getLogger(DatabaseReader.class);
     
     private static final String[] VALIDATE_COLS = { DatabaseTestUtil.EXT_ID_COL, DatabaseTestUtil.SFDC_ID_COL,
@@ -57,30 +60,21 @@ public class DatabaseTest extends TestBase {
         DatabaseTestUtil.ACCOUNT_NUMBER_COL };
     private static final int NUM_ROWS = 10;
 
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#setUp()
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUpDb() throws Exception {
         DatabaseTestUtil.createTable(getController(), "dataloader");
         
         // delete accounts from database to start fresh
         DatabaseTestUtil.deleteAllAccountsDb(getController());
     }
     
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#tearDown()
-     */
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-
+    @After
+    public void tearDownDb() throws Exception {
         // delete accounts from database to finish with no leftovers
         DatabaseTestUtil.deleteAllAccountsDb(getController());
     }
 
+    @Test
     public void testDatabaseInsertQuery() {
         // insert some data
         DatabaseTestUtil.insertOrUpdateAccountsDb(getController(), true/* insert */, NUM_ROWS, false);
@@ -89,6 +83,7 @@ public class DatabaseTest extends TestBase {
         verifyDbInsertOrUpdate(getController(), true, true);
     }
 
+    @Test
     public void testDatabaseUpdateQuery() {
         // insert some data
         DatabaseTestUtil.insertOrUpdateAccountsDb(getController(), true/* insert */, NUM_ROWS, false);
@@ -100,24 +95,28 @@ public class DatabaseTest extends TestBase {
         verifyDbInsertOrUpdate(getController(), false, true);
     }
 
+    @Test
     public void testDatabaseDateMappingDate() {
         doTestDatabaseDateMapping(DatabaseTestUtil.DateType.DATE, true);
     }
 
+    @Test
     public void testDatabaseDateMappingCalendar() {
         doTestDatabaseDateMapping(DatabaseTestUtil.DateType.CALENDAR, true);
     }
 
+    @Test
     public void testDatabaseDateMappingString() {
         doTestDatabaseDateMapping(DatabaseTestUtil.DateType.STRING, true);
     }
 
+    @Test
     public void testDatabaseDateMappingNull() {
         // just make sure that this works.  Used to crash.
         doTestDatabaseDateMapping(DatabaseTestUtil.DateType.NULL, false);
     }
 
-    public void doTestDatabaseDateMapping(DatabaseTestUtil.DateType dateType, boolean verifyDates) {
+    private void doTestDatabaseDateMapping(DatabaseTestUtil.DateType dateType, boolean verifyDates) {
         for (String sqlType : new String[] { "java.sql.Date", "java.sql.Time", "java.sql.Timestamp" }) {
             try {
                 // insert some data
@@ -155,7 +154,7 @@ public class DatabaseTest extends TestBase {
                 for (int i=0; i < readRowList.size(); i++) {
                     Row readRow = readRowList.get(i);
                     assertNotNull("Error reading data row #" + i + ": the row shouldn't be null", readRow);
-                    assertTrue("Error reading data row #" + i + ": the row shouldn't be empty", readRow.size()>0);
+                    assertTrue("Error reading data row #" + i + ": the row shouldn't be empty", readRow.size() > 0);
                     Row expectedRow = DatabaseTestUtil.getInsertOrUpdateAccountRow(isInsert, rowsProcessed, DatabaseTestUtil.DateType.VALIDATION);
                     // verify all expected data
                     for(String colName : VALIDATE_COLS) {
@@ -172,9 +171,9 @@ public class DatabaseTest extends TestBase {
                 assertNotNull("Error reading " + readBatchSize + " rows", readRowList);
             }
         } catch (DataAccessObjectInitializationException e) {
-            fail("Error initializing database reader for db config: " + "queryAccountAll");
+            Assert.fail("Error initializing database reader for db config: " + "queryAccountAll");
         } catch (DataAccessObjectException e) {
-            fail("Error getting database from the database using db config: "+ "queryAccountAll");
+            Assert.fail("Error getting database from the database using db config: " + "queryAccountAll");
         } finally {
             if(reader != null) reader.close();
         }

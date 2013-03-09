@@ -26,8 +26,6 @@
 
 package com.salesforce.dataloader.process;
 
-import java.util.*;
-
 import com.salesforce.dataloader.ConfigGenerator;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
@@ -40,6 +38,19 @@ import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
+import org.junit.Assert;
+import org.junit.runners.Parameterized;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Base class for extraction process tests
@@ -93,21 +104,17 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         }
     }
 
-    public ProcessExtractTestBase(String name, Map<String, String> config) {
-        super(name, config);
+    public ProcessExtractTestBase(Map<String, String> config) {
+        super(config);
 
     }
 
-    public ProcessExtractTestBase(String name) {
-        super(name);
-
-    }
-
-    public static ConfigGenerator getConfigGenerator() {
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getParameters() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
         final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
                 Boolean.TRUE.toString());
-        return new UnionConfigGenerator(parent, withBulkApi);
+        return Arrays.asList(new Object[]{parent.getConfigurations().get(0)}, new Object[] {withBulkApi.getConfigurations().get(0)});
     }
 
     protected abstract boolean isExtractAll();
@@ -151,11 +158,11 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         }
 
         if (!expectedIds.isEmpty()) {
-            fail("These ids were not found in the result file: " + expectedIds);
+            Assert.fail("These ids were not found in the result file: " + expectedIds);
         }
 
         if (!unexpectedIds.isEmpty()) {
-            fail("These unexpected ids were found in the result file");
+            Assert.fail("These unexpected ids were found in the result file");
         }
     }
 
@@ -165,8 +172,8 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
      * Verify that a correct error is given when a user attempts to perform a nested query using queryAll(). This
      * verifies bug W-870843.
      *
-     * @throws DataAccessObjectException
-     * @throws ProcessInitializationException
+     * @throws com.salesforce.dataloader.exception.DataAccessObjectException
+     * @throws com.salesforce.dataloader.exception.ProcessInitializationException
      * @expectedResults Assert that the internal error message is correct.
      */
     protected void runTestNestedQueryErrorsCorrectly() throws ProcessInitializationException, DataAccessObjectException {

@@ -25,30 +25,32 @@
  */
 package com.salesforce.dataloader.dao;
 
-import java.io.File;
-import java.util.*;
-
 import com.salesforce.dataloader.TestBase;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.model.Row;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * 
  */
 public class CsvTest extends TestBase {
 
-    public CsvTest(String name) {
-        super(name);
-    }
-
     /**
      * Basic Test for CSV Reading
      *
      */
-
+    @Test
     public void testCSVReadBasic() {
         File f = new File(getTestDataDir(), "csvtext.csv");
         assertTrue(f.exists());
@@ -58,7 +60,7 @@ public class CsvTest extends TestBase {
         try {
             csv.open();
         } catch (DataAccessObjectInitializationException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
+            Assert.fail("Exception has been caught, error: " + e.getMessage());
         }
 
         // check that the header row is correctly returned.
@@ -74,7 +76,7 @@ public class CsvTest extends TestBase {
             assertEquals("row1-2", (String) firstRow.get("column2"));
             assertEquals("row1-3", (String) firstRow.get("column3"));
         } catch (DataAccessObjectException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
+            Assert.fail("Exception has been caught, error: " + e.getMessage());
         }
 
         // validate the second row
@@ -84,7 +86,7 @@ public class CsvTest extends TestBase {
             assertEquals("row2-2", (String) firstRow.get("column2"));
             assertEquals("row2-3", (String) firstRow.get("column3"));
         } catch (DataAccessObjectException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
+            Assert.fail("Exception has been caught, error: " + e.getMessage());
         }
 
         csv.close();
@@ -95,8 +97,8 @@ public class CsvTest extends TestBase {
      * Basic test for CSV Writing
      *
      */
-
-    public synchronized void testCSVWriteBasic() {
+    @Test
+    public void testCSVWriteBasic() {
         File f = new File(getTestDataDir(), "csvtestTemp.csv");
         String path = f.getAbsolutePath();
         CSVFileWriter writer = new CSVFileWriter(path, DEFAULT_CHARSET);
@@ -109,13 +111,13 @@ public class CsvTest extends TestBase {
             writer.open();
             writer.setColumnNames(writeHeader);
         } catch (DataAccessObjectInitializationException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
+            Assert.fail("Exception has been caught, error: " + e.getMessage());
         }
 
         try {
             writer.writeRowList(rowList);
         } catch (DataAccessObjectException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
+            Assert.fail("Exception has been caught, error: " + e.getMessage());
         }
         writer.close();
 
@@ -135,7 +137,7 @@ public class CsvTest extends TestBase {
         try {
             csv.open();
         } catch (DataAccessObjectInitializationException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
+            Assert.fail("Exception has been caught, error: " + e.getMessage());
         }
 
         //check that the header is the same as what we wanted to write
@@ -151,7 +153,7 @@ public class CsvTest extends TestBase {
                 assertEquals(row1.get(headerColumn), nextRow.get(headerColumn));
             }
         } catch (DataAccessObjectException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
+            Assert.fail("Exception has been caught, error: " + e.getMessage());
         }
 
         //check that row 2 is valid
@@ -161,7 +163,7 @@ public class CsvTest extends TestBase {
                 assertEquals(row2.get(headerColumn), nextRow.get(headerColumn));
             }
         } catch (DataAccessObjectException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
+            Assert.fail("Exception has been caught, error: " + e.getMessage());
         }
 
         csv.close();

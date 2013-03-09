@@ -25,18 +25,34 @@
  */
 package com.salesforce.dataloader.client;
 
-import java.util.*;
-
-import org.apache.commons.beanutils.*;
-
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.dyna.ObjectField;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.process.ProcessTestBase;
-import com.sforce.soap.partner.*;
+import com.sforce.soap.partner.DeleteResult;
+import com.sforce.soap.partner.DescribeSObjectResult;
+import com.sforce.soap.partner.Field;
+import com.sforce.soap.partner.QueryResult;
+import com.sforce.soap.partner.SaveResult;
+import com.sforce.soap.partner.UpsertResult;
 import com.sforce.soap.partner.fault.LoginFault;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
+import org.apache.commons.beanutils.BasicDynaClass;
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.beanutils.DynaProperty;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test for partner client operations provided with dataloader
@@ -47,10 +63,7 @@ import com.sforce.ws.ConnectionException;
  */
 public class PartnerClientTest extends ProcessTestBase {
 
-    public PartnerClientTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testPartnerClientConnect() {
         try {
             PartnerClient client = new PartnerClient(getController());
@@ -66,6 +79,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
+    @Test
     public void testPartnerClientNoUserName() throws ConnectionException {
         Config config = getController().getConfig();
         String origUserName = config.getString(Config.USERNAME);
@@ -82,6 +96,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
+    @Test
     public void testPartnerClientSfdcInternalSessionIdConnect() throws Exception {
         Config config = getController().getConfig();
 
@@ -117,6 +132,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
+    @Test
     public void testPartnerClientSfdcInternalSessionIdWithoutSfdcInternalConnect() throws Exception {
         Config config = getController().getConfig();
 
@@ -142,7 +158,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
             PartnerClient client = new PartnerClient(getController());
             client.connect();
-            fail("Should not be able to connect with sfdcInternal=false and no username.");
+            Assert.fail("Should not be able to connect with sfdcInternal=false and no username.");
         } catch (IllegalStateException e) {
             assertEquals(
                     "Wrong error messsage",
@@ -158,8 +174,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
-
-
+    @Test
     public void testIsSessionValidAlwaysTrueForSessionIdLogin() throws Exception {
         Config config = getController().getConfig();
 
@@ -175,6 +190,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
+    @Test
     public void testDisconnect() throws Exception {
         PartnerClient client = new PartnerClient(getController());
 
@@ -185,6 +201,7 @@ public class PartnerClientTest extends ProcessTestBase {
         assertFalse(client.isLoggedIn());
     }
 
+    @Test
     public void testSetEntityDescribe() {
         PartnerClient client = new PartnerClient(getController());
         try {
@@ -197,6 +214,7 @@ public class PartnerClientTest extends ProcessTestBase {
                 .getDescribeGlobalResults().size());
     }
 
+    @Test
     public void testDescribeSObjects() {
         PartnerClient client = new PartnerClient(getController());
         assertTrue(client.getEntityDescribeMap().isEmpty());
@@ -219,6 +237,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
+    @Test
     public void testSetFieldTypes() {
         try {
             PartnerClient client = new PartnerClient(getController());
@@ -229,6 +248,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
+    @Test
     public void testGetSforceField() {
         // test for account name as a default test case
         try {
@@ -251,6 +271,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
     }
 
+    @Test
     public void testInsertBasic() {
         // setup our dynabeans
         BasicDynaClass dynaClass = null;
@@ -288,7 +309,7 @@ public class PartnerClientTest extends ProcessTestBase {
             for (int i = 0; i < results.length; i++) {
                 SaveResult result = results[i];
                 if (!result.getSuccess()) {
-                    fail("Insert returned an error: " + result.getErrors()[0].getMessage());
+                    Assert.fail("Insert returned an error: " + result.getErrors()[0].getMessage());
                 }
             }
         } catch (ConnectionException e) {
@@ -297,6 +318,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
     }
 
+    @Test
     public void testUpdateBasic() {
         String id = getRandomAccountId();
 
@@ -337,7 +359,7 @@ public class PartnerClientTest extends ProcessTestBase {
             for (int i = 0; i < results.length; i++) {
                 SaveResult result = results[i];
                 if (!result.getSuccess()) {
-                    fail("Update returned an error" + result.getErrors()[0].getMessage());
+                    Assert.fail("Update returned an error" + result.getErrors()[0].getMessage());
                 }
             }
         } catch (ConnectionException e) {
@@ -349,7 +371,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Basic failing - forgetting the id
      */
-
+    @Test
     public void testUpdateFailBasic() {
 
         // setup our dynabeans
@@ -388,7 +410,7 @@ public class PartnerClientTest extends ProcessTestBase {
             for (int i = 0; i < results.length; i++) {
                 SaveResult result = results[i];
                 if (result.getSuccess()) {
-                    fail("Update should not have been a success.");
+                    Assert.fail("Update should not have been a success.");
                 }
             }
         } catch (ConnectionException e) {
@@ -399,6 +421,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test basic upsert operation
      */
+    @Test
     public void testUpsertAccountBasic() {
         doUpsertAccount(false);
     }
@@ -406,6 +429,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test basic upsert operation
      */
+    @Test
     public void testUpsertContactBasic() {
         doUpsertContact(false);
     }
@@ -413,6 +437,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test basic upsert on foreign key
      */
+    @Test
     public void testUpsertAccountFkBasic() {
         doUpsertAccount(true);
     }
@@ -420,6 +445,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test basic upsert on foreign key
      */
+    @Test
     public void testUpsertContactFkBasic() {
         doUpsertContact(true);
     }
@@ -427,6 +453,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test basic failure to upsert - no external id specified
      */
+    @Test
     public void testUpsertFailBasic() {
         doUpsertFailBasic(false);
     }
@@ -434,11 +461,12 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test basic failure to upsert on foreign key - no foreign key external id specified (blank value)
      */
+    @Test
     public void testUpsertFkFailBasic() {
         doUpsertFailBasic(true);
     }
 
-    public void doUpsertAccount(boolean upsertFk) {
+    private void doUpsertAccount(boolean upsertFk) {
         String origExtIdField = getController().getConfig().getString(Config.EXTERNAL_ID_FIELD);
 
         try {
@@ -471,7 +499,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
-    public void doUpsertContact(boolean upsertFk) {
+    private void doUpsertContact(boolean upsertFk) {
         String origExtIdField = getController().getConfig().getString(Config.EXTERNAL_ID_FIELD);
 
         try {
@@ -544,7 +572,7 @@ public class PartnerClientTest extends ProcessTestBase {
             UpsertResult[] results = client.loadUpserts(beanList);
             for (UpsertResult result : results) {
                 if (!result.getSuccess()) {
-                    fail("Upsert returned an error: " + result.getErrors()[0].getMessage());
+                    Assert.fail("Upsert returned an error: " + result.getErrors()[0].getMessage());
                 }
             }
         } catch (ConnectionException e) {
@@ -555,7 +583,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Basic failing - forgetting the external id or foreign key external id
      */
-    public void doUpsertFailBasic(boolean upsertFk) {
+    private void doUpsertFailBasic(boolean upsertFk) {
 
         // setup our dynabeans
         BasicDynaClass dynaClass = null;
@@ -600,7 +628,7 @@ public class PartnerClientTest extends ProcessTestBase {
             UpsertResult[] results = client.loadUpserts(beanList);
             for (UpsertResult result : results) {
                 if (result.getSuccess()) {
-                    fail("Upsert should not have been a success.");
+                    Assert.fail("Upsert should not have been a success.");
                 }
             }
         } catch (ConnectionException e) {
@@ -608,6 +636,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
+    @Test
     public void testDeleteBasic() {
         String id = getRandomAccountId();
 
@@ -648,7 +677,7 @@ public class PartnerClientTest extends ProcessTestBase {
             for (int i = 0; i < results.length; i++) {
                 DeleteResult result = results[i];
                 if (!result.getSuccess()) {
-                    fail("Delete returned an error: " + result.getErrors()[0].getMessage());
+                    Assert.fail("Delete returned an error: " + result.getErrors()[0].getMessage());
                 }
             }
         } catch (ConnectionException e) {
@@ -659,6 +688,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test a delete missing the id
      */
+    @Test
     public void testDeleteFailBasic() {
 
         // setup our dynabeans
@@ -697,7 +727,7 @@ public class PartnerClientTest extends ProcessTestBase {
             for (int i = 0; i < results.length; i++) {
                 DeleteResult result = results[i];
                 if (result.getSuccess()) {
-                    fail("Delete should have returned an error");
+                    Assert.fail("Delete should have returned an error");
                 }
             }
         } catch (ConnectionException e) {
@@ -705,6 +735,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
+    @Test
     public void testQueryBasic() {
         // make sure there're some records to test with
         upsertSfdcAccounts(10);

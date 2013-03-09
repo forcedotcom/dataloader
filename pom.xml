@@ -89,7 +89,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
 
@@ -248,14 +248,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.12</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.maven.surefire</groupId>
-            <artifactId>surefire-junit3</artifactId>
-            <version>2.12</version>
-          </dependency>
-        </dependencies>
+        <version>2.13</version>
         <configuration>
           <excludes>
             <!-- exclude TestRecordsUtil class which inherit from TestCase -->

@@ -25,15 +25,16 @@
  */
 package com.salesforce.dataloader.dyna;
 
-import com.salesforce.dataloader.ConfigTestBase;
 import org.apache.commons.beanutils.ConversionException;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class BooleanConverterTest extends ConfigTestBase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
-    public BooleanConverterTest(String name) {
-        super(name);
-    }
+public class BooleanConverterTest {
 
+    @Test
     public void testBooleanConverter() {
         BooleanConverter converter = new BooleanConverter();
         Boolean result;
@@ -91,7 +92,7 @@ public class BooleanConverterTest extends ConfigTestBase {
 
         try {
             result = (Boolean)converter.convert(null, "qweorijo");
-            fail();
+            Assert.fail();
         } catch (ConversionException e) {
 
         }

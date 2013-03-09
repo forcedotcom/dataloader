@@ -26,42 +26,44 @@
 
 package com.salesforce.dataloader.process;
 
-import java.text.*;
-import java.util.*;
-
-import junit.framework.TestSuite;
-
 import com.salesforce.dataloader.ConfigGenerator;
-import com.salesforce.dataloader.ConfigTestSuite;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.sforce.soap.partner.QueryResult;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.TimeZone;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests date values used in DataLoader processes
- * 
+ *
  * @author Colin Jarvis
  * @since 21.0
  */
+@RunWith(Parameterized.class)
 public class DateProcessTest extends ProcessTestBase {
 
-    public static TestSuite suite() {
-        return ConfigTestSuite.createSuite(DateProcessTest.class);
+    public DateProcessTest(Map<String, String> config) {
+        super(config);
     }
 
-    public static ConfigGenerator getConfigGenerator() {
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getTestParameters() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
         final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
                 Boolean.TRUE.toString());
-        return new UnionConfigGenerator(parent, withBulkApi);
-    }
-
-    public DateProcessTest(String name) {
-        super(name);
-    }
-
-    public DateProcessTest(String name, Map<String, String> config) {
-        super(name, config);
+        return Arrays.asList(new Object[] {parent.getConfigurations().get(0)}, new Object[] {withBulkApi.getConfigurations().get(0)});
     }
 
     @Override
@@ -80,6 +82,7 @@ public class DateProcessTest extends ProcessTestBase {
         PARTNER_API_FMT.setTimeZone(GMT_TIME_ZONE);
     }
 
+    @Test
     public void testDateEndingInZ() throws Exception {
         runProcess(getTestConfig(OperationInfo.insert, false), 1);
 
@@ -90,6 +93,7 @@ public class DateProcessTest extends ProcessTestBase {
         assertEquals(expectedDate, parseDateFromPartnerApi((String)qr.getRecords()[0].getField("CustomDateTime__c")));
     }
 
+    @Test
     public void testDateUsingDefaultTimeZone() throws Exception {
         runProcess(getTestConfig(OperationInfo.insert, false), 1);
         QueryResult qr = getBinding().query("select CustomDateTime__c from Account where AccountNumber__c='ACCT_0'");
@@ -99,6 +103,7 @@ public class DateProcessTest extends ProcessTestBase {
         assertEquals(expectedDate, parseDateFromPartnerApi((String)qr.getRecords()[0].getField("CustomDateTime__c")));
     }
 
+    @Test
     public void testDateWithTimeZone() throws Exception {
         runProcess(getTestConfig(OperationInfo.insert, false), 1);
         QueryResult qr = getBinding().query("select CustomDateTime__c from Account where AccountNumber__c='ACCT_0'");

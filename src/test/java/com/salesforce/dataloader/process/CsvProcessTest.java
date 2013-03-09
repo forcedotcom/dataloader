@@ -26,14 +26,7 @@
 
 package com.salesforce.dataloader.process;
 
-import java.io.File;
-import java.util.*;
-
-import com.salesforce.dataloader.model.Row;
-import junit.framework.TestSuite;
-
 import com.salesforce.dataloader.ConfigGenerator;
-import com.salesforce.dataloader.ConfigTestSuite;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
@@ -41,7 +34,23 @@ import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dyna.DateConverter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
+import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.sobject.SObject;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Test for dataloader batch interface, also known as "integration framework"
@@ -51,14 +60,15 @@ import com.sforce.soap.partner.sobject.SObject;
  * @hierarchy API.dataloader Csv Process Tests
  * @userstory Commenting existing data loader tests and uploading into QA force
  */
-
+@RunWith(Parameterized.class)
 public class CsvProcessTest extends ProcessTestBase {
 
-    public static TestSuite suite() {
-        return ConfigTestSuite.createSuite(CsvProcessTest.class);
+    public CsvProcessTest(Map<String, String> config) {
+        super(config);
     }
 
-    public static ConfigGenerator getConfigGenerator() {
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getParameters() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
         final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
                 Boolean.TRUE.toString());
@@ -66,20 +76,16 @@ public class CsvProcessTest extends ProcessTestBase {
                 Boolean.TRUE.toString());
         final ConfigGenerator bulkApiSerialMode = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_SERIAL_MODE,
                 Boolean.TRUE.toString());
-        return new UnionConfigGenerator(parent, withBulkApi, bulkApiSerialMode, bulkApiZipContent);
-    }
-
-    public CsvProcessTest(String name, Map<String, String> config) {
-        super(name, config);
-    }
-
-    public CsvProcessTest(String name) {
-        super(name);
+        return Arrays.asList(new Object[] {parent.getConfigurations().get(0)},
+                new Object[] {withBulkApi.getConfigurations().get(0)},
+                new Object[] {bulkApiSerialMode.getConfigurations().get(0)},
+                new Object[] {bulkApiZipContent.getConfigurations().get(0)});
     }
 
     /**
      * Tests the insert operation on Account - Positive test.
      */
+    @Test
     public void testInsertAccountCsv() throws ProcessInitializationException, DataAccessObjectException {
         runProcess(getTestConfig(OperationInfo.insert, false), 100);
     }
@@ -87,6 +93,7 @@ public class CsvProcessTest extends ProcessTestBase {
     /**
      * Tests update operation with input coming from a CSV file. Relies on the id's in the CSV on being in the database
      */
+    @Test
     public void testUpdateAccountCsv() throws ProcessInitializationException, Throwable {
         runProcess(getUpdateTestConfig(false, null, 100), 100);
     }
@@ -94,6 +101,7 @@ public class CsvProcessTest extends ProcessTestBase {
     /**
      * Upsert the records from CSV file
      */
+    @Test
     public void testUpsertAccountCsv() throws ProcessInitializationException, DataAccessObjectException {
         // manually inserts 50 accounts, then upserts 100 accounts (50 inserts and 50 updates)
         runUpsertProcess(getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 50), 50, 50);
@@ -110,6 +118,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *                  when queried.
      * @throws Exception
      */
+    @Test
     public void testConstantMappingInCsv() throws Exception {
 
         // The use case is as follows:
@@ -141,6 +150,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @throws Exception
      */
+    @Test
     public void testDescriptionAsConstantMappingInCsv() throws Exception {
         // The use case is as follows:
         // This company in this scenario only does business in the state of CA, therefore billing and shipping
@@ -167,6 +177,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @expectedResults Assert that the values retrieved for that field match those in the CSV file
      */
+    @Test
     public void testFieldAndConstantFieldClash()  throws Exception {
 
         // The use case is as follows:
@@ -196,6 +207,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @expectedResults Assert that the values retrieved for that field match those in the CSV file
      */
+    @Test
     public void testNullConstantAssignment()  throws Exception {
 
         /* Field assignments in .sdl are as follows:
@@ -256,6 +268,7 @@ public class CsvProcessTest extends ProcessTestBase {
     /**
      * Tests Upsert on foreign key for the records based on the CSV file
      */
+    @Test
     public void testUpsertFkAccountCsv() throws ProcessInitializationException, DataAccessObjectException {
         // manually inserts 100 accounts, then upserts specifying account parent for 50 accounts
         runUpsertProcess(getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 100), 0, 50);
@@ -264,6 +277,7 @@ public class CsvProcessTest extends ProcessTestBase {
     /**
      * Tests that Deleting the records based on a CSV file works
      */
+    @Test
     public void testDeleteAccountCsv() throws ProcessInitializationException, DataAccessObjectException {
         AccountIdTemplateListener listener = new AccountIdTemplateListener(100);
         String deleteFileName = convertTemplateToInput(baseName + "Template.csv", baseName + ".csv", listener);
@@ -272,7 +286,7 @@ public class CsvProcessTest extends ProcessTestBase {
         verifySuccessIds(theController, listener.getAccountIds());
     }
 
-    public class AttachmentTemplateListener extends AccountIdTemplateListener {
+    private class AttachmentTemplateListener extends AccountIdTemplateListener {
         public AttachmentTemplateListener() {
             super(1);
         }
@@ -287,6 +301,7 @@ public class CsvProcessTest extends ProcessTestBase {
         }
     }
 
+    @Test
     public void testCreateAttachment() throws ProcessInitializationException, DataAccessObjectException {
         // convert the template using the parent account id
         final String fileName = convertTemplateToInput(this.baseName + "Template.csv", this.baseName + ".csv",
@@ -312,6 +327,7 @@ public class CsvProcessTest extends ProcessTestBase {
      * @expectedResults Assert that all the records were inserted and that the constant value was mapped as well.
      *
      */
+    @Test
     public void testNonMappedFieldsPermittedInDLTransaction() throws Exception {
 
         final int numberOfRows = 4;
@@ -341,6 +357,7 @@ public class CsvProcessTest extends ProcessTestBase {
      * @expectedResults Assert that the dates in Salesforce match up.
      *
      */
+    @Test
     public void testTimezoneNotTruncated() throws Exception {
 
         final int numberOfRows = 12;
@@ -374,6 +391,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @throws Exception
      */
+    @Test
     public void testErrorsGeneratedOnInvalidDateMatching() throws Exception {
 
     	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(0, 3,3);
@@ -386,6 +404,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @throws Exception
      */
+    @Test
     public void testErrorsGeneratedOnInvalidDateMatchingWithOffset() throws Exception {
     	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(2, 2, 2);
     }
