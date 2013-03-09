@@ -26,7 +26,6 @@
 package com.salesforce.dataloader.process;
 
 import com.salesforce.dataloader.ConfigGenerator;
-import com.salesforce.dataloader.ConfigTestSuite;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
@@ -37,12 +36,23 @@ import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
-import junit.framework.TestSuite;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * This class test that #N/A can be used to set fields to null when Use Bulk Api is enabled.
@@ -51,6 +61,7 @@ import java.util.Map;
  * @author Jeff Lai
  * @since 25.0
  */
+@RunWith(Parameterized.class)
 public class NAProcessTest extends ProcessTestBase {
 
     private static final String TASK_SUBJECT = "NATest";
@@ -59,70 +70,72 @@ public class NAProcessTest extends ProcessTestBase {
     private static final String CSV_FILE_PATH = CSV_DIR_PATH + File.separator + "na.csv";
     private String userId;
 
-    public NAProcessTest(String name, Map<String, String> config) {
-        super(name, config);
+    public NAProcessTest(Map<String, String> config) {
+        super(config);
     }
 
-    public NAProcessTest(String name) {
-        super(name);
-    }
-
-    public static TestSuite suite() {
-        return ConfigTestSuite.createSuite(NAProcessTest.class);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void populateUserId() throws Exception {
         if (userId == null) {
             userId = getUserId();
         }
     }
 
-    public static ConfigGenerator getConfigGenerator() {
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getConfigGeneratorParams() {
         final ConfigGenerator bulkApiTrue = new ConfigSettingGenerator(ProcessTestBase.getConfigGenerator(),
                 Config.BULK_API_ENABLED, Boolean.TRUE.toString());
         final ConfigGenerator bulkApiFalse = new ConfigSettingGenerator(ProcessTestBase.getConfigGenerator(),
                 Config.BULK_API_ENABLED, Boolean.FALSE.toString());
-        return new UnionConfigGenerator(bulkApiTrue, bulkApiFalse);
+        return Arrays.asList(new Object[]{bulkApiTrue.getConfigurations().get(0)}, new Object[]{bulkApiFalse.getConfigurations().get(0)});
     }
 
+    @Test
     public void testTextFieldInsert() throws Exception {
         runNAtest("Description", false, OperationInfo.insert);
     }
 
+    @Test
     public void testTextFieldUpdate() throws Exception {
         runNAtest("Description", false, OperationInfo.update);
     }
 
+    @Test
     public void testDateTimeFieldInsert() throws Exception {
         runNAtest("ReminderDateTime", true, OperationInfo.insert);
     }
 
+    @Test
     public void testDateTimeFieldUpdate() throws Exception {
         runNAtest("ReminderDateTime", true, OperationInfo.update);
     }
 
+    @Test
     public void testDateFieldInsert() throws Exception {
         runNAtest("ActivityDate", true, OperationInfo.insert);
     }
 
+    @Test
     public void testDateFieldUpdate() throws Exception {
         runNAtest("ActivityDate", true, OperationInfo.update);
     }
 
+    @Test
     public void testTextEmptyFieldIsNotHandledAsNAUpdate() throws Exception {
         runEmptyFieldUpdateTest("Description", false);
     }
 
+    @Test
     public void testTextEmptyFieldIsNotHandledAsNAInsert() throws Exception {
         runEmptyFieldInsertTest("Description");
     }
 
+    @Test
     public void testDateEmptyFieldIsNotHandledAsNAUpdate() throws Exception {
         runEmptyFieldUpdateTest("ActivityDate", true);
     }
 
+    @Test
     public void testDateEmptyFieldIsNotHandledAsNAInsert() throws Exception {
         runEmptyFieldInsertTest("ActivityDate");
     }
@@ -191,7 +204,7 @@ public class NAProcessTest extends ProcessTestBase {
         SaveResult[] result = getController().getPartnerClient().getClient().create(new SObject[] { task });
         assertEquals(1, result.length);
         if (!result[0].getSuccess())
-            fail("creation of task failed with error " + result[0].getErrors()[0].getMessage());
+            Assert.fail("creation of task failed with error " + result[0].getErrors()[0].getMessage());
         return result[0].getId();
     }
 
@@ -252,7 +265,7 @@ public class NAProcessTest extends ProcessTestBase {
     }
 
     @Override
-    protected void cleanRecords() {
+    public void cleanRecords() {
         deleteSfdcRecords("Task", "Subject='" + TASK_SUBJECT + "'", 0);
     }
 

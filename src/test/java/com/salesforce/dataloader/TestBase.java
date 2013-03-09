@@ -25,25 +25,38 @@
  */
 package com.salesforce.dataloader;
 
-import java.io.*;
-import java.net.*;
-import java.nio.charset.Charset;
-import java.util.Properties;
-
-import junit.framework.TestCase;
-
-import org.apache.log4j.Logger;
-
 import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
-import com.sforce.soap.partner.*;
+import com.sforce.soap.partner.Connector;
+import com.sforce.soap.partner.LoginResult;
+import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
+import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
+import org.springframework.util.StringUtils;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * This class represents the base class for all data loader JUnit tests. TODO: ProcessScheduler test? TODO: Encryption
@@ -53,8 +66,11 @@ import com.sforce.ws.ConnectorConfig;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public abstract class TestBase extends TestCase {
-    
+public abstract class TestBase {
+
+    private static final Pattern INSIDE_BRACKETS_TEST_PARAMETERS = Pattern.compile("\\[.+\\]");
+    @Rule
+    public TestName testName = new TestName();
     private static final Properties TEST_PROPS;
 
     static {
@@ -108,15 +124,11 @@ public abstract class TestBase extends TestCase {
     String oldThreadName;
     PartnerConnection binding;
 
-    protected TestBase(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void basicSetUp() throws Exception {
         File testStatusDir = new File(TEST_STATUS_DIR);
         if (!testStatusDir.exists()) testStatusDir.mkdirs();
-        
+
         // reset binding
         this.binding = null;
 
@@ -125,13 +137,12 @@ public abstract class TestBase extends TestCase {
     }
 
     private void setupTestName() {
-        // get the test name and lowercase the 1st letter of the name for file for readability
-        String baseNameOrig = getName().substring(4);
-        this.baseName = baseNameOrig.substring(0, 1).toLowerCase() + baseNameOrig.substring(1);
+        String methodNameWithoutTest = testName.getMethodName().replace("test", "");
+        baseName = StringUtils.capitalize(INSIDE_BRACKETS_TEST_PARAMETERS.matcher(methodNameWithoutTest).replaceAll(""));
 
         // name the current thread. useful for test logging
         this.oldThreadName = Thread.currentThread().getName();
-        Thread.currentThread().setName(getName());
+        Thread.currentThread().setName(methodNameWithoutTest);
     }
 
     protected void setupController() {
@@ -141,15 +152,15 @@ public abstract class TestBase extends TestCase {
 
         if (controller == null) {
             try {
-                controller = Controller.getInstance(getName(), true);
+                controller = Controller.getInstance(testName.getMethodName(), true);
             } catch (ControllerInitializationException e) {
                 fail("While initializing controller instance", e);
             }
         }
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void resetThreadName() throws Exception {
         // restore original thread name
         if(this.oldThreadName != null && this.oldThreadName.length() > 0) {
             try {
@@ -205,7 +216,7 @@ public abstract class TestBase extends TestCase {
                     }
                 }
             } catch (URISyntaxException e) {
-                fail("Error parsing endpoint URL: " + Connector.END_POINT + ", error: " + e.getMessage());
+                Assert.fail("Error parsing endpoint URL: " + Connector.END_POINT + ", error: " + e.getMessage());
             }
         }
         return bindingConfig;
@@ -214,7 +225,7 @@ public abstract class TestBase extends TestCase {
     /**
      * @param bindingConfig
      * @return PartnerConnection
-     * @throws ConnectionException
+     * @throws com.sforce.ws.ConnectionException
      */
     private PartnerConnection newConnection(ConnectorConfig bindingConfig, int retries) {
         try {
@@ -290,7 +301,7 @@ public abstract class TestBase extends TestCase {
         pw.println(t.getMessage());
         pw.println("Stack trace:");
         t.printStackTrace(pw);
-        fail(String.valueOf(failMessage));
+        Assert.fail(String.valueOf(failMessage));
     }
 
     protected void fail(Throwable t) {

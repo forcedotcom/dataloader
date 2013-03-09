@@ -26,20 +26,25 @@
 
 package com.salesforce.dataloader.process;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.salesforce.dataloader.model.Row;
-import junit.framework.TestSuite;
-
 import com.salesforce.dataloader.ConfigGenerator;
-import com.salesforce.dataloader.ConfigTestSuite;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.model.Row;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for testing data loads with different configured row offsets.
@@ -47,28 +52,28 @@ import com.salesforce.dataloader.exception.DataAccessObjectInitializationExcepti
  * @author Aleksandr Shulman, Colin Jarvis
  * @since 23.0
  */
+@RunWith(Parameterized.class)
 public class CsvProcessWithOffsetTest extends ProcessTestBase {
 
     private static final int NUM_DATA_ROWS = 10;
     private static final String FILE_NAME_BASE = "upsertAccountSmall";
 
-    public static TestSuite suite() {
-        return ConfigTestSuite.createSuite(CsvProcessWithOffsetTest.class);
+    public CsvProcessWithOffsetTest(Map<String, String> config) {
+        super(config);
     }
 
-    public static ConfigGenerator getConfigGenerator() {
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getTestParameters() {
         final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
         final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED, Config.TRUE);
-        return new UnionConfigGenerator(parent, withBulkApi);
-    }
-
-    public CsvProcessWithOffsetTest(String name, Map<String, String> config) {
-        super(name, config);
+        return Arrays.asList(new Object[] {parent.getConfigurations().get(0)},
+                new Object[] {withBulkApi.getConfigurations().get(0)});
     }
 
     /**
      * Verify that a row offset will produce the correct effects and success file for a small set of rows (<5).
      */
+    @Test
     public void testSmallUpsertWithOffset() throws Exception {
 
         runOffsetValueTest(1, NUM_DATA_ROWS - 1);
@@ -80,6 +85,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
      * @expectedResults Assert that the number of successes and failures in returned spreadsheets matches with expected
      *                  results.
      */
+    @Test
     public void testOffsetResultsInNoDML() throws Exception {
 
         runOffsetValueTest(NUM_DATA_ROWS, 0);
@@ -90,6 +96,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
      * 
      * @expectedResults Assert no inserts or updates occur.
      */
+    @Test
     public void testOffsetGreaterThanRowCount() throws Exception {
 
         runOffsetValueTest(NUM_DATA_ROWS + 1, 0);
@@ -102,7 +109,9 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
      * @expectedResults Assert that the error string contains the invalid value.
      * @throws Exception
      */
-    protected void _testInvalidOffsetValueCorrectlyHandled() throws Exception {
+    @Test
+    @Ignore
+    public void testInvalidOffsetValueCorrectlyHandled() throws Exception {
 
         runInvalidOffsetValueTest("abc", "For input string: \"" + "abc" + "\"");
         runInvalidOffsetValueTest("11a", "For input string: \"" + "11a" + "\"");
@@ -115,6 +124,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
      * 
      * @expectedResults Assert that the correct number of DML events occur.
      */
+    @Test
     public void testEmptyOffsetValueTreatedAsZero() throws Exception {
 
         runOffsetValueTest("", NUM_DATA_ROWS);
@@ -126,7 +136,9 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
      * 
      * @expectedResults Assert the exception type is not an NPE.
      */
-    protected void _testNullOffsetValueDoesNotNPE() throws Exception {
+    @Test
+    @Ignore
+    public void testNullOffsetValueDoesNotNPE() throws Exception {
         try {
             runOffsetValueTest(null, NUM_DATA_ROWS);
         } catch (NullPointerException npe) {
@@ -140,7 +152,9 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
      * 
      * @expectedResults Assert that the error message contains "For input string".
      */
-    protected void _testNegativeOffsetValuesCorrectlyHandled() throws Exception {
+    @Test
+    @Ignore
+    public void testNegativeOffsetValuesCorrectlyHandled() throws Exception {
 
         runInvalidOffsetValueTest("-1", "For input string");
         runInvalidOffsetValueTest("-5", "For input string");

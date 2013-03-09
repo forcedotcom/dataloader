@@ -26,14 +26,21 @@
 
 package com.salesforce.dataloader.process;
 
-import java.io.*;
-import java.util.Map;
-
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.sforce.async.CSVReader;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test to validate we handle unicode correctly.
@@ -44,14 +51,7 @@ import com.sforce.ws.ConnectionException;
 
 public class CsvUnicodeProcessTest extends ProcessTestBase {
 
-    public CsvUnicodeProcessTest(String name, Map<String, String> config) {
-        super(name, config);
-    }
-
-    public CsvUnicodeProcessTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testUnicodeExtraction() throws Exception {
         final String name = System.nanoTime() + "☠";
         final String accountId = insertAccount(name);

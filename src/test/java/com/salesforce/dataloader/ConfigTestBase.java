@@ -25,11 +25,18 @@
  */
 package com.salesforce.dataloader;
 
-import java.util.*;
-
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.exception.ConfigInitializationException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
+import org.junit.Before;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class ConfigTestBase extends TestBase {
 
@@ -48,7 +55,7 @@ public abstract class ConfigTestBase extends TestBase {
 
         /**
          * Translates the enum name into a property name found in test.properties.
-         * 
+         *
          * @return A property name in the test.properties file. EG USER_ADMIN becomes "test.user.admin"
          */
         private String getPropertyName() {
@@ -163,19 +170,19 @@ public abstract class ConfigTestBase extends TestBase {
         return propSet;
     }
 
-    protected ConfigTestBase(String name, Map<String, String> testConfig) {
-        super(name);
-        if (testConfig == null) testConfig = new HashMap<String, String>();
+    protected ConfigTestBase() {
+        this(Collections.<String, String>emptyMap());
+    }
+
+    protected ConfigTestBase(Map<String, String> testConfig) {
+        if (testConfig == null) {
+            testConfig = new HashMap<String, String>();
+        }
         this.testConfig = testConfig;
     }
 
-    protected ConfigTestBase(String name) {
-        this(name, null);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void loadParameterOverrides() throws Exception {
         getController().getConfig().loadParameterOverrides(getTestConfig());
     }
 
