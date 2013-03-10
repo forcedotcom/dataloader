@@ -26,7 +26,8 @@
 
 package com.salesforce.dataloader.process;
 
-import com.salesforce.dataloader.ConfigGenerator;
+import com.salesforce.dataloader.TestSetting;
+import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
@@ -67,17 +68,11 @@ public class CsvProcessTest extends ProcessTestBase {
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getParameters() {
-        final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
-        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
-                Boolean.TRUE.toString());
-        final ConfigGenerator bulkApiZipContent = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_ZIP_CONTENT,
-                Boolean.TRUE.toString());
-        final ConfigGenerator bulkApiSerialMode = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_SERIAL_MODE,
-                Boolean.TRUE.toString());
-        return Arrays.asList(new Object[] {parent.getConfigurations().get(0)},
-                new Object[] {withBulkApi.getConfigurations().get(0)},
-                new Object[] {bulkApiSerialMode.getConfigurations().get(0)},
-                new Object[] {bulkApiZipContent.getConfigurations().get(0)});
+        return Arrays.asList(
+                TestVariant.defaultSettings(),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_SERIAL_MODE_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED));
     }
 
     /**

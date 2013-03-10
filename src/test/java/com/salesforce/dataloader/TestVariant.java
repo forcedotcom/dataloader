@@ -23,53 +23,40 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package com.salesforce.dataloader;
 
-package com.salesforce.dataloader.process;
-
-import com.salesforce.dataloader.TestSetting;
-import com.salesforce.dataloader.TestVariant;
-import com.salesforce.dataloader.config.Config;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Describe your class here.
- * 
- * @author Colin Jarvis, Aleksandr Shulman
- * @since 22.0
+ * A test variant consists of one or more {@link TestSetting}s and it's meant to be used as
+ * a test parameter in a JUnit 4 {@link Parameterized.Parameters} annotated method.
+ *
+ * @author Federico Recio
  */
-@RunWith(Parameterized.class)
-public class CsvUpsertProcessTest extends ProcessTestBase {
+public class TestVariant {
 
-    public CsvUpsertProcessTest(Map<String, String> config) {
-        super(config);
+    private static final Object[] EMPTY_SETTINGS = {Collections.emptyMap()};
+
+    private TestVariant() {
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> getTestParameters() {
-        return Arrays.asList(
-                TestVariant.defaultSettings(),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED));
+    public static Object[] forSettings(TestSetting... settings) {
+        Map<String, String> config = new LinkedHashMap<String, String>();
+        for (TestSetting setting : settings) {
+            String parameter = setting.getParameter();
+            if (config.containsKey(parameter)) {
+                throw new IllegalArgumentException("Duplicate parameter: " + parameter);
+            }
+            config.put(parameter, setting.getValue().toString());
+        }
+        return new Object[]{Collections.unmodifiableMap(config)};
     }
 
-    /**
-     * Verify that a row offset will produce the correct effects and success file for a small set of rows (<5).
-     */
-    @Test
-    public void testUpsertWithRowOffset() throws Exception {
-        // define properties
-        Map<String, String> argMap = getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 10);
-
-        // start at 3, not 0!!
-        argMap.put(Config.LOAD_ROW_TO_START_AT, "3");
-
-        // perform the upsert
-        runUpsertProcess(argMap, 0, 7);
+    public static Object[] defaultSettings() {
+        return EMPTY_SETTINGS;
     }
-
 }
