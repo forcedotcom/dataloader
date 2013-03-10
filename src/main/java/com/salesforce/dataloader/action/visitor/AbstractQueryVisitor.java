@@ -26,18 +26,25 @@
 
 package com.salesforce.dataloader.action.visitor;
 
-import java.util.*;
-
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
-import com.salesforce.dataloader.exception.*;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.exception.ExtractException;
+import com.salesforce.dataloader.exception.OperationException;
+import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.mapping.SOQLMapper;
+import com.salesforce.dataloader.model.Row;
 import com.sforce.async.AsyncApiException;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Superclass for all query visitors
@@ -49,7 +56,7 @@ abstract class AbstractQueryVisitor extends AbstractVisitor implements IQueryVis
 
     private final DataWriter queryWriter;
     private final String soql;
-    private final List<Map<String, Object>> batchRows;
+    private final List<Row> batchRows;
     private final List<String> batchIds;
     private final int batchSize;
 
@@ -58,7 +65,7 @@ abstract class AbstractQueryVisitor extends AbstractVisitor implements IQueryVis
         super(controller, monitor, successWriter, errorWriter);
         this.queryWriter = queryWriter;
         this.soql = getConfig().getString(Config.EXTRACT_SOQL);
-        this.batchRows = new LinkedList<Map<String, Object>>();
+        this.batchRows = new LinkedList<Row>();
         this.batchIds = new LinkedList<String>();
         this.batchSize = getWriteBatchSize();
     }
@@ -103,7 +110,7 @@ abstract class AbstractQueryVisitor extends AbstractVisitor implements IQueryVis
         return this.queryWriter;
     }
 
-    protected void addResultRow(Map<String, Object> row, String id) throws DataAccessObjectException {
+    protected void addResultRow(Row row, String id) throws DataAccessObjectException {
         this.batchRows.add(row);
         this.batchIds.add(id);
         if (this.batchSize == this.batchRows.size()) {
@@ -142,13 +149,13 @@ abstract class AbstractQueryVisitor extends AbstractVisitor implements IQueryVis
     private void writeSuccesses() throws DataAccessObjectException {
         final String msg = Messages.getMessage(getClass(), "statusItemQueried");
         final Iterator<String> ids = this.batchIds.iterator();
-        for (final Map<String, Object> row : this.batchRows) {
+        for (final Row row : this.batchRows) {
             writeSuccess(row, ids.next(), msg);
         }
     }
 
     private void writeErrors(String errorMessage) throws DataAccessObjectException {
-        for (final Map<String, Object> row : this.batchRows) {
+        for (final Row row : this.batchRows) {
             writeError(row, errorMessage);
         }
     }

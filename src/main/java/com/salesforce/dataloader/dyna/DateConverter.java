@@ -29,6 +29,8 @@ package com.salesforce.dataloader.dyna;
 import java.text.*;
 import java.util.*;
 
+import com.salesforce.dataloader.model.NACalendarValue;
+import com.salesforce.dataloader.model.NATextValue;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.Converter;
 import org.apache.log4j.Logger;
@@ -117,7 +119,13 @@ public final class DateConverter implements Converter {
 
     @Override
     public Object convert(Class type, Object value) {
-        if (value == null)  return null;
+        if (value == null) {
+            return null;
+        }
+
+        if(value instanceof NATextValue) {
+            return NACalendarValue.getInstance();
+        }
         
         Calendar cal = Calendar.getInstance(this.timeZone);
 

@@ -24,20 +24,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.action.visitor;
+package com.salesforce.dataloader.model;
 
-import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.OperationException;
-import com.salesforce.dataloader.model.Row;
-import com.sforce.ws.ConnectionException;
+import java.util.GregorianCalendar;
 
 /**
- *
- * @author Lexi Viripaeff
- * @since 6.0
+ * Represents a null value for a datetime field.
  */
-public interface DAORowVisitor {
+public class NACalendarValue extends GregorianCalendar {
 
-    public void visit(Row row) throws OperationException, DataAccessObjectException, ConnectionException;
+    private static final NACalendarValue INSTANCE = new NACalendarValue();
+    private static final String NA_VALUE = "#N/A";
 
+    private NACalendarValue() {
+    }
+
+    public static NACalendarValue getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+
+        return NA_VALUE.equals(obj.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return NA_VALUE.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return NA_VALUE;
+    }
 }

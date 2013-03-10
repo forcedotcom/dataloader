@@ -27,6 +27,7 @@ package com.salesforce.dataloader.process;
 
 import java.util.Map;
 
+import com.salesforce.dataloader.model.Row;
 import junit.framework.TestSuite;
 
 import com.salesforce.dataloader.ConfigGenerator;
@@ -160,7 +161,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         }
 
         @Override
-        public void updateRow(int idx, Map<String, Object> row) {
+        public void updateRow(int idx, Row row) {
             if (idx == 0)
                 row.put("ID", "abcde0123456789XYZ");
             else
@@ -224,7 +225,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         }
 
         @Override
-        public void updateRow(int idx, Map<String, Object> row) {
+        public void updateRow(int idx, Row row) {
             if (idx < this.contactIds.length)
                 row.put("ID", this.contactIds[idx]);
             else

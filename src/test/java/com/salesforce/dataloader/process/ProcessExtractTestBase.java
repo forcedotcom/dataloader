@@ -36,6 +36,7 @@ import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
+import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
@@ -137,7 +138,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
             resultReader.open();
 
             // go through item by item and assert that it's there
-            Map<String, Object> row;
+            Row row;
             while ((row = resultReader.readRow()) != null) {
                 final String resultId = (String)row.get(Config.ID_COLUMN_NAME);
                 assertValidId(resultId);
@@ -278,7 +279,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
             runProcess(argMap, 1);
             final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME));
             try {
-                final Map<String, Object> resultRow = resultReader.readRow();
+                final Row resultRow = resultReader.readRow();
                 assertEquals("Query returned incorrect Contact ID", contactId, resultRow.get("CONTACT_ID"));
                 assertEquals("Query returned incorrect Contact Name", "First 000000 Last 000000",
                         resultRow.get("CONTACT_NAME"));
@@ -326,7 +327,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                 // open the results of the extraction
                 final CSVFileReader rdr = new CSVFileReader(argmap.get(Config.DAO_NAME));
                 rdr.open();
-                Map<String, Object> row = rdr.readRow();
+                Row row = rdr.readRow();
                 assertNotNull(row);
                 assertEquals(5,row.size());
                 // validate the extract results are correct.

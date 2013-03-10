@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.model.Row;
 
 /**
  * Interface to be implemented for data readers -- data access objects that are used for reading rows of data.
@@ -42,19 +43,19 @@ public interface DataReader extends DataAccessObject {
     /**
      * Get a row of data from a data source
      *
-     * @return Name/value pairs of the column values
+     * @return a {@link Row} containing all the keys and values of a row
      * @throws DataAccessObjectException
      */
-    Map<String, Object> readRow() throws DataAccessObjectException;
+    Row readRow() throws DataAccessObjectException;
 
     /**
      * Get a list of rows of data from a data source
      *
      * @param maxRows Maximum number of rows to read in one call
-     * @return List of rows (maps of name/value pairs)
+     * @return a list of up to maxRows {@link Row} objects, each of them containing all the keys and values of a row
      * @throws DataAccessObjectException
      */
-    List<Map<String, Object>> readRowList(int maxRows) throws DataAccessObjectException;
+    List<Row> readRowList(int maxRows) throws DataAccessObjectException;
 
     /**
      * @return Total number of rows that will be read by the current Data Access Object
