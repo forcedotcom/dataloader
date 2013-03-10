@@ -26,6 +26,8 @@
 package com.salesforce.dataloader.process;
 
 import com.salesforce.dataloader.ConfigGenerator;
+import com.salesforce.dataloader.TestSetting;
+import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
@@ -61,16 +63,12 @@ public class CsvHardDeleteTest extends ProcessTestBase {
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getTestParameters() {
-        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(ProcessTestBase.getConfigGenerator(),
-                Config.BULK_API_ENABLED, Boolean.TRUE.toString());
-        final ConfigGenerator bulkApiZipContent = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_ZIP_CONTENT,
-                Boolean.TRUE.toString());
-        final ConfigGenerator bulkApiSerialMode = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_SERIAL_MODE,
-                Boolean.TRUE.toString());
-        return Arrays.asList(new Object[] {withBulkApi.getConfigurations().get(0)},
-                new Object[] {bulkApiSerialMode.getConfigurations().get(0)},
-                new Object[] {bulkApiZipContent.getConfigurations().get(0)});
+        return Arrays.asList(
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_SERIAL_MODE_ENABLED));
     }
+
     /**
      * Hard Delete the records based on a CSV file. Verifies that there were no errors during this operation and success
      * was returned. This operation permanently deletes records from the org.
@@ -129,7 +127,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
             // fail("Did not expect empty CSV file to succeed");
         } catch (RuntimeException e) {
             if (e.getCause() instanceof DataAccessObjectInitializationException) {
-                DataAccessObjectInitializationException ex = (DataAccessObjectInitializationException)e.getCause();
+                DataAccessObjectInitializationException ex = (DataAccessObjectInitializationException) e.getCause();
                 String actualMessage = ex.getMessage();
                 assertTrue("Wrong exception message: " + actualMessage,
                         actualMessage != null && actualMessage.contains("some error string"));

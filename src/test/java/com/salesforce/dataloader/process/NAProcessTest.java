@@ -26,6 +26,8 @@
 package com.salesforce.dataloader.process;
 
 import com.salesforce.dataloader.ConfigGenerator;
+import com.salesforce.dataloader.TestSetting;
+import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
@@ -83,11 +85,9 @@ public class NAProcessTest extends ProcessTestBase {
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getConfigGeneratorParams() {
-        final ConfigGenerator bulkApiTrue = new ConfigSettingGenerator(ProcessTestBase.getConfigGenerator(),
-                Config.BULK_API_ENABLED, Boolean.TRUE.toString());
-        final ConfigGenerator bulkApiFalse = new ConfigSettingGenerator(ProcessTestBase.getConfigGenerator(),
-                Config.BULK_API_ENABLED, Boolean.FALSE.toString());
-        return Arrays.asList(new Object[]{bulkApiTrue.getConfigurations().get(0)}, new Object[]{bulkApiFalse.getConfigurations().get(0)});
+        return Arrays.asList(
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_DISABLED));
     }
 
     @Test

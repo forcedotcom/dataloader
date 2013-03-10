@@ -23,53 +23,36 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package com.salesforce.dataloader;
 
-package com.salesforce.dataloader.process;
-
-import com.salesforce.dataloader.TestSetting;
-import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.config.Config;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
 
 /**
- * Describe your class here.
- * 
- * @author Colin Jarvis, Aleksandr Shulman
- * @since 22.0
+ * A test setting is used to modify the behavior of dataloader during test execution.
+ * Many test settings can be used together to configure a {@link TestVariant}.
+ *
+ * @author Federico Recio
  */
-@RunWith(Parameterized.class)
-public class CsvUpsertProcessTest extends ProcessTestBase {
+public enum TestSetting {
 
-    public CsvUpsertProcessTest(Map<String, String> config) {
-        super(config);
+    BULK_API_ENABLED(Config.BULK_API_ENABLED, Boolean.TRUE),
+    BULK_API_DISABLED(Config.BULK_API_ENABLED, Boolean.FALSE),
+    BULK_API_ZIP_CONTENT_ENABLED(Config.BULK_API_ZIP_CONTENT, Boolean.TRUE),
+    BULK_API_SERIAL_MODE_ENABLED(Config.BULK_API_SERIAL_MODE, Boolean.TRUE);
+
+    private final String parameter;
+    private final Object value;
+
+    TestSetting(String parameter, Object value) {
+        this.parameter = parameter;
+        this.value = value;
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> getTestParameters() {
-        return Arrays.asList(
-                TestVariant.defaultSettings(),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED));
+    public String getParameter() {
+        return parameter;
     }
 
-    /**
-     * Verify that a row offset will produce the correct effects and success file for a small set of rows (<5).
-     */
-    @Test
-    public void testUpsertWithRowOffset() throws Exception {
-        // define properties
-        Map<String, String> argMap = getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 10);
-
-        // start at 3, not 0!!
-        argMap.put(Config.LOAD_ROW_TO_START_AT, "3");
-
-        // perform the upsert
-        runUpsertProcess(argMap, 0, 7);
+    public Object getValue() {
+        return value;
     }
-
 }
