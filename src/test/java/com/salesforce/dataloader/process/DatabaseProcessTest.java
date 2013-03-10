@@ -25,7 +25,6 @@
  */
 package com.salesforce.dataloader.process;
 
-import com.salesforce.dataloader.ConfigGenerator;
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;

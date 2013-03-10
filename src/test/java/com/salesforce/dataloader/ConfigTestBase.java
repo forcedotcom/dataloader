@@ -30,11 +30,9 @@ import com.salesforce.dataloader.exception.ConfigInitializationException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import org.junit.Before;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -64,91 +62,6 @@ public abstract class ConfigTestBase extends TestBase {
 
         public void putConfigSetting(Map<String, String> destConfig) {
             destConfig.put(this.configName, getProperty(getPropertyName()));
-        }
-    }
-
-    public static ConfigGenerator DEFAULT_CONFIG_GEN = new ConfigGenerator() {
-
-        @Override
-        public List<Map<String, String>> getConfigurations() {
-            List<Map<String, String>> result = new ArrayList<Map<String, String>>();
-            result.add(new HashMap<String, String>());
-            return result;
-        }
-
-        @Override
-        public int getNumConfigurations() {
-            return 1;
-        }
-
-    };
-
-    public static class UnionConfigGenerator implements ConfigGenerator {
-        private final ConfigGenerator[] gens;
-
-        public UnionConfigGenerator(ConfigGenerator... gens) {
-            this.gens = gens == null ? new ConfigGenerator[0] : gens;
-        }
-
-        @Override
-        public List<Map<String, String>> getConfigurations() {
-            List<Map<String, String>> configs = new ArrayList<Map<String, String>>(getNumConfigurations());
-            for (ConfigGenerator g : this.gens) {
-                if (g != null) configs.addAll(g.getConfigurations());
-            }
-            return configs;
-        }
-
-        @Override
-        public int getNumConfigurations() {
-            int n = 0;
-            for (ConfigGenerator g : this.gens)
-                if (g != null) n += g.getNumConfigurations();
-            return n;
-        }
-
-    }
-
-    public static class ConfigSettingGenerator implements ConfigGenerator {
-        private final ConfigGenerator gen;
-        private final String setting;
-        private final String[] values;
-
-        public static ConfigSettingGenerator getBooleanGenerator(ConfigGenerator gen, String setting) {
-            return new ConfigSettingGenerator(gen, setting, Boolean.TRUE.toString(), Boolean.FALSE.toString());
-        }
-
-        public ConfigSettingGenerator(String setting, String... values) {
-            this(null, setting, values);
-        }
-
-        public ConfigSettingGenerator(ConfigGenerator gen, String setting, String... values) {
-            this.gen = gen == null ? DEFAULT_CONFIG_GEN : gen;
-            this.setting = setting;
-            this.values = values;
-            assert this.values != null && this.values.length > 0;
-        }
-
-        @Override
-        public List<Map<String, String>> getConfigurations() {
-            final List<Map<String, String>> result = this.gen.getConfigurations();
-            final int startSize = result.size();
-            assert startSize > 0;
-            for (int idx = 0; idx < startSize; idx++) {
-                Map<String, String> config = result.get(idx);
-                config.put(this.setting, this.values[0]);
-                for (int j = 1; j < this.values.length; j++) {
-                    config = new HashMap<String, String>(config);
-                    config.put(this.setting, this.values[j]);
-                    result.add(config);
-                }
-            }
-            return result;
-        }
-
-        @Override
-        public int getNumConfigurations() {
-            return this.gen.getNumConfigurations() * this.values.length;
         }
     }
 
