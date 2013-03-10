@@ -26,7 +26,6 @@
 
 package com.salesforce.dataloader.process;
 
-import com.salesforce.dataloader.ConfigGenerator;
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.TestBase;
 import com.salesforce.dataloader.TestProgressMontitor;
@@ -82,9 +81,7 @@ import static org.junit.Assert.assertTrue;
  */
 public abstract class ProcessTestBase extends ConfigTestBase {
 
-    public static ConfigGenerator getConfigGenerator() {
-        return DEFAULT_CONFIG_GEN;
-    }
+    private static Logger logger = Logger.getLogger(TestBase.class);
 
     protected ProcessTestBase() {
         super(Collections.<String, String>emptyMap());
@@ -93,9 +90,6 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     protected ProcessTestBase(Map<String, String> config) {
         super(config);
     }
-
-    // logger
-    private static Logger logger = Logger.getLogger(TestBase.class);
 
     @Before
     public void cleanRecords() {
