@@ -25,11 +25,6 @@
  */
 package com.salesforce.dataloader.process;
 
-import java.io.File;
-import java.util.*;
-
-import junit.framework.TestSuite;
-
 import com.salesforce.dataloader.ConfigGenerator;
 import com.salesforce.dataloader.ConfigTestSuite;
 import com.salesforce.dataloader.action.OperationInfo;
@@ -37,23 +32,32 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
+import com.salesforce.dataloader.model.NATextValue;
+import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
+import junit.framework.TestSuite;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * This class test that #N/A can be used to set fields to null when Use Bulk Api is enabled.
- * 
+ * It also validates that empty fields are not handled in the same way as #N/A
+ *
  * @author Jeff Lai
  * @since 25.0
  */
 public class NAProcessTest extends ProcessTestBase {
 
-    private final String TASK_SUBJECT = "NATest";
-    private final String TARGET_DIR = getProperty("target.dir").trim();
-    private final String CSV_DIR_PATH = TARGET_DIR + File.separator + getClass().getSimpleName();
-    private final String CSV_FILE_PATH = CSV_DIR_PATH + File.separator + "na.csv";
-    private String userId = null;
+    private static final String TASK_SUBJECT = "NATest";
+    private static final String TARGET_DIR = getProperty("target.dir").trim();
+    private static final String CSV_DIR_PATH = TARGET_DIR + File.separator + NAProcessTest.class.getSimpleName();
+    private static final String CSV_FILE_PATH = CSV_DIR_PATH + File.separator + "na.csv";
+    private String userId;
 
     public NAProcessTest(String name, Map<String, String> config) {
         super(name, config);
@@ -70,7 +74,9 @@ public class NAProcessTest extends ProcessTestBase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        if (userId == null) userId = getUserId();
+        if (userId == null) {
+            userId = getUserId();
+        }
     }
 
     public static ConfigGenerator getConfigGenerator() {
@@ -96,7 +102,7 @@ public class NAProcessTest extends ProcessTestBase {
     public void testDateTimeFieldUpdate() throws Exception {
         runNAtest("ReminderDateTime", true, OperationInfo.update);
     }
-    
+
     public void testDateFieldInsert() throws Exception {
         runNAtest("ActivityDate", true, OperationInfo.insert);
     }
@@ -105,15 +111,30 @@ public class NAProcessTest extends ProcessTestBase {
         runNAtest("ActivityDate", true, OperationInfo.update);
     }
 
-    protected void runNAtest(String nullFieldName, boolean isDateField, OperationInfo operation) throws Exception {
+    public void testTextEmptyFieldIsNotHandledAsNAUpdate() throws Exception {
+        runEmptyFieldUpdateTest("Description", false);
+    }
+
+    public void testTextEmptyFieldIsNotHandledAsNAInsert() throws Exception {
+        runEmptyFieldInsertTest("Description");
+    }
+
+    public void testDateEmptyFieldIsNotHandledAsNAUpdate() throws Exception {
+        runEmptyFieldUpdateTest("ActivityDate", true);
+    }
+
+    public void testDateEmptyFieldIsNotHandledAsNAInsert() throws Exception {
+        runEmptyFieldInsertTest("ActivityDate");
+    }
+
+    private void runNAtest(String nullFieldName, boolean isDateField, OperationInfo operation) throws Exception {
         String taskId = null;
-        if (!operation.equals(OperationInfo.insert)) taskId = createTask(nullFieldName, isDateField);
-        generateCsv(nullFieldName, taskId);
-        Map<String, String> argMap = getTestConfig(operation, CSV_FILE_PATH, getTestDataDir() + File.separator
-                + "NAProcessTest.sdl", false);
-        argMap.put(Config.ENTITY, "Task");
-        argMap.remove(Config.EXTERNAL_ID_FIELD);
-        Controller controller = null;
+        if (!operation.equals(OperationInfo.insert)) {
+            taskId = createTask(nullFieldName, isDateField);
+        }
+        generateCsvWithNAField(nullFieldName, taskId);
+        Map<String, String> argMap = getArgMap(operation);
+        Controller controller;
         if (!getController().getConfig().getBoolean(Config.BULK_API_ENABLED) && isDateField) {
             controller = runProcess(argMap, true, null, 0, 0, 1, false);
             String errorFile = controller.getConfig().getStringRequired(Config.OUTPUT_ERROR);
@@ -124,16 +145,40 @@ public class NAProcessTest extends ProcessTestBase {
             int numInsert = operation.equals(OperationInfo.insert) ? 1 : 0;
             int numUpdate = operation.equals(OperationInfo.update) ? 1 : 0;
             controller = runProcess(argMap, true, null, numInsert, numUpdate, 0, false);
-            String successFile = controller.getConfig().getStringRequired(Config.OUTPUT_SUCCESS);
-            taskId = getCsvFieldValue(successFile, "ID");
-            String expectedNullFieldValue = getController().getConfig().getBoolean(Config.BULK_API_ENABLED) ? null
-                    : "#N/A";
-            QueryResult result = getController().getPartnerClient().query(
-                    "select " + nullFieldName + " from Task where Id='" + taskId + "'");
-            assertEquals(1, result.getSize());
-            String actualNullFieldValue = (String)result.getRecords()[0].getField(nullFieldName);
+            String actualNullFieldValue = getFieldValueAfterOperation(nullFieldName, controller);
+            String expectedNullFieldValue = getController().getConfig().getBoolean(Config.BULK_API_ENABLED) ? null : NATextValue.getInstance().toString();
             assertEquals("unexpected field value", expectedNullFieldValue, actualNullFieldValue);
         }
+    }
+
+    private void runEmptyFieldInsertTest(String emtpyFieldName) throws Exception {
+        generateCsvWithEmptyField(emtpyFieldName, null);
+        Controller controller = runProcess(getArgMap(OperationInfo.insert), true, null, 1, 0, 0, false);
+        String actualValue = getFieldValueAfterOperation(emtpyFieldName, controller);
+        assertNull("Empty field values in CSV shouldn't have been inserted with values", actualValue);
+    }
+
+    private void runEmptyFieldUpdateTest(String nullFieldName, boolean isDateField) throws Exception {
+        String taskId = createTask(nullFieldName, isDateField);
+        generateCsvWithEmptyField(nullFieldName, taskId);
+        Controller controller = runProcess(getArgMap(OperationInfo.update), true, null, 0, 1, 0, false);
+        String actualValue = getFieldValueAfterOperation(nullFieldName, controller);
+        assertNotNull("Empty field values in CSV should have been ignored", actualValue);
+    }
+
+    private String getFieldValueAfterOperation(String nullFieldName, Controller controller) throws Exception {
+        String successFile = controller.getConfig().getStringRequired(Config.OUTPUT_SUCCESS);
+        String taskId = getCsvFieldValue(successFile, "ID");
+        QueryResult result = getController().getPartnerClient().query("select " + nullFieldName + " from Task where Id='" + taskId + "'");
+        assertEquals(1, result.getSize());
+        return (String)result.getRecords()[0].getField(nullFieldName);
+    }
+
+    private Map<String, String> getArgMap(OperationInfo operation) {
+        Map<String, String> argMap = getTestConfig(operation, CSV_FILE_PATH, getTestDataDir() + File.separator + "NAProcessTest.sdl", false);
+        argMap.put(Config.ENTITY, "Task");
+        argMap.remove(Config.EXTERNAL_ID_FIELD);
+        return argMap;
     }
 
     private String createTask(String fieldToNullName, boolean isDateField) throws Exception {
@@ -166,27 +211,41 @@ public class NAProcessTest extends ProcessTestBase {
         return result.getRecords()[0].getId();
     }
 
+    private void generateCsvWithNAField(String nullFieldName, String id) throws Exception {
+         generateCsv(nullFieldName, NATextValue.getInstance(), id);
+    }
+
+    private void generateCsvWithEmptyField(String emptyFieldName, String id) throws Exception {
+        generateCsv(emptyFieldName, null, id);
+    }
+
     /**
      * We have to generate the csv file because the user id will change.
      */
-    protected void generateCsv(String nullFieldName, String id) throws Exception {
+    private void generateCsv(String nullFieldName, Object nullFieldValue, String id) throws Exception {
         File csvDir = new File(CSV_DIR_PATH);
-        if (!csvDir.exists()) csvDir.mkdirs();
+        if (!csvDir.exists()) {
+            boolean deleteCsvDirOk = csvDir.mkdirs();
+            assertTrue("Could not delete directory: " + CSV_DIR_PATH, deleteCsvDirOk);
+        }
         File csvFile = new File(CSV_FILE_PATH);
-        if (csvFile.exists()) csvFile.delete();
+        if (csvFile.exists()) {
+            boolean deleteCsvFileOk = csvFile.delete();
+            assertTrue("Could not delete existing CSV file: " + CSV_FILE_PATH, deleteCsvFileOk);
+        }
 
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("OwnerId", userId);
-        map.put("Subject", TASK_SUBJECT);
-        map.put(nullFieldName, "#N/A");
-        if (id != null) map.put("Id", id);
+        Row row = new Row();
+        row.put("OwnerId", userId);
+        row.put("Subject", TASK_SUBJECT);
+        row.put(nullFieldName, nullFieldValue);
+        if (id != null) row.put("Id", id);
 
         CSVFileWriter writer = null;
         try {
             writer = new CSVFileWriter(CSV_FILE_PATH, DEFAULT_CHARSET);
             writer.open();
-            writer.setColumnNames(new ArrayList<String>(map.keySet()));
-            writer.writeRow(map);
+            writer.setColumnNames(new ArrayList<String>(row.keySet()));
+            writer.writeRow(row);
         } finally {
             if (writer != null) writer.close();
         }

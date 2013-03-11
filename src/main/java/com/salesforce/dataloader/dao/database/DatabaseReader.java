@@ -29,6 +29,7 @@ import java.io.File;
 import java.sql.*;
 import java.util.*;
 
+import com.salesforce.dataloader.model.Row;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
 
@@ -155,10 +156,10 @@ public class DatabaseReader implements DataReader {
      * @see com.salesforce.dataloader.dao.DataReader#readRowList(int)
      */
     @Override
-    public List<Map<String, Object>> readRowList(int maxRows) throws DataAccessObjectException {
-        List<Map<String, Object>> outputRows = new ArrayList<Map<String,Object>>();
+    public List<Row> readRowList(int maxRows) throws DataAccessObjectException {
+        List<Row> outputRows = new ArrayList<Row>();
         for(int i=0; i < maxRows; i++) {
-            Map<String,Object> outputRow = readRow();
+            Row outputRow = readRow();
             if(outputRow != null) {
                 // if row has been returned, add it to the output
                 outputRows.add(outputRow);
@@ -171,8 +172,8 @@ public class DatabaseReader implements DataReader {
     }
 
     @Override
-    public Map<String, Object> readRow() throws DataAccessObjectException {
-        Map<String, Object> resultValues = null;
+    public Row readRow() throws DataAccessObjectException {
+        Row row = null;
 
         if (!dbContext.isOpen()) {
             open();
@@ -182,16 +183,16 @@ public class DatabaseReader implements DataReader {
         try {
             ResultSet rs = dbContext.getDataResultSet();
             if (rs != null && rs.next()) {
-                resultValues = new HashMap<String, Object>();
+                row = new Row(columnNames.size());
 
                 for (String columnName : columnNames) {
                     currentColumnName = columnName;
                     Object value = rs.getObject(columnName);
-                    resultValues.put(columnName, value);
+                    row.put(columnName, value);
                 }
                 currentRowNumber++;
             }
-            return resultValues;
+            return row;
         } catch (SQLException sqe) {
             String errMsg = Messages.getFormattedString("DatabaseDAO.sqlExceptionReadRow", new String[] {
                     currentColumnName, String.valueOf(currentRowNumber + 1), dbContext.getDbConfigName(), sqe.getMessage() });

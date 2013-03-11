@@ -29,6 +29,7 @@ import java.io.File;
 import java.sql.*;
 import java.util.*;
 
+import com.salesforce.dataloader.model.Row;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
 
@@ -123,7 +124,7 @@ public class DatabaseWriter implements DataWriter {
      * @see com.salesforce.dataloader.dao.DataWriter#writeRowList(java.util.List)
      */
     @Override
-    public boolean writeRowList(List<Map<String, Object>> inputRowList) throws DataAccessObjectException {
+    public boolean writeRowList(List<Row> inputRowList) throws DataAccessObjectException {
 
         // make sure that the update is setup and ready to go, otherwise stop
         if (!dbContext.isOpen()) { throw new DataAccessObjectInitializationException(Messages
@@ -140,7 +141,7 @@ public class DatabaseWriter implements DataWriter {
             } else {
                 // for each row set the Sql params in the prepared statement
                 dbContext.getDataStatement().clearBatch();
-                for (Map<String, Object> inputRow : inputRowList) {
+                for (Row inputRow : inputRowList) {
                     dbContext.setSqlParamValues(sqlConfig, config, inputRow);
                     dbContext.getDataStatement().addBatch();
                     currentRowNumber++;
@@ -230,9 +231,9 @@ public class DatabaseWriter implements DataWriter {
      * @throws DataAccessObjectException
      */
     @Override
-    public boolean writeRow(Map<String, Object> inputRow) throws DataAccessObjectException {
+    public boolean writeRow(Row inputRow) throws DataAccessObjectException {
         // FIXME: Think about refactoring this for the caller to writeRow() and here take care of batching internally
-        List<Map<String, Object>> inputRowList = new ArrayList<Map<String, Object>>();
+        List<Row> inputRowList = new ArrayList<Row>();
         inputRowList.add(inputRow);
         return writeRowList(inputRowList);
     }

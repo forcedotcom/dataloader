@@ -30,6 +30,7 @@ import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.salesforce.dataloader.model.Row;
 import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.client.PartnerClient;
@@ -97,7 +98,7 @@ public abstract class Mapper {
         return constantVal.substring(1, constantVal.length() - 1);
     }
 
-    protected void mapConstants(Map<String, Object> rowMap) {
+    protected void mapConstants(Row rowMap) {
         rowMap.putAll(this.constants);
     }
 

@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import com.salesforce.dataloader.model.Row;
 import org.apache.commons.beanutils.DynaBean;
 
 import com.salesforce.dataloader.action.OperationInfo;
@@ -98,7 +99,7 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
 
     }
 
-    private void writeOutputToWriter(Object[] results, List<Map<String, Object>> dataArray)
+    private void writeOutputToWriter(Object[] results, List<Row> dataArray)
             throws DataAccessObjectException, LoadException {
 
         if (results.length != dataArray.size()) {
@@ -109,7 +110,7 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
         // have to do this because although saveResult and deleteResult
         // are a) not the same class yet b) not subclassed
         for (int i = 0; i < results.length; i++) {
-            Map<String, Object> dataRow = dataArray.get(i);
+            Row dataRow = dataArray.get(i);
             String statusMsg = null;
             if (results instanceof SaveResult[]) {
                 SaveResult saveRes = (SaveResult)results[i];
@@ -141,7 +142,7 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
         }
     }
 
-    private void processResult(Map<String, Object> dataRow, boolean isSuccess, String id, Error[] errors)
+    private void processResult(Row dataRow, boolean isSuccess, String id, Error[] errors)
             throws DataAccessObjectException {
         // process success vs. error
         // extract error message from error result
