@@ -26,14 +26,20 @@
 
 package com.salesforce.dataloader.process;
 
-import java.io.*;
-import java.util.Map;
-
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.sforce.async.CSVReader;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
+import org.apache.commons.io.IOUtils;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test to validate we handle unicode correctly.
@@ -44,14 +50,7 @@ import com.sforce.ws.ConnectionException;
 
 public class CsvUnicodeProcessTest extends ProcessTestBase {
 
-    public CsvUnicodeProcessTest(String name, Map<String, String> config) {
-        super(name, config);
-    }
-
-    public CsvUnicodeProcessTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testUnicodeExtraction() throws Exception {
         final String name = System.nanoTime() + "☠";
         final String accountId = insertAccount(name);
@@ -74,11 +73,16 @@ public class CsvUnicodeProcessTest extends ProcessTestBase {
         return argMap;
     }
 
-    private void validateExtraction(final String name, final Map<String, String> testConfig)
-            throws UnsupportedEncodingException, FileNotFoundException, IOException {
-        CSVReader rdr = new CSVReader(new FileInputStream(new File(testConfig.get(Config.DAO_NAME))), "UTF-8");
-        int nameidx = rdr.nextRecord().indexOf("NAME");
-        assertEquals(name, rdr.nextRecord().get(nameidx));
+    private void validateExtraction(final String name, final Map<String, String> testConfig) throws IOException {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(new File(testConfig.get(Config.DAO_NAME)));
+            CSVReader rdr = new CSVReader(fis, "UTF-8");
+            int nameidx = rdr.nextRecord().indexOf("NAME");
+            assertEquals(name, rdr.nextRecord().get(nameidx));
+        } finally {
+            IOUtils.closeQuietly(fis);
+        }
     }
 
     private String insertAccount(String name) throws ConnectionException {

@@ -26,17 +26,20 @@
 package com.salesforce.dataloader.dyna;
 
 import com.salesforce.dataloader.ConfigTestBase;
+import com.salesforce.dataloader.TestBase;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Calendar;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class SObjectReferenceConverterTest extends ConfigTestBase {
 
-    public SObjectReferenceConverterTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testSObjectReferenceConverter() throws ConnectionException {
         SObjectReferenceConverter refConverter = new SObjectReferenceConverter();
         SObjectReference ref;
@@ -75,21 +78,21 @@ public class SObjectReferenceConverterTest extends ConfigTestBase {
     private void testValidSObjectReference(String refValue, String relationshipName, boolean expectSuccess) {
         SObjectReference ref = new SObjectReference(refValue);
         SObject sObj = new SObject();
-        String fkFieldName = DEFAULT_ACCOUNT_EXT_ID_FIELD;
+        String fkFieldName = TestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD;
 
         try {
             ref.addReferenceToSObject(getController(), sObj, ObjectField.formatAsString("Parent",
-                    DEFAULT_ACCOUNT_EXT_ID_FIELD));
+                    TestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD));
 
             SObject child = (SObject)sObj.getChild(relationshipName);
             boolean succeeded = child != null && child.getField(fkFieldName) != null && child.getField(fkFieldName)
                     .equals(refValue);
             if (expectSuccess && !succeeded || !expectSuccess && succeeded) {
-                fail();
+                Assert.fail();
             }
         } catch (Exception e) {
             if (expectSuccess) {
-                fail();
+                Assert.fail();
             }
         }
     }

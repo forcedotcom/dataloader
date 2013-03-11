@@ -23,44 +23,36 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader.model;
+package com.salesforce.dataloader;
 
-import java.util.GregorianCalendar;
+import com.salesforce.dataloader.config.Config;
 
 /**
- * Represents a null value for a datetime field.
+ * A test setting is used to modify the behavior of dataloader during test execution.
+ * Many test settings can be used together to configure a {@link TestVariant}.
+ *
+ * @author Federico Recio
  */
-public class NACalendarValue extends GregorianCalendar {
+public enum TestSetting {
 
-    private static final NACalendarValue INSTANCE = new NACalendarValue();
-    private static final String NA_VALUE = "#N/A";
+    BULK_API_ENABLED(Config.BULK_API_ENABLED, Boolean.TRUE),
+    BULK_API_DISABLED(Config.BULK_API_ENABLED, Boolean.FALSE),
+    BULK_API_ZIP_CONTENT_ENABLED(Config.BULK_API_ZIP_CONTENT, Boolean.TRUE),
+    BULK_API_SERIAL_MODE_ENABLED(Config.BULK_API_SERIAL_MODE, Boolean.TRUE);
 
-    private NACalendarValue() {
+    private final String parameter;
+    private final Object value;
+
+    TestSetting(String parameter, Object value) {
+        this.parameter = parameter;
+        this.value = value;
     }
 
-    public static NACalendarValue getInstance() {
-        return INSTANCE;
+    public String getParameter() {
+        return parameter;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-
-        return NA_VALUE.equals(obj.toString());
-    }
-
-    @Override
-    public int hashCode() {
-        return NA_VALUE.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return NA_VALUE;
+    public Object getValue() {
+        return value;
     }
 }

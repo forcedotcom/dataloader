@@ -25,24 +25,39 @@
  */
 package com.salesforce.dataloader.process;
 
-import java.io.File;
-import java.text.ParseException;
-import java.util.*;
-
-import com.salesforce.dataloader.model.Row;
-import junit.framework.TestSuite;
-
-import org.apache.log4j.Logger;
-
-import com.salesforce.dataloader.ConfigGenerator;
-import com.salesforce.dataloader.ConfigTestSuite;
+import com.salesforce.dataloader.TestSetting;
+import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.LastRun;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.database.DatabaseReader;
 import com.salesforce.dataloader.dao.database.DatabaseTestUtil;
-import com.salesforce.dataloader.exception.*;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.exception.ProcessInitializationException;
+import com.salesforce.dataloader.model.Row;
+import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.io.File;
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Automated tests for dataloader database batch interface
@@ -50,56 +65,41 @@ import com.salesforce.dataloader.exception.*;
  * @author Alex Warshavsky
  * @since 8.0
  */
+@RunWith(Parameterized.class)
 public class DatabaseProcessTest extends ProcessTestBase {
 
-    public static TestSuite suite() {
-        return ConfigTestSuite.createSuite(DatabaseProcessTest.class);
-    }
-
-    public static ConfigGenerator getConfigGenerator() {
-        final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
-        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED, Boolean.TRUE
-                .toString());
-        final ConfigGenerator bulkApiZipContent = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_ZIP_CONTENT,
-                Boolean.TRUE.toString());
-        final ConfigGenerator bulkApiSerialMode = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_SERIAL_MODE,
-                Boolean.TRUE.toString());
-        return new UnionConfigGenerator(parent, withBulkApi, bulkApiSerialMode, bulkApiZipContent);
-    }
-
-    // logger
-    private static Logger logger = Logger.getLogger(DatabaseReader.class);
+    private static final Logger logger = Logger.getLogger(DatabaseReader.class);
     private static final int NUM_ROWS = 1000;
     private static final int BATCH_SIZE = 100;
 
-    public DatabaseProcessTest(String name, Map<String, String> config) {
-        super(name, config);
+    public DatabaseProcessTest(Map<String, String> config) {
+        super(config);
     }
 
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#setUp()
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getTestParameters() {
+        return Arrays.asList(
+                TestVariant.defaultSettings(),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_SERIAL_MODE_ENABLED));
+    }
+
+    @Before
+    public void setUpDb() throws Exception {
         DatabaseTestUtil.createTable(getController(), "dataloader");
         
         // delete accounts from database to start fresh
         DatabaseTestUtil.deleteAllAccountsDb(getController());
     }
 
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#tearDown()
-     */
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-
+    @After
+    public void tearDownDb() throws Exception {
         // delete accounts from database to finish with no leftovers
         DatabaseTestUtil.deleteAllAccountsDb(getController());
     }
 
+    @Test
     public void testExtractAccountDb() throws ProcessInitializationException, DataAccessObjectException {
         // upsert accounts into salesforce so there's something to query
         upsertSfdcAccounts(NUM_ROWS);
@@ -111,7 +111,8 @@ public class DatabaseProcessTest extends ProcessTestBase {
         doExtractAccountDb(processName, NUM_ROWS, 0, false);
     }
 
-    public void testExtractAccountDbNegative() throws ProcessInitializationException, DataAccessObjectException {
+    @Test
+    public void testExtractAccountDbNegative() throws Exception {
         // upsert accounts into salesforce so there's something to query
         upsertSfdcAccounts(500);
         // upsert one bad record causing only one of the database write batches to fail
@@ -121,7 +122,8 @@ public class DatabaseProcessTest extends ProcessTestBase {
         doExtractAccountDb("extractAccountDbProcess", 400, 100, true);
     }
 
-    public void testExtractMultipleBadAccounts() throws ProcessInitializationException, DataAccessObjectException {
+    @Test
+    public void testExtractMultipleBadAccounts() throws Exception {
         // upsert many accounts which will fail to be written to the database on extract
         // the sql exceptions should be logged
         upsertBadSfdcAccounts(555, 777);
@@ -130,7 +132,8 @@ public class DatabaseProcessTest extends ProcessTestBase {
         doExtractAccountDb("extractAccountDbProcess", 0, 555, true);
     }
 
-    public void testUpsertAccountDb() throws ParseException, ProcessInitializationException, DataAccessObjectException {
+    @Test
+    public void testUpsertAccountDb() throws Exception {
 	// This test happens to configure its own encryption file and encrypted password
         // so we need to remove the default test password from the config
         final Map<String, String> argMap = getTestConfig();
@@ -141,8 +144,8 @@ public class DatabaseProcessTest extends ProcessTestBase {
         testUpsertAccountsDb(argMap, NUM_ROWS, false, false);
     }
 
-    public void testMaximumBatchRowsDb() throws ParseException, ProcessInitializationException,
-    DataAccessObjectException {
+    @Test
+    public void testMaximumBatchRowsDb() throws Exception {
         final int numRows = isBulkAPIEnabled(getTestConfig()) ? Config.MAX_BULK_API_BATCH_SIZE
                 : Config.MAX_LOAD_BATCH_SIZE;
         // insert
@@ -173,7 +176,8 @@ public class DatabaseProcessTest extends ProcessTestBase {
         runUpsertProcess(args, isInsert ? numRows : 0, isInsert ? 0 : numRows);
     }
 
-    public void testInsertNullsDB() throws ParseException, ProcessInitializationException, DataAccessObjectException {
+    @Test
+    public void testInsertNullsDB() throws Exception {
         Map<String, String> args = getTestConfig();
         if (isBulkAPIEnabled(args)) {
             logger.info("testInsertNulls is disabled for bulk api");
@@ -190,7 +194,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         testUpsertAccountsDb(args, 10, false, true);
     }
 
-    protected void doExtractAccountDb(String processName, int expectedSuccesses, int expectedFailures, boolean isInsert)
+    private void doExtractAccountDb(String processName, int expectedSuccesses, int expectedFailures, boolean isInsert)
             throws ProcessInitializationException, DataAccessObjectException {
 
         // specify the name of the configured process and select appropriate database access type
@@ -216,10 +220,6 @@ public class DatabaseProcessTest extends ProcessTestBase {
         verifyDbSuccess(theController, "queryAccount", expectedSuccesses);
     }
 
-    /**
-     * @param theController
-     * @param startTime
-     */
     private void verifyDbSuccess(Controller theController, String dbConfigName, int expectedSuccesses) {
         DatabaseReader reader = null;
         logger.info("Verifying database success for database configuration: " + dbConfigName);
@@ -238,13 +238,13 @@ public class DatabaseProcessTest extends ProcessTestBase {
             }
             assertEquals(expectedSuccesses, rowsProcessed);
         } catch (DataAccessObjectInitializationException e) {
-            fail("Error initializing database operation success verification using dbConfig: " + dbConfigName +
+            Assert.fail("Error initializing database operation success verification using dbConfig: " + dbConfigName +
                     ", error:" + e.getMessage());
         } catch (DataAccessObjectException e) {
-            fail("Error reading rows during database operation success verification using dbConfig: " + dbConfigName +
+            Assert.fail("Error reading rows during database operation success verification using dbConfig: " + dbConfigName +
                     ", error:" + e.getMessage());
         } catch (ParameterLoadException e) {
-            fail("Error getting a config parameter: " + e.getMessage()
+            Assert.fail("Error getting a config parameter: " + e.getMessage()
                     + "during database operation success verification using dbConfig: " + dbConfigName);
         } finally {
             if(reader != null) reader.close();
