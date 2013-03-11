@@ -25,75 +25,56 @@
  */
 package com.salesforce.dataloader.dyna;
 
-import com.salesforce.dataloader.ConfigTestBase;
 import org.apache.commons.beanutils.ConversionException;
+import org.junit.Test;
 
-public class BooleanConverterTest extends ConfigTestBase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-    public BooleanConverterTest(String name) {
-        super(name);
+public class BooleanConverterTest {
+
+    private static final String[] VALID_TRUE_VALUES = {"yes", "y", "true", "on", "1"};
+    private static final String[] VALID_FALSE_VALUES = {"no", "n", "false", "off", "0"};
+    private final BooleanConverter converter = new BooleanConverter();
+
+    @Test(expected = ConversionException.class)
+    public void testConvertInvalidString() {
+        converter.convert(null, "qweorijo");
     }
 
-    public void testBooleanConverter() {
-        BooleanConverter converter = new BooleanConverter();
-        Boolean result;
+    @Test
+    public void testConvertEmptyString() {
+        assertNull(converter.convert(null, ""));
+    }
 
-        // test null and empty string, should return null
-        result = (Boolean)converter.convert(null, null);
-        assertNull(result);
-        result = (Boolean)converter.convert(null, "");
-        assertNull(result);
+    @Test
+    public void testConvertNull() {
+        assertNull(converter.convert(null, null));
+    }
 
-        // if we pass in a boolean, we should get the same one back
-        result = (Boolean)converter.convert(null, Boolean.TRUE);
-        assertEquals(Boolean.TRUE, result);
-
-        result = (Boolean)converter.convert(null, Boolean.FALSE);
-        assertEquals(Boolean.FALSE, result);
-
-        // //////////////////////////
-        // test the valid true values
-        // //////////////////////////.
-        result = (Boolean)converter.convert(null, "yes");
-        assertEquals(Boolean.TRUE, result);
-
-        result = (Boolean)converter.convert(null, "y");
-        assertEquals(Boolean.TRUE, result);
-
-        result = (Boolean)converter.convert(null, "true");
-        assertEquals(Boolean.TRUE, result);
-
-        result = (Boolean)converter.convert(null, "on");
-        assertEquals(Boolean.TRUE, result);
-
-        result = (Boolean)converter.convert(null, "1");
-        assertEquals(Boolean.TRUE, result);
-
-        // ///////////////////////////
-        // Test the valid false values
-        // ///////////////////////////
-        result = (Boolean)converter.convert(null, "no");
-        assertEquals(Boolean.FALSE, result);
-
-        result = (Boolean)converter.convert(null, "n");
-        assertEquals(Boolean.FALSE, result);
-
-        result = (Boolean)converter.convert(null, "false");
-        assertEquals(Boolean.FALSE, result);
-
-        result = (Boolean)converter.convert(null, "off");
-        assertEquals(Boolean.FALSE, result);
-
-        result = (Boolean)converter.convert(null, "0");
-        assertEquals(Boolean.FALSE, result);
-
-        // For garbage, we throw a conversion Exception
-
-        try {
-            result = (Boolean)converter.convert(null, "qweorijo");
-            fail();
-        } catch (ConversionException e) {
-
+    @Test
+    public void testConvertValidFalseValues() {
+        for(String validFalseValue : VALID_FALSE_VALUES) {
+            assertFalse((Boolean) converter.convert(null, validFalseValue));
         }
+    }
+
+    @Test
+    public void testConvertValidTrueValues() {
+        for(String validTrueValue : VALID_TRUE_VALUES) {
+            assertTrue((Boolean) converter.convert(null, validTrueValue));
+        }
+    }
+
+    @Test
+    public void testConvertBooleanFalse() {
+        assertEquals(Boolean.FALSE, converter.convert(null, Boolean.FALSE));
+    }
+
+    @Test
+    public void testConvertBooleanTrue() {
+        assertEquals(Boolean.TRUE, converter.convert(null, Boolean.TRUE));
     }
 }

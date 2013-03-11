@@ -26,27 +26,52 @@
 
 package com.salesforce.dataloader.process;
 
-import java.io.*;
-import java.util.*;
-
-import com.salesforce.dataloader.model.Row;
-import org.apache.log4j.Logger;
-
-import com.salesforce.dataloader.*;
+import com.salesforce.dataloader.ConfigTestBase;
+import com.salesforce.dataloader.TestBase;
+import com.salesforce.dataloader.TestProgressMontitor;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
-import com.salesforce.dataloader.exception.*;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
+import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.Base64;
-import com.sforce.soap.partner.*;
+import com.sforce.soap.partner.DeleteResult;
+import com.sforce.soap.partner.PartnerConnection;
+import com.sforce.soap.partner.QueryResult;
+import com.sforce.soap.partner.SaveResult;
+import com.sforce.soap.partner.UpsertResult;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.util.FileUtil;
+import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Before;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Base class for batch process tests
@@ -54,39 +79,20 @@ import com.sforce.ws.util.FileUtil;
  * @author Alex Warshavsky
  * @since 8.0
  */
-abstract public class ProcessTestBase extends ConfigTestBase {
+public abstract class ProcessTestBase extends ConfigTestBase {
 
-    public static ConfigGenerator getConfigGenerator() {
-        return DEFAULT_CONFIG_GEN;
-    }
-
-    protected ProcessTestBase(String name, Map<String, String> config) {
-        super(name, config);
-    }
-
-    protected ProcessTestBase(String name) {
-        super(name);
-    }
-
-    // logger
     private static Logger logger = Logger.getLogger(TestBase.class);
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        cleanRecords();
+    protected ProcessTestBase() {
+        super(Collections.<String, String>emptyMap());
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            cleanRecords();
-        } finally {
-            super.tearDown();
-        }
+    protected ProcessTestBase(Map<String, String> config) {
+        super(config);
     }
 
-    protected void cleanRecords() {
+    @Before
+    public void cleanRecords() {
         // cleanup the records that might've been created on previous tests
         deleteSfdcRecords("Account", ACCOUNT_WHERE_CLAUSE, 0);
         deleteSfdcRecords("Contact", CONTACT_WHERE_CLAUSE, 0);
@@ -97,9 +103,9 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         try {
             errReader.open();
             for (Row errorRow : errReader.readRowList(errReader.getTotalRows())) {
-                String actualMessage = (String)errorRow.get("ERROR");
+                String actualMessage = (String) errorRow.get("ERROR");
                 if (actualMessage == null || !actualMessage.startsWith(expectedErrorMessage))
-                    fail("Error row does not have the expected error message: " + expectedErrorMessage
+                    Assert.fail("Error row does not have the expected error message: " + expectedErrorMessage
                             + "\n  Actual row: " + errorRow);
             }
         } finally {
@@ -117,15 +123,15 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         final Set<String> unexpected = new HashSet<String>();
         try {
             for (Row row : successRdr.readRowList(Integer.MAX_VALUE)) {
-                final String rowid = (String)row.get("ID");
+                final String rowid = (String) row.get("ID");
                 if (rowid != null && rowid.length() > 0 && !remaining.remove(rowid)) unexpected.add(rowid);
             }
         } finally {
             successRdr.close();
         }
 
-        if (!remaining.isEmpty()) fail("Ids not found: " + remaining);
-        if (!unexpected.isEmpty()) fail("Unexpected ids found: " + unexpected);
+        if (!remaining.isEmpty()) Assert.fail("Ids not found: " + remaining);
+        if (!unexpected.isEmpty()) Assert.fail("Unexpected ids found: " + unexpected);
     }
 
     /**
@@ -166,7 +172,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
          * ignore
          * output
          */,
-         false/* not negative test */, new ContactGenerator());
+                false/* not negative test */, new ContactGenerator());
     }
 
     /**
@@ -232,7 +238,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
      * @return String[] inserted id's
      */
     protected String[] insertSfdcAccounts(int numAccounts, int startingSeq,
-            boolean ignoreOutput) {
+                                          boolean ignoreOutput) {
         return saveSfdcRecords(numAccounts, startingSeq, true, ignoreOutput,
                 false, new AccountGenerator());
     }
@@ -314,7 +320,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
             for (int i = 0; i < results.length; i++) {
                 SaveResult result = results[i];
                 if (!result.getSuccess()) {
-                    fail("Insert returned an error: "
+                    Assert.fail("Insert returned an error: "
                             + result.getErrors()[0].getMessage());
                 } else {
                     ids[i] = result.getId();
@@ -329,9 +335,9 @@ abstract public class ProcessTestBase extends ConfigTestBase {
             if (checkBinding(++retries, e) != null) {
                 insertSfdcRecords(records, ignoreOutput, retries);
             }
-            fail("Error inserting records: " + e.getExceptionMessage());
+            Assert.fail("Error inserting records: " + e.getExceptionMessage());
         } catch (ConnectionException e) {
-            fail("Error inserting records: " + e.getMessage());
+            Assert.fail("Error inserting records: " + e.getMessage());
         }
         return null; // make eclipse happy, shouldn't reach this point after
         // fail()
@@ -348,7 +354,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
             for (int i = 0; i < results.length; i++) {
                 UpsertResult result = results[i];
                 if (!result.getSuccess()) {
-                    fail("Upsert returned an error: "
+                    Assert.fail("Upsert returned an error: "
                             + result.getErrors()[0].getMessage());
                 } else {
                     ids[i] = result.getId();
@@ -363,9 +369,9 @@ abstract public class ProcessTestBase extends ConfigTestBase {
             if (checkBinding(++retries, e) != null) {
                 upsertSfdcRecords(records, ignoreOutput, retries);
             }
-            fail("Error upserting records: " + e.getExceptionMessage());
+            Assert.fail("Error upserting records: " + e.getExceptionMessage());
         } catch (ConnectionException e) {
-            fail("Error upserting records: " + e.getMessage());
+            Assert.fail("Error upserting records: " + e.getMessage());
         }
         return null; // make eclipse happy, shouldn't reach this point after
         // fail()
@@ -522,10 +528,10 @@ abstract public class ProcessTestBase extends ConfigTestBase {
             if (checkBinding(++retries, e) != null) {
                 deleteSfdcRecords(entityName, whereClause, retries);
             }
-            fail("Failed to query " + entityName + "s to delete ("
+            Assert.fail("Failed to query " + entityName + "s to delete ("
                     + whereClause + "), error: " + e.getExceptionMessage());
         } catch (ConnectionException e) {
-            fail("Failed to query " + entityName + "s to delete ("
+            Assert.fail("Failed to query " + entityName + "s to delete ("
                     + whereClause + "), error: " + e.getMessage());
         }
     }
@@ -559,9 +565,9 @@ abstract public class ProcessTestBase extends ConfigTestBase {
             if (checkBinding(++retries, e) != null) {
                 deleteSfdcRecords(qryResult, retries);
             }
-            fail("Failed to delete records, error: " + e.getExceptionMessage());
+            Assert.fail("Failed to delete records, error: " + e.getExceptionMessage());
         } catch (ConnectionException e) {
-            fail("Failed to delete records, error: " + e.getMessage());
+            Assert.fail("Failed to delete records, error: " + e.getMessage());
         }
     }
 
@@ -749,7 +755,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         // TODO: validate all messages, including nulls if those exist
         if (failMessage != null) {
             if (!actualMessage.startsWith(failMessage))
-                fail("Error message should start with '" + failMessage + "' but the actual message was '"
+                Assert.fail("Error message should start with '" + failMessage + "' but the actual message was '"
                         + actualMessage + "'");
         }
 
@@ -759,6 +765,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
 
     private static final String INSERT_MSG = "Item Created";
     private static final Map<OperationInfo, String> UPDATE_MSGS;
+
     static {
         UPDATE_MSGS = new EnumMap<OperationInfo, String>(OperationInfo.class);
         UPDATE_MSGS.put(OperationInfo.delete, "Item Deleted");
@@ -792,7 +799,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
             else if (updateMsg.equals(status))
                 updatesFound++;
             else
-                fail("unrecognized status: " + status);
+                Assert.fail("unrecognized status: " + status);
         }
         assertEquals("Wrong number of inserts in success file: " + successFile, numInserts, insertsFound);
         assertEquals("Wrong number of updates in success file: " + successFile, numUpdates, updatesFound);
@@ -835,28 +842,25 @@ abstract public class ProcessTestBase extends ConfigTestBase {
     }
 
     /**
-     *
      * Verifies that the list of files imported and their makeup is consistent
      * with what we expect to be in the org
      *
-     * @param dbaseFileCorrespondence
-     *            - Map<String,String>
-     * @param expectedFileCorrespondence
-     *            - Map<String,String>
+     * @param dbaseFileCorrespondence    - Map<String,String>
+     * @param expectedFileCorrespondence - Map<String,String>
      * @return void
      */
-    protected void verifyAttachmentObjects(Map<String,String> dbaseFileCorrespondence, Map<String,String> expectedFileCorrespondence) {
+    protected void verifyAttachmentObjects(Map<String, String> dbaseFileCorrespondence, Map<String, String> expectedFileCorrespondence) {
 
         if (dbaseFileCorrespondence == null
                 || expectedFileCorrespondence == null) {
 
-            fail("verifyAttachmentObjects: null input map object(s)");
+            Assert.fail("verifyAttachmentObjects: null input map object(s)");
 
         }
 
         if (dbaseFileCorrespondence.size() != expectedFileCorrespondence.size()) {
 
-            fail("verifyAttachmentObjects: number of attached files ("
+            Assert.fail("verifyAttachmentObjects: number of attached files ("
                     + dbaseFileCorrespondence.size()
                     + ") differs from expected number of attached files ("
                     + expectedFileCorrespondence.size() + ")");
@@ -909,12 +913,12 @@ abstract public class ProcessTestBase extends ConfigTestBase {
     /**
      * Get a config map for use with update/upsert operations
      *
-     * @param fileNameBase This method will expect a file named <fileNameBase>Template.csv to exist.
-     *        The template file will be filled in using freshly inserted accounts (if numAccountsToInsert is
-     *        greater than zero). This will generate <fileNameBase>.csv for the DAO, and the mapping file will be
-     *        set to <fileNameBase>Map.sdl.
-     * @param isUpsert True for upsert process configuration false for update process configuration.
-     * @param extIdField The name of the external id field (for upsert)
+     * @param fileNameBase        This method will expect a file named <fileNameBase>Template.csv to exist.
+     *                            The template file will be filled in using freshly inserted accounts (if numAccountsToInsert is
+     *                            greater than zero). This will generate <fileNameBase>.csv for the DAO, and the mapping file will be
+     *                            set to <fileNameBase>Map.sdl.
+     * @param isUpsert            True for upsert process configuration false for update process configuration.
+     * @param extIdField          The name of the external id field (for upsert)
      * @param numAccountsToInsert Number of accounts to create right now and use to fill in the template file.
      * @return Map of dataloader settings for running an update/upsert operation.
      */

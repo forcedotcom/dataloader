@@ -25,13 +25,38 @@
  */
 package com.salesforce.dataloader;
 
-import java.util.List;
+import org.junit.runners.Parameterized;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public interface ConfigGenerator {
+/**
+ * A test variant consists of one or more {@link TestSetting}s and it's meant to be used as
+ * a test parameter in a JUnit 4 {@link Parameterized.Parameters} annotated method.
+ *
+ * @author Federico Recio
+ */
+public class TestVariant {
 
-    int getNumConfigurations();
+    private static final Object[] EMPTY_SETTINGS = {Collections.emptyMap()};
 
-    List<Map<String, String>> getConfigurations();
+    private TestVariant() {
+    }
 
+    public static Object[] forSettings(TestSetting... settings) {
+        Map<String, String> config = new LinkedHashMap<String, String>();
+        for (TestSetting setting : settings) {
+            String parameter = setting.getParameter();
+            if (config.containsKey(parameter)) {
+                throw new IllegalArgumentException("Duplicate parameter: " + parameter);
+            }
+            config.put(parameter, setting.getValue().toString());
+        }
+        return new Object[]{Collections.unmodifiableMap(config)};
+    }
+
+    public static Object[] defaultSettings() {
+        return EMPTY_SETTINGS;
+    }
 }

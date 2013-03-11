@@ -25,10 +25,12 @@
  */
 package com.salesforce.dataloader.util;
 
-import java.util.*;
-
 import com.salesforce.dataloader.TestBase;
 import com.salesforce.dataloader.process.ProcessTestBase;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Utility to load/delete test records for a manual dataloader test
@@ -38,12 +40,8 @@ import com.salesforce.dataloader.process.ProcessTestBase;
  */
 public class TestRecordsUtil extends ProcessTestBase {
 
-    public TestRecordsUtil(String name, Map<String, String> config) {
-        super(name, config);
-    }
-
     private TestRecordsUtil(Map<String, String> config) {
-        this(TestRecordsUtil.class.getSimpleName(), config);
+        super(config);
     }
 
     /**
