@@ -28,12 +28,19 @@ package com.salesforce.dataloader.mapping;
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.model.Row;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Set of unit tests for the data mapper
@@ -51,14 +58,8 @@ public class LoadMapperTest extends ConfigTestBase {
     private static final String CONSTANT_VALUE = "constantValue123";
     private Row sourceRow;
 
-    public LoadMapperTest(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUp() throws Exception {
         sourceRow = new Row();
         // populate all the available values
         for (int i = 0; i < SOURCE_NAMES.length; i++) {
@@ -74,6 +75,7 @@ public class LoadMapperTest extends ConfigTestBase {
      * 
      * @throws MappingInitializationException
      */
+    @Test
     public void testMapFile() throws MappingInitializationException {
         LoadMapper mapper = new LoadMapper(null, Arrays.asList(SOURCE_NAMES), new File(getTestDataDir(), "basicMap.sdl").getAbsolutePath());
 
@@ -88,6 +90,7 @@ public class LoadMapperTest extends ConfigTestBase {
      * 
      * @throws MappingInitializationException
      */
+    @Test
     public void testMapFileNoSourceColumns()
             throws MappingInitializationException {
         // null column list
@@ -109,6 +112,7 @@ public class LoadMapperTest extends ConfigTestBase {
      * 
      * @throws MappingInitializationException
      */
+    @Test
     public void testMapProperties() throws MappingInitializationException {
         // prepopulate properties map
         Properties mappings = new Properties();
@@ -130,6 +134,7 @@ public class LoadMapperTest extends ConfigTestBase {
      * @expectedResults Assert that the mappings from various keys (fields) can have the same value.
      * @throws MappingInitializationException
      */
+    @Test
     public void testDuplicateConstants() throws MappingInitializationException {
         Properties mappings = new Properties();
 
@@ -168,6 +173,7 @@ public class LoadMapperTest extends ConfigTestBase {
      * 
      * @throws MappingInitializationException
      */
+    @Test
     public void testColumnValueDoesNotOverrideConstant() throws MappingInitializationException {
 
         Properties mappings = new Properties();
@@ -199,6 +205,7 @@ public class LoadMapperTest extends ConfigTestBase {
      * 
      * @expectedResults Assert that the new value is maintained.
      */
+    @Test
     public void testConstValueOverridesColumnValue() throws Exception {
 
         Properties mappings = new Properties();
@@ -226,6 +233,7 @@ public class LoadMapperTest extends ConfigTestBase {
         assertEquals(constantValue, result.get(sfdcField));
     }
 
+    @Test
     public void testMapDataEmptyEntriesIgnored() throws Exception {
         LoadMapper loadMapper = new LoadMapper(null, null, null);
         loadMapper.putMapping("SOURCE_COL", "");
@@ -237,18 +245,20 @@ public class LoadMapperTest extends ConfigTestBase {
         assertTrue("Empty destination column should have not been mapped", result.isEmpty());
     }
 
+    @Test
     public void testVerifyMappingsAreValidEmptyEntries() throws Exception {
         LoadMapper loadMapper = new LoadMapper(null, null, null);
         loadMapper.putMapping("SOURCE_COL", "");
         loadMapper.verifyMappingsAreValid(); // no exception expected
     }
 
+    @Test
     public void testVerifyMappingsAreValidUnknownColumn() throws Exception {
         LoadMapper loadMapper = new LoadMapper(getController().getPartnerClient(), null, null);
         loadMapper.putMapping(SOURCE_NAMES[0], "non_existing_col_aa");
         try {
             loadMapper.verifyMappingsAreValid();
-            fail("An exception should have been thrown since destination column does not exist");
+            Assert.fail("An exception should have been thrown since destination column does not exist");
         } catch (MappingInitializationException ignored) {
             // expected
         }
