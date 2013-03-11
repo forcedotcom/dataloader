@@ -29,6 +29,7 @@ package com.salesforce.dataloader.util;
 import java.io.IOException;
 import java.util.*;
 
+import com.salesforce.dataloader.model.Row;
 import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
@@ -63,7 +64,7 @@ public class DAORowUtil {
         try {
             //visit the rows
             DAOSizeVisitor visitor = new DAOSizeVisitor();
-            for (Map<String, Object> row = dataReader.readRow(); isValidRow(row); row = dataReader.readRow()) {
+            for (Row row = dataReader.readRow(); isValidRow(row); row = dataReader.readRow()) {
                 visitor.visit(row);
             }
 
@@ -83,7 +84,7 @@ public class DAORowUtil {
      * @param row
      * @return true if row is valid
      */
-    public static boolean isValidRow(Map<String, Object> row) {
+    public static boolean isValidRow(Row row) {
         if (row == null) { return false; }
         return true;
     }

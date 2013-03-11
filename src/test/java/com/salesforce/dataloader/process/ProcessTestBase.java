@@ -29,6 +29,7 @@ package com.salesforce.dataloader.process;
 import java.io.*;
 import java.util.*;
 
+import com.salesforce.dataloader.model.Row;
 import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.*;
@@ -95,7 +96,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         final CSVFileReader errReader = new CSVFileReader(theController.getConfig().getString(Config.OUTPUT_ERROR));
         try {
             errReader.open();
-            for (Map<String, Object> errorRow : errReader.readRowList(errReader.getTotalRows())) {
+            for (Row errorRow : errReader.readRowList(errReader.getTotalRows())) {
                 String actualMessage = (String)errorRow.get("ERROR");
                 if (actualMessage == null || !actualMessage.startsWith(expectedErrorMessage))
                     fail("Error row does not have the expected error message: " + expectedErrorMessage
@@ -115,7 +116,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         final Set<String> remaining = new HashSet<String>(ids);
         final Set<String> unexpected = new HashSet<String>();
         try {
-            for (Map<String, Object> row : successRdr.readRowList(Integer.MAX_VALUE)) {
+            for (Row row : successRdr.readRowList(Integer.MAX_VALUE)) {
                 final String rowid = (String)row.get("ID");
                 if (rowid != null && rowid.length() > 0 && !remaining.remove(rowid)) unexpected.add(rowid);
             }
@@ -565,7 +566,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
     }
 
     protected static interface TemplateListener {
-        void updateRow(int idx, Map<String, Object> row);
+        void updateRow(int idx, Row row);
     }
 
     /**
@@ -580,7 +581,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         }
 
         @Override
-        public void updateRow(int idx, Map<String, Object> row) {
+        public void updateRow(int idx, Row row) {
             row.put("ID", idx < this.accountIds.length ? this.accountIds[idx] : "");
         }
 
@@ -609,10 +610,10 @@ abstract public class ProcessTestBase extends ConfigTestBase {
             templateReader.open();
 
             int numRows = templateReader.getTotalRows();
-            final List<Map<String, Object>> templateRows = templateReader.readRowList(numRows);
+            final List<Row> templateRows = templateReader.readRowList(numRows);
             assertNotNull("CVSReader returned a null list of rows, but expected a list with size " + numRows,
                     templateRows);
-            final List<Map<String, Object>> inputRows = new ArrayList<Map<String, Object>>(templateRows.size());
+            final List<Row> inputRows = new ArrayList<Row>(templateRows.size());
 
             // verify that the template file is useable
             assertEquals("Wrong number of rows were read using readRowList while attempting to convert template file: "
@@ -621,8 +622,8 @@ abstract public class ProcessTestBase extends ConfigTestBase {
             // insert accounts for the whole template or part of it if
             // maxInserts is smaller then template size
             int idx = 0;
-            for (Map<String, Object> templateRow : templateRows) {
-                final Map<String, Object> row = new HashMap<String, Object>(templateRow);
+            for (Row templateRow : templateRows) {
+                final Row row = new Row(templateRow);
                 if (listeners != null) {
                     for (TemplateListener l : listeners) {
                         l.updateRow(idx, row);
@@ -775,7 +776,7 @@ abstract public class ProcessTestBase extends ConfigTestBase {
         //final String suceessFule2 = ctl.getConfig().
         assertNumRowsInCSVFile(successFile, numInserts + numUpdates);
 
-        Map<String, Object> row = null;
+        Row row = null;
         CSVFileReader rdr = new CSVFileReader(successFile);
         String updateMsg = UPDATE_MSGS.get(ctl.getConfig().getOperationInfo());
         int insertsFound = 0;

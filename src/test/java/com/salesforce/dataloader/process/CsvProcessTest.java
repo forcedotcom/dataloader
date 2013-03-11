@@ -29,6 +29,7 @@ package com.salesforce.dataloader.process;
 import java.io.File;
 import java.util.*;
 
+import com.salesforce.dataloader.model.Row;
 import junit.framework.TestSuite;
 
 import com.salesforce.dataloader.ConfigGenerator;
@@ -230,8 +231,8 @@ public class CsvProcessTest extends ProcessTestBase {
         List<String> ids = new ArrayList<String>();
         final CSVFileReader successRdr = new CSVFileReader(resultController.getConfig().getString(Config.OUTPUT_SUCCESS));
         try {
-            for (Map<String, Object> row : successRdr
-                    .readRowList(Integer.MAX_VALUE)) {
+            // TODO: revise the use of Integer.MAX_VALUE
+            for (Row row : successRdr.readRowList(Integer.MAX_VALUE)) {
                 final String rowId = (String) row.get("ID");
                 if (rowId != null) {
                     ids.add(rowId);
@@ -277,7 +278,7 @@ public class CsvProcessTest extends ProcessTestBase {
         }
 
         @Override
-        public void updateRow(int idx, Map<String, Object> row) {
+        public void updateRow(int idx, Row row) {
             // set parent account id
             row.put("ParentId", getAccountIds()[0]);
             // make body pathname absolute

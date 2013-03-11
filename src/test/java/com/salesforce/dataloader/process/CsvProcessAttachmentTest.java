@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import com.salesforce.dataloader.model.Row;
 import junit.framework.TestSuite;
 
 import com.salesforce.dataloader.*;
@@ -124,7 +125,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         }
 
         @Override
-        public void updateRow(int idx, Map<String, Object> row) {
+        public void updateRow(int idx, Row row) {
             // set parent account id
             row.put("ParentId", getAccountIds()[0]);
             // make body pathname absolute

@@ -29,6 +29,7 @@ package com.salesforce.dataloader.dao.csv;
 import java.io.*;
 import java.util.*;
 
+import com.salesforce.dataloader.model.Row;
 import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.config.Messages;
@@ -141,10 +142,10 @@ public class CSVFileWriter implements DataWriter {
      * @see com.salesforce.dataloader.dao.csv.Writer#writeRow(java.util.Map)
      */
     @Override
-    public boolean writeRow(Map<String,Object> columnValues) throws DataAccessObjectException {
+    public boolean writeRow(Row row) throws DataAccessObjectException {
         CSVColumnVisitor visitor = new CSVColumnVisitor(fileOut);
         try {
-            visitColumns(columnNames, columnValues, visitor);
+            visitColumns(columnNames, row, visitor);
             fileOut.newLine();
             visitor.newRow();
             currentRowNumber++;
@@ -160,10 +161,10 @@ public class CSVFileWriter implements DataWriter {
      * @see com.salesforce.dataloader.dao.csv.Writer#writeRowList(java.util.List)
      */
     @Override
-    public boolean writeRowList(List<Map<String,Object>> dataArray) throws DataAccessObjectException {
+    public boolean writeRowList(List<Row> rows) throws DataAccessObjectException {
         boolean success = true;
         // return the last result, should be same as others
-        for (Map<String,Object> row : dataArray) {
+        for (Row row : rows) {
             success = writeRow(row);
         }
         return success;
@@ -185,9 +186,9 @@ public class CSVFileWriter implements DataWriter {
         }
     }
 
-    static private void visitColumns(List<String> columnNames, Map<String, Object> columnValues, CSVColumnVisitor visitor) throws IOException {
+    static private void visitColumns(List<String> columnNames, Row row, CSVColumnVisitor visitor) throws IOException {
         for (String colName : columnNames) {
-            Object colVal = columnValues.get(colName);
+            Object colVal = row.get(colName);
             visitor.visit(colVal != null ? colVal.toString() : "");
         }
     }

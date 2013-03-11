@@ -33,6 +33,7 @@ import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.model.Row;
 
 /**
  * 
@@ -68,7 +69,7 @@ public class CsvTest extends TestBase {
 
         // validate the first row
         try {
-            Map<String, Object> firstRow = csv.readRow();
+            Row firstRow = csv.readRow();
             assertEquals("row1-1", (String) firstRow.get("column1"));
             assertEquals("row1-2", (String) firstRow.get("column2"));
             assertEquals("row1-3", (String) firstRow.get("column3"));
@@ -78,7 +79,7 @@ public class CsvTest extends TestBase {
 
         // validate the second row
         try {
-            Map<String, Object> firstRow = csv.readRow();
+            Row firstRow = csv.readRow();
             assertEquals("row2-1", (String) firstRow.get("column1"));
             assertEquals("row2-2", (String) firstRow.get("column2"));
             assertEquals("row2-3", (String) firstRow.get("column3"));
@@ -99,7 +100,7 @@ public class CsvTest extends TestBase {
         File f = new File(getTestDataDir(), "csvtestTemp.csv");
         String path = f.getAbsolutePath();
         CSVFileWriter writer = new CSVFileWriter(path, DEFAULT_CHARSET);
-        List<Map<String,Object>> rowList = new ArrayList<Map<String,Object>>();
+        List<Row> rowList = new ArrayList<Row>();
 
         rowList.add(row1);
         rowList.add(row2);
@@ -145,7 +146,7 @@ public class CsvTest extends TestBase {
 
         //check that row 1 is valid
         try {
-            Map<String, Object> nextRow = csv.readRow();
+            Row nextRow = csv.readRow();
             for (String headerColumn : writeHeader) {
                 assertEquals(row1.get(headerColumn), nextRow.get(headerColumn));
             }
@@ -155,7 +156,7 @@ public class CsvTest extends TestBase {
 
         //check that row 2 is valid
         try {
-            Map<String, Object> nextRow = csv.readRow();
+            Row nextRow = csv.readRow();
             for (String headerColumn : writeHeader) {
                 assertEquals(row2.get(headerColumn), nextRow.get(headerColumn));
             }
@@ -168,8 +169,8 @@ public class CsvTest extends TestBase {
 
 
     private static List<String> writeHeader;
-    private static Map<String,Object> row1;
-    private static Map<String,Object> row2;
+    private static Row row1;
+    private static Row row2;
 
     static {
         writeHeader = new ArrayList<String>();
@@ -177,12 +178,12 @@ public class CsvTest extends TestBase {
         writeHeader.add("COL2");
         writeHeader.add("COL3");
 
-        row1 = new HashMap<String,Object>();
+        row1 = new Row();
         row1.put("COL1", "row1col1");
         row1.put("COL2", "row1col2");
         row1.put("COL3", "row1col3");
 
-        row2 = new HashMap<String,Object>();
+        row2 = new Row();
         row2.put("COL1", "row2col1");
         row2.put("COL2", "row2col2");
         row2.put("COL3", "row2col3");

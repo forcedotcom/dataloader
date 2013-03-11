@@ -29,6 +29,7 @@ package com.salesforce.dataloader.dao.csv;
 import java.io.*;
 import java.util.*;
 
+import com.salesforce.dataloader.model.Row;
 import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.config.Config;
@@ -305,10 +306,10 @@ public class CSVFileReader implements DataReader {
      * @see com.salesforce.dataloader.dao.DataReader#readRowList(int)
      */
     @Override
-    public List<Map<String, Object>> readRowList(int maxRows) throws DataAccessObjectException {
-        List<Map<String, Object>> outputRows = new ArrayList<Map<String, Object>>();
+    public List<Row> readRowList(int maxRows) throws DataAccessObjectException {
+        List<Row> outputRows = new ArrayList<Row>();
         for (int i = 0; i < maxRows; i++) {
-            Map<String, Object> outputRow = readRow();
+            Row outputRow = readRow();
             if (outputRow != null) {
                 // if row has been returned, add it to the output
                 outputRows.add(outputRow);
@@ -326,7 +327,7 @@ public class CSVFileReader implements DataReader {
      * @see com.salesforce.dataloader.dao.DataAccessObject#getNextRow()
      */
     @Override
-    public synchronized Map<String, Object> readRow() throws DataAccessObjectException {
+    public synchronized Row readRow() throws DataAccessObjectException {
         // make sure file is open
         if(!isOpen()) {
             open();
@@ -338,7 +339,7 @@ public class CSVFileReader implements DataReader {
 
         if (mAtEOF) return null;
         ArrayList<String> line = null;
-        Map<String, Object> map = null;
+        Row map = null;
         try {
             ++currentRowNumber;
             line = getRegularLine();
@@ -370,7 +371,7 @@ public class CSVFileReader implements DataReader {
                                         String.valueOf(headerRow.size()) });
                 throw new DataAccessRowException(errMsg);
             }
-            map = new HashMap<String, Object>();
+            map = new Row(line.size());
             for (int i = 0; i < line.size(); i++) {
                 map.put(headerRow.get(i), line.get(i));
             }

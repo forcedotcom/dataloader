@@ -35,6 +35,7 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
@@ -86,8 +87,8 @@ public class PartnerQueryVisitor extends AbstractQueryVisitor {
         }
     }
 
-    private Map<String, Object> getDaoRow(SObject sob) {
-        Map<String, Object> row = getMapper().mapPartnerSObjectSfdcToLocal(sob);
+    private Row getDaoRow(SObject sob) {
+        Row row = getMapper().mapPartnerSObjectSfdcToLocal(sob);
         for (Map.Entry<String, Object> ent : row.entrySet()) {
             Object newVal = convertFieldValue(ent.getValue());
             if (newVal != ent.getValue()) row.put(ent.getKey(), newVal);
