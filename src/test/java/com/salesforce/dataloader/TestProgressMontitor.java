@@ -25,9 +25,11 @@
  */
 package com.salesforce.dataloader;
 
-import java.util.*;
-
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Progress monitor for use by tests.
@@ -43,6 +45,7 @@ public class TestProgressMontitor implements ILoaderProgress {
     private boolean success;
     private String message;
     private final List<String> subTasksInOrder = new ArrayList<String>();
+    private int numberBatchesTotal;
 
     @Override
     public void beginTask(String name, int totalWork) {
@@ -75,6 +78,15 @@ public class TestProgressMontitor implements ILoaderProgress {
     @Override
     public boolean isCanceled() {
         return false;
+    }
+
+    @Override
+    public void setNumberBatchesTotal(int numberBatchesTotal) {
+        this.numberBatchesTotal = numberBatchesTotal;
+    }
+
+    public int getNumberBatchesTotal() {
+        return numberBatchesTotal;
     }
 
     // /////////// getters for test verification //////////////////

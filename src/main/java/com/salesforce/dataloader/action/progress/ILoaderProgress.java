@@ -26,17 +26,13 @@
 
 package com.salesforce.dataloader.action.progress;
 
-/**
- * 
- */
 public interface ILoaderProgress {
 
-
-    public void beginTask(String name, int totalWork);
-    public void doneError(String message);
-    public void doneSuccess(String message);
-    public void worked(int worked);
-    public void setSubTask(String name);
-    public boolean isCanceled();
-
+    void beginTask(String name, int totalWork);
+    void doneError(String message);
+    void doneSuccess(String message);
+    void worked(int worked);
+    void setSubTask(String name);
+    boolean isCanceled();
+    void setNumberBatchesTotal(int numberBatchesTotal);
 }
