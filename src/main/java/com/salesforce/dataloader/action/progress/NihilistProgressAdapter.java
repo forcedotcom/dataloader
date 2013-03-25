@@ -83,4 +83,9 @@ public enum NihilistProgressAdapter implements ILoaderProgress {
         return false;
     }
 
+    @Override
+    public void setNumberBatchesTotal(int numberBatchesTotal) {
+        // nothing
+    }
+
 }

@@ -26,12 +26,13 @@
 
 package com.salesforce.dataloader.action.progress;
 
+import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.ui.LoadFinishDialog;
+import com.salesforce.dataloader.ui.LoaderWindow;
+import com.salesforce.dataloader.ui.UIUtils;
+import com.salesforce.dataloader.ui.extraction.ExtractionFinishDialog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
-
-import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.ui.*;
-import com.salesforce.dataloader.ui.extraction.ExtractionFinishDialog;
 
 /**
  * @author Lexi Viripaeff
@@ -137,6 +138,11 @@ public class SWTProgressAdapter implements ILoaderProgress {
     @Override
     public boolean isCanceled() {
         return monitor.isCanceled();
+    }
+
+    @Override
+    public void setNumberBatchesTotal(int numberBatchesTotal) {
+        // nothing
     }
 
 }

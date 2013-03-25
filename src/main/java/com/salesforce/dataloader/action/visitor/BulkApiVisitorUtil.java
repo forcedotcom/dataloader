@@ -25,21 +25,28 @@
  */
 package com.salesforce.dataloader.action.visitor;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.text.NumberFormat;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.util.LoadRateCalculator;
-import com.sforce.async.*;
+import com.sforce.async.AsyncApiException;
+import com.sforce.async.BatchInfo;
+import com.sforce.async.BatchInfoList;
+import com.sforce.async.BulkConnection;
+import com.sforce.async.CSVReader;
+import com.sforce.async.ConcurrencyMode;
+import com.sforce.async.ContentType;
+import com.sforce.async.JobInfo;
+import com.sforce.async.OperationEnum;
+import org.apache.log4j.Logger;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.text.NumberFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 class BulkApiVisitorUtil {
 
@@ -144,6 +151,7 @@ class BulkApiVisitorUtil {
             updateJobStatus();
             return this.checkStatusInterval;
         }
+        monitor.setNumberBatchesTotal(jobInfo.getNumberBatchesTotal());
         return timeRemaining;
     }
 
