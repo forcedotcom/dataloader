@@ -95,6 +95,10 @@ public class UIUtils {
         return messageBox(shell, Labels.getString("UI.error"), SWT.OK | SWT.ICON_ERROR, String.valueOf(message)); //$NON-NLS-1$
     }
 
+    public static int infoMessageBox(Shell shell, String message) {
+        return messageBox(shell, Labels.getString("UI.message"), SWT.OK | SWT.ICON_INFORMATION, message);
+    }
+
     private static int messageBox(Shell shell, String title, int uiProps, String message) {
         MessageBox mb = new MessageBox (shell, uiProps);
         if(title != null && title.length() > 0) {
