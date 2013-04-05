@@ -15,3 +15,7 @@ Thumbs.db
 *.ipr
 *.iws
 *.iml
+/test/
+/lib/
+/classes/
+/bin/
