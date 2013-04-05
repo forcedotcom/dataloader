@@ -220,7 +220,25 @@
     </pluginManagement>
 
     <plugins>
-
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-resources-plugin</artifactId>
+			<version>2.4.3</version>
+			<configuration>
+			    <useDefaultDelimiters>false</useDefaultDelimiters>
+			    <delimiters>
+			        <delimiter>${*}</delimiter>
+			    </delimiters>
+			    <nonFilteredFileExtensions>
+			        <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+			        <nonFilteredFileExtension>swf</nonFilteredFileExtension>
+			        <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
+			        <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
+			        <nonFilteredFileExtension>png</nonFilteredFileExtension>
+			    </nonFilteredFileExtensions>
+			</configuration>
+		</plugin>
+	
       <!-- we might want to use the maven-shade-plugin in the future instead 
         of maven-assembly-plugin -->
       <plugin>
