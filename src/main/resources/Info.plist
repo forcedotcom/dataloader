@@ -7,7 +7,7 @@
 	<key>CFBundleName</key>
 	<string>${bundleName}</string>
 	<key>CFBundleVersion</key>
-	<string>27.0</string>
+	<string>${version}</string>
 	<key>CFBundleExecutable</key>
 	<string>JavaApplicationStub</string>
 	<key>CFBundleDevelopmentRegion</key>
