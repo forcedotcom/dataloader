@@ -209,8 +209,36 @@
       </testResource>
     </testResources>
 
-    <plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>osxappbundle-maven-plugin</artifactId>
+          <version>1.0-alpha-2</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
 
+    <plugins>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-resources-plugin</artifactId>
+			<version>2.4.3</version>
+			<configuration>
+			    <useDefaultDelimiters>false</useDefaultDelimiters>
+			    <delimiters>
+			        <delimiter>${*}</delimiter>
+			    </delimiters>
+			    <nonFilteredFileExtensions>
+			        <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+			        <nonFilteredFileExtension>swf</nonFilteredFileExtension>
+			        <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
+			        <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
+			        <nonFilteredFileExtension>png</nonFilteredFileExtension>
+			    </nonFilteredFileExtensions>
+			</configuration>
+		</plugin>
+	
       <!-- we might want to use the maven-shade-plugin in the future instead 
         of maven-assembly-plugin -->
       <plugin>
@@ -296,6 +324,26 @@
                 </execution>
             </executions>
         </plugin>
+
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>osxappbundle-maven-plugin</artifactId>
+            <version>1.0-alpha-2</version>
+            <configuration>
+                <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
+				<jvmVersion>1.6</jvmVersion>
+				<iconFile>${basedir}/src/main/resources/img/icons/icon_loader.icns</iconFile>
+				<dictionaryFile>${basedir}/src/main/resources/Info.plist</dictionaryFile>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>bundle</goal>
+                    </goals>
+                </execution>
+           </executions>
+       </plugin>
     </plugins>
   </build>
 
