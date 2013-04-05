@@ -31,7 +31,7 @@
 		<key>Properties</key>
 		<dict>
 			<key>salesforce.config.dir</key>
-			<string>$APP_PACKAGE/Contents/Resources/conf</string>
+			<string>#set ($dollar="$")${dollar}APP_PACKAGE/Contents/Resources/conf</string>
 		</dict>
 		<key>ClassPath</key>
 		${classpath}
