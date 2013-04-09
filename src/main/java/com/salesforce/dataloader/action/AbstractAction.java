@@ -39,7 +39,12 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObject;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
-import com.salesforce.dataloader.exception.*;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.exception.LoadException;
+import com.salesforce.dataloader.exception.MappingInitializationException;
+import com.salesforce.dataloader.exception.OperationException;
+import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.sforce.async.AsyncApiException;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
@@ -209,7 +214,7 @@ abstract class AbstractAction implements IAction {
         if (filename == null || filename.length() == 0)
             throw new DataAccessObjectInitializationException(getMessage("errorMissingErrorFile"));
         // TODO: Make sure that specific DAO is not mentioned: use DataReader, DataWriter, or DataAccessObject
-        return new CSVFileWriter(filename, getConfig().getCsvWriteEncoding());
+        return new CSVFileWriter(filename, getConfig());
     }
 
     /**
@@ -221,7 +226,7 @@ abstract class AbstractAction implements IAction {
         if (filename == null || filename.length() == 0)
             throw new DataAccessObjectInitializationException(getMessage("errorMissingSuccessFile"));
         // TODO: Make sure that specific DAO is not mentioned: use DataReader, DataWriter, or DataAccessObject
-        return new CSVFileWriter(filename, getConfig().getCsvWriteEncoding());
+        return new CSVFileWriter(filename, getConfig());
     }
 
     private void openErrorWriter(List<String> headers) throws OperationException {
