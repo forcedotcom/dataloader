@@ -25,6 +25,19 @@
  */
 package com.salesforce.dataloader.process;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
@@ -37,18 +50,6 @@ import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -208,7 +209,7 @@ public class NAProcessTest extends ProcessTestBase {
     }
 
     private String getCsvFieldValue(String csvFile, String fieldName) throws Exception {
-        CSVFileReader reader = new CSVFileReader(csvFile);
+        CSVFileReader reader = new CSVFileReader(csvFile, getController());
         reader.open();
         assertEquals(1, reader.getTotalRows());
         String fieldValue = (String)reader.readRow().get(fieldName);
@@ -254,7 +255,7 @@ public class NAProcessTest extends ProcessTestBase {
 
         CSVFileWriter writer = null;
         try {
-            writer = new CSVFileWriter(CSV_FILE_PATH, DEFAULT_CHARSET);
+            writer = new CSVFileWriter(CSV_FILE_PATH, getController().getConfig());
             writer.open();
             writer.setColumnNames(new ArrayList<String>(row.keySet()));
             writer.writeRow(row);

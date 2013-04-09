@@ -38,7 +38,11 @@ public enum TestSetting {
     BULK_API_ENABLED(Config.BULK_API_ENABLED, Boolean.TRUE),
     BULK_API_DISABLED(Config.BULK_API_ENABLED, Boolean.FALSE),
     BULK_API_ZIP_CONTENT_ENABLED(Config.BULK_API_ZIP_CONTENT, Boolean.TRUE),
-    BULK_API_SERIAL_MODE_ENABLED(Config.BULK_API_SERIAL_MODE, Boolean.TRUE);
+    BULK_API_SERIAL_MODE_ENABLED(Config.BULK_API_SERIAL_MODE, Boolean.TRUE),
+    WRITE_UTF8_ENABLED(Config.WRITE_UTF8, Boolean.TRUE),
+    WRITE_UTF8_DISABLED(Config.WRITE_UTF8, Boolean.FALSE),
+    READ_UTF8_ENABLED(Config.READ_UTF8, Boolean.TRUE),
+    READ_UTF8_DISABLED(Config.READ_UTF8, Boolean.FALSE);
 
     private final String parameter;
     private final Object value;

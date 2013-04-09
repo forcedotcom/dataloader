@@ -26,29 +26,82 @@
 
 package com.salesforce.dataloader.process;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import com.salesforce.dataloader.TestSetting;
+import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.sforce.async.CSVReader;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
-import org.apache.commons.io.IOUtils;
-import org.junit.Test;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 /**
- * Test to validate we handle unicode correctly.
- * 
+ * Test to validate we handle encodings correctly.
+ *
  * @author Colin Jarvis
+ * @author Federico Recio
  * @since 24
  */
+@RunWith(Parameterized.class)
+public class CsvEncodingProcessTest extends ProcessTestBase {
 
-public class CsvUnicodeProcessTest extends ProcessTestBase {
+    private static final String UTF8 = "UTF-8";
+    private static final String JAPANESE = "Shift_JIS";
+    private static final String FILE_ENCODING_SYSTEM_PROPERTY = "file.encoding";
+    private final Map<String, String> config;
+    private final String fileEncoding;
+    private String originalFileEncoding;
+
+    public CsvEncodingProcessTest(String fileEncoding, Map<String, String> config) {
+        super(config);
+        this.config = config;
+        this.fileEncoding = fileEncoding;
+    }
+
+    @Parameterized.Parameters(name = "{0}, {1}")
+    public static Collection<Object[]> getParameters() {
+        return Arrays.asList(
+                TestVariant.builder().withSettings(TestSetting.BULK_API_ENABLED, TestSetting.WRITE_UTF8_ENABLED, TestSetting.READ_UTF8_ENABLED).withFileEncoding(UTF8).get(),
+                TestVariant.builder().withSettings(TestSetting.BULK_API_ENABLED, TestSetting.WRITE_UTF8_DISABLED, TestSetting.READ_UTF8_DISABLED).withFileEncoding(UTF8).get(),
+                TestVariant.builder().withSettings(TestSetting.BULK_API_ENABLED, TestSetting.WRITE_UTF8_ENABLED, TestSetting.READ_UTF8_ENABLED).withFileEncoding(JAPANESE).get(),
+                TestVariant.builder().withSettings(TestSetting.BULK_API_ENABLED, TestSetting.WRITE_UTF8_DISABLED, TestSetting.READ_UTF8_DISABLED).withFileEncoding(JAPANESE).get());
+    }
+
+    @Before
+    public void overrideSystemFileEncoding() throws Exception {
+        originalFileEncoding = System.getProperty(FILE_ENCODING_SYSTEM_PROPERTY);
+        setSystemFileEncoding(fileEncoding);
+    }
+
+    @After
+    public void restoreOriginalSystemFileEncoding() throws Exception {
+        setSystemFileEncoding(originalFileEncoding);
+    }
+
+    private void setSystemFileEncoding(String encoding) throws NoSuchFieldException, IllegalAccessException {
+        System.setProperty(FILE_ENCODING_SYSTEM_PROPERTY, encoding);
+        // following is necessary for new value to be properly read because default charset is cached
+        Field charset = Charset.class.getDeclaredField("defaultCharset");
+        charset.setAccessible(true);
+        charset.set(null, null);
+    }
 
     @Test
     public void testUnicodeExtraction() throws Exception {
@@ -66,17 +119,14 @@ public class CsvUnicodeProcessTest extends ProcessTestBase {
         argMap.put(Config.EXTRACT_SOQL, soql);
         argMap.put(Config.ENABLE_EXTRACT_STATUS_OUTPUT, Config.TRUE);
         argMap.put(Config.EXTRACT_REQUEST_SIZE, "2000");
-        argMap.put(Config.WRITE_UTF8, Config.TRUE);
-        argMap.put(Config.READ_UTF8, Config.TRUE);
-        argMap.put(Config.BULK_API_ENABLED, Config.TRUE);
+        argMap.putAll(config);
         argMap.remove(Config.MAPPING_FILE);
         return argMap;
     }
 
     private void validateExtraction(final String name, final Map<String, String> testConfig) throws IOException {
-        FileInputStream fis = null;
+        FileInputStream fis = new FileInputStream(new File(testConfig.get(Config.DAO_NAME)));
         try {
-            fis = new FileInputStream(new File(testConfig.get(Config.DAO_NAME)));
             CSVReader rdr = new CSVReader(fis, "UTF-8");
             int nameidx = rdr.nextRecord().indexOf("NAME");
             assertEquals(name, rdr.nextRecord().get(nameidx));
@@ -89,6 +139,6 @@ public class CsvUnicodeProcessTest extends ProcessTestBase {
         final SObject account = new SObject();
         account.setType("Account");
         account.setField("Name", name);
-        return getBinding().create(new SObject[] { account })[0].getId();
+        return getBinding().create(new SObject[]{account})[0].getId();
     }
 }
