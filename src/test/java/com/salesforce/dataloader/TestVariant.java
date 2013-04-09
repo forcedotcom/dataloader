@@ -25,11 +25,11 @@
  */
 package com.salesforce.dataloader;
 
-import org.junit.runners.Parameterized;
-
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.junit.runners.Parameterized;
 
 /**
  * A test variant consists of one or more {@link TestSetting}s and it's meant to be used as
@@ -40,6 +40,8 @@ import java.util.Map;
 public class TestVariant {
 
     private static final Object[] EMPTY_SETTINGS = {Collections.emptyMap()};
+    private TestSetting[] settings;
+    private String fileEncoding;
 
     private TestVariant() {
     }
@@ -54,6 +56,28 @@ public class TestVariant {
             config.put(parameter, setting.getValue().toString());
         }
         return new Object[]{Collections.unmodifiableMap(config)};
+    }
+
+    public static TestVariant builder() {
+        return new TestVariant();
+    }
+
+    public TestVariant withSettings(TestSetting... settings) {
+        this.settings = settings;
+        return this;
+    }
+
+    public TestVariant withFileEncoding(String fileEncoding) {
+        this.fileEncoding = fileEncoding;
+        return this;
+    }
+
+    public Object[] get() {
+        if (fileEncoding == null) {
+            return forSettings(settings);
+        } else {
+            return new Object[]{fileEncoding, forSettings(settings)[0]};
+        }
     }
 
     public static Object[] defaultSettings() {
