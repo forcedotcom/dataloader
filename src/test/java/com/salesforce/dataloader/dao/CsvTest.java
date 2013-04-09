@@ -25,16 +25,17 @@
  */
 package com.salesforce.dataloader.dao;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import com.salesforce.dataloader.TestBase;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.model.Row;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -78,7 +79,7 @@ public class CsvTest extends TestBase {
         assertTrue(f.exists());
         assertTrue(f.canRead());
 
-        CSVFileReader csv = new CSVFileReader(f);
+        CSVFileReader csv = new CSVFileReader(f, getController().getConfig());
         csv.open();
 
         List<String> headerRow = csv.getColumnNames();
@@ -107,7 +108,7 @@ public class CsvTest extends TestBase {
     public void testCSVWriteBasic() throws Exception {
         File f = new File(getTestDataDir(), "csvtestTemp.csv");
         String path = f.getAbsolutePath();
-        CSVFileWriter writer = new CSVFileWriter(path, DEFAULT_CHARSET);
+        CSVFileWriter writer = new CSVFileWriter(path, getController().getConfig());
         List<Row> rowList = new ArrayList<Row>();
 
         rowList.add(row1);
@@ -132,7 +133,7 @@ public class CsvTest extends TestBase {
      */
 
     private void compareWriterFile(String filePath) throws Exception {
-        CSVFileReader csv = new CSVFileReader(filePath);
+        CSVFileReader csv = new CSVFileReader(filePath, getController());
         csv.open();
 
         //check that the header is the same as what we wanted to write

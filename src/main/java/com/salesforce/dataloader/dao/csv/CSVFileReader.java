@@ -26,16 +26,31 @@
 
 package com.salesforce.dataloader.dao.csv;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StreamTokenizer;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.salesforce.dataloader.model.Row;
 import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
+import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
-import com.salesforce.dataloader.exception.*;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.exception.DataAccessRowException;
+import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.DAORowUtil;
 
 /**
@@ -115,20 +130,21 @@ public class CSVFileReader implements DataReader {
 
     private boolean isOpen = false;
 
-    public CSVFileReader() {
-    }
-
     public CSVFileReader(Config config) {
-        this(config.getString(Config.DAO_NAME));
-        setForceUTF8(config.getBoolean(Config.READ_UTF8));
+        this(new File(config.getString(Config.DAO_NAME)), config);
     }
 
-    public CSVFileReader(String filePath) {
-        file = new File(filePath);
+    public CSVFileReader(String filePath, Controller controller) {
+        this(new File(filePath), controller.getConfig());
     }
 
-    public CSVFileReader(File f) {
-        file = f;
+    public CSVFileReader(File file, Config config) {
+        this.file = file;
+        if(config.isBulkAPIEnabled()) {
+            forceUTF8 = true;
+        } else {
+            forceUTF8 = config.getBoolean(Config.READ_UTF8);
+        }
     }
 
     @Override

@@ -26,6 +26,19 @@
 
 package com.salesforce.dataloader.process;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
@@ -35,18 +48,6 @@ import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dyna.DateConverter;
 import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.sobject.SObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -234,7 +235,8 @@ public class CsvProcessTest extends ProcessTestBase {
     private SObject[] retrieveAccounts(Controller resultController, String... accountFieldsToReturn) throws Exception {
 
         List<String> ids = new ArrayList<String>();
-        final CSVFileReader successRdr = new CSVFileReader(resultController.getConfig().getString(Config.OUTPUT_SUCCESS));
+        String fileName = resultController.getConfig().getString(Config.OUTPUT_SUCCESS);
+        final CSVFileReader successRdr = new CSVFileReader(fileName, getController());
         try {
             // TODO: revise the use of Integer.MAX_VALUE
             for (Row row : successRdr.readRowList(Integer.MAX_VALUE)) {

@@ -26,14 +26,22 @@
 
 package com.salesforce.dataloader.action.visitor;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.TreeSet;
 
-import com.salesforce.dataloader.model.NACalendarValue;
-import com.salesforce.dataloader.model.NATextValue;
-import com.salesforce.dataloader.model.Row;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.log4j.Logger;
@@ -44,9 +52,19 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.DataWriter;
-import com.salesforce.dataloader.exception.*;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.exception.LoadException;
+import com.salesforce.dataloader.exception.OperationException;
+import com.salesforce.dataloader.model.NACalendarValue;
+import com.salesforce.dataloader.model.NATextValue;
+import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.DAORowUtil;
-import com.sforce.async.*;
+import com.sforce.async.AsyncApiException;
+import com.sforce.async.AsyncExceptionCode;
+import com.sforce.async.BatchInfo;
+import com.sforce.async.BatchStateEnum;
+import com.sforce.async.CSVReader;
 
 /**
  * Visitor for operations using the bulk API client
@@ -145,7 +163,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
     private void createBatches() throws OperationException, IOException, AsyncApiException {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        final PrintStream out = new PrintStream(os, true, BulkApiVisitorUtil.ENCODING);
+        final PrintStream out = new PrintStream(os, true, Config.BULK_API_ENCODING);
         doOneBatch(out, os, this.dynaArray);
     }
 
