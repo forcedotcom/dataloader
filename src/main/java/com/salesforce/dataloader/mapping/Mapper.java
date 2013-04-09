@@ -26,16 +26,25 @@
 
 package com.salesforce.dataloader.mapping;
 
-import java.io.*;
-import java.util.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
-import com.salesforce.dataloader.model.Row;
 import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.exception.MappingInitializationException;
+import com.salesforce.dataloader.model.Row;
 
 /**
  * Base class for field name mappers. Used by data loader operations to map between local field names and sfdc field
@@ -157,7 +166,16 @@ public abstract class Mapper {
     }
 
     public String getMapping(String srcName) {
-        return this.map.get(srcName);
+        if(map.containsKey(srcName)) {
+            return map.get(srcName);
+        }
+        // handle aggregate queries
+        for(Entry<String, String> entry: map.entrySet()) {
+            if(entry.getKey().endsWith("." + srcName)) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 
     public void clearMap() {
