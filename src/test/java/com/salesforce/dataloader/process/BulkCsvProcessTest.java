@@ -25,20 +25,21 @@
  */
 package com.salesforce.dataloader.process;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
+
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import com.salesforce.dataloader.TestProgressMontitor;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.model.Row;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -121,7 +122,7 @@ public class BulkCsvProcessTest extends ProcessTestBase {
 
         CSVFileWriter writer = null;
         try {
-            writer = new CSVFileWriter(CSV_FILE_PATH, DEFAULT_CHARSET);
+            writer = new CSVFileWriter(CSV_FILE_PATH, getController().getConfig());
             writer.open();
             writer.setColumnNames(new ArrayList<String>(rows[0].keySet()));
             writer.writeRowList(Arrays.asList(rows));

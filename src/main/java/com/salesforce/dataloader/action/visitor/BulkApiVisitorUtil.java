@@ -25,6 +25,14 @@
  */
 package com.salesforce.dataloader.action.visitor;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.text.NumberFormat;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -40,18 +48,8 @@ import com.sforce.async.ConcurrencyMode;
 import com.sforce.async.ContentType;
 import com.sforce.async.JobInfo;
 import com.sforce.async.OperationEnum;
-import org.apache.log4j.Logger;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.text.NumberFormat;
-import java.util.HashMap;
-import java.util.Map;
 
 class BulkApiVisitorUtil {
-
-    /** communications with bulk api always use UTF8 */
-    public static final String ENCODING = "UTF-8";
 
     private static final Logger logger = Logger.getLogger(BulkApiVisitorUtil.class);
 
