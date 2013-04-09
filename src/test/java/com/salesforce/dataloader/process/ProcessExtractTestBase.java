@@ -26,6 +26,15 @@
 
 package com.salesforce.dataloader.process;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.junit.Assert;
+import org.junit.runners.Parameterized;
+
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
@@ -39,14 +48,6 @@ import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
-import org.junit.Assert;
-import org.junit.runners.Parameterized;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -139,7 +140,8 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         // assert that it's a CSV...if not fail
         final Set<String> unexpectedIds = new HashSet<String>();
         final Set<String> expectedIds = new HashSet<String>(Arrays.asList(ids));
-        final DataReader resultReader = new CSVFileReader(control.getConfig().getString(Config.OUTPUT_SUCCESS));
+        String fileName = control.getConfig().getString(Config.OUTPUT_SUCCESS);
+        final DataReader resultReader = new CSVFileReader(fileName, getController());
         try {
             resultReader.open();
 
@@ -283,7 +285,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                     "Batch failed: InvalidBatch : Failed to process query: FUNCTIONALITY_NOT_ENABLED: Foreign Key Relationships not supported in Bulk Query");
         } else {
             runProcess(argMap, 1);
-            final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME));
+            final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME), getController());
             try {
                 final Row resultRow = resultReader.readRow();
                 assertEquals("Query returned incorrect Contact ID", contactId, resultRow.get("CONTACT_ID"));
@@ -331,7 +333,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                 // run the extract
                 runProcess(argmap, 1);
                 // open the results of the extraction
-                final CSVFileReader rdr = new CSVFileReader(argmap.get(Config.DAO_NAME));
+                final CSVFileReader rdr = new CSVFileReader(argmap.get(Config.DAO_NAME), getController());
                 rdr.open();
                 Row row = rdr.readRow();
                 assertNotNull(row);
@@ -392,7 +394,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                     "Batch failed: InvalidBatch : Failed to process query: FUNCTIONALITY_NOT_ENABLED: Aggregate Relationships not supported in Bulk Query");
         } else {
             runProcess(argMap, 1, true);
-            final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME));
+            final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME), getController());
             try {
                 assertEquals(String.valueOf(numRecords - 1), resultReader.readRow().get("MAX(NUMBEROFEMPLOYEES)"));
             } finally {

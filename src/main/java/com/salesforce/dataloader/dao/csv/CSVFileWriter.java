@@ -26,16 +26,22 @@
 
 package com.salesforce.dataloader.dao.csv;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.salesforce.dataloader.model.Row;
 import org.apache.log4j.Logger;
 
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.model.Row;
 
 /**
  * Writes csv files.
@@ -68,10 +74,14 @@ public class CSVFileWriter implements DataWriter {
      */
     private final boolean capitalizedHeadings;
 
-    public CSVFileWriter(String fileName, String encoding) {
+    public CSVFileWriter(String fileName, Config config) {
         this.fileName = fileName;
         this.capitalizedHeadings = true;
-        this.encoding = (encoding == null || encoding.isEmpty()) ? null : encoding;
+        if(config.isBulkAPIEnabled()) {
+            encoding = Config.BULK_API_ENCODING;
+        } else {
+            encoding = config.getCsvWriteEncoding();
+        }
     }
 
     /**

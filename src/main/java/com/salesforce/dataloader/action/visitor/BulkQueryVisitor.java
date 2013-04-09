@@ -26,16 +26,25 @@
 
 package com.salesforce.dataloader.action.visitor;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.Map;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
-import com.salesforce.dataloader.exception.*;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.ExtractException;
+import com.salesforce.dataloader.exception.OperationException;
 import com.salesforce.dataloader.model.Row;
-import com.sforce.async.*;
+import com.sforce.async.AsyncApiException;
+import com.sforce.async.BatchInfo;
+import com.sforce.async.BatchStateEnum;
+import com.sforce.async.CSVReader;
+import com.sforce.async.QueryResultList;
 
 /**
  * Query visitor for bulk api extract operations.
@@ -58,7 +67,7 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
                 getRateCalculator(), false);
         jobUtil.createJob(getConfig());
         try {
-            jobUtil.createBatch(new ByteArrayInputStream(soql.getBytes(BulkApiVisitorUtil.ENCODING)));
+            jobUtil.createBatch(new ByteArrayInputStream(soql.getBytes(Config.BULK_API_ENCODING)));
         } catch (final UnsupportedEncodingException e) {
             throw new ExtractException(e);
         }
@@ -82,7 +91,7 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
                 final InputStream resultStream = getController().getBulkClient().getClient()
                         .getQueryResultStream(this.batch.getJobId(), this.batch.getId(), resultId);
                 try {
-                    final CSVReader rdr = new CSVReader(resultStream, getConfig().getCsvWriteEncoding());
+                    final CSVReader rdr = new CSVReader(resultStream, Config.BULK_API_ENCODING);
                     rdr.setMaxCharsInFile(Integer.MAX_VALUE);
                     rdr.setMaxRowsInFile(Integer.MAX_VALUE);
                     List<String> headers;

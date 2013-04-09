@@ -26,6 +26,16 @@
 
 package com.salesforce.dataloader.process;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.config.Config;
@@ -34,15 +44,6 @@ import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.model.Row;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -273,7 +274,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
 
     private CSVFileReader openConfiguredPath(Config cfg, String configSetting)
             throws DataAccessObjectInitializationException {
-        final CSVFileReader rdr = new CSVFileReader(new File(cfg.getString(configSetting)));
+        final CSVFileReader rdr = new CSVFileReader(new File(cfg.getString(configSetting)), cfg);
         rdr.open();
         return rdr;
     }
