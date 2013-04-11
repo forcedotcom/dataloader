@@ -26,10 +26,11 @@
 
 package com.salesforce.dataloader.process;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,9 +45,6 @@ import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.model.Row;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for testing data loads with different configured row offsets.
@@ -289,10 +287,10 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
 
         if (isSuccessFile) {
             // Also ask for ID
-            rowResult.put("ID", (String)firstRow.get("ID"));
+            rowResult.put("ID", firstRow.get("ID"));
         }
         if (firstRow != null && firstRow.get("NAME") != null) {
-            rowResult.put("NAME", (String)firstRow.get("NAME"));
+            rowResult.put("NAME", firstRow.get("NAME"));
         }
     }
 
@@ -309,10 +307,10 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
 
         if (isSuccessFile) {
             // Also ask for ID
-            rowResult.put("ID", (String)lastRow.get("ID"));
+            rowResult.put("ID", lastRow.get("ID"));
         }
 
-        rowResult.put("NAME", (String)lastRow.get("NAME"));
+        rowResult.put("NAME", lastRow.get("NAME"));
     }
 
     private Map<String, String> getRowOffsetTestConfig(Object offset, int numInserts) throws DataAccessObjectException {
