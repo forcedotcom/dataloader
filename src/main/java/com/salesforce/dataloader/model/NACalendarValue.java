@@ -23,15 +23,44 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader;
+package com.salesforce.dataloader.model;
 
-import java.util.List;
-import java.util.Map;
+import java.util.GregorianCalendar;
 
-public interface ConfigGenerator {
+/**
+ * Represents a null value for a datetime field.
+ */
+public class NACalendarValue extends GregorianCalendar {
 
-    int getNumConfigurations();
+    private static final NACalendarValue INSTANCE = new NACalendarValue();
+    private static final String NA_VALUE = "#N/A";
 
-    List<Map<String, String>> getConfigurations();
+    private NACalendarValue() {
+    }
 
+    public static NACalendarValue getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+
+        return NA_VALUE.equals(obj.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return NA_VALUE.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return NA_VALUE;
+    }
 }

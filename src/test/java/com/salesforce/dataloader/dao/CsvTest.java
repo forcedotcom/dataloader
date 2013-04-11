@@ -26,96 +26,98 @@
 package com.salesforce.dataloader.dao;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import com.salesforce.dataloader.TestBase;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
-import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.model.Row;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
- * 
+ *
  */
 public class CsvTest extends TestBase {
 
-    public CsvTest(String name) {
-        super(name);
+    private static final String COLUMN_1_NAME = "column1";
+    private static final String COLUMN_2_NAME = "column2";
+    private static final String COLUMN_3_NAME = "column3";
+    private List<String> writeHeader;
+    private Row row1;
+    private Row row2;
+
+    @Before
+    public void createTestData() {
+        writeHeader = new ArrayList<String>(3);
+        writeHeader.add("COL1");
+        writeHeader.add("COL2");
+        writeHeader.add("COL3");
+
+        row1 = new Row();
+        row1.put("COL1", "row1col1");
+        row1.put("COL2", "row1col2");
+        row1.put("COL3", "row1col3");
+
+        row2 = new Row();
+        row2.put("COL1", "row2col1");
+        row2.put("COL2", "row2col2");
+        row2.put("COL3", "row2col3");
     }
 
     /**
      * Basic Test for CSV Reading
-     *
      */
-
-    public void testCSVReadBasic() {
+    @Test
+    public void testCSVReadBasic() throws Exception {
         File f = new File(getTestDataDir(), "csvtext.csv");
         assertTrue(f.exists());
         assertTrue(f.canRead());
 
-        CSVFileReader csv = new CSVFileReader(f);
-        try {
-            csv.open();
-        } catch (DataAccessObjectInitializationException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
-        }
+        CSVFileReader csv = new CSVFileReader(f, getController().getConfig());
+        csv.open();
 
-        // check that the header row is correctly returned.
         List<String> headerRow = csv.getColumnNames();
-        assertEquals("column1", headerRow.get(0));
-        assertEquals("column2", headerRow.get(1));
-        assertEquals("column3", headerRow.get(2));
+        assertEquals(COLUMN_1_NAME, headerRow.get(0));
+        assertEquals(COLUMN_2_NAME, headerRow.get(1));
+        assertEquals(COLUMN_3_NAME, headerRow.get(2));
 
-        // validate the first row
-        try {
-            Map<String, Object> firstRow = csv.readRow();
-            assertEquals("row1-1", (String) firstRow.get("column1"));
-            assertEquals("row1-2", (String) firstRow.get("column2"));
-            assertEquals("row1-3", (String) firstRow.get("column3"));
-        } catch (DataAccessObjectException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
-        }
+        Row firstRow = csv.readRow();
+        assertEquals("row1-1", firstRow.get(COLUMN_1_NAME));
+        assertEquals("row1-2", firstRow.get(COLUMN_2_NAME));
+        assertEquals("row1-3", firstRow.get(COLUMN_3_NAME));
 
-        // validate the second row
-        try {
-            Map<String, Object> firstRow = csv.readRow();
-            assertEquals("row2-1", (String) firstRow.get("column1"));
-            assertEquals("row2-2", (String) firstRow.get("column2"));
-            assertEquals("row2-3", (String) firstRow.get("column3"));
-        } catch (DataAccessObjectException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
-        }
+        Row secondRow = csv.readRow();
+        assertEquals("row2-1", secondRow.get(COLUMN_1_NAME));
+        assertEquals("row2-2", secondRow.get(COLUMN_2_NAME));
+        assertEquals("row2-3", secondRow.get(COLUMN_3_NAME));
 
         csv.close();
-
     }
+
 
     /**
      * Basic test for CSV Writing
-     *
      */
-
-    public synchronized void testCSVWriteBasic() {
+    @Test
+    public void testCSVWriteBasic() throws Exception {
         File f = new File(getTestDataDir(), "csvtestTemp.csv");
         String path = f.getAbsolutePath();
-        CSVFileWriter writer = new CSVFileWriter(path, DEFAULT_CHARSET);
-        List<Map<String,Object>> rowList = new ArrayList<Map<String,Object>>();
+        CSVFileWriter writer = new CSVFileWriter(path, getController().getConfig());
+        List<Row> rowList = new ArrayList<Row>();
 
         rowList.add(row1);
         rowList.add(row2);
 
-        try {
-            writer.open();
-            writer.setColumnNames(writeHeader);
-        } catch (DataAccessObjectInitializationException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
-        }
+        writer.open();
+        writer.setColumnNames(writeHeader);
 
-        try {
-            writer.writeRowList(rowList);
-        } catch (DataAccessObjectException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
-        }
+        writer.writeRowList(rowList);
         writer.close();
 
         compareWriterFile(path);
@@ -126,66 +128,32 @@ public class CsvTest extends TestBase {
 
     /**
      * Helper to compare the static variables to the csv we wrote
+     *
      * @param filePath
      */
 
-    private void compareWriterFile(String filePath) {
-        CSVFileReader csv = new CSVFileReader(filePath);
-        try {
-            csv.open();
-        } catch (DataAccessObjectInitializationException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
-        }
+    private void compareWriterFile(String filePath) throws Exception {
+        CSVFileReader csv = new CSVFileReader(filePath, getController());
+        csv.open();
 
         //check that the header is the same as what we wanted to write
         List<String> headerRow = csv.getColumnNames();
-        for (int i = 0; i < writeHeader.size(); i ++) {
+        for (int i = 0; i < writeHeader.size(); i++) {
             assertEquals(headerRow.get(i), writeHeader.get(i));
         }
 
         //check that row 1 is valid
-        try {
-            Map<String, Object> nextRow = csv.readRow();
-            for (String headerColumn : writeHeader) {
-                assertEquals(row1.get(headerColumn), nextRow.get(headerColumn));
-            }
-        } catch (DataAccessObjectException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
+        Row firstRow = csv.readRow();
+        for (String headerColumn : writeHeader) {
+            assertEquals(row1.get(headerColumn), firstRow.get(headerColumn));
         }
 
         //check that row 2 is valid
-        try {
-            Map<String, Object> nextRow = csv.readRow();
-            for (String headerColumn : writeHeader) {
-                assertEquals(row2.get(headerColumn), nextRow.get(headerColumn));
-            }
-        } catch (DataAccessObjectException e) {
-            fail("Exception has been caught, error: " + e.getMessage());
+        Row secondRow = csv.readRow();
+        for (String headerColumn : writeHeader) {
+            assertEquals(row2.get(headerColumn), secondRow.get(headerColumn));
         }
-
         csv.close();
-    }
-
-
-    private static List<String> writeHeader;
-    private static Map<String,Object> row1;
-    private static Map<String,Object> row2;
-
-    static {
-        writeHeader = new ArrayList<String>();
-        writeHeader.add("COL1");
-        writeHeader.add("COL2");
-        writeHeader.add("COL3");
-
-        row1 = new HashMap<String,Object>();
-        row1.put("COL1", "row1col1");
-        row1.put("COL2", "row1col2");
-        row1.put("COL3", "row1col3");
-
-        row2 = new HashMap<String,Object>();
-        row2.put("COL1", "row2col1");
-        row2.put("COL2", "row2col2");
-        row2.put("COL3", "row2col3");
     }
 }
 

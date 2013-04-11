@@ -39,12 +39,17 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.util.LoadRateCalculator;
-import com.sforce.async.*;
+import com.sforce.async.AsyncApiException;
+import com.sforce.async.BatchInfo;
+import com.sforce.async.BatchInfoList;
+import com.sforce.async.BulkConnection;
+import com.sforce.async.CSVReader;
+import com.sforce.async.ConcurrencyMode;
+import com.sforce.async.ContentType;
+import com.sforce.async.JobInfo;
+import com.sforce.async.OperationEnum;
 
 class BulkApiVisitorUtil {
-
-    /** communications with bulk api always use UTF8 */
-    public static final String ENCODING = "UTF-8";
 
     private static final Logger logger = Logger.getLogger(BulkApiVisitorUtil.class);
 
@@ -144,6 +149,7 @@ class BulkApiVisitorUtil {
             updateJobStatus();
             return this.checkStatusInterval;
         }
+        monitor.setNumberBatchesTotal(jobInfo.getNumberBatchesTotal());
         return timeRemaining;
     }
 

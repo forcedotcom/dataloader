@@ -23,21 +23,40 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package com.salesforce.dataloader;
 
-package com.salesforce.dataloader.action.visitor;
-
-import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.OperationException;
-import com.salesforce.dataloader.model.Row;
-import com.sforce.ws.ConnectionException;
+import com.salesforce.dataloader.config.Config;
 
 /**
+ * A test setting is used to modify the behavior of dataloader during test execution.
+ * Many test settings can be used together to configure a {@link TestVariant}.
  *
- * @author Lexi Viripaeff
- * @since 6.0
+ * @author Federico Recio
  */
-public interface DAORowVisitor {
+public enum TestSetting {
 
-    public void visit(Row row) throws OperationException, DataAccessObjectException, ConnectionException;
+    BULK_API_ENABLED(Config.BULK_API_ENABLED, Boolean.TRUE),
+    BULK_API_DISABLED(Config.BULK_API_ENABLED, Boolean.FALSE),
+    BULK_API_ZIP_CONTENT_ENABLED(Config.BULK_API_ZIP_CONTENT, Boolean.TRUE),
+    BULK_API_SERIAL_MODE_ENABLED(Config.BULK_API_SERIAL_MODE, Boolean.TRUE),
+    WRITE_UTF8_ENABLED(Config.WRITE_UTF8, Boolean.TRUE),
+    WRITE_UTF8_DISABLED(Config.WRITE_UTF8, Boolean.FALSE),
+    READ_UTF8_ENABLED(Config.READ_UTF8, Boolean.TRUE),
+    READ_UTF8_DISABLED(Config.READ_UTF8, Boolean.FALSE);
 
+    private final String parameter;
+    private final Object value;
+
+    TestSetting(String parameter, Object value) {
+        this.parameter = parameter;
+        this.value = value;
+    }
+
+    public String getParameter() {
+        return parameter;
+    }
+
+    public Object getValue() {
+        return value;
+    }
 }

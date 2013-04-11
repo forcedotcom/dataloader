@@ -53,7 +53,7 @@ public class DataAccessObjectFactory {
         if (CSV_READ_TYPE.equalsIgnoreCase(daoType)) {
             dao = new CSVFileReader(config);
         } else if (CSV_WRITE_TYPE.equalsIgnoreCase(daoType)) {
-            dao = new CSVFileWriter(config.getString(Config.DAO_NAME), config.getCsvWriteEncoding());
+            dao = new CSVFileWriter(config.getString(Config.DAO_NAME), config);
         } else if (DATABASE_READ_TYPE.equalsIgnoreCase(daoType)) {
             dao = new DatabaseReader(config);
         } else if (DATABASE_WRITE_TYPE.equalsIgnoreCase(daoType)) {

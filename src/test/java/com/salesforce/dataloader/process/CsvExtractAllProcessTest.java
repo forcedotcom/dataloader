@@ -26,11 +26,11 @@
 
 package com.salesforce.dataloader.process;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
 import java.util.Map;
-
-import junit.framework.TestSuite;
-
-import com.salesforce.dataloader.ConfigTestSuite;
 
 /**
  * Tests extract all dataloader process
@@ -38,19 +38,11 @@ import com.salesforce.dataloader.ConfigTestSuite;
  * @author Aleksandr Shulman, Colin Jarvis
  * @since 21.0
  */
+@RunWith(Parameterized.class)
 public class CsvExtractAllProcessTest extends ProcessExtractTestBase {
 
-    public static TestSuite suite() {
-        return ConfigTestSuite.createSuite(CsvExtractAllProcessTest.class);
-    }
-
-    public CsvExtractAllProcessTest(String name, Map<String, String> config) throws Exception {
-        super(name, config);
-
-    }
-
-    public CsvExtractAllProcessTest(String name) {
-        super(name);
+    public CsvExtractAllProcessTest(Map<String, String> config) throws Exception {
+        super(config);
     }
 
     @Override
@@ -64,6 +56,7 @@ public class CsvExtractAllProcessTest extends ProcessExtractTestBase {
      * @expectedResults Assert that the internal error message is correct.
      */
     @Override
+    @Test
     public void testNestedQueryErrorsCorrectly() throws Exception {
         runTestNestedQueryErrorsCorrectly();
     }
@@ -75,6 +68,7 @@ public class CsvExtractAllProcessTest extends ProcessExtractTestBase {
      * @throws Exception
      */
     @Override
+    @Test
     public void testSoqlWithRelationships() throws Exception {
         runTestSoqlWithRelationships();
     }
@@ -87,6 +81,7 @@ public class CsvExtractAllProcessTest extends ProcessExtractTestBase {
      * @throws Exception
      */
     @Override
+    @Test
     public void testSoqlWithTableNameInSelect() throws Exception {
         runTestSoqlWithTableNameInSelect();
     }
@@ -98,6 +93,7 @@ public class CsvExtractAllProcessTest extends ProcessExtractTestBase {
      * @expectedResults Assert that the error message is correct and contains the SObject type
      */
     @Override
+    @Test
     public void testForNonQueryableSObjects() throws Exception {
         runTestForNonQueryableSObjects();
     }
@@ -110,16 +106,19 @@ public class CsvExtractAllProcessTest extends ProcessExtractTestBase {
      * @throws Exception
      */
     @Override
+    @Test
     public void testMalformedQueries() throws Exception {
         runMalformedQueriesTest();
     }
 
     @Override
+    @Test
     public void testExtractAccountCsv() throws Exception {
         runTestExtractAccountCsv();
     }
 
     @Override
+    @Test
     public void testExtractAccountCsvAggregate() throws Exception {
         runTestExtractAccountCsvAggregate();
     }

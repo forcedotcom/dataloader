@@ -26,19 +26,25 @@
 
 package com.salesforce.dataloader.process;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-import junit.framework.TestSuite;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import com.salesforce.dataloader.ConfigGenerator;
-import com.salesforce.dataloader.ConfigTestSuite;
+import com.salesforce.dataloader.TestSetting;
+import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.model.Row;
 
 /**
  * Test class for testing data loads with different configured row offsets.
@@ -46,28 +52,27 @@ import com.salesforce.dataloader.exception.DataAccessObjectInitializationExcepti
  * @author Aleksandr Shulman, Colin Jarvis
  * @since 23.0
  */
+@RunWith(Parameterized.class)
 public class CsvProcessWithOffsetTest extends ProcessTestBase {
 
     private static final int NUM_DATA_ROWS = 10;
     private static final String FILE_NAME_BASE = "upsertAccountSmall";
 
-    public static TestSuite suite() {
-        return ConfigTestSuite.createSuite(CsvProcessWithOffsetTest.class);
+    public CsvProcessWithOffsetTest(Map<String, String> config) {
+        super(config);
     }
 
-    public static ConfigGenerator getConfigGenerator() {
-        final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
-        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED, Config.TRUE);
-        return new UnionConfigGenerator(parent, withBulkApi);
-    }
-
-    public CsvProcessWithOffsetTest(String name, Map<String, String> config) {
-        super(name, config);
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getTestParameters() {
+        return Arrays.asList(
+                TestVariant.defaultSettings(),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED));
     }
 
     /**
      * Verify that a row offset will produce the correct effects and success file for a small set of rows (<5).
      */
+    @Test
     public void testSmallUpsertWithOffset() throws Exception {
 
         runOffsetValueTest(1, NUM_DATA_ROWS - 1);
@@ -79,6 +84,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
      * @expectedResults Assert that the number of successes and failures in returned spreadsheets matches with expected
      *                  results.
      */
+    @Test
     public void testOffsetResultsInNoDML() throws Exception {
 
         runOffsetValueTest(NUM_DATA_ROWS, 0);
@@ -89,6 +95,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
      * 
      * @expectedResults Assert no inserts or updates occur.
      */
+    @Test
     public void testOffsetGreaterThanRowCount() throws Exception {
 
         runOffsetValueTest(NUM_DATA_ROWS + 1, 0);
@@ -101,7 +108,9 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
      * @expectedResults Assert that the error string contains the invalid value.
      * @throws Exception
      */
-    protected void _testInvalidOffsetValueCorrectlyHandled() throws Exception {
+    @Test
+    @Ignore
+    public void testInvalidOffsetValueCorrectlyHandled() throws Exception {
 
         runInvalidOffsetValueTest("abc", "For input string: \"" + "abc" + "\"");
         runInvalidOffsetValueTest("11a", "For input string: \"" + "11a" + "\"");
@@ -114,6 +123,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
      * 
      * @expectedResults Assert that the correct number of DML events occur.
      */
+    @Test
     public void testEmptyOffsetValueTreatedAsZero() throws Exception {
 
         runOffsetValueTest("", NUM_DATA_ROWS);
@@ -125,7 +135,9 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
      * 
      * @expectedResults Assert the exception type is not an NPE.
      */
-    protected void _testNullOffsetValueDoesNotNPE() throws Exception {
+    @Test
+    @Ignore
+    public void testNullOffsetValueDoesNotNPE() throws Exception {
         try {
             runOffsetValueTest(null, NUM_DATA_ROWS);
         } catch (NullPointerException npe) {
@@ -139,7 +151,9 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
      * 
      * @expectedResults Assert that the error message contains "For input string".
      */
-    protected void _testNegativeOffsetValuesCorrectlyHandled() throws Exception {
+    @Test
+    @Ignore
+    public void testNegativeOffsetValuesCorrectlyHandled() throws Exception {
 
         runInvalidOffsetValueTest("-1", "For input string");
         runInvalidOffsetValueTest("-5", "For input string");
@@ -210,12 +224,12 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
         }
 
         // Initializations of row results
-        Map<String, String> firstInputOffsetAdjustedRow = new HashMap<String, String>();
-        Map<String, String> lastInputRow = new HashMap<String, String>();
-        Map<String, String> firstSuccessRow = new HashMap<String, String>();
-        Map<String, String> lastSuccessRow = new HashMap<String, String>();
-        Map<String, String> firstErrorRow = new HashMap<String, String>();
-        Map<String, String> lastErrorRow = new HashMap<String, String>();
+        Row firstInputOffsetAdjustedRow = new Row();
+        Row lastInputRow = new Row();
+        Row firstSuccessRow = new Row();
+        Row lastSuccessRow = new Row();
+        Row firstErrorRow = new Row();
+        Row lastErrorRow = new Row();
 
         // The next few if statements deal with the edge statements on file size...(i.e. suppose that there are no
         // errors)
@@ -258,14 +272,14 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
 
     private CSVFileReader openConfiguredPath(Config cfg, String configSetting)
             throws DataAccessObjectInitializationException {
-        final CSVFileReader rdr = new CSVFileReader(new File(cfg.getString(configSetting)));
+        final CSVFileReader rdr = new CSVFileReader(new File(cfg.getString(configSetting)), cfg);
         rdr.open();
         return rdr;
     }
 
-    private void getFirstRow(Map<String, String> rowResult, CSVFileReader reader, boolean isSuccessFile, int rowOffset)
+    private void getFirstRow(Row rowResult, CSVFileReader reader, boolean isSuccessFile, int rowOffset)
             throws Exception {
-        Map<String, Object> firstRow = reader.readRow();
+        Row firstRow = reader.readRow();
 
         for (int i = 0; i < rowOffset; i++) {
             firstRow = reader.readRow(); // then, for each, move down one row
@@ -273,18 +287,18 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
 
         if (isSuccessFile) {
             // Also ask for ID
-            rowResult.put("ID", (String)firstRow.get("ID"));
+            rowResult.put("ID", firstRow.get("ID"));
         }
         if (firstRow != null && firstRow.get("NAME") != null) {
-            rowResult.put("NAME", (String)firstRow.get("NAME"));
+            rowResult.put("NAME", firstRow.get("NAME"));
         }
     }
 
-    private void getLastRow(Map<String, String> rowResult, CSVFileReader reader, boolean isSuccessFile)
+    private void getLastRow(Row rowResult, CSVFileReader reader, boolean isSuccessFile)
             throws Exception {
 
-        Map<String, Object> tempRow = new HashMap<String, Object>();
-        Map<String, Object> lastRow = new HashMap<String, Object>();
+        Row tempRow = new Row();
+        Row lastRow = new Row();
 
         // get to the last row:
         while ((tempRow = reader.readRow()) != null) {
@@ -293,10 +307,10 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
 
         if (isSuccessFile) {
             // Also ask for ID
-            rowResult.put("ID", (String)lastRow.get("ID"));
+            rowResult.put("ID", lastRow.get("ID"));
         }
 
-        rowResult.put("NAME", (String)lastRow.get("NAME"));
+        rowResult.put("NAME", lastRow.get("NAME"));
     }
 
     private Map<String, String> getRowOffsetTestConfig(Object offset, int numInserts) throws DataAccessObjectException {

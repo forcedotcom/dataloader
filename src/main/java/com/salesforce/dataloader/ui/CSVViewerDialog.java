@@ -27,21 +27,33 @@
 package com.salesforce.dataloader.ui;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.ui.csvviewer.CSVContentProvider;
 import com.salesforce.dataloader.ui.csvviewer.CSVLabelProvider;
 import com.salesforce.dataloader.util.DAORowUtil;
@@ -59,6 +71,7 @@ public class CSVViewerDialog extends Dialog {
 
     //the two tableViewers
     private TableViewer csvTblViewer;
+    private final Controller controller;
 
     public void setFileName(String filename) {
         this.filename = filename;
@@ -73,8 +86,7 @@ public class CSVViewerDialog extends Dialog {
      */
     public CSVViewerDialog(Shell parent, Controller controller) {
         // Pass the default styles here
-        this(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.MAX | SWT.MIN);
-
+        this(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.MAX | SWT.MIN, controller);
     }
 
     /**
@@ -83,11 +95,11 @@ public class CSVViewerDialog extends Dialog {
      * @param style
      *            the style
      */
-    public CSVViewerDialog(Shell parent, int style) {
+    public CSVViewerDialog(Shell parent, int style, Controller controller) {
         // Let users override the default styles
         super(parent, style);
-
         setText(Labels.getString("CSVViewer.title")); //$NON-NLS-1$
+        this.controller = controller;
     }
 
     /**
@@ -231,7 +243,7 @@ public class CSVViewerDialog extends Dialog {
     private void initializeCSVViewer(Shell shell) throws DataAccessObjectInitializationException {
         GridData data;
 
-        CSVFileReader csvReader = new CSVFileReader(filename);
+        CSVFileReader csvReader = new CSVFileReader(filename, controller);
 
         try {
             csvReader.open();
@@ -284,7 +296,7 @@ public class CSVViewerDialog extends Dialog {
 
         List<List<Object>> rowList = new LinkedList<List<Object>>();
         for (int i = 0; i < numberOfRows; i++) {
-            Map<String, Object> rowMap;
+            Row rowMap;
             try {
                 rowMap = csvReader.readRow();
             } catch (DataAccessObjectException e) {

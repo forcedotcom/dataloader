@@ -27,20 +27,30 @@
 package com.salesforce.dataloader.process;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 
-import junit.framework.TestSuite;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import com.salesforce.dataloader.ConfigGenerator;
-import com.salesforce.dataloader.ConfigTestSuite;
+import com.salesforce.dataloader.TestSetting;
+import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dyna.DateConverter;
-import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.ProcessInitializationException;
+import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.sobject.SObject;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Test for dataloader batch interface, also known as "integration framework"
@@ -50,50 +60,43 @@ import com.sforce.soap.partner.sobject.SObject;
  * @hierarchy API.dataloader Csv Process Tests
  * @userstory Commenting existing data loader tests and uploading into QA force
  */
-
+@RunWith(Parameterized.class)
 public class CsvProcessTest extends ProcessTestBase {
 
-    public static TestSuite suite() {
-        return ConfigTestSuite.createSuite(CsvProcessTest.class);
+    public CsvProcessTest(Map<String, String> config) {
+        super(config);
     }
 
-    public static ConfigGenerator getConfigGenerator() {
-        final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
-        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
-                Boolean.TRUE.toString());
-        final ConfigGenerator bulkApiZipContent = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_ZIP_CONTENT,
-                Boolean.TRUE.toString());
-        final ConfigGenerator bulkApiSerialMode = new ConfigSettingGenerator(withBulkApi, Config.BULK_API_SERIAL_MODE,
-                Boolean.TRUE.toString());
-        return new UnionConfigGenerator(parent, withBulkApi, bulkApiSerialMode, bulkApiZipContent);
-    }
-
-    public CsvProcessTest(String name, Map<String, String> config) {
-        super(name, config);
-    }
-
-    public CsvProcessTest(String name) {
-        super(name);
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getParameters() {
+        return Arrays.asList(
+                TestVariant.defaultSettings(),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_SERIAL_MODE_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED));
     }
 
     /**
      * Tests the insert operation on Account - Positive test.
      */
-    public void testInsertAccountCsv() throws ProcessInitializationException, DataAccessObjectException {
+    @Test
+    public void testInsertAccountCsv() throws Exception {
         runProcess(getTestConfig(OperationInfo.insert, false), 100);
     }
 
     /**
      * Tests update operation with input coming from a CSV file. Relies on the id's in the CSV on being in the database
      */
-    public void testUpdateAccountCsv() throws ProcessInitializationException, Throwable {
+    @Test
+    public void testUpdateAccountCsv() throws Exception {
         runProcess(getUpdateTestConfig(false, null, 100), 100);
     }
 
     /**
      * Upsert the records from CSV file
      */
-    public void testUpsertAccountCsv() throws ProcessInitializationException, DataAccessObjectException {
+    @Test
+    public void testUpsertAccountCsv() throws Exception {
         // manually inserts 50 accounts, then upserts 100 accounts (50 inserts and 50 updates)
         runUpsertProcess(getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 50), 50, 50);
     }
@@ -109,6 +112,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *                  when queried.
      * @throws Exception
      */
+    @Test
     public void testConstantMappingInCsv() throws Exception {
 
         // The use case is as follows:
@@ -140,6 +144,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @throws Exception
      */
+    @Test
     public void testDescriptionAsConstantMappingInCsv() throws Exception {
         // The use case is as follows:
         // This company in this scenario only does business in the state of CA, therefore billing and shipping
@@ -166,6 +171,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @expectedResults Assert that the values retrieved for that field match those in the CSV file
      */
+    @Test
     public void testFieldAndConstantFieldClash()  throws Exception {
 
         // The use case is as follows:
@@ -195,6 +201,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @expectedResults Assert that the values retrieved for that field match those in the CSV file
      */
+    @Test
     public void testNullConstantAssignment()  throws Exception {
 
         /* Field assignments in .sdl are as follows:
@@ -228,10 +235,11 @@ public class CsvProcessTest extends ProcessTestBase {
     private SObject[] retrieveAccounts(Controller resultController, String... accountFieldsToReturn) throws Exception {
 
         List<String> ids = new ArrayList<String>();
-        final CSVFileReader successRdr = new CSVFileReader(resultController.getConfig().getString(Config.OUTPUT_SUCCESS));
+        String fileName = resultController.getConfig().getString(Config.OUTPUT_SUCCESS);
+        final CSVFileReader successRdr = new CSVFileReader(fileName, getController());
         try {
-            for (Map<String, Object> row : successRdr
-                    .readRowList(Integer.MAX_VALUE)) {
+            // TODO: revise the use of Integer.MAX_VALUE
+            for (Row row : successRdr.readRowList(Integer.MAX_VALUE)) {
                 final String rowId = (String) row.get("ID");
                 if (rowId != null) {
                     ids.add(rowId);
@@ -243,19 +251,21 @@ public class CsvProcessTest extends ProcessTestBase {
 
 
         // query them and verify that they have the values
-        StringBuffer fields = new StringBuffer("id");
-        for(String field : accountFieldsToReturn)
-            fields.append("," + field);
+        StringBuilder fields = new StringBuilder("id");
+        for(String field : accountFieldsToReturn) {
+            fields.append(",").append(field);
+        }
 
-                SObject[] sobjects = getBinding().retrieve(fields.toString(), "Account", ids.toArray(new String[ids.size()]));
-                assertEquals("Wrong number of accounts created", ids.size(), sobjects.length);
-                return sobjects;
+        SObject[] sobjects = getBinding().retrieve(fields.toString(), "Account", ids.toArray(new String[ids.size()]));
+        assertEquals("Wrong number of accounts created", ids.size(), sobjects.length);
+        return sobjects;
     }
 
     /**
      * Tests Upsert on foreign key for the records based on the CSV file
      */
-    public void testUpsertFkAccountCsv() throws ProcessInitializationException, DataAccessObjectException {
+    @Test
+    public void testUpsertFkAccountCsv() throws Exception {
         // manually inserts 100 accounts, then upserts specifying account parent for 50 accounts
         runUpsertProcess(getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 100), 0, 50);
     }
@@ -263,7 +273,8 @@ public class CsvProcessTest extends ProcessTestBase {
     /**
      * Tests that Deleting the records based on a CSV file works
      */
-    public void testDeleteAccountCsv() throws ProcessInitializationException, DataAccessObjectException {
+    @Test
+    public void testDeleteAccountCsv() throws Exception {
         AccountIdTemplateListener listener = new AccountIdTemplateListener(100);
         String deleteFileName = convertTemplateToInput(baseName + "Template.csv", baseName + ".csv", listener);
         Map<String, String> argMap = getTestConfig(OperationInfo.delete, deleteFileName, false);
@@ -271,13 +282,13 @@ public class CsvProcessTest extends ProcessTestBase {
         verifySuccessIds(theController, listener.getAccountIds());
     }
 
-    public class AttachmentTemplateListener extends AccountIdTemplateListener {
+    private class AttachmentTemplateListener extends AccountIdTemplateListener {
         public AttachmentTemplateListener() {
             super(1);
         }
 
         @Override
-        public void updateRow(int idx, Map<String, Object> row) {
+        public void updateRow(int idx, Row row) {
             // set parent account id
             row.put("ParentId", getAccountIds()[0]);
             // make body pathname absolute
@@ -286,7 +297,8 @@ public class CsvProcessTest extends ProcessTestBase {
         }
     }
 
-    public void testCreateAttachment() throws ProcessInitializationException, DataAccessObjectException {
+    @Test
+    public void testCreateAttachment() throws Exception {
         // convert the template using the parent account id
         final String fileName = convertTemplateToInput(this.baseName + "Template.csv", this.baseName + ".csv",
                 new AttachmentTemplateListener());
@@ -311,6 +323,7 @@ public class CsvProcessTest extends ProcessTestBase {
      * @expectedResults Assert that all the records were inserted and that the constant value was mapped as well.
      *
      */
+    @Test
     public void testNonMappedFieldsPermittedInDLTransaction() throws Exception {
 
         final int numberOfRows = 4;
@@ -340,6 +353,7 @@ public class CsvProcessTest extends ProcessTestBase {
      * @expectedResults Assert that the dates in Salesforce match up.
      *
      */
+    @Test
     public void testTimezoneNotTruncated() throws Exception {
 
         final int numberOfRows = 12;
@@ -373,6 +387,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @throws Exception
      */
+    @Test
     public void testErrorsGeneratedOnInvalidDateMatching() throws Exception {
 
     	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(0, 3,3);
@@ -385,6 +400,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @throws Exception
      */
+    @Test
     public void testErrorsGeneratedOnInvalidDateMatchingWithOffset() throws Exception {
     	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(2, 2, 2);
     }

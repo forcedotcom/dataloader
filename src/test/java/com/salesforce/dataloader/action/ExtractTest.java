@@ -25,13 +25,17 @@
  */
 package com.salesforce.dataloader.action;
 
+import com.salesforce.dataloader.exception.ExtractException;
+import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
-import com.salesforce.dataloader.TestBase;
-import com.salesforce.dataloader.exception.ExtractException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test for extract action
@@ -39,14 +43,11 @@ import com.salesforce.dataloader.exception.ExtractException;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class ExtractTest extends TestBase {
+public class ExtractTest {
 
     private static final Logger logger = Logger.getLogger(ExtractTest.class);
 
-    public ExtractTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testQueryParsePositive() throws Exception {
         // test simple soql
         positiveQueryParse("select field1, field2, field3 from account",
@@ -69,6 +70,7 @@ public class ExtractTest extends TestBase {
                 new String[] {"max(name)", "industry", "max(name) mname", "industry"});
     }
 
+    @Test
     public void testQueryParseNegative() {
         // empty
         negativeQueryParse(null);
@@ -89,10 +91,10 @@ public class ExtractTest extends TestBase {
     private void negativeQueryParse(String soqlString) {
         try {
             List<String> fields = AbstractExtractAction.getColumnsFromSoql(soqlString, logger);
-            fail("The parse should have failed with an error, instead of getting fields: " + fields.toString());
+            Assert.fail("The parse should have failed with an error, instead of getting fields: " + fields.toString());
         } catch (ExtractException e) {
             assertNotNull("The parse error message should not be null", e.getMessage());
-            assertTrue("The parse error message should not be empty", e.getMessage().length() > 0);
+            assertTrue("The parse error message should not be empty", !e.getMessage().isEmpty());
         }
     }
 
