@@ -23,21 +23,46 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-package com.salesforce.dataloader.action.visitor;
-
-import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.OperationException;
-import com.salesforce.dataloader.model.Row;
-import com.sforce.ws.ConnectionException;
+package com.salesforce.dataloader.model;
 
 /**
- *
- * @author Lexi Viripaeff
- * @since 6.0
+ * Represents a null value for a text field.
  */
-public interface DAORowVisitor {
+public class NATextValue {
 
-    public void visit(Row row) throws OperationException, DataAccessObjectException, ConnectionException;
+    private static final NATextValue INSTANCE = new NATextValue();
+    private static final String NA_VALUE = "#N/A";
 
+    private NATextValue() {
+    }
+
+    public static NATextValue getInstance() {
+        return INSTANCE;
+    }
+
+    public static boolean isNA(Object obj) {
+        return INSTANCE.equals(obj);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+
+        return NA_VALUE.equals(obj.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return NA_VALUE.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return NA_VALUE;
+    }
 }

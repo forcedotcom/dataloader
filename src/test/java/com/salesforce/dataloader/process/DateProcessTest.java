@@ -26,42 +26,52 @@
 
 package com.salesforce.dataloader.process;
 
-import java.text.*;
-import java.util.*;
-
-import junit.framework.TestSuite;
-
-import com.salesforce.dataloader.ConfigGenerator;
-import com.salesforce.dataloader.ConfigTestSuite;
+import com.salesforce.dataloader.TestSetting;
+import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.sforce.soap.partner.QueryResult;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.TimeZone;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests date values used in DataLoader processes
- * 
+ *
  * @author Colin Jarvis
  * @since 21.0
  */
+@RunWith(Parameterized.class)
 public class DateProcessTest extends ProcessTestBase {
 
-    public static TestSuite suite() {
-        return ConfigTestSuite.createSuite(DateProcessTest.class);
+    private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone("GMT");
+    private final DateFormat partnerApiDateFormat;
+    private final DateFormat dateFormatWithTimezone;
+
+    public DateProcessTest(Map<String, String> config) {
+        super(config);
+        partnerApiDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        partnerApiDateFormat.setTimeZone(GMT_TIME_ZONE);
+        dateFormatWithTimezone = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSz");
     }
 
-    public static ConfigGenerator getConfigGenerator() {
-        final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
-        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
-                Boolean.TRUE.toString());
-        return new UnionConfigGenerator(parent, withBulkApi);
-    }
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getTestParameters() {
+        return Arrays.asList(
+                TestVariant.defaultSettings(),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED));
 
-    public DateProcessTest(String name) {
-        super(name);
-    }
-
-    public DateProcessTest(String name, Map<String, String> config) {
-        super(name, config);
     }
 
     @Override
@@ -72,48 +82,43 @@ public class DateProcessTest extends ProcessTestBase {
         return cfg;
     }
 
-    private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone("GMT");
-    private static final DateFormat PARTNER_API_FMT;
-    private static final DateFormat DATE_FMT_WITH_TZ = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSz");
-    static {
-        PARTNER_API_FMT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        PARTNER_API_FMT.setTimeZone(GMT_TIME_ZONE);
-    }
-
+    @Test
     public void testDateEndingInZ() throws Exception {
         runProcess(getTestConfig(OperationInfo.insert, false), 1);
 
         QueryResult qr = getBinding().query("select CustomDateTime__c from Account where AccountNumber__c='ACCT_0'");
-        assertEquals(qr.getSize(), 1);
+        assertEquals(1, qr.getSize());
 
         Date expectedDate = parseDateWithTimezone("2010-10-14T12:00:00.000GMT");
         assertEquals(expectedDate, parseDateFromPartnerApi((String)qr.getRecords()[0].getField("CustomDateTime__c")));
     }
 
+    @Test
     public void testDateUsingDefaultTimeZone() throws Exception {
         runProcess(getTestConfig(OperationInfo.insert, false), 1);
         QueryResult qr = getBinding().query("select CustomDateTime__c from Account where AccountNumber__c='ACCT_0'");
-        assertEquals(qr.getSize(), 1);
+        assertEquals(1, qr.getSize());
 
         Date expectedDate = parseDateWithTimezone("2010-10-14T12:00:00.000PDT");
         assertEquals(expectedDate, parseDateFromPartnerApi((String)qr.getRecords()[0].getField("CustomDateTime__c")));
     }
 
+    @Test
     public void testDateWithTimeZone() throws Exception {
         runProcess(getTestConfig(OperationInfo.insert, false), 1);
         QueryResult qr = getBinding().query("select CustomDateTime__c from Account where AccountNumber__c='ACCT_0'");
-        assertEquals(qr.getSize(), 1);
+        assertEquals(1, qr.getSize());
 
         Date expectedDate = parseDateWithTimezone("2010-10-14T12:00:00.000-0300");
         assertEquals(expectedDate, parseDateFromPartnerApi((String)qr.getRecords()[0].getField("CustomDateTime__c")));
     }
 
     private Date parseDateFromPartnerApi(String dateString) throws ParseException {
-        return PARTNER_API_FMT.parse(dateString);
+        return partnerApiDateFormat.parse(dateString);
     }
 
     private Date parseDateWithTimezone(String dateString) throws ParseException {
-        return DATE_FMT_WITH_TZ.parse(dateString);
+        return dateFormatWithTimezone.parse(dateString);
     }
 
 }

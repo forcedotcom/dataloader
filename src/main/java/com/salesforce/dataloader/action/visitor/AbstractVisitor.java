@@ -26,18 +26,15 @@
 
 package com.salesforce.dataloader.action.visitor;
 
-import java.util.Collections;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.mapping.Mapper;
+import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.LoadRateCalculator;
+import org.apache.log4j.Logger;
 
 public abstract class AbstractVisitor implements IVisitor {
 
@@ -102,7 +99,7 @@ public abstract class AbstractVisitor implements IVisitor {
         return getController().getMapper();
     }
 
-    protected void writeSuccess(Map<String, Object> row, String id, String message) throws DataAccessObjectException {
+    protected void writeSuccess(Row row, String id, String message) throws DataAccessObjectException {
         if (writeStatus()) {
             if (id != null && id.length() > 0) {
                 row.put(Config.ID_COLUMN_NAME, id);
@@ -115,10 +112,10 @@ public abstract class AbstractVisitor implements IVisitor {
         addSuccess();
     }
 
-    protected void writeError(Map<String, Object> row, String errorMessage) throws DataAccessObjectException {
+    protected void writeError(Row row, String errorMessage) throws DataAccessObjectException {
         if (writeStatus()) {
             if (row == null) {
-                row = Collections.<String, Object> singletonMap(Config.ERROR_COLUMN_NAME, errorMessage);
+                row = Row.singleEntryImmutableRow(Config.ERROR_COLUMN_NAME, errorMessage);
             } else {
                 row.put(Config.ERROR_COLUMN_NAME, errorMessage);
             }

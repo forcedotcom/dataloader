@@ -26,16 +26,20 @@
 
 package com.salesforce.dataloader.process;
 
-import java.io.File;
-import java.util.Map;
-
-import junit.framework.TestSuite;
-
-import com.salesforce.dataloader.ConfigTestSuite;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.io.File;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test suite for the extracting to csv.
@@ -43,18 +47,11 @@ import com.salesforce.dataloader.exception.ProcessInitializationException;
  * @author Colin Jarvis, Aleksandr Shulman
  * @since 21.0
  */
+@RunWith(Parameterized.class)
 public class CsvExtractProcessTest extends ProcessExtractTestBase {
 
-    public static TestSuite suite() {
-        return ConfigTestSuite.createSuite(CsvExtractProcessTest.class);
-    }
-
-    public CsvExtractProcessTest(String name, Map<String, String> config) {
-        super(name, config);
-    }
-
-    public CsvExtractProcessTest(String name) {
-        super(name);
+    public CsvExtractProcessTest(Map<String, String> config) {
+        super(config);
     }
 
     @Override
@@ -70,6 +67,7 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
      * @throws Exception
      */
     @Override
+    @Test
     public void testSoqlWithTableNameInSelect() throws Exception {
         runTestSoqlWithTableNameInSelect();
     }
@@ -79,11 +77,13 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
      * correctly.
      */
     @Override
+    @Test
     public void testExtractAccountCsv() throws Exception {
         runTestExtractAccountCsv();
     }
 
     @Override
+    @Test
     public void testExtractAccountCsvAggregate() throws Exception {
         runTestExtractAccountCsvAggregate();
     }
@@ -92,6 +92,7 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
      * Tests that SOQL queries with relationships work as expected
      */
     @Override
+    @Test
     public void testSoqlWithRelationships() throws Exception {
         runTestSoqlWithRelationships();
     }
@@ -103,6 +104,7 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
      * @hierarchy API.dataloader Csv Process Tests
      * @userstory Commenting existing data loader tests and uploading into QA force
      */
+    @Test
     public void testLastRunOutput() throws Exception {
         // 1. Output is enabled (use default), directory is not set (use
         // default)
@@ -124,6 +126,7 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
      * @expectedResults Assert that the error message is correct and contains the SObject type
      */
     @Override
+    @Test
     public void testForNonQueryableSObjects() throws Exception {
         runTestForNonQueryableSObjects();
     }
@@ -172,6 +175,7 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
      * @expectedResults Assert that the internal error message is correct.
      */
     @Override
+    @Test
     public void testNestedQueryErrorsCorrectly() throws Exception {
         runTestNestedQueryErrorsCorrectly();
     }
@@ -184,6 +188,7 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
      * @throws Exception
      */
     @Override
+    @Test
     public void testMalformedQueries() throws Exception {
         runMalformedQueriesTest();
     }

@@ -26,6 +26,8 @@
 
 package com.salesforce.dataloader.action.visitor;
 
+import com.salesforce.dataloader.model.Row;
+
 import java.util.Map;
 
 /**
@@ -39,7 +41,7 @@ public class DAOSizeVisitor implements DAORowVisitor {
     private int numberOfRows = 0;
 
     @Override
-    public void visit(Map<String, Object> row) {
+    public void visit(Row row) {
         numberOfRows++;
     }
 

@@ -25,16 +25,27 @@
  */
 package com.salesforce.dataloader.dao.database;
 
-import java.util.*;
-
-import org.apache.log4j.Logger;
-
 import com.salesforce.dataloader.TestBase;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.database.DatabaseTestUtil.DateType;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.AccountRowComparator;
+import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test for database operations
@@ -44,43 +55,29 @@ import com.salesforce.dataloader.util.AccountRowComparator;
  */
 public class DatabaseTest extends TestBase {
 
-    public DatabaseTest(String name) {
-        super(name);
-    }
-
-    // logger
-    private static Logger logger = Logger.getLogger(DatabaseReader.class);
+    private static final Logger logger = Logger.getLogger(DatabaseReader.class);
     
     private static final String[] VALIDATE_COLS = { DatabaseTestUtil.EXT_ID_COL, DatabaseTestUtil.SFDC_ID_COL,
         DatabaseTestUtil.NAME_COL, DatabaseTestUtil.PHONE_COL, DatabaseTestUtil.REVENUE_COL,
         DatabaseTestUtil.ACCOUNT_NUMBER_COL };
     private static final int NUM_ROWS = 10;
 
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#setUp()
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUpDb() throws Exception {
         DatabaseTestUtil.createTable(getController(), "dataloader");
         
         // delete accounts from database to start fresh
         DatabaseTestUtil.deleteAllAccountsDb(getController());
     }
     
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#tearDown()
-     */
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-
+    @After
+    public void tearDownDb() throws Exception {
         // delete accounts from database to finish with no leftovers
         DatabaseTestUtil.deleteAllAccountsDb(getController());
     }
 
-    public void testDatabaseInsertQuery() {
+    @Test
+    public void testDatabaseInsertQuery() throws Exception {
         // insert some data
         DatabaseTestUtil.insertOrUpdateAccountsDb(getController(), true/* insert */, NUM_ROWS, false);
 
@@ -88,7 +85,8 @@ public class DatabaseTest extends TestBase {
         verifyDbInsertOrUpdate(getController(), true, true);
     }
 
-    public void testDatabaseUpdateQuery() {
+    @Test
+    public void testDatabaseUpdateQuery() throws Exception {
         // insert some data
         DatabaseTestUtil.insertOrUpdateAccountsDb(getController(), true/* insert */, NUM_ROWS, false);
 
@@ -99,29 +97,33 @@ public class DatabaseTest extends TestBase {
         verifyDbInsertOrUpdate(getController(), false, true);
     }
 
-    public void testDatabaseDateMappingDate() {
+    @Test
+    public void testDatabaseDateMappingDate() throws Exception {
         doTestDatabaseDateMapping(DatabaseTestUtil.DateType.DATE, true);
     }
 
-    public void testDatabaseDateMappingCalendar() {
+    @Test
+    public void testDatabaseDateMappingCalendar() throws Exception {
         doTestDatabaseDateMapping(DatabaseTestUtil.DateType.CALENDAR, true);
     }
 
-    public void testDatabaseDateMappingString() {
+    @Test
+    public void testDatabaseDateMappingString() throws Exception {
         doTestDatabaseDateMapping(DatabaseTestUtil.DateType.STRING, true);
     }
 
-    public void testDatabaseDateMappingNull() {
+    @Test
+    public void testDatabaseDateMappingNull() throws Exception {
         // just make sure that this works.  Used to crash.
         doTestDatabaseDateMapping(DatabaseTestUtil.DateType.NULL, false);
     }
 
-    public void doTestDatabaseDateMapping(DatabaseTestUtil.DateType dateType, boolean verifyDates) {
-        for (String sqlType : new String[] { "java.sql.Date", "java.sql.Time", "java.sql.Timestamp" }) {
+    private void doTestDatabaseDateMapping(DatabaseTestUtil.DateType dateType, boolean verifyDates) throws Exception {
+        List<Class<? extends Date>> dateClass = Arrays.asList(java.sql.Date.class, Time.class, Timestamp.class);
+        for (Class<? extends Date> sqlType : dateClass) {
             try {
                 // insert some data
-                DatabaseTestUtil.insertOrUpdateAccountsDb(getController(), true/* insert */, 1, dateType, false,
-                        sqlType);
+                DatabaseTestUtil.insertOrUpdateAccountsDb(getController(), true/* insert */, 1, dateType, false, sqlType);
                 // query and verify the results
                 verifyDbInsertOrUpdate(getController(), true, verifyDates);
             } finally {
@@ -130,12 +132,7 @@ public class DatabaseTest extends TestBase {
         }
     }
 
-    /**
-     * @param theController
-     * @param validateDates TODO
-     * 
-     */
-    private static void verifyDbInsertOrUpdate(Controller theController, boolean isInsert, boolean validateDates) {
+    private static void verifyDbInsertOrUpdate(Controller theController, boolean isInsert, boolean validateDates) throws DataAccessObjectException {
         DatabaseReader reader = null;
         logger.info("Verifying database success for '" + (isInsert ? "insert" : "update") + "' operation");
         try {
@@ -143,7 +140,7 @@ public class DatabaseTest extends TestBase {
             reader = new DatabaseReader(theController.getConfig(), "queryAccountAll");
             reader.open();
             int readBatchSize = 1000;
-            List<Map<String,Object>> readRowList = reader.readRowList(readBatchSize);
+            List<Row> readRowList = reader.readRowList(readBatchSize);
             int rowsProcessed = 0;
             assertNotNull("Error reading " + readBatchSize + " rows", readRowList);
             while(readRowList.size() > 0) {
@@ -152,10 +149,10 @@ public class DatabaseTest extends TestBase {
                 Collections.sort(readRowList, new AccountRowComparator(!isInsert));
                 logger.info("Verifying database success for next " + (rowsProcessed + readRowList.size()) + " rows");
                 for (int i=0; i < readRowList.size(); i++) {
-                    Map<String,Object> readRow = readRowList.get(i);
+                    Row readRow = readRowList.get(i);
                     assertNotNull("Error reading data row #" + i + ": the row shouldn't be null", readRow);
-                    assertTrue("Error reading data row #" + i + ": the row shouldn't be empty", readRow.size()>0);
-                    Map<String,Object> expectedRow = DatabaseTestUtil.getInsertOrUpdateAccountRow(isInsert, rowsProcessed, DatabaseTestUtil.DateType.VALIDATION);
+                    assertTrue("Error reading data row #" + i + ": the row shouldn't be empty", readRow.size() > 0);
+                    Row expectedRow = DatabaseTestUtil.getInsertOrUpdateAccountRow(isInsert, rowsProcessed, DatabaseTestUtil.DateType.VALIDATION);
                     // verify all expected data
                     for(String colName : VALIDATE_COLS) {
                         if(validateDates && colName.equals(DateType.DATE)) {
@@ -170,21 +167,12 @@ public class DatabaseTest extends TestBase {
                 readRowList = reader.readRowList(readBatchSize);
                 assertNotNull("Error reading " + readBatchSize + " rows", readRowList);
             }
-        } catch (DataAccessObjectInitializationException e) {
-            fail("Error initializing database reader for db config: " + "queryAccountAll");
-        } catch (DataAccessObjectException e) {
-            fail("Error getting database from the database using db config: "+ "queryAccountAll");
         } finally {
             if(reader != null) reader.close();
         }
     }
 
-    /**
-     * @param colName
-     * @param col
-     * @param colExpected
-     */
-    private static void verifyCol(String colName, Map<String, Object> row, Map<String, Object> expectedRow) {
+    private static void verifyCol(String colName, Row row, Row expectedRow) {
         Object actualValue = row.get(colName);
         Object expectedValue = expectedRow.get(colName);
         assertNotNull("actual value is null", actualValue);

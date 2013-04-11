@@ -25,6 +25,8 @@
  */
 package com.salesforce.dataloader.util;
 
+import com.salesforce.dataloader.model.Row;
+
 import static com.salesforce.dataloader.dao.database.DatabaseTestUtil.NAME_COL;
 
 import java.util.Comparator;
@@ -36,9 +38,9 @@ import java.util.Map;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class AccountRowComparator implements Comparator<Map<String, Object>> {
+public class AccountRowComparator implements Comparator<Row> {
 
-    private static String getName(Map<String, Object> o1) {
+    private static String getName(Row o1) {
         return o1.get(NAME_COL).toString();
     }
 
@@ -56,7 +58,7 @@ public class AccountRowComparator implements Comparator<Map<String, Object>> {
     }
 
     @Override
-    public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+    public int compare(Row o1, Row o2) {
         final int result = getName(o1).compareTo(getName(o2));
         return isReverse ? -result : result;
     }

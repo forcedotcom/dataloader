@@ -25,20 +25,22 @@
  */
 package com.salesforce.dataloader.dyna;
 
-import com.salesforce.dataloader.ConfigTestBase;
 import org.apache.commons.beanutils.ConversionException;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class DateConverterTest extends ConfigTestBase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+public class DateConverterTest {
 
     private static final TimeZone TZ = TimeZone.getTimeZone("GMT");
-
-    public DateConverterTest(String name) {
-        super(name);
-    }
 
     /**
      * Verify that equivalent instances in time (string form) but written in different time zones
@@ -49,6 +51,7 @@ public class DateConverterTest extends ConfigTestBase {
      *
      * @throws Exception
      */
+    @Test
     public void testDateConverterAcknowledgesTimezoneInDate() throws Exception {
 
         //create a date, October 15th, 7 PM, +0 GMT.
@@ -94,6 +97,7 @@ public class DateConverterTest extends ConfigTestBase {
      *
      * @expectedResults Assert that the date string is a valid calendar of that same instant.
      */
+    @Test
     public void testTimeConversationOfSecondSpecificityWithRespectToTimeZones() throws Exception {
 
         TimeZone gmt = TimeZone.getTimeZone("GMT");
@@ -120,6 +124,7 @@ public class DateConverterTest extends ConfigTestBase {
      *
      * @throws Exception
      */
+    @Test
     public void testTimeConversationOfMinuteSpecificityWithRespectToTimeZones() throws Exception {
 
         TimeZone gmt = TimeZone.getTimeZone("GMT");
@@ -151,6 +156,7 @@ public class DateConverterTest extends ConfigTestBase {
      * @expectedResults Assert that the strings maps to the same instant as the calendar.
      *
      */
+    @Test
     public void testFullBasicFormat() {
 
         TimeZone gmt = TimeZone.getTimeZone("GMT");
@@ -177,6 +183,7 @@ public class DateConverterTest extends ConfigTestBase {
      *
      * @expectedResults Assert that the Calendar object created is null.
      */
+    @Test
     public void testDateConverterWithNull() {
 
         Calendar calDate;
@@ -196,6 +203,7 @@ public class DateConverterTest extends ConfigTestBase {
      *
      * @expectedResults Assert that both objects are equal.
      */
+    @Test
     public void testDateClosureUnderCalendarConversion() {
 
         Calendar calDate;
@@ -219,6 +227,7 @@ public class DateConverterTest extends ConfigTestBase {
      * @expectedResults Assert that the GMT and timezone-specified times equate
      *                  to the same instant.
      */
+    @Test
     public void testTimeZoneIsRecognized() {
 
         Calendar expCalDate = Calendar.getInstance(TZ);
@@ -237,6 +246,7 @@ public class DateConverterTest extends ConfigTestBase {
      *
      * @expectedResults Assert that the calendar and the string will evaluate to the same instant.
      */
+    @Test
     public void testNotInDelimeterPattern() {
 
         // use this as the expected calendar instance
@@ -255,6 +265,7 @@ public class DateConverterTest extends ConfigTestBase {
      *
      * @expectedResults Assert that all strings correct map to their corresponding calendars.
      */
+    @Test
     public void testDegreesOfPrecisionInTimeString() {
 
         TimeZone gmt = TimeZone.getTimeZone("GMT");
@@ -307,6 +318,7 @@ public class DateConverterTest extends ConfigTestBase {
      * @expectedResults Assert that date-only is treated as a case of dateTime
      *                  where it is 00:00:00 on that day.
      */
+    @Test
     public void testDateOnly() {
 
         Calendar expCalDate = Calendar.getInstance(TZ);
@@ -333,6 +345,7 @@ public class DateConverterTest extends ConfigTestBase {
      *
      * @expectedResults
      */
+    @Test
     public void testDateWithTimeZone() {
 
         Calendar expCalDate = Calendar.getInstance(TZ);
@@ -384,6 +397,7 @@ public class DateConverterTest extends ConfigTestBase {
      * @expectedResults Assert that the interpreted string will be treated
      *
      */
+    @Test
     public void testDatePrecision() {
 
         TimeZone gmt = TimeZone.getTimeZone("GMT");
@@ -428,6 +442,7 @@ public class DateConverterTest extends ConfigTestBase {
      * the same instant as the original calendar.
      *
      */
+    @Test
     public void testMillisecondPrecisionSupported() {
 
         Calendar expCalDate = Calendar.getInstance(TZ);
@@ -445,6 +460,7 @@ public class DateConverterTest extends ConfigTestBase {
      * @expectedResults Assert that the calendar to which the string is converted represents
      * the same instant as the original calendar.
      */
+    @Test
     public void testInputStringWithoutDashes() {
 
         // use this as the expected calendar instance
@@ -462,6 +478,7 @@ public class DateConverterTest extends ConfigTestBase {
      * @expectedResults Assert that the string and converted calendar equate to the same instance.
      *
      */
+    @Test
     public void testInputStringWithoutTimeZoneInformation() {
 
         Calendar expCalDate = Calendar.getInstance(TZ);
@@ -479,6 +496,7 @@ public class DateConverterTest extends ConfigTestBase {
      * as the calendar.
      *
      */
+    @Test
     public void testInputDateString() {
 
         // use this as the expected calendar instance
@@ -498,6 +516,7 @@ public class DateConverterTest extends ConfigTestBase {
      * and time in the calendar.
      *
      */
+    @Test
     public void testSlashAndNoTDelimeterFormat() {
 
         Calendar expCalDate = Calendar.getInstance(TZ);
@@ -523,6 +542,7 @@ public class DateConverterTest extends ConfigTestBase {
      * and time in the calendar.
      *
      */
+    @Test
     public void testSlashWithTimeZoneDelimeterFormat() {
 
         TimeZone wst = TimeZone.getTimeZone("Australia/Perth");
@@ -552,6 +572,7 @@ public class DateConverterTest extends ConfigTestBase {
      *                  date and time in the calendar.
      *
      */
+    @Test
     public void testSlashWithTimeZoneDelimeterFormatEuropeanFormat() {
 
         TimeZone wst = TimeZone.getTimeZone("Australia/Perth");
@@ -579,6 +600,7 @@ public class DateConverterTest extends ConfigTestBase {
      *
      * @expectedResults Assert that the string converts to the same instant as the calendar.
      */
+    @Test
     public void testEuropeanDatesWithSlashes() {
 
         Calendar expCalDate = Calendar.getInstance(TZ);
@@ -601,11 +623,13 @@ public class DateConverterTest extends ConfigTestBase {
      *
      * @expectedResults Assert that an exception is thrown.
      */
+    @Test
     public void testDateConverterNegative() {
         assertInvalidDate("fofofod", null, false);
         assertInvalidDate("20A4-11-08", null, false);
     }
 
+    @Test
     public void testUserSpecifiedTimeZoneIsUsed() throws Exception {
         DateConverter dateConverter = new DateConverter(TimeZone.getTimeZone("Asia/Tokyo"));
 
@@ -663,7 +687,7 @@ public class DateConverterTest extends ConfigTestBase {
         DateConverter converter = new DateConverter(TZ, useEuropean);
         try {
             converter.convert(null, strDate); // converter is set to be
-            fail("The conversion of an invalid string into a valid date occurred");
+            Assert.fail("The conversion of an invalid string into a valid date occurred");
         } catch (ConversionException c) {
             assertEquals("Incorrect error message on date conversion failure", "Failed to parse date: " + strDate,
                     c.getLocalizedMessage());

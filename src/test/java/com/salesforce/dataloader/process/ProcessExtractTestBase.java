@@ -26,9 +26,17 @@
 
 package com.salesforce.dataloader.process;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import com.salesforce.dataloader.ConfigGenerator;
+import org.junit.Assert;
+import org.junit.runners.Parameterized;
+
+import com.salesforce.dataloader.TestSetting;
+import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
@@ -36,9 +44,15 @@ import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
+import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Base class for extraction process tests
@@ -47,6 +61,17 @@ import com.sforce.ws.ConnectionException;
  * @since 21.0
  */
 public abstract class ProcessExtractTestBase extends ProcessTestBase {
+
+    public ProcessExtractTestBase(Map<String, String> config) {
+        super(config);
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getParameters() {
+        return Arrays.asList(
+                TestVariant.defaultSettings(),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED));
+    }
 
     protected class ExtractContactGenerator extends ContactGenerator {
         private final String uniqueLastName;
@@ -92,23 +117,6 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         }
     }
 
-    public ProcessExtractTestBase(String name, Map<String, String> config) {
-        super(name, config);
-
-    }
-
-    public ProcessExtractTestBase(String name) {
-        super(name);
-
-    }
-
-    public static ConfigGenerator getConfigGenerator() {
-        final ConfigGenerator parent = ProcessTestBase.getConfigGenerator();
-        final ConfigGenerator withBulkApi = new ConfigSettingGenerator(parent, Config.BULK_API_ENABLED,
-                Boolean.TRUE.toString());
-        return new UnionConfigGenerator(parent, withBulkApi);
-    }
-
     protected abstract boolean isExtractAll();
 
     protected Map<String, String> getTestConfig(String soql, String entity, boolean useMappingFile) {
@@ -132,12 +140,13 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         // assert that it's a CSV...if not fail
         final Set<String> unexpectedIds = new HashSet<String>();
         final Set<String> expectedIds = new HashSet<String>(Arrays.asList(ids));
-        final DataReader resultReader = new CSVFileReader(control.getConfig().getString(Config.OUTPUT_SUCCESS));
+        String fileName = control.getConfig().getString(Config.OUTPUT_SUCCESS);
+        final DataReader resultReader = new CSVFileReader(fileName, getController());
         try {
             resultReader.open();
 
             // go through item by item and assert that it's there
-            Map<String, Object> row;
+            Row row;
             while ((row = resultReader.readRow()) != null) {
                 final String resultId = (String)row.get(Config.ID_COLUMN_NAME);
                 assertValidId(resultId);
@@ -150,11 +159,11 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         }
 
         if (!expectedIds.isEmpty()) {
-            fail("These ids were not found in the result file: " + expectedIds);
+            Assert.fail("These ids were not found in the result file: " + expectedIds);
         }
 
         if (!unexpectedIds.isEmpty()) {
-            fail("These unexpected ids were found in the result file");
+            Assert.fail("These unexpected ids were found in the result file");
         }
     }
 
@@ -164,8 +173,8 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
      * Verify that a correct error is given when a user attempts to perform a nested query using queryAll(). This
      * verifies bug W-870843.
      *
-     * @throws DataAccessObjectException
-     * @throws ProcessInitializationException
+     * @throws com.salesforce.dataloader.exception.DataAccessObjectException
+     * @throws com.salesforce.dataloader.exception.ProcessInitializationException
      * @expectedResults Assert that the internal error message is correct.
      */
     protected void runTestNestedQueryErrorsCorrectly() throws ProcessInitializationException, DataAccessObjectException {
@@ -276,9 +285,9 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                     "Batch failed: InvalidBatch : Failed to process query: FUNCTIONALITY_NOT_ENABLED: Foreign Key Relationships not supported in Bulk Query");
         } else {
             runProcess(argMap, 1);
-            final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME));
+            final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME), getController());
             try {
-                final Map<String, Object> resultRow = resultReader.readRow();
+                final Row resultRow = resultReader.readRow();
                 assertEquals("Query returned incorrect Contact ID", contactId, resultRow.get("CONTACT_ID"));
                 assertEquals("Query returned incorrect Contact Name", "First 000000 Last 000000",
                         resultRow.get("CONTACT_NAME"));
@@ -324,9 +333,9 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                 // run the extract
                 runProcess(argmap, 1);
                 // open the results of the extraction
-                final CSVFileReader rdr = new CSVFileReader(argmap.get(Config.DAO_NAME));
+                final CSVFileReader rdr = new CSVFileReader(argmap.get(Config.DAO_NAME), getController());
                 rdr.open();
-                Map<String, Object> row = rdr.readRow();
+                Row row = rdr.readRow();
                 assertNotNull(row);
                 assertEquals(5,row.size());
                 // validate the extract results are correct.
@@ -385,7 +394,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                     "Batch failed: InvalidBatch : Failed to process query: FUNCTIONALITY_NOT_ENABLED: Aggregate Relationships not supported in Bulk Query");
         } else {
             runProcess(argMap, 1, true);
-            final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME));
+            final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME), getController());
             try {
                 assertEquals(String.valueOf(numRecords - 1), resultReader.readRow().get("MAX(NUMBEROFEMPLOYEES)"));
             } finally {

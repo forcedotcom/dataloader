@@ -26,17 +26,28 @@
 
 package com.salesforce.dataloader.ui;
 
+import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.Messages;
+import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
-
-import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.springframework.util.StringUtils;
 
 public class CSVChooserDialog extends Dialog {
     private String message;
@@ -244,7 +255,12 @@ public class CSVChooserDialog extends Dialog {
         buttonSuccess.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                openViewer(controller.getConfig().getString(Config.OUTPUT_SUCCESS));
+                String successFilePath = controller.getConfig().getString(Config.OUTPUT_SUCCESS);
+                if(StringUtils.hasText(successFilePath)) {
+                    openViewer(successFilePath);
+                } else {
+                    UIUtils.infoMessageBox(shell, Messages.getString("CSVChooser.noSucessOrErrorFile"));
+                }
             }
         });
 
@@ -258,7 +274,12 @@ public class CSVChooserDialog extends Dialog {
         buttonError.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                openViewer(controller.getConfig().getString(Config.OUTPUT_ERROR));
+                String errorFilePath = controller.getConfig().getString(Config.OUTPUT_ERROR);
+                if(StringUtils.hasText(errorFilePath)) {
+                    openViewer(errorFilePath);
+                } else {
+                    UIUtils.infoMessageBox(shell, Messages.getString("CSVChooser.noSucessOrErrorFile"));
+                }
             }
         });
 

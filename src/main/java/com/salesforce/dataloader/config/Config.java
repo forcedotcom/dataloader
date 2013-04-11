@@ -26,11 +26,28 @@
 
 package com.salesforce.dataloader.config;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
-import java.text.*;
-import java.util.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 
@@ -205,6 +222,11 @@ public class Config {
      * The string representation used for <code>false</code>(<code>"false"</code>).
      */
     public static final String FALSE = "false"; //$NON-NLS-1$
+
+    /**
+     * communications with bulk api always use UTF8
+     */
+    public static final String BULK_API_ENCODING = "UTF-8";
 
     /**
      * Creates an empty config that loads from and saves to the a file.

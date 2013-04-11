@@ -26,10 +26,21 @@
 
 package com.salesforce.dataloader.action.visitor;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.TreeSet;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
@@ -41,9 +52,19 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.DataWriter;
-import com.salesforce.dataloader.exception.*;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.exception.LoadException;
+import com.salesforce.dataloader.exception.OperationException;
+import com.salesforce.dataloader.model.NACalendarValue;
+import com.salesforce.dataloader.model.NATextValue;
+import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.DAORowUtil;
-import com.sforce.async.*;
+import com.sforce.async.AsyncApiException;
+import com.sforce.async.AsyncExceptionCode;
+import com.sforce.async.BatchInfo;
+import com.sforce.async.BatchStateEnum;
+import com.sforce.async.CSVReader;
 
 /**
  * Visitor for operations using the bulk API client
@@ -54,8 +75,7 @@ import com.sforce.async.*;
 public class BulkLoadVisitor extends DAOLoadVisitor {
 
     private static final Logger logger = Logger.getLogger(BulkLoadVisitor.class);
-    
-    private static final String NULL_STRING = "#N/A";
+
     private static final String SUCCESS_RESULT_COL = "Success";
     private static final String ERROR_RESULT_COL = "Error";
     private static final String ID_RESULT_COL = "Id";
@@ -64,7 +84,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
     private final boolean isDelete;
     private static final DateFormat DATE_FMT;
-    private int rowsToSkip;
+
     static {
         DATE_FMT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         DATE_FMT.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -143,7 +163,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
     private void createBatches() throws OperationException, IOException, AsyncApiException {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        final PrintStream out = new PrintStream(os, true, BulkApiVisitorUtil.ENCODING);
+        final PrintStream out = new PrintStream(os, true, Config.BULK_API_ENCODING);
         doOneBatch(out, os, this.dynaArray);
     }
 
@@ -185,11 +205,12 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     private void writeSingleColumn(PrintStream out, String fieldName, Object fieldValue) throws LoadException {
-
         if (fieldValue != null) {
             Object col = fieldValue;
-            if (fieldValue instanceof Calendar) {
-                col = DATE_FMT.format(((Calendar)fieldValue).getTime());
+            if (fieldValue instanceof NACalendarValue) {
+                col = fieldValue.toString();
+            } else if (fieldValue instanceof Calendar) {
+                col = DATE_FMT.format(((Calendar) fieldValue).getTime());
             } else if (fieldValue instanceof byte[]) {
                 if (!getController().attachmentsEnabled())
                     throw new LoadException(Messages.getMessage("FinishPage", "cannotMapBase64ForBulkApi", fieldName));
@@ -197,10 +218,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             }
             writeColumnToCsv(out, col);
         } else {
-            // TODO: we should be more strict about this
-            // perhaps we should have a "Strict" setting that makes us more picky about the input
+            // all null values should be ignored when using bulk API
             getLogger().warn(Messages.getMessage(getClass(), "noFieldVal", fieldName));
-            writeColumnToCsv(out, NULL_STRING);
         }
     }
 
@@ -309,7 +328,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final String errorMessage = stateMessage == null ? null : Messages.getMessage(getClass(), "batchError",
                 stateMessage);
 
-        final List<Map<String, Object>> rows = dataReader.readRowList(clientBatchInfo.numRows);
+        final List<Row> rows = dataReader.readRowList(clientBatchInfo.numRows);
         if (batch.getState() == BatchStateEnum.Completed || batch.getNumberRecordsProcessed() > 0) {
             try {
                 processBatchResults(batch, errorMessage, batch.getState(), rows);
@@ -317,19 +336,19 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 throw new LoadException("IOException while reading batch results", e);
             }
         } else {
-            for (final Map<String, Object> row : rows) {
+            for (final Row row : rows) {
                 writeError(row, errorMessage);
             }
         }
     }
 
     private void skipDataRows(DataReader dataReader, int numRows) throws DataAccessObjectException {
-        List<Map<String, Object>> skippedRows = dataReader.readRowList(numRows);
+        List<Row> skippedRows = dataReader.readRowList(numRows);
         assert skippedRows.size() == numRows;
     }
 
     private void processBatchResults(final BatchInfo batch, final String errorMessage, final BatchStateEnum state,
-            final List<Map<String, Object>> rows) throws DataAccessObjectException, IOException, AsyncApiException {
+            final List<Row> rows) throws DataAccessObjectException, IOException, AsyncApiException {
 
         // get the batch csv result stream from sfdc
         final CSVReader resultRdr = this.jobUtil.getBatchResults(batch.getId());
@@ -342,7 +361,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final int errIdx = hdrIndices.get(ERROR_RESULT_COL);
         hdrIndices = null;
 
-        for (final Map<String, Object> row : rows) {
+        for (final Row row : rows) {
             final List<String> res = resultRdr.nextRecord();
 
             // no result for this column. In this case it failed, and we should use the batch state message
@@ -382,7 +401,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         return dataReader;
     }
 
-    private void writeRowResult(Map<String, Object> row, RowResult resultRow) throws DataAccessObjectException {
+    private void writeRowResult(Row row, RowResult resultRow) throws DataAccessObjectException {
         if (resultRow.success) {
             String successMessage;
             switch (getConfig().getOperationInfo()) {
@@ -451,33 +470,19 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     @Override
-    protected void convertBulkAPINulls(Map<String, Object> row) {
-        final HashSet<String> nullColumns = new HashSet<String>();
-        for (final Map.Entry<String, Object> ent : row.entrySet())
-            if (NULL_STRING.equals(String.valueOf(ent.getValue()))) nullColumns.add(ent.getKey());
-        for (final String key : nullColumns)
-            row.put(key, null);
+    protected void convertBulkAPINulls(Row row) {
+        for (final Map.Entry<String, Object> entry : row.entrySet()) {
+            if (NATextValue.isNA(entry.getValue())) {
+                entry.setValue(NATextValue.getInstance());
+            }
+        }
     }
 
     @Override
-    protected void conversionFailed(Map<String, Object> row, String errMsg) throws DataAccessObjectException,
+    protected void conversionFailed(Row row, String errMsg) throws DataAccessObjectException,
             OperationException {
         super.conversionFailed(row, errMsg);
-        this.rowsToSkip++;
-        // in order for this to work correctly we must flush any rows that have already been converted
-        if (!this.dynaArray.isEmpty()) {
-            rememberEmptyRows();
-            loadBatch();
-        }
+        getLogger().warn("Skipping results for row " + row + " which failed before upload to Saleforce.com");
+        allBatchesInOrder.add(new BatchData(SKIP_BATCH_ID, 1));
     }
-
-    private void rememberEmptyRows() {
-        if (this.rowsToSkip > 0) {
-            getLogger().warn(
-                    "Skipping results for " + this.rowsToSkip + " rows which failed before upload to Saleforce.com");
-            this.allBatchesInOrder.add(new BatchData(SKIP_BATCH_ID, this.rowsToSkip));
-            this.rowsToSkip = 0;
-        }
-    }
-
 }
