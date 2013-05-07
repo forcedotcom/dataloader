@@ -40,9 +40,6 @@ import com.salesforce.dataloader.model.Row;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- *
- */
 public class CsvTest extends TestBase {
 
     private static final String COLUMN_1_NAME = "column1";
@@ -70,9 +67,6 @@ public class CsvTest extends TestBase {
         row2.put("COL3", "row2col3");
     }
 
-    /**
-     * Basic Test for CSV Reading
-     */
     @Test
     public void testCSVReadBasic() throws Exception {
         File f = new File(getTestDataDir(), "csvtext.csv");
@@ -100,10 +94,6 @@ public class CsvTest extends TestBase {
         csv.close();
     }
 
-
-    /**
-     * Basic test for CSV Writing
-     */
     @Test
     public void testCSVWriteBasic() throws Exception {
         File f = new File(getTestDataDir(), "csvtestTemp.csv");
@@ -125,6 +115,23 @@ public class CsvTest extends TestBase {
         f.delete();
     }
 
+    @Test
+    public void testReadingEscapedValues() throws Exception {
+        File f = new File(getTestDataDir(), "csvEscapedQuotes.csv");
+        assertTrue(f.exists());
+        assertTrue(f.canRead());
+
+        CSVFileReader csv = new CSVFileReader(f, getController().getConfig());
+        csv.open();
+
+        Row firstRow = csv.readRow();
+        assertEquals("\"The Best\" Account", firstRow.get(COLUMN_1_NAME));
+
+        Row secondRow = csv.readRow();
+        assertEquals("The \"Best\" Account", secondRow.get(COLUMN_1_NAME));
+
+        csv.close();
+    }
 
     /**
      * Helper to compare the static variables to the csv we wrote
@@ -156,7 +163,3 @@ public class CsvTest extends TestBase {
         csv.close();
     }
 }
-
-
-
-
