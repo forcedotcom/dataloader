@@ -66,8 +66,8 @@ public class CsvExtractAggregateQueryProcessTest extends ProcessTestBase {
     @Test
     public void testAggregateQuery() throws Exception {
         String accountId = insertAccount("acctNameXyz");
-        insertContact(accountId);
-        runExtraction("select Count(Id), Account.Name from Contact GROUP BY Account.Name");
+        String contactId = insertContact(accountId);
+        runExtraction("select Count(Id), Account.Name from Contact where Id='" + contactId + "' GROUP BY Account.Name");
         validateAccountNameInOutputFile("acctNameXyz");
     }
 
