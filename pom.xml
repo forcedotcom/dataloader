@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>28.0.0</version>
+  <version>28.0.1</version>
   <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -307,12 +307,15 @@
                     <exclude>**/*.md</exclude>
                     <exclude>**/*.nsi</exclude>
                     <exclude>**/*.properties</exclude>
+                    <exclude>**/*.sh</exclude>
                     <exclude>windows-dependencies/**</exclude>
                     <exclude>local-proj-repo/**</exclude>
                     <exclude>src/main/resources/**</exclude>
                     <exclude>src/main/nsis/**</exclude>
                     <exclude>src/test/resources/**</exclude>
+                    <exclude>yoursway-create-dmg/**</exclude>
                     <exclude>.gitignore</exclude>
+                    <exclude>.gitmodules</exclude>
                 </excludes>
             </configuration>
             <executions>
@@ -391,37 +394,6 @@
           <version>4.2</version>
         </dependency>
       </dependencies>
-    </profile>
-    <profile>
-        <id>MacOSbundle</id>
-        <activation>
-            <os>
-                <family>mac</family>
-            </os>
-        </activation>
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>osxappbundle-maven-plugin</artifactId>
-                    <version>1.0-alpha-2</version>
-                    <configuration>
-                        <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-                        <jvmVersion>1.6</jvmVersion>
-                        <iconFile>${basedir}/src/main/resources/img/icons/icon_loader.icns</iconFile>
-                        <dictionaryFile>${basedir}/src/main/resources/Info.plist</dictionaryFile>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>bundle</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </build>
     </profile>
     <profile>
       <id>win32</id>
@@ -619,6 +591,63 @@
         </plugins>
       </build>
     </profile>
+
+    <profile>
+        <id>mac-dmg</id>
+        <activation>
+            <os>
+                <family>mac</family>
+            </os>
+        </activation>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>osxappbundle-maven-plugin</artifactId>
+                    <version>1.0-alpha-2</version>
+                    <configuration>
+                        <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
+                        <jvmVersion>1.6</jvmVersion>
+                        <iconFile>${basedir}/src/main/resources/img/icons/icon_loader.icns</iconFile>
+                        <dictionaryFile>${basedir}/src/main/resources/Info.plist</dictionaryFile>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>bundle</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.1</version>
+          <executions>
+            <execution>
+              <id>make-pretty-dmg</id>
+              <phase>package</phase>
+              <configuration>
+                <executable>bash</executable>
+                <arguments>
+                  <argument>make-pretty-dmg.sh</argument>
+                  <argument>${basedir}</argument>
+                  <argument>${project.build.directory}/${project.build.finalName}</argument>
+                  <argument>${project.build.directory}/${project.build.finalName}-pretty.dmg</argument>
+                </arguments>
+              </configuration>
+              <goals>
+                <goal>exec</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+            </plugins>
+        </build>
+    </profile>
+
 
   </profiles>
 

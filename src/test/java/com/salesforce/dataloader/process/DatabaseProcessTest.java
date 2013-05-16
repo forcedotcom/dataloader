@@ -144,16 +144,6 @@ public class DatabaseProcessTest extends ProcessTestBase {
         testUpsertAccountsDb(argMap, NUM_ROWS, false, false);
     }
 
-    @Test
-    public void testMaximumBatchRowsDb() throws Exception {
-        final int numRows = isBulkAPIEnabled(getTestConfig()) ? Config.MAX_BULK_API_BATCH_SIZE
-                : Config.MAX_LOAD_BATCH_SIZE;
-        // insert
-        testUpsertAccountsDb(numRows, true);
-        // update
-        testUpsertAccountsDb(numRows, false);
-    }
-
     private void testUpsertAccountsDb(int numRows, boolean isInsert) throws ParseException,
     ProcessInitializationException, DataAccessObjectException {
         testUpsertAccountsDb(null, numRows, isInsert, false);
