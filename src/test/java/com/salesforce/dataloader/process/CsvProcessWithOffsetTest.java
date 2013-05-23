@@ -26,13 +26,11 @@
 
 package com.salesforce.dataloader.process;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -45,6 +43,9 @@ import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.model.Row;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for testing data loads with different configured row offsets.
@@ -101,62 +102,20 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
         runOffsetValueTest(NUM_DATA_ROWS + 1, 0);
     }
 
-    /**
-     * Verify that certain values produce error messages when used as row offsets. TODO: Allow this test to run by
-     * making it 'Public' and modify the error messages to reflect new values.
-     * 
-     * @expectedResults Assert that the error string contains the invalid value.
-     * @throws Exception
-     */
     @Test
-    @Ignore
-    public void testInvalidOffsetValueCorrectlyHandled() throws Exception {
-
-        runInvalidOffsetValueTest("abc", "For input string: \"" + "abc" + "\"");
-        runInvalidOffsetValueTest("11a", "For input string: \"" + "11a" + "\"");
-        runInvalidOffsetValueTest("%6", "For input string: \"" + "%6" + "\"");
-        runInvalidOffsetValueTest("!", "For input string: " + "\"!\"");
+    public void testNonNumericOffsetValueTreatedAsZero() throws Exception {
+        runOffsetValueTest("abc", NUM_DATA_ROWS);
     }
 
-    /**
-     * Verify that an empty offset value will be treated as the default of 0.
-     * 
-     * @expectedResults Assert that the correct number of DML events occur.
-     */
     @Test
     public void testEmptyOffsetValueTreatedAsZero() throws Exception {
 
         runOffsetValueTest("", NUM_DATA_ROWS);
     }
 
-    /**
-     * Verify that placing a null value for row offset does not produce a null pointer exception TODO: Allow this test
-     * to run by making it 'Public' and modify the error messages to reflect new values.
-     * 
-     * @expectedResults Assert the exception type is not an NPE.
-     */
     @Test
-    @Ignore
-    public void testNullOffsetValueDoesNotNPE() throws Exception {
-        try {
-            runOffsetValueTest(null, NUM_DATA_ROWS);
-        } catch (NullPointerException npe) {
-            fail("DataLoader threw NPE when row offset was null", npe);
-        }
-    }
-
-    /**
-     * Verify that negative values for the offset produce an error. TODO: Allow this test to run by making it 'Public'
-     * and modify the error messages to reflect new values.
-     * 
-     * @expectedResults Assert that the error message contains "For input string".
-     */
-    @Test
-    @Ignore
-    public void testNegativeOffsetValuesCorrectlyHandled() throws Exception {
-
-        runInvalidOffsetValueTest("-1", "For input string");
-        runInvalidOffsetValueTest("-5", "For input string");
+    public void testNegativeOffsetValueTreatedAsZero() throws Exception {
+        runOffsetValueTest("-5", NUM_DATA_ROWS);
     }
 
     private void runOffsetValueTest(Object offset, int numberOfInserts) throws Exception {
@@ -165,6 +124,10 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
         try {
             iOffset = Integer.valueOf(String.valueOf(offset));
         } catch (NumberFormatException e) {
+            iOffset = 0;
+        }
+
+        if(iOffset < 0) {
             iOffset = 0;
         }
 
@@ -178,34 +141,18 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
         // now check offset specs
         String rowOffset = ctl.getConfig().getString(Config.LOAD_ROW_TO_START_AT);
 
-        // TODO is there anything to verify when rowOffset=0 or null
         if (rowOffset != null) {
-            if (rowOffset != "0" || rowOffset != "") {
-                verifyOffsetFromInputAndOutputFiles(rowOffset, ctl.getConfig());
-            }
+            verifyOffsetFromInputAndOutputFiles(iOffset, ctl.getConfig());
         }
     }
 
-    // Verifies that the first row of the success file is the first row after the offset on the input file
-    private void runInvalidOffsetValueTest(String value, String errorMessage) throws Exception {
-        runProcessNegative(getRowOffsetTestConfig(value, NUM_DATA_ROWS >> 1), errorMessage);
-    }
-
-    private void verifyOffsetFromInputAndOutputFiles(String rowOffset, Config cfg) throws Exception {
+    private void verifyOffsetFromInputAndOutputFiles(int numberOfOffsetRows, Config cfg) throws Exception {
 
         // Find out how many rows each file has
         int numberOfSuccessRows = 0;
         int numberOfErrorRows = 0;
         int numberOfInputRows = 0;
-        int numberOfOffsetRows = 0;
 
-        try {
-            numberOfOffsetRows = Integer.parseInt(rowOffset);
-
-        } catch (NumberFormatException e) {
-
-            numberOfOffsetRows = 0;
-        }
         // finding rows in input file and opening it
 
         numberOfInputRows = getNumCsvRows(cfg, Config.DAO_NAME);
@@ -314,9 +261,8 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
     }
 
     private Map<String, String> getRowOffsetTestConfig(Object offset, int numInserts) throws DataAccessObjectException {
-        final Map<String, String> argMap = getUpdateTestConfig(FILE_NAME_BASE, true, DEFAULT_ACCOUNT_EXT_ID_FIELD,
-                numInserts);
-        argMap.put(Config.LOAD_ROW_TO_START_AT, offset == null ? null : offset.toString());
+        final Map<String, String> argMap = getUpdateTestConfig(FILE_NAME_BASE, true, DEFAULT_ACCOUNT_EXT_ID_FIELD, numInserts);
+        argMap.put(Config.LOAD_ROW_TO_START_AT, offset.toString());
         return argMap;
     }
 }
