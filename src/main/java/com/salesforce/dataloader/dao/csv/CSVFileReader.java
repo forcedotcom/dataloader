@@ -257,6 +257,8 @@ public class CSVFileReader implements DataReader {
             } else {
                 csvReader = new CSVReader(input);
             }
+            csvReader.setMaxRowsInFile(Integer.MAX_VALUE);
+            csvReader.setMaxCharsInFile(Integer.MAX_VALUE);
         } catch (FileNotFoundException e) {
             String errMsg = Messages.getFormattedString("CSVFileDAO.errorOpen", file.getAbsolutePath());
             LOGGER.error(errMsg, e);
