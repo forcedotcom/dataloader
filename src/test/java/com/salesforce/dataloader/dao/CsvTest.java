@@ -133,6 +133,16 @@ public class CsvTest extends TestBase {
         csv.close();
     }
 
+    @Test
+    public void testCsvWithManyRowsCanBeParsed() throws Exception {
+        CSVFileReader csvFileReader = new CSVFileReader(new File(getTestDataDir(), "20kRows.csv"), getController().getConfig());
+        csvFileReader.open();
+        assertEquals(20000, csvFileReader.getTotalRows());
+        int count = 0;
+        for(Row row = csvFileReader.readRow(); row != null; row = csvFileReader.readRow(), count++);
+        assertEquals(20000, count);
+    }
+
     /**
      * Helper to compare the static variables to the csv we wrote
      *
