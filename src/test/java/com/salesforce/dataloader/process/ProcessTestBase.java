@@ -26,53 +26,31 @@
 
 package com.salesforce.dataloader.process;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import static org.junit.Assert.*;
+
+import java.io.*;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
 
-import com.salesforce.dataloader.ConfigTestBase;
-import com.salesforce.dataloader.TestBase;
-import com.salesforce.dataloader.TestProgressMontitor;
+import com.salesforce.dataloader.*;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
-import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.ParameterLoadException;
-import com.salesforce.dataloader.exception.ProcessInitializationException;
+import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.Base64;
-import com.sforce.soap.partner.DeleteResult;
-import com.sforce.soap.partner.PartnerConnection;
-import com.sforce.soap.partner.QueryResult;
-import com.sforce.soap.partner.SaveResult;
-import com.sforce.soap.partner.UpsertResult;
+import com.sforce.soap.partner.*;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.util.FileUtil;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Base class for batch process tests
@@ -757,9 +735,8 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         }
         // TODO: validate all messages, including nulls if those exist
         if (failMessage != null) {
-            if (!actualMessage.startsWith(failMessage))
-                Assert.fail("Error message should start with '" + failMessage + "' but the actual message was '"
-                        + actualMessage + "'");
+            Assert.assertTrue("Error message should contain '" + failMessage + "' but the actual message was '" + actualMessage + "'",
+                    actualMessage.contains(failMessage));
         }
 
         // return the controller used by the process so that the tests can validate success/error output files, etc
