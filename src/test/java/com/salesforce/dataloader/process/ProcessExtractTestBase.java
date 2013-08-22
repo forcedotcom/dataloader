@@ -26,11 +26,9 @@
 
 package com.salesforce.dataloader.process;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import static org.junit.Assert.*;
+
+import java.util.*;
 
 import org.junit.Assert;
 import org.junit.runners.Parameterized;
@@ -48,11 +46,6 @@ import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Base class for extraction process tests
@@ -257,11 +250,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         // no select keyword
         runExtractNegativeTest("id from account where Name='sometext'", "Invalid soql: No 'SELECT' keyword");
         // incomplete where expression
-        final boolean isBulkApi = isBulkAPIEnabled(getTestConfig());
-        // bulk api prepends some additional stuff to the error message
-        final String bulkPrefix = isBulkApi ? "Batch failed: InvalidBatch : Failed to process query: MALFORMED_QUERY: "
-                : "";
-        runExtractNegativeTest("select id from account where", bulkPrefix + "unexpected token: '<EOF>'");
+        runExtractNegativeTest("select id from account where", "unexpected token: '<EOF>'");
         // from doesn't contain table name
         runExtractNegativeTest("select id from where Name='sometext'", "Invalid soql: Failed to parse table name");
         // bad field name in select expression
