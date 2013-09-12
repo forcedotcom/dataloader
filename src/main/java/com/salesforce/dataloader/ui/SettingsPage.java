@@ -56,6 +56,7 @@ public class SettingsPage extends WizardPage {
     private Text textUsername;
     private Button isSessionIdLogin;
     private Text textSessionId;
+    private Text textEndpoint1;
     private Text textEndpoint;
     private Label loginLabel;
     private final String nestedException = "nested exception is:";
@@ -94,10 +95,12 @@ public class SettingsPage extends WizardPage {
 
         textUsername = new Text(comp, SWT.BORDER);
         textUsername.setText(config.getString(Config.USERNAME));
+
         GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false);
         data.widthHint = 150;
         textUsername.setLayoutData(data);
 
+        // Consume the 2 cells to the right of txtUsername and txtPassword
         Composite composite2 = new Composite(comp, SWT.NONE);
         data = new GridData();
         data.verticalSpan = 2;
@@ -114,6 +117,21 @@ public class SettingsPage extends WizardPage {
         data = new GridData(SWT.FILL, SWT.CENTER, true, false);
         data.widthHint = 150;
         textPassword.setLayoutData(data);
+
+        Label labelEndpoint1 = new Label(comp, SWT.RIGHT);
+        labelEndpoint1.setText(Labels.getString("ExtractionInputDialog.serverURL")); //$NON-NLS-1$
+
+        textEndpoint1 = new Text(comp, SWT.BORDER);
+        textEndpoint1.setText(config.getString(Config.ENDPOINT));
+        data = new GridData(SWT.FILL, SWT.CENTER, true, false);
+        data.widthHint = 150;
+        textEndpoint1.setLayoutData(data);
+
+        // Consume cell to the right of the  txtEndpoint1
+        composite2 = new Composite(comp, SWT.NONE);
+        data = new GridData();
+        //data.verticalSpan = 2;
+        composite2.setLayoutData(data);
 
         if(config.getBoolean(Config.SFDC_INTERNAL)) {
             //spacer
@@ -226,6 +244,7 @@ public class SettingsPage extends WizardPage {
             Config config = controller.getConfig();
             config.setValue(Config.USERNAME, textUsername.getText());
             config.setValue(Config.PASSWORD, textPassword.getText());
+            config.setValue(Config.ENDPOINT, textEndpoint1.getText());
 
             if(config.getBoolean(Config.SFDC_INTERNAL)) {
                 config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, isSessionIdLogin.getSelection());
