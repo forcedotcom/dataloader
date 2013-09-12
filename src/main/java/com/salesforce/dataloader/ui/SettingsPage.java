@@ -94,10 +94,12 @@ public class SettingsPage extends WizardPage {
 
         textUsername = new Text(comp, SWT.BORDER);
         textUsername.setText(config.getString(Config.USERNAME));
+
         GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false);
         data.widthHint = 150;
         textUsername.setLayoutData(data);
 
+        // Consume the 2 cells to the right of txtUsername and txtPassword
         Composite composite2 = new Composite(comp, SWT.NONE);
         data = new GridData();
         data.verticalSpan = 2;
@@ -114,6 +116,16 @@ public class SettingsPage extends WizardPage {
         data = new GridData(SWT.FILL, SWT.CENTER, true, false);
         data.widthHint = 150;
         textPassword.setLayoutData(data);
+
+        //endpoint
+        Label labelEndpoint = new Label(comp, SWT.RIGHT);
+        labelEndpoint.setText(Labels.getString("SettingsPage.instServerUrl")); //$NON-NLS-1$
+
+        textEndpoint = new Text(comp, SWT.BORDER);
+        textEndpoint.setText(config.getString(Config.ENDPOINT));
+        data = new GridData(SWT.FILL, SWT.CENTER, true, false);
+        data.widthHint = 150;
+        textEndpoint.setLayoutData(data);
 
         if(config.getBoolean(Config.SFDC_INTERNAL)) {
             //spacer
@@ -154,16 +166,6 @@ public class SettingsPage extends WizardPage {
             data = new GridData();
             data.verticalSpan = 2;
             composite2.setLayoutData(data);
-
-            //endpoint
-            Label labelEndpoint = new Label(comp, SWT.RIGHT);
-            labelEndpoint.setText(Labels.getString("SettingsPage.instServerUrl")); //$NON-NLS-1$
-
-            textEndpoint = new Text(comp, SWT.BORDER);
-            textEndpoint.setText(config.getString(Config.ENDPOINT));
-            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
-            data.widthHint = 150;
-            textEndpoint.setLayoutData(data);
 
             reconcileLoginCredentialFieldsEnablement();
         }
@@ -226,11 +228,11 @@ public class SettingsPage extends WizardPage {
             Config config = controller.getConfig();
             config.setValue(Config.USERNAME, textUsername.getText());
             config.setValue(Config.PASSWORD, textPassword.getText());
+            config.setValue(Config.ENDPOINT, textEndpoint.getText());
 
             if(config.getBoolean(Config.SFDC_INTERNAL)) {
                 config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, isSessionIdLogin.getSelection());
                 config.setValue(Config.SFDC_INTERNAL_SESSION_ID, textSessionId.getText());
-                config.setValue(Config.ENDPOINT, textEndpoint.getText());
             }
 
             controller.saveConfig();
