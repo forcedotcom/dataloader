@@ -21,7 +21,11 @@ To run the Data Loader GUI, run the command
     
 Use the command below to run the Data Loader GUI on Mac
 
-    java -XstartOnFirstThread -jar target/dataloader-33.0.0-uber.jar
+<<<<<<< HEAD
+    java -XstartOnFirstThread -jar target/dataloader-32.0.0-uber.jar
+=======
+    java -jar target/dataloader-33.0.0-uber.jar -XstartOnFirstThread
+>>>>>>> release/33.0.0
     
 To run Data Loader from the command line, use the command:
 
