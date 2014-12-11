@@ -77,11 +77,7 @@ public class CSVFileWriter implements DataWriter {
     public CSVFileWriter(String fileName, Config config) {
         this.fileName = fileName;
         this.capitalizedHeadings = true;
-        if(config.isBulkAPIEnabled()) {
-            encoding = Config.BULK_API_ENCODING;
-        } else {
-            encoding = config.getCsvWriteEncoding();
-        }
+        encoding = config.getCsvWriteEncoding();
     }
 
     /**

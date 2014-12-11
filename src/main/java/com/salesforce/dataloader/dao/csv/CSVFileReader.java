@@ -76,7 +76,7 @@ public class CSVFileReader implements DataReader {
 
     public CSVFileReader(File file, Config config) {
         this.file = file;
-        forceUTF8 = config.isBulkAPIEnabled() || config.getBoolean(Config.READ_UTF8);
+        forceUTF8 = config.getBoolean(Config.READ_UTF8);
     }
 
     @Override
