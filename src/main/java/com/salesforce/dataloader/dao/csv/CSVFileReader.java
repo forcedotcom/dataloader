@@ -253,9 +253,9 @@ public class CSVFileReader implements DataReader {
         try {
             input = new FileInputStream(file);
             if (forceUTF8 || isUTF8File(file)) {
-                csvReader = new CSVReader(input, "UTF-8");
+                csvReader = new CSVReader(input, "UTF-8", new char[]{',', '\t'});
             } else {
-                csvReader = new CSVReader(input);
+                csvReader = new CSVReader(input, new char[]{',', '\t'});
             }
             csvReader.setMaxRowsInFile(Integer.MAX_VALUE);
             csvReader.setMaxCharsInFile(Integer.MAX_VALUE);
