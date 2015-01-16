@@ -325,8 +325,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
         // If there was an error processing the batch and the state of the batch is 'Failed' then the server 
         // will fill in stateMessage.  
-        final String stateMessage = (batch.getState() == BatchStateEnum.Completed) ? null :
-                stateMessage = batch.getStateMessage();
+        final String stateMessage = (batch.getState() == BatchStateEnum.Completed) ? null : batch.getStateMessage();
         final String errorMessage = stateMessage == null ? null : Messages.getMessage(getClass(), "batchError",
                 stateMessage);
 
