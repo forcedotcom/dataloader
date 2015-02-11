@@ -323,8 +323,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         // do some basic checks to make sure we are matching up the batches correctly
         sanityCheckBatch(clientBatchInfo, batch);
 
-        // If there was an error processing the batch and the state of the batch is 'Failed' then the server 
-        // will fill in stateMessage.  
+        // If there was an error processing the batch and the state isn't 'Completed' get stateMessage from batch 
         final String stateMessage = (batch.getState() == BatchStateEnum.Completed) ? null : batch.getStateMessage();
         final String errorMessage = stateMessage == null ? null : Messages.getMessage(getClass(), "batchError",
                 stateMessage);
