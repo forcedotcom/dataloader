@@ -168,9 +168,13 @@ public class LoaderWindow extends ApplicationWindow {
 
         createButtons(comp);
 
-
         getStatusLineManager().setMessage(Labels.getString("LoaderWindow.chooseAction"));
-        displayTitleDialog(Display.getDefault(), this.operationActionsByIndex, this.controller.getConfig());
+
+        Config config = controller.getConfig();
+
+        if (!config.getBoolean(config.HIDE_WELCOME_SCREEN)) {
+            displayTitleDialog(Display.getDefault(), this.operationActionsByIndex, this.controller.getConfig());
+        }
 
         comp.pack();
         parent.pack();

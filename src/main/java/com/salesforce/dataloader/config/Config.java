@@ -111,6 +111,9 @@ public class Config {
      */
     //
     // salesforce constants
+    
+    // Loader Preferences
+    public static final String HIDE_WELCOME_SCREEN = "loader.hideWelcome";
 
     //Special Internal Configs
     public static final String SFDC_INTERNAL = "sfdcInternal"; //$NON-NLS-1$
@@ -277,6 +280,7 @@ public class Config {
      * This sets the current defaults.
      */
     public void setDefaults() {
+		setValue(HIDE_WELCOME_SCREEN, false);
 		setValue(ENDPOINT, DEFAULT_ENDPOINT_URL);
         setValue(LOAD_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
         setValue(LOAD_ROW_TO_START_AT, 0);
