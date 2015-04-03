@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, salesforce.com, inc.
+ * Copyright (c) 2015, salesforce.com, inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided
@@ -26,7 +26,10 @@
 
 package com.salesforce.dataloader.ui;
 
+import java.awt.Desktop;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -180,7 +183,23 @@ public class HyperlinkDialog extends Dialog {
                     public void run() {
                         int exitVal = 0;
                         try {
-                            Process proc = Runtime.getRuntime().exec("rundll32 url.dll, FileProtocolHandler " + linkURL);
+                            Process proc = null;
+                            if (System.getProperty("os.name").toLowerCase().indexOf("windows") >= 0)
+                                proc = Runtime.getRuntime().exec("rundll32 url.dll, FileProtocolHandler " + getLinkURL());
+                            else if (System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0){
+                                Desktop desktop = Desktop.getDesktop();
+                                try {
+                                    desktop.browse(new URI(getLinkURL()));
+                                } catch (URISyntaxException e) {
+                                    // TODO Auto-generated catch block
+                                    logger.error("Browser Error");
+                                }
+                            }
+                            else {
+                                logger.error("OS is not supported.");
+                                return;
+                            }
+                                
                             StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR"); //$NON-NLS-1$
                             StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), "OUTPUT"); //$NON-NLS-1$
                             errorGobbler.start();
