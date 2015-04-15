@@ -102,7 +102,7 @@ public class ProcessConfig {
         if (configFactory == null) {
             logger.info(Messages.getFormattedString("ProcessConfig.loadingConfig", getConfigFileLocation()));
             
-            configFactory = new FileSystemXmlApplicationContext(getConfigFileLocation());
+            configFactory = new FileSystemXmlApplicationContext("file://" + getConfigFileLocation());
         }
         return configFactory;
     }
