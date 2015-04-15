@@ -210,10 +210,7 @@ public class DatabaseReader implements DataReader {
 
     @Override
     public int getTotalRows() throws DataAccessObjectException {
-        if (totalRows == 0) {
-            totalRows = DAORowUtil.calculateTotalRows(this);
-        }
-        return totalRows;
+        return 0;
     }
 
     @Override
