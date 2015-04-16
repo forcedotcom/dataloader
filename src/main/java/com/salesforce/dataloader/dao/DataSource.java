@@ -1,8 +1,11 @@
 package com.salesforce.dataloader.dao.database;
 
 import java.io.IOException;
-import sun.misc.BASE64Decoder;
 import org.apache.log4j.Logger;
+
+import com.salesforce.dataloader.security.EncryptionUtil;
+import com.salesforce.dataloader.config.Messages;
+import java.security.GeneralSecurityException;
 
 import org.apache.commons.dbcp.BasicDataSource;
 
@@ -13,21 +16,38 @@ public class DataSource extends org.apache.commons.dbcp.BasicDataSource {
     }
 
     public synchronized void setPassword(String encodedPassword) {
-    	logger.warn("encoded password is " + encodedPassword);
     	this.password = decode(encodedPassword);
     }
     
     private String decode(String password) {
-        BASE64Decoder decoder = new BASE64Decoder();
-        String decodedPassword = null;
-        try {
-        	decodedPassword = new String(decoder.decodeBuffer(password));
-        } catch (IOException e) {
-        	e.printStackTrace();
-        }
-        
-        return decodedPassword;
+        return new String(DecryptString(encrypter, password));
     }
+    
+    /* Decrypt property with propName using the encrypter. If decryption succeeds, return the decrypted value
+     *
+     * @param propMap
+     * @param propName
+     * @return decrypted property value
+     * @throws ParameterLoadException
+     */
+    static private String DecryptString(EncryptionUtil encrypter, String encryptedString) {
+
+        if (encryptedString != null && encryptedString.length() > 0) {
+            try {
+                return encrypter.decryptString(encryptedString);
+            } 
+            
+            catch (Exception e) {
+            	String errMsg = Messages.getFormattedString("Config.errorParameterLoad", 
+                	new String[] { "db password", String.class.getName() });                
+                logger.error(errMsg, e);
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+    
+    private final EncryptionUtil encrypter = new EncryptionUtil();
     
     private static Logger logger = Logger.getLogger(DataSource.class);
 }
