@@ -210,7 +210,19 @@ public class DatabaseReader implements DataReader {
 
     @Override
     public int getTotalRows() throws DataAccessObjectException {
-        return 0;
+    	boolean skipRowCount = Config.DEFAULT_SKIP_TOTAL_COUNT;
+    	
+    	if (config.contains(Config.DAO_SKIP_TOTAL_COUNT))
+    		skipRowCount = config.getBoolean(Config.DAO_SKIP_TOTAL_COUNT);
+    	
+    	if (skipRowCount == true)
+    		return 0;
+
+    	if (totalRows == 0) {
+    		totalRows = DAORowUtil.calculateTotalRows(this);
+    	}
+
+    	return totalRows;
     }
 
     @Override
