@@ -9,9 +9,32 @@ import java.security.GeneralSecurityException;
 
 import org.apache.commons.dbcp.BasicDataSource;
 
-public class DataSource extends org.apache.commons.dbcp.BasicDataSource {
+/*
+ * This class can be substituted for org.apache.commons.dbcp.BasicDataSource in
+ * a user's database-conf.xml file.  It's purpose is to allow the database
+ * password to be enrypted.  
+ *
+ * Use dataloader's "ecnrypt -e" command (no key file) to encrypt the 
+ * database password, and paste the resulting string into the password
+ * entry as in:
+ *
+ * DrozBook:dao tgagne$ encrypt -e mysecretpassword
+ * 2015-04-18 06:46:05,267 INFO  [main] security.EncryptionUtil main (EncryptionUtil.java:365) - fa7f28fd6b39f34660f359f4e67fcdbbf80a8187cf4eec85
+ *
+ * then 
+ *
+ * <bean id="qa" class="com.salesforce.dataloader.dao.database.EncryptedDataSource" destroy-method="close">
+ *     <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
+ *     <property name="url" value="your db url"/>
+ *     <property name="username" value="username"/>
+ *     <property name="password" value="fa7f28fd6b39f34660f359f4e67fcdbbf80a8187cf4eec85 "/>
+ * </bean>
+ *
+ */
 
-    public DataSource() {
+public class EncryptedDataSource extends org.apache.commons.dbcp.BasicDataSource {
+
+    public EncryptedDataSource() {
         super();
     }
 
@@ -49,5 +72,5 @@ public class DataSource extends org.apache.commons.dbcp.BasicDataSource {
     
     private final EncryptionUtil encrypter = new EncryptionUtil();
     
-    private static Logger logger = Logger.getLogger(DataSource.class);
+    private static Logger logger = Logger.getLogger(EncryptedDataSource.class);
 }
