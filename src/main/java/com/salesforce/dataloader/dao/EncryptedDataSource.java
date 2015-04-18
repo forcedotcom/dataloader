@@ -27,7 +27,7 @@ import org.apache.commons.dbcp.BasicDataSource;
  *     <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
  *     <property name="url" value="your db url"/>
  *     <property name="username" value="username"/>
- *     <property name="password" value="fa7f28fd6b39f34660f359f4e67fcdbbf80a8187cf4eec85 "/>
+ *     <property name="password" value="fa7f28fd6b39f34660f359f4e67fcdbbf80a8187cf4eec85"/>
  * </bean>
  *
  */
