@@ -13,7 +13,11 @@
   </organization>
 
   <properties>
+<<<<<<< HEAD
+    <force.version>33.0.3</force.version>
+=======
     <force.version>34.0.0</force.version>
+>>>>>>> release/34.0.0
     <jacob.version>1.14.3</jacob.version>
     <java.compile.version>1.6</java.compile.version>
     <nsis.version>2.46</nsis.version>
