@@ -70,15 +70,19 @@ public class LoadMapper extends Mapper {
         return result;
     }
 
+    // issue #76, the target field may have multiple field names in it, we should map all of them
     public Row mapData(Row localRow) {
         Row mappedData = new Row();
         for (Map.Entry<String, Object> entry : localRow.entrySet()) {
             String sfdcName = getMapping(entry.getKey());
             if (StringUtils.hasText(sfdcName)) {
-                mappedData.put(sfdcName, entry.getValue());
+            	for (String eachField : sfdcName.split(",")) {
+    	            mappedData.put(eachField.trim(), entry.getValue());
+                }
             } else {
                 logger.info("Mapping for field " + entry.getKey() + " will be ignored since destination column is empty");
             }
+            
         }
         mapConstants(mappedData);
         return mappedData;
@@ -88,8 +92,8 @@ public class LoadMapper extends Mapper {
         for (Map.Entry<String, String> entry : getMappingWithUnmappedColumns(false).entrySet()) {
             String sfdcName = entry.getValue();
             if(StringUtils.hasText(sfdcName)) {
-                final Field f = getClient().getField(sfdcName);
-                if (f == null)
+                final HashSet<Field> fieldSet = getClient().getField(sfdcName);
+                if (fieldSet == null | fieldSet.isEmpty())
                     throw new MappingInitializationException("Field mapping is invalid: " + entry.getKey() + " => " + sfdcName);
             }
         }

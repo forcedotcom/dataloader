@@ -745,16 +745,24 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         return false;
     }
 
-    private final Map<String, Field> fieldsByName = new HashMap<String, Field>();
+    private final Map<String, HashSet<Field>> fieldsByName = new HashMap<String, HashSet<Field>>();
 
-    public Field getField(String apiName) {
+    // when a list of target fields are passed, apiName will (should)
+    // be something like "field1, field2."  That will be its key and
+    // its value will be a set of fields (Issue #76)
+    public HashSet<Field> getField(String apiName) {
         apiName = apiName.toLowerCase();
-        Field field = this.fieldsByName.get(apiName);
-        if (field == null) {
-            field = lookupField(apiName);
-            this.fieldsByName.put(apiName, field);
+        
+	    HashSet<Field> fieldSet = this.fieldsByName.get(apiName);
+        if (fieldSet == null || fieldSet.isEmpty()) {
+        	fieldSet = new HashSet<Field>();
+        	for (String eachField : apiName.split(",")) {
+	            Field field = lookupField(eachField.trim());
+	            fieldSet.add(field);
+        	}
+            this.fieldsByName.put(apiName, fieldSet);
         }
-        return field;
+        return fieldSet;
     }
 
     private Field lookupField(String apiName) {
