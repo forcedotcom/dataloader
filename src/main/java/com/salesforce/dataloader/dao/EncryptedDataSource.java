@@ -1,4 +1,4 @@
-package com.salesforce.dataloader.dao.database;
+package com.salesforce.dataloader.dao;
 
 import java.io.IOException;
 import org.apache.log4j.Logger;
@@ -23,7 +23,7 @@ import org.apache.commons.dbcp.BasicDataSource;
  *
  * then 
  *
- * <bean id="qa" class="com.salesforce.dataloader.dao.database.EncryptedDataSource" destroy-method="close">
+ * <bean id="qa" class="com.salesforce.dataloader.dao.EncryptedDataSource" destroy-method="close">
  *     <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
  *     <property name="url" value="your db url"/>
  *     <property name="username" value="username"/>
