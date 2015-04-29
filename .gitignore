@@ -19,3 +19,6 @@ Thumbs.db
 /lib/
 /classes/
 /bin/
+
+## vi files
+*.un~
