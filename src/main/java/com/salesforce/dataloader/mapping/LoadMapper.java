@@ -93,7 +93,7 @@ public class LoadMapper extends Mapper {
             String sfdcName = entry.getValue();
             if(StringUtils.hasText(sfdcName)) {
                 final HashSet<Field> fieldSet = getClient().getField(sfdcName);
-                if (fieldSet == null | fieldSet.isEmpty())
+                if (fieldSet == null || fieldSet.isEmpty())
                     throw new MappingInitializationException("Field mapping is invalid: " + entry.getKey() + " => " + sfdcName);
             }
         }
