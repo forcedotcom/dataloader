@@ -55,12 +55,12 @@ package com.salesforce.dataloader.process;
 import java.io.File;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.FileSystemResource;
 
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 /**
  * This class gives access to the configuration of the processes and the process scheduler
@@ -74,7 +74,7 @@ public class ProcessConfig {
 
     public final static String DEFAULT_CONFIG_FILENAME = "process-conf.xml";
     private final static String DEFAULT_SCHEDULER_FACTORY_NAME = "schedulerFactory";
-    private static XmlBeanFactory configFactory;
+    private static ApplicationContext configFactory;
 
     public ProcessConfig() {
     }
@@ -98,10 +98,11 @@ public class ProcessConfig {
         }
     }
 
-    public static synchronized XmlBeanFactory getBeanFactory() {
+    public static synchronized ApplicationContext getBeanFactory() {
         if (configFactory == null) {
             logger.info(Messages.getFormattedString("ProcessConfig.loadingConfig", getConfigFileLocation()));
-            configFactory = new XmlBeanFactory(new FileSystemResource(getConfigFileLocation()));
+            
+            configFactory = new FileSystemXmlApplicationContext("file://" + getConfigFileLocation());
         }
         return configFactory;
     }
