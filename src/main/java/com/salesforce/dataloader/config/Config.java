@@ -83,6 +83,14 @@ public class Config {
     public static final int DEFAULT_BULK_API_BATCH_SIZE = 2000;
     public static final long DEFAULT_BULK_API_CHECK_STATUS_INTERVAL = 5000L;
 	public static final String DEFAULT_ENDPOINT_URL = "https://login.salesforce.com";
+	
+	/*
+	 * Issue #59 - Dataloader will not read all the database rows to get a total count
+	 * when skipTotalCount = "false"
+	 * 
+	 * The default is "true"
+	 */
+	public static final Boolean DEFAULT_SKIP_TOTAL_COUNT = true;
     /**
      * Constants that were made not configurable by choice
      */
@@ -111,6 +119,9 @@ public class Config {
      */
     //
     // salesforce constants
+    
+    // Loader Preferences
+    public static final String HIDE_WELCOME_SCREEN = "loader.hideWelcome";
 
     //Special Internal Configs
     public static final String SFDC_INTERNAL = "sfdcInternal"; //$NON-NLS-1$
@@ -175,6 +186,7 @@ public class Config {
     public static final String DAO_NAME = "dataAccess.name"; //$NON-NLS-1$
     public static final String DAO_READ_BATCH_SIZE = "dataAccess.readBatchSize";
     public static final String DAO_WRITE_BATCH_SIZE = "dataAccess.writeBatchSize";
+    public static final String DAO_SKIP_TOTAL_COUNT = "dataAccess.skipTotalCount";
 
     /*
      * TODO: when batching is introduced to the DataAccess, these parameters will become useful
@@ -277,6 +289,7 @@ public class Config {
      * This sets the current defaults.
      */
     public void setDefaults() {
+		setValue(HIDE_WELCOME_SCREEN, false);
 		setValue(ENDPOINT, DEFAULT_ENDPOINT_URL);
         setValue(LOAD_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
         setValue(LOAD_ROW_TO_START_AT, 0);

@@ -68,6 +68,7 @@ public class AdvancedSettingsDialog extends Dialog {
     private final String defaultServer;
 
     private final Logger logger = Logger.getLogger(AdvancedSettingsDialog.class);
+    private Button buttonHideWelcomeScreen;
     private Button buttonOutputExtractStatus;
     private Button buttonReadUtf8;
     private Button buttonWriteUtf8;
@@ -247,6 +248,14 @@ public class AdvancedSettingsDialog extends Dialog {
         layout = new GridLayout(2, false);
         layout.verticalSpacing = 10;
         restComp.setLayout(layout);
+
+        // Hide welecome screen
+        Label labelHideWelcomeScreen = new Label(restComp, SWT.RIGHT);
+        labelHideWelcomeScreen.setText(Labels.getString("AdvancedSettingsDialog.hideWelcomeScreen")); //$NON-NLS-1$
+        labelHideWelcomeScreen.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+
+        buttonHideWelcomeScreen = new Button(restComp, SWT.CHECK);
+        buttonHideWelcomeScreen.setSelection(config.getBoolean(Config.HIDE_WELCOME_SCREEN));
 
         //batch size
         Label labelBatch = new Label(restComp, SWT.RIGHT);
@@ -586,6 +595,7 @@ public class AdvancedSettingsDialog extends Dialog {
                 Config config = controller.getConfig();
 
                 //set the configValues
+                config.setValue(Config.HIDE_WELCOME_SCREEN, buttonHideWelcomeScreen.getSelection());
                 config.setValue(Config.INSERT_NULLS, buttonNulls.getSelection());
                 config.setValue(Config.LOAD_BATCH_SIZE, textBatch.getText());
                 config.setValue(Config.EXTRACT_REQUEST_SIZE, textQueryBatch.getText());

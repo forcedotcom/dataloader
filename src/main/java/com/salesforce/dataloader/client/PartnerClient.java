@@ -741,6 +741,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         final String msg = ex.getMessage();
         if (msg != null && msg.toLowerCase().indexOf("connection reset") >= 0) {
             retrySleep(operationName, retryNum);
+            return true;
         }
         return false;
     }

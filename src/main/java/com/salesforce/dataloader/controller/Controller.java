@@ -94,7 +94,7 @@ public class Controller {
         // load app version properties
         Properties versionProps = new Properties();
         try {
-            versionProps.load(this.getClass().getClassLoader().getResourceAsStream("version.properties"));
+            versionProps.load(this.getClass().getClassLoader().getResourceAsStream("com/salesforce/dataloader/version.properties"));
         } catch (IOException e) {
             throw new ControllerInitializationException(e);
         }
