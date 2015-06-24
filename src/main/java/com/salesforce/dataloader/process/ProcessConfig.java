@@ -100,9 +100,15 @@ public class ProcessConfig {
 
     public static synchronized ApplicationContext getBeanFactory() {
         if (configFactory == null) {
-            logger.info(Messages.getFormattedString("ProcessConfig.loadingConfig", getConfigFileLocation()));
-            
-            configFactory = new FileSystemXmlApplicationContext("file://" + getConfigFileLocation());
+            String configFileLocation = getConfigFileLocation();
+            logger.info(Messages.getFormattedString("ProcessConfig.loadingConfig", configFileLocation));
+
+            //don't modify window local file system paths or URIs
+            if (!configFileLocation.contains(":")){
+                configFileLocation = "file://".concat(configFileLocation);
+            }
+
+            configFactory = new FileSystemXmlApplicationContext(configFileLocation);
         }
         return configFactory;
     }
