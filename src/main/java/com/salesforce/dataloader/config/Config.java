@@ -154,6 +154,13 @@ public class Config {
     public static final String WIRE_OUTPUT  = "sfdc.wireOutput";
     public static final String TIMEZONE = "sfdc.timezone";
 
+    public static final String OAUTH = "sfdc.oauth";
+    public static final String OAUTH_SERVER = "sfdc.oauthServer";
+    public static final String OAUTH_CLIENTKEY = "sfdc.oauthClientKey";
+    public static final String OAUTH_ACCESSTOKEN = "sfdc.oauthAccesstoken";
+    public static final String OAUTH_REFRESHTOKEN = "sfdc.oauthRefreshtoken";
+    public static final String OAUTH_CLIENTID = "sfdc.oauth.clientid";
+
     // salesforce operation parameters
     public static final String INSERT_NULLS = "sfdc.insertNulls"; //$NON-NLS-1$
     public static final String ENTITY = "sfdc.entity"; //$NON-NLS-1$
@@ -318,6 +325,10 @@ public class Config {
         setValue(SFDC_INTERNAL, false);
         setValue(SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
         setValue(SFDC_INTERNAL_SESSION_ID, (String) null);
+
+        //oauth settings
+        setValue(OAUTH, false);
+        setValue(OAUTH_SERVER, DEFAULT_ENDPOINT_URL);
     }
 
     /**
@@ -802,6 +813,13 @@ public class Config {
         // no great way to do this,
         String oldPassword = encryptProperty(PASSWORD);
         String oldProxyPassword = encryptProperty(PROXY_PASSWORD);
+
+        String oauthAccessToken = getString(OAUTH_ACCESSTOKEN);
+        String oauthRefreshToken = getString(OAUTH_REFRESHTOKEN);
+        putValue(OAUTH_ACCESSTOKEN, "");
+        putValue(OAUTH_REFRESHTOKEN, "");
+
+
         FileOutputStream out = null;
         try {
             out = new FileOutputStream(filename);
@@ -813,6 +831,9 @@ public class Config {
             // restore original property values
             putValue(PASSWORD, oldPassword);
             putValue(PROXY_PASSWORD, oldProxyPassword);
+            putValue(OAUTH_ACCESSTOKEN, oauthAccessToken);
+            putValue(OAUTH_REFRESHTOKEN, oauthRefreshToken);
+
         }
         // save last run statistics
         lastRun.save();
