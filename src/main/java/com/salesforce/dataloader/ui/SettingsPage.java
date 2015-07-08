@@ -62,6 +62,10 @@ public class SettingsPage extends WizardPage {
 
     // logger
     private static Logger logger = Logger.getLogger(SettingsPage.class);
+    private Button isOAuthIdLogin;
+    private Text textOAuthId;
+    private Text textOAuthSecret;
+    private Text textOAuthEndpoint;
 
     public SettingsPage(Controller controller) {
         super(Labels.getString("SettingsPage.title"), Labels.getString("SettingsPage.titleMsg"), UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -167,6 +171,71 @@ public class SettingsPage extends WizardPage {
             data.verticalSpan = 2;
             composite2.setLayoutData(data);
 
+        }
+        if(config.getBoolean(Config.OAUTH)) {
+            //spacer
+            Label spacer = new Label(comp, SWT.NONE);
+            data = new GridData();
+            data.horizontalSpan = 3;
+            data.widthHint = 15;
+            spacer.setLayoutData(data);
+
+            Label labelIsOAuthLogin = new Label(comp, SWT.RIGHT);
+            labelIsOAuthLogin.setText(Labels.getString("SettingsPage.isOAuthLogin")); //$NON-NLS-1$
+
+            isOAuthIdLogin = new Button(comp, SWT.CHECK);
+            isOAuthIdLogin.setSelection(config.getBoolean(Config.OAUTH));
+            data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+            data.horizontalSpan = 2;
+            isOAuthIdLogin.setLayoutData(data);
+            isOAuthIdLogin.addSelectionListener(new SelectionAdapter(){
+                @Override
+                public void widgetSelected(SelectionEvent event) {
+                    reconcileLoginCredentialFieldsEnablement();
+                }
+            });
+
+            //OAuthId
+            Label labelOAuthId = new Label(comp, SWT.RIGHT);
+            labelOAuthId.setText(Labels.getString("SettingsPage.OAuthClientId")); //$NON-NLS-1$
+
+            textOAuthId = new Text(comp, SWT.BORDER);
+            textOAuthId.setText(config.getString(Config.OAUTH_CLIENTID));
+            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
+            data.widthHint = 150;
+            textOAuthId.setLayoutData(data);
+
+            // consume the 2 cells to the right of textOAuthId & textEndpoint
+            composite2 = new Composite(comp, SWT.NONE);
+            data = new GridData();
+            data.verticalSpan = 2;
+            composite2.setLayoutData(data);
+
+            //OAuthId
+            Label labelOAuthSecret = new Label(comp, SWT.RIGHT);
+            labelOAuthSecret.setText(Labels.getString("SettingsPage.OAuthClientSecret")); //$NON-NLS-1$
+
+            textOAuthSecret = new Text(comp, SWT.BORDER);
+            textOAuthSecret.setText(config.getString(Config.OAUTH_CLIENTKEY));
+            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
+            data.widthHint = 150;
+            textOAuthSecret.setLayoutData(data);
+
+
+
+            //endpoint
+            labelEndpoint = new Label(comp, SWT.RIGHT);
+            labelEndpoint.setText(Labels.getString("SettingsPage.OAuthServer")); //$NON-NLS-1$
+
+            textOAuthEndpoint = new Text(comp, SWT.BORDER);
+            textOAuthEndpoint.setText(config.getString(Config.OAUTH_SERVER));
+            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
+            data.widthHint = 150;
+            textOAuthEndpoint.setLayoutData(data);
+
+        }
+
+        if (config.getBoolean(Config.OAUTH) || config.getBoolean(Config.SFDC_INTERNAL)){
             reconcileLoginCredentialFieldsEnablement();
         }
 
@@ -234,8 +303,19 @@ public class SettingsPage extends WizardPage {
                 config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, isSessionIdLogin.getSelection());
                 config.setValue(Config.SFDC_INTERNAL_SESSION_ID, textSessionId.getText());
             }
-
+            if(config.getBoolean(Config.OAUTH)) {
+                config.setValue(Config.OAUTH_SERVER, textOAuthEndpoint.getText());
+                config.setValue(Config.OAUTH_CLIENTID, textOAuthId.getText());
+                config.setValue(Config.OAUTH_CLIENTKEY, textOAuthSecret.getText());
+            }
             controller.saveConfig();
+
+            if(config.getBoolean(Config.OAUTH)) {
+                if (isOAuthIdLogin.getSelection()) {
+                    OAuthFlow flow = new OAuthFlow(getShell(), config);
+                    flow.open();
+                }
+            }
 
             loginLabel.setText(Labels.getString("SettingsPage.verifyingLogin")); //$NON-NLS-1$
 
@@ -333,10 +413,16 @@ public class SettingsPage extends WizardPage {
      * text fields depending on if isSessionIdLogin is checked.
      */
     private void reconcileLoginCredentialFieldsEnablement() {
-        textUsername.setEnabled(!isSessionIdLogin.getSelection());
-        textPassword.setEnabled(!isSessionIdLogin.getSelection());
-        textSessionId.setEnabled(isSessionIdLogin.getSelection());
-        textEndpoint.setEnabled(isSessionIdLogin.getSelection());
+        boolean isSesssionLogin = isSessionIdLogin != null && isSessionIdLogin.getSelection();
+        boolean isOAuthLogin = isOAuthIdLogin != null && isOAuthIdLogin.getSelection();
+        textUsername.setEnabled(!isSesssionLogin && !isOAuthLogin);
+        textPassword.setEnabled(!isSesssionLogin && !isOAuthLogin);
+
+        if (textSessionId != null) textSessionId.setEnabled(isSesssionLogin);
+
+        if (textOAuthId!= null) textOAuthId.setEnabled(isOAuthLogin);
+        if (textOAuthSecret!= null) textOAuthSecret.setEnabled(isOAuthLogin);
+        if (textOAuthEndpoint!= null) textOAuthEndpoint.setEnabled(isOAuthLogin);
     }
 
     public static boolean isNeeded(Controller controller) {
