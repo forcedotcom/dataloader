@@ -191,8 +191,8 @@ public class Controller {
     public void createMapper() throws MappingInitializationException {
         String mappingFile = config.getString(Config.MAPPING_FILE);
         this.mapper = getConfig().getOperationInfo().isExtraction() ? new SOQLMapper(getPartnerClient(),
-                dao.getColumnNames(), mappingFile) : new LoadMapper(getPartnerClient(), dao.getColumnNames(),
-                mappingFile);
+                dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) : new LoadMapper(getPartnerClient(), dao.getColumnNames(),
+                getFieldTypes().getFields(), mappingFile);
     }
 
     public void createAndShowGUI() throws ControllerInitializationException {
