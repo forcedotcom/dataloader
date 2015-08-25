@@ -53,9 +53,9 @@ public class SOQLMapper extends Mapper {
 
     private SOQLInfo soqlInfo;
 
-    public SOQLMapper(PartnerClient client, Collection<String> columnNames, String mappingFileName)
+    public SOQLMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
-        super(client, columnNames, mappingFileName);
+        super(client, columnNames, fields, mappingFileName);
     }
 
     public List<String> getDaoColumnsForSoql() {
