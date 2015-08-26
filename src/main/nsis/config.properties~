@@ -1,0 +1,5 @@
+#Loader Config
+#Thu Sep 10 09:37:47 PDT 2009
+sfdc.endpoint=https\://na1-blitz02.soma.salesforce.com
+sfdc.username=admin@pint.com
+sfdc.password=test1234
