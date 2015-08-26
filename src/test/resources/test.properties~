@@ -3,14 +3,14 @@
 ## For CI, these properties are configured externally in a Jenkins configuration
 
 ## endpoint
-test.endpoint=${test.endpoint}
+test.endpoint=https://na1-blitz02.soma.salesforce.com
 test.redirect=true
 
 ## user/org/passwd
-test.org=${test.org}
-test.user.default=${test.user.default}@${test.org}
-test.user.restricted=${test.user.restricted}@${test.org}
-test.password=${test.password}
+test.org=pint.com
+test.user.default=***REMOVED***
+test.user.restricted=***REMOVED***
+test.password=***REMOVED***L
 
 ## test logging level
 test.log.level=debug
