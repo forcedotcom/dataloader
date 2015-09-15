@@ -596,14 +596,16 @@
         <build>
             <plugins>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>osxappbundle-maven-plugin</artifactId>
-                    <version>1.0-alpha-2</version>
+                    <groupId>sh.tak.appbundler</groupId>
+                    <artifactId>appbundle-maven-plugin</artifactId>
+                    <version>1.0.4</version>
                     <configuration>
                         <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
                         <jvmVersion>1.8</jvmVersion>
+                        <jvmOptions>
+                            <string>-XstartOnFirstThread</string>
+                        </jvmOptions>
                         <iconFile>${basedir}/src/main/resources/img/icons/icon_loader.icns</iconFile>
-                        <dictionaryFile>${basedir}/src/main/resources/Info.plist</dictionaryFile>
                     </configuration>
                     <executions>
                         <execution>
