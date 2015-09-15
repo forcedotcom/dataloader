@@ -15,7 +15,7 @@
   <properties>
     <force.version>35.0.0</force.version>
     <jacob.version>1.14.3</jacob.version>
-    <java.compile.version>1.6</java.compile.version>
+    <java.compile.version>1.8</java.compile.version>
     <nsis.version>2.46</nsis.version>
     <spring.version>3.1.1.RELEASE</spring.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -445,7 +445,7 @@
 
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
-            <version>1.6</version>
+            <version>1.8</version>
             <executions>
               <execution>
                 <phase> prepare-package </phase>
@@ -601,7 +601,7 @@
                     <version>1.0-alpha-2</version>
                     <configuration>
                         <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-                        <jvmVersion>1.6</jvmVersion>
+                        <jvmVersion>1.8</jvmVersion>
                         <iconFile>${basedir}/src/main/resources/img/icons/icon_loader.icns</iconFile>
                         <dictionaryFile>${basedir}/src/main/resources/Info.plist</dictionaryFile>
                     </configuration>
