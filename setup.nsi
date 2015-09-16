@@ -6,7 +6,7 @@
 
 ;--------------------------------------
 ; General
-Icon "src\main\nsis\icon_SforceDL16x16.ico"
+Icon "src\main\nsis\icon_SforceDL32x32.ico"
 Name "${PROJECT_NAME}"
 BrandingText "${PROJECT_ORGANIZATION_NAME}"
 
@@ -41,8 +41,9 @@ RequestExecutionLevel admin
 
 Section "${PROJECT_NAME}"
   !define DL_START_MENU_DIR "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
-  !define DL_JRE_PATH "$INSTDIR\Java\bin\javaw.exe"
-  !define DL_EXEC_JAR_PARAM "-Dappdata.dir=$\"$APPDATA$\" -jar $\"$INSTDIR\${PROJECT_FINAL_NAME}-uber.jar$\""
+  !define DL_EXE_PATH "$\"$INSTDIR\${PROJECT_FINAL_NAME}.exe$\""
+  !define DL_JAR_PATH "$\"$INSTDIR\${PROJECT_FINAL_NAME}-uber.jar$\""
+  !define DL_EXEC_JAR_PARAM "-Dappdata.dir=$\"$APPDATA$\""
   !define DL_SMALL_ICON_PATH "$INSTDIR\icon_SforceDL16x16.ico"
   !define DL_LARGE_ICON_PATH "$INSTDIR\icon_SforceDL32x32.ico"
   !define DL_UNINSTALLER_PATH "$INSTDIR\dataloader_uninstall.exe"
@@ -51,38 +52,41 @@ Section "${PROJECT_NAME}"
   SetOutPath "$INSTDIR"
   SectionIn RO
   SetOverwrite try
+  File "target\${PROJECT_FINAL_NAME}.exe"
   File "target\${PROJECT_FINAL_NAME}-uber.jar"
   File "src\main\nsis\icon_SforceDL16x16.ico"
   File "src\main\nsis\icon_SforceDL32x32.ico"
-  
+  FileOpen $9 "${PROJECT_FINAL_NAME}.l4j.ini" w
+  FileWrite $9 "${DL_EXEC_JAR_PARAM}"
+  FileWrite $9 "$\r$\n"
+  FileWrite $9 "-jar ${DL_JAR_PATH}"
+  FileClose $9
+
   SetOutPath "$INSTDIR\licenses"
   File /r "src\main\nsis\licenses\"
-  
+
   SetOutPath "$INSTDIR\samples"
   File /r "src\main\nsis\samples\"
-  
+
   SetOutPath "$INSTDIR\bin"
   File "target\classes\encrypt.bat"
   File "target\classes\process.bat"
-  
-  SetOutPath "$INSTDIR\Java"
-  File /r "windows-dependencies\Java\"
-  
+
   WriteUninstaller ${DL_UNINSTALLER_PATH}
-    
+
   ; copy config files to appdata dir
   CreateDirectory "${DL_CONFIG_DIR}"
   SetOutPath "${DL_CONFIG_DIR}"
   File "src\main\nsis\config.properties"
-  
+
   CreateDirectory "${DL_START_MENU_DIR}"
-  CreateShortCut "${DL_START_MENU_DIR}\${PROJECT_NAME}.lnk" "${DL_JRE_PATH}" "${DL_EXEC_JAR_PARAM}" "${DL_SMALL_ICON_PATH}"
+  CreateShortCut "${DL_START_MENU_DIR}\${PROJECT_NAME}.lnk" "${DL_EXE_PATH}" "${DL_CONFIG_DIR}"
   CreateShortCut "${DL_START_MENU_DIR}\Uninstall ${PROJECT_NAME}.lnk" "${DL_UNINSTALLER_PATH}"
-  CreateShortCut "$DESKTOP\${PROJECT_NAME}.lnk" "${DL_JRE_PATH}" "${DL_EXEC_JAR_PARAM}" "${DL_LARGE_ICON_PATH}"
+  CreateShortCut "$DESKTOP\${PROJECT_NAME}.lnk" "${DL_EXE_PATH}"  "${DL_CONFIG_DIR}"
 
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROJECT_NAME}" "DisplayName" "${PROJECT_ORGANIZATION_NAME} ${PROJECT_NAME}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROJECT_NAME}" "UninstallString" "$\"${DL_UNINSTALLER_PATH}$\""
-  
+
 SectionEnd
 
 ;--------------------------------------
@@ -91,22 +95,23 @@ SectionEnd
 Section "Uninstall"
   SectionIn RO
   Delete "$INSTDIR\${PROJECT_FINAL_NAME}-uber.jar"
+  Delete "$INSTDIR\${PROJECT_FINAL_NAME}.l4j.ini"
+  Delete "$INSTDIR\${PROJECT_FINAL_NAME}.exe"
   Delete "$INSTDIR\icon_SforceDL16x16.ico"
   Delete "$INSTDIR\icon_SforceDL32x32.ico"
   Delete "$INSTDIR\dataloader_uninstall.exe"
   RMDir /r "$INSTDIR\licenses"
   RMDir /r "$INSTDIR\samples"
   RMDir /r "$INSTDIR\bin"
-  RMDir /r "$INSTDIR\Java"
   RMDir /r "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
   Delete "$DESKTOP\${PROJECT_NAME}.lnk"
   RMDir /r "$APPDATA\${PROJECT_ORGANIZATION_NAME}"
-  
+
   ; delete salesforce.com directory only if it's empty
   RMDir "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}"
-  
+
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROJECT_NAME}"
-  
+
 SectionEnd
 
 Function .onInit
