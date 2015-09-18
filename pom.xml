@@ -14,8 +14,12 @@
 
   <properties>
     <force.version>35.0.0</force.version>
+    <build.year>2015</build.year>
+    <java.compile.version>1.8</java.compile.version>
+    <minJvmVersion>1.8.0</minJvmVersion>
+
     <jacob.version>1.14.3</jacob.version>
-    <java.compile.version>1.6</java.compile.version>
+
     <nsis.version>2.46</nsis.version>
     <spring.version>3.1.1.RELEASE</spring.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -415,9 +419,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse</groupId>
-          <artifactId>swt-win32-win32-x86_64</artifactId>
-          <version>4.2</version>
+            <groupId>org.eclipse</groupId>
+            <artifactId>swt-win32-win32-x86</artifactId>
+            <version>4.2</version>
         </dependency>
       </dependencies>
     </profile>
@@ -438,46 +442,134 @@
               <artifactId>nsis-maven-plugin</artifactId>
               <version>1.0-SNAPSHOT</version>
             </plugin>
+              <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-compiler-plugin</artifactId>
+                  <version>2.5.1</version>
+              </plugin>
+              <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-shade-plugin</artifactId>
+                  <version>1.7.1</version>
+              </plugin>
+              <plugin>
+                  <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                  <artifactId>launch4j-maven-plugin</artifactId>
+                  <version>1.5.1</version>
+              </plugin>
           </plugins>
         </pluginManagement>
 
         <plugins>
-
-          <plugin>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <version>1.6</version>
-            <executions>
-              <execution>
-                <phase> prepare-package </phase>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
                 <configuration>
-                  <target>
-                    <!-- unpack NSIS -->
-                    <unzip src="windows-dependencies/nsis-${nsis.version}.zip" dest="target" />
-                  </target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>nsis-maven-plugin</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <executions>
-              <execution>
-                <phase>package</phase>
-                <goals>
-                  <goal>generate-project</goal> <!-- create target/project.nsh -->
-                  <goal>compile</goal> <!-- compile setup.nsi into exe -->
-                </goals>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
-                  <makensisBin>target/nsis-${nsis.version}/makensis.exe</makensisBin>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>shaded</shadedClassifierName>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
+                        </transformer>
+                    </transformers>
                 </configuration>
-              </execution>
-            </executions>
-          </plugin>
+            </plugin>
+            <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <version>1.7.8</version>
+                <executions>
+                    <execution>
+                        <id>l4j-clui</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+                        <configuration>
+                            <headerType>gui</headerType>
+                            <dontWrapJar>true</dontWrapJar>
+                            <jar>${artifactId}-${version}-uber.jar</jar>
+                            <outfile>${project.build.directory}/${artifactId}-${version}.exe</outfile>
+                            <downloadUrl>http://java.com/download</downloadUrl>
+                            <classPath>
+                                <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
+                                <preCp>anything</preCp>
+                            </classPath>
+                            <icon>${basedir}/src/main/nsis/icon_SforceDL32x32.ico</icon>
+                            <jre>
+                                <minVersion>${minJvmVersion}</minVersion>
+                                <jdkPreference>preferJre</jdkPreference>
+                                <runtimeBits>32</runtimeBits>
+                            </jre>
+                            <versionInfo>
+                                <fileVersion>${version}.0</fileVersion>
+                                <txtFileVersion>${project.version}</txtFileVersion>
+                                <fileDescription>${project.name}</fileDescription>
+                                <copyright>${build.year} ${organization.name}</copyright>
+                                <productVersion>${version}.0</productVersion>
+                                <txtProductVersion>${version}.0</txtProductVersion>
+                                <productName>${project.name}</productName>
+                                <companyName>${organization.name}</companyName>
+                                <internalName>/${artifactId}-${version}</internalName>
+                                <originalFilename>${artifactId}-${version}.exe</originalFilename>
+                            </versionInfo>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase> prepare-package </phase>
+                        <configuration>
+                            <target>
+                                <!-- unpack NSIS -->
+                                <unzip src="windows-dependencies/nsis-${nsis.version}.zip" dest="target" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>nsis-maven-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>generate-project</goal> <!-- create target/project.nsh -->
+                            <goal>compile</goal> <!-- compile setup.nsi into exe -->
+                        </goals>
+                        <configuration>
+                            <makensisBin>target/nsis-${nsis.version}/makensis.exe</makensisBin>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
       </build>
     </profile>
@@ -596,14 +688,16 @@
         <build>
             <plugins>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>osxappbundle-maven-plugin</artifactId>
-                    <version>1.0-alpha-2</version>
+                    <groupId>sh.tak.appbundler</groupId>
+                    <artifactId>appbundle-maven-plugin</artifactId>
+                    <version>1.0.4</version>
                     <configuration>
                         <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-                        <jvmVersion>1.6</jvmVersion>
+                        <jvmVersion>${minJvmVersion}</jvmVersion>
+                        <jvmOptions>
+                            <string>-XstartOnFirstThread</string>
+                        </jvmOptions>
                         <iconFile>${basedir}/src/main/resources/img/icons/icon_loader.icns</iconFile>
-                        <dictionaryFile>${basedir}/src/main/resources/Info.plist</dictionaryFile>
                     </configuration>
                     <executions>
                         <execution>
