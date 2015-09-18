@@ -15,7 +15,9 @@
   <properties>
     <force.version>35.0.0</force.version>
     <build.year>2015</build.year>
-    <java.compile.version>1.8.0</java.compile.version>
+    <java.compile.version>1.8</java.compile.version>
+    <minJvmVersion>1.8.0</minJvmVersion>
+
     <jacob.version>1.14.3</jacob.version>
 
     <nsis.version>2.46</nsis.version>
@@ -513,7 +515,7 @@
                             </classPath>
                             <icon>${basedir}/src/main/nsis/icon_SforceDL32x32.ico</icon>
                             <jre>
-                                <minVersion>${java.compile.version}</minVersion>
+                                <minVersion>${minJvmVersion}</minVersion>
                                 <jdkPreference>preferJre</jdkPreference>
                                 <runtimeBits>32</runtimeBits>
                             </jre>
@@ -691,7 +693,7 @@
                     <version>1.0.4</version>
                     <configuration>
                         <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-                        <jvmVersion>${java.compile.version}</jvmVersion>
+                        <jvmVersion>${minJvmVersion}</jvmVersion>
                         <jvmOptions>
                             <string>-XstartOnFirstThread</string>
                         </jvmOptions>
