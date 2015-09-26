@@ -17,7 +17,7 @@
     <build.year>2015</build.year>
     <java.compile.version>1.8</java.compile.version>
     <minJvmVersion>1.8.0</minJvmVersion>
-
+    <codesign></codesign>
     <jacob.version>1.14.3</jacob.version>
 
     <nsis.version>2.46</nsis.version>
@@ -693,9 +693,10 @@
                     <version>1.0.4</version>
                     <configuration>
                         <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-                        <jvmVersion>${minJvmVersion}</jvmVersion>
+                        <jvmVersion>1.8</jvmVersion>
                         <jvmOptions>
                             <string>-XstartOnFirstThread</string>
+                            <string>-Dsalesforce.config.dir=$APP_PACKAGE/Contents/Resources/conf</string>
                         </jvmOptions>
                         <iconFile>${basedir}/src/main/resources/img/icons/icon_loader.icns</iconFile>
                     </configuration>
@@ -707,6 +708,25 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>1.1</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <tasks>
+                            <echo>Copying localized strings</echo>
+                            <copy file="${basedir}/src/main/resources/Localizable.strings" tofile="${basedir}/target/${project.build.finalName}/${name}.app/Contents/Resources/en.lproj/Localizable.strings"/>
+                        </tasks>
+                    </configuration>
                 </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -722,7 +742,8 @@
                   <argument>make-pretty-dmg.sh</argument>
                   <argument>${basedir}</argument>
                   <argument>${project.build.directory}/${project.build.finalName}</argument>
-                  <argument>${project.build.directory}/${project.build.finalName}-pretty.dmg</argument>
+                  <argument>${project.build.directory}/Apex Data Loader.dmg</argument>
+                  <argument>${codesign}</argument>
                 </arguments>
               </configuration>
               <goals>
