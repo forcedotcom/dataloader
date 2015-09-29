@@ -53,7 +53,7 @@ public class SOQLMapperTest extends ConfigTestBase {
     @Before
     public void createSoqlMapper() throws Exception {
         PartnerClient partnerClient = new PartnerClient(getController());
-        soqlMapper = new SOQLMapper(partnerClient, Collections.<String>emptyList(), "");
+        soqlMapper = new SOQLMapper(partnerClient, Collections.<String>emptyList(), null, "");
     }
 
     @Test
@@ -103,7 +103,7 @@ public class SOQLMapperTest extends ConfigTestBase {
         List<String> daoCols = Arrays.asList("NAME", "ID", "Parent.Id",
                 "NumberOfEMPLOYEES");
         SOQLMapper mapper = new SOQLMapper(getController().getPartnerClient(),
-                daoCols, null);
+                daoCols, null, null);
         mapper.initSoqlMapping(soql);
         List<String> actual = mapper.getDaoColumnsForSoql();
         assertEquals(daoCols, actual);
