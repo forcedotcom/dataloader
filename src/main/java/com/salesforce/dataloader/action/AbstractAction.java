@@ -131,7 +131,8 @@ abstract class AbstractAction implements IAction {
             flush();
             // need to close up here for sync message.
             closeAll();
-
+            int successCount = getVisitor().getNumberSuccesses();
+            int errorCount = getVisitor().getNumberErrors();
             final Object[] args = { String.valueOf(getVisitor().getNumberSuccesses()),
                     getConfig().getString(Config.OPERATION), String.valueOf(getVisitor().getNumberErrors()) };
 
@@ -141,6 +142,8 @@ abstract class AbstractAction implements IAction {
             } else {
                 getMonitor().doneSuccess(getMessage("success", args)); //$NON-NLS-1$
             }
+            getMonitor().setErrorCount(errorCount);
+            getMonitor().setSuccessCount(successCount);
 
         } catch (final Exception e) {
             handleException(e);
@@ -203,6 +206,7 @@ abstract class AbstractAction implements IAction {
         }
         getLogger().error(getMessage("exception"), e);
         getMonitor().doneError(errMsg);
+        getMonitor().setErrorException(e);
     }
 
     /**

@@ -56,6 +56,46 @@ public class SWTProgressAdapter implements ILoaderProgress {
         monitor.beginTask(name, totalWork);
     }
 
+    @Override
+    public Integer getTotalWorkCount() {
+        return null;
+    }
+
+    @Override
+    public void setErrorException(Exception errorException) {
+
+    }
+
+    @Override
+    public Exception getErrorException() {
+        return null;
+    }
+
+    @Override
+    public void setSuccessCount(int successCount) {
+
+    }
+
+    @Override
+    public void setErrorCount(int errorCount) {
+
+    }
+
+    @Override
+    public Integer getSuccessCount() {
+        return null;
+    }
+
+    @Override
+    public Integer getErrorCount() {
+        return null;
+    }
+
+    @Override
+    public Integer getWorkedCount() {
+        return null;
+    }
+
     public void done() {
         monitor.done();
     }
@@ -68,7 +108,6 @@ public class SWTProgressAdapter implements ILoaderProgress {
     @Override
     public void doneSuccess(String message) {
         monitor.done();
-
         dispMessage = message;
         Display.getDefault().syncExec(new Thread() {
             @Override
@@ -145,4 +184,8 @@ public class SWTProgressAdapter implements ILoaderProgress {
         // nothing
     }
 
+    @Override
+    public Integer getNumberBatchesTotal() {
+        return null;
+    }
 }
