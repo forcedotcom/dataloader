@@ -46,9 +46,9 @@ public class LoadMapper extends Mapper {
 
     private static final Logger logger = Logger.getLogger(Mapper.class);
 
-    public LoadMapper(PartnerClient client, Collection<String> columnNames, String mappingFileName)
+    public LoadMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
-        super(client, columnNames, mappingFileName);
+        super(client, columnNames, fields, mappingFileName);
     }
 
     @Override

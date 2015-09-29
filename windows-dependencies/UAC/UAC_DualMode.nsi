@@ -1,23 +1,20 @@
-!addplugindir "windows-dependencies\UAC\plugins\x86-ansi"
-!include target\project.nsh
+!addplugindir ".\plugins\x86-ansi"
 
-!define S_NAME "${PROJECT_FINAL_NAME}"
-!define APPNAME "${PROJECT_NAME}"
-!define S_DEFAULT_CONFIGFOLDER "$APPDATA\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME} ${PROJECT_VERSION}"
-!define S_DEFINSTDIR_USER "$LOCALAPPDATA\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
-!define S_DEFINSTDIR_ADMIN "$PROGRAMFILES\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
+!define S_NAME "UAC_ModeSelection example"
+!define APPNAME "UAC_Dummy_App"
+!define S_DEFINSTDIR_USER "$LocalAppData\${APPNAME}"
+!define S_DEFINSTDIR_ADMIN "$ProgramFiles\${APPNAME}"
 !define UNINSTALLER_FULLPATH "$InstDir\Uninstaller.exe"
 
-!define MUI_ICON "src\main\nsis\icon_SforceDL32x32.ico"
-!define MUI_UNICON "src\main\nsis\icon_SforceDL32x32.ico"
+!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\orange-install.ico"
+!define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
 
-Name "${APPNAME}"
-OutFile "target\${S_NAME}.installer.exe"
+Name "${S_NAME}"
+OutFile "${S_NAME}.exe"
 
 !include MUI2.nsh
-!include windows-dependencies\UAC\UAC.nsh
+!include UAC.nsh
 !include nsDialogs.nsh
-!include Sections.nsh
 
 !ifndef BCM_SETSHIELD
 !define BCM_SETSHIELD 0x0000160C
@@ -44,7 +41,7 @@ call InstModeChanged
 !define MUI_COMPONENTSPAGE_NODESC
 !define MUI_CUSTOMFUNCTION_GUIINIT GuiInit
 
-!insertmacro MUI_PAGE_LICENSE "src\main\nsis\license.rtf"
+!insertmacro MUI_PAGE_LICENSE History.txt
 page custom InstModeSelectionPage_Create InstModeSelectionPage_Leave
 !define MUI_PAGE_CUSTOMFUNCTION_PRE disableBack
 !insertmacro MUI_PAGE_COMPONENTS
@@ -104,12 +101,12 @@ SendMessage $0 ${BCM_SETSHIELD} 0 0
 FunctionEnd
 
 Function InstModeSelectionPage_Create
-!insertmacro MUI_HEADER_TEXT_PAGE "Select install type" "Choose for which users you want to install $(^NameDA)."
+!insertmacro MUI_HEADER_TEXT_PAGE "Select install type" "Blah blah blah blah"
 GetFunctionAddress $8 InstModeSelectionPage_OnClick
 nsDialogs::Create /NOUNLOAD 1018
 Pop $9
 ${NSD_OnBack} RemoveNextBtnShield
-${NSD_CreateLabel} 0 20u 75% 20u "Select whether you want to install $(^NameDA) for yourself only or for all users of this computer. $(^ClickNext)"
+${NSD_CreateLabel} 0 20u 75% 20u "Blah blah blah blah select install type..."
 Pop $0
 System::Call "advapi32::GetUserName(t.r0,*i${NSIS_MAX_STRLEN})i"
 ${NSD_CreateRadioButton} 0 40u 75% 15u "Single User ($0)"
@@ -150,9 +147,9 @@ ${Else}
 		!insertmacro UAC_PageElevation_RunElevated
 		EnableWindow $9 1
 		System::Call user32::SetFocus(is) ;Do we need WM_NEXTDLGCTL or can we get away with this hack?
-		${If} $2 = 0x666666 ;our special return, the new process was not admin after all
+		${If} $2 = 0x666666 ;our special return, the new process was not admin after all 
 			MessageBox mb_iconExclamation "You need to login with an account that is a member of the admin group to continue..."
-			Abort
+			Abort 
 		${ElseIf} $0 = 1223 ;cancel
 			Abort
 		${Else}
@@ -161,75 +158,40 @@ ${Else}
 					MessageBox mb_iconstop "Unable to elevate, Secondary Logon service not running!"
 				${Else}
 					MessageBox mb_iconstop "Unable to elevate, error $0"
-				${EndIf}
+				${EndIf} 
 				Abort
 			${EndIf}
-		${EndIf}
+		${EndIf} 
 		Quit ;We now have a new process, the install will continue there, we have nothing left to do here
 	${EndIf}
 ${EndIf}
 FunctionEnd
 
 Function FinishRun
-!insertmacro UAC_AsUser_ExecShell "" "$INSTDIR\${PROJECT_FINAL_NAME}.exe" "" "" ""
+!insertmacro UAC_AsUser_ExecShell "" "calc.exe" "" "" ""
 FunctionEnd
 
 Section "Required Files"
-    SectionIn RO
-    SetOutPath "$INSTDIR"
-    File "target\${PROJECT_FINAL_NAME}.exe"
-    File "target\${PROJECT_FINAL_NAME}-uber.jar"
-    File "src\main\nsis\icon_SforceDL16x16.ico"
-    File "src\main\nsis\icon_SforceDL32x32.ico"
-    FileOpen $9 "${PROJECT_FINAL_NAME}.l4j.ini" w
-    ;Java Args here
-    FileWrite $9 "-Dappdata.dir=$\"$APPDATA$\"$\r$\n"
-    FileWrite $9 "-jar $\"$INSTDIR\${PROJECT_FINAL_NAME}-uber.jar$\""
-    FileClose $9
-
-    SetOutPath "$INSTDIR\licenses"
-    File /r "src\main\nsis\licenses\"
-
-    ; copy config files to appdata dir
-    CreateDirectory "${S_DEFAULT_CONFIGFOLDER}"
-    SetOutPath "${S_DEFAULT_CONFIGFOLDER}"
-    File "src\main\nsis\config.properties"
-
+SectionIn RO
 SectionEnd
 
 Section "Start menu shortcuts"
-CreateShortcut "$smprograms\${APPNAME}.lnk" '"$INSTDIR\${PROJECT_FINAL_NAME}.exe"' '"${S_DEFAULT_CONFIGFOLDER}"'
+CreateShortcut "$smprograms\${APPNAME}.lnk" '"${UNINSTALLER_FULLPATH}"'
 SectionEnd
 
 Section Uninstaller
-    SetOutPath -
-    ${If} $InstMode = 0
-        !insertmacro CreateUninstaller "${UNINSTALLER_FULLPATH}" 0
-    ${Else}
-        !insertmacro CreateUninstaller "${UNINSTALLER_FULLPATH}" 1
-    ${EndIf}
-    WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" DisplayName "${APPNAME}"
-    WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" UninstallString "${UNINSTALLER_FULLPATH}"
-    WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" InstallLocation $InstDir
-    WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" NoModify 1
-    WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" NoRepair 1
-    WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" DisplayIcon "$INSTDIR\icon_SforceDL32x32.ico"
-    WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" Publisher "${PROJECT_ORGANIZATION_NAME}"
-    WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" EstimatedSize  12178
-    WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" DisplayVersion  "${PROJECT_VERSION}"
+SetOutPath -
+${If} $InstMode = 0
+	!insertmacro CreateUninstaller "${UNINSTALLER_FULLPATH}" 0
+${Else}
+	!insertmacro CreateUninstaller "${UNINSTALLER_FULLPATH}" 1
+${EndIf}
+WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" DisplayName "${APPNAME}"
+WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" UninstallString "${UNINSTALLER_FULLPATH}"
+WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" InstallLocation $InstDir
+WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" NoModify 1
+WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" NoRepair 1
 SectionEnd
-
-Section "Command line tools" CommandLineTools
-    SetOutPath "$INSTDIR\bin"
-    File "target\classes\encrypt.bat"
-    File "target\classes\process.bat"
-SectionEnd
-
-Section "Samples" Samples
-    SetOutPath "$INSTDIR\samples"
-    File /r "src\main\nsis\samples\"
-SectionEnd
-
 !macroend
 
 /***************************************************
@@ -274,14 +236,13 @@ SectionEnd
 
 /***************************************************/
 !macro CreateUninstaller extractTo mode
-!tempfile UNINSTEXE
-!system '"${NSISDIR}\MakeNSIS" /DBUILDUNINST=${mode} /DUNINSTEXE=${UNINSTEXE}.exe "${__FILE__}"' = 0
-!system '"${UNINSTEXE}.exe"' = 0
-File "/oname=${extractTo}" "${UNINSTEXE}.exe.un"
-!delfile "${UNINSTEXE}"
-!delfile "${UNINSTEXE}.un"
-!delfile "${UNINSTEXE}.exe.un"
-!undef UNINSTEXE
+;!tempfile UNINSTEXE
+;!system '"${NSISDIR}\MakeNSIS" /DBUILDUNINST=${mode} /DUNINSTEXE=${UNINSTEXE} "${__FILE__}"' = 0
+;!system '"${UNINSTEXE}"' = 0
+;File "/oname=${extractTo}" "${UNINSTEXE}.un"
+;!delfile "${UNINSTEXE}"
+;!delfile "${UNINSTEXE}.un"
+;!undef UNINSTEXE
 !macroend
 
 !ifndef BUILDUNINST
@@ -300,23 +261,6 @@ File "/oname=${extractTo}" "${UNINSTEXE}.exe.un"
 	Section
 	WriteUninstaller "${UNINSTEXE}.un"
 	SectionEnd
-
-    Section "Uninstall"
-      SectionIn RO
-      Delete "$INSTDIR\${PROJECT_FINAL_NAME}-uber.jar"
-      Delete "$INSTDIR\${PROJECT_FINAL_NAME}.l4j.ini"
-      Delete "$INSTDIR\${PROJECT_FINAL_NAME}.exe"
-      Delete "$INSTDIR\icon_SforceDL32x32.ico"
-      Delete "$INSTDIR\dataloader_uninstall.exe"
-      RMDir /r "$INSTDIR\licenses"
-      RMDir /r "$INSTDIR\samples"
-      RMDir /r "$INSTDIR\bin"
-      RMDir /r "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
-      Delete "$DESKTOP\${PROJECT_NAME}.lnk"
-      RMDir /r "$APPDATA\${PROJECT_ORGANIZATION_NAME}"
-
-    SectionEnd
-
 !endif
 !insertmacro BUILD_LANGUAGES
 

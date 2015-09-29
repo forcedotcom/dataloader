@@ -77,7 +77,7 @@ public class LoadMapperTest extends ConfigTestBase {
      */
     @Test
     public void testMapFile() throws MappingInitializationException {
-        LoadMapper mapper = new LoadMapper(null, Arrays.asList(SOURCE_NAMES), new File(getTestDataDir(), "basicMap.sdl").getAbsolutePath());
+        LoadMapper mapper = new LoadMapper(null, Arrays.asList(SOURCE_NAMES), null, new File(getTestDataDir(), "basicMap.sdl").getAbsolutePath());
 
         verifyMapping(mapper, DEST_NAMES);
     }
@@ -94,12 +94,12 @@ public class LoadMapperTest extends ConfigTestBase {
     public void testMapFileNoSourceColumns()
             throws MappingInitializationException {
         // null column list
-        LoadMapper mapper = new LoadMapper(null, null, new File(
+        LoadMapper mapper = new LoadMapper(null, null, null, new File(
                 getTestDataDir(), "basicMap.sdl").getAbsolutePath());
         verifyMapping(mapper, DEST_NAMES);
 
         // empty column list
-        mapper = new LoadMapper(null, new ArrayList<String>(), new File(
+        mapper = new LoadMapper(null, new ArrayList<String>(), null, new File(
                 getTestDataDir(), "basicMap.sdl").getAbsolutePath());
         verifyMapping(mapper, DEST_NAMES);
     }
@@ -122,7 +122,7 @@ public class LoadMapperTest extends ConfigTestBase {
         mappings.setProperty("\"" + CONSTANT_VALUE + "\"", DEST_CONSTANT_NAME);
 
         LoadMapper mapper = new LoadMapper(null, Arrays.asList(SOURCE_NAMES),
-                null);
+                null, null);
         mapper.putPropertyFileMappings(mappings);
         verifyMapping(mapper, DEST_NAMES);
     }
@@ -144,7 +144,7 @@ public class LoadMapperTest extends ConfigTestBase {
         final String value = wrappedConstantValue;
         mappings.setProperty(value, "Name, field1__c,field2__c,   field3__c,\n\tfield4__c");
         mappings.setProperty("", "Value6");
-        LoadMapper mapper = new LoadMapper(null, null, null);
+        LoadMapper mapper = new LoadMapper(null, null, null, null);
         mapper.putPropertyFileMappings(mappings);
         Row result = mapper.mapData(Row.emptyRow());
         assertEquals(constantValue, result.get("Name"));
@@ -184,7 +184,7 @@ public class LoadMapperTest extends ConfigTestBase {
 
         //place a constant mapping into the LoadMapper.
         mappings.setProperty(wrappedConstantValue, sfdcField);
-        LoadMapper mapper = new LoadMapper(null, null, null);
+        LoadMapper mapper = new LoadMapper(null, null, null, null);
         mapper.putPropertyFileMappings(mappings);
 
         //place a dao column -> sfdc field mapping
@@ -215,7 +215,7 @@ public class LoadMapperTest extends ConfigTestBase {
         final String constantValue = "NotAbc";
         final String wrappedConstantValue = "\"" + constantValue + "\"";
 
-        LoadMapper mapper = new LoadMapper(null, null, null);
+        LoadMapper mapper = new LoadMapper(null, null, null, null);
 
         //place a dao column -> sfdc field mapping
         //(src, dest).
@@ -235,7 +235,7 @@ public class LoadMapperTest extends ConfigTestBase {
 
     @Test
     public void testMapDataEmptyEntriesIgnored() throws Exception {
-        LoadMapper loadMapper = new LoadMapper(null, null, null);
+        LoadMapper loadMapper = new LoadMapper(null, null, null, null);
         loadMapper.putMapping("SOURCE_COL", "");
 
         Row inputData = Row.singleEntryImmutableRow("SOURCE_COL", "123");
@@ -247,14 +247,14 @@ public class LoadMapperTest extends ConfigTestBase {
 
     @Test
     public void testVerifyMappingsAreValidEmptyEntries() throws Exception {
-        LoadMapper loadMapper = new LoadMapper(null, null, null);
+        LoadMapper loadMapper = new LoadMapper(null, null, null, null);
         loadMapper.putMapping("SOURCE_COL", "");
         loadMapper.verifyMappingsAreValid(); // no exception expected
     }
 
     @Test
     public void testVerifyMappingsAreValidUnknownColumn() throws Exception {
-        LoadMapper loadMapper = new LoadMapper(getController().getPartnerClient(), null, null);
+        LoadMapper loadMapper = new LoadMapper(getController().getPartnerClient(), null, null, null);
         loadMapper.putMapping(SOURCE_NAMES[0], "non_existing_col_aa");
         try {
             loadMapper.verifyMappingsAreValid();
