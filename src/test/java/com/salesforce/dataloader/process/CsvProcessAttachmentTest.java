@@ -26,7 +26,7 @@
 
 package com.salesforce.dataloader.process;
 
-import com.salesforce.dataloader.TestProgressMontitor;
+import com.salesforce.dataloader.TestProgressMonitor;
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
@@ -149,8 +149,9 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         final ProcessRunner runner = ProcessRunner.getInstance(argMap);
         runner.setName(this.baseName);
 
-        final TestProgressMontitor monitor = new TestProgressMontitor();
-        runner.run(monitor);
+        final TestProgressMonitor monitor = new TestProgressMonitor();
+        runner.setProgressMonitor(monitor);
+        runner.run();
         Controller controller = runner.getController();
 
         // verify process completed as expected
@@ -200,9 +201,9 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
     /**
      * To verify that the insertion is done correctly
      *
-     * @param The     controller ctl - Controller
-     * @param Mapping of filename to base-64 encodings Map<String,String>
-     * @param The     listener - myAttachmentTemplateListener - AttachmentTemplateListener
+     * @param ctl - the controller
+     * @param expectedMapping - Mapping of filename to base-64 encodings Map<String,String> The listener
+     * @param myAttachmentTemplateListener - AttachmentTemplateListener
      */
     private void verifyInsertCorrectByContent(Controller ctl, Map<String, String> expectedMapping,
                                                 AttachmentTemplateListener myAttachmentTemplateListener) throws ConnectionException {

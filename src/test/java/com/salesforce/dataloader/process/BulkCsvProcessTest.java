@@ -34,7 +34,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.salesforce.dataloader.TestProgressMontitor;
+import com.salesforce.dataloader.TestProgressMonitor;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
@@ -82,24 +82,25 @@ public class BulkCsvProcessTest extends ProcessTestBase {
     public void testBatchSizes() throws Exception {
         writeCsv(validRow, validRow);
         argMap.put(Config.LOAD_BATCH_SIZE, "1");
-        TestProgressMontitor monitor = runProcess(argMap, 2, 0, 0, false);
-        assertEquals("Inserting 2 rows with batch size of 1 should have produced 2 batches", 2, monitor.getNumberBatchesTotal());
+        TestProgressMonitor monitor = runProcess(argMap, 2, 0, 0, false);
+        assertEquals("Inserting 2 rows with batch size of 1 should have produced 2 batches", 2, (int) monitor.getNumberBatchesTotal());
     }
 
     @Test
     public void testBatchSizesNotAlteredByInvalidData() throws Exception {
         writeCsv(validRow, invalidRow, validRow);
         argMap.put(Config.LOAD_BATCH_SIZE, "2");
-        TestProgressMontitor monitor = runProcess(argMap, 2, 0, 1, false);
-        assertEquals("Even though middle row contains invalid data only 1 batch should have been created", 1, monitor.getNumberBatchesTotal());
+        TestProgressMonitor monitor = runProcess(argMap, 2, 0, 1, false);
+        assertEquals("Even though middle row contains invalid data only 1 batch should have been created", 1, (int) monitor.getNumberBatchesTotal());
     }
 
-    private TestProgressMontitor runProcess(Map<String, String> argMap, int numInserts, int numUpdates, int numFailures, boolean emptyId) throws Exception {
+    private TestProgressMonitor runProcess(Map<String, String> argMap, int numInserts, int numUpdates, int numFailures, boolean emptyId) throws Exception {
         final ProcessRunner runner = ProcessRunner.getInstance(argMap);
         runner.setName(baseName);
 
-        final TestProgressMontitor monitor = new TestProgressMontitor();
-        runner.run(monitor);
+        final TestProgressMonitor monitor = new TestProgressMonitor();
+        runner.setProgressMonitor(monitor);
+        runner.run();
         Controller controller = runner.getController();
 
         assertTrue("Process failed", monitor.isSuccess());

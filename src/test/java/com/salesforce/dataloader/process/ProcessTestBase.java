@@ -718,8 +718,9 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         final ProcessRunner runner = ProcessRunner.getInstance(argMap);
         runner.setName(this.baseName);
 
-        final TestProgressMontitor monitor = new TestProgressMontitor();
-        runner.run(monitor);
+        final TestProgressMonitor monitor = new TestProgressMonitor();
+        runner.setProgressMonitor(monitor);
+        runner.run();
         Controller controller = runner.getController();
 
         // verify process completed as expected
@@ -792,7 +793,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     /**
      * To create a mapping between the name of the objects being inserted and their base-64 encoded data.
      *
-     * @param None
+     * @param fileNames
      * @return The mapping of String to String -- Map<String,String>
      */
     protected Map<String, String> createAttachmentFileMap(String... fileNames) throws IOException {
