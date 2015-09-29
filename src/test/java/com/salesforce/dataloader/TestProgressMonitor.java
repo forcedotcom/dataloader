@@ -46,11 +46,18 @@ public class TestProgressMonitor implements ILoaderProgress {
     private String message;
     private final List<String> subTasksInOrder = new ArrayList<String>();
     private int numberBatchesTotal;
+    private int errorCount;
+    private int successCount;
 
     @Override
     public void beginTask(String name, int totalWork) {
         this.taskName = name;
         this.totalWork = totalWork;
+    }
+
+    @Override
+    public Integer getTotalWorkCount() {
+        return totalWork;
     }
 
     @Override
@@ -60,14 +67,49 @@ public class TestProgressMonitor implements ILoaderProgress {
     }
 
     @Override
+    public void setErrorException(Exception errorException) {
+
+    }
+
+    @Override
+    public Exception getErrorException() {
+        return null;
+    }
+
+    @Override
     public void doneSuccess(String message) {
         this.success = true;
         this.message = message;
     }
 
     @Override
+    public void setSuccessCount(int successCount) {
+        this.successCount = successCount;
+    }
+
+    @Override
+    public void setErrorCount(int errorCount) {
+        this.errorCount = errorCount;
+    }
+
+    @Override
+    public Integer getSuccessCount() {
+        return successCount;
+    }
+
+    @Override
+    public Integer getErrorCount() {
+        return errorCount;
+    }
+
+    @Override
     public void worked(int worked) {
         this.workDone += worked;
+    }
+
+    @Override
+    public Integer getWorkedCount() {
+        return this.workDone;
     }
 
     @Override
@@ -85,7 +127,8 @@ public class TestProgressMonitor implements ILoaderProgress {
         this.numberBatchesTotal = numberBatchesTotal;
     }
 
-    public int getNumberBatchesTotal() {
+    @Override
+    public Integer getNumberBatchesTotal() {
         return numberBatchesTotal;
     }
 
@@ -95,20 +138,12 @@ public class TestProgressMonitor implements ILoaderProgress {
         return this.taskName;
     }
 
-    public int getTotalWork() {
-        return this.totalWork;
-    }
-
     public boolean isSuccess() {
         return this.success;
     }
 
     public String getMessage() {
         return this.message;
-    }
-
-    public int getNumWorked() {
-        return this.workDone;
     }
 
     public List<String> getSubTasks() {

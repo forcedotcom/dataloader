@@ -2,7 +2,9 @@ package com.salesforce.dataloader.process;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.sforce.async.AsyncApiException;
+import com.sforce.async.AsyncExceptionCode;
 import com.sforce.soap.partner.fault.ApiFault;
+import com.sforce.soap.partner.fault.ExceptionCode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +21,6 @@ public class ExitCodeMapper {
 
     /** Default Exit code for exception */
     private static int DEFAULT_EXCEPTION_EXIT_CODE = -1;
-
     /** Exit code on exception to use */
     private int onException = DEFAULT_EXCEPTION_EXIT_CODE;
     /** Exit code to use on success */
@@ -34,17 +35,17 @@ public class ExitCodeMapper {
     /**
      * Map dedicated to Api Error
      */
-    private Map<String, Integer> apiFaultExitCodeMapper = new HashMap<String, Integer>();
+    private Map<ExceptionCode, Integer> apiFaultExitCodeMapper = new HashMap<ExceptionCode, Integer>();
     /**
      * Map dedicated to Async Api Error
      */
-    private Map<String, Integer> asyncApiExitCodeMapper = new HashMap<String, Integer>();
+    private Map<AsyncExceptionCode, Integer> asyncApiExitCodeMapper = new HashMap<AsyncExceptionCode, Integer>();
 
     private Integer getApiErrorExitCode(ApiFault e) {
         return apiFaultExitCodeMapper.get(e.getExceptionCode());
     }
 
-    private int getAsyncApiErrorExitCode(AsyncApiException e) {
+    private Integer getAsyncApiErrorExitCode(AsyncApiException e) {
         return asyncApiExitCodeMapper.get(e.getExceptionCode());
     }
 
@@ -91,11 +92,11 @@ public class ExitCodeMapper {
         this.onNoDataFound = onNoDataFound;
     }
 
-    public void setOnNoneSuccess(int onNoneSuccess) {
+    public void setOnNoneSucceed(int onNoneSuccess) {
         this.onNoneSuccess = onNoneSuccess;
     }
 
-    public void onPartialSuccess(int exitCode) {
+    public void setOnPartialSuccess(int exitCode) {
         this.onPartialSuccess = exitCode;
     }
 
@@ -103,11 +104,11 @@ public class ExitCodeMapper {
         this.onSuccess = exitCode;
     }
 
-    public void setApiFaultExitCodeMapper(Map<String, Integer> map) {
+    public void setApiFaultExitCodeMapper(Map<ExceptionCode, Integer> map) {
         this.apiFaultExitCodeMapper = map;
     }
 
-    public void setAsyncApiExitCodeMapper(Map<String, Integer> map) {
+    public void setAsyncApiExitCodeMapper(Map<AsyncExceptionCode, Integer> map) {
         this.asyncApiExitCodeMapper = map;
     }
 }
