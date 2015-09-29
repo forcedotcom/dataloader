@@ -54,14 +54,48 @@ public enum NihilistProgressAdapter implements ILoaderProgress {
     }
 
     @Override
-    public void doneError(String msgs) {
-        logger.error(msgs);
+    public Integer getTotalWorkCount() {
+        return null;
+    }
+
+    @Override
+    public void setErrorException(Exception errorException) {
+
+    }
+
+    @Override
+    public Exception getErrorException() {
+        return null;
+    }
+
+    @Override
+    public void setSuccessCount(int successCount) {
+
+    }
+
+    @Override
+    public void setErrorCount(int errorCount) {
+
+    }
+
+    @Override
+    public Integer getSuccessCount() {
+        return null;
+    }
+
+    @Override
+    public Integer getErrorCount() {
+        return null;
+    }
+
+    @Override
+    public void doneError(String errMsg) {
+        logger.error(errMsg);
     }
 
     @Override
     public void doneSuccess(String msg) {
         logger.info(msg);
-
     }
 
     @Override
@@ -69,8 +103,9 @@ public enum NihilistProgressAdapter implements ILoaderProgress {
 
     }
 
-    public void setTaskName(String name) {
-
+    @Override
+    public Integer getWorkedCount() {
+        return null;
     }
 
     @Override
@@ -88,4 +123,8 @@ public enum NihilistProgressAdapter implements ILoaderProgress {
         // nothing
     }
 
+    @Override
+    public Integer getNumberBatchesTotal() {
+        return null;
+    }
 }

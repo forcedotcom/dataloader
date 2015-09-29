@@ -352,6 +352,7 @@
                     <exclude>.gitignore</exclude>
                     <exclude>.gitmodules</exclude>
                 </excludes>
+                <failIfMissing>false</failIfMissing>
             </configuration>
             <executions>
                 <execution>

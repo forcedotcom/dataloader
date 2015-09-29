@@ -29,10 +29,19 @@ package com.salesforce.dataloader.action.progress;
 public interface ILoaderProgress {
 
     void beginTask(String name, int totalWork);
+    Integer getTotalWorkCount();
     void doneError(String message);
+    void setErrorException(Exception errorException);
+    Exception getErrorException();
     void doneSuccess(String message);
+    void setSuccessCount(int successCount);
+    void setErrorCount(int errorCount);
+    Integer getSuccessCount();
+    Integer getErrorCount();
     void worked(int worked);
+    Integer getWorkedCount();
     void setSubTask(String name);
     boolean isCanceled();
     void setNumberBatchesTotal(int numberBatchesTotal);
+    Integer getNumberBatchesTotal();
 }

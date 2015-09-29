@@ -87,6 +87,16 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
     // config override parameters
     private final Map<String, String> configOverrideMap = new HashMap<String, String>();
 
+    /**
+     * Current progress monitor object used. (defaults to NihilistProgressAdapter)
+     */
+    private ILoaderProgress progressMonitor = NihilistProgressAdapter.get();
+
+    /**
+     * Exit Code Mapper of the ProcessRunner instance.
+     */
+    private ExitCodeMapper exitCodeMapper = new ExitCodeMapper();
+
     private Controller controller;
 
     /**
@@ -97,10 +107,6 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
 
     @Override
     public synchronized void run() {
-        run(NihilistProgressAdapter.get());
-    }
-
-    public synchronized void run(ILoaderProgress monitor) {
         final String oldName = Thread.currentThread().getName();
         final String name = getName();
 
@@ -148,7 +154,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
                 Date currentTime = Calendar.getInstance().getTime();
 
                 // execute the requested operation
-                controller.executeAction(monitor);
+                controller.executeAction(progressMonitor);
 
                 // save last successful run date
                 // FIXME look into a better place so that long runs don't skew this
@@ -218,6 +224,13 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         }
     }
 
+    /**
+     * @return exit code of process runner.
+     */
+    private int getExitCode() {
+        return exitCodeMapper.getExitCode(progressMonitor);
+    }
+
     private static boolean validateCmdLineArgs (String[] args) {
 
         for (int i = 0; i < args.length; i++) {
@@ -253,6 +266,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         try {
             // run the process
             runner.run();
+            System.exit(runner.getExitCode());
         } catch (Throwable e) {
             topLevelError("Unable to run process " + runner.getName(), e);
         }
@@ -330,5 +344,19 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
 
     public Controller getController() {
         return controller;
+    }
+
+    /**
+     * @param progressMonitor the progress monitor to use
+     */
+    public void setProgressMonitor(ILoaderProgress progressMonitor) {
+        this.progressMonitor = progressMonitor;
+    }
+
+    /**
+     * @param exitCodeMapper the exit code mapper to use
+     */
+    public void setExitCodeMapper(ExitCodeMapper exitCodeMapper) {
+        this.exitCodeMapper = exitCodeMapper;
     }
 }

@@ -37,7 +37,7 @@ import java.util.List;
  * @author Colin Jarvis
  * @since 20.0
  */
-public class TestProgressMontitor implements ILoaderProgress {
+public class TestProgressMonitor implements ILoaderProgress {
 
     private String taskName;
     private int workDone;
