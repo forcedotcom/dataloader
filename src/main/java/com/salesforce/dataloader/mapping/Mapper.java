@@ -39,6 +39,7 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.sforce.soap.partner.Field;
 import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.client.PartnerClient;
@@ -67,27 +68,32 @@ public abstract class Mapper {
         }
     }
 
-    private final Set<String> daoColumns;
+    private final CaseInsensitiveSet daoColumns;
     private final Map<String, String> constants = caseInsensitiveMap();
 
     private final Map<String, String> map = caseInsensitiveMap();
     private final PartnerClient client;
+    private final CaseInsensitiveSet fields;
 
     private <V> Map<String, V> caseInsensitiveMap() {
         return new TreeMap<String, V>(String.CASE_INSENSITIVE_ORDER);
     }
 
-    protected Mapper(PartnerClient client, Collection<String> columnNames, String mappingFileName)
+    protected Mapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
         this.client = client;
+        this.fields = new CaseInsensitiveSet();
         Set<String> daoColumns = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         if (columnNames != null) daoColumns.addAll(columnNames);
-        this.daoColumns = Collections.unmodifiableSet(daoColumns);
+        this.daoColumns = new CaseInsensitiveSet(Collections.unmodifiableSet(daoColumns));
         putPropertyFileMappings(mappingFileName);
+        for(Field field: fields){
+            this.fields.add(field.getName());
+        }
     }
 
     public final void putMapping(String src, String dest) {
-        this.map.put(src, dest);
+        this.map.put(daoColumns.getOriginal(src), fields.getOriginal(dest));
     }
 
     protected void putConstant(String name, String value) {
@@ -211,7 +217,7 @@ public abstract class Mapper {
     }
 
     protected Set<String> getDaoColumns() {
-        return this.daoColumns;
+        return this.daoColumns.getOriginalValues();
     }
 
     public PartnerClient getClient() {
