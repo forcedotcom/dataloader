@@ -17,7 +17,7 @@
     <build.year>2015</build.year>
     <java.compile.version>1.8</java.compile.version>
     <minJvmVersion>1.8.0</minJvmVersion>
-    <codesign></codesign>
+    <codesign>DONTSIGN</codesign>
     <jacob.version>1.14.3</jacob.version>
 
     <nsis.version>2.46</nsis.version>
@@ -769,7 +769,7 @@
                   <argument>make-pretty-dmg.sh</argument>
                   <argument>${basedir}</argument>
                   <argument>${project.build.directory}/${project.build.finalName}</argument>
-                  <argument>${project.build.directory}/Apex Data Loader.dmg</argument>
+                  <argument>${project.build.directory}/ApexDataLoader.dmg</argument>
                   <argument>${codesign}</argument>
                 </arguments>
               </configuration>
