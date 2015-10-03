@@ -29,12 +29,7 @@ package com.salesforce.dataloader.ui;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.model.LoginCriteria;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 
 /**
  * LoginAdvancedControl is used to connect to SF with a sessionid
@@ -43,10 +38,10 @@ public class LoginAdvancedControl extends Composite {
     private final Text loginUrl;
     private final Button loginButton;
     private final Text sessionId;
-    private final AuthenticatorControl authenticator;
+    private final AuthenticationRunner authenticator;
     private final Label loginLabel;
 
-    public LoginAdvancedControl(Composite parent, int style, AuthenticatorControl authenticator) {
+    public LoginAdvancedControl(Composite parent, int style, AuthenticationRunner authenticator) {
         super(parent, style);
         this.authenticator = authenticator;
 
@@ -61,16 +56,13 @@ public class LoginAdvancedControl extends Composite {
 
         loginLabel = grid.createLabel(10, "");
         loginButton = grid.createButton(2, SWT.PUSH | SWT.FILL, Labels.getString("SettingsPage.login"));
-        loginButton.addSelectionListener(new LoginButtonAdapter());
+        loginButton.addListener(SWT.Selection, this::loginButton_Clicked);
     }
 
-    private class LoginButtonAdapter extends SelectionAdapter {
-        @Override
-        public void widgetDefaultSelected(SelectionEvent e) {
-            LoginCriteria criteria = new LoginCriteria(LoginCriteria.Advanced);
-            criteria.setInstanceUrl(loginUrl.getText());
-            criteria.setSessionId(sessionId.getText());
-            authenticator.login(criteria, loginLabel::setText);
-        }
+    private void loginButton_Clicked(Event event) {
+        LoginCriteria criteria = new LoginCriteria(LoginCriteria.Advanced);
+        criteria.setInstanceUrl(loginUrl.getText());
+        criteria.setSessionId(sessionId.getText());
+        authenticator.login(criteria, loginLabel::setText);
     }
 }

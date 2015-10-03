@@ -29,12 +29,7 @@ package com.salesforce.dataloader.ui;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.model.LoginCriteria;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 
 /**
  * LoginStandardControl is the way to login to the api
@@ -46,10 +41,10 @@ public class LoginStandardControl extends Composite {
     private final Text userName;
     private final Text password;
     private final Text instanceUrl;
-    private final AuthenticatorControl authentication;
+    private final AuthenticationRunner authentication;
     private final Label loginLabel;
 
-    public LoginStandardControl(Composite parent, int style, AuthenticatorControl authentication) {
+    public LoginStandardControl(Composite parent, int style, AuthenticationRunner authentication) {
         super(parent, style);
         this.authentication = authentication;
         grid = new Grid12(this, 40, 20);
@@ -68,17 +63,14 @@ public class LoginStandardControl extends Composite {
 
         loginLabel = grid.createLabel(10, "");
         loginButton = grid.createButton(2, SWT.PUSH | SWT.FILL, Labels.getString("SettingsPage.login"));
-        loginButton.addSelectionListener(new LoginButtonAdapter());
+        loginButton.addListener(SWT.Selection, this::loginButton_Clicked);
     }
 
-    private class LoginButtonAdapter extends SelectionAdapter {
-        @Override
-        public void widgetSelected(SelectionEvent e) {
-            LoginCriteria criteria = new LoginCriteria(LoginCriteria.Standard);
-            criteria.setInstanceUrl(instanceUrl.getText());
-            criteria.setUserName(userName.getText());
-            criteria.setPassword(password.getText());
-            authentication.login(criteria, loginLabel::setText);
-        }
+    private void loginButton_Clicked(Event event) {
+        LoginCriteria criteria = new LoginCriteria(LoginCriteria.Standard);
+        criteria.setInstanceUrl(instanceUrl.getText());
+        criteria.setUserName(userName.getText());
+        criteria.setPassword(password.getText());
+        authentication.login(criteria, loginLabel::setText);
     }
 }

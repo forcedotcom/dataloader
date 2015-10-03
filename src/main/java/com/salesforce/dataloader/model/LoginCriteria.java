@@ -26,6 +26,8 @@
 
 package com.salesforce.dataloader.model;
 
+import com.salesforce.dataloader.config.Config;
+
 /**
  * all possible criteria for login into the api
  */
@@ -89,5 +91,17 @@ public class LoginCriteria {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public void updateConfig(Config config) {
+        switch (getMode()){
+            case LoginCriteria.Standard:
+                config.setValue(Config.USERNAME, getUserName().trim());
+                config.setValue(Config.PASSWORD, getPassword().trim());
+                config.setValue(Config.ENDPOINT, getInstanceUrl().trim());
+                //clear out conflicting configuration?
+                break;
+
+        }
     }
 }
