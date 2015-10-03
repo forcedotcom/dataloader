@@ -40,18 +40,24 @@ public class LoginAdvancedControl extends Composite {
     private final Text sessionId;
     private final AuthenticationRunner authenticator;
     private final Label loginLabel;
+    private final Text userName;
 
     public LoginAdvancedControl(Composite parent, int style, AuthenticationRunner authenticator) {
         super(parent, style);
         this.authenticator = authenticator;
 
         Grid12 grid = new Grid12(this, 40, 20);
-        grid.createLabel(4, Labels.getString("SettingsPage.instServerUrl"));
-        loginUrl = grid.createText(6, SWT.BORDER, authenticator.getConfig().getString(Config.ENDPOINT));
+
+        grid.createLabel(4, Labels.getString("SettingsPage.username"));
+        userName = grid.createText(6, SWT.BORDER | SWT.FILL, authenticator.getConfig().getString(Config.USERNAME));
         grid.createPadding(2);
 
         grid.createLabel(4, Labels.getString("SettingsPage.sessionId"));
         sessionId = grid.createText(6, SWT.BORDER, authenticator.getConfig().getString(Config.SFDC_INTERNAL_SESSION_ID));
+        grid.createPadding(2);
+
+        grid.createLabel(4, Labels.getString("SettingsPage.instServerUrl"));
+        loginUrl = grid.createText(6, SWT.BORDER, authenticator.getConfig().getString(Config.ENDPOINT));
         grid.createPadding(2);
 
         loginLabel = grid.createLabel(10, "");
@@ -63,6 +69,7 @@ public class LoginAdvancedControl extends Composite {
         LoginCriteria criteria = new LoginCriteria(LoginCriteria.Advanced);
         criteria.setInstanceUrl(loginUrl.getText());
         criteria.setSessionId(sessionId.getText());
+        criteria.setUserName(userName.getText());
         authenticator.login(criteria, loginLabel::setText);
     }
 }
