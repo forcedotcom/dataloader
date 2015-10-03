@@ -19,6 +19,7 @@
     <minJvmVersion>1.8.0</minJvmVersion>
     <codesign>DONTSIGN</codesign>
     <jacob.version>1.14.3</jacob.version>
+    <swt.version>4.5</swt.version>
 
     <nsis.version>2.46</nsis.version>
     <spring.version>3.1.1.RELEASE</spring.version>
@@ -31,6 +32,10 @@
       <name>Project Local Repository</name>
       <layout>default</layout>
       <url>file://${basedir}/local-proj-repo/</url>
+    </repository>
+    <repository>
+      <id>maven-eclipse-repo</id>
+      <url>http://maven-eclipse.github.io/maven</url>
     </repository>
   </repositories>
 
@@ -388,9 +393,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse</groupId>
-          <artifactId>swt-gtk-linux-x86</artifactId>
-          <version>4.2</version>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.gtk.linux.x86</artifactId>
+          <version>${swt.version}</version>
         </dependency>
       </dependencies>
     </profile>
@@ -404,9 +409,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse</groupId>
-          <artifactId>swt-gtk-linux-x86_64</artifactId>
-          <version>4.2</version>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
+          <version>${swt.version}</version>
         </dependency>
       </dependencies>
     </profile>
@@ -420,9 +425,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse</groupId>
-          <artifactId>swt-cocoa-macosx</artifactId>
-          <version>4.2</version>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
+          <version>${swt.version}</version>
         </dependency>
       </dependencies>
     </profile>
@@ -436,9 +441,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse</groupId>
-          <artifactId>swt-cocoa-macosx-x86_64</artifactId>
-          <version>4.2</version>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
+          <version>${swt.version}</version>
         </dependency>
       </dependencies>
     </profile>
@@ -452,9 +457,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse</groupId>
-          <artifactId>swt-win32-win32-x86</artifactId>
-          <version>4.2</version>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
+          <version>${swt.version}</version>
         </dependency>
       </dependencies>
     </profile>
@@ -468,9 +473,9 @@
       </activation>
       <dependencies>
         <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>swt-win32-win32-x86</artifactId>
-            <version>4.2</version>
+            <groupId>org.eclipse.swt</groupId>
+            <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
+            <version>${swt.version}</version>
         </dependency>
       </dependencies>
     </profile>

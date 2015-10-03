@@ -29,10 +29,9 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.model.LoginCriteria;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 
 /**
@@ -41,10 +40,10 @@ import org.eclipse.swt.widgets.Label;
 public class LoginDefaultControl extends Composite {
     private final Button loginButton;
     private final CCombo environment;
-    private final AuthenticatorControl authenticator;
+    private final AuthenticationRunner authenticator;
     private final Label loginLabel;
 
-    public LoginDefaultControl(Composite parent, int style, AuthenticatorControl authenticator) {
+    public LoginDefaultControl(Composite parent, int style, AuthenticationRunner authenticator) {
         super(parent, style);
         this.authenticator = authenticator;
 
@@ -56,15 +55,12 @@ public class LoginDefaultControl extends Composite {
 
         loginLabel = grid.createLabel(10, "");
         loginButton = grid.createButton(2, SWT.PUSH | SWT.FILL, Labels.getString("SettingsPage.login"));
-        loginButton.addSelectionListener(new LoginButtonAdapter());
+        loginButton.addListener(SWT.Selection, this::loginButton_Clicked);
     }
 
-    private class LoginButtonAdapter extends SelectionAdapter {
-        @Override
-        public void widgetSelected(SelectionEvent e) {
-            LoginCriteria criteria = new LoginCriteria(LoginCriteria.Default);
-            criteria.setEnvironment(environment.getText());
-            authenticator.login(criteria, loginLabel::setText);
-        }
+    private void loginButton_Clicked(Event event) {
+        LoginCriteria criteria = new LoginCriteria(LoginCriteria.Default);
+        criteria.setEnvironment(environment.getText());
+        authenticator.login(criteria, loginLabel::setText);
     }
 }
