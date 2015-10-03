@@ -30,10 +30,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 
 /**
  * Grid12 simplifies the creation of grid based layout
@@ -122,5 +119,19 @@ public class Grid12 {
         }
 
         return combo;
+    }
+
+    public void hide(Control control) {
+        control.setVisible(false);
+        ((GridData) control.getLayoutData()).exclude = true;
+    }
+
+    public void show(Control control) {
+        control.setVisible(true);
+        ((GridData) control.getLayoutData()).exclude = false;
+    }
+
+    public void pack() {
+        composite.pack();
     }
 }
