@@ -58,7 +58,6 @@ public class SettingsPage extends WizardPage {
     private Text textSessionId;
     private Text textEndpoint;
     private Label loginLabel;
-    private final String nestedException = "nested exception is:";
 
     // logger
     private static Logger logger = Logger.getLogger(SettingsPage.class);
@@ -66,6 +65,7 @@ public class SettingsPage extends WizardPage {
     private Text textOAuthId;
     private Text textOAuthSecret;
     private Text textOAuthEndpoint;
+    private AuthenticatorControl authenticator;
 
     public SettingsPage(Controller controller) {
         super(Labels.getString("SettingsPage.title"), Labels.getString("SettingsPage.titleMsg"), UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -85,186 +85,196 @@ public class SettingsPage extends WizardPage {
         getShell().setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
 
         Config config = controller.getConfig();
+        Composite control = new Composite(parent, SWT.FILL);
+        Grid12 grid = new Grid12(control, 40);
+        authenticator = new AuthenticatorControl(config, controller);
 
-        Composite comp = new Composite(parent, SWT.NONE);
+        LoginDefaultControl defaultControl = new LoginDefaultControl(control, SWT.FILL, authenticator);
+        defaultControl.setLayoutData(grid.createCell(12));
+        LoginStandardControl standardControl = new LoginStandardControl(control, SWT.FILL, authenticator);
+        standardControl.setLayoutData(grid.createCell(12));
+        LoginAdvancedControl advancedControl = new LoginAdvancedControl(control, SWT.FILL, authenticator);
+        advancedControl.setLayoutData(grid.createCell(12));
 
-        GridLayout gridLayout = new GridLayout();
-        gridLayout.numColumns = 3;
-        gridLayout.marginHeight = 30;
-        comp.setLayout(gridLayout);
+        setControl(control);
 
-        Label labelUsername = new Label(comp, SWT.RIGHT);
-        labelUsername.setText(Labels.getString("SettingsPage.username")); //$NON-NLS-1$
-
-        textUsername = new Text(comp, SWT.BORDER);
-        textUsername.setText(config.getString(Config.USERNAME));
-
-        GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false);
-        data.widthHint = 150;
-        textUsername.setLayoutData(data);
-
-        // Consume the 2 cells to the right of txtUsername and txtPassword
-        Composite composite2 = new Composite(comp, SWT.NONE);
-        data = new GridData();
-        data.verticalSpan = 2;
-        composite2.setLayoutData(data);
-
-        Label labelPassword = new Label(comp, SWT.RIGHT);
-        labelPassword.setText(Labels.getString("SettingsPage.password")); //$NON-NLS-1$
-
-        textPassword = new Text(comp, SWT.BORDER | SWT.PASSWORD);
-        // don't want to cache the password
-        config.setValue(Config.PASSWORD, ""); //$NON-NLS-1$
-        textPassword.setText(config.getString(Config.PASSWORD));
-
-        data = new GridData(SWT.FILL, SWT.CENTER, true, false);
-        data.widthHint = 150;
-        textPassword.setLayoutData(data);
-
-        //endpoint
-        Label labelEndpoint = new Label(comp, SWT.RIGHT);
-        labelEndpoint.setText(Labels.getString("SettingsPage.instServerUrl")); //$NON-NLS-1$
-
-        textEndpoint = new Text(comp, SWT.BORDER);
-        textEndpoint.setText(config.getString(Config.ENDPOINT));
-        data = new GridData(SWT.FILL, SWT.CENTER, true, false);
-        data.widthHint = 150;
-        textEndpoint.setLayoutData(data);
-
-        if(config.getBoolean(Config.SFDC_INTERNAL)) {
-            //spacer
-            Label spacer = new Label(comp, SWT.NONE);
-            data = new GridData();
-            data.horizontalSpan = 3;
-            data.widthHint = 15;
-            spacer.setLayoutData(data);
-
-            //lIsSessionLogin checkbox
-            Label labelIsSessionIdLogin = new Label(comp, SWT.RIGHT);
-            labelIsSessionIdLogin.setText(Labels.getString("SettingsPage.isSessionIdLogin")); //$NON-NLS-1$
-
-            isSessionIdLogin = new Button(comp, SWT.CHECK);
-            isSessionIdLogin.setSelection(config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN));
-            data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-            data.horizontalSpan = 2;
-            isSessionIdLogin.setLayoutData(data);
-            isSessionIdLogin.addSelectionListener(new SelectionAdapter(){
-                @Override
-                public void widgetSelected(SelectionEvent event) {
-                    reconcileLoginCredentialFieldsEnablement();
-                }
-            });
-
-            //sessionId
-            Label labelSessionId = new Label(comp, SWT.RIGHT);
-            labelSessionId.setText(Labels.getString("SettingsPage.sessionId")); //$NON-NLS-1$
-
-            textSessionId = new Text(comp, SWT.BORDER);
-            textSessionId.setText(config.getString(Config.SFDC_INTERNAL_SESSION_ID));
-            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
-            data.widthHint = 150;
-            textSessionId.setLayoutData(data);
-
-            // consume the 2 cells to the right of textSessionId & textEndpoint
-            composite2 = new Composite(comp, SWT.NONE);
-            data = new GridData();
-            data.verticalSpan = 2;
-            composite2.setLayoutData(data);
-
-        }
-        if(config.getBoolean(Config.OAUTH)) {
-            //spacer
-            Label spacer = new Label(comp, SWT.NONE);
-            data = new GridData();
-            data.horizontalSpan = 3;
-            data.widthHint = 15;
-            spacer.setLayoutData(data);
-
-            Label labelIsOAuthLogin = new Label(comp, SWT.RIGHT);
-            labelIsOAuthLogin.setText(Labels.getString("SettingsPage.isOAuthLogin")); //$NON-NLS-1$
-
-            isOAuthIdLogin = new Button(comp, SWT.CHECK);
-            isOAuthIdLogin.setSelection(config.getBoolean(Config.OAUTH));
-            data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-            data.horizontalSpan = 2;
-            isOAuthIdLogin.setLayoutData(data);
-            isOAuthIdLogin.addSelectionListener(new SelectionAdapter(){
-                @Override
-                public void widgetSelected(SelectionEvent event) {
-                    reconcileLoginCredentialFieldsEnablement();
-                }
-            });
-
-            //OAuthId
-            Label labelOAuthId = new Label(comp, SWT.RIGHT);
-            labelOAuthId.setText(Labels.getString("SettingsPage.OAuthClientId")); //$NON-NLS-1$
-
-            textOAuthId = new Text(comp, SWT.BORDER);
-            textOAuthId.setText(config.getString(Config.OAUTH_CLIENTID));
-            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
-            data.widthHint = 150;
-            textOAuthId.setLayoutData(data);
-
-            // consume the 2 cells to the right of textOAuthId & textEndpoint
-            composite2 = new Composite(comp, SWT.NONE);
-            data = new GridData();
-            data.verticalSpan = 2;
-            composite2.setLayoutData(data);
-
-            //OAuthId
-            Label labelOAuthSecret = new Label(comp, SWT.RIGHT);
-            labelOAuthSecret.setText(Labels.getString("SettingsPage.OAuthClientSecret")); //$NON-NLS-1$
-
-            textOAuthSecret = new Text(comp, SWT.BORDER);
-            textOAuthSecret.setText(config.getString(Config.OAUTH_CLIENTKEY));
-            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
-            data.widthHint = 150;
-            textOAuthSecret.setLayoutData(data);
-
-
-
-            //endpoint
-            labelEndpoint = new Label(comp, SWT.RIGHT);
-            labelEndpoint.setText(Labels.getString("SettingsPage.OAuthServer")); //$NON-NLS-1$
-
-            textOAuthEndpoint = new Text(comp, SWT.BORDER);
-            textOAuthEndpoint.setText(config.getString(Config.OAUTH_SERVER));
-            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
-            data.widthHint = 150;
-            textOAuthEndpoint.setLayoutData(data);
-
-        }
-
-        if (config.getBoolean(Config.OAUTH) || config.getBoolean(Config.SFDC_INTERNAL)){
-            reconcileLoginCredentialFieldsEnablement();
-        }
-
-        loginLabel = new Label(comp, SWT.NONE);
-        data = new GridData(GridData.FILL_HORIZONTAL);
-        data.horizontalSpan = 3;
-        data.widthHint = 220;
-        loginLabel.setLayoutData(data);
-
-        Button loginButton = new Button(comp, SWT.PUSH);
-        loginButton.setText(Labels.getString("SettingsPage.login")); //$NON-NLS-1$
-        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        data.horizontalSpan = 2;
-        data.widthHint = 75;
-        loginButton.setLayoutData(data);
-        final LoginButtonSelectionListener loginListener = new LoginButtonSelectionListener();
-        loginButton.addSelectionListener(loginListener);
-        parent.getShell().setDefaultButton(loginButton);
-
-        Composite composite5 = new Composite(comp, SWT.NONE);
-        data = new GridData();
-        data.horizontalSpan = 2;
-        composite5.setLayoutData(data);
-
-        setControl(comp);
-
-        // respond to enter key on username and password box
-        textUsername.addKeyListener(new UsernamePasswordKeyListener(loginListener));
-        textPassword.addKeyListener(new UsernamePasswordKeyListener(loginListener));
+//        GridLayout gridLayout = new GridLayout();
+//        gridLayout.numColumns = 3;
+//        gridLayout.marginHeight = 30;
+//        comp.setLayout(gridLayout);
+//
+//        Label labelUsername = new Label(comp, SWT.RIGHT);
+//        labelUsername.setText(Labels.getString("SettingsPage.username")); //$NON-NLS-1$
+//
+//        textUsername = new Text(comp, SWT.BORDER);
+//        textUsername.setText(config.getString(Config.USERNAME));
+//
+//        GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false);
+//        data.widthHint = 150;
+//        textUsername.setLayoutData(data);
+//
+//        // Consume the 2 cells to the right of txtUsername and txtPassword
+//        Composite composite2 = new Composite(comp, SWT.NONE);
+//        data = new GridData();
+//        data.verticalSpan = 2;
+//        composite2.setLayoutData(data);
+//
+//        Label labelPassword = new Label(comp, SWT.RIGHT);
+//        labelPassword.setText(Labels.getString("SettingsPage.password")); //$NON-NLS-1$
+//
+//        textPassword = new Text(comp, SWT.BORDER | SWT.PASSWORD);
+//        // don't want to cache the password
+//        config.setValue(Config.PASSWORD, ""); //$NON-NLS-1$
+//        textPassword.setText(config.getString(Config.PASSWORD));
+//
+//        data = new GridData(SWT.FILL, SWT.CENTER, true, false);
+//        data.widthHint = 150;
+//        textPassword.setLayoutData(data);
+//
+//        //endpoint
+//        Label labelEndpoint = new Label(comp, SWT.RIGHT);
+//        labelEndpoint.setText(Labels.getString("SettingsPage.instServerUrl")); //$NON-NLS-1$
+//
+//        textEndpoint = new Text(comp, SWT.BORDER);
+//        textEndpoint.setText(config.getString(Config.ENDPOINT));
+//        data = new GridData(SWT.FILL, SWT.CENTER, true, false);
+//        data.widthHint = 150;
+//        textEndpoint.setLayoutData(data);
+//
+//        if(config.getBoolean(Config.SFDC_INTERNAL)) {
+//            //spacer
+//            Label spacer = new Label(comp, SWT.NONE);
+//            data = new GridData();
+//            data.horizontalSpan = 3;
+//            data.widthHint = 15;
+//            spacer.setLayoutData(data);
+//
+//            //lIsSessionLogin checkbox
+//            Label labelIsSessionIdLogin = new Label(comp, SWT.RIGHT);
+//            labelIsSessionIdLogin.setText(Labels.getString("SettingsPage.isSessionIdLogin")); //$NON-NLS-1$
+//
+//            isSessionIdLogin = new Button(comp, SWT.CHECK);
+//            isSessionIdLogin.setSelection(config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN));
+//            data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+//            data.horizontalSpan = 2;
+//            isSessionIdLogin.setLayoutData(data);
+//            isSessionIdLogin.addSelectionListener(new SelectionAdapter(){
+//                @Override
+//                public void widgetSelected(SelectionEvent event) {
+//                    reconcileLoginCredentialFieldsEnablement();
+//                }
+//            });
+//
+//            //sessionId
+//            Label labelSessionId = new Label(comp, SWT.RIGHT);
+//            labelSessionId.setText(Labels.getString("SettingsPage.sessionId")); //$NON-NLS-1$
+//
+//            textSessionId = new Text(comp, SWT.BORDER);
+//            textSessionId.setText(config.getString(Config.SFDC_INTERNAL_SESSION_ID));
+//            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
+//            data.widthHint = 150;
+//            textSessionId.setLayoutData(data);
+//
+//            // consume the 2 cells to the right of textSessionId & textEndpoint
+//            composite2 = new Composite(comp, SWT.NONE);
+//            data = new GridData();
+//            data.verticalSpan = 2;
+//            composite2.setLayoutData(data);
+//
+//        }
+//        if(config.getBoolean(Config.OAUTH)) {
+//            //spacer
+//            Label spacer = new Label(comp, SWT.NONE);
+//            data = new GridData();
+//            data.horizontalSpan = 3;
+//            data.widthHint = 15;
+//            spacer.setLayoutData(data);
+//
+//            Label labelIsOAuthLogin = new Label(comp, SWT.RIGHT);
+//            labelIsOAuthLogin.setText(Labels.getString("SettingsPage.isOAuthLogin")); //$NON-NLS-1$
+//
+//            isOAuthIdLogin = new Button(comp, SWT.CHECK);
+//            isOAuthIdLogin.setSelection(config.getBoolean(Config.OAUTH));
+//            data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+//            data.horizontalSpan = 2;
+//            isOAuthIdLogin.setLayoutData(data);
+//            isOAuthIdLogin.addSelectionListener(new SelectionAdapter(){
+//                @Override
+//                public void widgetSelected(SelectionEvent event) {
+//                    reconcileLoginCredentialFieldsEnablement();
+//                }
+//            });
+//
+//            //OAuthId
+//            Label labelOAuthId = new Label(comp, SWT.RIGHT);
+//            labelOAuthId.setText(Labels.getString("SettingsPage.OAuthClientId")); //$NON-NLS-1$
+//
+//            textOAuthId = new Text(comp, SWT.BORDER);
+//            textOAuthId.setText(config.getString(Config.OAUTH_CLIENTID));
+//            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
+//            data.widthHint = 150;
+//            textOAuthId.setLayoutData(data);
+//
+//            // consume the 2 cells to the right of textOAuthId & textEndpoint
+//            composite2 = new Composite(comp, SWT.NONE);
+//            data = new GridData();
+//            data.verticalSpan = 2;
+//            composite2.setLayoutData(data);
+//
+//            //OAuthId
+//            Label labelOAuthSecret = new Label(comp, SWT.RIGHT);
+//            labelOAuthSecret.setText(Labels.getString("SettingsPage.OAuthClientSecret")); //$NON-NLS-1$
+//
+//            textOAuthSecret = new Text(comp, SWT.BORDER);
+//            textOAuthSecret.setText(config.getString(Config.OAUTH_CLIENTKEY));
+//            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
+//            data.widthHint = 150;
+//            textOAuthSecret.setLayoutData(data);
+//
+//
+//
+//            //endpoint
+//            labelEndpoint = new Label(comp, SWT.RIGHT);
+//            labelEndpoint.setText(Labels.getString("SettingsPage.OAuthServer")); //$NON-NLS-1$
+//
+//            textOAuthEndpoint = new Text(comp, SWT.BORDER);
+//            textOAuthEndpoint.setText(config.getString(Config.OAUTH_SERVER));
+//            data = new GridData(SWT.FILL, SWT.CENTER, true, false);
+//            data.widthHint = 150;
+//            textOAuthEndpoint.setLayoutData(data);
+//
+//        }
+//
+//        if (config.getBoolean(Config.OAUTH) || config.getBoolean(Config.SFDC_INTERNAL)){
+//            reconcileLoginCredentialFieldsEnablement();
+//        }
+//
+//        loginLabel = new Label(comp, SWT.NONE);
+//        data = new GridData(GridData.FILL_HORIZONTAL);
+//        data.horizontalSpan = 3;
+//        data.widthHint = 220;
+//        loginLabel.setLayoutData(data);
+//
+//        Button loginButton = new Button(comp, SWT.PUSH);
+//        loginButton.setText(Labels.getString("SettingsPage.login")); //$NON-NLS-1$
+//        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+//        data.horizontalSpan = 2;
+//        data.widthHint = 75;
+//        loginButton.setLayoutData(data);
+//        final LoginButtonSelectionListener loginListener = new LoginButtonSelectionListener();
+//        loginButton.addSelectionListener(loginListener);
+//        parent.getShell().setDefaultButton(loginButton);
+//
+//        Composite composite5 = new Composite(comp, SWT.NONE);
+//        data = new GridData();
+//        data.horizontalSpan = 2;
+//        composite5.setLayoutData(data);
+//
+//        setControl(comp);
+//
+//        // respond to enter key on username and password box
+//        textUsername.addKeyListener(new UsernamePasswordKeyListener(loginListener));
+//        textPassword.addKeyListener(new UsernamePasswordKeyListener(loginListener));
     }
 
     private static class UsernamePasswordKeyListener implements KeyListener {
@@ -316,58 +326,6 @@ public class SettingsPage extends WizardPage {
                     flow.open();
                 }
             }
-
-            loginLabel.setText(Labels.getString("SettingsPage.verifyingLogin")); //$NON-NLS-1$
-
-            BusyIndicator.showWhile(Display.getDefault(), new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        if (controller.login() && controller.setEntityDescribes()) {
-                            loginLabel.setText(Labels.getString("SettingsPage.loginSuccessful")); //$NON-NLS-1$
-                            controller.saveConfig();
-                            loadDataSelectionPage(controller);
-                        } else {
-                            loginLabel.setText(Labels.getString("SettingsPage.invalidLogin")); //$NON-NLS-1$
-                            setPageComplete(false);
-                        }
-                    } catch (LoginFault lf ) {
-                        loginLabel.setText(Labels.getString("SettingsPage.invalidLogin"));
-                        setPageComplete(false);
-                    } catch (ApiFault e) {
-                        String msg = e.getExceptionMessage();
-                        processException(msg);
-                        logger.error(msg);
-                    } catch (ConnectionException e) {
-                        String msg = e.getMessage();
-                        processException(msg);
-                        logger.error(msg);
-                    } catch (Throwable e) {
-                        String msg = e.getMessage();
-                        processException(msg);
-                        logger.error(msg);
-                        logger.error("\n" + ExceptionUtil.getStackTraceString(e));
-                    }
-                }
-
-                /**
-                 * @param msg
-                 */
-                private void processException(String msg) {
-                    if (msg == null || msg.length() < 1) {
-                        loginLabel.setText(Labels.getString("SettingsPage.invalidLogin"));
-                    } else {
-                        int x = msg.indexOf(nestedException);
-                        if (x >= 0) {
-                            x += nestedException.length();
-                            msg = msg.substring(x);
-                        }
-                        loginLabel.setText(msg.replace('\n', ' ').trim());
-                    }
-                    setPageComplete(false);
-                }
-
-            });
         }
     }
 
