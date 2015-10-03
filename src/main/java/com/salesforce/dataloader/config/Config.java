@@ -39,15 +39,7 @@ import java.security.GeneralSecurityException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TimeZone;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 
@@ -112,7 +104,7 @@ public class Config {
     public static final int INT_DEFAULT = 0;
     public static final long LONG_DEFAULT = 0L;
     public static final String STRING_DEFAULT = ""; //$NON-NLS-1$
-    public static final Map<String,String> MAP_STRING_DEFAULT = new HashMap<String,String>();
+    public static final Map<String,String> MAP_STRING_DEFAULT = new HashMap<>();
 
     /**
      * The Constants for the current Loader Keys
@@ -160,6 +152,7 @@ public class Config {
     public static final String OAUTH_ACCESSTOKEN = "sfdc.oauthAccesstoken";
     public static final String OAUTH_REFRESHTOKEN = "sfdc.oauthRefreshtoken";
     public static final String OAUTH_CLIENTID = "sfdc.oauth.clientid";
+    public static final String OAUTH_ENVIRONMENTS = "sfdc.environments";
 
     // salesforce operation parameters
     public static final String INSERT_NULLS = "sfdc.insertNulls"; //$NON-NLS-1$
@@ -329,6 +322,7 @@ public class Config {
         //oauth settings
         setValue(OAUTH, false);
         setValue(OAUTH_SERVER, DEFAULT_ENDPOINT_URL);
+        setValue(OAUTH_ENVIRONMENTS, "Production", "Sandbox");
     }
 
     /**
@@ -460,7 +454,6 @@ public class Config {
         return value;
     }
 
-
     /**
      * Gets string for a given name.
      *
@@ -471,6 +464,15 @@ public class Config {
         String value = getParamValue(name);
         if (value == null) return STRING_DEFAULT;
         return value;
+    }
+
+
+    public String[] getStrings(String name) {
+        String values = getString(name);
+        if (values != null){
+            return values.split(",");
+        }
+        return new String[0];
     }
 
     /**
@@ -954,10 +956,21 @@ public class Config {
      * Sets a string
      *
      * @param name
-     * @param value
+     * @param values
      */
-    public void setValue(String name, String value) {
-        setProperty(name, value);
+    public void setValue(String name, String... values) {
+        if (values != null && values.length > 1) {
+            StringJoiner joiner = new StringJoiner(",");
+            for (String value : values) {
+                joiner.add(value);
+            }
+            setProperty(name, joiner.toString());
+        } else if (values != null && values.length > 0){
+            setProperty(name, values[0]);
+        } else {
+            setProperty(name, null);
+        }
+
     }
 
     /**
@@ -976,7 +989,6 @@ public class Config {
 
     /**
      * @param name
-     * @param oldValue
      * @param newValue
      */
     private void setProperty(String name, String newValue) {
