@@ -94,14 +94,25 @@ public class LoginCriteria {
     }
 
     public void updateConfig(Config config) {
+        config.setValue(Config.USERNAME, "");
+        config.setValue(Config.PASSWORD, "");
+        config.setValue(Config.ENDPOINT, "");
+        config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
+        config.setValue(Config.SFDC_INTERNAL, false);
+
         switch (getMode()){
             case LoginCriteria.Standard:
                 config.setValue(Config.USERNAME, getUserName().trim());
                 config.setValue(Config.PASSWORD, getPassword().trim());
                 config.setValue(Config.ENDPOINT, getInstanceUrl().trim());
-                //clear out conflicting configuration?
                 break;
-
+            case LoginCriteria.Advanced:
+                config.setValue(Config.USERNAME, getUserName().trim());
+                config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
+                config.setValue(Config.SFDC_INTERNAL_SESSION_ID, getSessionId().trim());
+                config.setValue(Config.SFDC_INTERNAL, true);
+                config.setValue(Config.ENDPOINT, getInstanceUrl().trim());
+                break;
         }
     }
 }
