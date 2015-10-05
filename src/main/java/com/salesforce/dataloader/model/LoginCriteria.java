@@ -94,11 +94,12 @@ public class LoginCriteria {
     }
 
     public void updateConfig(Config config) {
-        config.setValue(Config.USERNAME, "");
-        config.setValue(Config.PASSWORD, "");
-        config.setValue(Config.ENDPOINT, "");
+        config.setValue(Config.USERNAME, config.STRING_DEFAULT);
+        config.setValue(Config.PASSWORD, config.STRING_DEFAULT);
+        config.setValue(Config.ENDPOINT, config.STRING_DEFAULT);
         config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
-        config.setValue(Config.SFDC_INTERNAL, false);
+        config.setValue(Config.SFDC_INTERNAL_SESSION_ID, config.STRING_DEFAULT);
+        config.setValue(Config.OAUTH_ENVIRONMENT, config.STRING_DEFAULT);
 
         switch (getMode()){
             case LoginCriteria.Standard:
@@ -110,8 +111,11 @@ public class LoginCriteria {
                 config.setValue(Config.USERNAME, getUserName().trim());
                 config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
                 config.setValue(Config.SFDC_INTERNAL_SESSION_ID, getSessionId().trim());
-                config.setValue(Config.SFDC_INTERNAL, true);
                 config.setValue(Config.ENDPOINT, getInstanceUrl().trim());
+                break;
+            case LoginCriteria.Default:
+                config.setValue(Config.OAUTH, true);
+                config.setOAuthEnvironment(getEnvironment());
                 break;
         }
     }

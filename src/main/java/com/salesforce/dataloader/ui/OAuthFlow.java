@@ -40,10 +40,7 @@ import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.*;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -53,18 +50,14 @@ import java.util.List;
  */
 public class OAuthFlow extends Dialog {
     private final Config config;
-    private final String oauthServer;
-    private final String endPoint;
 
     public OAuthFlow(Shell parent, Config config) {
         super(parent);
         this.config = config;
-        endPoint = config.getString(Config.ENDPOINT);
-        oauthServer = config.getString(Config.OAUTH_SERVER);
     }
 
 
-    public boolean open() {
+    public boolean open() throws UnsupportedEncodingException {
         // Create the dialog window
         Display display = getParent().getDisplay();
         final Shell shell = new Shell(getParent(), getStyle());
@@ -89,7 +82,10 @@ public class OAuthFlow extends Dialog {
         browser.setLayoutData(data);
 
         browser.addProgressListener(new OAuthBrowserListener(browser, shell));
-        browser.setUrl(oauthServer + "/services/oauth2/authorize?response_type=code&display=popup&client_id=" + config.getString(Config.OAUTH_CLIENTID) + "&redirect_uri=" + URLEncoder.encode(endPoint));
+        browser.setUrl(config.getString(Config.OAUTH_SERVER) +
+                "/services/oauth2/authorize?response_type=code&display=popup&client_id=" +
+                config.getString(Config.OAUTH_CLIENTID) + "&redirect_uri=" +
+                URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), "UTF-8"));
 
 
         shell.pack();
@@ -127,10 +123,10 @@ public class OAuthFlow extends Dialog {
                 for(NameValuePair queryParam: queryParams){
                     if (queryParam.getName().toLowerCase().equals("code")){
                         String code = queryParam.getValue();
-                        URL fetchToken = new URL(oauthServer + "/services/oauth2/token");
+                        URL fetchToken = new URL(config.getString(Config.OAUTH_SERVER) + "/services/oauth2/token");
                         HttpURLConnection urlConnection = (HttpURLConnection) fetchToken.openConnection();
                         urlConnection.setRequestMethod("POST");
-                        String parameters = "code=" + URLEncoder.encode(code) + "&grant_type=authorization_code&client_id=" + config.getString(Config.OAUTH_CLIENTID) + "&client_secret=" + config.getString(Config.OAUTH_CLIENTKEY) + "&redirect_uri=" + URLEncoder.encode(endPoint);
+                        String parameters = "code=" + URLEncoder.encode(code, "UTF-8") + "&grant_type=authorization_code&client_id=" + config.getString(Config.OAUTH_CLIENTID) + "&client_secret=" + config.getString(Config.OAUTH_CLIENTSECRET) + "&redirect_uri=" + URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), "UTF-8");
                         byte[] postData = parameters.getBytes(Charset.forName("UTF-8"));
                         urlConnection.setDoOutput( true );
                         urlConnection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
