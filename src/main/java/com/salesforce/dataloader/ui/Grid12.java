@@ -32,6 +32,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import java.util.ArrayList;
+
 /**
  * Grid12 simplifies the creation of grid based layout
  */
@@ -110,7 +112,7 @@ public class Grid12 {
         return button;
     }
 
-    public CCombo createCombo(int columns, int style, String... labels) {
+    public CCombo createCombo(int columns, int style, ArrayList<String> labels) {
         CCombo combo = new CCombo(composite, style);
         combo.setEditable(false);
         combo.setLayoutData(createCell(columns));

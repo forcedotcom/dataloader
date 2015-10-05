@@ -147,12 +147,15 @@ public class Config {
     public static final String TIMEZONE = "sfdc.timezone";
 
     public static final String OAUTH = "sfdc.oauth";
-    public static final String OAUTH_SERVER = "sfdc.oauthServer";
-    public static final String OAUTH_CLIENTKEY = "sfdc.oauthClientKey";
-    public static final String OAUTH_ACCESSTOKEN = "sfdc.oauthAccesstoken";
-    public static final String OAUTH_REFRESHTOKEN = "sfdc.oauthRefreshtoken";
-    public static final String OAUTH_CLIENTID = "sfdc.oauth.clientid";
-    public static final String OAUTH_ENVIRONMENTS = "sfdc.environments";
+    public static final String OAUTH_SERVER = "sfdc.oauth.server";
+    public static final String OAUTH_CLIENTSECRET = "sfdc.oauth.clientSecret";
+    public static final String OAUTH_ACCESSTOKEN = "sfdc.oauth.accesstoken";
+    public static final String OAUTH_REFRESHTOKEN = "sfdc.oauth.refreshtoken";
+    public static final String OAUTH_CLIENTID = "sfdc.oauth.clientId";
+    public static final String OAUTH_REDIRECTURI = "sfdc.oauthRedirectUri";
+    public static final String OAUTH_ENVIRONMENTS = "sfdc.oauth.environments";
+    public static final String OAUTH_ENVIRONMENT = "sfdc.oauth.environment";
+
 
     // salesforce operation parameters
     public static final String INSERT_NULLS = "sfdc.insertNulls"; //$NON-NLS-1$
@@ -322,7 +325,9 @@ public class Config {
         //oauth settings
         setValue(OAUTH, false);
         setValue(OAUTH_SERVER, DEFAULT_ENDPOINT_URL);
-        setValue(OAUTH_ENVIRONMENTS, "Production", "Sandbox");
+        setValue(OAUTH_REDIRECTURI, DEFAULT_ENDPOINT_URL);
+        setValue(OAUTH_ENVIRONMENTS, STRING_DEFAULT);
+        setValue(OAUTH_ENVIRONMENT, STRING_DEFAULT);
     }
 
     /**
@@ -467,12 +472,13 @@ public class Config {
     }
 
 
-    public String[] getStrings(String name) {
+    public ArrayList<String> getStrings(String name) {
         String values = getString(name);
-        if (values != null){
-            return values.split(",");
+        ArrayList<String> list = new ArrayList<>();
+        if (values != null && !values.trim().isEmpty()){
+            Collections.addAll(list, values.trim().split(","));
         }
-        return new String[0];
+        return list;
     }
 
     /**
@@ -1062,6 +1068,16 @@ public class Config {
         for (ConfigListener l : this.listeners) {
             l.configValueChanged(key, oldValue, newValue);
         }
+    }
+
+    public void setOAuthEnvironment(String environment) {
+        String rootKey = "sfdc.oauth." + environment;
+        setValue(OAUTH_ENVIRONMENT, environment);
+
+        setValue(OAUTH_SERVER, getString(rootKey + ".server"));
+        setValue(OAUTH_CLIENTID, getString(rootKey + ".clientId"));
+        setValue(OAUTH_CLIENTSECRET, getString(rootKey + ".clientKey"));
+        setValue(OAUTH_REDIRECTURI, getString(rootKey + ".redirectUri"));
     }
 
     public static interface ConfigListener {
