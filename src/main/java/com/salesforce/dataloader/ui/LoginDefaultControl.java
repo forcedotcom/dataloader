@@ -34,6 +34,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 
+import java.util.ArrayList;
+
 /**
  * Login default control is the oauth login
  */
@@ -49,8 +51,14 @@ public class LoginDefaultControl extends Composite {
 
         Grid12 grid =  new Grid12(this, 40, 20);
 
-        grid.createLabel(4, "Environment");
-        environment = grid.createCombo(6, SWT.DROP_DOWN | SWT.BORDER, authenticator.getConfig().getStrings(Config.OAUTH_ENVIRONMENTS));
+        grid.createLabel(4, Labels.getString("SettingsPage.environment"));
+        ArrayList<String> environments = authenticator.getConfig().getStrings(Config.OAUTH_ENVIRONMENTS);
+        environment = grid.createCombo(6, SWT.DROP_DOWN | SWT.BORDER, environments);
+        String currentEnvironment = authenticator.getConfig().getString(Config.OAUTH_ENVIRONMENT);
+        if (environments.contains(currentEnvironment)) {
+            environment.setText(currentEnvironment);
+        }
+
         grid.createPadding(2);
 
         loginLabel = grid.createLabel(10, "");

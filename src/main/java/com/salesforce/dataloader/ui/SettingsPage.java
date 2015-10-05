@@ -26,14 +26,14 @@
 
 package com.salesforce.dataloader.ui;
 
-import org.apache.log4j.Logger;
+import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.controller.Controller;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.*;
-
-import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.controller.Controller;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 
 /**
  * Describe your class here.
@@ -71,13 +71,13 @@ public class SettingsPage extends WizardPage {
         Config config = controller.getConfig();
         Composite control = new Composite(parent, SWT.FILL);
         grid = new Grid12(control, 40);
-        authenticator = new AuthenticationRunner(config, controller, this::authenticationCompleted);
+        authenticator = new AuthenticationRunner(getShell(), config, controller, this::authenticationCompleted);
 
         Button[] layouts = new Button[3];
         grid.createPadding(2);
-        layouts[0] = grid.createButton(2, SWT.RADIO, "Default");
-        layouts[1] = grid.createButton(2, SWT.RADIO, "Standard");
-        layouts[2] = grid.createButton(2, SWT.RADIO, "Advanced");
+        layouts[0] = grid.createButton(2, SWT.RADIO, Labels.getString("SettingsPage.loginDefault"));
+        layouts[1] = grid.createButton(2, SWT.RADIO, Labels.getString("SettingsPage.loginStandard"));
+        layouts[2] = grid.createButton(2, SWT.RADIO, Labels.getString("SettingsPage.loginAdvanced"));
         grid.createPadding(2);
 
         defaultControl = new LoginDefaultControl(control, SWT.FILL, authenticator);
@@ -92,8 +92,24 @@ public class SettingsPage extends WizardPage {
         layouts[0].addListener(SWT.Selection, this::selectDefault);
         layouts[1].addListener(SWT.Selection, this::selectStandard);
         layouts[2].addListener(SWT.Selection, this::selectAdvanced);
-        layouts[0].setSelection(true);
-        selectDefault(null);
+
+        //turn off oauth options if no configured environments found
+        if (config.getStrings(Config.OAUTH_ENVIRONMENTS).size() > 0) {
+            layouts[0].setSelection(true);
+            selectDefault(null);
+        } else {
+            grid.hide(layouts[0]);
+            layouts[1].setSelection(true);
+            selectStandard(null);
+        }
+        if (!config.getBoolean(Config.SFDC_INTERNAL)){
+            grid.hide(layouts[2]);
+            if (!layouts[0].getVisible()){
+                //no options other than standard so don't present them
+                grid.hide(layouts[1]);
+            }
+        }
+        grid.pack();
     }
 
     private void selectAdvanced(Event event) {

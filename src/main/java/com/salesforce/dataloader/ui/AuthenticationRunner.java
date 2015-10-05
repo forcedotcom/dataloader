@@ -29,12 +29,13 @@ package com.salesforce.dataloader.ui;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.model.LoginCriteria;
+import com.salesforce.dataloader.model.OAuthToken;
 import com.salesforce.dataloader.util.ExceptionUtil;
-import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.soap.partner.fault.LoginFault;
 import org.apache.log4j.Logger;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 import java.util.function.Consumer;
 
@@ -48,10 +49,13 @@ public class AuthenticationRunner {
     private final Controller controller;
     private final Consumer<Boolean> complete;
     private final String nestedException = "nested exception is:";
+    private final Shell shell;
     private Consumer<String> messenger;
+    private LoginCriteria criteria;
 
 
-    public AuthenticationRunner(Config config, Controller controller, Consumer<Boolean> complete) {
+    public AuthenticationRunner(Shell shell, Config config, Controller controller, Consumer<Boolean> complete) {
+        this.shell = shell;
         this.config = config;
         this.controller = controller;
         this.complete = complete;
@@ -63,6 +67,7 @@ public class AuthenticationRunner {
 
     public void login(LoginCriteria criteria, Consumer<String> messenger) {
         this.messenger = messenger;
+        this.criteria = criteria;
 
         criteria.updateConfig(config);
 
@@ -72,6 +77,12 @@ public class AuthenticationRunner {
     private void loginAsync(){
         try {
             messenger.accept(Labels.getString("SettingsPage.verifyingLogin"));
+
+            if (criteria.getMode() == LoginCriteria.Default){
+
+                OAuthFlow flow = new OAuthFlow(shell, config);
+                flow.open();
+            }
             if (controller.login() && controller.setEntityDescribes()) {
                 messenger.accept(Labels.getString("SettingsPage.loginSuccessful"));
                 controller.saveConfig();
