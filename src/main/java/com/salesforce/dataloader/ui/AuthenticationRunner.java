@@ -26,10 +26,10 @@
 
 package com.salesforce.dataloader.ui;
 
+import com.salesforce.dataloader.client.SimplePost;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.model.LoginCriteria;
-import com.salesforce.dataloader.model.OAuthToken;
 import com.salesforce.dataloader.util.ExceptionUtil;
 import com.sforce.soap.partner.fault.LoginFault;
 import org.apache.log4j.Logger;
@@ -65,6 +65,8 @@ public class AuthenticationRunner {
         return config;
     }
 
+
+
     public void login(LoginCriteria criteria, Consumer<String> messenger) {
         this.messenger = messenger;
         this.criteria = criteria;
@@ -81,7 +83,15 @@ public class AuthenticationRunner {
             if (criteria.getMode() == LoginCriteria.Default){
 
                 OAuthFlow flow = new OAuthFlow(shell, config);
-                flow.open();
+                if (!flow.open()){
+                    String message = flow.getStatusCode() == SimplePost.PROXY_AUTHENTICATION_REQUIRED ?
+                            flow.getReasonPhrase() : Labels.getString("SettingsPage.invalidLogin");
+
+                    logger.info("Login failed:" + flow.getReasonPhrase());
+                    messenger.accept(message);
+                    complete.accept(false);
+                    return;
+                }
             }
             if (controller.login() && controller.setEntityDescribes()) {
                 messenger.accept(Labels.getString("SettingsPage.loginSuccessful"));
