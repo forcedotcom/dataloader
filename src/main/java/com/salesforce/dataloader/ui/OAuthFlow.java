@@ -28,65 +28,68 @@ package com.salesforce.dataloader.ui;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.salesforce.dataloader.client.SimplePost;
 import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.model.OAuthToken;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
-
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
-import java.io.*;
-import java.net.*;
-import java.nio.charset.Charset;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.util.Optional;
 
 /**
  * the web dialog for hosting oauth flows
  */
 public class OAuthFlow extends Dialog {
     private final Config config;
+    private static Logger logger = Logger.getLogger(OAuthFlow.class);
+    private String reasonPhrase;
+    private int statusCode;
 
     public OAuthFlow(Shell parent, Config config) {
         super(parent);
         this.config = config;
     }
 
+    public String getReasonPhrase() {
+        return reasonPhrase;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
 
     public boolean open() throws UnsupportedEncodingException {
         // Create the dialog window
         Display display = getParent().getDisplay();
-        final Shell shell = new Shell(getParent(), getStyle());
-
-        shell.setLayout(new FormLayout());
-
-        // Create the composite to hold the buttons and text field
-        Composite controls = new Composite(shell, SWT.NONE);
-        FormData data = new FormData();
-        data.top = new FormAttachment(0, 0);
-        data.left = new FormAttachment(0, 0);
-        data.right = new FormAttachment(100, 0);
-        controls.setLayoutData(data);
+        Shell shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.FILL);
+        Grid12 grid = new Grid12(shell, 30, 600);
 
         // Create the web browser
-        final Browser browser = new Browser(shell, SWT.NONE);
-        data = new FormData(800,600);
-        data.top = new FormAttachment(controls);
-        data.bottom = new FormAttachment(100, 0);
-        data.left = new FormAttachment(0, 0);
-        data.right = new FormAttachment(100, 0);
-        browser.setLayoutData(data);
+        Browser browser = new Browser(shell, SWT.NONE);
+        browser.setLayoutData(grid.createCell(12));
 
-        browser.addProgressListener(new OAuthBrowserListener(browser, shell));
+        OAuthBrowserListener listener = new OAuthBrowserListener(browser, shell);
+        browser.addProgressListener(listener);
         browser.setUrl(config.getString(Config.OAUTH_SERVER) +
                 "/services/oauth2/authorize?response_type=code&display=popup&client_id=" +
                 config.getString(Config.OAUTH_CLIENTID) + "&redirect_uri=" +
                 URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), "UTF-8"));
-
 
         shell.pack();
         shell.open();
@@ -96,13 +99,14 @@ public class OAuthFlow extends Dialog {
                 display.sleep();
             }
         }
-        // Return the sucess
-        return true;
+
+        return listener.getResult();
     }
 
     private class OAuthBrowserListener implements ProgressListener {
         private final Browser browser;
         private final Shell shell;
+        private boolean result;
 
         public OAuthBrowserListener(Browser browser, Shell shell) {
             this.browser = browser;
@@ -118,57 +122,53 @@ public class OAuthFlow extends Dialog {
         public void completed(ProgressEvent progressEvent) {
             String url = browser.getUrl();
             try {
-                URIBuilder uri = new URIBuilder(url);
-                List<NameValuePair> queryParams = uri.getQueryParams();
-                for(NameValuePair queryParam: queryParams){
-                    if (queryParam.getName().toLowerCase().equals("code")){
-                        String code = queryParam.getValue();
-                        URL fetchToken = new URL(config.getString(Config.OAUTH_SERVER) + "/services/oauth2/token");
-                        HttpURLConnection urlConnection = (HttpURLConnection) fetchToken.openConnection();
-                        urlConnection.setRequestMethod("POST");
-                        String parameters = "code=" + URLEncoder.encode(code, "UTF-8") + "&grant_type=authorization_code&client_id=" + config.getString(Config.OAUTH_CLIENTID) + "&client_secret=" + config.getString(Config.OAUTH_CLIENTSECRET) + "&redirect_uri=" + URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), "UTF-8");
-                        byte[] postData = parameters.getBytes(Charset.forName("UTF-8"));
-                        urlConnection.setDoOutput( true );
-                        urlConnection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-                        urlConnection.setRequestProperty( "charset", "utf-8");
-                        urlConnection.setRequestProperty( "Content-Length", Integer.toString( postData.length ));
-                        urlConnection.setUseCaches( false );
-                        urlConnection.setInstanceFollowRedirects(true);
-                        DataOutputStream wr = null;
-                        try{
-                            wr = new DataOutputStream( urlConnection.getOutputStream());
-                            wr.write( postData );
-                        }
-                        finally{
-                            if (wr != null){
-                                wr.close();
-                            }
-                        }
-                        StringBuilder builder = new StringBuilder();
-                        BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
-                        for ( int c = in.read(); c != -1; c = in.read() ) {
-                            builder.append((char) c);
-                        }
-
-                        String jsonTokenResult = builder.toString();
-                        Gson gson = new GsonBuilder()
-                                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                                .create();
-                        OAuthToken token = gson.fromJson(jsonTokenResult, OAuthToken.class);
-                        config.setValue(Config.OAUTH_ACCESSTOKEN, token.getAccessToken());
-                        config.setValue(Config.OAUTH_REFRESHTOKEN, token.getRefreshToken());
-                        shell.close();
-                        shell.dispose();
-                        break;
-                    }
+                Optional<NameValuePair> codeParam = new URIBuilder(url).getQueryParams().stream()
+                        .filter(q -> q.getName().toLowerCase().equals("code")).findFirst();
+                if (!codeParam.isPresent()){
+                    return;
                 }
-        } catch (URISyntaxException e) {
-                e.printStackTrace();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+
+                String code = codeParam.get().getValue();
+                String server = config.getString(Config.OAUTH_SERVER) + "/services/oauth2/token";
+                SimplePost client = new SimplePost(config, server,
+                        new BasicNameValuePair("grant_type", "authorization_code"),
+                        new BasicNameValuePair("code", code),
+                        new BasicNameValuePair("client_id", config.getString(Config.OAUTH_CLIENTID)),
+                        new BasicNameValuePair("client_secret",  config.getString(Config.OAUTH_CLIENTSECRET)),
+                        new BasicNameValuePair("redirect_uri",  config.getString(Config.OAUTH_REDIRECTURI))
+                );
+                client.post();
+
+                reasonPhrase = client.getReasonPhrase();
+                statusCode = client.getStatusCode();
+
+                if (client.isSuccessful()) {
+
+                    StringBuilder builder = new StringBuilder();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(client.getInput(), "UTF-8"));
+                    for (int c = in.read(); c != -1; c = in.read()) {
+                        builder.append((char) c);
+                    }
+
+                    String jsonTokenResult = builder.toString();
+                    Gson gson = new GsonBuilder()
+                            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                            .create();
+                    OAuthToken token = gson.fromJson(jsonTokenResult, OAuthToken.class);
+                    config.setValue(Config.OAUTH_ACCESSTOKEN, token.getAccessToken());
+                    config.setValue(Config.OAUTH_REFRESHTOKEN, token.getRefreshToken());
+                    result = true;
+                }
+
+                shell.close();
+                shell.dispose();
+            } catch (URISyntaxException | ParameterLoadException | IOException e) {
+                logger.error("Failed to retrieve oauth token.", e);
             }
+        }
+
+        public boolean getResult() {
+            return result;
         }
     }
 }

@@ -1072,12 +1072,15 @@ public class Config {
 
     public void setOAuthEnvironment(String environment) {
         String rootKey = "sfdc.oauth." + environment;
-        setValue(OAUTH_ENVIRONMENT, environment);
+        String redirectUri = getString(rootKey + ".redirectUri");
+        String endpoint = redirectUri.substring(0, redirectUri.indexOf('/',8));
 
+        setValue(OAUTH_ENVIRONMENT, environment);
         setValue(OAUTH_SERVER, getString(rootKey + ".server"));
         setValue(OAUTH_CLIENTID, getString(rootKey + ".clientId"));
-        setValue(OAUTH_CLIENTSECRET, getString(rootKey + ".clientKey"));
-        setValue(OAUTH_REDIRECTURI, getString(rootKey + ".redirectUri"));
+        setValue(OAUTH_CLIENTSECRET, getString(rootKey + ".clientSecret"));
+        setValue(OAUTH_REDIRECTURI, redirectUri);
+        setValue(ENDPOINT, endpoint);
     }
 
     public static interface ConfigListener {
