@@ -1,4 +1,5 @@
 !addplugindir "windows-dependencies\UAC\plugins\x86-ansi"
+!addplugindir "windows-dependencies\AccessControl\Plugins"
 !include target\project.nsh
 
 !define S_NAME "${PROJECT_FINAL_NAME}"
@@ -192,6 +193,7 @@ Section "Required Files"
 
     ; copy config files to appdata dir
     CreateDirectory "${S_DEFAULT_CONFIGFOLDER}"
+    AccessControl::GrantOnFile "${S_DEFAULT_CONFIGFOLDER}" "(S-1-5-32-545)" "FullAccess"
     SetOutPath "${S_DEFAULT_CONFIGFOLDER}"
     File "src\main\nsis\config.properties"
 
