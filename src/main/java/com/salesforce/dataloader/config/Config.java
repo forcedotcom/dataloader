@@ -1080,7 +1080,6 @@ public class Config {
         setValue(OAUTH_CLIENTID, getString(rootKey + ".clientId"));
         setValue(OAUTH_CLIENTSECRET, getString(rootKey + ".clientSecret"));
         setValue(OAUTH_REDIRECTURI, redirectUri);
-        setValue(ENDPOINT, endpoint);
     }
 
     public static interface ConfigListener {
