@@ -157,6 +157,7 @@ public class OAuthFlow extends Dialog {
                     OAuthToken token = gson.fromJson(jsonTokenResult, OAuthToken.class);
                     config.setValue(Config.OAUTH_ACCESSTOKEN, token.getAccessToken());
                     config.setValue(Config.OAUTH_REFRESHTOKEN, token.getRefreshToken());
+                    config.setValue(Config.ENDPOINT, token.getInstanceUrl());
                     result = true;
                 }
 
