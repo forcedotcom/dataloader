@@ -50,6 +50,7 @@ public class SettingsPage extends WizardPage {
     private LoginStandardControl standardControl;
     private LoginAdvancedControl advancedControl;
     private Grid12 grid;
+    private Composite control;
 
     public SettingsPage(Controller controller) {
         super(Labels.getString("SettingsPage.title"), Labels.getString("SettingsPage.titleMsg"), UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -69,7 +70,7 @@ public class SettingsPage extends WizardPage {
         getShell().setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
 
         Config config = controller.getConfig();
-        Composite control = new Composite(parent, SWT.FILL);
+        control = new Composite(parent, SWT.FILL);
         grid = new Grid12(control, 40);
         authenticator = new AuthenticationRunner(getShell(), config, controller, this::authenticationCompleted);
 
@@ -111,31 +112,6 @@ public class SettingsPage extends WizardPage {
         }
         grid.pack();
     }
-
-    private void selectAdvanced(Event event) {
-        grid.hide(defaultControl);
-        grid.hide(standardControl);
-        grid.show(advancedControl);
-
-        grid.pack();
-    }
-
-    private void selectStandard(Event event) {
-        grid.hide(defaultControl);
-        grid.show(standardControl);
-        grid.hide(advancedControl);
-
-        grid.pack();
-    }
-
-    private void selectDefault(Event event) {
-        grid.show(defaultControl);
-        grid.hide(standardControl);
-        grid.hide(advancedControl);
-
-        grid.pack();
-    }
-
     /**
      * Loads DataSelectionPage. To be overridden by subclasses for special behavior.
      *
@@ -180,5 +156,27 @@ public class SettingsPage extends WizardPage {
         else{
             setPageComplete(false);
         }
+    }
+
+    private void selectAdvanced(Event event) {
+        show(advancedControl);
+    }
+
+    private void selectStandard(Event event) {
+        show(standardControl);
+    }
+
+    private void selectDefault(Event event) {
+        show(defaultControl);
+    }
+
+    private void show(Composite showControl) {
+        grid.hide(defaultControl);
+        grid.hide(standardControl);
+        grid.hide(advancedControl);
+        grid.show(showControl);
+
+        grid.pack();
+        control.layout(false);
     }
 }
