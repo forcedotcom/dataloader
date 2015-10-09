@@ -452,7 +452,7 @@
         <dependency>
           <groupId>org.eclipse.swt</groupId>
           <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
-          <version>${swt.version}</version>
+          <version>4.5.1</version>
         </dependency>
       </dependencies>
     </profile>
