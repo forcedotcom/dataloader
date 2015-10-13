@@ -23,6 +23,15 @@
     <nsis.version>2.46</nsis.version>
     <spring.version>3.1.1.RELEASE</spring.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+
+    <!-- test proeprties -->
+    <test.endpoint>http://testendpoint</test.endpoint>
+    <test.user.default>admin@org.com</test.user.default>
+    <test.user.restricted>standard@org.com</test.user.restricted>
+    <test.password>encryptedpassword</test.password>
+    <test.redirect>false</test.redirect>
+
   </properties>
 
   <repositories>
@@ -337,8 +346,7 @@
           </dependencies>
         <configuration>
           <excludes>
-            <!-- the below tests require connectivity or are expensive -->
-            <!-- need to sanely bring them back -->
+            <!-- CORE UNIT TESTS: revise to keep this list fast and connectivity free -->
             <exclude>**/client/**</exclude>
             <exclude>**/dyna/SObjectReferenceConverterTest.*</exclude>
             <exclude>**/integration/**</exclude>
@@ -346,7 +354,6 @@
             <exclude>**/mapping/SOQLMapperTest.*</exclude>
             <exclude>**/process/**</exclude>
           </excludes>
-          <!--<skip>true</skip> -->
         </configuration>
       </plugin>
 
@@ -787,7 +794,31 @@
         </build>
     </profile>
 
-
+    <profile>
+      <id>integration-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.13</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.apache.maven.surefire</groupId>
+                <artifactId>surefire-junit4</artifactId>
+                <version>2.13</version>
+              </dependency>
+            </dependencies>
+            <configuration>
+              <excludes>
+                <!-- INTEGRATION UNIT TESTS: revise to remove works in progress -->
+                <exclude>**/integration/**</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
 
