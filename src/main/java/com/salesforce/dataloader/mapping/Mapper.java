@@ -87,8 +87,10 @@ public abstract class Mapper {
         if (columnNames != null) daoColumns.addAll(columnNames);
         this.daoColumns = new CaseInsensitiveSet(Collections.unmodifiableSet(daoColumns));
         putPropertyFileMappings(mappingFileName);
-        for(Field field: fields){
-            this.fields.add(field.getName());
+        if (fields != null) {
+            for (Field field : fields) {
+                this.fields.add(field.getName());
+            }
         }
     }
 

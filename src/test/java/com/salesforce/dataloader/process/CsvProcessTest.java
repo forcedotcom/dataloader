@@ -358,7 +358,7 @@ public class CsvProcessTest extends ProcessTestBase {
 
         final int numberOfRows = 12;
         final int targetDate = 14;
-        final String dateField = "CustomDateField__c";
+        final String dateField = "CustomDateTime__c";
 
         TimeZone TZ = TimeZone.getTimeZone("GMT");
 
@@ -410,7 +410,7 @@ public class CsvProcessTest extends ProcessTestBase {
     	//examine the error file and verify that the row in question failed
     	final int numberOfRows = 6;
         final int targetDate = 14;
-        final String dateField = "CustomDateField__c";
+        final String dateField = "CustomDateTime__c";
 
         assertEquals("Invalid testing configuration", numberOfRows, rowOffset + numFailures + numSuccesses);
 

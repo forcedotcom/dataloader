@@ -14,11 +14,24 @@
 
   <properties>
     <force.version>35.0.0</force.version>
+    <build.year>2015</build.year>
+    <java.compile.version>1.8</java.compile.version>
+    <minJvmVersion>1.8.0</minJvmVersion>
+    <codesign>DONTSIGN</codesign>
     <jacob.version>1.14.3</jacob.version>
-    <java.compile.version>1.6</java.compile.version>
+    <autoit.dll.path>autoitplaceholder</autoit.dll.path>
     <nsis.version>2.46</nsis.version>
     <spring.version>3.1.1.RELEASE</spring.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+
+    <!-- test proeprties -->
+    <test.endpoint>http://testendpoint</test.endpoint>
+    <test.user.default>admin@org.com</test.user.default>
+    <test.user.restricted>standard@org.com</test.user.restricted>
+    <test.password>encryptedpassword</test.password>
+    <test.redirect>false</test.redirect>
+
   </properties>
 
   <repositories>
@@ -28,13 +41,17 @@
       <layout>default</layout>
       <url>file://${basedir}/local-proj-repo/</url>
     </repository>
+    <repository>
+      <id>maven-eclipse-repo</id>
+      <url>http://maven-eclipse.github.io/maven</url>
+    </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
       <id>codehaus-mojo</id>
       <name>Codehaus Mojo</name>
-      <url>https://nexus.codehaus.org/content/repositories/snapshots</url>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
       <releases>
         <enabled>false</enabled>
       </releases>
@@ -215,6 +232,11 @@
           <artifactId>osxappbundle-maven-plugin</artifactId>
           <version>1.0-alpha-2</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>2.4.1</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -284,6 +306,9 @@
                 </filter>
               </filters>
               <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
+                </transformer>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                   <resource>META-INF/spring.handlers</resource>
                 </transformer>
@@ -321,11 +346,14 @@
           </dependencies>
         <configuration>
           <excludes>
-            <!-- exclude TestRecordsUtil class which inherit from TestCase -->
-            <exclude>**/TestRecordsUtil.java</exclude>
+            <!-- CORE UNIT TESTS: revise to keep this list fast and connectivity free -->
+            <exclude>**/client/**</exclude>
+            <exclude>**/dyna/SObjectReferenceConverterTest.*</exclude>
             <exclude>**/integration/**</exclude>
+            <exclude>**/mapping/LoadMapperTest.*</exclude>
+            <exclude>**/mapping/SOQLMapperTest.*</exclude>
+            <exclude>**/process/**</exclude>
           </excludes>
-          <!--<skip>true</skip> -->
         </configuration>
       </plugin>
 
@@ -377,9 +405,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse</groupId>
-          <artifactId>swt-gtk-linux-x86</artifactId>
-          <version>4.2</version>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.gtk.linux.x86</artifactId>
+          <version>4.5.1</version>
         </dependency>
       </dependencies>
     </profile>
@@ -393,9 +421,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse</groupId>
-          <artifactId>swt-gtk-linux-x86_64</artifactId>
-          <version>4.2</version>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
+          <version>4.5.1</version>
         </dependency>
       </dependencies>
     </profile>
@@ -409,9 +437,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse</groupId>
-          <artifactId>swt-cocoa-macosx</artifactId>
-          <version>4.2</version>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
+          <version>4.5.1</version>
         </dependency>
       </dependencies>
     </profile>
@@ -441,9 +469,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse</groupId>
-          <artifactId>swt-win32-win32-x86</artifactId>
-          <version>4.2</version>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
+          <version>4.5.1</version>
         </dependency>
       </dependencies>
     </profile>
@@ -457,9 +485,10 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse</groupId>
-          <artifactId>swt-win32-win32-x86_64</artifactId>
-          <version>4.2</version>
+            <groupId>org.eclipse.swt</groupId>
+            <!-- we still run the 32bit JDK on 64bit windows for now -->
+            <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
+            <version>4.5.1</version>
         </dependency>
       </dependencies>
     </profile>
@@ -480,46 +509,106 @@
               <artifactId>nsis-maven-plugin</artifactId>
               <version>1.0-SNAPSHOT</version>
             </plugin>
+              <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-compiler-plugin</artifactId>
+                  <version>2.5.1</version>
+              </plugin>
+              <plugin>
+                  <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                  <artifactId>launch4j-maven-plugin</artifactId>
+                  <version>1.5.1</version>
+              </plugin>
           </plugins>
         </pluginManagement>
 
         <plugins>
-
-          <plugin>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <version>1.6</version>
-            <executions>
-              <execution>
-                <phase> prepare-package </phase>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
                 <configuration>
-                  <target>
-                    <!-- unpack NSIS -->
-                    <unzip src="windows-dependencies/nsis-${nsis.version}.zip" dest="target" />
-                  </target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>nsis-maven-plugin</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <executions>
-              <execution>
-                <phase>package</phase>
-                <goals>
-                  <goal>generate-project</goal> <!-- create target/project.nsh -->
-                  <goal>compile</goal> <!-- compile setup.nsi into exe -->
-                </goals>
-                <configuration>
-                  <makensisBin>target/nsis-${nsis.version}/makensis.exe</makensisBin>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
+            </plugin>
+            <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <version>1.7.8</version>
+                <executions>
+                    <execution>
+                        <id>l4j-clui</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+                        <configuration>
+                            <headerType>gui</headerType>
+                            <dontWrapJar>true</dontWrapJar>
+                            <jar>${project.artifactId}-${project.version}-uber.jar</jar>
+                            <outfile>${project.build.directory}/${project.artifactId}-${project.version}.exe</outfile>
+                            <downloadUrl>http://java.com/download</downloadUrl>
+                            <classPath>
+                                <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
+                                <preCp>anything</preCp>
+                            </classPath>
+                            <icon>${basedir}/src/main/nsis/icon_SforceDL32x32.ico</icon>
+                            <jre>
+                                <minVersion>${minJvmVersion}</minVersion>
+                                <jdkPreference>preferJre</jdkPreference>
+                                <runtimeBits>32</runtimeBits>
+                            </jre>
+                            <versionInfo>
+                                <fileVersion>${project.version}.0</fileVersion>
+                                <txtFileVersion>${project.version}</txtFileVersion>
+                                <fileDescription>${project.name}</fileDescription>
+                                <copyright>${build.year} ${project.organization.name}</copyright>
+                                <productVersion>${project.version}.0</productVersion>
+                                <txtProductVersion>${project.version}.0</txtProductVersion>
+                                <productName>${project.name}</productName>
+                                <companyName>${project.organization.name}</companyName>
+                                <internalName>/${project.artifactId}-${project.version}</internalName>
+                                <originalFilename>${project.artifactId}-${project.version}.exe</originalFilename>
+                            </versionInfo>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase> prepare-package </phase>
+                        <configuration>
+                            <target>
+                                <!-- unpack NSIS -->
+                                <unzip src="windows-dependencies/nsis-${nsis.version}.zip" dest="target" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>nsis-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>generate-project</goal> <!-- create target/project.nsh -->
+                            <goal>compile</goal> <!-- compile setup.nsi into exe -->
+                        </goals>
+                        <configuration>
+                            <makensisBin>target/nsis-${nsis.version}/makensis.exe</makensisBin>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
       </build>
     </profile>
@@ -638,14 +727,17 @@
         <build>
             <plugins>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>osxappbundle-maven-plugin</artifactId>
-                    <version>1.0-alpha-2</version>
+                    <groupId>sh.tak.appbundler</groupId>
+                    <artifactId>appbundle-maven-plugin</artifactId>
+                    <version>1.0.4</version>
                     <configuration>
                         <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-                        <jvmVersion>1.6</jvmVersion>
+                        <jvmVersion>1.8</jvmVersion>
+                        <jvmOptions>
+                            <string>-XstartOnFirstThread</string>
+                            <string>-Dsalesforce.config.dir=$APP_PACKAGE/Contents/Resources/conf</string>
+                        </jvmOptions>
                         <iconFile>${basedir}/src/main/resources/img/icons/icon_loader.icns</iconFile>
-                        <dictionaryFile>${basedir}/src/main/resources/Info.plist</dictionaryFile>
                     </configuration>
                     <executions>
                         <execution>
@@ -655,6 +747,25 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>1.1</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <tasks>
+                            <echo>Copying localized strings</echo>
+                            <copy file="${basedir}/src/main/resources/Localizable.strings" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/en.lproj/Localizable.strings"/>
+                        </tasks>
+                    </configuration>
                 </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -670,7 +781,7 @@
                   <argument>make-pretty-dmg.sh</argument>
                   <argument>${basedir}</argument>
                   <argument>${project.build.directory}/${project.build.finalName}</argument>
-                  <argument>${project.build.directory}/${project.build.finalName}-pretty.dmg</argument>
+                  <argument>${codesign}</argument>
                 </arguments>
               </configuration>
               <goals>
@@ -684,7 +795,31 @@
         </build>
     </profile>
 
-
+    <profile>
+      <id>integration-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.13</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.apache.maven.surefire</groupId>
+                <artifactId>surefire-junit4</artifactId>
+                <version>2.13</version>
+              </dependency>
+            </dependencies>
+            <configuration>
+              <excludes>
+                <!-- INTEGRATION UNIT TESTS: revise to remove works in progress -->
+                <exclude>**/integration/**</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
 
