@@ -96,8 +96,8 @@ public class ExitCodeMapper {
         this.onNoneSuccess = onNoneSuccess;
     }
 
-    public void setOnPartialSuccess(int exitCode) {
-        this.onPartialSuccess = exitCode;
+    public void setOnPartialSuccess(int onPartialSuccess) {
+        this.onPartialSuccess = onPartialSuccess;
     }
 
     public void setOnSuccess(int exitCode) {
