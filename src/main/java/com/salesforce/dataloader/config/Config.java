@@ -104,7 +104,7 @@ public class Config {
     public static final int INT_DEFAULT = 0;
     public static final long LONG_DEFAULT = 0L;
     public static final String STRING_DEFAULT = ""; //$NON-NLS-1$
-    public static final Map<String,String> MAP_STRING_DEFAULT = new HashMap<>();
+    public static final Map<String,String> MAP_STRING_DEFAULT = new LinkedHashMap<>();
 
     /**
      * The Constants for the current Loader Keys
@@ -256,7 +256,7 @@ public class Config {
      * @see #save()
      */
     public Config(String configDir, String filename, String lastRunFileName) throws ConfigInitializationException {
-        properties = new Properties();
+        properties = new LinkedProperties();
         this.configDir = configDir;
         this.filename = filename;
         // last run gets initialized a little later since config params are needed for that
