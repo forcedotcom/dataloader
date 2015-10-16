@@ -25,11 +25,11 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 
-    <!-- test proeprties -->
+    <!-- test properties -->
     <test.endpoint>http://testendpoint</test.endpoint>
     <test.user.default>admin@org.com</test.user.default>
     <test.user.restricted>standard@org.com</test.user.restricted>
-    <test.password>encryptedpassword</test.password>
+    <test.password></test.password><!-- use the encrypted password -->
     <test.redirect>false</test.redirect>
 
   </properties>
