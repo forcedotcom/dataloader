@@ -73,8 +73,8 @@ public class ExitCodeMapper {
             return onNoDataFound;
         }
 
-        if (progressMonitor.getErrorCount() > 0) {
-            if (progressMonitor.getSuccessCount() > 0) {
+        if (progressMonitor.getErrorCount() != null && progressMonitor.getErrorCount() > 0) {
+            if (progressMonitor.getSuccessCount() != null && progressMonitor.getSuccessCount() > 0) {
                 return onPartialSuccess;
             } else {
                 return onNoneSuccess;
