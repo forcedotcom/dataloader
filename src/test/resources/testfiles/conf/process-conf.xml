@@ -141,7 +141,7 @@
         </property>
         <property name="asyncApiExitCodeMapper">
             <map key-type="java.lang.String" value-type="java.lang.Integer">
-                <entry key="INVALID_LOGIN" value="300" />
+                <entry key="Timeout" value="300" />
             </map>
         </property>
     </bean>
@@ -152,6 +152,9 @@
         <description>testing exit code mapper on extraction</description>
         <property name="name" value="testExitCodeMapperProcess"/>
         <property name="exitCodeMapper" ref="testedExitCodeMapper" />
+        <property name="progressMonitor">
+            <bean class="com.salesforce.dataloader.action.progress.ReportCountProgressAdapter" />
+        </property>
         <property name="configOverrideMap">
             <map>
                 <entry key="sfdc.extractionSOQL" value="Select Id, Name, Type, Phone, Website, AnnualRevenue LastModifiedDate FROM Account " />
