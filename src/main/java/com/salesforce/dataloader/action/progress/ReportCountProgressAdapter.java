@@ -10,25 +10,25 @@ public class ReportCountProgressAdapter implements ILoaderProgress {
     /**
      * Success item count
      */
-    private Integer successCount;
+    private int successCount = 0;
     /**
      * Error item count
      */
-    private Integer errorCount;
+    private int errorCount = 0;
     /**
      * Worked item count
      */
-    private Integer workedCount;
+    private int workedCount = 0;
 
     /**
      * Total batch count reported.
      */
-    private Integer totalBatchCount;
+    private int totalBatchCount = 0;
 
     /**
      * Total Work Count
      */
-    private Integer totalWorkCount;
+    private int totalWorkCount = 0;
 
     /** Task Name */
     private String taskName;
