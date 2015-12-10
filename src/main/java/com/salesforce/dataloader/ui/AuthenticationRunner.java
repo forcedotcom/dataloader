@@ -26,7 +26,7 @@
 
 package com.salesforce.dataloader.ui;
 
-import com.salesforce.dataloader.client.SimplePost;
+import com.salesforce.dataloader.client.DefaultSimplePost;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.model.LoginCriteria;
@@ -82,9 +82,10 @@ public class AuthenticationRunner {
 
             if (criteria.getMode() == LoginCriteria.Default){
 
-                OAuthFlow flow = new OAuthFlow(shell, config);
+                boolean hasSecret = !config.getString(Config.OAUTH_CLIENTSECRET).trim().equals("");
+                OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, config) : new OAuthTokenFlow(shell, config);
                 if (!flow.open()){
-                    String message = flow.getStatusCode() == SimplePost.PROXY_AUTHENTICATION_REQUIRED ?
+                    String message = flow.getStatusCode() == DefaultSimplePost.PROXY_AUTHENTICATION_REQUIRED ?
                             flow.getReasonPhrase() : Labels.getString("SettingsPage.invalidLogin");
 
                     logger.info("Login failed:" + flow.getReasonPhrase());
