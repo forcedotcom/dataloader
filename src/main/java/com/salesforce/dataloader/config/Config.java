@@ -146,16 +146,18 @@ public class Config {
     public static final String WIRE_OUTPUT  = "sfdc.wireOutput";
     public static final String TIMEZONE = "sfdc.timezone";
 
-    public static final String OAUTH = "sfdc.oauth";
-    public static final String OAUTH_SERVER = "sfdc.oauth.server";
-    public static final String OAUTH_CLIENTSECRET = "sfdc.oauth.clientSecret";
-    public static final String OAUTH_ACCESSTOKEN = "sfdc.oauth.accesstoken";
-    public static final String OAUTH_REFRESHTOKEN = "sfdc.oauth.refreshtoken";
-    public static final String OAUTH_CLIENTID = "sfdc.oauth.clientId";
-    public static final String OAUTH_REDIRECTURI = "sfdc.oauthRedirectUri";
+    public static final String OAUTH_PARTIAL_SERVER = "server";
+    public static final String OAUTH_PARTIAL_CLIENTSECRET = "clientsecret";
+    public static final String OAUTH_PARTIAL_CLIENTID = "clientid";
+    public static final String OAUTH_PARTIAL_REDIRECTURI = "redirecturi";
     public static final String OAUTH_ENVIRONMENTS = "sfdc.oauth.environments";
     public static final String OAUTH_ENVIRONMENT = "sfdc.oauth.environment";
-
+    public static final String OAUTH_ACCESSTOKEN = "sfdc.oauth.accesstoken";
+    public static final String OAUTH_REFRESHTOKEN = "sfdc.oauth.refreshtoken";
+    public static final String OAUTH_SERVER = "sfdc.oauth." + OAUTH_PARTIAL_SERVER;
+    public static final String OAUTH_CLIENTSECRET = "sfdc.oauth." + OAUTH_PARTIAL_CLIENTSECRET;
+    public static final String OAUTH_CLIENTID = "sfdc.oauth." + OAUTH_PARTIAL_CLIENTID;
+    public static final String OAUTH_REDIRECTURI = "sfdc.oauth." + OAUTH_PARTIAL_REDIRECTURI;
 
     // salesforce operation parameters
     public static final String INSERT_NULLS = "sfdc.insertNulls"; //$NON-NLS-1$
@@ -323,7 +325,6 @@ public class Config {
         setValue(SFDC_INTERNAL_SESSION_ID, (String) null);
 
         //oauth settings
-        setValue(OAUTH, false);
         setValue(OAUTH_SERVER, DEFAULT_ENDPOINT_URL);
         setValue(OAUTH_REDIRECTURI, DEFAULT_ENDPOINT_URL);
         setValue(OAUTH_ENVIRONMENTS, STRING_DEFAULT);
@@ -1070,16 +1071,20 @@ public class Config {
         }
     }
 
-    public void setOAuthEnvironment(String environment) {
-        String rootKey = "sfdc.oauth." + environment;
-        String redirectUri = getString(rootKey + ".redirectUri");
-        String endpoint = redirectUri.substring(0, redirectUri.indexOf('/',8));
+    public String getOAuthEnvironmentString(String environmentName, String name){
+        return getString("sfdc.oauth." + environmentName + "." + name);
+    }
 
+    public void setOAuthEnvironmentString(String environmentName, String name, String... values){
+        setValue("sfdc.oauth." + environmentName + "." + name, values);
+    }
+
+    public void setOAuthEnvironment(String environment) {
         setValue(OAUTH_ENVIRONMENT, environment);
-        setValue(OAUTH_SERVER, getString(rootKey + ".server"));
-        setValue(OAUTH_CLIENTID, getString(rootKey + ".clientId"));
-        setValue(OAUTH_CLIENTSECRET, getString(rootKey + ".clientSecret"));
-        setValue(OAUTH_REDIRECTURI, redirectUri);
+        setValue(OAUTH_SERVER, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_SERVER));
+        setValue(OAUTH_CLIENTID, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTID));
+        setValue(OAUTH_CLIENTSECRET, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTSECRET));
+        setValue(OAUTH_REDIRECTURI, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_REDIRECTURI));
     }
 
     public static interface ConfigListener {

@@ -25,39 +25,28 @@
  */
 package com.salesforce.dataloader.ui;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.salesforce.dataloader.client.SimplePost;
 import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.exception.ParameterLoadException;
-import com.salesforce.dataloader.model.OAuthToken;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.browser.ProgressEvent;
-import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * the web dialog for hosting oauth flows
+ * OAuthFlow is basic instrumentation of delegating authentication to an external web browser using OAuth2
+ * Currently derived classes include authorization_code flow and token flow. authorization_flow would be setup
+ * by individuals using connected apps as it requires storing a secret which cannot be done for the normal login
  */
-public class OAuthFlow extends Dialog {
-    private final Config config;
-    private static Logger logger = Logger.getLogger(OAuthFlow.class);
+public abstract class OAuthFlow extends Dialog {
+    protected static Logger logger = Logger.getLogger(OAuthFlow.class);
+    protected final Config config;
     private String reasonPhrase;
     private int statusCode;
 
@@ -84,12 +73,9 @@ public class OAuthFlow extends Dialog {
         Browser browser = new Browser(shell, SWT.NONE);
         browser.setLayoutData(grid.createCell(12));
 
-        OAuthBrowserListener listener = new OAuthBrowserListener(browser, shell);
+        OAuthBrowserListener listener = getOAuthBrowserListener(shell, browser, config);
         browser.addProgressListener(listener);
-        browser.setUrl(config.getString(Config.OAUTH_SERVER) +
-                "/services/oauth2/authorize?response_type=code&display=popup&client_id=" +
-                config.getString(Config.OAUTH_CLIENTID) + "&redirect_uri=" +
-                URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), "UTF-8"));
+        browser.setUrl(getStartUrl(config));
 
         shell.pack();
         shell.open();
@@ -100,76 +86,22 @@ public class OAuthFlow extends Dialog {
             }
         }
 
+        reasonPhrase = listener.getReasonPhrase();
+        statusCode = listener.getStatusCode();
+
+
         return listener.getResult();
     }
 
-    private class OAuthBrowserListener implements ProgressListener {
-        private final Browser browser;
-        private final Shell shell;
-        private boolean result;
+    protected abstract OAuthBrowserListener getOAuthBrowserListener(Shell shell, Browser browser, Config config);
 
-        public OAuthBrowserListener(Browser browser, Shell shell) {
-            this.browser = browser;
-            this.shell = shell;
-        }
+    public abstract String getStartUrl(Config config) throws UnsupportedEncodingException;
 
-        @Override
-        public void changed(ProgressEvent progressEvent) {
-
-        }
-
-        @Override
-        public void completed(ProgressEvent progressEvent) {
-            String url = browser.getUrl();
-            try {
-                Optional<NameValuePair> codeParam = new URIBuilder(url).getQueryParams().stream()
-                        .filter(q -> q.getName().toLowerCase().equals("code")).findFirst();
-                if (!codeParam.isPresent()){
-                    return;
-                }
-
-                String code = codeParam.get().getValue();
-                String server = config.getString(Config.OAUTH_SERVER) + "/services/oauth2/token";
-                SimplePost client = new SimplePost(config, server,
-                        new BasicNameValuePair("grant_type", "authorization_code"),
-                        new BasicNameValuePair("code", code),
-                        new BasicNameValuePair("client_id", config.getString(Config.OAUTH_CLIENTID)),
-                        new BasicNameValuePair("client_secret",  config.getString(Config.OAUTH_CLIENTSECRET)),
-                        new BasicNameValuePair("redirect_uri",  config.getString(Config.OAUTH_REDIRECTURI))
-                );
-                client.post();
-
-                reasonPhrase = client.getReasonPhrase();
-                statusCode = client.getStatusCode();
-
-                if (client.isSuccessful()) {
-
-                    StringBuilder builder = new StringBuilder();
-                    BufferedReader in = new BufferedReader(new InputStreamReader(client.getInput(), "UTF-8"));
-                    for (int c = in.read(); c != -1; c = in.read()) {
-                        builder.append((char) c);
-                    }
-
-                    String jsonTokenResult = builder.toString();
-                    Gson gson = new GsonBuilder()
-                            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                            .create();
-                    OAuthToken token = gson.fromJson(jsonTokenResult, OAuthToken.class);
-                    config.setValue(Config.OAUTH_ACCESSTOKEN, token.getAccessToken());
-                    config.setValue(Config.OAUTH_REFRESHTOKEN, token.getRefreshToken());
-                    config.setValue(Config.ENDPOINT, token.getInstanceUrl());
-                    result = true;
-                }
-
-                shell.close();
-                shell.dispose();
-            } catch (URISyntaxException | ParameterLoadException | IOException e) {
-                logger.error("Failed to retrieve oauth token.", e);
-            }
-        }
-
-        public boolean getResult() {
-            return result;
-        }
+    public static Map<String, String> getQueryParameters(String url) throws URISyntaxException {
+        url = url.replace("#","?");
+        Map<String, String> params = new HashMap<>();
+        new URIBuilder(url).getQueryParams().stream().forEach(kvp -> params.put(kvp.getName(), kvp.getValue()));
+        return params;
     }
+
 }

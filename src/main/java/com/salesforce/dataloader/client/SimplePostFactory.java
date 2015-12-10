@@ -23,83 +23,43 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package com.salesforce.dataloader.client;
 
-package com.salesforce.dataloader.model;
+import com.salesforce.dataloader.config.Config;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.util.function.Function;
 
 /**
- * possible return arguments from oauth
+ * Created by rmazzeo on 12/9/15.
  */
-public class OAuthToken {
-    private String accessToken;
-    private String refreshToken;
-    private String signature;
-    private String scope;
-    private String instanceUrl;
-    private String id;
-    private String tokenType;
-    private long issuedAt;
+public class SimplePostFactory {
 
-    public long getIssuedAt() {
-        return issuedAt;
+    private static Function<Criteria, SimplePost> constructor = c -> new DefaultSimplePost(c.config, c.endpoint, c.pairs);;
+
+    public static class Criteria{
+        public Config config;
+        public String endpoint;
+        public BasicNameValuePair[] pairs;
     }
 
-    public void setIssuedAt(long issuedAt) {
-        this.issuedAt = issuedAt;
+    public static Function<Criteria, SimplePost> getConstructor()
+    {
+        return constructor;
     }
 
-    public String getTokenType() {
-        return tokenType;
+    public static void setConstructor(Function<Criteria, SimplePost> constructor)
+    {
+        SimplePostFactory.constructor = constructor;
     }
 
-    public void setTokenType(String tokenType) {
-        this.tokenType = tokenType;
-    }
+    public static SimplePost getInstance(Config config, String endpoint, BasicNameValuePair... pairs){
+        Criteria criteria = new Criteria();
+        criteria.config = config;
+        criteria.endpoint = endpoint;
+        criteria.pairs = pairs;
 
-    public String getId() {
-        return id;
-    }
+        return constructor.apply(criteria);
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getInstanceUrl() {
-        return instanceUrl;
-    }
-
-    public void setInstanceUrl(String instanceUrl) {
-        this.instanceUrl = instanceUrl;
-    }
-
-    public String getScope() {
-        return scope;
-    }
-
-    public void setScope(String scope) {
-        this.scope = scope;
-    }
-
-    public String getSignature() {
-        return signature;
-    }
-
-    public void setSignature(String signature) {
-        this.signature = signature;
-    }
-
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
     }
 }
