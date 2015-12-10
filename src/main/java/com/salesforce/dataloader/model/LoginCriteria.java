@@ -114,7 +114,6 @@ public class LoginCriteria {
                 config.setValue(Config.ENDPOINT, getInstanceUrl().trim());
                 break;
             case LoginCriteria.Default:
-                config.setValue(Config.OAUTH, true);
                 config.setOAuthEnvironment(getEnvironment());
                 break;
         }
