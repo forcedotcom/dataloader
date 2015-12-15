@@ -195,7 +195,7 @@ public class CSVFileWriter implements DataWriter {
     static private void visitColumns(List<String> columnNames, Row row, CSVColumnVisitor visitor) throws IOException {
         for (String colName : columnNames) {
             Object colVal = row.get(colName);
-            visitor.visit(colVal != null ? colVal.toString() : "");
+            visitor.visit(colVal != null ? colVal.toString() : null);
         }
     }
 

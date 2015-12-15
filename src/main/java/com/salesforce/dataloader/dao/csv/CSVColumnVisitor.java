@@ -58,16 +58,12 @@ public class CSVColumnVisitor {
     }
 
     public void visit(String column) throws IOException {
-        // prevent failure on nulls -- treat nulls as blanks
-        if (column == null) {
-            column = "";
-        }
         try {
             if (!first)
                 writer.write(COMMA);
             else
                 first = false;
-
+        if(column!=null) {
             writer.write(QUOTE);
 
             for (int i = 0, len = column.length(); i < len; i++) {
@@ -79,6 +75,7 @@ public class CSVColumnVisitor {
             }
 
             writer.write(QUOTE);
+        }
 
         } catch (IOException e) {
             logger.error(e);
