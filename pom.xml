@@ -62,6 +62,11 @@
   </pluginRepositories>
 
   <dependencies>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.3.1</version>
+    </dependency>
 
     <dependency>
       <groupId>autoitx4java</groupId>
@@ -159,7 +164,12 @@
       <version>6.3.1</version>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>net.sf.jacob-project</groupId>
       <artifactId>jacob</artifactId>
@@ -452,9 +462,9 @@
       </activation>
       <dependencies>
         <dependency>
-          <groupId>org.eclipse</groupId>
-          <artifactId>swt-cocoa-macosx-x86_64</artifactId>
-          <version>4.2</version>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
+          <version>4.5.1</version>
         </dependency>
       </dependencies>
     </profile>
@@ -734,7 +744,7 @@
                         <jvmVersion>1.8</jvmVersion>
                         <jvmOptions>
                             <string>-XstartOnFirstThread</string>
-                            <string>-Dsalesforce.config.dir=$APP_PACKAGE/Contents/Resources/conf</string>
+                            <string>-Dsalesforce.config.dir=Contents/Resources/conf</string>
                         </jvmOptions>
                         <iconFile>${basedir}/src/main/resources/img/icons/icon_loader.icns</iconFile>
                     </configuration>
@@ -761,8 +771,9 @@
                     </executions>
                     <configuration>
                         <tasks>
-                            <echo>Copying localized strings</echo>
+                            <echo>Copying additional assets for DMG</echo>
                             <copy file="${basedir}/src/main/resources/Localizable.strings" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/en.lproj/Localizable.strings"/>
+                            <copy file="${basedir}/src/main/nsis/config.properties" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/config.properties"/>
                         </tasks>
                     </configuration>
                 </plugin>
