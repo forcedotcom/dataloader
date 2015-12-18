@@ -39,15 +39,7 @@ import java.security.GeneralSecurityException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TimeZone;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 
@@ -112,7 +104,7 @@ public class Config {
     public static final int INT_DEFAULT = 0;
     public static final long LONG_DEFAULT = 0L;
     public static final String STRING_DEFAULT = ""; //$NON-NLS-1$
-    public static final Map<String,String> MAP_STRING_DEFAULT = new HashMap<String,String>();
+    public static final Map<String,String> MAP_STRING_DEFAULT = new LinkedHashMap<>();
 
     /**
      * The Constants for the current Loader Keys
@@ -153,6 +145,19 @@ public class Config {
     public static final String BULK_API_ZIP_CONTENT = "sfdc.bulkApiZipContent";
     public static final String WIRE_OUTPUT  = "sfdc.wireOutput";
     public static final String TIMEZONE = "sfdc.timezone";
+
+    public static final String OAUTH_PARTIAL_SERVER = "server";
+    public static final String OAUTH_PARTIAL_CLIENTSECRET = "clientsecret";
+    public static final String OAUTH_PARTIAL_CLIENTID = "clientid";
+    public static final String OAUTH_PARTIAL_REDIRECTURI = "redirecturi";
+    public static final String OAUTH_ENVIRONMENTS = "sfdc.oauth.environments";
+    public static final String OAUTH_ENVIRONMENT = "sfdc.oauth.environment";
+    public static final String OAUTH_ACCESSTOKEN = "sfdc.oauth.accesstoken";
+    public static final String OAUTH_REFRESHTOKEN = "sfdc.oauth.refreshtoken";
+    public static final String OAUTH_SERVER = "sfdc.oauth." + OAUTH_PARTIAL_SERVER;
+    public static final String OAUTH_CLIENTSECRET = "sfdc.oauth." + OAUTH_PARTIAL_CLIENTSECRET;
+    public static final String OAUTH_CLIENTID = "sfdc.oauth." + OAUTH_PARTIAL_CLIENTID;
+    public static final String OAUTH_REDIRECTURI = "sfdc.oauth." + OAUTH_PARTIAL_REDIRECTURI;
 
     // salesforce operation parameters
     public static final String INSERT_NULLS = "sfdc.insertNulls"; //$NON-NLS-1$
@@ -253,7 +258,7 @@ public class Config {
      * @see #save()
      */
     public Config(String configDir, String filename, String lastRunFileName) throws ConfigInitializationException {
-        properties = new Properties();
+        properties = new LinkedProperties();
         this.configDir = configDir;
         this.filename = filename;
         // last run gets initialized a little later since config params are needed for that
@@ -318,6 +323,12 @@ public class Config {
         setValue(SFDC_INTERNAL, false);
         setValue(SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
         setValue(SFDC_INTERNAL_SESSION_ID, (String) null);
+
+        //oauth settings
+        setValue(OAUTH_SERVER, DEFAULT_ENDPOINT_URL);
+        setValue(OAUTH_REDIRECTURI, DEFAULT_ENDPOINT_URL);
+        setValue(OAUTH_ENVIRONMENTS, STRING_DEFAULT);
+        setValue(OAUTH_ENVIRONMENT, STRING_DEFAULT);
     }
 
     /**
@@ -449,7 +460,6 @@ public class Config {
         return value;
     }
 
-
     /**
      * Gets string for a given name.
      *
@@ -460,6 +470,16 @@ public class Config {
         String value = getParamValue(name);
         if (value == null) return STRING_DEFAULT;
         return value;
+    }
+
+
+    public ArrayList<String> getStrings(String name) {
+        String values = getString(name);
+        ArrayList<String> list = new ArrayList<>();
+        if (values != null && !values.trim().isEmpty()){
+            Collections.addAll(list, values.trim().split(","));
+        }
+        return list;
     }
 
     /**
@@ -802,6 +822,13 @@ public class Config {
         // no great way to do this,
         String oldPassword = encryptProperty(PASSWORD);
         String oldProxyPassword = encryptProperty(PROXY_PASSWORD);
+
+        String oauthAccessToken = getString(OAUTH_ACCESSTOKEN);
+        String oauthRefreshToken = getString(OAUTH_REFRESHTOKEN);
+        putValue(OAUTH_ACCESSTOKEN, "");
+        putValue(OAUTH_REFRESHTOKEN, "");
+
+
         FileOutputStream out = null;
         try {
             out = new FileOutputStream(filename);
@@ -813,6 +840,9 @@ public class Config {
             // restore original property values
             putValue(PASSWORD, oldPassword);
             putValue(PROXY_PASSWORD, oldProxyPassword);
+            putValue(OAUTH_ACCESSTOKEN, oauthAccessToken);
+            putValue(OAUTH_REFRESHTOKEN, oauthRefreshToken);
+
         }
         // save last run statistics
         lastRun.save();
@@ -933,10 +963,21 @@ public class Config {
      * Sets a string
      *
      * @param name
-     * @param value
+     * @param values
      */
-    public void setValue(String name, String value) {
-        setProperty(name, value);
+    public void setValue(String name, String... values) {
+        if (values != null && values.length > 1) {
+            StringJoiner joiner = new StringJoiner(",");
+            for (String value : values) {
+                joiner.add(value);
+            }
+            setProperty(name, joiner.toString());
+        } else if (values != null && values.length > 0){
+            setProperty(name, values[0]);
+        } else {
+            setProperty(name, null);
+        }
+
     }
 
     /**
@@ -955,7 +996,6 @@ public class Config {
 
     /**
      * @param name
-     * @param oldValue
      * @param newValue
      */
     private void setProperty(String name, String newValue) {
@@ -1029,6 +1069,22 @@ public class Config {
         for (ConfigListener l : this.listeners) {
             l.configValueChanged(key, oldValue, newValue);
         }
+    }
+
+    public String getOAuthEnvironmentString(String environmentName, String name){
+        return getString("sfdc.oauth." + environmentName + "." + name);
+    }
+
+    public void setOAuthEnvironmentString(String environmentName, String name, String... values){
+        setValue("sfdc.oauth." + environmentName + "." + name, values);
+    }
+
+    public void setOAuthEnvironment(String environment) {
+        setValue(OAUTH_ENVIRONMENT, environment);
+        setValue(OAUTH_SERVER, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_SERVER));
+        setValue(OAUTH_CLIENTID, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTID));
+        setValue(OAUTH_CLIENTSECRET, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTSECRET));
+        setValue(OAUTH_REDIRECTURI, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_REDIRECTURI));
     }
 
     public static interface ConfigListener {

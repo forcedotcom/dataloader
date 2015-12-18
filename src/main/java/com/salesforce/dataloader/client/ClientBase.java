@@ -105,8 +105,9 @@ public abstract class ClientBase<ClientType> {
         // set authentication credentials
         // blank username is not acceptible
         String username = config.getString(Config.USERNAME);
-        if (!(config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN))
-                && (username == null || username.length() == 0)) {
+        boolean isManualSession = config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN);
+        boolean isOAuthSession = config.getString(Config.OAUTH_ACCESSTOKEN) != null && config.getString(Config.OAUTH_ACCESSTOKEN).trim().length() > 0;
+        if (!isManualSession && !isOAuthSession && (username == null || username.length() == 0)) {
             String errMsg = Messages.getMessage(getClass(), "emptyUsername", Config.USERNAME);
             logger.error(errMsg);
             throw new IllegalStateException(errMsg);
