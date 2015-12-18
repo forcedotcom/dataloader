@@ -469,6 +469,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     boolean isSessionValid() {
         if (config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) { return true; }
+        if (config.getString(Config.OAUTH_ACCESSTOKEN) != null && config.getString(Config.OAUTH_ACCESSTOKEN).trim().length() > 0) { return true; }
         return isLoggedIn();
     }
 
@@ -481,8 +482,11 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         // identify the client as dataloader
         conn.setCallOptions(ClientBase.getClientName(this.config), null);
 
-        if (config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
-            setConfiguredSessionId(conn);
+        String oauthAccessToken = config.getString(Config.OAUTH_ACCESSTOKEN);
+        if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0){
+            setConfiguredSessionId(conn, oauthAccessToken);
+        } else if (config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
+            setConfiguredSessionId(conn, config.getString(Config.SFDC_INTERNAL_SESSION_ID));
         } else {
             setSessionRenewer(conn);
             loginInternal(conn);
@@ -501,9 +505,9 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         });
     }
 
-    private void setConfiguredSessionId(final PartnerConnection conn) throws ConnectionException {
+    private void setConfiguredSessionId(final PartnerConnection conn, String sessionId) throws ConnectionException {
         logger.info("Using manually configured session id to bypass login");
-        conn.setSessionHeader(config.getString(Config.SFDC_INTERNAL_SESSION_ID));
+        conn.setSessionHeader(sessionId);
         try {
             conn.getUserInfo(); // check to make sure we have a good connection
         } catch (ConnectionException e) {
