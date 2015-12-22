@@ -170,7 +170,7 @@ public class ExtractionDataSelectionPage extends WizardPage {
             }
         });
 
-        Button fileButton = new Button(compChooser, SWT.PUSH);
+        Button fileButton = new Button(compChooser, SWT.PUSH | SWT.FLAT);
         fileButton.setText(Labels.getString("ExtractionDataSelectionPage.chooseFile")); //$NON-NLS-1$
         fileButton.addSelectionListener(new SelectionAdapter() {
             @Override

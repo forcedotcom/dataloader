@@ -35,6 +35,9 @@ import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.*;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
@@ -44,6 +47,9 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Config.ConfigListener;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.uiActions.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 /**
  * The main class for the Loader UI.
@@ -187,10 +193,21 @@ public class LoaderWindow extends ApplicationWindow {
         Composite comp = new Composite(parent, SWT.BORDER);
         setBackground(comp);
         comp.setLayout(new FillLayout(SWT.VERTICAL));
-        Label titleImage = new Label(comp, SWT.CENTER);
-        setBackground(titleImage);
-        titleImage.setImage(UIUtils.getImageRegistry().get("logo"));
+
+
+        Composite titleContainer = new Composite(comp, SWT.CENTER);
+        setBackground(titleContainer);
+        Grid12 grid12 = new Grid12(titleContainer, 25);
+        grid12.createImage(6, UIUtils.getImageRegistry().get("logo"));
+
+        Label label = grid12.createLabel(6, "data loader", SWT.LEFT);
+        FontData fontData = label.getFont().getFontData()[0];
+        fontData.setHeight(30);
+        label.setForeground(new Color(Display.getCurrent(),125,134,140));
+        label.setFont(new Font(Display.getCurrent(), fontData));
+        grid12.pack();
         comp.pack();
+
         return comp;
     }
 
@@ -199,7 +216,7 @@ public class LoaderWindow extends ApplicationWindow {
     }
 
     private void createButtons(Composite parent) {
-        Composite buttons = new Composite(parent, SWT.NONE);
+        Composite buttons = new ToolBar(parent, SWT.NONE);
         setBackground(buttons);
         RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
         rowLayout.wrap = true;
@@ -207,8 +224,8 @@ public class LoaderWindow extends ApplicationWindow {
         rowLayout.justify = false;
         rowLayout.marginLeft = 10;
         rowLayout.marginRight = 10;
-        rowLayout.marginTop = 10;
-        rowLayout.marginBottom = 10;
+        rowLayout.marginTop = 15;
+        rowLayout.marginBottom = 15;
         rowLayout.spacing = 5;
         buttons.setLayout(rowLayout);
         // create all the buttons, in order
@@ -219,8 +236,8 @@ public class LoaderWindow extends ApplicationWindow {
     }
 
     private void createOperationButton(Composite parent, final OperationInfo info) {
-        final Button butt = new Button(parent, SWT.PUSH);
 
+        final Button butt = new Button(parent, SWT.PUSH | SWT.FLAT);
         butt.setText(info.getLabel());
         butt.setEnabled(info.isOperationAllowed(this.controller.getConfig()));
         butt.setImage(info.getIconImage());

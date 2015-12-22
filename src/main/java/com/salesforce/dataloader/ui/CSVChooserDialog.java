@@ -230,7 +230,7 @@ public class CSVChooserDialog extends Dialog {
         labelSelect.setText(Labels.getString("CSVChooser.selectOpen")); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelSelect.setLayoutData(data);
-        buttonSelect = new Button(restComp, SWT.PUSH);
+        buttonSelect = new Button(restComp, SWT.PUSH | SWT.FLAT);
         buttonSelect.setText(Labels.getString("CSVChooser.openCsv")); //$NON-NLS-1$
         buttonSelect.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -250,7 +250,7 @@ public class CSVChooserDialog extends Dialog {
         labelSuccess.setText(Labels.getString("CSVChooser.lastSuccess")); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelSuccess.setLayoutData(data);
-        buttonSuccess = new Button(restComp, SWT.PUSH);
+        buttonSuccess = new Button(restComp, SWT.PUSH | SWT.FLAT);
         buttonSuccess.setText(Labels.getString("CSVChooser.openSuccess")); //$NON-NLS-1$
         buttonSuccess.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -269,7 +269,7 @@ public class CSVChooserDialog extends Dialog {
         labelError.setText(Labels.getString("CSVChooser.lastError")); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelError.setLayoutData(data);
-        buttonError = new Button(restComp, SWT.PUSH);
+        buttonError = new Button(restComp, SWT.PUSH | SWT.FLAT);
         buttonError.setText(Labels.getString("CSVChooser.openError")); //$NON-NLS-1$
         buttonError.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -300,7 +300,7 @@ public class CSVChooserDialog extends Dialog {
         // Create the OK button and add a handler
         // so that pressing it will set input
         // to the entered value
-        Button ok = new Button(buttonComp, SWT.PUSH);
+        Button ok = new Button(buttonComp, SWT.PUSH | SWT.FLAT);
         ok.setText(Labels.getString("UI.close")); //$NON-NLS-1$
         ok.addSelectionListener(new SelectionAdapter() {
             @Override

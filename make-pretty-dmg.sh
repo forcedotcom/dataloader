@@ -14,4 +14,4 @@ then
     codesign --force --verify --sign "$CODE_SIGN" $DMG_SRC_DIR/Data\ Loader.app
 fi
 
-bash $BASEDIR/yoursway-create-dmg/create-dmg --volname "DataLoader" --background "$BASEDIR/src/main/resources/img/installscreens.gif" --hide-extension "Data Loader.app" --icon-size 60 --window-size 400 300 --app-drop-link 300 230 --icon "Data Loader" 100 230 "$DMG_OUT" $DMG_SRC_DIR
+bash $BASEDIR/yoursway-create-dmg/create-dmg --volname "DataLoader" --volicon "$BASEDIR/src/main/resources/img/icons/icon_loader.icns" --background "$BASEDIR/src/main/nsis/installer-salesforce-dataLoader.png" --hide-extension Data\ Loader.app --icon-size 60 --window-size 400 300 --app-drop-link 300 210 --icon "Data Loader" 100 210 "$DMG_OUT" $DMG_SRC_DIR

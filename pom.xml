@@ -562,7 +562,7 @@
                                 <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
                                 <preCp>anything</preCp>
                             </classPath>
-                            <icon>${basedir}/src/main/nsis/icon_SforceDL32x32.ico</icon>
+                            <icon>${basedir}/src/main/resources/img/icons/dataloader.ico</icon>
                             <jre>
                                 <minVersion>${minJvmVersion}</minVersion>
                                 <jdkPreference>preferJre</jdkPreference>
