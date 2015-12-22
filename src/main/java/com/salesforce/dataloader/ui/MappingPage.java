@@ -81,7 +81,7 @@ public class MappingPage extends LoadPage {
         gridLayout.marginHeight = 15;
         comp.setLayout(gridLayout);
 
-        Button buttonExisting = new Button(comp, SWT.PUSH);
+        Button buttonExisting = new Button(comp, SWT.PUSH | SWT.FLAT);
         buttonExisting.setText(Labels.getString("MappingPage.selectExisting")); //$NON-NLS-1$
         buttonExisting.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -105,7 +105,7 @@ public class MappingPage extends LoadPage {
             }
         });
 
-        Button buttonCreateNew = new Button(comp, SWT.PUSH);
+        Button buttonCreateNew = new Button(comp, SWT.PUSH | SWT.FLAT);
         buttonCreateNew.setText(Labels.getString("MappingPage.createEdit")); //$NON-NLS-1$
         final MappingPage thisPage = this;
         buttonCreateNew.addSelectionListener(new SelectionAdapter() {

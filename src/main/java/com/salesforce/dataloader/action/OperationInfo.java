@@ -118,7 +118,6 @@ public enum OperationInfo {
 
     public String getIconLocation() {
         if (this == hard_delete) return delete.getIconLocation();
-        if (this == upsert) return update.getIconLocation();
         if (this == extract_all) return extract.getIconLocation();
         return "img/icons/icon_" + name() + ".gif";
     }

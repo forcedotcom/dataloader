@@ -28,6 +28,7 @@ package com.salesforce.dataloader.ui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -68,6 +69,8 @@ public class Grid12 {
         data.widthHint = columnSpan * this.columnWidth;
         data.horizontalAlignment = horizontalAlignment;
         data.heightHint = cellHeight;
+        data.grabExcessHorizontalSpace = true;
+        data.grabExcessVerticalSpace = true;
 
         return data;
     }
@@ -81,9 +84,26 @@ public class Grid12 {
     }
 
     public Label createLabel(int columns, String message) {
-        Label label = new Label(composite, SWT.RIGHT);
+        return createLabel(columns, message, SWT.RIGHT);
+    }
+
+    public Label createLabel(int columns, String message, int style) {
+        Label label = new Label(composite, style);
         label.setText(message);
         label.setLayoutData(createCell(columns));
+
+        return label;
+    }
+
+    public Label createImage(int columns, Image image) {
+        return createImage(columns, image, SWT.RIGHT, SWT.RIGHT);
+    }
+
+    public Label createImage(int columns, Image image, int style, int alignment) {
+        Label label = new Label(composite, style);
+        label.setImage(image);
+        label.setLayoutData(createCell(columns));
+        label.setAlignment(alignment);
 
         return label;
     }

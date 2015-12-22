@@ -334,7 +334,7 @@ public class ExtractionInputDialog extends Dialog {
         // Create the OK button and add a handler
         // so that pressing it will set input
         // to the entered value
-        Button ok = new Button(buttonComp, SWT.PUSH);
+        Button ok = new Button(buttonComp, SWT.PUSH | SWT.FLAT);
         ok.setText(Labels.getString("UI.ok")); //$NON-NLS-1$
         ok.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -363,7 +363,7 @@ public class ExtractionInputDialog extends Dialog {
 
         // Create the cancel button and add a handler
         // so that pressing it will set input to null
-        Button cancel = new Button(buttonComp, SWT.PUSH);
+        Button cancel = new Button(buttonComp, SWT.PUSH | SWT.FLAT);
         cancel.setText(Labels.getString("UI.cancel")); //$NON-NLS-1$
         cancel.addSelectionListener(new SelectionAdapter() {
             @Override

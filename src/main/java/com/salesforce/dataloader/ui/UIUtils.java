@@ -57,13 +57,13 @@ public class UIUtils {
 
             Class<?> baseClass = LoaderWindow.class;
 
-            image_registry.put("sfdc_icon", 
-                    ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/icons/icon_sforceDL16x16.bmp")));
+            image_registry.put("sfdc_icon",
+                    ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/icons/dataloader.ico")));
 
             image_registry.put("logo", 
-                    ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/appExch_dataload_logo.gif")));
-            image_registry.put("splashscreens", 
-                    ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/splashscreens.gif")));
+                    ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/icons/icon_128x128.png")));
+            image_registry.put("splashscreens",
+                    ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/icons/icon_256x256.png")));
 
             for (OperationInfo info : OperationInfo.values()) {
                 if (image_registry.get(info.getIconName()) == null)
