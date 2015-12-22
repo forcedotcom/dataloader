@@ -62,6 +62,8 @@ public class UIUtils {
 
             image_registry.put("logo", 
                     ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/icons/icon_128x128.png")));
+            image_registry.put("title_logo",
+                    ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/dataloader-title-logo.png")));
             image_registry.put("splashscreens",
                     ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/icons/icon_256x256.png")));
 

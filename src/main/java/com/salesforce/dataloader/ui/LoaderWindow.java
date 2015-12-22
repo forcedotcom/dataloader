@@ -193,26 +193,16 @@ public class LoaderWindow extends ApplicationWindow {
         Composite comp = new Composite(parent, SWT.BORDER);
         setBackground(comp);
         comp.setLayout(new FillLayout(SWT.VERTICAL));
-
-
-        Composite titleContainer = new Composite(comp, SWT.CENTER);
-        setBackground(titleContainer);
-        Grid12 grid12 = new Grid12(titleContainer, 25);
-        grid12.createImage(6, UIUtils.getImageRegistry().get("logo"));
-
-        Label label = grid12.createLabel(6, "data loader", SWT.LEFT);
-        FontData fontData = label.getFont().getFontData()[0];
-        fontData.setHeight(30);
-        label.setForeground(new Color(Display.getCurrent(),125,134,140));
-        label.setFont(new Font(Display.getCurrent(), fontData));
-        grid12.pack();
+        Label label = new Label(comp, SWT.CENTER);
+        setBackground(label);
+        label.setImage(UIUtils.getImageRegistry().get("title_logo"));
         comp.pack();
 
         return comp;
     }
 
     private void setBackground(Control comp) {
-        comp.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+        comp.setBackground(new Color(Display.getCurrent(), 238,241,246));
     }
 
     private void createButtons(Composite parent) {
