@@ -23,6 +23,7 @@
     <nsis.version>2.46</nsis.version>
     <spring.version>3.1.1.RELEASE</spring.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <config.additional.properties></config.additional.properties>
 
 
     <!-- test properties -->
@@ -774,6 +775,8 @@
                             <echo>Copying additional assets for DMG</echo>
                             <copy file="${basedir}/src/main/resources/Localizable.strings" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/en.lproj/Localizable.strings"/>
                             <copy file="${basedir}/src/main/nsis/config.properties" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/config.properties"/>
+                            <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/config.properties" token="#placeholder" value="${config.additional.properties}"/>
+                            <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/config.properties" token="\n" value="${line.separator}"/>
                         </tasks>
                     </configuration>
                 </plugin>
