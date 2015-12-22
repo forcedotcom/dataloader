@@ -194,7 +194,7 @@ Section "Required Files"
     CreateDirectory "${S_DEFAULT_CONFIGFOLDER}"
     AccessControl::GrantOnFile "${S_DEFAULT_CONFIGFOLDER}" "(S-1-5-32-545)" "FullAccess"
     SetOutPath "${S_DEFAULT_CONFIGFOLDER}"
-    File "src\main\nsis\config.properties"
+    File "target\config.properties"
 
 SectionEnd
 
