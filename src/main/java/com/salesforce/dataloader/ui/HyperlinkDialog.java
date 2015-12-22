@@ -259,7 +259,7 @@ public class HyperlinkDialog extends Dialog {
         GridData dataComp = new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.VERTICAL_ALIGN_CENTER);
         compositeX.setLayoutData(dataComp);
 
-        Button ok = new Button(compositeX, SWT.PUSH);
+        Button ok = new Button(compositeX, SWT.PUSH | SWT.FLAT);
         ok.setText(IDialogConstants.OK_LABEL);
         GridData okData = new GridData();
         okData.widthHint = Math.max(75, ok.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x);

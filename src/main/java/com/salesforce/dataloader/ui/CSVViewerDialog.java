@@ -181,7 +181,7 @@ public class CSVViewerDialog extends Dialog {
         comp2.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 
         if (isWindows) {
-            Button external = new Button(comp2, SWT.PUSH);
+            Button external = new Button(comp2, SWT.PUSH | SWT.FLAT);
             external.setText(Labels.getString("CSVViewerDialog.externalButton")); //$NON-NLS-1$
             external.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
             external.addSelectionListener(new SelectionListener() {
@@ -222,7 +222,7 @@ public class CSVViewerDialog extends Dialog {
             });
         }
 
-        Button ok = new Button(comp2, SWT.PUSH);
+        Button ok = new Button(comp2, SWT.PUSH | SWT.FLAT);
         ok.setText(Labels.getString("UI.close")); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         data.widthHint = 75;
