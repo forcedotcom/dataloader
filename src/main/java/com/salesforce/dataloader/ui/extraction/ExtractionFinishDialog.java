@@ -157,7 +157,7 @@ public class ExtractionFinishDialog extends Dialog {
         }
         buttonComp.setLayout(layout);
 
-        Button viewExtraction = new Button(buttonComp, SWT.PUSH);
+        Button viewExtraction = new Button(buttonComp, SWT.PUSH | SWT.FLAT);
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         viewExtraction.setLayoutData(data);
         viewExtraction.setText(Labels.getString("ExtractionFinishDialog.viewExtraction"));  //$NON-NLS-1$
@@ -173,7 +173,7 @@ public class ExtractionFinishDialog extends Dialog {
 
         // error status output is optional
         if (enableStatusOutput) {
-            Button viewErrors = new Button(buttonComp, SWT.PUSH);
+            Button viewErrors = new Button(buttonComp, SWT.PUSH | SWT.FLAT | SWT.FLAT);
             data = new GridData(GridData.HORIZONTAL_ALIGN_END);
             data.widthHint = 75;
             viewErrors.setLayoutData(data);
@@ -189,7 +189,7 @@ public class ExtractionFinishDialog extends Dialog {
             });
         }
 
-        ok = new Button(buttonComp, SWT.PUSH);
+        ok = new Button(buttonComp, SWT.PUSH | SWT.FLAT);
         ok.setText(Labels.getString("UI.ok")); //$NON-NLS-1$
         ok.addSelectionListener(new SelectionAdapter() {
             @Override
