@@ -237,7 +237,7 @@ public class DataSelectionDialog extends Dialog {
         //ok cancel buttons
         new Label(shell, SWT.NONE);
 
-        ok = new Button(shell, SWT.PUSH);
+        ok = new Button(shell, SWT.PUSH | SWT.FLAT);
         ok.setText(Labels.getString("UI.ok")); //$NON-NLS-1$
         ok.addSelectionListener(new SelectionAdapter() {
             @Override

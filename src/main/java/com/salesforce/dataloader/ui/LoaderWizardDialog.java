@@ -97,6 +97,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     private int pageHeight = SWT.DEFAULT;
     private static final String FOCUS_CONTROL = "focusControl"; //$NON-NLS-1$
     private boolean lockedUI = false;
+    private HashMap<Integer, Button> buttons;
 
     /**
      * A layout for a container which includes several pages, like a notebook, wizard, or preference dialog. The size
@@ -226,6 +227,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      */
     public LoaderWizardDialog(Shell parentShell, IWizard newWizard) {
         super(parentShell);
+        buttons = new HashMap<>();
         setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL | SWT.RESIZE);
         setWizard(newWizard);
         // since VAJava can't initialize an instance var with an anonymous
@@ -424,7 +426,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     private Button createCancelButton(Composite parent) {
         // increment the number of columns in the button bar
         ((GridLayout)parent.getLayout()).numColumns++;
-        Button button = new Button(parent, SWT.PUSH);
+        Button button = new Button(parent, SWT.PUSH | SWT.FLAT);
         button.setText(IDialogConstants.CANCEL_LABEL);
         setButtonLayoutData(button);
         button.setFont(parent.getFont());
@@ -443,7 +445,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     @Override
     protected Button getButton(int id) {
         if (id == IDialogConstants.CANCEL_ID) return cancelButton;
-        return super.getButton(id);
+        return buttons.get(new Integer(id));
     }
 
     /**
@@ -698,7 +700,14 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
             // dispose code
             createdWizard.setContainer(null);
         }
-        return super.close();
+
+        boolean close = super.close();
+
+        if (close){
+            buttons = new HashMap<>();
+        }
+
+        return close;
     }
 
     /**
@@ -1087,7 +1096,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      */
 
     protected void updateBannerImage() {
-        setBannerImage(UIUtils.getImageRegistry().get("logo"));
+        //setBannerImage(UIUtils.getImageRegistry().get("logo"));
     }
 
     /**
@@ -1228,4 +1237,32 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
         if (title == null) title = ""; //$NON-NLS-1$
         getShell().setText(title);
     }
+
+    @Override
+    protected Button createButton(Composite parent, int id, String label,boolean defaultButton)
+    {
+        // increment the number of columns in the button bar
+        ((GridLayout) parent.getLayout()).numColumns++;
+        Button button = new Button(parent, SWT.PUSH | SWT.FLAT);
+        button.setText(label);
+        button.setFont(JFaceResources.getDialogFont());
+        button.setData(new Integer(id));
+        button.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent event) {
+                buttonPressed(((Integer) event.widget.getData()).intValue());
+            }
+        });
+        if (defaultButton) {
+            Shell shell = parent.getShell();
+            if (shell != null) {
+                shell.setDefaultButton(button);
+            }
+        }
+
+        buttons.put(new Integer(id), button);
+        setButtonLayoutData(button);
+        return button;
+
+    }
+
 }

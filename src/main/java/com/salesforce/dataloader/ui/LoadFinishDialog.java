@@ -150,7 +150,7 @@ public class LoadFinishDialog extends Dialog {
         layout = new GridLayout(3, false);
         buttonComp.setLayout(layout);
 
-        Button viewSuccess = new Button(buttonComp, SWT.PUSH);
+        Button viewSuccess = new Button(buttonComp, SWT.PUSH | SWT.FLAT);
         viewSuccess.setText(Labels.getString("LoadFinishDialog.viewSuccess")); //$NON-NLS-1$
         viewSuccess.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         viewSuccess.addSelectionListener(new SelectionListener() {
@@ -163,7 +163,7 @@ public class LoadFinishDialog extends Dialog {
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
 
-        Button viewErrors = new Button(buttonComp, SWT.PUSH);
+        Button viewErrors = new Button(buttonComp, SWT.PUSH | SWT.FLAT);
         viewErrors.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         viewErrors.setText(Labels.getString("LoadFinishDialog.viewErrors")); //$NON-NLS-1$
         viewErrors.addSelectionListener(new SelectionListener() {
@@ -176,7 +176,7 @@ public class LoadFinishDialog extends Dialog {
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
 
-        ok = new Button(buttonComp, SWT.PUSH);
+        ok = new Button(buttonComp, SWT.PUSH | SWT.FLAT );
         ok.setText(Labels.getString("UI.ok")); //$NON-NLS-1$
         ok.addSelectionListener(new SelectionAdapter() {
             @Override

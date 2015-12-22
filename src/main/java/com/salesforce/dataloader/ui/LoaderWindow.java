@@ -35,6 +35,9 @@ import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.*;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
@@ -44,6 +47,9 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Config.ConfigListener;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.uiActions.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 /**
  * The main class for the Loader UI.
@@ -187,15 +193,16 @@ public class LoaderWindow extends ApplicationWindow {
         Composite comp = new Composite(parent, SWT.BORDER);
         setBackground(comp);
         comp.setLayout(new FillLayout(SWT.VERTICAL));
-        Label titleImage = new Label(comp, SWT.CENTER);
-        setBackground(titleImage);
-        titleImage.setImage(UIUtils.getImageRegistry().get("logo"));
+        Label label = new Label(comp, SWT.CENTER);
+        setBackground(label);
+        label.setImage(UIUtils.getImageRegistry().get("title_logo"));
         comp.pack();
+
         return comp;
     }
 
     private void setBackground(Control comp) {
-        comp.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+        comp.setBackground(new Color(Display.getCurrent(), 238,241,246));
     }
 
     private void createButtons(Composite parent) {
@@ -207,8 +214,8 @@ public class LoaderWindow extends ApplicationWindow {
         rowLayout.justify = false;
         rowLayout.marginLeft = 10;
         rowLayout.marginRight = 10;
-        rowLayout.marginTop = 10;
-        rowLayout.marginBottom = 10;
+        rowLayout.marginTop = 15;
+        rowLayout.marginBottom = 15;
         rowLayout.spacing = 5;
         buttons.setLayout(rowLayout);
         // create all the buttons, in order
@@ -219,11 +226,12 @@ public class LoaderWindow extends ApplicationWindow {
     }
 
     private void createOperationButton(Composite parent, final OperationInfo info) {
-        final Button butt = new Button(parent, SWT.PUSH);
 
+        final Button butt = new Button(parent, SWT.PUSH | SWT.FLAT);
         butt.setText(info.getLabel());
         butt.setEnabled(info.isOperationAllowed(this.controller.getConfig()));
         butt.setImage(info.getIconImage());
+        butt.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         butt.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent selectionEvent) {
