@@ -43,17 +43,26 @@ public class Grid12 {
     private final int columnWidth;
     private final int cellHeight;
     private final GridLayout root;
+    private boolean grabExcessHorizontalSpace;
+    private boolean grabExcessVerticalSpace;
 
     public Grid12(Composite composite, int columnWidth){
         this(composite, columnWidth, -1);
     }
     public Grid12(Composite composite, int columnWidth, int cellHeight){
+        this(composite, columnWidth, cellHeight, false, true);
+    }
+    public Grid12(Composite composite, int columnWidth, int cellHeight, boolean grabExcessVerticalSpace, boolean grabExcessHorizontalSpace) {
         this.composite = composite;
         this.columnWidth = columnWidth;
         this.cellHeight = cellHeight;
         this.root = new GridLayout(12, true);
         this.composite.setLayout(root);
+        this.grabExcessVerticalSpace = grabExcessVerticalSpace;
+        this.grabExcessHorizontalSpace = grabExcessHorizontalSpace;
     }
+
+
 
     public GridLayout getRoot() {
         return root;
@@ -69,8 +78,8 @@ public class Grid12 {
         data.widthHint = columnSpan * this.columnWidth;
         data.horizontalAlignment = horizontalAlignment;
         data.heightHint = cellHeight;
-        data.grabExcessHorizontalSpace = true;
-        data.grabExcessVerticalSpace = true;
+        data.grabExcessHorizontalSpace = grabExcessHorizontalSpace;
+        data.grabExcessVerticalSpace = grabExcessVerticalSpace;
 
         return data;
     }
