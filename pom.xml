@@ -585,6 +585,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
@@ -595,6 +596,10 @@
                             <target>
                                 <!-- unpack NSIS -->
                                 <unzip src="windows-dependencies/nsis-${nsis.version}.zip" dest="target" />
+                              <echo>Copying additional assets for MSI</echo>
+                              <copy file="${basedir}/src/main/nsis/config.properties" tofile="${basedir}/target/config.properties"/>
+                              <replace file="${basedir}/target/config.properties" token="#placeholder" value="${config.additional.properties}"/>
+                              <replace file="${basedir}/target/config.properties" token="\n" value="${line.separator}"/>
                             </target>
                         </configuration>
                         <goals>
