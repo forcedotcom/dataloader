@@ -73,8 +73,6 @@ public class LoaderTitleDialog extends LoaderTitleAreaDialog {
         setMessage(Labels.getString("TitleDialog.messageLineOne") //$NON-NLS-1$
                 + System.getProperty("line.separator") + Labels.getString("TitleDialog.messageLineTwo")); //$NON-NLS-1$ //$NON-NLS-2$
 
-        setBannerImage(UIUtils.getImageRegistry().get("logo"));
-
         // Set the image
         setTitleImage(UIUtils.getImageRegistry().get("splashscreens")); //$NON-NLS-1$
 

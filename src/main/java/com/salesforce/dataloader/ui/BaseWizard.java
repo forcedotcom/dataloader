@@ -78,9 +78,4 @@ public abstract class BaseWizard extends Wizard {
         return finishPage;
     }
 
-    @Override
-    public Image getDefaultPageImage() {
-        return UIUtils.getImageRegistry().get("sfdc_icon"); //$NON-NLS-1$
-    }
-
 }

@@ -196,7 +196,7 @@ public class MappingDialog extends Dialog {
         Composite comp = new Composite(shell, SWT.NONE);
         comp.setLayout(new GridLayout(2, false));
 
-        Button buttonClear = new Button(comp, SWT.PUSH);
+        Button buttonClear = new Button(comp, SWT.PUSH | SWT.FLAT);
         buttonClear.setText(Labels.getString("MappingDialog.clearMapping")); //$NON-NLS-1$
         buttonClear.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -208,7 +208,7 @@ public class MappingDialog extends Dialog {
             }
         });
 
-        Button buttonMatch = new Button(comp, SWT.PUSH);
+        Button buttonMatch = new Button(comp, SWT.PUSH | SWT.FLAT);
         buttonMatch.setText(Labels.getString("MappingDialog.autoMatch")); //$NON-NLS-1$
         buttonMatch.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -249,7 +249,7 @@ public class MappingDialog extends Dialog {
         // Create the OK button and add a handler
         // so that pressing it will set input
         // to the entered value
-        Button ok = new Button(comp2, SWT.PUSH);
+        Button ok = new Button(comp2, SWT.PUSH | SWT.FLAT);
         ok.setText(Labels.getString("UI.ok")); //$NON-NLS-1$
         data = new GridData();
         data.widthHint = 75;
@@ -265,7 +265,7 @@ public class MappingDialog extends Dialog {
             }
         });
 
-        Button buttonSave = new Button(comp2, SWT.PUSH);
+        Button buttonSave = new Button(comp2, SWT.PUSH | SWT.FLAT);
         buttonSave.setText(Labels.getString("MappingDialog.saveMapping")); //$NON-NLS-1$
         data = new GridData();
         data.widthHint = Math.max(75, buttonSave.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x);
@@ -315,7 +315,7 @@ public class MappingDialog extends Dialog {
 
         // Create the cancel button and add a handler
         // so that pressing it will set input to null
-        Button cancel = new Button(comp2, SWT.PUSH);
+        Button cancel = new Button(comp2, SWT.PUSH | SWT.FLAT);
         cancel.setText(Labels.getString("UI.cancel")); //$NON-NLS-1$
         data = new GridData();
         data.widthHint = 75;

@@ -278,7 +278,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
             public void focusLost(FocusEvent e) {}
         });
 
-        Button addWhere = new Button(whereComp, SWT.PUSH);
+        Button addWhere = new Button(whereComp, SWT.PUSH | SWT.FLAT);
         addWhere.setText(Labels.getString("ExtractionSOQLPage.addCondition")); //$NON-NLS-1$
         addWhere.addSelectionListener(new SelectionListener() {
             @Override
@@ -336,7 +336,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
 
-        Button clearWhere = new Button(whereComp, SWT.PUSH);
+        Button clearWhere = new Button(whereComp, SWT.PUSH | SWT.FLAT);
         clearWhere.setText(Labels.getString("ExtractionSOQLPage.clearAllConditions")); //$NON-NLS-1$
         data = new GridData();
         data.horizontalSpan = 2;
@@ -357,7 +357,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
         gridLayout = new GridLayout(2, false);
         fieldButtonComp.setLayout(gridLayout);
 
-        Button selectAll = new Button(fieldButtonComp, SWT.PUSH);
+        Button selectAll = new Button(fieldButtonComp, SWT.PUSH | SWT.FLAT);
         selectAll.setText(Labels.getString("ExtractionSOQLPage.selectAllFields")); //$NON-NLS-1$
         selectAll.addSelectionListener(new SelectionListener() {
             @Override
@@ -371,7 +371,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
 
-        Button clearAll = new Button(fieldButtonComp, SWT.PUSH);
+        Button clearAll = new Button(fieldButtonComp, SWT.PUSH | SWT.FLAT);
         clearAll.setText(Labels.getString("ExtractionSOQLPage.clearAllFields")); //$NON-NLS-1$
         clearAll.addSelectionListener(new SelectionListener() {
             @Override

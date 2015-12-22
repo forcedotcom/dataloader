@@ -28,6 +28,7 @@ package com.salesforce.dataloader.ui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -42,17 +43,26 @@ public class Grid12 {
     private final int columnWidth;
     private final int cellHeight;
     private final GridLayout root;
+    private boolean grabExcessHorizontalSpace;
+    private boolean grabExcessVerticalSpace;
 
     public Grid12(Composite composite, int columnWidth){
         this(composite, columnWidth, -1);
     }
     public Grid12(Composite composite, int columnWidth, int cellHeight){
+        this(composite, columnWidth, cellHeight, false, true);
+    }
+    public Grid12(Composite composite, int columnWidth, int cellHeight, boolean grabExcessVerticalSpace, boolean grabExcessHorizontalSpace) {
         this.composite = composite;
         this.columnWidth = columnWidth;
         this.cellHeight = cellHeight;
         this.root = new GridLayout(12, true);
         this.composite.setLayout(root);
+        this.grabExcessVerticalSpace = grabExcessVerticalSpace;
+        this.grabExcessHorizontalSpace = grabExcessHorizontalSpace;
     }
+
+
 
     public GridLayout getRoot() {
         return root;
@@ -68,6 +78,8 @@ public class Grid12 {
         data.widthHint = columnSpan * this.columnWidth;
         data.horizontalAlignment = horizontalAlignment;
         data.heightHint = cellHeight;
+        data.grabExcessHorizontalSpace = grabExcessHorizontalSpace;
+        data.grabExcessVerticalSpace = grabExcessVerticalSpace;
 
         return data;
     }
@@ -81,9 +93,26 @@ public class Grid12 {
     }
 
     public Label createLabel(int columns, String message) {
-        Label label = new Label(composite, SWT.RIGHT);
+        return createLabel(columns, message, SWT.RIGHT);
+    }
+
+    public Label createLabel(int columns, String message, int style) {
+        Label label = new Label(composite, style);
         label.setText(message);
         label.setLayoutData(createCell(columns));
+
+        return label;
+    }
+
+    public Label createImage(int columns, Image image) {
+        return createImage(columns, image, SWT.RIGHT, SWT.RIGHT);
+    }
+
+    public Label createImage(int columns, Image image, int style, int alignment) {
+        Label label = new Label(composite, style);
+        label.setImage(image);
+        label.setLayoutData(createCell(columns));
+        label.setAlignment(alignment);
 
         return label;
     }

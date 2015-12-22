@@ -9,8 +9,8 @@
 !define S_DEFINSTDIR_ADMIN "$PROGRAMFILES\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
 !define UNINSTALLER_FULLPATH "$InstDir\Uninstaller.exe"
 
-!define MUI_ICON "src\main\nsis\icon_SforceDL32x32.ico"
-!define MUI_UNICON "src\main\nsis\icon_SforceDL32x32.ico"
+!define MUI_ICON "src\main\resources\img\icons\dataloader.ico"
+!define MUI_UNICON "src\main\resources\img\icons\dataloader.ico"
 
 Name "${APPNAME}"
 OutFile "target\${S_NAME}.installer.exe"
@@ -180,8 +180,7 @@ Section "Required Files"
     SetOutPath "$INSTDIR"
     File "target\${PROJECT_FINAL_NAME}.exe"
     File "target\${PROJECT_FINAL_NAME}-uber.jar"
-    File "src\main\nsis\icon_SforceDL16x16.ico"
-    File "src\main\nsis\icon_SforceDL32x32.ico"
+    File "src\main\resources\img\icons\dataloader.ico"
     FileOpen $9 "${PROJECT_FINAL_NAME}.l4j.ini" w
     ;Java Args here
     FileWrite $9 "-Dappdata.dir=$\"$APPDATA$\"$\r$\n"
@@ -215,7 +214,7 @@ Section Uninstaller
     WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" InstallLocation $InstDir
     WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" NoModify 1
     WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" NoRepair 1
-    WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" DisplayIcon "$INSTDIR\icon_SforceDL32x32.ico"
+    WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" DisplayIcon "$INSTDIR\dataloader.ico"
     WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" Publisher "${PROJECT_ORGANIZATION_NAME}"
     WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" EstimatedSize  12178
     WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" DisplayVersion  "${PROJECT_VERSION}"
@@ -308,7 +307,7 @@ File "/oname=${extractTo}" "${UNINSTEXE}.exe.un"
       Delete "$INSTDIR\${PROJECT_FINAL_NAME}-uber.jar"
       Delete "$INSTDIR\${PROJECT_FINAL_NAME}.l4j.ini"
       Delete "$INSTDIR\${PROJECT_FINAL_NAME}.exe"
-      Delete "$INSTDIR\icon_SforceDL32x32.ico"
+      Delete "$INSTDIR\dataloader.ico"
       Delete "$INSTDIR\dataloader_uninstall.exe"
       RMDir /r "$INSTDIR\licenses"
       RMDir /r "$INSTDIR\samples"
