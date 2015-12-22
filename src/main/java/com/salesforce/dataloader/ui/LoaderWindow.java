@@ -206,7 +206,7 @@ public class LoaderWindow extends ApplicationWindow {
     }
 
     private void createButtons(Composite parent) {
-        Composite buttons = new ToolBar(parent, SWT.NONE);
+        Composite buttons = new Composite(parent, SWT.NONE);
         setBackground(buttons);
         RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
         rowLayout.wrap = true;
@@ -231,6 +231,7 @@ public class LoaderWindow extends ApplicationWindow {
         butt.setText(info.getLabel());
         butt.setEnabled(info.isOperationAllowed(this.controller.getConfig()));
         butt.setImage(info.getIconImage());
+        butt.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         butt.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent selectionEvent) {

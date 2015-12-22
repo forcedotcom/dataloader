@@ -58,7 +58,7 @@ public class UIUtils {
             Class<?> baseClass = LoaderWindow.class;
 
             image_registry.put("sfdc_icon",
-                    ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/icons/dataloader.ico")));
+                    ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/icons/icon_32x32.png")));
 
             image_registry.put("logo", 
                     ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/icons/icon_128x128.png")));
