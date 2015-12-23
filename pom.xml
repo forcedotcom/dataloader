@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>35.0.0</version>
+  <version>36.0.0</version>
   <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -13,7 +13,7 @@
   </organization>
 
   <properties>
-    <force.version>35.0.0</force.version>
+    <force.version>36.0.0</force.version>
     <build.year>2015</build.year>
     <java.compile.version>1.8</java.compile.version>
     <minJvmVersion>1.8.0</minJvmVersion>
@@ -654,83 +654,6 @@
       </properties>
     </profile>
 
-    <profile>
-      <id>installer-test</id>
-      <activation>
-        <os>
-          <family>Windows</family>
-        </os>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <version>1.2.1</version>
-            <executions>
-              <execution>
-                <id>register-dll</id>
-                <phase>pre-integration-test</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>regsvr32</executable>
-                  <arguments>
-                    <argument>${autoit.dll.path}</argument>
-                    <argument>-s</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-              <execution>
-                <id>unregister-dll</id>
-                <phase>post-integration-test</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>regsvr32</executable>
-                  <arguments>
-                    <argument>-u</argument>
-                    <argument>${autoit.dll.path}</argument>
-                    <argument>-s</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <version>2.12</version>
-            <executions>
-              <execution>
-                <id>integration-test</id>
-                <goals>
-                  <goal>integration-test</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>verify</id>
-                <goals>
-                  <goal>verify</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <suiteXmlFiles>
-                <suiteXmlFile>${basedir}/src/test/resources/itest.xml</suiteXmlFile>
-              </suiteXmlFiles>
-              <systemPropertyVariables>
-                <exeName>${project.build.finalName}.exe</exeName>
-              </systemPropertyVariables>
-            </configuration>
-          </plugin>
-
-        </plugins>
-      </build>
-    </profile>
 
     <profile>
         <id>mac-dmg</id>
