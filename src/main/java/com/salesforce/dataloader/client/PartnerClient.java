@@ -217,7 +217,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     protected boolean connectPostLogin(ConnectorConfig cc) {
         if (getClient() == null) throw new IllegalStateException("Client should be logged in already");
 
-        getClient().setCallOptions(ClientBase.getClientName(this.config), null);
+        getClient().setCallOptions(ClientBase.getClientName(this.config), null, false);
         // query header
         int querySize;
         try {
@@ -480,7 +480,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         final ConnectorConfig cc = getLoginConnectorConfig();
         final PartnerConnection conn = Connector.newConnection(cc);
         // identify the client as dataloader
-        conn.setCallOptions(ClientBase.getClientName(this.config), null);
+        conn.setCallOptions(ClientBase.getClientName(this.config), null, false);
 
         String oauthAccessToken = config.getString(Config.OAUTH_ACCESSTOKEN);
         if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0){
