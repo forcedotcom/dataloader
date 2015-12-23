@@ -233,7 +233,7 @@ public abstract class TestBase {
         try {
             PartnerConnection newBinding = Connector.newConnection(bindingConfig);
 
-            newBinding.setCallOptions(API_CLIENT_NAME, null);
+            newBinding.setCallOptions(API_CLIENT_NAME, null, false);
 
             logger.info("Logging in as " + bindingConfig.getUsername() + "/" + bindingConfig.getPassword() + " to URL: " + bindingConfig.getAuthEndpoint());
             if (bindingConfig.isManualLogin()) {
