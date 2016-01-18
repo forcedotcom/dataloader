@@ -248,10 +248,10 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         return true;
     }
 
-    private static void topLevelError(String message, Throwable err) {
+    private static void topLevelError(String message, Throwable err, int exitCode) {
         ensureLogging();
         logger.fatal(message, err);
-        System.exit(-1);
+        System.exit(exitCode);
     }
 
     public static void main(String[] args) {
@@ -259,16 +259,16 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         try {
             // create the process
             runner = ProcessRunner.getInstance(args);
-            if (runner == null) topLevelError("Process runner is null", new NullPointerException());
+            if (runner == null) topLevelError("Process runner is null", new NullPointerException(), -1);
         } catch (Throwable t) {
-            topLevelError("Failed to create process", t);
+            topLevelError("Failed to create process", t, -1);
         }
         try {
             // run the process
             runner.run();
             System.exit(runner.getExitCode());
         } catch (Throwable e) {
-            topLevelError("Unable to run process " + runner.getName(), e);
+            topLevelError("Unable to run process " + runner.getName(), e, runner.getExitCode());
         }
     }
 
