@@ -224,6 +224,7 @@ Section "Command line tools" CommandLineTools
     SetOutPath "$INSTDIR\bin"
     File "target\classes\encrypt.bat"
     File "target\classes\process.bat"
+    File "target\${PROJECT_FINAL_NAME}-java-home.exe"
 SectionEnd
 
 Section "Samples" Samples
