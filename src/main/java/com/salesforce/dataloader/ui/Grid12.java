@@ -28,12 +28,14 @@ package com.salesforce.dataloader.ui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Grid12 simplifies the creation of grid based layout
@@ -100,7 +102,7 @@ public class Grid12 {
         Label label = new Label(composite, style);
         label.setText(message);
         label.setLayoutData(createCell(columns));
-
+        applyFormatting(label);
         return label;
     }
 
@@ -113,6 +115,7 @@ public class Grid12 {
         label.setImage(image);
         label.setLayoutData(createCell(columns));
         label.setAlignment(alignment);
+        applyFormatting(label);
 
         return label;
     }
@@ -125,18 +128,21 @@ public class Grid12 {
         Text text = new Text(composite, style);
         text.setLayoutData(createCell(columns, SWT.FILL));
         text.setText(content);
-
+        applyFormatting(text);
         return text;
     }
 
     public void createPadding(int columns) {
-        new Composite(composite, SWT.NONE).setLayoutData(createCell(columns));
+        Composite composite = new Composite(this.composite, SWT.NONE);
+        applyFormatting(composite);
+        composite.setLayoutData(createCell(columns));
     }
 
     public Button createButton(int columns, int style, String content) {
         Button button = new Button(composite, style);
         button.setText(content);
         button.setLayoutData(createCell(columns, SWT.FILL));
+        applyFormatting(button);
 
         return button;
     }
@@ -148,6 +154,7 @@ public class Grid12 {
         for (String label: labels) {
             combo.add(label);
         }
+        applyFormatting(combo);
 
         return combo;
     }
@@ -164,5 +171,12 @@ public class Grid12 {
 
     public void pack() {
         composite.pack();
+    }
+
+    private void applyFormatting(Control control) {
+        //use this to apply standard formatting
+
+        //the below call is useful for debugging grid layout issues
+        //control.setBackground(new Color(composite.getDisplay(),new Random().nextInt(255),new Random().nextInt(255),new Random().nextInt(255)));
     }
 }

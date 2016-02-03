@@ -77,7 +77,7 @@ public class SettingsPage extends WizardPage {
         Button[] layouts = new Button[3];
         grid.createPadding(2);
         layouts[0] = grid.createButton(2, SWT.RADIO, Labels.getString("SettingsPage.loginDefault"));
-        layouts[1] = grid.createButton(2, SWT.RADIO, Labels.getString("SettingsPage.loginStandard"));
+        layouts[1] = grid.createButton(4, SWT.RADIO, Labels.getString("SettingsPage.loginStandard"));
         layouts[2] = grid.createButton(2, SWT.RADIO, Labels.getString("SettingsPage.loginAdvanced"));
         grid.createPadding(2);
 
@@ -110,7 +110,6 @@ public class SettingsPage extends WizardPage {
                 grid.hide(layouts[1]);
             }
         }
-        grid.pack();
     }
     /**
      * Loads DataSelectionPage. To be overridden by subclasses for special behavior.
@@ -176,7 +175,6 @@ public class SettingsPage extends WizardPage {
         grid.hide(advancedControl);
         grid.show(showControl);
 
-        grid.pack();
         control.layout(false);
     }
 }
