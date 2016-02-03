@@ -28,8 +28,11 @@ package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.model.OAuthToken;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressEvent;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 import java.io.UnsupportedEncodingException;
@@ -97,14 +100,27 @@ public class OAuthTokenFlow extends OAuthFlow {
                 token.setInstanceUrl(params.get("instance_url"));
                 token.setId(params.get("id"));
                 token.setAccessToken(params.get("access_token"));
-                token.setRefreshToken(params.get("refresh_token"));
-                token.setScope(params.get("scope"));
-                token.setSignature(params.get("signature"));
-                token.setTokenType(params.get("token_type"));
 
-                String issued_at = params.get("issued_at");
-                if (issued_at != null && !issued_at.equals("")) {
-                    token.setIssuedAt(new Long(issued_at));
+                //optional parameters
+                if (params.containsKey("refresh_token")) {
+                    token.setRefreshToken(params.get("refresh_token"));
+                }
+
+                //currently unused parameters
+                if (params.containsKey("scope")) {
+                    token.setScope(params.get("scope"));
+                }
+                if (params.containsKey("signature")) {
+                    token.setSignature(params.get("signature"));
+                }
+                if (params.containsKey("token_type")) {
+                    token.setTokenType(params.get("token_type"));
+                }
+                if (params.containsKey("issued_at")) {
+                    String issued_at = params.get("issued_at");
+                    if (issued_at != null && !issued_at.equals("")) {
+                        token.setIssuedAt(new Long(issued_at));
+                    }
                 }
 
 

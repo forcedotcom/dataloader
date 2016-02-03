@@ -25,6 +25,7 @@
  */
 package com.salesforce.dataloader.ui;
 
+import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -44,19 +45,17 @@ public class Labels {
 
     public static String getString(String key) {
         try {
-            return RESOURCE_BUNDLE.getString(key);
+            //Hmm.. need to test other languages on this at some point
+            return new String(RESOURCE_BUNDLE.getString(key).getBytes("ISO-8859-1"), "UTF-8");//$NON-NLS-2$ //$NON-NLS-1$
         } catch (MissingResourceException e) {
+            return '!' + key + '!';
+        } catch (UnsupportedEncodingException e) {
             return '!' + key + '!';
         }
     }
 
     public static String getFormattedString(String key, Object arg) {
-        String format= null;
-        try {
-            format= RESOURCE_BUNDLE.getString(key);
-        } catch (MissingResourceException e) {
-            return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
-        }
+        String format=getString(key);
         if (arg == null)
             arg= ""; //$NON-NLS-1$
         return MessageFormat.format(format, new Object[] { arg });

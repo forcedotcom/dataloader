@@ -146,10 +146,14 @@ public class Config {
     public static final String WIRE_OUTPUT  = "sfdc.wireOutput";
     public static final String TIMEZONE = "sfdc.timezone";
 
+    public static final String OAUTH_PARTIAL_BULK = "bulk";
+    public static final String OAUTH_PARTIAL_PARTNER = "partner";
     public static final String OAUTH_PARTIAL_SERVER = "server";
     public static final String OAUTH_PARTIAL_CLIENTSECRET = "clientsecret";
     public static final String OAUTH_PARTIAL_CLIENTID = "clientid";
     public static final String OAUTH_PARTIAL_REDIRECTURI = "redirecturi";
+    public static final String OAUTH_PARTIAL_BULK_CLIENTID = OAUTH_PARTIAL_BULK + "." + OAUTH_PARTIAL_CLIENTID;
+    public static final String OAUTH_PARTIAL_PARTNER_CLIENTID = OAUTH_PARTIAL_PARTNER + "." + OAUTH_PARTIAL_CLIENTID;
     public static final String OAUTH_ENVIRONMENTS = "sfdc.oauth.environments";
     public static final String OAUTH_ENVIRONMENT = "sfdc.oauth.environment";
     public static final String OAUTH_ACCESSTOKEN = "sfdc.oauth.accesstoken";
@@ -365,7 +369,7 @@ public class Config {
     public double getDouble(String name) throws ParameterLoadException {
         String value = getParamValue(name);
         if (value == null || value.length() == 0) return DOUBLE_DEFAULT;
-        double ival = DOUBLE_DEFAULT;
+        double ival;
         try {
             ival = new Double(value).doubleValue();
         } catch (NumberFormatException e) {
@@ -1080,9 +1084,18 @@ public class Config {
     }
 
     public void setOAuthEnvironment(String environment) {
+        String clientId;
+        if (getBoolean(BULK_API_ENABLED)){
+            clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_BULK_CLIENTID);
+        } else {
+            clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_PARTNER_CLIENTID);
+        }
+        if (clientId == null || clientId.isEmpty()){
+            clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTID);
+        }
         setValue(OAUTH_ENVIRONMENT, environment);
         setValue(OAUTH_SERVER, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_SERVER));
-        setValue(OAUTH_CLIENTID, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTID));
+        setValue(OAUTH_CLIENTID, clientId);
         setValue(OAUTH_CLIENTSECRET, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTSECRET));
         setValue(OAUTH_REDIRECTURI, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_REDIRECTURI));
     }
