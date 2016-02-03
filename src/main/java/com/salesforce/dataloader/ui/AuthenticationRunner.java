@@ -85,8 +85,10 @@ public class AuthenticationRunner {
                 boolean hasSecret = !config.getString(Config.OAUTH_CLIENTSECRET).trim().equals("");
                 OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, config) : new OAuthTokenFlow(shell, config);
                 if (!flow.open()){
-                    String message = flow.getStatusCode() == DefaultSimplePost.PROXY_AUTHENTICATION_REQUIRED ?
-                            flow.getReasonPhrase() : Labels.getString("SettingsPage.invalidLogin");
+                    String message = Labels.getString("SettingsPage.invalidLogin");
+                    if (flow.getStatusCode() == DefaultSimplePost.PROXY_AUTHENTICATION_REQUIRED) {
+                        message = Labels.getFormattedString("SettingsPage.proxyError", flow.getReasonPhrase());
+                    }
 
                     logger.info("Login failed:" + flow.getReasonPhrase());
                     messenger.accept(message);

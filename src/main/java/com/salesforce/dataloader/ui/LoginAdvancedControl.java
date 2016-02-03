@@ -60,9 +60,10 @@ public class LoginAdvancedControl extends Composite {
         loginUrl = grid.createText(6, SWT.BORDER, authenticator.getConfig().getString(Config.ENDPOINT));
         grid.createPadding(2);
 
-        loginLabel = grid.createLabel(10, "");
+        loginLabel = grid.createLabel(8, "");
         loginButton = grid.createButton(2, SWT.PUSH | SWT.FILL, Labels.getString("SettingsPage.login"));
         loginButton.addListener(SWT.Selection, this::loginButton_Clicked);
+        grid.createPadding(2);
     }
 
     private void loginButton_Clicked(Event event) {
