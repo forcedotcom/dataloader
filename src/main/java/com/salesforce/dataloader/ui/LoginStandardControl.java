@@ -61,9 +61,10 @@ public class LoginStandardControl extends Composite {
         instanceUrl = grid.createText(6, SWT.BORDER, authentication.getConfig().getString(Config.ENDPOINT));
         grid.createPadding(2);
 
-        loginLabel = grid.createLabel(10, "");
+        loginLabel = grid.createLabel(8, "");
         loginButton = grid.createButton(2, SWT.PUSH | SWT.FILL | SWT.FLAT, Labels.getString("SettingsPage.login"));
         loginButton.addListener(SWT.Selection, this::loginButton_Clicked);
+        grid.createPadding(2);
     }
 
     private void loginButton_Clicked(Event event) {
