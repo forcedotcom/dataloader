@@ -26,7 +26,7 @@ if not [%2]==[] set PROCESS_OPTION=process.name=%2
 
 
 IF "%JAVA_HOME%" == "" (
-    for /f "tokens=*" %%i in ('${pom.build.finalName}-java-home.exe') do (
+    for /f "tokens=*" %%i in ('dataloader-36.0.0-java-home.exe') do (
         IF EXIST "%%i" (
             set JAVA_HOME=%%i
         ) ELSE (
@@ -36,12 +36,12 @@ IF "%JAVA_HOME%" == "" (
 )
 
 IF "%JAVA_HOME%" == "" (
-    echo To run process.bat, set the JAVA_HOME environment variable to the directory where the Java Runtime Environment (JRE) is installed.
+    echo To run process.bat, set the JAVA_HOME environment variable to the directory where the Java Runtime Environment ^(JRE^) is installed.
 ) ELSE (
     IF NOT EXIST "%JAVA_HOME%" (
-        echo We couldn't find the Java Runtime Environment (JRE) in directory %JAVA_HOME%. To run process.bat, set the JAVA_HOME environment variable to the directory where the JRE is installed.
+        echo We couldn't find the Java Runtime Environment ^(JRE^) in directory "%JAVA_HOME%". To run process.bat, set the JAVA_HOME environment variable to the directory where the JRE is installed.
     ) ELSE (
-        "%JAVA_HOME%\bin\java" -cp ..\${pom.build.finalName}-uber.jar -Dsalesforce.config.dir=%1 com.salesforce.dataloader.process.ProcessRunner %PROCESS_OPTION%
+        "%JAVA_HOME%\bin\java" -cp ..\dataloader-36.0.0-uber.jar -Dsalesforce.config.dir=%1 com.salesforce.dataloader.process.ProcessRunner %PROCESS_OPTION%
     )
 )
 
