@@ -105,21 +105,23 @@ SendMessage $0 ${BCM_SETSHIELD} 0 0
 FunctionEnd
 
 Function InstModeSelectionPage_Create
-!insertmacro MUI_HEADER_TEXT_PAGE "Select install type" "Choose for which users you want to install $(^NameDA)."
+!insertmacro MUI_HEADER_TEXT_PAGE "Install for admins only?" "This choice determines who can use Data Loader on this machine, and whether Data Loader can run automated processes."
 GetFunctionAddress $8 InstModeSelectionPage_OnClick
 nsDialogs::Create /NOUNLOAD 1018
 Pop $9
 ${NSD_OnBack} RemoveNextBtnShield
-${NSD_CreateLabel} 0 20u 75% 20u "Select whether you want to install $(^NameDA) for yourself only or for all users of this computer. $(^ClickNext)"
+${NSD_CreateLabel} 0 20u 75% 20u "Do you have administrator rights on this machine?"
 Pop $0
 System::Call "advapi32::GetUserName(t.r0,*i${NSIS_MAX_STRLEN})i"
-${NSD_CreateRadioButton} 0 40u 75% 15u "Single User ($0)"
+${NSD_CreateRadioButton} 0 40u 75% 15u "No, or I'm not sure"
 Pop $0
 nsDialogs::OnClick $0 $8
 nsDialogs::SetUserData $0 0
 SendMessage $0 ${BM_CLICK} 0 0
-${NSD_CreateRadioButton} 0 60u 75% 15u "All users"
+${NSD_CreateRadioButton} 0 60u 75% 15u "Yes"
 Pop $2
+${NSD_CreateLabel} 0 80u 95% 40u "If you select Yes, Data Loader will work only for users with administrator rights on this machine. If you're an advanced user with administrator rights on this machine, select Yes to enable Data Loader to run automated batch operations and scheduled processes."
+Pop $0
 nsDialogs::OnClick $2 $8
 nsDialogs::SetUserData $2 1
 ${IfThen} $InstMode <> 0 ${|} SendMessage $2 ${BM_CLICK} 0 0 ${|}
