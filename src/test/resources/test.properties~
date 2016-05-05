@@ -8,9 +8,9 @@ test.redirect=true
 
 ## user/org/passwd
 test.org=pint.com
-test.user.default=***REMOVED***
-test.user.restricted=***REMOVED***
-test.password=***REMOVED***L
+test.user.default=admin@pint.com
+test.user.restricted=admin@pint.com
+test.password=test1234L
 
 ## test logging level
 test.log.level=debug
