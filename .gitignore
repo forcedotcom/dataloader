@@ -19,3 +19,7 @@ Thumbs.db
 /lib/
 /classes/
 /bin/
+
+#swpfiles
+config.properties~
+
