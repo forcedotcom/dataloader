@@ -1,6 +1,6 @@
 !addplugindir "windows-dependencies\UAC\plugins\x86-ansi"
 !addplugindir "windows-dependencies\AccessControl\Plugins"
-!include target\project.nsh
+!include target\additional.nsh
 
 !define S_NAME "${PROJECT_FINAL_NAME}"
 !define APPNAME "${PROJECT_NAME}"
@@ -281,6 +281,7 @@ SectionEnd
 !tempfile UNINSTEXE
 !system '"${NSISDIR}\MakeNSIS" /DBUILDUNINST=${mode} /DUNINSTEXE=${UNINSTEXE}.exe "${__FILE__}"' = 0
 !system '"${UNINSTEXE}.exe"' = 0
+!system '"windows-dependencies\sign.bat" ${CODESIGN} ${UNINSTEXE}.exe.un' = 0
 File "/oname=${extractTo}" "${UNINSTEXE}.exe.un"
 !delfile "${UNINSTEXE}"
 !delfile "${UNINSTEXE}.un"

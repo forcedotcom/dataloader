@@ -25,7 +25,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <config.additional.properties></config.additional.properties>
 
-
     <!-- test properties -->
     <test.endpoint>http://testendpoint</test.endpoint>
     <test.user.default>admin@org.com</test.user.default>
@@ -375,6 +374,7 @@
             <configuration>
                 <header>license.txt</header>
                 <excludes>
+                    <exclude>**/*.bat</exclude>
                     <exclude>**/*.html</exclude>
                     <exclude>**/*.txt</exclude>
                     <exclude>**/*.xml</exclude>
@@ -627,6 +627,7 @@
                 <version>1.8</version>
                 <executions>
                     <execution>
+                        <id>copy-misc-files</id>
                         <phase> prepare-package </phase>
                         <configuration>
                             <target>
@@ -636,27 +637,56 @@
                               <copy file="${basedir}/src/main/nsis/config.properties" tofile="${basedir}/target/config.properties"/>
                               <replace file="${basedir}/target/config.properties" token="#placeholder" value="${config.additional.properties}"/>
                               <replace file="${basedir}/target/config.properties" token="\n" value="${line.separator}"/>
+                              <echo file="${basedir}/target/additional.nsh">
+!define CODESIGN "${codesign}"
+!define PROJECT_BASEDIR "${basedir}"
+!define PROJECT_BUILD_DIR "${basedir}\target"
+!define PROJECT_FINAL_NAME "${project.artifactId}-${project.version}"
+!define PROJECT_GROUP_ID "${project.groupId}"
+!define PROJECT_ARTIFACT_ID "${project.artifactId}"
+!define PROJECT_NAME "${project.name}"
+!define PROJECT_VERSION "${project.version}"
+!define PROJECT_URL "${project.url}"
+!define PROJECT_ORGANIZATION_NAME "${project.organization.name}"
+!define PROJECT_ORGANIZATION_URL "${project.organization.url}"
+!define PROJECT_REG_KEY "SOFTWARE\${project.organization.name}\${project.name}\${project.version}"
+!define PROJECT_REG_UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${project.name} ${project.version}"
+!define PROJECT_STARTMENU_FOLDER "$$SMPROGRAMS\${project.organization.name}\${project.name} ${project.version}"
+                              </echo>
+
                             </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>
                         </goals>
                     </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>nsis-maven-plugin</artifactId>
-                <executions>
                     <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>generate-project</goal> <!-- create target/project.nsh -->
-                            <goal>compile</goal> <!-- compile setup.nsi into exe -->
-                        </goals>
+                        <id>sign-windows-exes</id>
+                        <phase> package </phase>
                         <configuration>
-                            <makensisBin>target/nsis-${nsis.version}/makensis.exe</makensisBin>
+                            <target>
+                             <exec executable="windows-dependencies\sign.bat">
+                                <arg value="${codesign}"/>
+                                <arg value="target\${project.artifactId}-${project.version}-java-home.exe"/>
+                              </exec>
+                              <exec executable="windows-dependencies\sign.bat">
+                                <arg value="${codesign}"/>
+                                <arg value="target\${project.artifactId}-${project.version}.exe"/>
+                              </exec>
+                              <exec executable="target\nsis-${nsis.version}\makensis.exe">
+                                <arg value="/XOutFile ${basedir}\target\${project.artifactId}-${project.version}.exe"/>
+                                <arg value="/V2"/>
+                                <arg value="setup.nsi"/>
+                              </exec>
+                              <exec executable="windows-dependencies\sign.bat">
+                                <arg value="${codesign}"/>
+                                <arg value="target\${project.artifactId}-${project.version}.installer.exe"/>
+                              </exec>
+                            </target>
                         </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
