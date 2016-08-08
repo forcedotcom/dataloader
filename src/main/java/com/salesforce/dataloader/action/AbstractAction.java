@@ -26,6 +26,7 @@
 
 package com.salesforce.dataloader.action;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -116,6 +117,7 @@ abstract class AbstractAction implements IAction {
 
     @Override
     public final void execute() {
+        List<Exception> exceptions = new ArrayList<>();
         try {
             getLogger().info(getMessage("loading", getConfig().getString(Config.OPERATION)));
             getDao().open();
@@ -128,24 +130,40 @@ abstract class AbstractAction implements IAction {
 
             while (!getMonitor().isCanceled() && visit()) {}
 
-            flush();
-            // need to close up here for sync message.
-            closeAll();
-
-            final Object[] args = { String.valueOf(getVisitor().getNumberSuccesses()),
-                    getConfig().getString(Config.OPERATION), String.valueOf(getVisitor().getNumberErrors()) };
-
-            // set the monitor to done
-            if (getMonitor().isCanceled()) {
-                getMonitor().doneSuccess(getMessage("cancel", args)); //$NON-NLS-1$
-            } else {
-                getMonitor().doneSuccess(getMessage("success", args)); //$NON-NLS-1$
-            }
 
         } catch (final Exception e) {
-            handleException(e);
+            exceptions.add(e);
         } finally {
-            closeAll();
+            try{
+                flush(); //make sure we don't early abort here
+            } catch (Exception e) {
+                exceptions.add(e);
+            }
+            try {
+                closeAll(); //make sure we don't early abort here
+            } catch (Exception e){
+                exceptions.add(e);
+            }
+            try {
+                //if no exceptions occurred then display success/error
+                if (exceptions.size() == 0) {
+                    final Object[] args = {String.valueOf(getVisitor().getNumberSuccesses()),
+                            getConfig().getString(Config.OPERATION), String.valueOf(getVisitor().getNumberErrors())};
+
+                    // set the monitor to done
+                    if (getMonitor().isCanceled()) {
+                        getMonitor().doneSuccess(getMessage("cancel", args)); //$NON-NLS-1$
+                    } else {
+                        getMonitor().doneSuccess(getMessage("success", args)); //$NON-NLS-1$
+                    }
+                }
+            } catch (Exception e){
+                exceptions.add(e);
+            }
+            //handle each recorded exception
+            if (exceptions.size() > 0){
+                exceptions.forEach(this::handleException);
+            }
         }
     }
 

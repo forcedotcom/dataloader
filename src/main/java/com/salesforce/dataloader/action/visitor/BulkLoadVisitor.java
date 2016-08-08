@@ -438,21 +438,9 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
         final int recordsProcessed = batch.getNumberRecordsProcessed();
         final BatchStateEnum state = batch.getState();
-        // TODO: can we have a failed batch with recordsProcessed>0 ? I believe we can, but how?
-        if ((state == BatchStateEnum.Completed || recordsProcessed > 0) && recordsProcessed != clientBatchInfo.numRows)
-            sanityCheckError(batchId, "Expected " + clientBatchInfo.numRows
-                    + " to be processed for batch but got results for " + recordsProcessed);
+
         if (state != BatchStateEnum.Completed && state != BatchStateEnum.Failed)
             sanityCheckError(batchId, "Expected batch state to be Completed or Failed, but was " + state);
-        String stateMessage = batch.getStateMessage();
-        
-        // Commenting out due to issue with processing result files if in "Completed" state with a stateMessage
-        // May want to add back in at some future date
-        //if (state == BatchStateEnum.Completed && stateMessage != null && stateMessage.length() > 0)
-    	//sanityCheckError(batchId, "Did not expect error message for successful batch: " + stateMessage);
-        
-        if (state == BatchStateEnum.Failed && (stateMessage == null || stateMessage.length() == 0))
-            sanityCheckError(batchId, "Expected error message for failed batch but did not get one");
     }
 
     private void sanityCheckError(String id, String errMsg) throws LoadException {
