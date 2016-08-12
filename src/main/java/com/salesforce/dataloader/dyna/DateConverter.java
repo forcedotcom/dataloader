@@ -88,6 +88,7 @@ public final class DateConverter implements Converter {
 
     private Calendar parseDate(String dateString, DateFormat fmt) {
         final ParsePosition pos = new ParsePosition(0);
+        fmt.setLenient(false);
         final Date date = fmt.parse(dateString, pos);
         // we only want to use the date if parsing succeeded and used the entire string
         if (date != null && pos.getIndex() == dateString.length()) {
@@ -177,13 +178,11 @@ public final class DateConverter implements Converter {
         if (cal != null) return cal;
 
         DateFormat df = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT);
-        df.setLenient(true);
         df.setTimeZone(this.timeZone);
         cal = parseDate(dateString, df);
         if (cal != null) return cal;
 
         df = DateFormat.getDateInstance(DateFormat.SHORT);
-        df.setLenient(true);
         df.setTimeZone(this.timeZone);
         cal = parseDate(dateString, df);
         if (cal != null) return cal;
