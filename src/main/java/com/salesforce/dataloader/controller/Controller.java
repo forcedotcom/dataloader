@@ -200,6 +200,13 @@ public class Controller {
         File configFile = new File(config.getFilename());
         if (!configFile.canWrite()) {
             String errMsg = Messages.getFormattedString("Controller.errorConfigWritable", config.getFilename());
+
+            String currentWorkingDir = System.getProperty("user.dir");
+            if (currentWorkingDir.startsWith("/Volumes")){
+                //user is trying to launch dataloader from the dmg. this is not supported
+                errMsg = Messages.getString("Controller.errorConfigWritableDmg");
+            }
+
             logger.fatal(errMsg);
             throw new ControllerInitializationException(errMsg);
         }
