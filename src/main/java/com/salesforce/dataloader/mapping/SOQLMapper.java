@@ -26,6 +26,7 @@
 
 package com.salesforce.dataloader.mapping;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -40,6 +41,8 @@ import com.sforce.soap.partner.*;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.bind.XmlObject;
+
+import javax.xml.namespace.QName;
 
 /**
  * Mapping from sfdcName -> daoName
@@ -79,11 +82,19 @@ public class SOQLMapper extends Mapper {
         if (fields == null) return;
         while (fields.hasNext()) {
             XmlObject field = fields.next();
-
             final String fieldName = prefix + field.getName().getLocalPart();
             String localName = getMapping(fieldName);
             if (localName != null) {
-                map.put(localName, field.getValue());
+                Object value = field.getValue();
+                QName xmlType = field.getXmlType();
+                if (xmlType != null && xmlType.getLocalPart().equals("date") && value instanceof Date){
+                    //WSC got confused and converted a date string to a date object.
+                    //this causes weirdness in the output format and timezone correction that we don't want
+                    //convert the type back to a string before a later handler mis-handles it
+                    SimpleDateFormat formatter = new SimpleDateFormat("YYYY-MM-dd");
+                    value = formatter.format(value);
+                }
+                map.put(localName, value);
             }
             mapPartnerSObject(map, fieldName + ".", field);
         }
