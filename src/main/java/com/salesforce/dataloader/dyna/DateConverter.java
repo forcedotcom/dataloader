@@ -206,7 +206,6 @@ public final class DateConverter implements Converter {
         extendedPatterns.add("yyyy-MM-dd'T'HH:mm:ss");
         extendedPatterns.add("yyyy-MM-dd'T'HH:mm");
         extendedPatterns.add("yyyy-MM-dd'T'HH");
-        extendedPatterns.add("yyyy-MM-dd'T'HH");
         extendedPatterns.add("yyyy-MM-dd'T'"); //?
 
         //As per ISO 8601 5.2.1.1, when only the days are omitted, a - is necessary between year and month
@@ -259,6 +258,7 @@ public final class DateConverter implements Converter {
         extendedPatternsWithoutT.add(baseDate +" HH:mm:ss");
         extendedPatternsWithoutT.add(baseDate +" HH:mm");
         extendedPatternsWithoutT.add(baseDate +" HH");
+        extendedPatternsWithoutT.add(baseDate +" HHZ");
 
         List<String> slashPatternsWithT = new ArrayList<String>();
         extendedPatternsWithoutT.add(baseDate +  "'T'HH:mm:ss.SSS");
@@ -278,6 +278,10 @@ public final class DateConverter implements Converter {
         basePatterns.addAll(extendedPatternsWithoutT);
         basePatterns.addAll(slashPatternsWithoutT);
         basePatterns.addAll(slashPatternsWithT);
+
+        List<String> timeZones = new ArrayList<>();
+        basePatterns.forEach(p -> timeZones.add(p + "Z"));
+        basePatterns.addAll(timeZones);
 
         return basePatterns;
     }
