@@ -34,15 +34,20 @@ import java.util.zip.GZIPOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
 import org.apache.http.auth.*;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.tools.VersionInfo;
 import com.sforce.ws.transport.*;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 
 /**
  * 
@@ -90,64 +95,83 @@ public class HttpClientTransport implements Transport {
 
     @Override
     public InputStream getContent() throws IOException {
-        DefaultHttpClient client = new DefaultHttpClient();
-        
-        if (config.getProxy().address() != null) {
-            String proxyUser = config.getProxyUsername() == null ? "" : config.getProxyUsername();
-            String proxyPassword = config.getProxyPassword() == null ? "" : config.getProxyPassword();
-            
-            Credentials credentials;
-            
-            if (config.getNtlmDomain() != null && !config.getNtlmDomain().equals("")) {
-                String computerName = InetAddress.getLocalHost().getCanonicalHostName();
-                credentials = new NTCredentials(proxyUser, proxyPassword, computerName, config.getNtlmDomain());
-            } else {
-                credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
-            }
-            
-            InetSocketAddress proxyAddress = (InetSocketAddress) config.getProxy().address();
-            HttpHost proxyHost = new HttpHost(proxyAddress.getHostName(), proxyAddress.getPort(), "http");
-            client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHost);
-            
-            AuthScope scope = new AuthScope(proxyAddress.getHostName(), proxyAddress.getPort(), null, null);
-            client.getCredentialsProvider().setCredentials(scope, credentials);
-        }
-        
-        InputStream input = null;
-        
-        byte[] entityBytes = entityByteOut.toByteArray();
-        HttpEntity entity = new ByteArrayEntity(entityBytes);
-        post.setEntity(entity);
-        
-        try {
-            if (config.getNtlmDomain() != null && !config.getNtlmDomain().equals("")) {
-                // need to send a HEAD request to trigger NTLM authentication
-                HttpHead head = new HttpHead("http://salesforce.com");
-                client.execute(head);
-                head.releaseConnection();
-            }
-            HttpResponse response = client.execute(post);
-            
-            if (response.getStatusLine().getStatusCode() > 399) {
-                successful = false;
-                if (response.getStatusLine().getStatusCode() == 407) {
-                    throw new RuntimeException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
-                }
-            } else {
-                successful = true;
-            }
-            
-            // copy input stream data into a new input stream because releasing the connection will close the input stream
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            IOUtils.copy(response.getEntity().getContent(), bOut);
-            input = new ByteArrayInputStream(bOut.toByteArray());
 
-            if (response.containsHeader("Content-Encoding") && response.getHeaders("Content-Encoding")[0].getValue().equals("gzip")) {
-                input = new GZIPInputStream(input);
+        InputStream input = null;
+        CloseableHttpClient client = HttpClients.createDefault();
+        try {
+            if (config.getProxy().address() != null) {
+                String proxyUser = config.getProxyUsername() == null ? "" : config.getProxyUsername();
+                String proxyPassword = config.getProxyPassword() == null ? "" : config.getProxyPassword();
+
+                Credentials credentials;
+
+                if (config.getNtlmDomain() != null && !config.getNtlmDomain().equals("")) {
+                    String computerName = InetAddress.getLocalHost().getCanonicalHostName();
+                    credentials = new NTCredentials(proxyUser, proxyPassword, computerName, config.getNtlmDomain());
+                } else {
+                    credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
+                }
+
+                InetSocketAddress proxyAddress = (InetSocketAddress) config.getProxy().address();
+                HttpHost proxyHost = new HttpHost(proxyAddress.getHostName(), proxyAddress.getPort(), "http");
+                RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
+                requestConfigBuilder.setProxy(proxyHost);
+                post.setConfig(requestConfigBuilder.build());
+
+                CredentialsProvider credentialsprovider = new BasicCredentialsProvider();
+                AuthScope scope = new AuthScope(proxyAddress.getHostName(), proxyAddress.getPort(), null, null);
+                credentialsprovider.setCredentials(scope, credentials);
+                client = HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsprovider).build();
             }
-   
+
+
+
+            byte[] entityBytes = entityByteOut.toByteArray();
+            HttpEntity entity = new ByteArrayEntity(entityBytes);
+            post.setEntity(entity);
+
+            CloseableHttpResponse response = null;
+            try {
+                if (config.getNtlmDomain() != null && !config.getNtlmDomain().equals("")) {
+                    // need to send a HEAD request to trigger NTLM authentication
+                    HttpHead head = new HttpHead("http://salesforce.com");
+                    try {
+                        response = client.execute(head);
+                    } finally {
+                        response.close();
+                    }
+                }
+                response = client.execute(post);
+
+                if (response.getStatusLine().getStatusCode() > 399) {
+                    successful = false;
+                    if (response.getStatusLine().getStatusCode() == 407) {
+                        throw new RuntimeException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+                    }
+                } else {
+                    successful = true;
+                }
+
+                // copy input stream data into a new input stream because releasing the connection will close the input stream
+                ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+                InputStream inStream = response.getEntity().getContent();
+                try {
+                    IOUtils.copy(response.getEntity().getContent(), bOut);
+                    input = new ByteArrayInputStream(bOut.toByteArray());
+
+                    if (response.containsHeader("Content-Encoding") && response.getHeaders("Content-Encoding")[0].getValue().equals("gzip")) {
+                        input = new GZIPInputStream(input);
+                    }
+                } finally {
+                    inStream.close();
+                }
+
+            } finally {
+                if (response != null)
+                    response.close();
+            }
         } finally {
-            post.releaseConnection();
+            client.close();
         }
         
         return input;
