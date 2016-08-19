@@ -29,6 +29,7 @@ package com.salesforce.dataloader.client;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.sforce.ws.tools.VersionInfo;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -73,55 +74,52 @@ public class DefaultSimplePost implements SimplePost {
 
     @Override
     public void post() throws IOException, ParameterLoadException {
-        CloseableHttpClient client = HttpClients.createDefault();
-        try {
-            HttpPost post = new HttpPost(endpoint);
-            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(Arrays.asList(pairs));
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        HttpPost post = new HttpPost(endpoint);
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(Arrays.asList(pairs));
 
-            int proxyPort = config.getInt(Config.PROXY_PORT);
-            String proxyHostName = config.getString(Config.PROXY_HOST);
-            String proxyUser = config.getString(Config.PROXY_USERNAME);
-            String proxyPassword = config.getString(Config.PROXY_PASSWORD);
-            String ntlmDomain = config.getString(Config.PROXY_NTLM_DOMAIN);
-            proxyHostName = proxyHostName != null ? proxyHostName.trim() : "";
-            proxyUser = proxyUser != null ? proxyUser.trim() : "";
-            proxyPassword = proxyPassword != null ? proxyPassword.trim() : "";
-            ntlmDomain = ntlmDomain != null ? ntlmDomain.trim() : "";
+        int proxyPort = config.getInt(Config.PROXY_PORT);
+        String proxyHostName = config.getString(Config.PROXY_HOST);
+        String proxyUser = config.getString(Config.PROXY_USERNAME);
+        String proxyPassword = config.getString(Config.PROXY_PASSWORD);
+        String ntlmDomain = config.getString(Config.PROXY_NTLM_DOMAIN);
+        proxyHostName = proxyHostName != null ? proxyHostName.trim() : "";
+        proxyUser = proxyUser != null ? proxyUser.trim() : "";
+        proxyPassword = proxyPassword != null ? proxyPassword.trim() : "";
+        ntlmDomain = ntlmDomain != null ? ntlmDomain.trim() : "";
 
-            post.addHeader("User-Agent", VersionInfo.info());
-            post.setEntity(entity);
+        post.addHeader("User-Agent", VersionInfo.info());
+        post.setEntity(entity);
 
-            //proxy
-            if (proxyHostName.length() > 0) {
-                InetSocketAddress proxyAddress = new InetSocketAddress(proxyHostName, proxyPort);
-                HttpHost proxyHost = new HttpHost(proxyAddress.getHostName(), proxyAddress.getPort(), "http");
-                AuthScope scope = new AuthScope(proxyAddress.getHostName(), proxyAddress.getPort(), null, null);
-                Credentials credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
+        //proxy
+        if (proxyHostName.length() > 0) {
+            InetSocketAddress proxyAddress = new InetSocketAddress(proxyHostName, proxyPort);
+            HttpHost proxyHost = new HttpHost(proxyAddress.getHostName(), proxyAddress.getPort(), "http");
+            AuthScope scope = new AuthScope(proxyAddress.getHostName(), proxyAddress.getPort(), null, null);
+            Credentials credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
 
-                if (ntlmDomain.length() > 0) {
-                    credentials = new NTCredentials(proxyUser, proxyPassword, InetAddress.getLocalHost().getCanonicalHostName(), ntlmDomain);
-                }
-
-                RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
-                requestConfigBuilder.setProxy(proxyHost);
-                post.setConfig(requestConfigBuilder.build());
-
-                CredentialsProvider credentialsprovider = new BasicCredentialsProvider();
-                credentialsprovider.setCredentials(scope, credentials);
-                client = HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsprovider).build();
+            if (ntlmDomain.length() > 0) {
+                credentials = new NTCredentials(proxyUser, proxyPassword, InetAddress.getLocalHost().getCanonicalHostName(), ntlmDomain);
             }
-            CloseableHttpResponse response = null;
-            try {
-                if (ntlmDomain.length() > 0) {
-                    // need to send a HEAD request to trigger NTLM authentication
-                    HttpHead head = new HttpHead("http://salesforce.com");
-                    try {
-                        response = client.execute(head);
-                    } finally {
-                        response.close();
-                    }
+
+            RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
+            requestConfigBuilder.setProxy(proxyHost);
+            post.setConfig(requestConfigBuilder.build());
+
+            CredentialsProvider credentialsprovider = new BasicCredentialsProvider();
+            credentialsprovider.setCredentials(scope, credentials);
+            httpClientBuilder.setDefaultCredentialsProvider(credentialsprovider).build();
+        }
+
+        try (CloseableHttpClient httpClient = httpClientBuilder.build()) {
+
+            if (ntlmDomain.length() > 0) {
+                // need to send a HEAD request to trigger NTLM authentication
+                HttpHead head = new HttpHead("http://salesforce.com");
+                try (CloseableHttpResponse ignored = httpClient.execute(head)) {
                 }
-                response = client.execute(post);
+            }
+            try (CloseableHttpResponse response = httpClient.execute(post)) {
 
                 successful = response.getStatusLine().getStatusCode() < 400;
                 statusCode = response.getStatusLine().getStatusCode();
@@ -129,24 +127,15 @@ public class DefaultSimplePost implements SimplePost {
 
                 // copy input stream data into a new input stream because releasing the connection will close the input stream
                 ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-                InputStream inStream= response.getEntity().getContent();
-                try {
+                try (InputStream inStream = response.getEntity().getContent()) {
                     IOUtils.copy(inStream, bOut);
                     input = new ByteArrayInputStream(bOut.toByteArray());
-
                     if (response.containsHeader("Content-Encoding") && response.getHeaders("Content-Encoding")[0].getValue().equals("gzip")) {
                         input = new GZIPInputStream(input);
                     }
-                } finally {
-                    inStream.close();
                 }
 
-            } finally {
-                if(response != null)
-                    response.close();
             }
-        } finally {
-            client.close();
         }
     }
 
