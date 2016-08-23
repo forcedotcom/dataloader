@@ -51,6 +51,7 @@ public class AdvancedSettingsDialog extends Dialog {
     private Controller controller;
     private Text textBatch;
     private Text textQueryBatch;
+    private Text textSplitterValue;
     private Button buttonNulls;
     private Text textRule;
     private Text textEndpoint;
@@ -77,7 +78,10 @@ public class AdvancedSettingsDialog extends Dialog {
     private Button buttonUseBulkApi;
     private Button buttonBulkApiSerialMode;
     private Button buttonBulkApiZipContent;
-
+    private Button buttonCsvComma;
+    private Button buttonCsvTab;
+    private Button buttonCsvOther;
+    
     /**
      * InputDialog constructor
      *
@@ -367,7 +371,7 @@ public class AdvancedSettingsDialog extends Dialog {
         data = new GridData();
         data.widthHint = 30;
         textQueryBatch.setLayoutData(data);
-
+        
         //enable/disable output of success file for extracts
         Label labelOutputExtractStatus = new Label(restComp, SWT.RIGHT);
         labelOutputExtractStatus.setText(Labels.getString("AdvancedSettingsDialog.outputExtractStatus")); //$NON-NLS-1$
@@ -412,6 +416,37 @@ public class AdvancedSettingsDialog extends Dialog {
 
         buttonTruncateFields = new Button(restComp, SWT.CHECK);
         buttonTruncateFields.setSelection(config.getBoolean(Config.TRUNCATE_FIELDS));
+
+        Label labelCsvCommand = new Label(restComp, SWT.RIGHT);
+        labelCsvCommand.setText(Labels.getString("AdvancedSettingsDialog.useCommaAsCsvDelimiter"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelCsvCommand.setLayoutData(data);
+        buttonCsvComma = new Button(restComp, SWT.CHECK);
+        buttonCsvComma.setSelection(config.getBoolean(Config.CSV_DELIMETER_COMMA));
+
+        Label labelTabCommand = new Label(restComp, SWT.RIGHT);
+        labelTabCommand.setText(Labels.getString("AdvancedSettingsDialog.useTabAsCsvDelimiter"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelTabCommand.setLayoutData(data);
+        buttonCsvTab = new Button(restComp, SWT.CHECK);
+        buttonCsvTab.setSelection(config.getBoolean(Config.CSV_DELIMETER_TAB));
+
+        Label labelOtherCommand = new Label(restComp, SWT.RIGHT);
+        labelOtherCommand.setText(Labels.getString("AdvancedSettingsDialog.useOtherAsCsvDelimiter"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelOtherCommand.setLayoutData(data);
+        buttonCsvOther = new Button(restComp, SWT.CHECK);
+        buttonCsvOther.setSelection(config.getBoolean(Config.CSV_DELIMETER_OTHER));
+
+        Label labelOtherDelimiterValue = new Label(restComp, SWT.RIGHT);
+        labelOtherDelimiterValue.setText(Labels.getString("AdvancedSettingsDialog.csvOtherDelimiterValue"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelOtherDelimiterValue.setLayoutData(data);
+        textSplitterValue = new Text(restComp, SWT.BORDER);
+        textSplitterValue.setText(config.getString(Config.CSV_DELIMETER_OTHER_VALUE));
+        data = new GridData();
+        data.widthHint = 25;
+        textSplitterValue.setLayoutData(data);
 
         // Enable Bulk API Setting
         Label labelUseBulkApi = new Label(restComp, SWT.RIGHT);
@@ -598,6 +633,19 @@ public class AdvancedSettingsDialog extends Dialog {
                 config.setValue(Config.HIDE_WELCOME_SCREEN, buttonHideWelcomeScreen.getSelection());
                 config.setValue(Config.INSERT_NULLS, buttonNulls.getSelection());
                 config.setValue(Config.LOAD_BATCH_SIZE, textBatch.getText());
+                if (!buttonCsvComma.getSelection()
+                        && !buttonCsvTab.getSelection()
+                        &&  (!buttonCsvOther.getSelection()
+                            || textSplitterValue.getText() == null
+                            || textSplitterValue.getText().length() == 0))
+                {
+                    return;
+                }
+                config.setValue(Config.CSV_DELIMETER_OTHER_VALUE, textSplitterValue.getText());
+                config.setValue(Config.CSV_DELIMETER_COMMA, buttonCsvComma.getSelection());
+                config.setValue(Config.CSV_DELIMETER_TAB, buttonCsvTab.getSelection());
+                config.setValue(Config.CSV_DELIMETER_OTHER, buttonCsvOther.getSelection());
+
                 config.setValue(Config.EXTRACT_REQUEST_SIZE, textQueryBatch.getText());
                 config.setValue(Config.ENDPOINT, textEndpoint.getText());
                 config.setValue(Config.ASSIGNMENT_RULE, textRule.getText());

@@ -116,6 +116,32 @@ public class CsvTest extends TestBase {
     }
 
     @Test
+    public void testReadingSeparatedValues () throws Exception {
+        File f = new File(getTestDataDir(), "csvSeparator.csv");
+        assertTrue(f.exists());
+        assertTrue(f.canRead());
+        getController().getConfig().setValue("loader.csvOther", true);
+        getController().getConfig().setValue("loader.csvOtherValue", "!");
+
+        CSVFileReader csv = new CSVFileReader(f, getController().getConfig());
+        csv.open();
+        Row firstRow = csv.readRow();
+        assertEquals("somev1", firstRow.get("some"));
+        assertEquals(4, firstRow.size());
+        Row secondRow = csv.readRow();
+        assertEquals("somev2", secondRow.get("some"));
+        csv.close();
+
+        getController().getConfig().setValue("loader.csvOther", false);
+        csv = new CSVFileReader(f, getController().getConfig());
+        csv.open();
+        firstRow = csv.readRow();
+        assertEquals("col12!somev1", firstRow.get("column2!some"));
+        assertEquals(3, firstRow.size());
+        csv.close();
+    }
+
+    @Test
     public void testReadingEscapedValues() throws Exception {
         File f = new File(getTestDataDir(), "csvEscapedQuotes.csv");
         assertTrue(f.exists());
