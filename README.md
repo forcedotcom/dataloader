@@ -22,7 +22,11 @@ To run the Data Loader GUI, run the command
 Use the command below to run the Data Loader GUI on Mac
 
     java -XstartOnFirstThread -jar target/dataloader-34.0-uber.jar
-    
+
+To run data loader for debug
+
+    java -XstartOnFirstThread -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005  target/dataloader-37.0.1-uber.jar
+
 To run Data Loader from the command line, use the command:
 
     java -cp target/dataloader-34.0-uber.jar -Dsalesforce.config.dir=CONFIG_DIR com.salesforce.dataloader.process.ProcessRunner
