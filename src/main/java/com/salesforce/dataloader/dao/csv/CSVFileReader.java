@@ -65,6 +65,7 @@ public class CSVFileReader implements DataReader {
     private boolean forceUTF8;
     private List<String> headerRow;
     private boolean isOpen;
+    private char[] csvDelimiters;
 
     public CSVFileReader(Config config) {
         this(new File(config.getString(Config.DAO_NAME)), config);
@@ -77,6 +78,22 @@ public class CSVFileReader implements DataReader {
     public CSVFileReader(File file, Config config) {
         this.file = file;
         forceUTF8 = config.getBoolean(Config.READ_UTF8);
+        StringBuilder separator = new StringBuilder();
+        if (config.getBoolean(Config.CSV_DELIMETER_COMMA)) {
+            separator.append(",");
+        }
+        if (config.getBoolean(Config.CSV_DELIMETER_TAB)) {
+            separator.append("\t");
+        }
+        if (config.getBoolean(Config.CSV_DELIMETER_OTHER)) {
+            separator.append(config.getString(Config.CSV_DELIMETER_OTHER_VALUE));
+        }
+        csvDelimiters = separator.toString().toCharArray();
+        if (csvDelimiters.length == 0) {
+            String errorMsg = "No csv separator present! You need at least one separator character!";
+            LOGGER.error(errorMsg);
+            throw new RuntimeException(errorMsg);
+        }
     }
 
     @Override
@@ -91,7 +108,8 @@ public class CSVFileReader implements DataReader {
             close();
         }
         currentRowNumber = 0;
-        initalizeInput();
+
+        initalizeInput(csvDelimiters);
         readHeaderRow();
         isOpen = true;
     }
@@ -157,8 +175,8 @@ public class CSVFileReader implements DataReader {
     }
 
     /**
-     * Gets the next row from the current data access object data source. <i>Side effect:</i> Updates the current record
-     * number
+     * Gets the next row from the current data access object data source. <i>Side effect:</i>
+     * Updates the current record number
      */
     @Override
     public Row readRow() throws DataAccessObjectException {
@@ -249,13 +267,14 @@ public class CSVFileReader implements DataReader {
         }
     }
 
-    private void initalizeInput() throws DataAccessObjectInitializationException {
+    private void initalizeInput(char[] csvDelimiters) throws DataAccessObjectInitializationException {
+
         try {
             input = new FileInputStream(file);
             if (forceUTF8 || isUTF8File(file)) {
-                csvReader = new CSVReader(input, "UTF-8", new char[]{',', '\t'});
+                csvReader = new CSVReader(input, "UTF-8", csvDelimiters);
             } else {
-                csvReader = new CSVReader(input, new char[]{',', '\t'});
+                csvReader = new CSVReader(input, csvDelimiters);
             }
             csvReader.setMaxRowsInFile(Integer.MAX_VALUE);
             csvReader.setMaxCharsInFile(Integer.MAX_VALUE);
@@ -268,7 +287,7 @@ public class CSVFileReader implements DataReader {
             LOGGER.error(errMsg, e);
             throw new DataAccessObjectInitializationException(errMsg, e);
         } finally {
-            if(csvReader == null) {
+            if (csvReader == null) {
                 IOUtils.closeQuietly(input);
             }
         }
