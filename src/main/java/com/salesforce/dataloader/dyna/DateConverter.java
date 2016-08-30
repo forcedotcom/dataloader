@@ -88,6 +88,7 @@ public final class DateConverter implements Converter {
 
     private Calendar parseDate(String dateString, DateFormat fmt) {
         final ParsePosition pos = new ParsePosition(0);
+        fmt.setLenient(false);
         final Date date = fmt.parse(dateString, pos);
         // we only want to use the date if parsing succeeded and used the entire string
         if (date != null && pos.getIndex() == dateString.length()) {
@@ -177,13 +178,11 @@ public final class DateConverter implements Converter {
         if (cal != null) return cal;
 
         DateFormat df = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT);
-        df.setLenient(true);
         df.setTimeZone(this.timeZone);
         cal = parseDate(dateString, df);
         if (cal != null) return cal;
 
         df = DateFormat.getDateInstance(DateFormat.SHORT);
-        df.setLenient(true);
         df.setTimeZone(this.timeZone);
         cal = parseDate(dateString, df);
         if (cal != null) return cal;
@@ -206,7 +205,6 @@ public final class DateConverter implements Converter {
         extendedPatterns.add("yyyy-MM-dd'T'HH:mm:ss.SSS");
         extendedPatterns.add("yyyy-MM-dd'T'HH:mm:ss");
         extendedPatterns.add("yyyy-MM-dd'T'HH:mm");
-        extendedPatterns.add("yyyy-MM-dd'T'HH");
         extendedPatterns.add("yyyy-MM-dd'T'HH");
         extendedPatterns.add("yyyy-MM-dd'T'"); //?
 
@@ -260,6 +258,7 @@ public final class DateConverter implements Converter {
         extendedPatternsWithoutT.add(baseDate +" HH:mm:ss");
         extendedPatternsWithoutT.add(baseDate +" HH:mm");
         extendedPatternsWithoutT.add(baseDate +" HH");
+        extendedPatternsWithoutT.add(baseDate +" HHZ");
 
         List<String> slashPatternsWithT = new ArrayList<String>();
         extendedPatternsWithoutT.add(baseDate +  "'T'HH:mm:ss.SSS");
@@ -279,6 +278,10 @@ public final class DateConverter implements Converter {
         basePatterns.addAll(extendedPatternsWithoutT);
         basePatterns.addAll(slashPatternsWithoutT);
         basePatterns.addAll(slashPatternsWithT);
+
+        List<String> timeZones = new ArrayList<>();
+        basePatterns.forEach(p -> timeZones.add(p + "Z"));
+        basePatterns.addAll(timeZones);
 
         return basePatterns;
     }

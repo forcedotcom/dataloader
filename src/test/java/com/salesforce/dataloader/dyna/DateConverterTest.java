@@ -235,10 +235,10 @@ public class DateConverterTest {
         // test the valid date format
         expCalDate.clear();
         expCalDate.set(2001, 11 - 1, 11, 10, 11, 40);
-        assertValidDate("2001-11-11T10:10:100Z", expCalDate, false);
+        assertValidDate("2001-11-11T10:11:40.000Z", expCalDate, false);
 
         // same date but with time zone
-        assertValidDate("2001-11-11T02:10:100Z-0800", expCalDate, false);
+        assertValidDate("2001-11-11T02:11:40.000Z-0800", expCalDate, false);
     }
 
     /**
@@ -382,13 +382,9 @@ public class DateConverterTest {
         assertValidDate("2004-04-29T-0000", calDateWST, false);
 
         //test varying levels of precision with time and timeZone
-        assertValidDate("2004-04-28T00:00:00-2200", calDateWST3, false);
-        assertValidDate("2004-04-28T00:00-2200", calDateWST3, false);
-        assertValidDate("2004-04-28T00-2200", calDateWST3, false);
-
-        //By ISO 8601 5.3.3.1, this can cause ambiguity
-        assertStringAndCalendarDoNotMatch("2004-04-28T-2200", calDateWST3, false);
-
+        assertValidDate("2004-04-29T00:00:00+0200", calDateWST3, false);
+        assertValidDate("2004-04-29T00:00+0200", calDateWST3, false);
+        assertValidDate("2004-04-29T00+0200", calDateWST3, false);
     }
     /**
      *
@@ -559,8 +555,8 @@ public class DateConverterTest {
             assertValidDate("07/16/2009" + delimeter + "16:14:45+1200", calDateWST, false); // offset case
 
             //cross-day cases
-            assertValidDate("07/17/2009" + delimeter + "03:14:45+2300", calDateWST,    false);
-            assertValidDate("07/15/2009" + delimeter + "12:14:45-1600", calDateWST, false); // offset case
+            assertValidDate("07/16/2009" + delimeter + "03:14:45-0100", calDateWST,    false);
+            assertValidDate("07/16/2009" + delimeter + "12:14:45+0800", calDateWST, false); // offset case
         }
     }
 
@@ -589,8 +585,8 @@ public class DateConverterTest {
             assertValidDate("16/07/2009" + delimeter + "16:14:45+1200", calDateWST, true); // offset case
 
             //cross-day cases
-            assertValidDate("17/07/2009" + delimeter + "03:14:45+2300", calDateWST,    true);
-            assertValidDate("15/07/2009" + delimeter + "12:14:45-1600", calDateWST, true); // offset case
+            assertValidDate("16/07/2009" + delimeter + "03:14:45-0100", calDateWST,    true);
+            assertValidDate("16/07/2009" + delimeter + "12:14:45+0800", calDateWST, true); // offset case
         }
     }
 

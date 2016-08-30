@@ -74,15 +74,15 @@ public class Config {
     public static final int MAX_BULK_API_BATCH_SIZE = 10000;
     public static final int DEFAULT_BULK_API_BATCH_SIZE = 2000;
     public static final long DEFAULT_BULK_API_CHECK_STATUS_INTERVAL = 5000L;
-	public static final String DEFAULT_ENDPOINT_URL = "https://login.salesforce.com";
-	
-	/*
-	 * Issue #59 - Dataloader will not read all the database rows to get a total count
-	 * when skipTotalCount = "false"
-	 * 
-	 * The default is "true"
-	 */
-	public static final Boolean DEFAULT_SKIP_TOTAL_COUNT = true;
+    public static final String DEFAULT_ENDPOINT_URL = "https://login.salesforce.com";
+
+    /*
+     * Issue #59 - Dataloader will not read all the database rows to get a total count
+     * when skipTotalCount = "false"
+     *
+     * The default is "true"
+     */
+    public static final Boolean DEFAULT_SKIP_TOTAL_COUNT = true;
     /**
      * Constants that were made not configurable by choice
      */
@@ -104,16 +104,22 @@ public class Config {
     public static final int INT_DEFAULT = 0;
     public static final long LONG_DEFAULT = 0L;
     public static final String STRING_DEFAULT = ""; //$NON-NLS-1$
-    public static final Map<String,String> MAP_STRING_DEFAULT = new LinkedHashMap<>();
+    public static final Map<String, String> MAP_STRING_DEFAULT = new LinkedHashMap<>();
 
     /**
      * The Constants for the current Loader Keys
      */
     //
     // salesforce constants
-    
+
     // Loader Preferences
     public static final String HIDE_WELCOME_SCREEN = "loader.hideWelcome";
+
+    // Delimiter settings
+    public static final String CSV_DELIMETER_COMMA = "loader.csvComma";
+    public static final String CSV_DELIMETER_TAB = "loader.csvTab";
+    public static final String CSV_DELIMETER_OTHER = "loader.csvOther";
+    public static final String CSV_DELIMETER_OTHER_VALUE = "loader.csvOtherValue";
 
     //Special Internal Configs
     public static final String SFDC_INTERNAL = "sfdcInternal"; //$NON-NLS-1$
@@ -139,11 +145,11 @@ public class Config {
     public static final String DEBUG_MESSAGES_FILE = "sfdc.debugMessagesFile"; //$NON-NLS-1$
     public static final String RESET_URL_ON_LOGIN = "sfdc.resetUrlOnLogin"; //$NON-NLS-1$
     public static final String TRUNCATE_FIELDS = "sfdc.truncateFields";//$NON-NLS-1$
-    public static final String BULK_API_ENABLED  = "sfdc.useBulkApi";
+    public static final String BULK_API_ENABLED = "sfdc.useBulkApi";
     public static final String BULK_API_SERIAL_MODE = "sfdc.bulkApiSerialMode";
     public static final String BULK_API_CHECK_STATUS_INTERVAL = "sfdc.bulkApiCheckStatusInterval";
     public static final String BULK_API_ZIP_CONTENT = "sfdc.bulkApiZipContent";
-    public static final String WIRE_OUTPUT  = "sfdc.wireOutput";
+    public static final String WIRE_OUTPUT = "sfdc.wireOutput";
     public static final String TIMEZONE = "sfdc.timezone";
 
     public static final String OAUTH_PARTIAL_BULK = "bulk";
@@ -211,8 +217,8 @@ public class Config {
     private boolean dirty = false;
 
     /**
-     * The file name used by the <code>load</code> method to load a property file. This filename is used to save the
-     * properties file when <code>save</code> is called.
+     * The file name used by the <code>load</code> method to load a property file. This filename is
+     * used to save the properties file when <code>save</code> is called.
      */
     private String filename;
     /**
@@ -220,8 +226,8 @@ public class Config {
      */
     private final LastRun lastRun;
     /**
-     * <code>encrypter</code> is a utility used internally in the config for reading/writing encrypted values. Right
-     * now, the list of encrypted values is known to this class only.
+     * <code>encrypter</code> is a utility used internally in the config for reading/writing
+     * encrypted values. Right now, the list of encrypted values is known to this class only.
      */
     private final EncryptionUtil encrypter = new EncryptionUtil();
 
@@ -230,7 +236,8 @@ public class Config {
     private final String configDir;
 
     /**
-     * <code>dateFormatter</code> will be used for getting dates in/out of the configuration file(s)
+     * <code>dateFormatter</code> will be used for getting dates in/out of the configuration
+     * file(s)
      */
     public static final DateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
@@ -250,14 +257,10 @@ public class Config {
     public static final String BULK_API_ENCODING = "UTF-8";
 
     /**
-     * Creates an empty config that loads from and saves to the a file.
-     * <p>
-     * Use the methods <code>load()</code> and <code>save()</code> to load and store this preference store.
-     * </p>
+     * Creates an empty config that loads from and saves to the a file. <p> Use the methods
+     * <code>load()</code> and <code>save()</code> to load and store this preference store. </p>
      *
-     * @param filename
-     *            the file name
-     * @throws ConfigInitializationException
+     * @param filename the file name
      * @see #load()
      * @see #save()
      */
@@ -270,22 +273,22 @@ public class Config {
     }
 
     /**
-     * Initialize last run directory and file. This works hand in hand with Config constructor and the load. The config
-     * needs to be loaded before this. In case of UI, config is loaded once, in case of command line, config is loaded
-     * and then overrides are loaded.
+     * Initialize last run directory and file. This works hand in hand with Config constructor and
+     * the load. The config needs to be loaded before this. In case of UI, config is loaded once, in
+     * case of command line, config is loaded and then overrides are loaded.
      */
     public void initLastRunFile() {
-        if(getBoolean(Config.ENABLE_LAST_RUN_OUTPUT)) {
+        if (getBoolean(Config.ENABLE_LAST_RUN_OUTPUT)) {
             String lastRunDir = getString(Config.LAST_RUN_OUTPUT_DIR);
-            if(lastRunDir == null || lastRunDir.length() == 0) {
+            if (lastRunDir == null || lastRunDir.length() == 0) {
                 lastRunDir = this.configDir;
             }
             this.lastRun.init(lastRunDir, true);
             try {
                 this.lastRun.load();
             } catch (IOException e) {
-                logger.warn(Messages.getFormattedString("LastRun.errorLoading", new String[] {
-                        this.lastRun.getFullPath(), e.getMessage() }), e);
+                logger.warn(Messages.getFormattedString("LastRun.errorLoading", new String[]{
+                        this.lastRun.getFullPath(), e.getMessage()}), e);
             }
         }
     }
@@ -298,8 +301,14 @@ public class Config {
      * This sets the current defaults.
      */
     public void setDefaults() {
-		setValue(HIDE_WELCOME_SCREEN, true);
-		setValue(ENDPOINT, DEFAULT_ENDPOINT_URL);
+        setValue(HIDE_WELCOME_SCREEN, true);
+
+        setValue(CSV_DELIMETER_COMMA, true);
+        setValue(CSV_DELIMETER_TAB, true);
+        setValue(CSV_DELIMETER_OTHER, false);
+        setValue(CSV_DELIMETER_OTHER_VALUE, "-");
+
+        setValue(ENDPOINT, DEFAULT_ENDPOINT_URL);
         setValue(LOAD_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
         setValue(LOAD_ROW_TO_START_AT, 0);
         setValue(TIMEOUT_SECS, DEFAULT_TIMEOUT_SECS);
@@ -321,7 +330,7 @@ public class Config {
         setValue(BULK_API_SERIAL_MODE, false);
         setValue(BULK_API_ZIP_CONTENT, false);
         setValue(BULK_API_CHECK_STATUS_INTERVAL, DEFAULT_BULK_API_CHECK_STATUS_INTERVAL);
-        setValue(WIRE_OUTPUT,false);
+        setValue(WIRE_OUTPUT, false);
         setValue(TIMEZONE, TimeZone.getDefault().getID());
         //sfdcInternal settings
         setValue(SFDC_INTERNAL, false);
@@ -338,8 +347,7 @@ public class Config {
     /**
      * Returns true if the name is a key in the config
      *
-     * @param name
-     *            the name of the key
+     * @param name the name of the key
      */
     public boolean contains(String name) {
         return properties.containsKey(name) || lastRun.hasParameter(name) && lastRun.containsKey(name);
@@ -348,7 +356,6 @@ public class Config {
     /**
      * Gets boolean for a given name
      *
-     * @param name
      * @return boolean
      */
     public boolean getBoolean(String name) {
@@ -361,9 +368,7 @@ public class Config {
     /**
      * Gets double for a given name.
      *
-     * @param name
      * @return double
-     * @throws ParameterLoadException
      */
 
     public double getDouble(String name) throws ParameterLoadException {
@@ -373,8 +378,8 @@ public class Config {
         try {
             ival = new Double(value).doubleValue();
         } catch (NumberFormatException e) {
-            String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[] { name,
-                    Double.class.getName() });
+            String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{name,
+                    Double.class.getName()});
             logger.warn(errMsg, e);
             throw new ParameterLoadException(e.getMessage(), e);
         }
@@ -384,9 +389,7 @@ public class Config {
     /**
      * Gets float for a given name.
      *
-     * @param name
      * @return float
-     * @throws ParameterLoadException
      */
     public float getFloat(String name) throws ParameterLoadException {
         String value = getParamValue(name);
@@ -395,8 +398,8 @@ public class Config {
         try {
             ival = new Float(value).floatValue();
         } catch (NumberFormatException e) {
-            String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[] { name,
-                    Float.class.getName() });
+            String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{name,
+                    Float.class.getName()});
             logger.warn(errMsg, e);
             throw new ParameterLoadException(e.getMessage(), e);
         }
@@ -406,9 +409,7 @@ public class Config {
     /**
      * Gets int for a given name.
      *
-     * @param name
      * @return int
-     * @throws ParameterLoadException
      */
     public int getInt(String name) throws ParameterLoadException {
         String value = getParamValue(name);
@@ -417,8 +418,8 @@ public class Config {
         try {
             ival = Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[] { name,
-                    Integer.class.getName() });
+            String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{name,
+                    Integer.class.getName()});
             logger.warn(errMsg, e);
             throw new ParameterLoadException(e.getMessage(), e);
         }
@@ -428,9 +429,7 @@ public class Config {
     /**
      * Gets long for a given name.
      *
-     * @param name
      * @return long
-     * @throws ParameterLoadException
      */
     public long getLong(String name) throws ParameterLoadException {
         String value = getParamValue(name);
@@ -439,8 +438,8 @@ public class Config {
         try {
             ival = Long.parseLong(value);
         } catch (NumberFormatException e) {
-            String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[] { name,
-                    Long.class.getName() });
+            String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{name,
+                    Long.class.getName()});
             logger.warn(errMsg, e);
             throw new ParameterLoadException(e.getMessage(), e);
         }
@@ -450,13 +449,11 @@ public class Config {
     /**
      * Gets  required string param for a given name.  If not found, throws an exception
      *
-     * @param name
      * @return string
-     * @throws ParameterLoadException
      */
     public String getStringRequired(String name) throws ParameterLoadException {
         String value = getString(name);
-        if(value == null || value.length() == 0) {
+        if (value == null || value.length() == 0) {
             String errMsg = Messages.getFormattedString("Config.errorNoRequiredParameter", name); //$NON-NLS-1$
             logger.fatal(errMsg);
             throw new ParameterLoadException(errMsg);
@@ -467,7 +464,6 @@ public class Config {
     /**
      * Gets string for a given name.
      *
-     * @param name
      * @return string
      */
     public String getString(String name) {
@@ -480,7 +476,7 @@ public class Config {
     public ArrayList<String> getStrings(String name) {
         String values = getString(name);
         ArrayList<String> list = new ArrayList<>();
-        if (values != null && !values.trim().isEmpty()){
+        if (values != null && !values.trim().isEmpty()) {
             Collections.addAll(list, values.trim().split(","));
         }
         return list;
@@ -488,9 +484,6 @@ public class Config {
 
     /**
      * Gets an enum value for a given config name.
-     * 
-     * @param enumClass
-     * @param name
      */
     public <T extends Enum<T>> T getEnum(Class<T> enumClass, String name) {
         return Enum.valueOf(enumClass, getString(name));
@@ -503,10 +496,9 @@ public class Config {
     /**
      * Gets path to a config file given the config file property name
      *
-     * @param configFileProperty
-     *            property containing a config filename
-     * @return Config filename path based on config property value. Config file is assumed to reside in the global
-     *         config directory
+     * @param configFileProperty property containing a config filename
+     * @return Config filename path based on config property value. Config file is assumed to reside
+     * in the global config directory
      */
     public String getConfigFilename(String configFileProperty) {
         String value = getParamValue(configFileProperty);
@@ -520,10 +512,10 @@ public class Config {
 
 
     /**
-     * Constructs config file path based on the configuration directory and the passed in config filename
+     * Constructs config file path based on the configuration directory and the passed in config
+     * filename
      *
-     * @param configFilename
-     *            Config filename that resides in the config directory
+     * @param configFilename Config filename that resides in the config directory
      * @return Full path to the config file
      */
     public String constructConfigFilePath(String configFilename) {
@@ -532,9 +524,7 @@ public class Config {
     }
 
     /**
-     * @param name
      * @return Date
-     * @throws ParameterLoadException
      */
     public Date getDate(String name) throws ParameterLoadException {
         String value = getParamValue(name);
@@ -543,8 +533,8 @@ public class Config {
         try {
             dval = DATE_FORMATTER.parse(value);
         } catch (ParseException e) {
-            String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[] { name,
-                    Date.class.getName() });
+            String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{name,
+                    Date.class.getName()});
             logger.warn(errMsg, e);
             throw new ParameterLoadException(e.getMessage(), e);
         }
@@ -553,35 +543,33 @@ public class Config {
 
     /**
      * Get map from a string param value. String format of map is key1=val1,key2=val2,...
-     * @param name
+     *
      * @return Map
-     * @throws ParameterLoadException
      */
-    public Map<String,String> getMap(String name) throws ParameterLoadException {
+    public Map<String, String> getMap(String name) throws ParameterLoadException {
         String value = getParamValue(name);
         if (value == null || value.length() == 0) return MAP_STRING_DEFAULT;
-        Map<String,String> mval = new HashMap<String,String>();
+        Map<String, String> mval = new HashMap<String, String>();
         String[] pairs = value.split(",");
-        for(String pair : pairs) {
+        for (String pair : pairs) {
             String[] nameValue = pair.split("=");
-            if(nameValue.length != 2) {
-                String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[] { name,
-                        Map.class.getName() });
+            if (nameValue.length != 2) {
+                String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{name,
+                        Map.class.getName()});
                 logger.warn(errMsg);
                 throw new ParameterLoadException(errMsg);
             }
-            mval.put(nameValue[0],nameValue[1]);
+            mval.put(nameValue[0], nameValue[1]);
         }
         return mval;
     }
 
     /**
-     * @param name
      * @return parameter value
      */
     private String getParamValue(String name) {
         String value;
-        if(lastRun.hasParameter(name)) {
+        if (lastRun.hasParameter(name)) {
             value = lastRun.getProperty(name);
         } else {
             value = properties != null ? properties.getProperty(name) : null;
@@ -592,8 +580,7 @@ public class Config {
     /**
      * Prints the contents of this preference store to the given print stream.
      *
-     * @param out
-     *            the print stream
+     * @param out the print stream
      */
     public void list(PrintStream out) {
         properties.list(out);
@@ -603,8 +590,7 @@ public class Config {
     /**
      * Prints the contents of this preference store to the given print writer.
      *
-     * @param out
-     *            the print writer
+     * @param out the print writer
      */
     public void list(PrintWriter out) {
         properties.list(out);
@@ -612,13 +598,11 @@ public class Config {
     }
 
     /**
-     * Loads this preference store from the file established in the constructor <code>Config(java.lang.String)</code>
-     * (or by <code>setFileName</code>). Default preference values are not affected.
+     * Loads this preference store from the file established in the constructor
+     * <code>Config(java.lang.String)</code> (or by <code>setFileName</code>). Default preference
+     * values are not affected.
      *
-     * @exception java.io.IOException
-     *                if there is a problem loading this store
-     * @throws IOException
-     * @throws ConfigInitializationException
+     * @throws java.io.IOException if there is a problem loading this store
      */
     public void load() throws IOException, ConfigInitializationException {
         if (filename == null) {
@@ -634,14 +618,12 @@ public class Config {
     }
 
     /**
-     * Loads this preference store from the given input stream. Default preference values are not affected.
+     * Loads this preference store from the given input stream. Default preference values are not
+     * affected.
      *
-     * @param in
-     *            the input stream
-     * @throws ConfigInitializationException
-     *             If there's a problem loading the parameters
-     * @throws IOException
-     *             IF there's an I/O problem loading parameter from file
+     * @param in the input stream
+     * @throws ConfigInitializationException If there's a problem loading the parameters
+     * @throws IOException                   IF there's an I/O problem loading parameter from file
      */
     private void load(InputStream in) throws ConfigInitializationException, IOException {
         try {
@@ -659,9 +641,7 @@ public class Config {
     /**
      * Post process parameters. Right now, only decrypts encrypted values in the map
      *
-     * @param values
-     *            Values to be post-processed
-     * @throws ConfigInitializationException
+     * @param values Values to be post-processed
      */
     @SuppressWarnings("unchecked")
     private void postLoad(Map values) throws ConfigInitializationException {
@@ -673,25 +653,22 @@ public class Config {
         // decrypt encrypted values
         if (propMap.containsKey(PASSWORD)) {
             String propValue = decryptProperty(encrypter, propMap, PASSWORD, isBatchMode());
-            if(propValue == null) propValue = "";
+            if (propValue == null) propValue = "";
             propMap.put(PASSWORD, propValue);
         }
         if (propMap.containsKey(PROXY_PASSWORD)) {
             String propValue = decryptProperty(encrypter, propMap, PROXY_PASSWORD, isBatchMode());
-            if(propValue == null) propValue = "";
+            if (propValue == null) propValue = "";
             propMap.put(PROXY_PASSWORD, propValue);
         }
     }
 
     /**
-     * Load config parameter override values. The main use case is loading of overrides from external config file
-     *
-     * @param configOverrideMap
-     * @throws ParameterLoadException
-     * @throws ConfigInitializationException
+     * Load config parameter override values. The main use case is loading of overrides from
+     * external config file
      */
     public void loadParameterOverrides(Map<String, String> configOverrideMap) throws ParameterLoadException,
-    ConfigInitializationException {
+            ConfigInitializationException {
         // Need to initialize last run date if it's present neither in config or override
         if (configOverrideMap.containsKey(INITIAL_LAST_RUN_DATE)) {
             lastRun.setDefault(LastRun.LAST_RUN_DATE, configOverrideMap.get(INITIAL_LAST_RUN_DATE));
@@ -708,12 +685,10 @@ public class Config {
     }
 
     /**
-     * Decrypt property with propName using the encrypter. If decryption succeeds, return the decrypted value
+     * Decrypt property with propName using the encrypter. If decryption succeeds, return the
+     * decrypted value
      *
-     * @param propMap
-     * @param propName
      * @return decrypted property value
-     * @throws ParameterLoadException
      */
     static private String decryptProperty(EncryptionUtil encrypter, Map<String, String> propMap, String propName, boolean isBatch)
             throws ParameterLoadException {
@@ -723,17 +698,17 @@ public class Config {
                 return encrypter.decryptString(propValue);
             } catch (GeneralSecurityException e) {
                 // if running in the UI, we can ignore encryption errors
-                if(isBatch) {
-                    String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[] { propName,
-                            String.class.getName() });
+                if (isBatch) {
+                    String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{propName,
+                            String.class.getName()});
                     logger.error(errMsg, e);
                     throw new ParameterLoadException(errMsg, e);
                 } else {
                     return null;
                 }
             } catch (Exception e) {
-                String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[] { propName,
-                        String.class.getName() });
+                String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{propName,
+                        String.class.getName()});
                 logger.error(errMsg, e);
                 throw new ParameterLoadException(errMsg, e);
             }
@@ -751,8 +726,8 @@ public class Config {
             try {
                 encrypter.setCipherKeyFromFilePath(keyFile);
             } catch (IOException e) {
-                String errMsg = Messages.getFormattedString("Config.errorSecurityInit", new String[] { keyFile,
-                        e.getMessage() });
+                String errMsg = Messages.getFormattedString("Config.errorSecurityInit", new String[]{keyFile,
+                        e.getMessage()});
                 logger.error(errMsg);
                 throw new ConfigInitializationException(errMsg);
             }
@@ -777,7 +752,7 @@ public class Config {
         ArrayList<String> list = new ArrayList<String>();
         Enumeration<?> en = properties.propertyNames();
         while (en.hasMoreElements()) {
-            list.add((String)en.nextElement());
+            list.add((String) en.nextElement());
         }
         return list.toArray(new String[list.size()]);
     }
@@ -785,10 +760,7 @@ public class Config {
     /**
      * Puts a set of values from a map into config
      *
-     * @param values
-     *            Map of overriding values
-     * @throws ParameterLoadException
-     * @throws ConfigInitializationException
+     * @param values Map of overriding values
      */
     public void putValue(Map<String, String> values) throws ParameterLoadException, ConfigInitializationException {
         for (String key : values.keySet()) {
@@ -798,9 +770,6 @@ public class Config {
 
     /**
      * Puts a value into the config
-     *
-     * @param name
-     * @param value
      */
     public void putValue(String name, String value) {
         String oldValue = getString(name);
@@ -813,9 +782,7 @@ public class Config {
     /**
      * Saves the preferences to the file from which they were originally loaded.
      *
-     * @exception java.io.IOException
-     *                if there is a problem saving this store
-     * @throws GeneralSecurityException
+     * @throws java.io.IOException if there is a problem saving this store
      */
     public void save() throws IOException, GeneralSecurityException {
         if (filename == null) {
@@ -855,18 +822,14 @@ public class Config {
 
     /**
      * Save statistics from the last run
-     *
-     * @throws IOException
      */
     public void saveLastRun() throws IOException {
         lastRun.save();
     }
 
     /**
-     * @param propName
-     *            name of the property
+     * @param propName name of the property
      * @return old value of the property
-     * @throws GeneralSecurityException
      */
     private String encryptProperty(String propName) throws GeneralSecurityException {
         String oldValue = getString(propName);
@@ -877,25 +840,23 @@ public class Config {
     }
 
     /**
-     * Saves this config to the given output stream. The given string is inserted as header information.
+     * Saves this config to the given output stream. The given string is inserted as header
+     * information.
      *
-     * @param out
-     *            the output stream
-     * @param header
-     *            the header
-     * @exception java.io.IOException
-     *                if there is a problem saving this store
+     * @param out    the output stream
+     * @param header the header
+     * @throws java.io.IOException if there is a problem saving this store
      */
     private void save(OutputStream out, String header) throws IOException {
         properties.store(out, header);
         dirty = false;
     }
 
-    public void setValue(String name, Map<String,String> valueMap) {
+    public void setValue(String name, Map<String, String> valueMap) {
         StringBuilder sb = new StringBuilder();
-        for(String key : valueMap.keySet()) {
+        for (String key : valueMap.keySet()) {
             // add comma for subsequent entries
-            if(sb.length() != 0) {
+            if (sb.length() != 0) {
                 sb.append(",");
             }
             sb.append(key + "=" + valueMap.get(key));
@@ -906,8 +867,7 @@ public class Config {
     /**
      * Sets the name of the file used when loading and storing this config
      *
-     * @param name
-     *            the file name
+     * @param name the file name
      * @see #load()
      * @see #save()
      */
@@ -925,9 +885,6 @@ public class Config {
 
     /**
      * Sets a double
-     *
-     * @param name
-     * @param value
      */
     public void setValue(String name, double value) {
         setProperty(name, Double.toString(value));
@@ -935,9 +892,6 @@ public class Config {
 
     /**
      * Sets a float
-     *
-     * @param name
-     * @param value
      */
     public void setValue(String name, float value) {
         setProperty(name, Float.toString(value));
@@ -945,9 +899,6 @@ public class Config {
 
     /**
      * Sets an int
-     *
-     * @param name
-     * @param value
      */
     public void setValue(String name, int value) {
         setProperty(name, Integer.toString(value));
@@ -955,9 +906,6 @@ public class Config {
 
     /**
      * Sets a long
-     *
-     * @param name
-     * @param value
      */
     public void setValue(String name, long value) {
         setProperty(name, Long.toString(value));
@@ -965,9 +913,6 @@ public class Config {
 
     /**
      * Sets a string
-     *
-     * @param name
-     * @param values
      */
     public void setValue(String name, String... values) {
         if (values != null && values.length > 1) {
@@ -976,7 +921,7 @@ public class Config {
                 joiner.add(value);
             }
             setProperty(name, joiner.toString());
-        } else if (values != null && values.length > 0){
+        } else if (values != null && values.length > 0) {
             setProperty(name, values[0]);
         } else {
             setProperty(name, null);
@@ -986,9 +931,6 @@ public class Config {
 
     /**
      * Sets a boolean
-     *
-     * @param name
-     * @param value
      */
     public void setValue(String name, boolean value) {
         setProperty(name, Boolean.toString(value));
@@ -1006,16 +948,16 @@ public class Config {
         final String oldValue = getString(name);
         final boolean paramChanged = (oldValue == null || oldValue.length() == 0) ? (newValue != null && newValue
                 .length() > 0) : !oldValue.equals(newValue);
-                if (paramChanged) {
-                    this.dirty = true;
-                    configChanged(name, oldValue, newValue);
-                    if (lastRun.hasParameter(name)) {
-                        lastRun.put(name, newValue);
-                    } else {
-                        properties.put(name, newValue);
-                    }
+        if (paramChanged) {
+            this.dirty = true;
+            configChanged(name, oldValue, newValue);
+            if (lastRun.hasParameter(name)) {
+                lastRun.put(name, newValue);
+            } else {
+                properties.put(name, newValue);
+            }
 
-                }
+        }
     }
 
     public boolean isBatchMode() {
@@ -1031,7 +973,8 @@ public class Config {
         int bs = -1;
         try {
             bs = getInt(LOAD_BATCH_SIZE);
-        } catch (ParameterLoadException e) {}
+        } catch (ParameterLoadException e) {
+        }
         int maxBatchSize = bulkApi ? MAX_BULK_API_BATCH_SIZE : MAX_LOAD_BATCH_SIZE;
         return bs > maxBatchSize ? maxBatchSize : bs > 0 ? bs : getDefaultBatchSize(bulkApi);
     }
@@ -1075,22 +1018,22 @@ public class Config {
         }
     }
 
-    public String getOAuthEnvironmentString(String environmentName, String name){
+    public String getOAuthEnvironmentString(String environmentName, String name) {
         return getString("sfdc.oauth." + environmentName + "." + name);
     }
 
-    public void setOAuthEnvironmentString(String environmentName, String name, String... values){
+    public void setOAuthEnvironmentString(String environmentName, String name, String... values) {
         setValue("sfdc.oauth." + environmentName + "." + name, values);
     }
 
     public void setOAuthEnvironment(String environment) {
         String clientId;
-        if (getBoolean(BULK_API_ENABLED)){
+        if (getBoolean(BULK_API_ENABLED)) {
             clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_BULK_CLIENTID);
         } else {
             clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_PARTNER_CLIENTID);
         }
-        if (clientId == null || clientId.isEmpty()){
+        if (clientId == null || clientId.isEmpty()) {
             clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTID);
         }
         setValue(OAUTH_ENVIRONMENT, environment);

@@ -32,6 +32,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.model.LoginCriteria;
 import com.salesforce.dataloader.util.ExceptionUtil;
 import com.sforce.soap.partner.fault.LoginFault;
+import com.sforce.soap.partner.fault.UnexpectedErrorFault;
 import org.apache.log4j.Logger;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
@@ -107,21 +108,26 @@ public class AuthenticationRunner {
         } catch (LoginFault lf ) {
             messenger.accept(Labels.getString("SettingsPage.invalidLogin"));
             complete.accept(false);
+        } catch (UnexpectedErrorFault e) {
+            handleError(e, e.getExceptionMessage());
         } catch (Throwable e) {
-            String message = e.getMessage();
-            if (message == null || message.length() < 1) {
-                messenger.accept(Labels.getString("SettingsPage.invalidLogin"));
-            } else {
-                int x = message.indexOf(nestedException);
-                if (x >= 0) {
-                    x += nestedException.length();
-                    message = message.substring(x);
-                }
-                messenger.accept(message.replace('\n', ' ').trim());
-            }
-            complete.accept(false);
-            logger.error(message);
-            logger.error("\n" + ExceptionUtil.getStackTraceString(e));
+            handleError(e, e.getMessage());
         }
+    }
+
+    private void handleError(Throwable e, String message) {
+        if (message == null || message.length() < 1) {
+            messenger.accept(Labels.getString("SettingsPage.invalidLogin"));
+        } else {
+            int x = message.indexOf(nestedException);
+            if (x >= 0) {
+                x += nestedException.length();
+                message = message.substring(x);
+            }
+            messenger.accept(message.replace('\n', ' ').trim());
+        }
+        complete.accept(false);
+        logger.error(message);
+        logger.error("\n" + ExceptionUtil.getStackTraceString(e));
     }
 }
