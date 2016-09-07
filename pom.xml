@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>37.0.1</version>
+  <version>38.0.0</version>
   <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -13,8 +13,10 @@
   </organization>
 
   <properties>
-    <force.version>37.0.3</force.version>
-    <build.year>2015</build.year>
+    <force.wsc.version>38.0.3</force.wsc.version>
+    <force.partner.api.version>38.0.0</force.partner.api.version>
+
+    <build.year>2016</build.year>
     <java.compile.version>1.8</java.compile.version>
     <minJvmVersion>1.8.0</minJvmVersion>
     <codesign>DONTSIGN</codesign>
@@ -78,12 +80,12 @@
     <dependency>
       <groupId>com.force.api</groupId>
       <artifactId>force-wsc</artifactId>
-      <version>${force.version}</version>
+      <version>${force.wsc.version}</version>
     </dependency>
     <dependency>
       <groupId>com.force.api</groupId>
       <artifactId>force-partner-api</artifactId>
-      <version>${force.version}</version>
+      <version>${force.partner.api.version}</version>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
