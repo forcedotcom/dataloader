@@ -67,11 +67,17 @@ public class CSVViewerDialog extends Dialog {
 
     private Logger logger = Logger.getLogger(CSVViewerDialog.class);
     private String filename;
+    private boolean useCustomSplitter = false;
     private int numberOfRows;
 
     //the two tableViewers
     private TableViewer csvTblViewer;
     private final Controller controller;
+
+    public void setUseCustomSplitter(boolean useCustomSplitter)
+    {
+        this.useCustomSplitter = useCustomSplitter;
+    }
 
     public void setFileName(String filename) {
         this.filename = filename;
@@ -243,7 +249,7 @@ public class CSVViewerDialog extends Dialog {
     private void initializeCSVViewer(Shell shell) throws DataAccessObjectInitializationException {
         GridData data;
 
-        CSVFileReader csvReader = new CSVFileReader(filename, controller);
+        CSVFileReader csvReader = new CSVFileReader(filename, controller, useCustomSplitter);
 
         try {
             csvReader.open();

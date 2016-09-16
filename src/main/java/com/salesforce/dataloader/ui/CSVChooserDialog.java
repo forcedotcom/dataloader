@@ -239,7 +239,7 @@ public class CSVChooserDialog extends Dialog {
                 FileDialog dlg = new FileDialog(shell, SWT.OPEN);
                 String fn = dlg.open();
                 if (fn != null) {
-                    openViewer(fn);
+                    openViewer(fn, true);
                 }
 
             }
@@ -257,7 +257,7 @@ public class CSVChooserDialog extends Dialog {
             public void widgetSelected(SelectionEvent event) {
                 String successFilePath = controller.getConfig().getString(Config.OUTPUT_SUCCESS);
                 if(StringUtils.hasText(successFilePath)) {
-                    openViewer(successFilePath);
+                    openViewer(successFilePath, false);
                 } else {
                     UIUtils.infoMessageBox(shell, Messages.getString("CSVChooser.noSucessOrErrorFile"));
                 }
@@ -276,7 +276,7 @@ public class CSVChooserDialog extends Dialog {
             public void widgetSelected(SelectionEvent event) {
                 String errorFilePath = controller.getConfig().getString(Config.OUTPUT_ERROR);
                 if(StringUtils.hasText(errorFilePath)) {
-                    openViewer(errorFilePath);
+                    openViewer(errorFilePath, false);
                 } else {
                     UIUtils.infoMessageBox(shell, Messages.getString("CSVChooser.noSucessOrErrorFile"));
                 }
@@ -315,17 +315,17 @@ public class CSVChooserDialog extends Dialog {
         ok.setLayoutData(data);
 
 
-
         // Set the OK button as the default, so
         // user can type input and press Enter
         // to dismiss
         shell.setDefaultButton(ok);
     }
 
-    private void openViewer(String filename) {
+    private void openViewer(String filename, boolean useCustomSplitter) {
         CSVViewerDialog dlg = new CSVViewerDialog(getParent(), controller);
         dlg.setNumberOfRows(Integer.parseInt(textRows.getText()));
         dlg.setFileName(filename);
+        dlg.setUseCustomSplitter(useCustomSplitter);
         try {
             dlg.open();
         } catch (DataAccessObjectInitializationException e) {
