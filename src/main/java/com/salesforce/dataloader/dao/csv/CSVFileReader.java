@@ -68,27 +68,41 @@ public class CSVFileReader implements DataReader {
     private char[] csvDelimiters;
 
     public CSVFileReader(Config config) {
-        this(new File(config.getString(Config.DAO_NAME)), config);
+        this(new File(config.getString(Config.DAO_NAME)), config, true);
     }
 
     public CSVFileReader(String filePath, Controller controller) {
-        this(new File(filePath), controller.getConfig());
+        this(new File(filePath), controller.getConfig(), false);
     }
 
+    public CSVFileReader(String filePath, Controller controller, boolean custDelimiter) {
+        this(new File(filePath), controller.getConfig(), custDelimiter);
+    }
+
+    // Used only by the test
     public CSVFileReader(File file, Config config) {
+        this(file, config, true);
+    }
+
+    public CSVFileReader(File file, Config config, boolean custDelimiter) {
         this.file = file;
         forceUTF8 = config.getBoolean(Config.READ_UTF8);
         StringBuilder separator = new StringBuilder();
-        if (config.getBoolean(Config.CSV_DELIMETER_COMMA)) {
+        if (custDelimiter) {
+            if (config.getBoolean(Config.CSV_DELIMETER_COMMA)) {
+                separator.append(",");
+            }
+            if (config.getBoolean(Config.CSV_DELIMETER_TAB)) {
+                separator.append("\t");
+            }
+            if (config.getBoolean(Config.CSV_DELIMETER_OTHER)) {
+                separator.append(config.getString(Config.CSV_DELIMETER_OTHER_VALUE));
+            }
+        } else {
             separator.append(",");
         }
-        if (config.getBoolean(Config.CSV_DELIMETER_TAB)) {
-            separator.append("\t");
-        }
-        if (config.getBoolean(Config.CSV_DELIMETER_OTHER)) {
-            separator.append(config.getString(Config.CSV_DELIMETER_OTHER_VALUE));
-        }
         csvDelimiters = separator.toString().toCharArray();
+
         if (csvDelimiters.length == 0) {
             String errorMsg = "No csv separator present! You need at least one separator character!";
             LOGGER.error(errorMsg);
