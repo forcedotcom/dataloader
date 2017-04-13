@@ -313,7 +313,7 @@ public class SforceDynaBean {
         // Register DynaBean type conversions
         ConvertUtils.register(new DateConverter(tz, useEuroDates), Calendar.class);
         ConvertUtils.register(new DoubleConverter(), Double.class);
-        ConvertUtils.register(new IntegerConverter(), Integer.class);
+        ConvertUtils.register(new IntegerConverter(null), Integer.class);
         ConvertUtils.register(new BooleanConverter(), Boolean.class);
         ConvertUtils.register(new StringConverter(), String.class);
         ConvertUtils.register(new FileByteArrayConverter(), byte[].class);
