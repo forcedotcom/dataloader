@@ -186,6 +186,7 @@ public class Config {
     public static final String EURO_DATES = "process.useEuropeanDates"; //$NON-NLS-1$
 
     // process configuration
+    public static final String ENABLE_NO_FIELD_VAL_WARNING = "process.enableNoFieldValWarning"; //$NON-NLS-1$
     public static final String OUTPUT_STATUS_DIR = "process.statusOutputDirectory"; //$NON-NLS-1$
     public static final String OUTPUT_SUCCESS = "process.outputSuccess"; //$NON-NLS-1$
     public static final String ENABLE_EXTRACT_STATUS_OUTPUT = "process.enableExtractStatusOutput"; //$NON-NLS-1$
@@ -319,6 +320,7 @@ public class Config {
         setValue(ASSIGNMENT_RULE, ""); //$NON-NLS-1$
         setValue(INSERT_NULLS, false);
         setValue(ENABLE_EXTRACT_STATUS_OUTPUT, false);
+        setValue(ENABLE_NO_FIELD_VAL_WARNING, true);
         setValue(ENABLE_LAST_RUN_OUTPUT, true);
         setValue(RESET_URL_ON_LOGIN, true);
         setValue(EXTRACT_REQUEST_SIZE, DEFAULT_EXTRACT_REQUEST_SIZE);
@@ -997,6 +999,10 @@ public class Config {
 
     public OperationInfo getOperationInfo() {
         return getEnum(OperationInfo.class, OPERATION);
+    }
+
+    public boolean isNoFieldValWarningEnabled() {
+        return getBoolean(ENABLE_NO_FIELD_VAL_WARNING);
     }
 
     private static final Charset UTF8 = Charset.forName("UTF-8");

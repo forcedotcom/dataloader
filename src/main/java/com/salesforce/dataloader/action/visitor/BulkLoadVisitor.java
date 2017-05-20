@@ -218,8 +218,10 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             }
             writeColumnToCsv(out, col);
         } else {
-            // all null values should be ignored when using bulk API
-            getLogger().warn(Messages.getMessage(getClass(), "noFieldVal", fieldName));
+            if (getConfig().isNoFieldValWarningEnabled()) {
+                // all null values should be ignored when using bulk API
+                getLogger().warn(Messages.getMessage(getClass(), "noFieldVal", fieldName));
+            }
         }
     }
 
