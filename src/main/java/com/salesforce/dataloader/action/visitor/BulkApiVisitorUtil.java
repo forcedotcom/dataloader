@@ -69,6 +69,9 @@ class BulkApiVisitorUtil {
 
     private final boolean updateProgress;
 
+    private final boolean enablePKChunking;
+    private int queryChunkSize;
+
     BulkApiVisitorUtil(Controller ctl, ILoaderProgress monitor, LoadRateCalculator rateCalc, boolean updateProgress) {
         this.client = ctl.getBulkClient().getClient();
         try {
@@ -78,6 +81,15 @@ class BulkApiVisitorUtil {
                     : Config.DEFAULT_BULK_API_CHECK_STATUS_INTERVAL;
         } catch (ParameterLoadException e) {
             throw new RuntimeException("Failed to initialize check status interval", e);
+        }
+        this.enablePKChunking = ctl.getConfig().getBoolean(Config.BULK_QUERY_PK_CHUNKING);
+        try {
+            int chunkSize = ctl.getConfig().getInt(Config.BULK_QUERY_CHUNK_SIZE);
+            if (chunkSize < 1 || chunkSize > Config.MAX_BULK_QUERY_CHUNK_SIZE)
+                chunkSize = Config.DEFAULT_BULK_QUERY_CHUNK_SIZE;
+            this.queryChunkSize = chunkSize;
+        } catch (ParameterLoadException e) {
+            throw new RuntimeException("Failed to initialize query chunk size", e);
         }
         this.monitor = monitor;
         this.rateCalc = rateCalc;
@@ -111,6 +123,11 @@ class BulkApiVisitorUtil {
                 job.setAssignmentRuleId(assRule);
             }
         }
+
+        if (op == OperationEnum.query || op == OperationEnum.queryAll)
+            if (this.enablePKChunking)
+                this.client.addHeader("Sforce-Enable-PKChunking", "chunkSize=" + this.queryChunkSize);
+
         job = this.client.createJob(job);
         logger.info(Messages.getMessage(getClass(), "logJobCreated", job.getId()));
         this.jobInfo = job;
@@ -172,6 +189,13 @@ class BulkApiVisitorUtil {
         this.jobInfo = this.client.closeJob(getJobId());
         updateJobStatus();
         awaitJobCompletion();
+    }
+
+    void waitJob() throws AsyncApiException {
+        this.jobInfo = this.client.getJobStatus(getJobId());
+        updateJobStatus();
+        awaitJobCompletion();
+        this.jobInfo = this.client.closeJob(getJobId());
     }
 
     private void updateJobStatus() {

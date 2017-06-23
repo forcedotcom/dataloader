@@ -54,7 +54,7 @@ import com.sforce.async.QueryResultList;
  */
 public class BulkQueryVisitor extends AbstractQueryVisitor {
 
-    private BatchInfo batch;
+    private BatchInfo[] batches;
 
     public BulkQueryVisitor(Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {
@@ -71,25 +71,37 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
         } catch (final UnsupportedEncodingException e) {
             throw new ExtractException(e);
         }
-        jobUtil.closeJob();
-        final BatchInfo b = jobUtil.getBatches().getBatchInfo()[0];
-        if (b.getState() == BatchStateEnum.Failed) throw new ExtractException("Batch failed: " + b.getStateMessage());
-        this.batch = b;
-        return b.getNumberRecordsProcessed();
+        jobUtil.waitJob();
+
+        int recordsProcessed = 0;
+        final BatchInfo[] ba = jobUtil.getBatches().getBatchInfo();
+        for (BatchInfo b : ba) {
+            if (b.getState() == BatchStateEnum.Failed)
+                throw new ExtractException("Batch failed: " + b.getStateMessage());
+            recordsProcessed += b.getNumberRecordsProcessed();
+        }
+
+        this.batches = ba;
+        return recordsProcessed;
     }
 
     @Override
     protected void writeExtraction() throws AsyncApiException, ExtractException, DataAccessObjectException {
-        if (this.batch.getState() == BatchStateEnum.Failed)
-            throw new ExtractException("Batch failed: " + this.batch.getStateMessage());
+        for (BatchInfo b : this.batches)
+            writeExtractionBatch(b);
+    }
+
+    private void writeExtractionBatch(BatchInfo batch) throws AsyncApiException, ExtractException, DataAccessObjectException {
+        if (batch.getState() == BatchStateEnum.Failed)
+            throw new ExtractException("Batch failed: " + batch.getStateMessage());
         final QueryResultList results = getController().getBulkClient().getClient()
-                .getQueryResultList(this.batch.getJobId(), this.batch.getId());
+                .getQueryResultList(batch.getJobId(), batch.getId());
 
         for (final String resultId : results.getResult()) {
             if (getProgressMonitor().isCanceled()) return;
             try {
                 final InputStream resultStream = getController().getBulkClient().getClient()
-                        .getQueryResultStream(this.batch.getJobId(), this.batch.getId(), resultId);
+                        .getQueryResultStream(batch.getJobId(), batch.getId(), resultId);
                 try {
                     final CSVReader rdr = new CSVReader(resultStream, Config.BULK_API_ENCODING);
                     rdr.setMaxCharsInFile(Integer.MAX_VALUE);
