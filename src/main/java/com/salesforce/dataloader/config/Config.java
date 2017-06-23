@@ -87,6 +87,8 @@ public class Config {
     public static final int DEFAULT_BULK_API_BATCH_SIZE = 2000;
     public static final long DEFAULT_BULK_API_CHECK_STATUS_INTERVAL = 5000L;
     public static final String DEFAULT_ENDPOINT_URL = "https://login.salesforce.com";
+    public static final int DEFAULT_BULK_QUERY_CHUNK_SIZE = 100000;
+    public static final int MAX_BULK_QUERY_CHUNK_SIZE = 250000;
 
     /*
      * Issue #59 - Dataloader will not read all the database rows to get a total count
@@ -161,6 +163,8 @@ public class Config {
     public static final String BULK_API_SERIAL_MODE = "sfdc.bulkApiSerialMode";
     public static final String BULK_API_CHECK_STATUS_INTERVAL = "sfdc.bulkApiCheckStatusInterval";
     public static final String BULK_API_ZIP_CONTENT = "sfdc.bulkApiZipContent";
+    public static final String BULK_QUERY_PK_CHUNKING = "sfdc.bulkQueryPKChunking";
+    public static final String BULK_QUERY_CHUNK_SIZE = "sfcd.bulkQueryChunkSize";
     public static final String WIRE_OUTPUT = "sfdc.wireOutput";
     public static final String TIMEZONE = "sfdc.timezone";
 
@@ -342,6 +346,8 @@ public class Config {
         setValue(BULK_API_SERIAL_MODE, false);
         setValue(BULK_API_ZIP_CONTENT, false);
         setValue(BULK_API_CHECK_STATUS_INTERVAL, DEFAULT_BULK_API_CHECK_STATUS_INTERVAL);
+        setValue(BULK_QUERY_PK_CHUNKING, false);
+        setValue(BULK_QUERY_CHUNK_SIZE, DEFAULT_BULK_QUERY_CHUNK_SIZE);
         setValue(WIRE_OUTPUT, false);
         setValue(TIMEZONE, TimeZone.getDefault().getID());
         //sfdcInternal settings

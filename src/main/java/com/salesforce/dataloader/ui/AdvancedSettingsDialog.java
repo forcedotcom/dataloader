@@ -97,6 +97,8 @@ public class AdvancedSettingsDialog extends Dialog {
     private Button buttonCsvComma;
     private Button buttonCsvTab;
     private Button buttonCsvOther;
+    private Button buttonBulkQueryPKChunking;
+    private Text textBulkQueryChunkSize;
 
     /**
      * InputDialog constructor
@@ -499,6 +501,30 @@ public class AdvancedSettingsDialog extends Dialog {
         buttonBulkApiZipContent = new Button(restComp, SWT.CHECK);
         buttonBulkApiZipContent.setSelection(config.getBoolean(Config.BULK_API_SERIAL_MODE));
         buttonBulkApiZipContent.setEnabled(useBulkAPI);
+
+        Label labelBulkQueryPKChunking = new Label(restComp, SWT.RIGHT);
+        labelBulkQueryPKChunking.setText(Labels.getString("AdvancedSettingsDialog.bulkQueryPKChunking"));
+        labelBulkQueryPKChunking.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+
+        buttonBulkQueryPKChunking = new Button(restComp, SWT.CHECK);
+        buttonBulkQueryPKChunking.setSelection(config.getBoolean(Config.BULK_QUERY_PK_CHUNKING));
+        buttonBulkQueryPKChunking.setEnabled(useBulkAPI);
+
+        Label labelBulkQueryChunkSize = new Label(restComp, SWT.RIGHT);
+        labelBulkQueryChunkSize.setText(Labels.getString("AdvancedSettingsDialog.bulkQueryChunkSize"));
+        labelBulkQueryChunkSize.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+
+        textBulkQueryChunkSize = new Text(restComp, SWT.BORDER);
+        textBulkQueryChunkSize.setText(config.getString(Config.BULK_QUERY_CHUNK_SIZE));
+        textBulkQueryChunkSize.setTextLimit(6);
+        textBulkQueryChunkSize.addVerifyListener(new VerifyListener() {
+            @Override
+            public void verifyText(VerifyEvent event) {
+                event.doit = Character.isISOControl(event.character) || Character.isDigit(event.character);
+            }
+        });
+        textBulkQueryChunkSize.setEnabled(useBulkAPI);
+
         // timezone
         textTimezone = createTextInput(restComp, "AdvancedSettingsDialog.timezone", Config.TIMEZONE, TimeZone.getDefault().getID(), 200);
 
@@ -686,6 +712,8 @@ public class AdvancedSettingsDialog extends Dialog {
                 config.setValue(Config.BULK_API_ENABLED, buttonUseBulkApi.getSelection());
                 config.setValue(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode.getSelection());
                 config.setValue(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
+                config.setValue(Config.BULK_QUERY_PK_CHUNKING, buttonBulkQueryPKChunking.getSelection());
+                config.setValue(Config.BULK_QUERY_CHUNK_SIZE, textBulkQueryChunkSize.getText());
 
                 controller.saveConfig();
                 controller.logout();
