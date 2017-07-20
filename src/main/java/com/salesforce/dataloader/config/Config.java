@@ -174,6 +174,9 @@ public class Config {
     public static final String ENTITY = "sfdc.entity"; //$NON-NLS-1$
     public static final String LOAD_BATCH_SIZE = "sfdc.loadBatchSize"; //$NON-NLS-1$
     public static final String ASSIGNMENT_RULE = "sfdc.assignmentRule"; //$NON-NLS-1$
+    public static final String DUPLICATE_RULE_ALLOW_SAVE = "sfdc.duplicateRule.allowSave"; //$NON-NLS-1$
+    public static final String DUPLICATE_RULE_INCLUDE_RECORD_DETAILS = "sfdc.duplicateRule.includeRecordDetails"; //$NON-NLS-1$
+    public static final String DUPLICATE_RULE_RUN_AS_CURRENT_USER = "sfdc.duplicateRule.runAsCurrentUser"; //$NON-NLS-1$
     public static final String EXTERNAL_ID_FIELD = "sfdc.externalIdField"; //$NON-NLS-1$
     public static final String EXTRACT_REQUEST_SIZE = "sfdc.extractionRequestSize"; //$NON-NLS-1$
     public static final String EXTRACT_SOQL = "sfdc.extractionSOQL"; //$NON-NLS-1$
@@ -317,6 +320,9 @@ public class Config {
         setValue(MAX_RETRIES, DEFAULT_MAX_RETRIES);
         setValue(MIN_RETRY_SLEEP_SECS, DEFAULT_MIN_RETRY_SECS);
         setValue(ASSIGNMENT_RULE, ""); //$NON-NLS-1$
+        setValue(DUPLICATE_RULE_ALLOW_SAVE, false);
+        setValue(DUPLICATE_RULE_INCLUDE_RECORD_DETAILS, false);
+        setValue(DUPLICATE_RULE_RUN_AS_CURRENT_USER, false);
         setValue(INSERT_NULLS, false);
         setValue(ENABLE_EXTRACT_STATUS_OUTPUT, false);
         setValue(ENABLE_LAST_RUN_OUTPUT, true);

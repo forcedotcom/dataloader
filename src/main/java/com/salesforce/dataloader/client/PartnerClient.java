@@ -243,6 +243,13 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         // TODO: make this configurable
         getClient().setDisableFeedTrackingHeader(true);
+
+        getClient().setDuplicateRuleHeader(
+            config.getBoolean(Config.DUPLICATE_RULE_ALLOW_SAVE),
+            config.getBoolean(Config.DUPLICATE_RULE_INCLUDE_RECORD_DETAILS),
+            config.getBoolean(Config.DUPLICATE_RULE_RUN_AS_CURRENT_USER)
+        );
+
         return true;
     }
 
