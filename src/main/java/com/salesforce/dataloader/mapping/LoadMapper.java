@@ -64,7 +64,7 @@ public class LoadMapper extends Mapper {
         final Map<String, String> result = new HashMap<String, String>(getMap());
         if (includeUnmapped) {
             for (String daoColumn : getDaoColumns()) {
-                if (getMapping(daoColumn) == null) result.put(daoColumn, null);
+                if (getMapping(daoColumn, true) == null) result.put(daoColumn, null);
             }
         }
         return result;

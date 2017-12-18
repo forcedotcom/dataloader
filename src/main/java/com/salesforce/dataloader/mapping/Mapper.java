@@ -174,18 +174,23 @@ public abstract class Mapper {
     }
 
     public String getMapping(String srcName) {
-        if(map.containsKey(srcName)) {
+        return getMapping(srcName, false);
+    }
+
+    public String getMapping(String srcName, boolean strictMatching) {
+        if (map.containsKey(srcName)) {
             return map.get(srcName);
         }
         // handle aggregate queries
-        for(Entry<String, String> entry: map.entrySet()) {
-            if(entry.getKey().endsWith("." + srcName)) {
-                return entry.getValue();
+        if (!strictMatching) {
+            for (Entry<String, String> entry : map.entrySet()) {
+                if (entry.getKey().endsWith("." + srcName)) {
+                    return entry.getValue();
+                }
             }
         }
         return null;
     }
-
     public void clearMap() {
         this.map.clear();
     }
