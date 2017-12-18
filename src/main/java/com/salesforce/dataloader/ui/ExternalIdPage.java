@@ -137,11 +137,8 @@ public class ExternalIdPage extends LoadPage {
         Field[] fields = fieldTypes.getFields();
         ArrayList<String> extIdFields = new ArrayList<String>();
         for(Field field : fields) {
-            // salesforce id can be used for upsert in addition to external id fields
-            if("id".equals(field.getName().toLowerCase())) {
-                extIdFields.add(field.getName());
-            }
-            if(field.isExternalId() && (field.isCreateable() || field.isUpdateable())) {
+            // every idLookup field can be used for upserts, including Id and Name
+            if(field.isIdLookup()) {
                 extIdFields.add(field.getName());
             }
         }
