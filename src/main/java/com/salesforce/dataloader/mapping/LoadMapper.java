@@ -26,15 +26,18 @@
 
 package com.salesforce.dataloader.mapping;
 
-import java.util.*;
-import java.util.Map.Entry;
-
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.Field;
+
 import org.apache.log4j.Logger;
 import org.springframework.util.StringUtils;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Mapper which maps field names for loading operations. Field names are mapped from dao (local) name to sfdc name.
@@ -73,7 +76,7 @@ public class LoadMapper extends Mapper {
     public Row mapData(Row localRow) {
         Row mappedData = new Row();
         for (Map.Entry<String, Object> entry : localRow.entrySet()) {
-            String sfdcName = getMapping(entry.getKey());
+            String sfdcName = getMapping(entry.getKey(), true);
             if (StringUtils.hasText(sfdcName)) {
                 mappedData.put(sfdcName, entry.getValue());
             } else {
