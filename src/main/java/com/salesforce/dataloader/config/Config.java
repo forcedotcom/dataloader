@@ -749,6 +749,7 @@ public class Config {
                 throw new ConfigInitializationException(errMsg);
             }
         }
+
     }
 
     /**
@@ -812,6 +813,8 @@ public class Config {
         String oldProxyPassword = encryptProperty(PROXY_PASSWORD);
         String oauthAccessToken = getString(OAUTH_ACCESSTOKEN);
         String oauthRefreshToken = getString(OAUTH_REFRESHTOKEN);
+        putValue(PASSWORD, "");
+        putValue(PROXY_PASSWORD, "");
         putValue(OAUTH_ACCESSTOKEN, "");
         putValue(OAUTH_REFRESHTOKEN, "");
 

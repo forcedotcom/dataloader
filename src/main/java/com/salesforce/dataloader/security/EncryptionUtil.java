@@ -27,7 +27,6 @@ package com.salesforce.dataloader.security;
 
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 public class EncryptionUtil {
@@ -133,7 +132,7 @@ public class EncryptionUtil {
                 try {
                     EncryptionAesUtil encAes = new EncryptionAesUtil();
                     if (i == args.length - 2 || i == args.length - 1) {
-                        String filePath = encAes.createKeyFile(i == args.length - 1 ? null : args[i + 1]);
+                        String filePath = encAes.createKeyFileIfNotExisting(i == args.length - 1 ? null : args[i + 1]);
                         LOGGER.info("Keyfile \"" + filePath + "\" was created! ");
                     } else {
                         LOGGER.info("Please provide correct parameters!");
@@ -154,10 +153,6 @@ public class EncryptionUtil {
                         encAes.setCipherKeyFromFilePath(keyFilename);
                         String plainText = encAes.decryptMsg(encryptMsg);
                         LOGGER.info(plainText);
-                    } catch (IOException e) {
-                        LOGGER.error("Error setting the key from file: "
-                                + keyFilename + ", error: " + e.getMessage());
-                        System.exit(-1);
                     } catch (GeneralSecurityException e) {
                         LOGGER.error("Failed in encryption: " + e.getMessage());
                         System.exit(-1);
