@@ -145,12 +145,14 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
                 logger.info(Messages.getString("Process.creatingMap")); //$NON-NLS-1$
                 controller.createMapper();
 
+                // keep track of when we started
+                Date startDate = Calendar.getInstance().getTime();
+
                 // execute the requested operation
                 controller.executeAction(monitor);
 
                 // save last successful run date
-                // FIXME look into a better place so that long runs don't skew this
-                config.setValue(LastRun.LAST_RUN_DATE, Calendar.getInstance().getTime());
+                config.setValue(LastRun.LAST_RUN_DATE, startDate);
                 config.saveLastRun();
             } else {
                 logger.fatal(Messages.getString("Process.loginError")); //$NON-NLS-1$
