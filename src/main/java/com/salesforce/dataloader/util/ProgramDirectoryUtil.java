@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, salesforce.com, inc.
+ * Copyright (c) 2018, salesforce.com, inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided
@@ -23,30 +23,52 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader.process;
+
+package com.salesforce.dataloader.util;
+
+import java.io.File;
+import java.net.URISyntaxException;
 
 /**
- * @author Lexi Viripaeff
- * @input DataLoaderRunner -------------- @ * ----------------
+ * This is an utility class to find out the path of Dataloader
+ *
+ * @author Jae Jang
+ *
  */
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+public class ProgramDirectoryUtil {
 
-import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.exception.ControllerInitializationException;
-import com.salesforce.dataloader.ui.UIUtils;
+    public static String getProgramDirectory()
+    {
+        return runningFromJAR() ? getCurrentJARDirectory() : getCurrentProjectDirectory();
+    }
 
-public class DataLoaderRunner {
+    private static boolean runningFromJAR()
+    {
+        String jarName = new File(ProgramDirectoryUtil.class.getProtectionDomain()
+                .getCodeSource()
+                .getLocation()
+                .getPath())
+                .getName();
 
-    public static final String UI = "ui";
+        return jarName.contains(".jar");
+    }
 
-    public static void main(String[] args) {
-        Controller controller;
+    private static String getCurrentProjectDirectory()
+    {
+        return new File("").getAbsolutePath();
+    }
+
+    private static String getCurrentJARDirectory()
+    {
         try {
-            controller = Controller.getInstance(UI, false);
-            controller.createAndShowGUI();
-        } catch (ControllerInitializationException e) {
-            UIUtils.errorMessageBox(new Shell(new Display()), e);
+            return new File(ProgramDirectoryUtil.class.getProtectionDomain()
+                    .getCodeSource().getLocation().toURI().getPath()).getParent();
         }
+        catch (URISyntaxException exception) {
+            exception.printStackTrace();
+        }
+
+        return null;
     }
 }
+

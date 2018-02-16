@@ -26,12 +26,16 @@
 package com.salesforce.dataloader.controller;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
+import com.salesforce.dataloader.process.DataLoaderRunner;
+import com.salesforce.dataloader.util.ProgramDirectoryUtil;
 import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.action.IAction;
@@ -67,12 +71,15 @@ public class Controller {
     public static final String CONFIG_DIR_PROP = "salesforce.config.dir";
 
     public static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
+    public static final String DEFAULT_CONFIG_FILE = "defaultConfig.properties"; //$NON-NLS-1$
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
     private static final String CONFIG_DIR = "conf"; //$NON-NLS-1$
     private static String APP_NAME; //$NON-NLS-1$
     public static String APP_VERSION; //$NON-NLS-1$
     public static String API_VERSION;
     private static String APP_VENDOR; //$NON-NLS-1$
+
+    private static boolean IS_WINDOWS;
 
     /**
      * <code>config</code> is an instance of configuration that's tied to this instance of controller in a multithreaded
@@ -105,6 +112,9 @@ public class Controller {
         APP_VERSION = versionProps.getProperty("dataloader.version");
         String[] dataloaderVersion = APP_VERSION.split("\\.");
         API_VERSION = dataloaderVersion[0] + "." + dataloaderVersion[1];
+
+        // Check if we are in Windows UI based
+        IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
 
         // if name is passed to controller, use it to create a unique run file name
         initConfig(name, isBatchMode);
@@ -263,6 +273,7 @@ public class Controller {
 
         } catch (IOException ioe) {
             logger.error("Cannot copy file " + file.getAbsolutePath());
+            logger.error(ioe);
         } finally {
             if (in != null) try {
                 in.close();
@@ -274,6 +285,66 @@ public class Controller {
     }
 
     /**
+     * Create directory provided from the parameter
+     *
+     * @param dirPath - directory to be created
+     *
+     * @return
+     *  True if directory was created successfully or directory already existed
+     *  False if directory was failed to create
+     */
+    private boolean createDir(File dirPath) {
+        boolean isSuccessful = true;
+        if (!dirPath.exists() || !dirPath.isDirectory()) {
+            isSuccessful = dirPath.mkdirs();
+            if (isSuccessful) {
+                logger.info("Created config directory: " + dirPath);
+            } else {
+                logger.info("Unable to create config directory: " + dirPath);
+            }
+        } else {
+            logger.info("Config directory already exists: " + dirPath);
+        }
+        return isSuccessful;
+    }
+
+    /**
+     * Returns current user's Dataloader configuration directory
+     *  ie) For Windows - C:\Users\{user}\AppData\Roaming\salesforce.com\Data Loader {version}\conf
+     *      For Mac - /Users/{user}/Library/Preferences/salesforce.com/Data Loader {version}/conf
+     *      For Unix* - {user.home}/Library/Preferences/salesforce.com/Data Loader {version}/conf
+     *
+     * @return
+     *  Current user's Dataloader configuration directory
+     */
+    private static File getUserConfigDir() {
+        Path path = IS_WINDOWS
+                ? Paths.get(System.getProperty("user.home"), "AppData/Roaming", APP_VENDOR, getProductName(), CONFIG_DIR)
+                : Paths.get(System.getProperty("user.home"), "Library/Preferences", APP_VENDOR, getProductName(), CONFIG_DIR);
+
+        File file = new File(path.toString());
+        return file;
+    }
+
+    /**
+     * Returns default Dataloader configuration directory
+     * ie) For Windows - C:\Program Files (x86)\salesforce.com\Data Loader
+     *     For Mac - /Applications/Data Loader.app/Contents/Resources/conf
+     *     For Unix* - {user.dir}/Contents/Resources/conf
+     *
+     * @return
+     *  Default Dataloader configuration directory
+     */
+    private static File getDefaultConfigDir() {
+        Path path = IS_WINDOWS
+                ? Paths.get(ProgramDirectoryUtil.getProgramDirectory())
+                : Paths.get(System.getProperty("user.dir"), "Contents/Resources/conf");
+
+        File file = new File(path.toString());
+        return file;
+    }
+
+    /**
      * Get the current config.properties and load it into the config bean.
      *
      * @param isBatchMode
@@ -281,79 +352,73 @@ public class Controller {
      */
     protected void initConfig(String name, boolean isBatchMode) throws ControllerInitializationException {
 
-        // see if we are ui based
-        String appdataDir = System.getProperty("appdata.dir");
-        String configPath;
-        String lastRunFileName = name + LAST_RUN_FILE_SUFFIX;
-        if (appdataDir != null && appdataDir.length() > 0) {
-
-            String appVendorDir = new File(appdataDir, APP_VENDOR).getAbsolutePath();
-            // the application directory is versioned to support multiple versions of the loader running in parallel
-            File appDir = new File(appVendorDir, getProductName());
-            appPath = appDir.getAbsolutePath();
-            if (!appDir.exists() || !appDir.isDirectory()) {
-                if (!appDir.mkdirs()) {
-                    logger.warn("Unable to create configuration directory");
-                }
-            }
-
-            // look for config directory under user home directory
-            String oldConfigDir = new File(System.getProperty("user.dir"), CONFIG_DIR).getAbsolutePath();
-
-            // check if the files exist
-            File configFile = new File(appDir, CONFIG_FILE);
-            configPath = configFile.getAbsolutePath();
-            if (!configFile.exists()) {
-                File oldConfig = new File(oldConfigDir, CONFIG_FILE);
-                if (!oldConfig.exists()) {
-                    logger.warn("Cannot find default configuration file");
-                } else {
-                    copyFile(oldConfig, configFile);
-                }
-            }
-
-        } else {
-            // nope we are running commandline
-
-            // FIXME PLEASE
-            String configDirPath = getConfigDir();
-            logger.debug("config dir: " + configDirPath);
-            // if configDir is null, set it to target, which is the maven build output directory
-            // TODO: FIXME
-            if (configDirPath == null) {
-                configDirPath = "target";
-                logger.warn("config dir was null, so config dir has been set to " + configDirPath);
-            }
-
-            // TODO: we should log creating new files/directories
-            // TODO: why did we add this?
-            File configDir = new File(configDirPath);
-            if (!(configDir.isDirectory() || configDir.mkdirs())) {
-                throw new ControllerInitializationException("could not create configuration directory: " + configDir);
-            } else {
-                logger.info("config dir created at " + configDir.getAbsolutePath());
-            }
-
-            // let the File class combine the dir and file names
-            File configFile = new File(configDirPath, CONFIG_FILE);
-
-            // TODO: why did we add this?
-            if (!configFile.exists()) try {
-                configFile.createNewFile();
-                configFile.setWritable(true);
-                configFile.setReadable(true);
-                logger.info("config file created at " + configFile.getAbsolutePath());
-            } catch (IOException e) {
-                throw new ControllerInitializationException(e);
-            }
-
-            this.appPath = configDirPath;
-            configPath = configFile.getAbsolutePath();
-        }
-
+        // Initialize log first to use correct logging level
         initLog();
 
+        String configDirPath = getConfigDir();
+        File configDir;
+        if (IS_WINDOWS) {
+            if ((name == null || name.equals(DataLoaderRunner.UI) == false) && configDirPath == null ) {
+                // Windows commandline and config dir is not provided - use '{user.dir}\target' as config dir
+                logger.debug("Windows commandline and config dir is not provided");
+                configDir = new File(System.getProperty("user.dir"), "target");
+            }
+            else if ((name == null || name.equals(DataLoaderRunner.UI) == false) && configDirPath != null) {
+                // Windows commandline and config dir is provided - use provided config dir
+                logger.debug("Windows commandline and config dir is provided");
+                configDir = new File(configDirPath);
+            }
+            else if (name != null && name.equals("ui")) {
+                // Windows UI - use user's config dir
+                logger.debug("Windows UI");
+                configDir= getUserConfigDir();
+            }
+            else {
+                logger.error("Unknown application mode!");
+                throw new ControllerInitializationException("Unknown application mode!");
+            }
+        }
+        else {
+            // Note that Mac is supported but Unix* are not officially supported
+
+            if (configDirPath != null) {
+                // Mac or Unix* commandline and config dir is provided - use provided config dir
+                logger.debug("Mac or Unix* commandline and config dir is provided");
+                configDir = new File(configDirPath);
+            }
+            else {
+                // Mac or Unix* - use user's config dir
+                logger.debug("Mac or Unix* UI");
+                configDir = getUserConfigDir();
+            }
+        }
+
+        // Create dir if it doesn't exist
+        boolean isMkdirSuccessful = createDir(configDir);
+        if (!isMkdirSuccessful) {
+            throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorCreatingOutputDir", configDir));
+        }
+        appPath = configDir.getAbsolutePath();
+
+        // check if the config file exists
+        File configFile = new File(appPath, CONFIG_FILE);
+        String configPath = configFile.getAbsolutePath();
+        if (!configFile.exists()) {
+
+            // If config file doesn't exist, copy default config
+            File defaultConfigFile = new File(getDefaultConfigDir(), DEFAULT_CONFIG_FILE);
+            copyFile(defaultConfigFile, configFile);
+            configFile.setWritable(true);
+            configFile.setReadable(true);
+            logger.info("User config file does not exist in "+ configPath +
+                    " Default config file is copied from "+defaultConfigFile.getAbsolutePath());
+        }
+        else {
+            logger.info("User config is found in " + configFile.getAbsolutePath());
+        }
+
         try {
+            String lastRunFileName = name + LAST_RUN_FILE_SUFFIX;
             config = new Config(getAppPath(), configPath, lastRunFileName);
             // set default before actual values are loaded
             config.setDefaults();
@@ -361,11 +426,9 @@ public class Controller {
             config.load();
             logger.info(Messages.getMessage(getClass(), "configInit")); //$NON-NLS-1$
         } catch (IOException e) {
-            throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorConfigLoad", configPath),
-                    e);
+            throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorConfigLoad", configPath), e);
         } catch (ProcessInitializationException e) {
-            throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorConfigLoad", configPath),
-                    e);
+            throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorConfigLoad", configPath), e);
         }
 
         if (daoFactory == null) {
@@ -376,7 +439,7 @@ public class Controller {
     /**
      * @return product name
      */
-    private String getProductName() {
+    private static String getProductName() {
         return APP_NAME + " " + APP_VERSION;
     }
 
@@ -384,7 +447,7 @@ public class Controller {
         // init the log if not initialized already
         if (Controller.isLogInitialized) { return; }
         try {
-            File logConfXml = new File(System.getProperty("user.dir"), LOG_CONF_OVERRIDE);
+            File logConfXml = new File(getDefaultConfigDir(), LOG_CONF_OVERRIDE);
             if(logConfXml.exists()) {
                 logger.info("Reading log-conf.xml in " + logConfXml.getAbsolutePath());
                 if(logConfXml.canRead()) {
