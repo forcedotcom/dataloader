@@ -81,11 +81,13 @@ public class EncryptionAesUtil {
 
     // Support single text encryption and decryption
 
-    static public Cipher cipher;
-    static public byte[] cipherKey;
+    static private Cipher cipher;
+    static private byte[] cipherKey;
 
     // 16 bytes was used for 128 bit AES encryption
     public static final int ENCRYPTION_KEY_LENGTH_IN_BYTES = 16;
+    public static final int IV_LENGTH_IN_BYTES = 16;
+
     public static final String DEFAULT_KEYFILE_NAME = "dataLoader.key";
 
     static {
@@ -101,14 +103,14 @@ public class EncryptionAesUtil {
 
 
     private byte[] extractIvBytes(byte[] cipheredText) {
-        byte[] iv = new byte[ENCRYPTION_KEY_LENGTH_IN_BYTES];
-        System.arraycopy(cipheredText, 0, iv, 0, ENCRYPTION_KEY_LENGTH_IN_BYTES);
+        byte[] iv = new byte[IV_LENGTH_IN_BYTES];
+        System.arraycopy(cipheredText, 0, iv, 0, IV_LENGTH_IN_BYTES);
         return iv;
     }
 
     private byte[] extractCipherContent(byte[] cipheredText) {
-        byte[] cipheredPassword = new byte[cipheredText.length - ENCRYPTION_KEY_LENGTH_IN_BYTES];
-        System.arraycopy(cipheredText, ENCRYPTION_KEY_LENGTH_IN_BYTES, cipheredPassword, 0, cipheredText.length - ENCRYPTION_KEY_LENGTH_IN_BYTES);
+        byte[] cipheredPassword = new byte[cipheredText.length - IV_LENGTH_IN_BYTES];
+        System.arraycopy(cipheredText, IV_LENGTH_IN_BYTES, cipheredPassword, 0, cipheredText.length - IV_LENGTH_IN_BYTES);
         return cipheredPassword;
 
     }
@@ -132,6 +134,13 @@ public class EncryptionAesUtil {
         return bytes;
     }
 
+    public byte[] generateIv() {
+        SecureRandom random = new SecureRandom();
+        byte bytes[] = new byte[IV_LENGTH_IN_BYTES];
+        random.nextBytes(bytes);
+        return bytes;
+    }
+
     public String createUserProfileKeyName() {
         String path = Paths.get(System.getProperty("user.home"), ".dataloader").toString();
         File customDir = new File(path);
@@ -144,11 +153,13 @@ public class EncryptionAesUtil {
                 customDir.setReadable(false, false);
                 // only owner can read
                 customDir.setReadable(true, true);
+                customDir.setExecutable(false, false);
+                customDir.setExecutable(true, true);
             }
             LOGGER.info(customDir + " was created");
 
         } else {
-            LOGGER.info(customDir + " was not created");
+            LOGGER.error(customDir + " was not created");
             throw new RuntimeException("Cannot create directory:" + path);
         }
         return Paths.get(path, DEFAULT_KEYFILE_NAME).toString();
@@ -231,20 +242,20 @@ public class EncryptionAesUtil {
         }
     }
 
-    synchronized public byte[] encryptMsg(String msg, byte[] encryptionKey) throws GeneralSecurityException, UnsupportedEncodingException {
+    public byte[] encryptMsg(String msg, byte[] encryptionKey) throws GeneralSecurityException, UnsupportedEncodingException {
 
         if (encryptionKey == null || encryptionKey.length != ENCRYPTION_KEY_LENGTH_IN_BYTES)
             throw new GeneralSecurityException("Encryption key is null or has invalid length");
         SecretKeySpec key = new SecretKeySpec(encryptionKey, "AES");
-        byte[] ivBytes = generateEncryptionKey();
+        byte[] ivBytes = generateIv();
         IvParameterSpec iv = new IvParameterSpec(ivBytes);
         cipher.init(Cipher.ENCRYPT_MODE, key, iv);
         byte[] cipherText = cipher.doFinal(msg.getBytes());
         return concatenateByteArray(ivBytes, cipherText);
     }
 
-    synchronized public String decryptMsg(byte[] cipherMsg, byte[] encryptionKey) throws GeneralSecurityException, UnsupportedEncodingException {
-        if (encryptionKey == null)
+    public String decryptMsg(byte[] cipherMsg, byte[] encryptionKey) throws GeneralSecurityException, UnsupportedEncodingException {
+        if (encryptionKey == null || encryptionKey.length != ENCRYPTION_KEY_LENGTH_IN_BYTES)
             throw new GeneralSecurityException("Encryption key is null or has invalid length");
         SecretKeySpec key = new SecretKeySpec(encryptionKey, "AES");
         byte[] iv = extractIvBytes(cipherMsg);
