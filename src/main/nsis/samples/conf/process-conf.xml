@@ -14,7 +14,7 @@
                 <!-- password below has been encrypted using key file, therefore it will not work without the key setting: process.encryptionKeyFile
                 the password is not a valid encrypted value, please generate the real value using encrypt.bat utility -->
                 <entry key="sfdc.password" value="5555555555555555"/>
-                <entry key="process.encryptionKeyFile" value="c:\dataloader\samples\conf\sample.key"/>
+                <entry key="process.encryptionKeyFile" value="c:\users\username\sample.key"/>
                 <entry key="sfdc.timeoutSecs" value="600"/>
                 <entry key="sfdc.loadBatchSize" value="200"/>
                 <entry key="sfdc.externalIdField" value="Oracle_Id__c"/>
@@ -34,12 +34,12 @@
         <property name="name" value="opportunityUpsertProcess"/>
         <property name="configOverrideMap">
             <map>
-                <entry key="sfdc.endpoint" value="https://login.salesforce.com"/> 
+                <entry key="sfdc.endpoint" value="https://login.salesforce.com"/>
                 <entry key="sfdc.username" value="user@mycompany.com"/>
                 <!-- password below has been encrypted using key file, therefore it will not work without the key setting: process.encryptionKeyFile
                 the password is not a valid encrypted value, please generate the real value using encrypt.bat utility -->
                 <entry key="sfdc.password" value="5555555555555555"/>
-                <entry key="process.encryptionKeyFile" value="c:\dataloader\samples\conf\sample.key"/>
+                <entry key="process.encryptionKeyFile" value="c:\users\username\sample.key"/>
                 <entry key="sfdc.timeoutSecs" value="600"/>
                 <entry key="sfdc.loadBatchSize" value="200"/>
                 <entry key="sfdc.externalIdField" value="Oracle_Id__c"/>
@@ -65,6 +65,7 @@
                 <entry key="sfdc.username" value="user@mycompany.com"/>
                 <!-- password specified below is invalid, please generate one using the encrypt.bat utility -->
                 <entry key="sfdc.password" value="1111111111111111"/>
+                <entry key="process.encryptionKeyFile" value="c:\users\username\sample.key"/>
                 <entry key="sfdc.timeoutSecs" value="600"/>
                 <entry key="sfdc.loadBatchSize" value="200"/>
                 <entry key="sfdc.entity" value="Account"/>
@@ -90,6 +91,7 @@
                 <entry key="sfdc.username" value="user@mycompany.com"/>
                 <!-- password specified below is invalid, please generate one using the encrypt.bat utility -->
                 <entry key="sfdc.password" value="1111111111111111"/>
+                <entry key="process.encryptionKeyFile" value="c:\users\username\sample.key"/>
                 <entry key="sfdc.timeoutSecs" value="600"/>
                 <entry key="sfdc.loadBatchSize" value="200"/>
                 <entry key="sfdc.entity" value="Account"/>
