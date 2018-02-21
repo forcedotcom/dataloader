@@ -39,7 +39,7 @@ public class ProgramDirectoryUtil {
 
     public static String getProgramDirectory()
     {
-        return runningFromJAR() ? getCurrentJARDirectory() : getCurrentProjectDirectory();
+        return runningFromJAR() ? getCurrentJARDirectory() : System.getProperty("user.dir");
     }
 
     private static boolean runningFromJAR()
@@ -53,16 +53,15 @@ public class ProgramDirectoryUtil {
         return jarName.contains(".jar");
     }
 
-    private static String getCurrentProjectDirectory()
-    {
-        return new File("").getAbsolutePath();
-    }
-
     private static String getCurrentJARDirectory()
     {
         try {
             return new File(ProgramDirectoryUtil.class.getProtectionDomain()
-                    .getCodeSource().getLocation().toURI().getPath()).getParent();
+                    .getCodeSource()
+                    .getLocation()
+                    .toURI()
+                    .getPath())
+                    .getParent();
         }
         catch (URISyntaxException exception) {
             exception.printStackTrace();

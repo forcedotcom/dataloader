@@ -4,7 +4,7 @@
 
 !define S_NAME "${PROJECT_FINAL_NAME}"
 !define APPNAME "${PROJECT_NAME}"
-!define S_DEFAULT_CONFIGFOLDER "$APPDATA\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME} ${PROJECT_VERSION}"
+!define S_DEFAULT_CONFIGFOLDER "$LOCALAPPDATA\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME} ${PROJECT_VERSION}"
 !define S_DEFINSTDIR_USER "$LOCALAPPDATA\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
 !define S_DEFINSTDIR_ADMIN "$PROGRAMFILES\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
 !define UNINSTALLER_FULLPATH "$InstDir\Uninstaller.exe"
@@ -183,7 +183,6 @@ Section "Required Files"
     File "target\${PROJECT_FINAL_NAME}.exe"
     File "target\${PROJECT_FINAL_NAME}-uber.jar"
     File "src\main\resources\img\icons\dataloader.ico"
-    File "/oname=defaultConfig.properties" "target\config.properties"
     FileOpen $9 "${PROJECT_FINAL_NAME}.l4j.ini" w
     ;Java Args here
     FileWrite $9 "-jar $\"$INSTDIR\${PROJECT_FINAL_NAME}-uber.jar$\""
@@ -192,9 +191,12 @@ Section "Required Files"
     SetOutPath "$INSTDIR\licenses"
     File /r "src\main\nsis\licenses\"
 
+    ; copy default config file
+    SetOutPath "$INSTDIR\conf"
+    File "/oname=defaultConfig.properties" "target\config.properties"
+
     ; copy config files to appdata dir
     CreateDirectory "${S_DEFAULT_CONFIGFOLDER}"
-    AccessControl::GrantOnFile "${S_DEFAULT_CONFIGFOLDER}" "(S-1-5-32-545)" "FullAccess"
     SetOutPath "${S_DEFAULT_CONFIGFOLDER}\conf"
     File "target\config.properties"
 
@@ -313,10 +315,11 @@ File "/oname=${extractTo}" "${UNINSTEXE}.exe.un"
       Delete "$INSTDIR\${PROJECT_FINAL_NAME}.exe"
       Delete "$INSTDIR\dataloader.ico"
       Delete "$INSTDIR\dataloader_uninstall.exe"
-      Delete "$INSTDIR\defaultConfig.properties"
+      Delete "$INSTDIR\conf\defaultConfig.properties"
       RMDir /r "$INSTDIR\licenses"
       RMDir /r "$INSTDIR\samples"
       RMDir /r "$INSTDIR\bin"
+      RMDir /r "$INSTDIR\conf"
       RMDir /r "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
       Delete "$DESKTOP\${PROJECT_NAME}.lnk"
       RMDir /r "$APPDATA\${PROJECT_ORGANIZATION_NAME}"

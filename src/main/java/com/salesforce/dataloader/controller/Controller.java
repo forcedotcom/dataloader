@@ -26,8 +26,7 @@
 package com.salesforce.dataloader.controller;
 
 import java.io.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -53,6 +52,7 @@ import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.ws.ConnectionException;
 import org.apache.log4j.xml.DOMConfigurator;
+import sun.awt.OSInfo;
 
 /**
  * The class that controls dataloader engine (config, salesforce communication, mapping, dao). For UI, this is the
@@ -79,7 +79,7 @@ public class Controller {
     public static String API_VERSION;
     private static String APP_VENDOR; //$NON-NLS-1$
 
-    private static boolean IS_WINDOWS;
+    private static OSInfo.OSType OS_TYPE;
 
     /**
      * <code>config</code> is an instance of configuration that's tied to this instance of controller in a multithreaded
@@ -113,8 +113,7 @@ public class Controller {
         String[] dataloaderVersion = APP_VERSION.split("\\.");
         API_VERSION = dataloaderVersion[0] + "." + dataloaderVersion[1];
 
-        // Check if we are in Windows UI based
-        IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
+        OS_TYPE = OSInfo.getOSType();
 
         // if name is passed to controller, use it to create a unique run file name
         initConfig(name, isBatchMode);
@@ -244,47 +243,6 @@ public class Controller {
     }
 
     /**
-     * Copies a file
-     *
-     * @param file
-     *            the file to copy from
-     * @param destFile
-     *            the file to copy to
-     */
-    private void copyFile(File file, File destFile) {
-        BufferedInputStream in = null;
-        BufferedOutputStream out = null;
-        try {
-
-            // reading and writing 8 KB at a time
-            int bufferSize = 8 * 1024;
-
-            byte[] buf = new byte[bufferSize];
-
-            in = new BufferedInputStream(new FileInputStream(file), bufferSize);
-            int r = 0;
-
-            out = new BufferedOutputStream(new FileOutputStream(destFile), bufferSize);
-
-            while ((r = in.read(buf, 0, buf.length)) != -1) {
-                out.write(buf, 0, r);
-            }
-            out.flush();
-
-        } catch (IOException ioe) {
-            logger.error("Cannot copy file " + file.getAbsolutePath());
-            logger.error(ioe);
-        } finally {
-            if (in != null) try {
-                in.close();
-            } catch (Exception e) {}
-            if (out != null) try {
-                out.close();
-            } catch (Exception e) {}
-        }
-    }
-
-    /**
      * Create directory provided from the parameter
      *
      * @param dirPath - directory to be created
@@ -293,7 +251,7 @@ public class Controller {
      *  True if directory was created successfully or directory already existed
      *  False if directory was failed to create
      */
-    private boolean createDir(File dirPath) {
+    private static boolean createDir(File dirPath) {
         boolean isSuccessful = true;
         if (!dirPath.exists() || !dirPath.isDirectory()) {
             isSuccessful = dirPath.mkdirs();
@@ -310,38 +268,63 @@ public class Controller {
 
     /**
      * Returns current user's Dataloader configuration directory
-     *  ie) For Windows - C:\Users\{user}\AppData\Roaming\salesforce.com\Data Loader {version}\conf
+     *  ie) For Windows - C:\Users\{user}\AppData\Local\salesforce.com\Data Loader {version}\conf
      *      For Mac - /Users/{user}/Library/Preferences/salesforce.com/Data Loader {version}/conf
-     *      For Unix* - {user.home}/Library/Preferences/salesforce.com/Data Loader {version}/conf
+     *      For *nix - ~/.salesforce.com/Data Loader {version}/conf
      *
      * @return
      *  Current user's Dataloader configuration directory
      */
     private static File getUserConfigDir() {
-        Path path = IS_WINDOWS
-                ? Paths.get(System.getProperty("user.home"), "AppData/Roaming", APP_VENDOR, getProductName(), CONFIG_DIR)
-                : Paths.get(System.getProperty("user.home"), "Library/Preferences", APP_VENDOR, getProductName(), CONFIG_DIR);
+        File dir;
 
-        File file = new File(path.toString());
-        return file;
+        switch (OS_TYPE) {
+            case WINDOWS: {
+                dir = Paths.get(System.getProperty("user.home"), "AppData/Local", APP_VENDOR, getProductName(), CONFIG_DIR).toFile();
+                break;
+            }
+            case MACOSX: {
+                dir = Paths.get(System.getProperty("user.home"), "Library/Preferences", APP_VENDOR, getProductName(), CONFIG_DIR).toFile();
+                break;
+            }
+            default:
+            case LINUX: {
+                dir = Paths.get(System.getProperty("user.home"), "." + APP_VENDOR, getProductName(), CONFIG_DIR).toFile();
+                break;
+            }
+
+        }
+        return dir;
     }
 
     /**
      * Returns default Dataloader configuration directory
-     * ie) For Windows - C:\Program Files (x86)\salesforce.com\Data Loader
+     * ie) For Windows - C:\Program Files (x86)\salesforce.com\Data Loader\conf
      *     For Mac - /Applications/Data Loader.app/Contents/Resources/conf
-     *     For Unix* - {user.dir}/Contents/Resources/conf
+     *     For *nix - {where DL is installed}/conf
      *
      * @return
      *  Default Dataloader configuration directory
      */
     private static File getDefaultConfigDir() {
-        Path path = IS_WINDOWS
-                ? Paths.get(ProgramDirectoryUtil.getProgramDirectory())
-                : Paths.get(System.getProperty("user.dir"), "Contents/Resources/conf");
+        File dir;
+        switch (OS_TYPE) {
+            case WINDOWS: {
+                dir = new File(ProgramDirectoryUtil.getProgramDirectory(), "conf");
+                break;
+            }
+            case MACOSX: {
+                dir = new File(System.getProperty("user.dir"), "Contents/Resources/conf");
+                break;
+            }
+            default:
+            case LINUX: {
+                dir = new File(System.getProperty("user.dir"), "conf");
+                break;
+            }
+        }
 
-        File file = new File(path.toString());
-        return file;
+        return dir;
     }
 
     /**
@@ -357,40 +340,16 @@ public class Controller {
 
         String configDirPath = getConfigDir();
         File configDir;
-        if (IS_WINDOWS) {
-            if ((name == null || name.equals(DataLoaderRunner.UI) == false) && configDirPath == null ) {
-                // Windows commandline and config dir is not provided - use '{user.dir}\target' as config dir
-                logger.debug("Windows commandline and config dir is not provided");
-                configDir = new File(System.getProperty("user.dir"), "target");
-            }
-            else if ((name == null || name.equals(DataLoaderRunner.UI) == false) && configDirPath != null) {
-                // Windows commandline and config dir is provided - use provided config dir
-                logger.debug("Windows commandline and config dir is provided");
-                configDir = new File(configDirPath);
-            }
-            else if (name != null && name.equals("ui")) {
-                // Windows UI - use user's config dir
-                logger.debug("Windows UI");
-                configDir= getUserConfigDir();
-            }
-            else {
-                logger.error("Unknown application mode!");
-                throw new ControllerInitializationException("Unknown application mode!");
-            }
+
+        if (configDirPath == null) {
+            // CONFIG_DIR_PROP param is NOT provided - use user's config dir
+            configDir = getUserConfigDir();
+            logger.debug(String.format("OS: %s, '%s' NOT provided, setting config dir to : %s", OS_TYPE, CONFIG_DIR_PROP, configDir));
         }
         else {
-            // Note that Mac is supported but Unix* are not officially supported
-
-            if (configDirPath != null) {
-                // Mac or Unix* commandline and config dir is provided - use provided config dir
-                logger.debug("Mac or Unix* commandline and config dir is provided");
-                configDir = new File(configDirPath);
-            }
-            else {
-                // Mac or Unix* - use user's config dir
-                logger.debug("Mac or Unix* UI");
-                configDir = getUserConfigDir();
-            }
+            // CONFIG_DIR_PROP is provided - use provided config dir
+            configDir = new File(configDirPath);
+            logger.debug(String.format("OS: %s, '%s' provided, setting config dir to : %s", OS_TYPE, CONFIG_DIR_PROP, configDir));
         }
 
         // Create dir if it doesn't exist
@@ -405,13 +364,38 @@ public class Controller {
         String configPath = configFile.getAbsolutePath();
         if (!configFile.exists()) {
 
-            // If config file doesn't exist, copy default config
             File defaultConfigFile = new File(getDefaultConfigDir(), DEFAULT_CONFIG_FILE);
-            copyFile(defaultConfigFile, configFile);
+
+            // If default config exists, copy the default to user config
+            // If doesn't exist, create a blank user config in "./target"
+            if (defaultConfigFile.exists()) {
+                try {
+                    // Copy default config to user config
+                    logger.info(String.format("User config file does not exist in '%s' Default config file is copied from '%s'",
+                            configPath, defaultConfigFile.getAbsolutePath()));
+                    Files.copy(defaultConfigFile.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    String errorMsg = String.format("Failed to copy '%s' to '%s'", defaultConfigFile.getAbsolutePath(), configFile);
+                    logger.warn(errorMsg, e);
+                    throw new ControllerInitializationException(errorMsg, e);
+                }
+            }
+            else {
+                try {
+                    // Create a blank user config in "./target"
+                    appPath = new File(ProgramDirectoryUtil.getProgramDirectory(), "target").getAbsolutePath();
+                    configFile = new File(appPath, CONFIG_FILE);
+                    configPath = configFile.getAbsolutePath();
+                    logger.info(String.format("Default config does not exist in '%s' Creating the file", configPath));
+                    configFile.createNewFile();
+                } catch (IOException e) {
+                    String errorMsg = String.format("Failed to create a new config: '%s'", configPath);
+                    logger.warn(errorMsg, e);
+                    throw new ControllerInitializationException(errorMsg, e);
+                }
+            }
             configFile.setWritable(true);
             configFile.setReadable(true);
-            logger.info("User config file does not exist in "+ configPath +
-                    " Default config file is copied from "+defaultConfigFile.getAbsolutePath());
         }
         else {
             logger.info("User config is found in " + configFile.getAbsolutePath());
@@ -447,7 +431,7 @@ public class Controller {
         // init the log if not initialized already
         if (Controller.isLogInitialized) { return; }
         try {
-            File logConfXml = new File(getDefaultConfigDir(), LOG_CONF_OVERRIDE);
+            File logConfXml = new File(getUserConfigDir(), LOG_CONF_OVERRIDE);
             if(logConfXml.exists()) {
                 logger.info("Reading log-conf.xml in " + logConfXml.getAbsolutePath());
                 if(logConfXml.canRead()) {
