@@ -27,23 +27,39 @@
 
 package com.salesforce.dataloader.ui;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
-
-import org.apache.log4j.Logger;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
-
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.LastRun;
 import com.salesforce.dataloader.controller.Controller;
 import com.sforce.soap.partner.Connector;
+
+import org.apache.log4j.Logger;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
+
+import static com.salesforce.dataloader.ui.UIUtils.isValidHttpsUrl;
 
 public class AdvancedSettingsDialog extends Dialog {
     private String message;
@@ -81,12 +97,11 @@ public class AdvancedSettingsDialog extends Dialog {
     private Button buttonCsvComma;
     private Button buttonCsvTab;
     private Button buttonCsvOther;
-    
+
     /**
      * InputDialog constructor
      *
-     * @param parent
-     *            the parent
+     * @param parent the parent
      */
     public AdvancedSettingsDialog(Shell parent, Controller controller) {
         super(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
@@ -117,8 +132,7 @@ public class AdvancedSettingsDialog extends Dialog {
     /**
      * Sets the message
      *
-     * @param message
-     *            the new message
+     * @param message the new message
      */
     public void setMessage(String message) {
         this.message = message;
@@ -136,8 +150,7 @@ public class AdvancedSettingsDialog extends Dialog {
     /**
      * Sets the input
      *
-     * @param input
-     *            the new input
+     * @param input the new input
      */
     public void setInput(String input) {
         this.input = input;
@@ -185,8 +198,7 @@ public class AdvancedSettingsDialog extends Dialog {
     /**
      * Creates the dialog's contents
      *
-     * @param shell
-     *            the dialog window
+     * @param shell the dialog window
      */
     private void createContents(final Shell shell) {
 
@@ -315,7 +327,6 @@ public class AdvancedSettingsDialog extends Dialog {
         if ("".equals(endpoint)) { //$NON-NLS-1$
             endpoint = defaultServer;
         }
-
         textEndpoint.setText(endpoint);
 
         //reset url on login
@@ -371,7 +382,7 @@ public class AdvancedSettingsDialog extends Dialog {
         data = new GridData();
         data.widthHint = 30;
         textQueryBatch.setLayoutData(data);
-        
+
         //enable/disable output of success file for extracts
         Label labelOutputExtractStatus = new Label(restComp, SWT.RIGHT);
         labelOutputExtractStatus.setText(Labels.getString("AdvancedSettingsDialog.outputExtractStatus")); //$NON-NLS-1$
@@ -629,16 +640,24 @@ public class AdvancedSettingsDialog extends Dialog {
             public void widgetSelected(SelectionEvent event) {
                 Config config = controller.getConfig();
 
+                String currentTextEndpoint = textEndpoint.getText();
+                if (currentTextEndpoint != null && !currentTextEndpoint.isEmpty() && !isValidHttpsUrl(currentTextEndpoint)) {
+                    MessageDialog alert = new MessageDialog(getParent().getShell(), "Warning", null,
+                            Labels.getFormattedString("AdvancedSettingsDialog.serverURLInfo", currentTextEndpoint),
+                            MessageDialog.ERROR, new String[]{"OK"}, 0);
+                    alert.open();
+                    return;
+
+                }
                 //set the configValues
                 config.setValue(Config.HIDE_WELCOME_SCREEN, buttonHideWelcomeScreen.getSelection());
                 config.setValue(Config.INSERT_NULLS, buttonNulls.getSelection());
                 config.setValue(Config.LOAD_BATCH_SIZE, textBatch.getText());
                 if (!buttonCsvComma.getSelection()
                         && !buttonCsvTab.getSelection()
-                        &&  (!buttonCsvOther.getSelection()
-                            || textSplitterValue.getText() == null
-                            || textSplitterValue.getText().length() == 0))
-                {
+                        && (!buttonCsvOther.getSelection()
+                        || textSplitterValue.getText() == null
+                        || textSplitterValue.getText().length() == 0)) {
                     return;
                 }
                 config.setValue(Config.CSV_DELIMETER_OTHER_VALUE, textSplitterValue.getText());
@@ -647,7 +666,7 @@ public class AdvancedSettingsDialog extends Dialog {
                 config.setValue(Config.CSV_DELIMETER_OTHER, buttonCsvOther.getSelection());
 
                 config.setValue(Config.EXTRACT_REQUEST_SIZE, textQueryBatch.getText());
-                config.setValue(Config.ENDPOINT, textEndpoint.getText());
+                config.setValue(Config.ENDPOINT, currentTextEndpoint);
                 config.setValue(Config.ASSIGNMENT_RULE, textRule.getText());
                 config.setValue(Config.LOAD_ROW_TO_START_AT, textRowToStart.getText());
                 config.setValue(Config.RESET_URL_ON_LOGIN, buttonResetUrl.getSelection());

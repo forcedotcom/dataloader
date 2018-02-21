@@ -26,27 +26,39 @@
 
 package com.salesforce.dataloader.ui;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
+import com.salesforce.dataloader.action.OperationInfo;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 
-import com.salesforce.dataloader.action.OperationInfo;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 public class UIUtils {
     private static ImageRegistry image_registry;
 
-    public static URL newURL(String url_name) {
+    public static boolean isValidHttpsUrl(String url) {
         try {
-            return new URL(url_name);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("Malformed URL " + url_name, e);
+            // check if it is a valid url
+            new URL(url).toURI();
+            // check if it is https protocol
+            return url.matches("^https://.*$");
+        }
+        catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static void validateHttpsUrlAndThrow(String url) {
+        if (!isValidHttpsUrl(url)) {
+            throw new RuntimeException("Dataloader only supports server URL that uses https protocol:" + url);
         }
     }
 
@@ -60,7 +72,7 @@ public class UIUtils {
             image_registry.put("sfdc_icon",
                     ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/icons/icon_32x32.png")));
 
-            image_registry.put("logo", 
+            image_registry.put("logo",
                     ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/icons/icon_128x128.png")));
             image_registry.put("title_logo",
                     ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/dataloader-title-logo.png")));
@@ -69,11 +81,11 @@ public class UIUtils {
 
             for (OperationInfo info : OperationInfo.values()) {
                 if (image_registry.get(info.getIconName()) == null)
-                    image_registry.put(info.getIconName(), 
+                    image_registry.put(info.getIconName(),
                             ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource(info.getIconLocation())));
             }
 
-            image_registry.put("downArrow", 
+            image_registry.put("downArrow",
                     ImageDescriptor.createFromURL(baseClass.getClassLoader().getResource("img/downArrow.gif")));
 
         }
@@ -102,8 +114,8 @@ public class UIUtils {
     }
 
     private static int messageBox(Shell shell, String title, int uiProps, String message) {
-        MessageBox mb = new MessageBox (shell, uiProps);
-        if(title != null && title.length() > 0) {
+        MessageBox mb = new MessageBox(shell, uiProps);
+        if (title != null && title.length() > 0) {
             mb.setText(title);
         }
         mb.setMessage(String.valueOf(message));
@@ -111,15 +123,13 @@ public class UIUtils {
     }
 
     /**
-     * @param combo
-     * @param itemList
      * @return Array of combo items
      */
     public static String[] setComboItems(Combo combo, List<String> itemList, String defaultItemText) {
         String[] itemArray = itemList.toArray(new String[itemList.size()]);
         Arrays.sort(itemArray);
         combo.setItems(itemArray);
-        if(defaultItemText != null && defaultItemText.length() > 0) {
+        if (defaultItemText != null && defaultItemText.length() > 0) {
             combo.setText(defaultItemText);
         }
         return itemArray;
