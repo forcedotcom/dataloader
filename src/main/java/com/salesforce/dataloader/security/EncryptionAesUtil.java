@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, salesforce.com, inc.
+ * Copyright (c) 2018, salesforce.com, inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided
@@ -26,17 +26,16 @@
 package com.salesforce.dataloader.security;
 
 import org.apache.log4j.Logger;
+import sun.awt.OSInfo;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
-import java.util.Locale;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -51,38 +50,13 @@ public class EncryptionAesUtil {
 
     private static final Logger LOGGER = Logger.getLogger(EncryptionAesUtil.class);
 
-    public enum OSType {
-        Windows, MacOS, Linux, Other
-    }
 
-    ;
-    protected static OSType detectedOS;
-
-    /**
-     * detect the operating system from the os.name System property and cache the result
-     *
-     * @returns - the operating system detected
-     */
-    public static OSType getOperatingSystemType() {
-        if (detectedOS == null) {
-            String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
-            if ((OS.indexOf("mac") >= 0) || (OS.indexOf("darwin") >= 0)) {
-                detectedOS = OSType.MacOS;
-            } else if (OS.indexOf("win") >= 0) {
-                detectedOS = OSType.Windows;
-            } else if (OS.indexOf("nux") >= 0) {
-                detectedOS = OSType.Linux;
-            } else {
-                detectedOS = OSType.Other;
-            }
-        }
-        return detectedOS;
-    }
+    private static OSInfo.OSType detectedOS;
 
     // Support single text encryption and decryption
 
-    static private Cipher cipher;
-    static private byte[] cipherKey;
+    private static Cipher cipher;
+    private static byte[] cipherKey;
 
     // 16 bytes was used for 128 bit AES encryption
     public static final int ENCRYPTION_KEY_LENGTH_IN_BYTES = 16;
@@ -93,7 +67,7 @@ public class EncryptionAesUtil {
     static {
         try {
             cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            detectedOS = getOperatingSystemType();
+            detectedOS = OSInfo.getOSType();
 
         } catch (Exception e) {
             LOGGER.error("Fail to initialize encryption: " + e.getMessage());
@@ -148,7 +122,7 @@ public class EncryptionAesUtil {
         if (customDir.exists()) {
             LOGGER.debug(customDir + " exists");
         } else if (customDir.mkdirs()) {
-            if (detectedOS == OSType.MacOS || detectedOS == OSType.Linux) {
+            if (detectedOS == OSInfo.OSType.MACOSX || detectedOS == OSInfo.OSType.LINUX) {
                 // set all reading to false
                 customDir.setReadable(false, false);
                 // only owner can read
@@ -180,7 +154,7 @@ public class EncryptionAesUtil {
                     throw new GeneralSecurityException("Failed to open file:" + filePath, io);
                 }
                 // Windows platform is already readable only to owner.
-                if (detectedOS == OSType.MacOS || detectedOS == OSType.Linux) {
+                if (detectedOS == OSInfo.OSType.MACOSX || detectedOS == OSInfo.OSType.LINUX) {
                     File file = new File(filePath);
                     // set all reading to false
                     file.setReadable(false, false);
@@ -212,7 +186,7 @@ public class EncryptionAesUtil {
         }
     }
 
-    private void ensureKeyIsSet() throws IOException, GeneralSecurityException {
+    private void ensureKeyIsSet() throws GeneralSecurityException {
         if (cipherKey != null) {
             return;
         }
@@ -242,7 +216,7 @@ public class EncryptionAesUtil {
         }
     }
 
-    public byte[] encryptMsg(String msg, byte[] encryptionKey) throws GeneralSecurityException, UnsupportedEncodingException {
+    public byte[] encryptMsg(String msg, byte[] encryptionKey) throws GeneralSecurityException {
 
         if (encryptionKey == null || encryptionKey.length != ENCRYPTION_KEY_LENGTH_IN_BYTES)
             throw new GeneralSecurityException("Encryption key is null or has invalid length");
@@ -254,7 +228,7 @@ public class EncryptionAesUtil {
         return concatenateByteArray(ivBytes, cipherText);
     }
 
-    public String decryptMsg(byte[] cipherMsg, byte[] encryptionKey) throws GeneralSecurityException, UnsupportedEncodingException {
+    public String decryptMsg(byte[] cipherMsg, byte[] encryptionKey) throws GeneralSecurityException {
         if (encryptionKey == null || encryptionKey.length != ENCRYPTION_KEY_LENGTH_IN_BYTES)
             throw new GeneralSecurityException("Encryption key is null or has invalid length");
         SecretKeySpec key = new SecretKeySpec(encryptionKey, "AES");
