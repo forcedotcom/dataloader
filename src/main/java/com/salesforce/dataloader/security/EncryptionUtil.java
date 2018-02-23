@@ -27,6 +27,7 @@ package com.salesforce.dataloader.security;
 
 import org.apache.log4j.Logger;
 
+import java.io.Console;
 import java.security.GeneralSecurityException;
 
 public class EncryptionUtil {
@@ -75,12 +76,13 @@ public class EncryptionUtil {
 
 
     private static void printUsage() {
-        LOGGER.info("\nUtility to encrypt a string based on a static or a provided key");
-        LOGGER.info("Options (mutually exclusive - use one at a time): \n"
-                + "\t-e <plain text> <Path to keyfile>                Encrypt a plain text value, keyfile path\n)"
-                + "\t-d <encryptText> <Path to keyfile>               Decrypt an encrypted text back to plain text value using keyfile\n)"
-                + "\t-k [Path to Keyfile]                             Generate keyfile with optional keyfile path\n"
-        );
+        String usage = "\nUtility to encrypt a string based on a static or a provided key\n"
+                        + "Options (mutually exclusive - use one at a time): \n"
+                        + "\t-e <plain text> <Path to keyfile>                Encrypt a plain text value, keyfile path\n"
+                        + "\t-d <encryptText> <Path to keyfile>               Decrypt an encrypted text back to plain text value using keyfile\n"
+                        + "\t-k [Path to Keyfile]                             Generate keyfile with optional keyfile path\n";
+
+        LOGGER.info(usage);
     }
 
     public static void main(String[] args) {
