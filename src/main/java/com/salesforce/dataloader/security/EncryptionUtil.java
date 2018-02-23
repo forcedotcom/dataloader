@@ -82,7 +82,7 @@ public class EncryptionUtil {
                         + "\t-d <encryptText> <Path to keyfile>               Decrypt an encrypted text back to plain text value using keyfile\n"
                         + "\t-k [Path to Keyfile]                             Generate keyfile with optional keyfile path\n";
 
-        System.out.println(usage);
+        LOGGER.info(usage);
     }
 
     public static void main(String[] args) {
