@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -47,9 +48,9 @@ public class UIUtils {
     public static boolean isValidHttpsUrl(String url) {
         try {
             // check if it is a valid url
-            new URL(url).toURI();
+            URI uri = new URL(url).toURI();
             // check if it is https protocol
-            return url.matches("^https://.*$");
+            return "https".equalsIgnoreCase(uri.getScheme());
         }
         catch (Exception e) {
             return false;
