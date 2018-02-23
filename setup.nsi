@@ -4,7 +4,7 @@
 
 !define S_NAME "${PROJECT_FINAL_NAME}"
 !define APPNAME "${PROJECT_NAME}"
-!define S_DEFAULT_CONFIGFOLDER "$LOCALAPPDATA\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME} ${PROJECT_VERSION}"
+!define S_DEFAULT_CONFIGFOLDER "$APPDATA\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME} ${PROJECT_VERSION}"
 !define S_DEFINSTDIR_USER "$LOCALAPPDATA\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
 !define S_DEFINSTDIR_ADMIN "$PROGRAMFILES\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
 !define UNINSTALLER_FULLPATH "$InstDir\Uninstaller.exe"
@@ -61,7 +61,7 @@ Function InstModeChanged
 SetShellVarContext CURRENT
 ${IfNotThen} ${Silent} ${|} StrCpy $InstDir "${S_DEFINSTDIR_USER}" ${|}
 ${If} $InstMode > 0
-	SetShellVarContext CURRENT
+	SetShellVarContext ALL
 	${IfNotThen} ${Silent} ${|} StrCpy $InstDir "${S_DEFINSTDIR_ADMIN}" ${|}
 ${EndIf}
 FunctionEnd
@@ -174,7 +174,7 @@ ${EndIf}
 FunctionEnd
 
 Function FinishRun
-!insertmacro UAC_AsUser_ExecShell "" "$INSTDIR\${PROJECT_FINAL_NAME}.exe" "" "" ""
+!insertmacro UAC_AsUser_ExecShell "" "$INSTDIR\${PROJECT_FINAL_NAME}.exe" "" "$INSTDIR" ""
 FunctionEnd
 
 Section "Required Files"
@@ -194,15 +194,10 @@ Section "Required Files"
     ; copy default config file
     SetOutPath "$INSTDIR\conf"
     File "/oname=defaultConfig.properties" "target\config.properties"
-
-    ; copy config files to appdata dir
-    CreateDirectory "${S_DEFAULT_CONFIGFOLDER}"
-    SetOutPath "${S_DEFAULT_CONFIGFOLDER}\conf"
-    File "target\config.properties"
-
 SectionEnd
 
 Section "Start menu shortcuts"
+SetOutPath "$INSTDIR"
 CreateShortcut "$smprograms\${APPNAME}.lnk" '"$INSTDIR\${PROJECT_FINAL_NAME}.exe"' '"${S_DEFAULT_CONFIGFOLDER}"'
 SectionEnd
 

@@ -33,8 +33,6 @@ import java.util.*;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
-import com.salesforce.dataloader.process.DataLoaderRunner;
-import com.salesforce.dataloader.util.ProgramDirectoryUtil;
 import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.action.IAction;
@@ -277,10 +275,9 @@ public class Controller {
      */
     private static File getUserConfigDir() {
         File dir;
-
         switch (OS_TYPE) {
             case WINDOWS: {
-                dir = Paths.get(System.getProperty("user.home"), "AppData/Local", APP_VENDOR, getProductName(), CONFIG_DIR).toFile();
+                dir = Paths.get(System.getProperty("user.home"), "AppData\\Local", APP_VENDOR, getProductName(), CONFIG_DIR).toFile();
                 break;
             }
             case MACOSX: {
@@ -310,7 +307,7 @@ public class Controller {
         File dir;
         switch (OS_TYPE) {
             case WINDOWS: {
-                dir = new File(ProgramDirectoryUtil.getProgramDirectory(), "conf");
+                dir = new File(System.getProperty("user.dir"), "conf");
                 break;
             }
             case MACOSX: {
@@ -367,7 +364,7 @@ public class Controller {
             File defaultConfigFile = new File(getDefaultConfigDir(), DEFAULT_CONFIG_FILE);
 
             // If default config exists, copy the default to user config
-            // If doesn't exist, create a blank user config in "./target"
+            // If doesn't exist, create a blank user config
             if (defaultConfigFile.exists()) {
                 try {
                     // Copy default config to user config
@@ -382,11 +379,8 @@ public class Controller {
             }
             else {
                 try {
-                    // Create a blank user config in "./target"
-                    appPath = new File(ProgramDirectoryUtil.getProgramDirectory(), "target").getAbsolutePath();
-                    configFile = new File(appPath, CONFIG_FILE);
-                    configPath = configFile.getAbsolutePath();
-                    logger.info(String.format("Default config does not exist in '%s' Creating the file", configPath));
+                    // Create a blank user config
+                    logger.info(String.format("Default config does not exist in '%s' Creating empty config file in '%s'", defaultConfigFile, configPath));
                     configFile.createNewFile();
                 } catch (IOException e) {
                     String errorMsg = String.format("Failed to create a new config: '%s'", configPath);
