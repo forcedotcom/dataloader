@@ -1,6 +1,4 @@
 #!/bin/bash
-# change to directory of this script
-cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 function error {
     echo "$1" >&2
