@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 function error {
     echo "$1" >&2
@@ -25,6 +25,9 @@ function usage {
     exit 1
 }
 
+# set execution path
+EXE_PATH=$( dirname "${BASH_SOURCE[0]}" )
+
 if [ "$#" -eq 1 ]; then
     PROCESS_OPTION=""
 elif [ "$#" -eq 2 ]; then
@@ -33,13 +36,14 @@ else
     usage
 fi
 
+# test for java installed
 JAVA=$(which java)
 
 if [ "$JAVA" == "" ]; then
     error "To run $0, the Java Runtime Environment (JRE) must be installed."
     exit 1
 else
-    "${JAVA}" -cp "../${pom.build.finalName}-uber.jar" -Dsalesforce.config.dir="${1}" com.salesforce.dataloader.process.ProcessRunner "${PROCESS_OPTION}"
+    "${JAVA}" -cp "${EXE_PATH}/../${pom.build.finalName}-uber.jar" -Dsalesforce.config.dir="${1}" com.salesforce.dataloader.process.ProcessRunner "${PROCESS_OPTION}"
 fi
 
 exit 0

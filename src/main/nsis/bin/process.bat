@@ -21,6 +21,8 @@ echo.
 goto end
 
 :run
+set EXE_PATH=%~dp0
+
 set PROCESS_OPTION=
 if not [%2]==[] set PROCESS_OPTION=process.name=%2
 
@@ -41,7 +43,7 @@ IF "%JAVA_HOME%" == "" (
     IF NOT EXIST "%JAVA_HOME%" (
         echo We couldn't find the Java Runtime Environment ^(JRE^) in directory "%JAVA_HOME%". To run process.bat, set the JAVA_HOME environment variable to the directory where the JRE is installed.
     ) ELSE (
-        "%JAVA_HOME%\bin\java" -cp ..\${pom.build.finalName}-uber.jar -Dsalesforce.config.dir=%1 com.salesforce.dataloader.process.ProcessRunner %PROCESS_OPTION%
+        "%JAVA_HOME%\bin\java" -cp "%EXE_PATH%\..\${pom.build.finalName}-uber.jar" -Dsalesforce.config.dir=%1 com.salesforce.dataloader.process.ProcessRunner %PROCESS_OPTION%
     )
 )
 
