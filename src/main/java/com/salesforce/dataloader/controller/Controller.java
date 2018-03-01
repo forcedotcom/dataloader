@@ -25,32 +25,48 @@
  */
 package com.salesforce.dataloader.controller;
 
-import java.io.*;
-import java.nio.file.*;
-import java.security.GeneralSecurityException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import javax.xml.parsers.FactoryConfigurationError;
-
-import org.apache.log4j.Logger;
-
 import com.salesforce.dataloader.action.IAction;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.client.*;
+import com.salesforce.dataloader.client.BulkClient;
+import com.salesforce.dataloader.client.ClientBase;
+import com.salesforce.dataloader.client.DescribeRefObject;
+import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dao.DataAccessObject;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
-import com.salesforce.dataloader.exception.*;
-import com.salesforce.dataloader.mapping.*;
+import com.salesforce.dataloader.exception.ControllerInitializationException;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.exception.MappingInitializationException;
+import com.salesforce.dataloader.exception.OperationException;
+import com.salesforce.dataloader.exception.ProcessInitializationException;
+import com.salesforce.dataloader.mapping.LoadMapper;
+import com.salesforce.dataloader.mapping.Mapper;
+import com.salesforce.dataloader.mapping.SOQLMapper;
 import com.salesforce.dataloader.ui.LoaderWindow;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.ws.ConnectionException;
+
+import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
+
 import sun.awt.OSInfo;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.security.GeneralSecurityException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.xml.parsers.FactoryConfigurationError;
 
 /**
  * The class that controls dataloader engine (config, salesforce communication, mapping, dao). For UI, this is the
@@ -295,10 +311,7 @@ public class Controller {
     }
 
     /**
-     * Returns default Dataloader configuration directory
-     * ie) For Windows - C:\Program Files (x86)\salesforce.com\Data Loader\conf
-     *     For Mac - /Applications/Data Loader.app/Contents/Resources/conf
-     *     For *nix - {where DL is installed}/conf
+     * Returns default Dataloader configuration directory in user directory
      *
      * @return
      *  Default Dataloader configuration directory
