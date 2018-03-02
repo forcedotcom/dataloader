@@ -25,14 +25,10 @@
  */
 package com.salesforce.dataloader.dao;
 
-import java.io.IOException;
-import org.apache.log4j.Logger;
-
-import com.salesforce.dataloader.security.EncryptionUtil;
 import com.salesforce.dataloader.config.Messages;
-import java.security.GeneralSecurityException;
+import com.salesforce.dataloader.security.EncryptionAesUtil;
 
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.log4j.Logger;
 
 /*
  * This class can be substituted for org.apache.commons.dbcp.BasicDataSource in
@@ -78,11 +74,11 @@ public class EncryptedDataSource extends org.apache.commons.dbcp.BasicDataSource
      * @return decrypted property value
      * @throws ParameterLoadException
      */
-    static private String DecryptString(EncryptionUtil encrypter, String encryptedString) {
+    static private String DecryptString(EncryptionAesUtil encrypter, String encryptedString) {
 
         if (encryptedString != null && encryptedString.length() > 0) {
             try {
-                return encrypter.decryptString(encryptedString);
+                return encrypter.decryptMsg(encryptedString);
             } 
             
             catch (Exception e) {
@@ -95,7 +91,7 @@ public class EncryptedDataSource extends org.apache.commons.dbcp.BasicDataSource
         return null;
     }
     
-    private final EncryptionUtil encrypter = new EncryptionUtil();
+    private final EncryptionAesUtil encrypter = new EncryptionAesUtil();
     
     private static Logger logger = Logger.getLogger(EncryptedDataSource.class);
 }
