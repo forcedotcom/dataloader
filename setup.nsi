@@ -174,7 +174,7 @@ ${EndIf}
 FunctionEnd
 
 Function FinishRun
-!insertmacro UAC_AsUser_ExecShell "" "$INSTDIR\${PROJECT_FINAL_NAME}.exe" "" "" ""
+!insertmacro UAC_AsUser_ExecShell "" "$INSTDIR\${PROJECT_FINAL_NAME}.exe" "" "$INSTDIR" ""
 FunctionEnd
 
 Section "Required Files"
@@ -185,22 +185,19 @@ Section "Required Files"
     File "src\main\resources\img\icons\dataloader.ico"
     FileOpen $9 "${PROJECT_FINAL_NAME}.l4j.ini" w
     ;Java Args here
-    FileWrite $9 "-Dappdata.dir=$\"$APPDATA$\"$\r$\n"
     FileWrite $9 "-jar $\"$INSTDIR\${PROJECT_FINAL_NAME}-uber.jar$\""
     FileClose $9
 
     SetOutPath "$INSTDIR\licenses"
     File /r "src\main\nsis\licenses\"
 
-    ; copy config files to appdata dir
-    CreateDirectory "${S_DEFAULT_CONFIGFOLDER}"
-    AccessControl::GrantOnFile "${S_DEFAULT_CONFIGFOLDER}" "(S-1-5-32-545)" "FullAccess"
-    SetOutPath "${S_DEFAULT_CONFIGFOLDER}"
-    File "target\config.properties"
-
+    ; copy default config file
+    SetOutPath "$INSTDIR\conf"
+    File "/oname=defaultConfig.properties" "target\config.properties"
 SectionEnd
 
 Section "Start menu shortcuts"
+SetOutPath "$INSTDIR"
 CreateShortcut "$smprograms\${APPNAME}.lnk" '"$INSTDIR\${PROJECT_FINAL_NAME}.exe"' '"${S_DEFAULT_CONFIGFOLDER}"'
 SectionEnd
 
@@ -313,9 +310,11 @@ File "/oname=${extractTo}" "${UNINSTEXE}.exe.un"
       Delete "$INSTDIR\${PROJECT_FINAL_NAME}.exe"
       Delete "$INSTDIR\dataloader.ico"
       Delete "$INSTDIR\dataloader_uninstall.exe"
+      Delete "$INSTDIR\conf\defaultConfig.properties"
       RMDir /r "$INSTDIR\licenses"
       RMDir /r "$INSTDIR\samples"
       RMDir /r "$INSTDIR\bin"
+      RMDir /r "$INSTDIR\conf"
       RMDir /r "$SMPROGRAMS\${PROJECT_ORGANIZATION_NAME}\${PROJECT_NAME}"
       Delete "$DESKTOP\${PROJECT_NAME}.lnk"
       RMDir /r "$APPDATA\${PROJECT_ORGANIZATION_NAME}"

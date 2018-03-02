@@ -740,7 +740,6 @@
                         <jvmVersion>1.8</jvmVersion>
                         <jvmOptions>
                             <string>-XstartOnFirstThread</string>
-                            <string>-Dsalesforce.config.dir=Contents/Resources/conf</string>
                         </jvmOptions>
                         <iconFile>${basedir}/src/main/resources/img/icons/icon_loader.icns</iconFile>
                     </configuration>
@@ -767,11 +766,11 @@
                     </executions>
                     <configuration>
                         <tasks>
-                            <echo>Copying additional assets for DMG</echo>
-                            <copy file="${basedir}/src/main/resources/Localizable.strings" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/en.lproj/Localizable.strings"/>
-                            <copy file="${basedir}/src/main/nsis/config.properties" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/config.properties"/>
-                            <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/config.properties" token="#placeholder" value="${config.additional.properties}"/>
-                            <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/config.properties" token="\n" value="${line.separator}"/>
+                          <echo>Copying additional assets for DMG</echo>
+                          <copy file="${basedir}/src/main/resources/Localizable.strings" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/en.lproj/Localizable.strings"/>
+                          <copy file="${basedir}/src/main/nsis/config.properties" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties"/>
+                          <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties" token="#placeholder" value="${config.additional.properties}"/>
+                          <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties" token="\n" value="${line.separator}"/>
                         </tasks>
                     </configuration>
                 </plugin>

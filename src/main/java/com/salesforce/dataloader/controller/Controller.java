@@ -25,34 +25,54 @@
  */
 package com.salesforce.dataloader.controller;
 
-import java.io.*;
-import java.security.GeneralSecurityException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import javax.xml.parsers.FactoryConfigurationError;
-
-import org.apache.log4j.Logger;
-
 import com.salesforce.dataloader.action.IAction;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.client.*;
+import com.salesforce.dataloader.client.BulkClient;
+import com.salesforce.dataloader.client.ClientBase;
+import com.salesforce.dataloader.client.DescribeRefObject;
+import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dao.DataAccessObject;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
-import com.salesforce.dataloader.exception.*;
-import com.salesforce.dataloader.mapping.*;
+import com.salesforce.dataloader.exception.ControllerInitializationException;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.exception.MappingInitializationException;
+import com.salesforce.dataloader.exception.OperationException;
+import com.salesforce.dataloader.exception.ProcessInitializationException;
+import com.salesforce.dataloader.mapping.LoadMapper;
+import com.salesforce.dataloader.mapping.Mapper;
+import com.salesforce.dataloader.mapping.SOQLMapper;
 import com.salesforce.dataloader.ui.LoaderWindow;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.ws.ConnectionException;
+
+import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
+import sun.awt.OSInfo;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.security.GeneralSecurityException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.xml.parsers.FactoryConfigurationError;
+
 /**
- * The class that controls dataloader engine (config, salesforce communication, mapping, dao). For UI, this is the
- * controller for all the underlying data access.
+ * The class that controls dataloader engine (config, salesforce communication, mapping, dao). For
+ * UI, this is the controller for all the underlying data access.
  *
  * @author Lexi Viripaeff
  * @author Alex Warshavsky
@@ -63,10 +83,13 @@ public class Controller {
     private static final String LOG_CONF_OVERRIDE = "log-conf.xml";
     private static boolean isLogInitialized = false; // make sure log is initialized only once
 
-    /** the system property name used to determine the config directory */
+    /**
+     * the system property name used to determine the config directory
+     */
     public static final String CONFIG_DIR_PROP = "salesforce.config.dir";
 
     public static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
+    public static final String DEFAULT_CONFIG_FILE = "defaultConfig.properties"; //$NON-NLS-1$
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
     private static final String CONFIG_DIR = "conf"; //$NON-NLS-1$
     private static String APP_NAME; //$NON-NLS-1$
@@ -74,9 +97,11 @@ public class Controller {
     public static String API_VERSION;
     private static String APP_VENDOR; //$NON-NLS-1$
 
+    private static OSInfo.OSType OS_TYPE;
+
     /**
-     * <code>config</code> is an instance of configuration that's tied to this instance of controller in a multithreaded
-     * environment
+     * <code>config</code> is an instance of configuration that's tied to this instance of
+     * controller in a multithreaded environment
      */
     private Config config;
     private Mapper mapper;
@@ -106,8 +131,15 @@ public class Controller {
         String[] dataloaderVersion = APP_VERSION.split("\\.");
         API_VERSION = dataloaderVersion[0] + "." + dataloaderVersion[1];
 
+        OS_TYPE = OSInfo.getOSType();
+
         // if name is passed to controller, use it to create a unique run file name
-        initConfig(name, isBatchMode);
+        try {
+            initConfig(name, isBatchMode);
+        } catch (Exception e) {
+            logger.error("Exception happened in initConfig:", e);
+            throw e;
+        }
     }
 
     public void setConfigDefaults() {
@@ -202,7 +234,7 @@ public class Controller {
             String errMsg = Messages.getFormattedString("Controller.errorConfigWritable", config.getFilename());
 
             String currentWorkingDir = System.getProperty("user.dir");
-            if (currentWorkingDir.startsWith("/Volumes")){
+            if (currentWorkingDir.startsWith("/Volumes")) {
                 //user is trying to launch dataloader from the dmg. this is not supported
                 errMsg = Messages.getString("Controller.errorConfigWritableDmg");
             }
@@ -234,126 +266,182 @@ public class Controller {
     }
 
     /**
-     * Copies a file
+     * Create directory provided from the parameter
      *
-     * @param file
-     *            the file to copy from
-     * @param destFile
-     *            the file to copy to
+     * @param dirPath - directory to be created
+     * @return True if directory was created successfully or directory already existed False if
+     * directory was failed to create
      */
-    private void copyFile(File file, File destFile) {
-        BufferedInputStream in = null;
-        BufferedOutputStream out = null;
-        try {
-
-            // reading and writing 8 KB at a time
-            int bufferSize = 8 * 1024;
-
-            byte[] buf = new byte[bufferSize];
-
-            in = new BufferedInputStream(new FileInputStream(file), bufferSize);
-            int r = 0;
-
-            out = new BufferedOutputStream(new FileOutputStream(destFile), bufferSize);
-
-            while ((r = in.read(buf, 0, buf.length)) != -1) {
-                out.write(buf, 0, r);
+    private static boolean createDir(File dirPath) {
+        boolean isSuccessful = true;
+        if (!dirPath.exists() || !dirPath.isDirectory()) {
+            isSuccessful = dirPath.mkdirs();
+            if (isSuccessful) {
+                logger.info("Created config directory: " + dirPath);
+            } else {
+                logger.info("Unable to create config directory: " + dirPath);
             }
-            out.flush();
-
-        } catch (IOException ioe) {
-            logger.error("Cannot copy file " + file.getAbsolutePath());
-        } finally {
-            if (in != null) try {
-                in.close();
-            } catch (Exception e) {}
-            if (out != null) try {
-                out.close();
-            } catch (Exception e) {}
+        } else {
+            logger.info("Config directory already exists: " + dirPath);
         }
+        return isSuccessful;
+    }
+
+    /**
+     * Returns current user's Dataloader configuration directory
+     * ie) For Windows -
+     *     C:\Users\{user}\AppData\Local\salesforce.com\Data Loader {version}\conf
+     * For Mac -
+     *     /Users/{user}/Library/Preferences/salesforce.com/Data Loader {version}/conf
+     * For *nix -
+     *     ~/.salesforce.com/Data Loader {version}/conf
+     *
+     * @return Current user's Dataloader configuration directory
+     */
+    private static File getUserConfigDir() {
+        File dir;
+        switch (OS_TYPE) {
+            case WINDOWS: {
+                dir = Paths.get(System.getProperty("user.home"), "AppData\\Local", APP_VENDOR, getProductName(), CONFIG_DIR).toFile();
+                break;
+            }
+            case MACOSX: {
+                dir = Paths.get(System.getProperty("user.home"), "Library/Preferences", APP_VENDOR, getProductName(), CONFIG_DIR).toFile();
+                break;
+            }
+            default:
+            case LINUX: {
+                dir = Paths.get(System.getProperty("user.home"), "." + APP_VENDOR, getProductName(), CONFIG_DIR).toFile();
+                break;
+            }
+
+        }
+        return dir;
+    }
+
+    /* Append the osAppendix to the binPath starting at position endIdx */
+
+    private static File getInstalledConfigDir(String binPath, int endIdx, String osAppendix){
+        if (endIdx != -1){
+            binPath = binPath.substring(0, endIdx);
+        }
+        return new File(binPath, osAppendix);
+    }
+
+    /**
+     * Returns default Dataloader installed configuration directory
+     *
+     * @return Default Dataloader configuration directory
+     */
+    private static File getInstalledConfigDir() {
+
+        URI uri;
+        String path;
+        try {
+            // This return the jar's location
+            // The current recommendation (with JDK 1.7+) is to convert URL → URI → Path.
+            uri = Controller.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+            path = Paths.get(uri).toFile().getAbsolutePath();
+            logger.debug("The installation binary location is: " + path);
+        } catch (URISyntaxException e) {
+            logger.error("Can find binary's location", e);
+            throw new RuntimeException(e);
+        }
+
+        File dir;
+        switch (OS_TYPE) {
+            case WINDOWS: {
+                //For windows,﻿filepath is﻿C:\Program Files\salesforce.com\Data Loader\dataloader-xxx-uber.jar
+                dir = getInstalledConfigDir(path, path.lastIndexOf(File.separator),  "conf");
+                break;
+            }
+            case MACOSX: {
+                // For mac, ﻿filepath is /Applications/Data Loader.app/Contents/Java/com/force/dataloader/xx.0.0/***.jar
+                dir = getInstalledConfigDir(path, path.lastIndexOf("/Contents"),  "Contents/Resources/conf");
+                break;
+            }
+            default:
+            case LINUX: {
+                dir = getInstalledConfigDir(path, path.lastIndexOf(File.separator),  "conf");
+                break;
+            }
+        }
+        logger.info("The installation configuration location is: " + dir.getAbsolutePath());
+        return dir;
     }
 
     /**
      * Get the current config.properties and load it into the config bean.
-     *
-     * @param isBatchMode
-     * @throws ControllerInitializationException
      */
     protected void initConfig(String name, boolean isBatchMode) throws ControllerInitializationException {
 
-        // see if we are ui based
-        String appdataDir = System.getProperty("appdata.dir");
-        String configPath;
-        String lastRunFileName = name + LAST_RUN_FILE_SUFFIX;
-        if (appdataDir != null && appdataDir.length() > 0) {
-
-            String appVendorDir = new File(appdataDir, APP_VENDOR).getAbsolutePath();
-            // the application directory is versioned to support multiple versions of the loader running in parallel
-            File appDir = new File(appVendorDir, getProductName());
-            appPath = appDir.getAbsolutePath();
-            if (!appDir.exists() || !appDir.isDirectory()) {
-                if (!appDir.mkdirs()) {
-                    logger.warn("Unable to create configuration directory");
-                }
-            }
-
-            // look for config directory under user home directory
-            String oldConfigDir = new File(System.getProperty("user.dir"), CONFIG_DIR).getAbsolutePath();
-
-            // check if the files exist
-            File configFile = new File(appDir, CONFIG_FILE);
-            configPath = configFile.getAbsolutePath();
-            if (!configFile.exists()) {
-                File oldConfig = new File(oldConfigDir, CONFIG_FILE);
-                if (!oldConfig.exists()) {
-                    logger.warn("Cannot find default configuration file");
-                } else {
-                    copyFile(oldConfig, configFile);
-                }
-            }
-
-        } else {
-            // nope we are running commandline
-
-            // FIXME PLEASE
-            String configDirPath = getConfigDir();
-            logger.debug("config dir: " + configDirPath);
-            // if configDir is null, set it to target, which is the maven build output directory
-            // TODO: FIXME
-            if (configDirPath == null) {
-                configDirPath = "target";
-                logger.warn("config dir was null, so config dir has been set to " + configDirPath);
-            }
-
-            // TODO: we should log creating new files/directories
-            // TODO: why did we add this?
-            File configDir = new File(configDirPath);
-            if (!(configDir.isDirectory() || configDir.mkdirs())) {
-                throw new ControllerInitializationException("could not create configuration directory: " + configDir);
-            } else {
-                logger.info("config dir created at " + configDir.getAbsolutePath());
-            }
-
-            // let the File class combine the dir and file names
-            File configFile = new File(configDirPath, CONFIG_FILE);
-
-            // TODO: why did we add this?
-            if (!configFile.exists()) try {
-                configFile.createNewFile();
-                configFile.setWritable(true);
-                configFile.setReadable(true);
-                logger.info("config file created at " + configFile.getAbsolutePath());
-            } catch (IOException e) {
-                throw new ControllerInitializationException(e);
-            }
-
-            this.appPath = configDirPath;
-            configPath = configFile.getAbsolutePath();
-        }
-
+        // Initialize log first to use correct logging level
         initLog();
 
+        String configDirPath = getConfigDir();
+        File configDir;
+
+        if (configDirPath == null) {
+            // CONFIG_DIR_PROP param is NOT provided - use user's config dir
+            configDir = getUserConfigDir();
+            logger.debug(String.format("OS: %s, '%s' NOT provided, setting config dir to : %s", OS_TYPE, CONFIG_DIR_PROP, configDir));
+        } else {
+            // CONFIG_DIR_PROP is provided - use provided config dir
+            configDir = new File(configDirPath);
+            logger.debug(String.format("OS: %s, '%s' provided, setting config dir to : %s", OS_TYPE, CONFIG_DIR_PROP, configDir));
+        }
+
+        // Create dir if it doesn't exist
+        boolean isMkdirSuccessfulOrExisting = createDir(configDir);
+        if (!isMkdirSuccessfulOrExisting) {
+            String errorMsg = Messages.getMessage(getClass(), "errorCreatingOutputDir", configDir);
+            logger.error(errorMsg);
+            throw new ControllerInitializationException(errorMsg);
+        }
+        appPath = configDir.getAbsolutePath();
+
+        // check if the config file exists
+        File configFile = new File(appPath, CONFIG_FILE);
+
+        String configPath = configFile.getAbsolutePath();
+        logger.info("Looking for file in config path: " + configPath);
+        if (!configFile.exists()) {
+
+            File defaultConfigFile = new File(getInstalledConfigDir(), DEFAULT_CONFIG_FILE);
+            logger.debug("Looking for file in config file " + defaultConfigFile.getAbsolutePath());
+            // If default config exists, copy the default to user config
+            // If doesn't exist, create a blank user config
+
+            if (defaultConfigFile.exists()) {
+                try {
+                    // Copy default config to user config
+                    logger.info(String.format("User config file does not exist in '%s' Default config file is copied from '%s'",
+                            configPath, defaultConfigFile.getAbsolutePath()));
+                    Files.copy(defaultConfigFile.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    String errorMsg = String.format("Failed to copy '%s' to '%s'", defaultConfigFile.getAbsolutePath(), configFile);
+                    logger.warn(errorMsg, e);
+                    throw new ControllerInitializationException(errorMsg, e);
+                }
+            } else {
+                try {
+                    // Create a blank user config
+                    logger.info(String.format("Default config does not exist in '%s' Creating empty config file in '%s'", defaultConfigFile, configPath));
+                    configFile.createNewFile();
+                } catch (IOException e) {
+                    String errorMsg = String.format("Failed to create a new config: '%s'", configPath);
+                    logger.warn(errorMsg, e);
+                    throw new ControllerInitializationException(errorMsg, e);
+                }
+            }
+            configFile.setWritable(true);
+            configFile.setReadable(true);
+        } else {
+            logger.info("User config is found in " + configFile.getAbsolutePath());
+        }
+
         try {
+            String lastRunFileName = name + LAST_RUN_FILE_SUFFIX;
             config = new Config(getAppPath(), configPath, lastRunFileName);
             // set default before actual values are loaded
             config.setDefaults();
@@ -361,11 +449,9 @@ public class Controller {
             config.load();
             logger.info(Messages.getMessage(getClass(), "configInit")); //$NON-NLS-1$
         } catch (IOException e) {
-            throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorConfigLoad", configPath),
-                    e);
+            throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorConfigLoad", configPath), e);
         } catch (ProcessInitializationException e) {
-            throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorConfigLoad", configPath),
-                    e);
+            throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorConfigLoad", configPath), e);
         }
 
         if (daoFactory == null) {
@@ -376,18 +462,20 @@ public class Controller {
     /**
      * @return product name
      */
-    private String getProductName() {
+    private static String getProductName() {
         return APP_NAME + " " + APP_VERSION;
     }
 
     public static synchronized void initLog() throws FactoryConfigurationError {
         // init the log if not initialized already
-        if (Controller.isLogInitialized) { return; }
+        if (Controller.isLogInitialized) {
+            return;
+        }
         try {
-            File logConfXml = new File(System.getProperty("user.dir"), LOG_CONF_OVERRIDE);
-            if(logConfXml.exists()) {
+            File logConfXml = new File(getUserConfigDir(), LOG_CONF_OVERRIDE);
+            if (logConfXml.exists()) {
                 logger.info("Reading log-conf.xml in " + logConfXml.getAbsolutePath());
-                if(logConfXml.canRead()) {
+                if (logConfXml.canRead()) {
                     DOMConfigurator.configure(logConfXml.getAbsolutePath());
                 } else {
                     logger.warn("Unable to read log-conf.xml in " + logConfXml.getAbsolutePath());
@@ -466,8 +554,10 @@ public class Controller {
                 throw new ProcessInitializationException(Messages.getFormattedString("Controller.invalidOutputDir",
                         statusDirName));
             } else {
-                if (!statusDir.mkdirs()) { throw new ProcessInitializationException(Messages.getFormattedString(
-                        "Controller.errorCreatingOutputDir", statusDirName)); }
+                if (!statusDir.mkdirs()) {
+                    throw new ProcessInitializationException(Messages.getFormattedString(
+                            "Controller.errorCreatingOutputDir", statusDirName));
+                }
             }
         }
 
@@ -506,8 +596,9 @@ public class Controller {
         // if it doesn't exist and we can create it, its valid
         if (!file.exists()) {
             try {
-                if (!file.createNewFile()) { throw new IOException(Messages.getMessage(getClass(),
-                        "errorFileCreate", filePath)); //$NON-NLS-1$
+                if (!file.createNewFile()) {
+                    throw new IOException(Messages.getMessage(getClass(),
+                            "errorFileCreate", filePath)); //$NON-NLS-1$
                 }
             } catch (IOException iox) {
                 throw new IOException(Messages.getMessage(getClass(), "errorFileCreate", filePath));

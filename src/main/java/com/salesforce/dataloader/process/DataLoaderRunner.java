@@ -38,10 +38,12 @@ import com.salesforce.dataloader.ui.UIUtils;
 
 public class DataLoaderRunner {
 
+    public static final String UI = "ui";
+
     public static void main(String[] args) {
         Controller controller;
         try {
-            controller = Controller.getInstance("ui", false);
+            controller = Controller.getInstance(UI, false);
             controller.createAndShowGUI();
         } catch (ControllerInitializationException e) {
             UIUtils.errorMessageBox(new Shell(new Display()), e);
