@@ -1,7 +1,5 @@
-package com.salesforce.dataloader.ui;
-
 /*
- * Copyright (c) 2018, salesforce.com, inc.
+ * Copyright (c) 2015, salesforce.com, inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided
@@ -24,12 +22,8 @@ package com.salesforce.dataloader.ui;
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*
- * com.salesforce.dataloader.ui
- *
- * @author xbian
- *
  */
+package com.salesforce.dataloader.ui;
 
 import org.junit.Assert;
 import org.junit.Test;
