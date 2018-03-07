@@ -213,7 +213,7 @@ public class EncryptionAesUtil {
             return decryptMsg(cipherMsg, cipherKey);
         } catch (Exception e) {
             LOGGER.error("Fail to decrypt message: " + e.getMessage());
-            throw new GeneralSecurityException("Error to encrypt message: ", e);
+            throw new GeneralSecurityException("Error to decrypt message: ", e);
         }
     }
 

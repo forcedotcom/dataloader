@@ -25,14 +25,9 @@
  */
 package com.salesforce.dataloader.security;
 
-import org.apache.log4j.Logger;
-
-import java.io.Console;
 import java.security.GeneralSecurityException;
 
 public class EncryptionUtil {
-
-    private static final Logger LOGGER = Logger.getLogger(EncryptionUtil.class);
 
     /**
      * Convert text to bytes
@@ -82,7 +77,7 @@ public class EncryptionUtil {
                         + "\t-d <encryptText> <Path to keyfile>               Decrypt an encrypted text back to plain text value using keyfile\n"
                         + "\t-k [Path to Keyfile]                             Generate keyfile with optional keyfile path\n";
 
-        LOGGER.info(usage);
+        System.out.println(usage);
     }
 
     public static void main(String[] args) {
@@ -96,12 +91,12 @@ public class EncryptionUtil {
         int i = 0;
         String option = args[i];
         if (option.length() < 2 || option.charAt(0) != '-') {
-            LOGGER.info("Invalid option format: " + args[i]);
+            System.out.println("Invalid option format: " + args[i]);
             System.exit(-1);
         }
         // make sure enough arguments are provided
         if (arrayTooSmall(args, i) && option.charAt(1) != 'k') {
-            LOGGER.info("Option '" + option + "' requires at least one parameter.  Please check usage.\n");
+            System.out.println("Option '" + option + "' requires at least one parameter.  Please check usage.\n");
             printUsage();
             System.exit(-1);
         }
@@ -116,14 +111,14 @@ public class EncryptionUtil {
                     try {
                         enc.setCipherKeyFromFilePath(keyFilename);
                         String encrypted = enc.encryptMsg(param);
-                        LOGGER.info(encrypted);
+                        System.out.println("The output string of encryption is: \n" + encrypted);
                     } catch (Exception e) {
-                        LOGGER.error("Error setting the key from file: "
+                        System.out.println("Error setting the key from file: "
                                 + keyFilename + ", error: " + e.getMessage());
                         System.exit(-1);
                     }
                 } else {
-                    LOGGER.info("Please provide correct parameters!");
+                    System.out.println("Please provide correct parameters!");
                     printUsage();
                     System.exit(-1);
                 }
@@ -135,14 +130,14 @@ public class EncryptionUtil {
                     EncryptionAesUtil encAes = new EncryptionAesUtil();
                     if (i == args.length - 2 || i == args.length - 1) {
                         String filePath = encAes.createKeyFileIfNotExisting(i == args.length - 1 ? null : args[i + 1]);
-                        LOGGER.info("Keyfile \"" + filePath + "\" was created! ");
+                        System.out.println("Keyfile \"" + filePath + "\" was created! ");
                     } else {
-                        LOGGER.info("Please provide correct parameters!");
+                        System.out.println("Please provide correct parameters!");
                         printUsage();
                         System.exit(-1);
                     }
                 } catch (Exception e) {
-                    LOGGER.error("Error occurred:  " + e.getMessage());
+                    System.out.println("Error occurred:  " + e.getMessage());
                 }
                 break;
 
@@ -154,20 +149,20 @@ public class EncryptionUtil {
                     try {
                         encAes.setCipherKeyFromFilePath(keyFilename);
                         String plainText = encAes.decryptMsg(encryptMsg);
-                        LOGGER.info(plainText);
+                        System.out.println("The output string of decryption is: \n" + plainText);
                     } catch (GeneralSecurityException e) {
-                        LOGGER.error("Failed in encryption: " + e.getMessage());
+                        System.out.println("Failed in decryption: " + e.getMessage() + "\n Make sure using the same keyfile to decrypt.");
                         System.exit(-1);
                     }
                 } else {
-                    LOGGER.info("Please provide correct parameters!");
+                    System.out.println("Please provide correct parameters!");
                     printUsage();
                     System.exit(-1);
                 }
                 break;
 
             default:
-                LOGGER.error("Unsupported option: " + option);
+                System.out.println("Unsupported option: " + option);
                 printUsage();
                 System.exit(-1);
         }
