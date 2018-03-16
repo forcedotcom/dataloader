@@ -1,6 +1,7 @@
 # Build Data Loader
 
     git clone git@github.com:forcedotcom/dataloader.git
+    cd dataloader
     git submodule init
     git submodule update
     mvn clean package -DskipTests
