@@ -116,10 +116,21 @@ public class Controller {
     private String appPath;
 
     private Controller(String name, boolean isBatchMode) throws ControllerInitializationException {
-        // load app version properties
+        initStaticVariable();
+        // if name is passed to controller, use it to create a unique run file name
+        try {
+            initConfig(name, isBatchMode);
+        } catch (Exception e) {
+            logger.error("Exception happened in initConfig:", e);
+            throw e;
+        }
+    }
+
+    public static void initStaticVariable() throws ControllerInitializationException
+    {
         Properties versionProps = new Properties();
         try {
-            versionProps.load(this.getClass().getClassLoader().getResourceAsStream("com/salesforce/dataloader/version.properties"));
+            versionProps.load(Controller.class.getClassLoader().getResourceAsStream("com/salesforce/dataloader/version.properties"));
         } catch (IOException e) {
             throw new ControllerInitializationException(e);
         }
@@ -132,14 +143,6 @@ public class Controller {
         API_VERSION = dataloaderVersion[0] + "." + dataloaderVersion[1];
 
         OS_TYPE = OSInfo.getOSType();
-
-        // if name is passed to controller, use it to create a unique run file name
-        try {
-            initConfig(name, isBatchMode);
-        } catch (Exception e) {
-            logger.error("Exception happened in initConfig:", e);
-            throw e;
-        }
     }
 
     public void setConfigDefaults() {
@@ -251,6 +254,7 @@ public class Controller {
         return new Controller(name, isBatchMode);
     }
 
+
     public synchronized boolean saveConfig() {
         try {
             config.save();
@@ -299,8 +303,14 @@ public class Controller {
      * @return Current user's Dataloader configuration directory
      */
     private static File getUserConfigDir() {
+        if (OS_TYPE == null) {
+            logger.error("getUserConfigDir(): Control static values are not initiallized " );
+            throw new RuntimeException("Os type not initialled correctly!");
+        }
+
         File dir;
         switch (OS_TYPE) {
+
             case WINDOWS: {
                 dir = Paths.get(System.getProperty("user.home"), "AppData\\Local", APP_VENDOR, getProductName(), CONFIG_DIR).toFile();
                 break;
@@ -467,10 +477,12 @@ public class Controller {
     }
 
     public static synchronized void initLog() throws FactoryConfigurationError {
+
         // init the log if not initialized already
         if (Controller.isLogInitialized) {
             return;
         }
+
         try {
             File logConfXml = new File(getUserConfigDir(), LOG_CONF_OVERRIDE);
             if (logConfXml.exists()) {
@@ -486,7 +498,7 @@ public class Controller {
             logger.info(Messages.getString("Controller.logInit")); //$NON-NLS-1$
         } catch (Exception ex) {
             logger.error(Messages.getString("Controller.errorLogInit")); //$NON-NLS-1$
-            logger.error(ex.toString());
+            logger.error(ex);
             System.exit(1);
         }
         Controller.isLogInitialized = true;
