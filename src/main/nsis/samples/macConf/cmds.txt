@@ -1,0 +1,9 @@
+For mac:
+Debuggable.
+
+cd installed execuatable folder: 
+cd ~/workspace/dataloader/src/main/nsis/samples
+
+ java -cp ../../../../target/dataloader-42.1.0-uber.jar:ojdbc6.jar -Dsalesforce.config.dir=2017_02_08_ddl_driver com.salesforce.dataloader.process.ProcessRunner process.name=activity_event_extract_to_oracle
+
+ java -cp ../../../../target/dataloader-42.1.0-uber.jar -Dsalesforce.config.dir=macConf com.salesforce.dataloader.process.ProcessRunner process.name=csvAccountExtractProcess
