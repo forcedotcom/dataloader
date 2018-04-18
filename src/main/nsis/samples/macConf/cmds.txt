@@ -1,9 +1,31 @@
-For mac:
-Debuggable.
+1. For mac to run and debug command line:
 
+1. Extract to csv
 cd installed execuatable folder: 
 cd ~/workspace/dataloader/src/main/nsis/samples
 
- java -cp ../../../../target/dataloader-42.1.0-uber.jar:ojdbc6.jar -Dsalesforce.config.dir=2017_02_08_ddl_driver com.salesforce.dataloader.process.ProcessRunner process.name=activity_event_extract_to_oracle
+Csv Extraction for Mac that utilize macConf/process-conf.xml.  
+  You can use intellij to add an application with following sample settings
+	main class: com.salesforce.dataloader.process.ProcessRunner
+	vm options:  -Dsalesforce.config.dir=/Users/xbian/workspace/dataloader/src/main/nsis/samples/macConf
+	program arguments: process.name=csvAccountExtractProcessMac  
+	working directory:  /Users/xbian/workspace/dataloader/src/main/nsis/samples
+	using classpath of module: dataloader
 
- java -cp ../../../../target/dataloader-42.1.0-uber.jar -Dsalesforce.config.dir=macConf com.salesforce.dataloader.process.ProcessRunner process.name=csvAccountExtractProcess
+ ~/workspace/dataloader/src/main/nsis/samples>  java -cp ../../../../target/dataloader-42.1.0-uber.jar -Dsalesforce.config.dir=macConf com.salesforce.dataloader.process.ProcessRunner process.name=csvAccountExtractProcessMac
+
+2. Db connection
+	Db for mac: 
+	 java -cp ../../../../target/dataloader-42.1.0-uber.jar:ojdbc6.jar -Dsalesforce.config.dir=macConf com.salesforce.dataloader.process.ProcessRunner process.name=activity_event_extract_to_oracle
+
+
+
+ 2. Debug: this is running dataloader UI. 
+ ~/workspace/dataloader/src/main/nsis/samples> java -XstartOnFirstThread -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005  ../../../../target/dataloader-42.1.0-uber.jar -Dsalesforce.config.dir=macConf   com.salesforce.dataloader.process.ProcessRunner process.name=csvAccountExtractProcess
+
+ Intellij: using remote debug at port 5005
+
+ Not runing UI: 
+
+  -Dsalesforce.config.dir=/Users/xbian/workspace/dataloader/src/main/nsis/samples/conf
+

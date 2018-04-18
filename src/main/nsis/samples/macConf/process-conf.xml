@@ -1,5 +1,57 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
+    <bean id="csvAccountExtractProcessMac"
+          class="com.salesforce.dataloader.process.ProcessRunner"
+          singleton="false">
+        <description>csvAccountExtract job gets account info from salesforce and saves info into a CSV file."</description>
+        <property name="name" value="csvAccountExtract"/>
+        <property name="configOverrideMap">
+            <map>
+                <entry key="sfdc.debugMessages" value="false"/>
+                <entry key="sfdc.debugMessagesFile" value="/Users/xbian/dataloader/sfdcSoapTrace.log"/>
+                <entry key="sfdc.endpoint" value="https://mobile2.t.salesforce.com"/>
+                <entry key="sfdc.username" value="pint-ih-user@208.ee"/>
+                <!-- This is for test1234  using /Users/xbian/dataloader/mykey-->
+                <entry key="sfdc.password" value="e8c6c4b40547c48108f79bf84bce27b06b3ddd929d4c33a65cd54f4955b41797"/>
+                <entry key="process.encryptionKeyFile" value="/Users/xbian/dataloader/mykey"/>
+                <entry key="sfdc.timeoutSecs" value="600"/>
+                <entry key="sfdc.loadBatchSize" value="200"/>
+                <entry key="sfdc.entity" value="Account"/>
+                <entry key="sfdc.extractionRequestSize" value="500"/>
+                <entry key="sfdc.extractionSOQL" value="Select Id, Name, Phone,  NumberOfEmployees FROM Account"/>
+                <entry key="process.operation" value="extract"/>
+                <entry key="process.mappingFile" value="/Users/xbian/workspace/dataloader/src/main/nsis/samples/macConf/accountExtractMap.sdl"/>
+                <entry key="dataAccess.type" value="csvWrite"/>
+                <entry key="dataAccess.name" value="/Users/xbian/dataloader/extract.csv"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="csvAccountExtractProcessWin"
+          class="com.salesforce.dataloader.process.ProcessRunner"
+          singleton="false">
+        <description>csvAccountExtract job gets account info from salesforce and saves info into a CSV file."</description>
+        <property name="name" value="csvAccountExtract"/>
+        <property name="configOverrideMap">
+            <map>
+                <entry key="sfdc.debugMessages" value="false"/>
+                <entry key="sfdc.debugMessagesFile" value="/Users/xbian/dataloader/sfdcSoapTrace.log"/>
+                <entry key="sfdc.endpoint" value="https://mobile2.t.salesforce.com"/>
+                <entry key="sfdc.username" value="pint-ih-user@208.ee"/>
+                <!-- This is for test1234  using /Users/xbian/dataloader/mykey-->
+                <entry key="sfdc.password" value="e8c6c4b40547c48108f79bf84bce27b06b3ddd929d4c33a65cd54f4955b41797"/>
+                <entry key="process.encryptionKeyFile" value="/Users/xbian/workspace/dataloader/src/main/nsis/samples/macConf/mykey"/>
+                <entry key="sfdc.timeoutSecs" value="600"/>
+                <entry key="sfdc.loadBatchSize" value="200"/>
+                <entry key="sfdc.entity" value="Account"/>
+                <entry key="sfdc.extractionRequestSize" value="500"/>
+                <entry key="sfdc.extractionSOQL" value="Select Id, Name, Phone,  NumberOfEmployees FROM Account"/>
+                <entry key="process.operation" value="extract"/>
+                <entry key="process.mappingFile" value="/Users/xbian/workspace/dataloader/src/main/nsis/samples/macConf/accountExtractMap.sdl"/>
+                <entry key="dataAccess.type" value="csvWrite"/>
+                <entry key="dataAccess.name" value="/Users/xbian/dataloader/extract.csv"/>
+            </map>
+        </property>
+    </bean>
     <bean id="accountMasterProcess"
           class="com.salesforce.dataloader.process.ProcessRunner"
           singleton="false">
@@ -75,32 +127,6 @@
                 <entry key="process.mappingFile" value="c:\dataloader\samples\conf\accountExtractToDbMap.sdl"/>
                 <entry key="dataAccess.type" value="databaseWrite"/>
                 <entry key="dataAccess.name" value="updateAccount"/>
-            </map>
-        </property>
-    </bean>
-    <bean id="csvAccountExtractProcess"
-          class="com.salesforce.dataloader.process.ProcessRunner"
-          singleton="false">
-      <description>csvAccountExtract job gets account info from salesforce and saves info into a CSV file."</description>
-        <property name="name" value="csvAccountExtract"/>
-        <property name="configOverrideMap">
-            <map>
-                <entry key="sfdc.debugMessages" value="false"/>
-                <entry key="sfdc.debugMessagesFile" value="c:\dataloader\samples\status\sfdcSoapTrace.log"/>
-                <entry key="sfdc.endpoint" value="https://login.salesforce.com"/>
-                <entry key="sfdc.username" value="user@mycompany.com"/>
-                <!-- password specified below is invalid, please generate one using the encrypt.bat utility -->
-                <entry key="sfdc.password" value="1111111111111111"/>
-                <entry key="process.encryptionKeyFile" value="c:\users\username\sample.key"/>
-                <entry key="sfdc.timeoutSecs" value="600"/>
-                <entry key="sfdc.loadBatchSize" value="200"/>
-                <entry key="sfdc.entity" value="Account"/>
-                <entry key="sfdc.extractionRequestSize" value="500"/>
-                <entry key="sfdc.extractionSOQL" value="Select Id, Name, Type, ParentId, Phone, AccountNumber, Website, Sic, AnnualRevenue, NumberOfEmployees, TickerSymbol, Oracle_Id__c FROM Account"/>
-                <entry key="process.operation" value="extract"/>
-                <entry key="process.mappingFile" value="c:\dataloader\samples\conf\accountExtractMap.sdl"/>
-                <entry key="dataAccess.type" value="csvWrite"/>
-                <entry key="dataAccess.name" value="c:\dataloader\samples\data\extract.csv"/>
             </map>
         </property>
     </bean>
