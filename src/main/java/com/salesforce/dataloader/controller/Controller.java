@@ -304,8 +304,8 @@ public class Controller {
      */
     private static File getUserConfigDir() {
         if (OS_TYPE == null) {
-            logger.error("getUserConfigDir(): Control static values are not initiallized " );
-            throw new RuntimeException("Os type not initialled correctly!");
+            logger.error("getUserConfigDir(): Control static values are not initialized." );
+            throw new RuntimeException("OS type not initialized correctly!");
         }
 
         File dir;
