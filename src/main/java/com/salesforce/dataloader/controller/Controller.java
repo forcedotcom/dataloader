@@ -50,6 +50,7 @@ import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.ws.ConnectionException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
@@ -380,6 +381,23 @@ public class Controller {
         return dir;
     }
 
+    /*
+    Insecure .swt folder DLL loading issue for SWT library.  Salesforce filed a bug to track this issue.
+    https://bugs.eclipse.org/bugs/show_bug.cgi?id=531823
+    Temporary fix is to delete dlls/lib before launching the application and the application will generate it again.
+     */
+    private static void deleteSwtDirectory() {
+        File directoryToBeDeleted = Paths.get(System.getProperty("user.home") + File.separator+ ".swt").toFile();
+        if (directoryToBeDeleted.exists() && directoryToBeDeleted.isDirectory()) {
+            try {
+                FileUtils.deleteDirectory(directoryToBeDeleted);
+                logger.info("Deleted directory: " + directoryToBeDeleted);
+            } catch (IOException e) {
+                logger.info("Problems to delete: " + directoryToBeDeleted);
+            }
+        }
+    }
+
     /**
      * Get the current config.properties and load it into the config bean.
      */
@@ -387,6 +405,9 @@ public class Controller {
 
         // Initialize log first to use correct logging level
         initLog();
+
+        // Todo: Remove this after eclipse fixed the SWT issue.
+        deleteSwtDirectory();
 
         String configDirPath = getConfigDir();
         File configDir;
