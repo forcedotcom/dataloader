@@ -482,8 +482,10 @@
         <dependency>
           <groupId>org.eclipse.swt</groupId>
           <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
-          <version>4.5.1</version>
+          <!--<version>4.5.1</version>-->
+          <version>4.3</version>
         </dependency>
+
       </dependencies>
     </profile>
     <profile>
@@ -499,7 +501,8 @@
             <groupId>org.eclipse.swt</groupId>
             <!-- we still run the 32bit JDK on 64bit windows for now -->
             <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
-            <version>4.5.1</version>
+            <!--<version>4.5.1</version>-->
+          <version>4.3</version>
         </dependency>
       </dependencies>
     </profile>
