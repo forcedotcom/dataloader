@@ -57,6 +57,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 import sun.awt.OSInfo;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -127,8 +128,7 @@ public class Controller {
         }
     }
 
-    public static void initStaticVariable() throws ControllerInitializationException
-    {
+    public static void initStaticVariable() throws ControllerInitializationException {
         Properties versionProps = new Properties();
         try {
             versionProps.load(Controller.class.getClassLoader().getResourceAsStream("com/salesforce/dataloader/version.properties"));
@@ -305,7 +305,7 @@ public class Controller {
      */
     private static File getUserConfigDir() {
         if (OS_TYPE == null) {
-            logger.error("getUserConfigDir(): Control static values are not initialized." );
+            logger.error("getUserConfigDir(): Control static values are not initialized.");
             throw new RuntimeException("OS type not initialized correctly!");
         }
 
@@ -332,8 +332,8 @@ public class Controller {
 
     /* Append the osAppendix to the binPath starting at position endIdx */
 
-    private static File getInstalledConfigDir(String binPath, int endIdx, String osAppendix){
-        if (endIdx != -1){
+    private static File getInstalledConfigDir(String binPath, int endIdx, String osAppendix) {
+        if (endIdx != -1) {
             binPath = binPath.substring(0, endIdx);
         }
         return new File(binPath, osAppendix);
@@ -363,17 +363,17 @@ public class Controller {
         switch (OS_TYPE) {
             case WINDOWS: {
                 //For windows,﻿filepath is﻿C:\Program Files\salesforce.com\Data Loader\dataloader-xxx-uber.jar
-                dir = getInstalledConfigDir(path, path.lastIndexOf(File.separator),  "conf");
+                dir = getInstalledConfigDir(path, path.lastIndexOf(File.separator), "conf");
                 break;
             }
             case MACOSX: {
                 // For mac, ﻿filepath is /Applications/Data Loader.app/Contents/Java/com/force/dataloader/xx.0.0/***.jar
-                dir = getInstalledConfigDir(path, path.lastIndexOf("/Contents"),  "Contents/Resources/conf");
+                dir = getInstalledConfigDir(path, path.lastIndexOf("/Contents"), "Contents/Resources/conf");
                 break;
             }
             default:
             case LINUX: {
-                dir = getInstalledConfigDir(path, path.lastIndexOf(File.separator),  "conf");
+                dir = getInstalledConfigDir(path, path.lastIndexOf(File.separator), "conf");
                 break;
             }
         }
@@ -382,12 +382,19 @@ public class Controller {
     }
 
     /*
-    Insecure .swt folder DLL loading issue for SWT library.  Salesforce filed a bug to track this issue.
-    https://bugs.eclipse.org/bugs/show_bug.cgi?id=531823
-    Temporary fix is to delete dlls/lib before launching the application and the application will generate it again.
+     *  SWT library has a .swt folder DLL loading  issue in user space that causes security issue.
+     *  Salesforce filed a bug to track this issue.   https://bugs.eclipse.org/bugs/show_bug.cgi?id=531823
+     *  Temporary fix is to delete dll/lib before launching the application and the application will generate it again.
+     *  We will also delete teh swt*dll file from C:\Users\<usesr>\AppData\Local\salesforce.com\Data Loader\ location with dataloader binary if found;
+     *  A sample dll name would be swt-win32-4626.dll
      */
+
     private static void deleteSwtDirectory() {
-        File directoryToBeDeleted = Paths.get(System.getProperty("user.home") + File.separator+ ".swt").toFile();
+        // only need to do this for windows.
+        if (OS_TYPE != OSInfo.OSType.WINDOWS)
+            return;
+
+        File directoryToBeDeleted = Paths.get(System.getProperty("user.home") + File.separator + ".swt").toFile();
         if (directoryToBeDeleted.exists() && directoryToBeDeleted.isDirectory()) {
             try {
                 FileUtils.deleteDirectory(directoryToBeDeleted);
@@ -395,6 +402,26 @@ public class Controller {
             } catch (IOException e) {
                 logger.info("Problems to delete: " + directoryToBeDeleted);
             }
+        }
+
+        // Delete the dll files
+        try {
+            File localBinaryDirectory = Paths.get(System.getProperty("user.home"), "AppData\\Local", APP_VENDOR, getProductName()).toFile();
+            if (!localBinaryDirectory.isDirectory())
+                return;
+            final File[] files = localBinaryDirectory.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(final File dir,
+                                      final String name) {
+                    return name.toLowerCase().startsWith("swt") && name.toLowerCase().endsWith("dll");
+                }
+            });
+            for (final File file : files) {
+                if (!file.isDirectory())
+                    file.delete();
+            }
+        } catch (Exception e) {
+            logger.info("Problems to delete dll file: " + e.toString());
         }
     }
 
