@@ -398,9 +398,9 @@ public class Controller {
         if (directoryToBeDeleted.exists() && directoryToBeDeleted.isDirectory()) {
             try {
                 FileUtils.deleteDirectory(directoryToBeDeleted);
-                logger.info("Deleted directory: " + directoryToBeDeleted);
+                logger.debug("Deleted swt directory: " + directoryToBeDeleted);
             } catch (IOException e) {
-                logger.info("Problems to delete: " + directoryToBeDeleted);
+                logger.debug("Problems to delete swt directory: " + directoryToBeDeleted);
             }
         }
 
@@ -421,7 +421,7 @@ public class Controller {
                     file.delete();
             }
         } catch (Exception e) {
-            logger.info("Problems to delete dll file: " + e.toString());
+            logger.debug("Problems to delete dll file with exceptions: " + e.toString());
         }
     }
 
