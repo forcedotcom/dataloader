@@ -48,21 +48,27 @@
     </repository>
   </repositories>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>codehaus-mojo</id>
-      <name>Codehaus Mojo</name>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
+  <!--<pluginRepositories>-->
+    <!--<pluginRepository>-->
+      <!--<id>codehaus-mojo</id>-->
+      <!--<name>Codehaus Mojo</name>-->
+      <!--<url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
+      <!--<releases>-->
+        <!--<enabled>false</enabled>-->
+      <!--</releases>-->
+      <!--<snapshots>-->
+        <!--<enabled>true</enabled>-->
+      <!--</snapshots>-->
+    <!--</pluginRepository>-->
+  <!--</pluginRepositories>-->
 
   <dependencies>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-archiver</artifactId>
+      <version>3.4</version>
+    </dependency>
+
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
