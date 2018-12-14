@@ -26,8 +26,9 @@
 
 package com.salesforce.dataloader.security;
 
+import com.salesforce.dataloader.util.AppUtil;
+
 import org.apache.log4j.Logger;
-import sun.awt.OSInfo;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,7 +53,7 @@ public class EncryptionAesUtil {
     private static final Logger LOGGER = Logger.getLogger(EncryptionAesUtil.class);
 
 
-    private static OSInfo.OSType detectedOS;
+    private static AppUtil.OSType detectedOS;
 
     // Support single text encryption and decryption
 
@@ -68,7 +69,7 @@ public class EncryptionAesUtil {
     static {
         try {
             cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            detectedOS = OSInfo.getOSType();
+            detectedOS = AppUtil.getOSType();
 
         } catch (Exception e) {
             LOGGER.error("Fail to initialize encryption: " + e.getMessage());
@@ -123,7 +124,7 @@ public class EncryptionAesUtil {
         if (customDir.exists()) {
             LOGGER.debug(customDir + " exists");
         } else if (customDir.mkdirs()) {
-            if (detectedOS == OSInfo.OSType.MACOSX || detectedOS == OSInfo.OSType.LINUX) {
+            if (detectedOS == AppUtil.OSType.MACOSX || detectedOS == AppUtil.OSType.LINUX) {
                 // set all reading to false
                 customDir.setReadable(false, false);
                 // only owner can read
@@ -155,7 +156,7 @@ public class EncryptionAesUtil {
                     throw new GeneralSecurityException("Failed to open file:" + filePath, io);
                 }
                 // Windows platform is already readable only to owner.
-                if (detectedOS == OSInfo.OSType.MACOSX || detectedOS == OSInfo.OSType.LINUX) {
+                if (detectedOS == AppUtil.OSType.MACOSX || detectedOS == AppUtil.OSType.LINUX) {
                     File file = new File(filePath);
                     // set all reading to false
                     file.setReadable(false, false);

@@ -46,14 +46,13 @@ import com.salesforce.dataloader.mapping.LoadMapper;
 import com.salesforce.dataloader.mapping.Mapper;
 import com.salesforce.dataloader.mapping.SOQLMapper;
 import com.salesforce.dataloader.ui.LoaderWindow;
+import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.ws.ConnectionException;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
-
-import sun.awt.OSInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -97,7 +96,7 @@ public class Controller {
     public static String API_VERSION;
     private static String APP_VENDOR; //$NON-NLS-1$
 
-    private static OSInfo.OSType OS_TYPE;
+    private static AppUtil.OSType OS_TYPE;
 
     /**
      * <code>config</code> is an instance of configuration that's tied to this instance of
@@ -142,7 +141,8 @@ public class Controller {
         String[] dataloaderVersion = APP_VERSION.split("\\.");
         API_VERSION = dataloaderVersion[0] + "." + dataloaderVersion[1];
 
-        OS_TYPE = OSInfo.getOSType();
+
+        OS_TYPE = AppUtil.getOSType();
     }
 
     public void setConfigDefaults() {

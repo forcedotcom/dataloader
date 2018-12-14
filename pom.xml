@@ -16,8 +16,8 @@
     <force.wsc.version>44.0.0</force.wsc.version>
     <force.partner.api.version>44.0.0</force.partner.api.version>
     <build.year>2018</build.year>
-    <java.compile.version>1.9</java.compile.version>
-    <minJvmVersion>1.9.0</minJvmVersion>
+    <java.compile.version>11</java.compile.version>
+    <minJvmVersion>11</minJvmVersion>
     <codesign>DONTSIGN</codesign>
     <jacob.version>1.14.3</jacob.version>
     <autoit.dll.path>autoitplaceholder</autoit.dll.path>
