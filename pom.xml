@@ -17,12 +17,12 @@
     <force.partner.api.version>44.0.0</force.partner.api.version>
     <build.year>2018</build.year>
     <java.compile.version>11</java.compile.version>
-    <minJvmVersion>11</minJvmVersion>
+    <minJvmVersion>1.8.0</minJvmVersion>
     <codesign>DONTSIGN</codesign>
     <jacob.version>1.14.3</jacob.version>
     <autoit.dll.path>autoitplaceholder</autoit.dll.path>
     <nsis.version>2.46</nsis.version>
-    <spring.version>3.1.1.RELEASE</spring.version>
+    <spring.version>5.1.3.RELEASE</spring.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <config.additional.properties></config.additional.properties>
 
@@ -66,13 +66,13 @@
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-archiver</artifactId>
-      <version>3.4</version>
+      <version>3.7.0</version>
     </dependency>
 
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.3.1</version>
+      <version>2.8.5</version>
     </dependency>
 
     <dependency>
@@ -95,14 +95,14 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.3.163</version>
+      <version>1.4.197</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>commons-beanutils</groupId>
       <artifactId>commons-beanutils</artifactId>
-      <version>1.8.3</version>
+      <version>1.7.0</version>
     </dependency>
     <dependency>
       <groupId>commons-dbcp</groupId>
@@ -112,25 +112,25 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.4</version>
+      <version>2.6</version>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.13-beta-1</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-      <version>1.2.16</version>
+      <version>1.2.17</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.5.2</version>
+      <version>4.5.6</version>
     </dependency>
 
     <dependency>
@@ -168,13 +168,13 @@
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>6.3.1</version>
+      <version>7.0.0-beta1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
-      <version>1.9.5</version>
+      <version>2.0.2-beta</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -247,12 +247,12 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>osxappbundle-maven-plugin</artifactId>
-          <version>1.0-alpha-2</version>
+          <version>1.2.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>2.4.1</version>
+          <version>3.2.1</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -261,7 +261,7 @@
 		<plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-resources-plugin</artifactId>
-			<version>2.4.3</version>
+			<version>3.1.0</version>
 			<configuration>
 			    <useDefaultDelimiters>false</useDefaultDelimiters>
 			    <delimiters>
@@ -343,7 +343,7 @@
 
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.8.0</version>
         <configuration>
           <source>${java.compile.version}</source>
           <target>${java.compile.version}</target>
@@ -353,12 +353,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.13</version>
+        <version>2.22.1</version>
           <dependencies>
               <dependency>
                   <groupId>org.apache.maven.surefire</groupId>
                   <artifactId>surefire-junit4</artifactId>
-                  <version>2.13</version>
+                  <version>3.0.0-M2</version>
               </dependency>
           </dependencies>
         <configuration>
@@ -456,7 +456,7 @@
         <dependency>
           <groupId>org.eclipse.swt</groupId>
           <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
-          <version>4.5.1</version>
+          <version>4.6.1</version>
         </dependency>
       </dependencies>
     </profile>
@@ -472,7 +472,7 @@
         <dependency>
           <groupId>org.eclipse.swt</groupId>
           <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
-          <version>4.5.1</version>
+          <version>4.6.1</version>
         </dependency>
       </dependencies>
     </profile>
@@ -529,7 +529,7 @@
               <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-compiler-plugin</artifactId>
-                  <version>2.5.1</version>
+                  <version>3.8.1</version>
               </plugin>
               <plugin>
                   <groupId>com.akathist.maven.plugins.launch4j</groupId>
@@ -543,7 +543,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
+                <version>3.8.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -740,14 +740,27 @@
                 <plugin>
                     <groupId>sh.tak.appbundler</groupId>
                     <artifactId>appbundle-maven-plugin</artifactId>
-                    <version>1.0.4</version>
-                    <configuration>
+                    <version>1.2.0</version>
+                  <dependencies>
+                    <dependency>
+                      <groupId>org.codehaus.plexus</groupId>
+                      <artifactId>plexus-archiver</artifactId>
+                      <version>3.7.0</version>
+                    </dependency>
+                    <dependency>
+                      <groupId>org.apache.velocity</groupId>
+                      <artifactId>velocity-tools</artifactId>
+                      <version>2.0</version>
+                    </dependency>
+
+                  </dependencies>
+                  <configuration>
                         <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-                        <jvmVersion>1.8</jvmVersion>
+                        <jvmVersion>1.11+</jvmVersion>
                         <jvmOptions>
                             <string>-XstartOnFirstThread</string>
                         </jvmOptions>
-                        <iconFile>${basedir}/src/main/resources/img/icons/icon_loader.icns</iconFile>
+                        <iconFile>src/main/resources/img/icons/icon_loader.icns</iconFile>
                     </configuration>
                     <executions>
                         <execution>
@@ -761,7 +774,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
-                    <version>1.1</version>
+                    <version>1.8</version>
                     <executions>
                         <execution>
                             <phase>package</phase>
@@ -783,7 +796,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
-          <version>1.1</version>
+          <version>1.6.0</version>
           <executions>
             <execution>
               <id>make-pretty-dmg</id>
