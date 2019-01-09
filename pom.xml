@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>44.0.0</version>
+  <version>44.1.0</version>
   <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -17,12 +17,12 @@
     <force.partner.api.version>44.0.0</force.partner.api.version>
     <build.year>2018</build.year>
     <java.compile.version>11</java.compile.version>
-    <minJvmVersion>1.8.0</minJvmVersion>
+    <minJvmVersion>11</minJvmVersion>
     <codesign>DONTSIGN</codesign>
     <jacob.version>1.14.3</jacob.version>
     <autoit.dll.path>autoitplaceholder</autoit.dll.path>
     <nsis.version>2.46</nsis.version>
-    <spring.version>5.1.3.RELEASE</spring.version>
+    <spring.version>3.1.1.RELEASE</spring.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <config.additional.properties></config.additional.properties>
 
@@ -408,6 +408,14 @@
                 </execution>
             </executions>
         </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${java.compile.version}</source>
+          <target>${java.compile.version}</target>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -545,8 +553,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${java.compile.version}</source>
+                    <target>${java.compile.version}</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -738,9 +746,9 @@
         <build>
             <plugins>
                 <plugin>
-                    <groupId>sh.tak.appbundler</groupId>
-                    <artifactId>appbundle-maven-plugin</artifactId>
-                    <version>1.2.0</version>
+                  <groupId>sh.tak.appbundler</groupId>
+                  <artifactId>appbundle-maven-plugin</artifactId>
+                  <version>1.2.0</version>
                   <dependencies>
                     <dependency>
                       <groupId>org.codehaus.plexus</groupId>
@@ -752,16 +760,16 @@
                       <artifactId>velocity-tools</artifactId>
                       <version>2.0</version>
                     </dependency>
-
                   </dependencies>
                   <configuration>
                         <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-                        <jvmVersion>1.11+</jvmVersion>
+                        <jvmVersion>${java.compile.version}</jvmVersion>
                         <jvmOptions>
                             <string>-XstartOnFirstThread</string>
                         </jvmOptions>
-                        <iconFile>src/main/resources/img/icons/icon_loader.icns</iconFile>
-                    </configuration>
+                        <jrePath>/Library/Java/JavaVirtualMachines/sfdc-openjdk_11.0.1.jdk</jrePath>
+                    <iconFile>src/main/resources/img/icons/icon_loader.icns</iconFile>
+                  </configuration>
                     <executions>
                         <execution>
                             <phase>package</phase>
@@ -793,29 +801,29 @@
                         </tasks>
                     </configuration>
                 </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>exec-maven-plugin</artifactId>
-          <version>1.6.0</version>
-          <executions>
-            <execution>
-              <id>make-pretty-dmg</id>
-              <phase>package</phase>
-              <configuration>
-                <executable>bash</executable>
-                <arguments>
-                  <argument>make-pretty-dmg.sh</argument>
-                  <argument>${basedir}</argument>
-                  <argument>${project.build.directory}/${project.build.finalName}</argument>
-                  <argument>${codesign}</argument>
-                </arguments>
-              </configuration>
-              <goals>
-                <goal>exec</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
+                <plugin>
+                  <groupId>org.codehaus.mojo</groupId>
+                  <artifactId>exec-maven-plugin</artifactId>
+                  <version>1.6.0</version>
+                  <executions>
+                    <execution>
+                      <id>make-pretty-dmg</id>
+                      <phase>package</phase>
+                      <configuration>
+                        <executable>bash</executable>
+                        <arguments>
+                          <argument>make-pretty-dmg.sh</argument>
+                          <argument>${basedir}</argument>
+                          <argument>${project.build.directory}/${project.build.finalName}</argument>
+                          <argument>${codesign}</argument>
+                        </arguments>
+                      </configuration>
+                      <goals>
+                        <goal>exec</goal>
+                      </goals>
+                    </execution>
+                  </executions>
+                </plugin>
 
             </plugins>
         </build>
