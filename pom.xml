@@ -17,7 +17,7 @@
     <force.partner.api.version>44.0.0</force.partner.api.version>
     <build.year>2018</build.year>
     <java.compile.version>11</java.compile.version>
-    <minJvmVersion>11</minJvmVersion>
+    <minJvmVersion>1.11.0</minJvmVersion>
     <codesign>DONTSIGN</codesign>
     <jacob.version>1.14.3</jacob.version>
     <autoit.dll.path>autoitplaceholder</autoit.dll.path>
@@ -537,12 +537,12 @@
               <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-compiler-plugin</artifactId>
-                  <version>3.8.1</version>
+                  <version>3.8.0</version>
               </plugin>
               <plugin>
                   <groupId>com.akathist.maven.plugins.launch4j</groupId>
                   <artifactId>launch4j-maven-plugin</artifactId>
-                  <version>1.5.1</version>
+                  <version>1.7.8</version>
               </plugin>
           </plugins>
         </pluginManagement>
@@ -551,7 +551,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.8.0</version>
                 <configuration>
                     <source>${java.compile.version}</source>
                     <target>${java.compile.version}</target>
@@ -560,7 +560,6 @@
             <plugin>
                 <groupId>com.akathist.maven.plugins.launch4j</groupId>
                 <artifactId>launch4j-maven-plugin</artifactId>
-                <version>1.7.8</version>
                 <executions>
                     <execution>
                         <id>l4j-clui</id>
