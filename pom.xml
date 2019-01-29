@@ -542,7 +542,7 @@
               <plugin>
                   <groupId>com.akathist.maven.plugins.launch4j</groupId>
                   <artifactId>launch4j-maven-plugin</artifactId>
-                  <version>1.5.1</version>
+                  <version>1.7.25</version>
               </plugin>
           </plugins>
         </pluginManagement>
@@ -560,7 +560,6 @@
             <plugin>
                 <groupId>com.akathist.maven.plugins.launch4j</groupId>
                 <artifactId>launch4j-maven-plugin</artifactId>
-                <version>1.7.8</version>
                 <executions>
                     <execution>
                         <id>l4j-clui</id>
@@ -573,7 +572,7 @@
                             <dontWrapJar>true</dontWrapJar>
                             <jar>${project.artifactId}-${project.version}-uber.jar</jar>
                             <outfile>${project.build.directory}/${project.artifactId}-${project.version}.exe</outfile>
-                            <downloadUrl>http://java.com/download</downloadUrl>
+                            <downloadUrl>https://www.azul.com/downloads/zulu/</downloadUrl>
                             <classPath>
                                 <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
                                 <preCp>anything</preCp>
@@ -582,7 +581,7 @@
                             <jre>
                                 <minVersion>${minJvmVersion}</minVersion>
                                 <jdkPreference>preferJre</jdkPreference>
-                                <runtimeBits>32</runtimeBits>
+                                <runtimeBits>64</runtimeBits>
                             </jre>
                             <versionInfo>
                                 <fileVersion>${project.version}.0</fileVersion>
