@@ -64,6 +64,16 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.panayotis</groupId>
+      <artifactId>appbundler</artifactId>
+      <version>1.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.ultramixer.jarbundler</groupId>
+      <artifactId>jarbundler-core</artifactId>
+      <version>3.3.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-archiver</artifactId>
       <version>3.7.0</version>
@@ -542,7 +552,7 @@
               <plugin>
                   <groupId>com.akathist.maven.plugins.launch4j</groupId>
                   <artifactId>launch4j-maven-plugin</artifactId>
-                  <version>1.5.1</version>
+                  <version>1.7.25</version>
               </plugin>
           </plugins>
         </pluginManagement>
@@ -560,7 +570,6 @@
             <plugin>
                 <groupId>com.akathist.maven.plugins.launch4j</groupId>
                 <artifactId>launch4j-maven-plugin</artifactId>
-                <version>1.7.8</version>
                 <executions>
                     <execution>
                         <id>l4j-clui</id>
@@ -745,45 +754,129 @@
         </activation>
         <build>
             <plugins>
-                <plugin>
-                  <groupId>sh.tak.appbundler</groupId>
-                  <artifactId>appbundle-maven-plugin</artifactId>
-                  <version>1.2.0</version>
-                  <dependencies>
-                    <dependency>
-                      <groupId>org.codehaus.plexus</groupId>
-                      <artifactId>plexus-archiver</artifactId>
-                      <version>3.7.0</version>
-                    </dependency>
-                    <dependency>
-                      <groupId>org.apache.velocity</groupId>
-                      <artifactId>velocity-tools</artifactId>
-                      <version>2.0</version>
-                    </dependency>
-                  </dependencies>
-                  <configuration>
-                        <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-                        <jvmVersion>${java.compile.version}</jvmVersion>
-                        <jvmOptions>
-                            <string>-XstartOnFirstThread</string>
-                        </jvmOptions>
-                        <jrePath>/Library/Java/JavaVirtualMachines/sfdc-openjdk_11.0.1.jdk</jrePath>
-                    <iconFile>src/main/resources/img/icons/icon_loader.icns</iconFile>
-                  </configuration>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>bundle</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
+                <!--<plugin>-->
+                  <!--<groupId>sh.tak.appbundler</groupId>-->
+                  <!--<artifactId>appbundle-maven-plugin</artifactId>-->
+                  <!--<version>1.2.0</version>-->
+                  <!--<dependencies>-->
+                    <!--<dependency>-->
+                      <!--<groupId>org.codehaus.plexus</groupId>-->
+                      <!--<artifactId>plexus-archiver</artifactId>-->
+                      <!--<version>3.7.0</version>-->
+                    <!--</dependency>-->
+                    <!--<dependency>-->
+                      <!--<groupId>org.apache.velocity</groupId>-->
+                      <!--<artifactId>velocity-tools</artifactId>-->
+                      <!--<version>2.0</version>-->
+                    <!--</dependency>-->
+                  <!--</dependencies>-->
+                  <!--<configuration>-->
+                    <!--<mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>-->
+                    <!--&lt;!&ndash;<dictionaryFile>YourCustomInfo.plist</dictionaryFile>&ndash;&gt;-->
+                    <!--<jvmOptions>-->
+                        <!--<string>-XstartOnFirstThread</string>-->
+                    <!--</jvmOptions>-->
+                    <!--&lt;!&ndash;<jrePath>/Library/Java/JavaVirtualMachines/sfdc-openjdk_10.0.1.jdk</jrePath>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<jvmVersion>10.0.1-zulu10.0.1+9</jvmVersion>&ndash;&gt;-->
+
+                    <!--&lt;!&ndash;<jvmVersion>11.0.1</jvmVersion>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<jrePath>/Library/Java/JavaVirtualMachines/jdk-11.0.1.jdk</jrePath>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<jrePath>/Library/Java/JavaVirtualMachines/jdk1.8.0_172.jdk</jrePath>&ndash;&gt;-->
+
+
+                    <!--&lt;!&ndash;<jrePath>/Library/Java/JavaVirtualMachines/sfdc-openjdk_11.0.1.jdk-dataloader</jrePath>&ndash;&gt;-->
+
+                    <!--&lt;!&ndash;<jvmVersion>11.0.1-zulu-11.2+3</jvmVersion>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<jrePath>/Library/Java/JavaVirtualMachines/zulu-11.jdk</jrePath>&ndash;&gt;-->
+
+                    <!--<iconFile>src/main/resources/img/icons/icon_loader.icns</iconFile>-->
+                  <!--</configuration>-->
+                    <!--<executions>-->
+                        <!--<execution>-->
+                            <!--<phase>package</phase>-->
+                            <!--<goals>-->
+                                <!--<goal>bundle</goal>-->
+                            <!--</goals>-->
+                        <!--</execution>-->
+                    <!--</executions>-->
+                <!--</plugin>-->
+
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
                     <version>1.8</version>
+                  <dependencies>
+                    <dependency>
+                      <groupId>com.ultramixer.jarbundler</groupId>
+                      <artifactId>jarbundler-core</artifactId>
+                      <version>3.3.0</version>
+                    </dependency>
+                    <!-- https://mvnrepository.com/artifact/com.ultramixer.jarbundler/jarbundler-examples -->
+                    <dependency>
+                      <groupId>com.ultramixer.jarbundler</groupId>
+                      <artifactId>jarbundler-examples</artifactId>
+                      <version>3.3.0</version>
+                    </dependency>
+                    <!-- https://mvnrepository.com/artifact/com.ultramixer.jarbundler/jarbundler-parent -->
+                    <dependency>
+                      <groupId>com.ultramixer.jarbundler</groupId>
+                      <artifactId>jarbundler-parent</artifactId>
+                      <version>3.3.0</version>
+                      <type>pom</type>
+                    </dependency>
+
+                  </dependencies>
                     <executions>
+
+
+                      <execution>
+                        <id>BundleTheApp</id>
+                        <phase> prepare-package </phase>
+                        <configuration>
+
+                          <target>
+                            <echo>BundleTheApp1  prepare-package</echo>
+
+                            <taskdef name="jarbundler" classname="com.ultramixer.jarbundler.JarBundler" />
+                            <chmod file="${basedir}/src/main/resources/universalJavaApplicationStub.sh" perm="+x" />
+
+                            <!-- See the lib reference here, this is why you need to use the lib directory! -->
+
+                            <jarbundler dir="${project.build.directory}" name="DataloaderXuehai" shortname="DataloaderXuehai" signature="????"
+                                        verbose="true" showPlist="true"
+                                        jars="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                        stubfile="${project.build.directory}/classes/universalJavaApplicationStub.sh"
+                                        useJavaXKey="true"
+                                        workingdirectory="$JAVAROOT"
+                                        bundleid="${project.groupId}.${project.artifactId}"
+                                        mainclass="com.salesforce.dataloader.process.DataLoaderRunner"
+                                        version="${project.version}" copyright="2019"
+                                        icon="${basedir}/src/main/resources/img/icons/icon_loader.icns"
+                                        jvmversion="1.10+" screenmenu="true"
+                                        antialiasedgraphics="true" highresolutioncapable="true" >
+                              <documenttype name="Class File" extensions="class" role="Viewer" />
+                              <documenttype name="Java File" extensions="java" role="Viewer" />
+                              <documenttype name="Jar File" extensions="jar" role="Viewer" />
+                              <documenttype name="War File" extensions="war" role="Viewer" />
+                              <documenttype name="Ear File" extensions="ear" role="Viewer" />
+                              <documenttype name="Zip File" extensions="zip" role="Viewer" />
+                              <!--<jvmOptions>-->
+                                <!--<string>-XstartOnFirstThread</string>-->
+                              <!--</jvmOptions>-->
+
+                            </jarbundler>
+
+                          </target>
+
+                        </configuration>
+                        <goals>
+                          <goal>run</goal>
+                        </goals>
+                      </execution>
+
+
+
                         <execution>
                             <phase>package</phase>
                             <goals>
@@ -794,36 +887,36 @@
                     <configuration>
                         <tasks>
                           <echo>Copying additional assets for DMG</echo>
-                          <copy file="${basedir}/src/main/resources/Localizable.strings" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/en.lproj/Localizable.strings"/>
+                          <!--<copy file="${basedir}/src/main/resources/Localizable.strings" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/en.lproj/Localizable.strings"/>-->
                           <copy file="${basedir}/src/main/nsis/config.properties" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties"/>
                           <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties" token="#placeholder" value="${config.additional.properties}"/>
                           <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties" token="\n" value="${line.separator}"/>
                         </tasks>
                     </configuration>
                 </plugin>
-                <plugin>
-                  <groupId>org.codehaus.mojo</groupId>
-                  <artifactId>exec-maven-plugin</artifactId>
-                  <version>1.6.0</version>
-                  <executions>
-                    <execution>
-                      <id>make-pretty-dmg</id>
-                      <phase>package</phase>
-                      <configuration>
-                        <executable>bash</executable>
-                        <arguments>
-                          <argument>make-pretty-dmg.sh</argument>
-                          <argument>${basedir}</argument>
-                          <argument>${project.build.directory}/${project.build.finalName}</argument>
-                          <argument>${codesign}</argument>
-                        </arguments>
-                      </configuration>
-                      <goals>
-                        <goal>exec</goal>
-                      </goals>
-                    </execution>
-                  </executions>
-                </plugin>
+                <!--<plugin>-->
+                  <!--<groupId>org.codehaus.mojo</groupId>-->
+                  <!--<artifactId>exec-maven-plugin</artifactId>-->
+                  <!--<version>1.6.0</version>-->
+                  <!--<executions>-->
+                    <!--<execution>-->
+                      <!--<id>make-pretty-dmg</id>-->
+                      <!--<phase>package</phase>-->
+                      <!--<configuration>-->
+                        <!--<executable>bash</executable>-->
+                        <!--<arguments>-->
+                          <!--<argument>make-pretty-dmg.sh</argument>-->
+                          <!--<argument>${basedir}</argument>-->
+                          <!--<argument>${project.build.directory}/${project.build.finalName}</argument>-->
+                          <!--<argument>${codesign}</argument>-->
+                        <!--</arguments>-->
+                      <!--</configuration>-->
+                      <!--<goals>-->
+                        <!--<goal>exec</goal>-->
+                      <!--</goals>-->
+                    <!--</execution>-->
+                  <!--</executions>-->
+                <!--</plugin>-->
 
             </plugins>
         </build>
