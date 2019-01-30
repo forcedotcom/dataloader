@@ -1,849 +1,901 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.force</groupId>
-  <artifactId>dataloader</artifactId>
-  <packaging>jar</packaging>
-  <version>44.1.0</version>
-  <name>Data Loader</name>
-  <url>https://github.com/forcedotcom/dataloader</url>
-  <organization>
-    <name>salesforce.com</name>
-    <url>http://salesforce.com</url>
-  </organization>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.force</groupId>
+    <artifactId>dataloader</artifactId>
+    <packaging>jar</packaging>
+    <version>44.1.0</version>
+    <name>Data Loader</name>
+    <url>https://github.com/forcedotcom/dataloader</url>
+    <organization>
+        <name>salesforce.com</name>
+        <url>http://salesforce.com</url>
+    </organization>
 
-  <properties>
-    <force.wsc.version>44.0.0</force.wsc.version>
-    <force.partner.api.version>44.0.0</force.partner.api.version>
-    <build.year>2018</build.year>
-    <java.compile.version>11</java.compile.version>
-    <minJvmVersion>11</minJvmVersion>
-    <codesign>DONTSIGN</codesign>
-    <jacob.version>1.14.3</jacob.version>
-    <autoit.dll.path>autoitplaceholder</autoit.dll.path>
-    <nsis.version>2.46</nsis.version>
-    <spring.version>3.1.1.RELEASE</spring.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <config.additional.properties></config.additional.properties>
+    <properties>
+        <force.wsc.version>44.0.0</force.wsc.version>
+        <force.partner.api.version>44.0.0</force.partner.api.version>
+        <build.year>2018</build.year>
+        <java.compile.version>11</java.compile.version>
+        <minJvmVersion>11</minJvmVersion>
+        <codesign>DONTSIGN</codesign>
+        <jacob.version>1.14.3</jacob.version>
+        <autoit.dll.path>autoitplaceholder</autoit.dll.path>
+        <nsis.version>2.46</nsis.version>
+        <spring.version>3.1.1.RELEASE</spring.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <config.additional.properties></config.additional.properties>
 
-    <!-- test properties -->
-    <test.endpoint>http://testendpoint</test.endpoint>
-    <test.user.default>admin@org.com</test.user.default>
-    <test.user.restricted>standard@org.com</test.user.restricted>
-    <test.password></test.password><!-- use the encrypted password -->
-    <test.redirect>false</test.redirect>
+        <!-- test properties -->
+        <test.endpoint>http://testendpoint</test.endpoint>
+        <test.user.default>admin@org.com</test.user.default>
+        <test.user.restricted>standard@org.com</test.user.restricted>
+        <test.password></test.password><!-- use the encrypted password -->
+        <test.redirect>false</test.redirect>
 
-  </properties>
+    </properties>
 
-  <repositories>
-    <repository>
-      <id>local-proj-repo</id>
-      <name>Project Local Repository</name>
-      <layout>default</layout>
-      <url>file://${basedir}/local-proj-repo/</url>
-    </repository>
-    <repository>
-      <id>maven-eclipse-repo</id>
-      <url>http://maven-eclipse.github.io/maven</url>
-    </repository>
-  </repositories>
+    <repositories>
+        <repository>
+            <id>local-proj-repo</id>
+            <name>Project Local Repository</name>
+            <layout>default</layout>
+            <url>file://${basedir}/local-proj-repo/</url>
+        </repository>
+        <repository>
+            <id>maven-eclipse-repo</id>
+            <url>http://maven-eclipse.github.io/maven</url>
+        </repository>
+    </repositories>
 
-  <!--<pluginRepositories>-->
+    <!--<pluginRepositories>-->
     <!--<pluginRepository>-->
-      <!--<id>codehaus-mojo</id>-->
-      <!--<name>Codehaus Mojo</name>-->
-      <!--<url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
-      <!--<releases>-->
-        <!--<enabled>false</enabled>-->
-      <!--</releases>-->
-      <!--<snapshots>-->
-        <!--<enabled>true</enabled>-->
-      <!--</snapshots>-->
+    <!--<id>codehaus-mojo</id>-->
+    <!--<name>Codehaus Mojo</name>-->
+    <!--<url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
+    <!--<releases>-->
+    <!--<enabled>false</enabled>-->
+    <!--</releases>-->
+    <!--<snapshots>-->
+    <!--<enabled>true</enabled>-->
+    <!--</snapshots>-->
     <!--</pluginRepository>-->
-  <!--</pluginRepositories>-->
+    <!--</pluginRepositories>-->
 
-  <dependencies>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-archiver</artifactId>
-      <version>3.7.0</version>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-archiver</artifactId>
+            <version>3.7.0</version>
+        </dependency>
 
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.8.5</version>
-    </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.5</version>
+        </dependency>
 
-    <dependency>
-      <groupId>autoitx4java</groupId>
-      <artifactId>autoitx4java</artifactId>
-      <version>1</version>
-      <scope>test</scope>
-    </dependency>
+        <dependency>
+            <groupId>autoitx4java</groupId>
+            <artifactId>autoitx4java</artifactId>
+            <version>1</version>
+            <scope>test</scope>
+        </dependency>
 
-    <dependency>
-      <groupId>com.force.api</groupId>
-      <artifactId>force-wsc</artifactId>
-      <version>${force.wsc.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.force.api</groupId>
-      <artifactId>force-partner-api</artifactId>
-      <version>${force.partner.api.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <version>1.4.197</version>
-      <scope>test</scope>
-    </dependency>
+        <dependency>
+            <groupId>com.force.api</groupId>
+            <artifactId>force-wsc</artifactId>
+            <version>${force.wsc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.force.api</groupId>
+            <artifactId>force-partner-api</artifactId>
+            <version>${force.partner.api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.197</version>
+            <scope>test</scope>
+        </dependency>
 
-    <dependency>
-      <groupId>commons-beanutils</groupId>
-      <artifactId>commons-beanutils</artifactId>
-      <version>1.7.0</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-dbcp</groupId>
-      <artifactId>commons-dbcp</artifactId>
-      <version>1.4</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.6</version>
-    </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13-beta-1</version>
-      <scope>test</scope>
-    </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13-beta-1</version>
+            <scope>test</scope>
+        </dependency>
 
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.5.6</version>
-    </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.6</version>
+        </dependency>
 
-    <dependency>
-      <groupId>org.eclipse</groupId>
-      <artifactId>core.commands</artifactId>
-      <version>3.6.1.v20120521-2329</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse</groupId>
-      <artifactId>equinox.common</artifactId>
-      <version>3.6.100.v20120522-1841</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse</groupId>
-      <artifactId>jface</artifactId>
-      <version>3.8.0.v20120521-2329</version>
-    </dependency>
+        <dependency>
+            <groupId>org.eclipse</groupId>
+            <artifactId>core.commands</artifactId>
+            <version>3.6.1.v20120521-2329</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse</groupId>
+            <artifactId>equinox.common</artifactId>
+            <version>3.6.100.v20120522-1841</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse</groupId>
+            <artifactId>jface</artifactId>
+            <version>3.8.0.v20120521-2329</version>
+        </dependency>
 
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>${spring.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-expression</artifactId>
-      <version>${spring.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-jdbc</artifactId>
-      <version>${spring.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>7.0.0-beta1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>2.0.2-beta</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jacob-project</groupId>
-      <artifactId>jacob</artifactId>
-      <version>${jacob.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jacob-project</groupId>
-      <artifactId>jacob</artifactId>
-      <version>${jacob.version}</version>
-      <classifier>x86</classifier>
-      <type>dll</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jacob-project</groupId>
-      <artifactId>jacob</artifactId>
-      <version>${jacob.version}</version>
-      <classifier>x64</classifier>
-      <type>dll</type>
-      <scope>test</scope>
-    </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.0.0-beta1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>2.0.2-beta</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jacob-project</groupId>
+            <artifactId>jacob</artifactId>
+            <version>${jacob.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jacob-project</groupId>
+            <artifactId>jacob</artifactId>
+            <version>${jacob.version}</version>
+            <classifier>x86</classifier>
+            <type>dll</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jacob-project</groupId>
+            <artifactId>jacob</artifactId>
+            <version>${jacob.version}</version>
+            <classifier>x64</classifier>
+            <type>dll</type>
+            <scope>test</scope>
+        </dependency>
 
-    <dependency>
-      <groupId>quartz</groupId>
-      <artifactId>quartz</artifactId>
-      <version>1.5.2</version>
-    </dependency>
+        <dependency>
+            <groupId>quartz</groupId>
+            <artifactId>quartz</artifactId>
+            <version>1.5.2</version>
+        </dependency>
 
-  </dependencies>
+    </dependencies>
 
-  <build>
-    <defaultGoal>install</defaultGoal>
+    <build>
+        <defaultGoal>install</defaultGoal>
 
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-        <includes>
-          <include>**/*.properties</include>
-        </includes>
-      </resource>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>false</filtering>
-        <excludes>
-          <exclude>**/*.properties</exclude>
-        </excludes>
-      </resource>
-      <resource>
-        <directory>src/main/nsis/bin</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
-
-    <filters>
-      <filter>src/test/resources/testfilter.properties</filter>
-    </filters>
-    <testResources>
-      <testResource>
-        <directory>src/test/resources</directory>
-        <filtering>true</filtering>
-      </testResource>
-    </testResources>
-
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>osxappbundle-maven-plugin</artifactId>
-          <version>1.2.0</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-shade-plugin</artifactId>
-          <version>3.2.1</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-
-    <plugins>
-		<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-resources-plugin</artifactId>
-			<version>3.1.0</version>
-			<configuration>
-			    <useDefaultDelimiters>false</useDefaultDelimiters>
-			    <delimiters>
-			        <delimiter>${*}</delimiter>
-			    </delimiters>
-			    <nonFilteredFileExtensions>
-			        <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
-			        <nonFilteredFileExtension>swf</nonFilteredFileExtension>
-			        <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
-			        <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
-			        <nonFilteredFileExtension>png</nonFilteredFileExtension>
-			    </nonFilteredFileExtensions>
-			</configuration>
-		</plugin>
-	
-      <!-- we might want to use the maven-shade-plugin in the future instead 
-        of maven-assembly-plugin -->
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifest>
-              <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-            </manifest>
-          </archive>
-          <descriptors>
-            <descriptor>src/main/assembly/uber.xml</descriptor>
-          </descriptors>
-        </configuration>
-        <executions>
-          <execution>
-            <id>make-uber-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-shade-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>shade</shadedClassifierName> <!-- Any name that makes sense -->
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>META-INF/*.SF</exclude>
-                    <exclude>META-INF/*.DSA</exclude>
-                    <exclude>META-INF/*.RSA</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-                </transformer>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                  <resource>META-INF/spring.handlers</resource>
-                </transformer>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                  <resource>META-INF/spring.schemas</resource>
-                </transformer>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                  <resource>META-INF/spring.tooling</resource>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>${java.compile.version}</source>
-          <target>${java.compile.version}</target>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.1</version>
-          <dependencies>
-              <dependency>
-                  <groupId>org.apache.maven.surefire</groupId>
-                  <artifactId>surefire-junit4</artifactId>
-                  <version>3.0.0-M2</version>
-              </dependency>
-          </dependencies>
-        <configuration>
-          <excludes>
-            <!-- CORE UNIT TESTS: revise to keep this list fast and connectivity free -->
-            <exclude>**/client/**</exclude>
-            <exclude>**/dyna/SObjectReferenceConverterTest.*</exclude>
-            <exclude>**/integration/**</exclude>
-            <exclude>**/mapping/LoadMapperTest.*</exclude>
-            <exclude>**/mapping/SOQLMapperTest.*</exclude>
-            <exclude>**/process/**</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-
-        <plugin>
-            <groupId>com.mycila.maven-license-plugin</groupId>
-            <artifactId>maven-license-plugin</artifactId>
-            <version>1.8.0</version>
-            <configuration>
-                <header>license.txt</header>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
                 <excludes>
-                    <exclude>**/*.bat</exclude>
-                    <exclude>**/*.html</exclude>
-                    <exclude>**/*.txt</exclude>
-                    <exclude>**/*.xml</exclude>
-                    <exclude>**/*.md</exclude>
-                    <exclude>**/*.nsi</exclude>
                     <exclude>**/*.properties</exclude>
-                    <exclude>**/*.sh</exclude>
-                    <exclude>windows-dependencies/**</exclude>
-                    <exclude>local-proj-repo/**</exclude>
-                    <exclude>src/main/resources/**</exclude>
-                    <exclude>src/main/nsis/**</exclude>
-                    <exclude>src/test/resources/**</exclude>
-                    <exclude>yoursway-create-dmg/**</exclude>
-                    <exclude>.gitignore</exclude>
-                    <exclude>.gitmodules</exclude>
                 </excludes>
-            </configuration>
-            <executions>
-                <execution>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>check</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
-  </build>
+            </resource>
+            <resource>
+                <directory>src/main/nsis/bin</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
 
-  <profiles>
-    <profile>
-      <id>linux32</id>
-      <activation>
-        <os>
-          <family>Unix</family>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.gtk.linux.x86</artifactId>
-          <version>4.5.1</version>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>linux64</id>
-      <activation>
-        <os>
-          <family>Unix</family>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
-          <version>4.5.1</version>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>mac32</id>
-      <activation>
-        <os>
-          <family>mac</family>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
-          <version>4.6.1</version>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>mac64</id>
-      <activation>
-        <os>
-          <family>mac</family>
-          <arch>x86_64</arch>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
-          <version>4.6.1</version>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>win32</id>
-      <activation>
-        <os>
-          <family>Windows</family>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
-          <version>4.5.1</version>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>win64</id>
-      <activation>
-        <os>
-          <family>Windows</family>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <dependencies>
-		<!-- https://mvnrepository.com/artifact/org.eclipse.swt.org.eclipse.swt.win32.win32.x86_64.4.3.swt/org.eclipse.swt.win32.win32.x86_64 -->
-		<dependency>
-			<groupId>org.eclipse.swt.org.eclipse.swt.win32.win32.x86_64.4.3.swt</groupId>
-			<artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
-			<version>4.3</version>
-		</dependency>
-      </dependencies>
-    </profile>
-
-    <profile>
-      <id>NSIS</id>
-      <activation>
-        <os>
-          <family>Windows</family>
-        </os>
-      </activation>
-      <build>
+        <filters>
+            <filter>src/test/resources/testfilter.properties</filter>
+        </filters>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
 
         <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.codehaus.mojo</groupId>
-              <artifactId>nsis-maven-plugin</artifactId>
-              <version>1.0-SNAPSHOT</version>
-            </plugin>
-              <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-compiler-plugin</artifactId>
-                  <version>3.8.0</version>
-              </plugin>
-              <plugin>
-                  <groupId>com.akathist.maven.plugins.launch4j</groupId>
-                  <artifactId>launch4j-maven-plugin</artifactId>
-                  <version>1.7.25</version>
-              </plugin>
-          </plugins>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>osxappbundle-maven-plugin</artifactId>
+                    <version>1.2.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.2.1</version>
+                </plugin>
+            </plugins>
         </pluginManagement>
 
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <useDefaultDelimiters>false</useDefaultDelimiters>
+                    <delimiters>
+                        <delimiter>${*}</delimiter>
+                    </delimiters>
+                    <nonFilteredFileExtensions>
+                        <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>swf</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>png</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
+                </configuration>
+            </plugin>
+
+            <!-- we might want to use the maven-shade-plugin in the future instead
+              of maven-assembly-plugin -->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.salesforce.dataloader.process.DataLoaderRunner
+                            </mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptors>
+                        <descriptor>src/main/assembly/uber.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-uber-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>shade
+                            </shadedClassifierName> <!-- Any name that makes sense -->
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.salesforce.dataloader.process.DataLoaderRunner
+                                    </mainClass>
+                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.handlers</resource>
+                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.schemas</resource>
+                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.tooling</resource>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>${java.compile.version}</source>
                     <target>${java.compile.version}</target>
                 </configuration>
             </plugin>
+
             <plugin>
-                <groupId>com.akathist.maven.plugins.launch4j</groupId>
-                <artifactId>launch4j-maven-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.1</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit4</artifactId>
+                        <version>3.0.0-M2</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <excludes>
+                        <!-- CORE UNIT TESTS: revise to keep this list fast and connectivity free -->
+                        <exclude>**/client/**</exclude>
+                        <exclude>**/dyna/SObjectReferenceConverterTest.*</exclude>
+                        <exclude>**/integration/**</exclude>
+                        <exclude>**/mapping/LoadMapperTest.*</exclude>
+                        <exclude>**/mapping/SOQLMapperTest.*</exclude>
+                        <exclude>**/process/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>1.8.0</version>
+                <configuration>
+                    <header>license.txt</header>
+                    <excludes>
+                        <exclude>**/*.bat</exclude>
+                        <exclude>**/*.html</exclude>
+                        <exclude>**/*.txt</exclude>
+                        <exclude>**/*.xml</exclude>
+                        <exclude>**/*.md</exclude>
+                        <exclude>**/*.nsi</exclude>
+                        <exclude>**/*.properties</exclude>
+                        <exclude>**/*.sh</exclude>
+                        <exclude>windows-dependencies/**</exclude>
+                        <exclude>local-proj-repo/**</exclude>
+                        <exclude>src/main/resources/**</exclude>
+                        <exclude>src/main/nsis/**</exclude>
+                        <exclude>src/test/resources/**</exclude>
+                        <exclude>yoursway-create-dmg/**</exclude>
+                        <exclude>.gitignore</exclude>
+                        <exclude>.gitmodules</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>l4j-clui</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>launch4j</goal>
-                        </goals>
-                        <configuration>
-                            <headerType>gui</headerType>
-                            <dontWrapJar>true</dontWrapJar>
-                            <jar>${project.artifactId}-${project.version}-uber.jar</jar>
-                            <outfile>${project.build.directory}/${project.artifactId}-${project.version}.exe</outfile>
-                            <downloadUrl>https://www.azul.com/downloads/zulu/</downloadUrl>
-                            <classPath>
-                                <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-                                <preCp>anything</preCp>
-                            </classPath>
-                            <icon>${basedir}/src/main/resources/img/icons/dataloader.ico</icon>
-                            <jre>
-                                <minVersion>${minJvmVersion}</minVersion>
-                                <jdkPreference>preferJre</jdkPreference>
-                                <runtimeBits>64</runtimeBits>
-                            </jre>
-                            <versionInfo>
-                                <fileVersion>${project.version}.0</fileVersion>
-                                <txtFileVersion>${project.version}</txtFileVersion>
-                                <fileDescription>${project.name}</fileDescription>
-                                <copyright>${build.year} ${project.organization.name}</copyright>
-                                <productVersion>${project.version}.0</productVersion>
-                                <txtProductVersion>${project.version}.0</txtProductVersion>
-                                <productName>${project.name}</productName>
-                                <companyName>${project.organization.name}</companyName>
-                                <internalName>/${project.artifactId}-${project.version}</internalName>
-                                <originalFilename>${project.artifactId}-${project.version}.exe</originalFilename>
-                            </versionInfo>
-                        </configuration>
-                    </execution>
-                    <execution>
-                      <id>l4j-java-home</id>
-                      <phase>package</phase>
-                      <goals>
-                        <goal>launch4j</goal>
-                      </goals>
-                      <configuration>
-                        <headerType>console</headerType>
-                        <dontWrapJar>true</dontWrapJar>
-                        <jar>../${project.artifactId}-${project.version}-uber.jar</jar>
-                        <outfile>${project.build.directory}/${project.artifactId}-${project.version}-java-home.exe</outfile>
-                        <downloadUrl>https://www.azul.com/downloads/zulu/</downloadUrl>
-                        <classPath>
-                          <mainClass>com.salesforce.dataloader.process.FindJavaRunner</mainClass>
-                          <preCp>anything</preCp>
-                        </classPath>
-                        <icon>${basedir}/src/main/resources/img/icons/dataloader.ico</icon>
-                        <jre>
-                          <minVersion>${minJvmVersion}</minVersion>
-                          <jdkPreference>preferJre</jdkPreference>
-                          <runtimeBits>32</runtimeBits>
-                        </jre>
-                        <versionInfo>
-                          <fileVersion>${project.version}.0</fileVersion>
-                          <txtFileVersion>${project.version}</txtFileVersion>
-                          <fileDescription>${project.name}</fileDescription>
-                          <copyright>${build.year} ${project.organization.name}</copyright>
-                          <productVersion>${project.version}.0</productVersion>
-                          <txtProductVersion>${project.version}.0</txtProductVersion>
-                          <productName>${project.name}</productName>
-                          <companyName>${project.organization.name}</companyName>
-                          <internalName>/${project.artifactId}-${project.version}</internalName>
-                          <originalFilename>${project.artifactId}-${project.version}-java-home.exe</originalFilename>
-                        </versionInfo>
-                      </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>copy-misc-files</id>
-                        <phase> prepare-package </phase>
-                        <configuration>
-                            <target>
-                                <!-- unpack NSIS -->
-                                <unzip src="windows-dependencies/nsis-${nsis.version}.zip" dest="target" />
-                              <echo>Copying additional assets for MSI</echo>
-                              <copy file="${basedir}/src/main/nsis/config.properties" tofile="${basedir}/target/config.properties"/>
-                              <replace file="${basedir}/target/config.properties" token="#placeholder" value="${config.additional.properties}"/>
-                              <replace file="${basedir}/target/config.properties" token="\n" value="${line.separator}"/>
-                              <echo file="${basedir}/target/additional.nsh">
-!define CODESIGN "${codesign}"
-!define PROJECT_BASEDIR "${basedir}"
-!define PROJECT_BUILD_DIR "${basedir}\target"
-!define PROJECT_FINAL_NAME "${project.artifactId}-${project.version}"
-!define PROJECT_GROUP_ID "${project.groupId}"
-!define PROJECT_ARTIFACT_ID "${project.artifactId}"
-!define PROJECT_NAME "${project.name}"
-!define PROJECT_VERSION "${project.version}"
-!define PROJECT_URL "${project.url}"
-!define PROJECT_ORGANIZATION_NAME "${project.organization.name}"
-!define PROJECT_ORGANIZATION_URL "${project.organization.url}"
-!define PROJECT_REG_KEY "SOFTWARE\${project.organization.name}\${project.name}\${project.version}"
-!define PROJECT_REG_UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${project.name} ${project.version}"
-!define PROJECT_STARTMENU_FOLDER "$$SMPROGRAMS\${project.organization.name}\${project.name} ${project.version}"
-                              </echo>
-
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>sign-windows-exes</id>
-                        <phase> package </phase>
-                        <configuration>
-                            <target>
-                             <exec executable="windows-dependencies\sign.bat">
-                                <arg value="${codesign}"/>
-                                <arg value="target\${project.artifactId}-${project.version}-java-home.exe"/>
-                              </exec>
-                              <exec executable="windows-dependencies\sign.bat">
-                                <arg value="${codesign}"/>
-                                <arg value="target\${project.artifactId}-${project.version}.exe"/>
-                              </exec>
-                              <exec executable="target\nsis-${nsis.version}\makensis.exe">
-                                <arg value="/XOutFile ${basedir}\target\${project.artifactId}-${project.version}.exe"/>
-                                <arg value="/V2"/>
-                                <arg value="setup.nsi"/>
-                              </exec>
-                              <exec executable="windows-dependencies\sign.bat">
-                                <arg value="${codesign}"/>
-                                <arg value="target\${project.artifactId}-${project.version}.installer.exe"/>
-                              </exec>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
-      </build>
-    </profile>
+    </build>
 
-    <profile>
-      <id>installer-test-x86</id>
-      <activation>
-        <os>
-          <family>Windows</family>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <properties>
-        <autoit.dll.path>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3.dll</autoit.dll.path>
-      </properties>
-    </profile>
-
-    <profile>
-      <id>installer-test-amd64</id>
-      <activation>
-        <os>
-          <family>Windows</family>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <properties>
-        <autoit.dll.path>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3_x64.dll</autoit.dll.path>
-      </properties>
-    </profile>
-
-
-    <profile>
-        <id>mac-dmg</id>
-        <activation>
-            <os>
-                <family>mac</family>
-            </os>
-        </activation>
-        <build>
-            <plugins>
-                <plugin>
-                  <groupId>sh.tak.appbundler</groupId>
-                  <artifactId>appbundle-maven-plugin</artifactId>
-                  <version>1.2.0</version>
-                  <dependencies>
-                    <dependency>
-                      <groupId>org.codehaus.plexus</groupId>
-                      <artifactId>plexus-archiver</artifactId>
-                      <version>3.7.0</version>
-                    </dependency>
-                    <dependency>
-                      <groupId>org.apache.velocity</groupId>
-                      <artifactId>velocity-tools</artifactId>
-                      <version>2.0</version>
-                    </dependency>
-                  </dependencies>
-                  <configuration>
-                        <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-                        <jvmVersion>${java.compile.version}</jvmVersion>
-                        <jvmOptions>
-                            <string>-XstartOnFirstThread</string>
-                        </jvmOptions>
-                        <jrePath>/Library/Java/JavaVirtualMachines/sfdc-openjdk_11.0.1.jdk</jrePath>
-                    <iconFile>src/main/resources/img/icons/icon_loader.icns</iconFile>
-                  </configuration>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>bundle</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-antrun-plugin</artifactId>
-                    <version>1.8</version>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>run</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <tasks>
-                          <echo>Copying additional assets for DMG</echo>
-                          <copy file="${basedir}/src/main/resources/Localizable.strings" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/en.lproj/Localizable.strings"/>
-                          <copy file="${basedir}/src/main/nsis/config.properties" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties"/>
-                          <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties" token="#placeholder" value="${config.additional.properties}"/>
-                          <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties" token="\n" value="${line.separator}"/>
-                        </tasks>
-                    </configuration>
-                </plugin>
-                <plugin>
-                  <groupId>org.codehaus.mojo</groupId>
-                  <artifactId>exec-maven-plugin</artifactId>
-                  <version>1.6.0</version>
-                  <executions>
-                    <execution>
-                      <id>make-pretty-dmg</id>
-                      <phase>package</phase>
-                      <configuration>
-                        <executable>bash</executable>
-                        <arguments>
-                          <argument>make-pretty-dmg.sh</argument>
-                          <argument>${basedir}</argument>
-                          <argument>${project.build.directory}/${project.build.finalName}</argument>
-                          <argument>${codesign}</argument>
-                        </arguments>
-                      </configuration>
-                      <goals>
-                        <goal>exec</goal>
-                      </goals>
-                    </execution>
-                  </executions>
-                </plugin>
-
-            </plugins>
-        </build>
-    </profile>
-
-    <profile>
-      <id>integration-test</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.13</version>
+    <profiles>
+        <profile>
+            <id>linux32</id>
+            <activation>
+                <os>
+                    <family>Unix</family>
+                    <arch>x86</arch>
+                </os>
+            </activation>
             <dependencies>
-              <dependency>
-                <groupId>org.apache.maven.surefire</groupId>
-                <artifactId>surefire-junit4</artifactId>
-                <version>2.13</version>
-              </dependency>
+                <dependency>
+                    <groupId>org.eclipse.swt</groupId>
+                    <artifactId>org.eclipse.swt.gtk.linux.x86</artifactId>
+                    <version>4.5.1</version>
+                </dependency>
             </dependencies>
-            <configuration>
-              <excludes>
-                <!-- INTEGRATION UNIT TESTS: revise to remove works in progress -->
-                <exclude>**/integration/**</exclude>
-              </excludes>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
+        </profile>
+        <profile>
+            <id>linux64</id>
+            <activation>
+                <os>
+                    <family>Unix</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.swt</groupId>
+                    <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
+                    <version>4.5.1</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>mac32</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>x86</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.swt</groupId>
+                    <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
+                    <version>4.6.1</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>mac64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.swt</groupId>
+                    <artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
+                    <version>4.6.1</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>win32</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                    <arch>x86</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.swt</groupId>
+                    <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
+                    <version>4.5.1</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>win64</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <!-- https://mvnrepository.com/artifact/org.eclipse.swt.org.eclipse.swt.win32.win32.x86_64.4.3.swt/org.eclipse.swt.win32.win32.x86_64 -->
+                <dependency>
+                    <groupId>org.eclipse.swt.org.eclipse.swt.win32.win32.x86_64.4.3.swt</groupId>
+                    <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+                    <version>4.3</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>NSIS</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                </os>
+            </activation>
+            <build>
+
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>nsis-maven-plugin</artifactId>
+                            <version>1.0-SNAPSHOT</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-compiler-plugin</artifactId>
+                            <version>3.8.0</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                            <artifactId>launch4j-maven-plugin</artifactId>
+                            <version>1.7.25</version>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>${java.compile.version}</source>
+                            <target>${java.compile.version}</target>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                        <artifactId>launch4j-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>l4j-clui</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>launch4j</goal>
+                                </goals>
+                                <configuration>
+                                    <headerType>gui</headerType>
+                                    <dontWrapJar>true</dontWrapJar>
+                                    <jar>${project.artifactId}-${project.version}-uber.jar</jar>
+                                    <outfile>
+                                        ${project.build.directory}/${project.artifactId}-${project.version}.exe
+                                    </outfile>
+                                    <downloadUrl>https://www.azul.com/downloads/zulu/</downloadUrl>
+                                    <classPath>
+                                        <mainClass>
+                                            com.salesforce.dataloader.process.DataLoaderRunner
+                                        </mainClass>
+                                        <preCp>anything</preCp>
+                                    </classPath>
+                                    <icon>${basedir}/src/main/resources/img/icons/dataloader.ico
+                                    </icon>
+                                    <jre>
+                                        <minVersion>${minJvmVersion}</minVersion>
+                                        <jdkPreference>preferJre</jdkPreference>
+                                        <runtimeBits>64</runtimeBits>
+                                    </jre>
+                                    <versionInfo>
+                                        <fileVersion>${project.version}.0</fileVersion>
+                                        <txtFileVersion>${project.version}</txtFileVersion>
+                                        <fileDescription>${project.name}</fileDescription>
+                                        <copyright>${build.year} ${project.organization.name}
+                                        </copyright>
+                                        <productVersion>${project.version}.0</productVersion>
+                                        <txtProductVersion>${project.version}.0</txtProductVersion>
+                                        <productName>${project.name}</productName>
+                                        <companyName>${project.organization.name}</companyName>
+                                        <internalName>/${project.artifactId}-${project.version}
+                                        </internalName>
+                                        <originalFilename>
+                                            ${project.artifactId}-${project.version}.exe
+                                        </originalFilename>
+                                    </versionInfo>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>l4j-java-home</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>launch4j</goal>
+                                </goals>
+                                <configuration>
+                                    <headerType>console</headerType>
+                                    <dontWrapJar>true</dontWrapJar>
+                                    <jar>../${project.artifactId}-${project.version}-uber.jar</jar>
+                                    <outfile>
+                                        ${project.build.directory}/${project.artifactId}-${project.version}-java-home.exe
+                                    </outfile>
+                                    <downloadUrl>https://www.azul.com/downloads/zulu/</downloadUrl>
+                                    <classPath>
+                                        <mainClass>
+                                            com.salesforce.dataloader.process.FindJavaRunner
+                                        </mainClass>
+                                        <preCp>anything</preCp>
+                                    </classPath>
+                                    <icon>${basedir}/src/main/resources/img/icons/dataloader.ico
+                                    </icon>
+                                    <jre>
+                                        <minVersion>${minJvmVersion}</minVersion>
+                                        <jdkPreference>preferJre</jdkPreference>
+                                        <runtimeBits>32</runtimeBits>
+                                    </jre>
+                                    <versionInfo>
+                                        <fileVersion>${project.version}.0</fileVersion>
+                                        <txtFileVersion>${project.version}</txtFileVersion>
+                                        <fileDescription>${project.name}</fileDescription>
+                                        <copyright>${build.year} ${project.organization.name}
+                                        </copyright>
+                                        <productVersion>${project.version}.0</productVersion>
+                                        <txtProductVersion>${project.version}.0</txtProductVersion>
+                                        <productName>${project.name}</productName>
+                                        <companyName>${project.organization.name}</companyName>
+                                        <internalName>/${project.artifactId}-${project.version}
+                                        </internalName>
+                                        <originalFilename>
+                                            ${project.artifactId}-${project.version}-java-home.exe
+                                        </originalFilename>
+                                    </versionInfo>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <id>copy-misc-files</id>
+                                <phase>prepare-package</phase>
+                                <configuration>
+                                    <target>
+                                        <!-- unpack NSIS -->
+                                        <unzip src="windows-dependencies/nsis-${nsis.version}.zip"
+                                               dest="target"/>
+                                        <echo>Copying additional assets for MSI</echo>
+                                        <copy file="${basedir}/src/main/nsis/config.properties"
+                                              tofile="${basedir}/target/config.properties"/>
+                                        <replace file="${basedir}/target/config.properties"
+                                                 token="#placeholder"
+                                                 value="${config.additional.properties}"/>
+                                        <replace file="${basedir}/target/config.properties"
+                                                 token="\n" value="${line.separator}"/>
+                                        <echo file="${basedir}/target/additional.nsh">
+                                            !define CODESIGN "${codesign}"
+                                            !define PROJECT_BASEDIR "${basedir}"
+                                            !define PROJECT_BUILD_DIR "${basedir}\target"
+                                            !define PROJECT_FINAL_NAME
+                                            "${project.artifactId}-${project.version}"
+                                            !define PROJECT_GROUP_ID "${project.groupId}"
+                                            !define PROJECT_ARTIFACT_ID "${project.artifactId}"
+                                            !define PROJECT_NAME "${project.name}"
+                                            !define PROJECT_VERSION "${project.version}"
+                                            !define PROJECT_URL "${project.url}"
+                                            !define PROJECT_ORGANIZATION_NAME
+                                            "${project.organization.name}"
+                                            !define PROJECT_ORGANIZATION_URL
+                                            "${project.organization.url}"
+                                            !define PROJECT_REG_KEY
+                                            "SOFTWARE\${project.organization.name}\${project.name}\${project.version}"
+                                            !define PROJECT_REG_UNINSTALL_KEY
+                                            "Software\Microsoft\Windows\CurrentVersion\Uninstall\${project.name}
+                                            ${project.version}"
+                                            !define PROJECT_STARTMENU_FOLDER
+                                            "$$SMPROGRAMS\${project.organization.name}\${project.name}
+                                            ${project.version}"
+                                        </echo>
+
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>sign-windows-exes</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <target>
+                                        <exec executable="windows-dependencies\sign.bat">
+                                            <arg value="${codesign}"/>
+                                            <arg value="target\${project.artifactId}-${project.version}-java-home.exe"/>
+                                        </exec>
+                                        <exec executable="windows-dependencies\sign.bat">
+                                            <arg value="${codesign}"/>
+                                            <arg value="target\${project.artifactId}-${project.version}.exe"/>
+                                        </exec>
+                                        <exec executable="target\nsis-${nsis.version}\makensis.exe">
+                                            <arg value="/XOutFile ${basedir}\target\${project.artifactId}-${project.version}.exe"/>
+                                            <arg value="/V2"/>
+                                            <arg value="setup.nsi"/>
+                                        </exec>
+                                        <exec executable="windows-dependencies\sign.bat">
+                                            <arg value="${codesign}"/>
+                                            <arg value="target\${project.artifactId}-${project.version}.installer.exe"/>
+                                        </exec>
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>installer-test-x86</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                    <arch>x86</arch>
+                </os>
+            </activation>
+            <properties>
+                <autoit.dll.path>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3.dll
+                </autoit.dll.path>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>installer-test-amd64</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <properties>
+                <autoit.dll.path>${basedir}\windows-dependencies\autoit\AutoItX\AutoItX3_x64.dll
+                </autoit.dll.path>
+            </properties>
+        </profile>
+
+
+        <profile>
+            <id>mac-dmg</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>sh.tak.appbundler</groupId>
+                        <artifactId>appbundle-maven-plugin</artifactId>
+                        <version>1.2.0</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.codehaus.plexus</groupId>
+                                <artifactId>plexus-archiver</artifactId>
+                                <version>3.7.0</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.apache.velocity</groupId>
+                                <artifactId>velocity-tools</artifactId>
+                                <version>2.0</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <mainClass>com.salesforce.dataloader.process.DataLoaderRunner
+                            </mainClass>
+                            <jvmVersion>${java.compile.version}</jvmVersion>
+                            <jvmOptions>
+                                <string>-XstartOnFirstThread</string>
+                            </jvmOptions>
+                            <jrePath>/Library/Java/JavaVirtualMachines/sfdc-openjdk_11.0.1.jdk
+                            </jrePath>
+                            <iconFile>src/main/resources/img/icons/icon_loader.icns</iconFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>bundle</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <tasks>
+                                <echo>Copying additional assets for DMG</echo>
+                                <copy file="${basedir}/src/main/resources/Localizable.strings"
+                                      tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/en.lproj/Localizable.strings"/>
+                                <copy file="${basedir}/src/main/nsis/config.properties"
+                                      tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties"/>
+                                <replace
+                                        file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties"
+                                        token="#placeholder"
+                                        value="${config.additional.properties}"/>
+                                <replace
+                                        file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties"
+                                        token="\n" value="${line.separator}"/>
+                            </tasks>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                            <execution>
+                                <id>make-pretty-dmg</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>make-pretty-dmg.sh</argument>
+                                        <argument>${basedir}</argument>
+                                        <argument>
+                                            ${project.build.directory}/${project.build.finalName}
+                                        </argument>
+                                        <argument>${codesign}</argument>
+                                    </arguments>
+                                </configuration>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>integration-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.13</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.maven.surefire</groupId>
+                                <artifactId>surefire-junit4</artifactId>
+                                <version>2.13</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <excludes>
+                                <!-- INTEGRATION UNIT TESTS: revise to remove works in progress -->
+                                <exclude>**/integration/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 
 </project>
