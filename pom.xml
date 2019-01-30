@@ -343,7 +343,6 @@
 
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
         <configuration>
           <source>${java.compile.version}</source>
           <target>${java.compile.version}</target>
@@ -537,7 +536,7 @@
               <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-compiler-plugin</artifactId>
-                  <version>3.8.1</version>
+                  <version>3.8.0</version>
               </plugin>
               <plugin>
                   <groupId>com.akathist.maven.plugins.launch4j</groupId>
@@ -551,7 +550,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
                 <configuration>
                     <source>${java.compile.version}</source>
                     <target>${java.compile.version}</target>
@@ -608,7 +606,7 @@
                         <dontWrapJar>true</dontWrapJar>
                         <jar>../${project.artifactId}-${project.version}-uber.jar</jar>
                         <outfile>${project.build.directory}/${project.artifactId}-${project.version}-java-home.exe</outfile>
-                        <downloadUrl>http://java.com/download</downloadUrl>
+                        <downloadUrl>https://www.azul.com/downloads/zulu/</downloadUrl>
                         <classPath>
                           <mainClass>com.salesforce.dataloader.process.FindJavaRunner</mainClass>
                           <preCp>anything</preCp>
