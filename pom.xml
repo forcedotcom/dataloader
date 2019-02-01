@@ -583,7 +583,7 @@
                                     </icon>
                                     <jre>
                                         <minVersion>${minJvmVersion}</minVersion>
-                                        <jdkPreference>preferJre</jdkPreference>
+                                        <jdkPreference>preferJdk</jdkPreference>
                                         <runtimeBits>64</runtimeBits>
                                     </jre>
                                     <versionInfo>

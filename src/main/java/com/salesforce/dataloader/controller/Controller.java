@@ -115,7 +115,7 @@ public class Controller {
     private String appPath;
 
     private Controller(String name, boolean isBatchMode) throws ControllerInitializationException {
-        System.console().printf("HELLLO");
+
         initStaticVariable();
         // if name is passed to controller, use it to create a unique run file name
         try {
