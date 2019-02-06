@@ -114,7 +114,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         setThreadName(name);
 
         try {
-            controller = Controller.getInstance(name, true);
+            controller = Controller.getInstance(name, true, null);
         } catch (ControllerInitializationException e) {
             throw new RuntimeException(e);
         }

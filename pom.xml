@@ -766,7 +766,6 @@
                         <jvmOptions>
                             <string>-XstartOnFirstThread</string>
                         </jvmOptions>
-                        <jrePath>/Library/Java/JavaVirtualMachines/sfdc-openjdk_11.0.1.jdk</jrePath>
                     <iconFile>src/main/resources/img/icons/icon_loader.icns</iconFile>
                   </configuration>
                     <executions>

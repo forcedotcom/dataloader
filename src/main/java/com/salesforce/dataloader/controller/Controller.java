@@ -63,7 +63,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -114,19 +116,32 @@ public class Controller {
     private static Logger logger = Logger.getLogger(Controller.class);
     private String appPath;
 
-    private Controller(String name, boolean isBatchMode) throws ControllerInitializationException {
+    private Controller(String name, boolean isBatchMode, String[] args) throws ControllerInitializationException {
         initStaticVariable();
         // if name is passed to controller, use it to create a unique run file name
         try {
-            initConfig(name, isBatchMode);
+            initConfig(name, isBatchMode, getConfigDirFromArgMap(args));
         } catch (Exception e) {
             logger.error("Exception happened in initConfig:", e);
             throw e;
         }
     }
 
-    public static void initStaticVariable() throws ControllerInitializationException
-    {
+    private String getConfigDirFromArgMap(String[] args) {
+        //Process name=value config setting
+        Map<String, String> argNameValuePair = new HashMap<>();
+        Arrays.stream(args).forEach(arg ->
+        {
+            String[] argArray = arg.split("=");
+            if (argArray.length == 2)
+                argNameValuePair.put(argArray[0], argArray[1]);
+        });
+
+        return argNameValuePair.containsKey(CONFIG_DIR_PROP) ?
+                argNameValuePair.get(CONFIG_DIR_PROP) : null;
+    }
+
+    public static void initStaticVariable() throws ControllerInitializationException {
         Properties versionProps = new Properties();
         try {
             versionProps.load(Controller.class.getClassLoader().getResourceAsStream("com/salesforce/dataloader/version.properties"));
@@ -250,8 +265,8 @@ public class Controller {
         saveConfig();
     }
 
-    public static Controller getInstance(String name, boolean isBatchMode) throws ControllerInitializationException {
-        return new Controller(name, isBatchMode);
+    public static Controller getInstance(String name, boolean isBatchMode, String[] args) throws ControllerInitializationException {
+        return new Controller(name, isBatchMode, args);
     }
 
 
@@ -304,7 +319,7 @@ public class Controller {
      */
     private static File getUserConfigDir() {
         if (OS_TYPE == null) {
-            logger.error("getUserConfigDir(): Control static values are not initialized." );
+            logger.error("getUserConfigDir(): Control static values are not initialized.");
             throw new RuntimeException("OS type not initialized correctly!");
         }
 
@@ -331,8 +346,8 @@ public class Controller {
 
     /* Append the osAppendix to the binPath starting at position endIdx */
 
-    private static File getInstalledConfigDir(String binPath, int endIdx, String osAppendix){
-        if (endIdx != -1){
+    private static File getInstalledConfigDir(String binPath, int endIdx, String osAppendix) {
+        if (endIdx != -1) {
             binPath = binPath.substring(0, endIdx);
         }
         return new File(binPath, osAppendix);
@@ -362,17 +377,17 @@ public class Controller {
         switch (OS_TYPE) {
             case WINDOWS: {
                 //For windows,﻿filepath is﻿C:\Program Files\salesforce.com\Data Loader\dataloader-xxx-uber.jar
-                dir = getInstalledConfigDir(path, path.lastIndexOf(File.separator),  "conf");
+                dir = getInstalledConfigDir(path, path.lastIndexOf(File.separator), "conf");
                 break;
             }
             case MACOSX: {
                 // For mac, ﻿filepath is /Applications/Data Loader.app/Contents/Java/com/force/dataloader/xx.0.0/***.jar
-                dir = getInstalledConfigDir(path, path.lastIndexOf("/Contents"),  "Contents/Resources/conf");
+                dir = getInstalledConfigDir(path, path.lastIndexOf("/Contents"), "Contents/Resources/conf");
                 break;
             }
             default:
             case LINUX: {
-                dir = getInstalledConfigDir(path, path.lastIndexOf(File.separator),  "conf");
+                dir = getInstalledConfigDir(path, path.lastIndexOf(File.separator), "conf");
                 break;
             }
         }
@@ -383,12 +398,12 @@ public class Controller {
     /**
      * Get the current config.properties and load it into the config bean.
      */
-    protected void initConfig(String name, boolean isBatchMode) throws ControllerInitializationException {
+    protected void initConfig(String name, boolean isBatchMode, String configDirParameter) throws ControllerInitializationException {
 
         // Initialize log first to use correct logging level
         initLog();
 
-        String configDirPath = getConfigDir();
+        String configDirPath = configDirParameter != null ? configDirParameter : getConfigDir();
         File configDir;
 
         if (configDirPath == null) {
