@@ -1,3 +1,14 @@
+# Release Dataloader 45.0.0
+Since Jan 2019,  Oracle will not support Java 8 for commercial user any more.  We switch to Zulu Openjdk 11 since Dataloader V45.  
+As the Java community adapts to the Oracle Java support policy change, we have not yet found a good maven plug in that packages Maven and Windows application easily.  We are shipping the runnable  Dataloader Jar as of V45.   
+
+
+
+
+
+
+
+
 # Build Data Loader
 
     git clone git@github.com:forcedotcom/dataloader.git
