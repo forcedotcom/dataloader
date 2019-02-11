@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>44.0.0</version>
+  <version>45.0.0</version>
   <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -13,9 +13,9 @@
   </organization>
 
   <properties>
-    <force.wsc.version>44.0.0</force.wsc.version>
-    <force.partner.api.version>44.0.0</force.partner.api.version>
-    <build.year>2018</build.year>
+    <force.wsc.version>45.0.0</force.wsc.version>
+    <force.partner.api.version>45.0.0</force.partner.api.version>
+    <build.year>2019</build.year>
     <java.compile.version>1.8</java.compile.version>
     <minJvmVersion>1.8.0</minJvmVersion>
     <codesign>DONTSIGN</codesign>
