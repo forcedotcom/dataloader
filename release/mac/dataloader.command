@@ -17,9 +17,9 @@ export DATALODER_WORK_DIRECTORY="$HOME/dataloader"
 # This is used for Mac user Terminal
 if [ -z "$JAVA_HOME" ]
 then
-    echo "Please download Zulu Openjdk here: https://www.azul.com/downloads/zulu/zulu-mac/
+    echo "Please download Zulu Openjdk here: https://www.azul.com/downloads/zulu/zulu-mac/"
 else
     echo "$JAVA_HOME"
     cd $DATALODER_WORK_DIRECTORY   #change to your own customized directory
-    java -XstartOnFirstThread -jar libs/dataloader-45.0.0-uber.jar salesforce.config.dir=$DATALODER_WORK_DIRECTORY/configs
+    java -XstartOnFirstThread -jar jars/dataloader-45.0.0-uber.jar salesforce.config.dir=$DATALODER_WORK_DIRECTORY/configs
 fi
