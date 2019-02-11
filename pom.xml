@@ -241,7 +241,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>osxappbundle-maven-plugin</artifactId>
-          <version>1.0-alpha-2</version>
+          <version>1.2.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -734,14 +734,26 @@
                 <plugin>
                     <groupId>sh.tak.appbundler</groupId>
                     <artifactId>appbundle-maven-plugin</artifactId>
-                    <version>1.0.4</version>
+                    <version>1.2.0</version>
+                    <dependencies>
+                      <dependency>
+                        <groupId>org.codehaus.plexus</groupId>
+                        <artifactId>plexus-archiver</artifactId>
+                        <version>3.7.0</version>
+                      </dependency>
+                      <dependency>
+                        <groupId>org.apache.velocity</groupId>
+                        <artifactId>velocity-tools</artifactId>
+                        <version>2.0</version>
+                      </dependency>
+                    </dependencies>
                     <configuration>
                         <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
                         <jvmVersion>1.8</jvmVersion>
                         <jvmOptions>
                             <string>-XstartOnFirstThread</string>
                         </jvmOptions>
-                        <iconFile>${basedir}/src/main/resources/img/icons/icon_loader.icns</iconFile>
+                        <iconFile>src/main/resources/img/icons/icon_loader.icns</iconFile>
                     </configuration>
                     <executions>
                         <execution>
