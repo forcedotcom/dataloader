@@ -1,0 +1,107 @@
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+    <bean id="accountMasterProcess"
+          class="com.salesforce.dataloader.process.ProcessRunner"
+          singleton="false">
+        <description>AccountMaster job gets the Customer record updates from ERP (Oracle financials) and uploads them to salesforce using 'upsert'.</description>
+        <property name="name" value="accountMasterProcess"/>
+        <property name="configOverrideMap">
+            <map>
+                <entry key="sfdc.debugMessages" value="true"/>
+                <entry key="sfdc.debugMessagesFile" value="c:\dataloader\samples\status\accountMasterSoapTrace.log"/>
+                <entry key="sfdc.endpoint" value="https://login.salesforce.com"/>
+                <entry key="sfdc.username" value="user@mycompany.com"/>
+                <!-- password below has been encrypted using key file, therefore it will not work without the key setting: process.encryptionKeyFile
+                the password is not a valid encrypted value, please generate the real value using encrypt.bat utility -->
+                <entry key="sfdc.password" value="5555555555555555"/>
+                <entry key="process.encryptionKeyFile" value="c:\users\username\sample.key"/>
+                <entry key="sfdc.timeoutSecs" value="600"/>
+                <entry key="sfdc.loadBatchSize" value="200"/>
+                <entry key="sfdc.externalIdField" value="Oracle_Id__c"/>
+                <entry key="sfdc.entity" value="Account"/>
+                <entry key="process.operation" value="upsert"/>
+                <entry key="process.mappingFile" value="c:\dataloader\samples\conf\accountMasterMap.sdl"/>
+                <entry key="dataAccess.name" value="queryAccount"/>
+                <entry key="dataAccess.type" value="databaseRead"/>
+                <entry key="process.initialLastRunDate" value="2005-12-01T00:00:00.000-0800"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="opportunityUpsertProcess"
+          class="com.salesforce.dataloader.process.ProcessRunner"
+          singleton="false">
+        <description>Opportunity Upsert job gets the Customer record updates from a CSV file and uploads them to salesforce using 'upsert'.</description>
+        <property name="name" value="opportunityUpsertProcess"/>
+        <property name="configOverrideMap">
+            <map>
+                <entry key="sfdc.endpoint" value="https://login.salesforce.com"/>
+                <entry key="sfdc.username" value="user@mycompany.com"/>
+                <!-- password below has been encrypted using key file, therefore it will not work without the key setting: process.encryptionKeyFile
+                the password is not a valid encrypted value, please generate the real value using encrypt.bat utility -->
+                <entry key="sfdc.password" value="5555555555555555"/>
+                <entry key="process.encryptionKeyFile" value="c:\users\username\sample.key"/>
+                <entry key="sfdc.timeoutSecs" value="600"/>
+                <entry key="sfdc.loadBatchSize" value="200"/>
+                <entry key="sfdc.externalIdField" value="Oracle_Id__c"/>
+                <entry key="sfdc.entity" value="Opportunity"/>
+                <entry key="process.operation" value="upsert"/>
+                <entry key="process.mappingFile" value="c:\dataloader\samples\conf\opportunityUpsertMap.sdl"/>
+                <entry key="dataAccess.name" value="c:\dataloader\samples\data\opportunityData.csv"/>
+                <entry key="dataAccess.type" value="csvRead"/>
+                <entry key="process.initialLastRunDate" value="2006-12-01T00:00:00.000-0800"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="databaseAccountExtractProcess"
+          class="com.salesforce.dataloader.process.ProcessRunner"
+          singleton="false">
+        <description>DatabaseAccountExtract job gets account info from salesforce and updates or inserts info into database."</description>
+        <property name="name" value="databaseAccountExtract"/>
+        <property name="configOverrideMap">
+            <map>
+                <entry key="sfdc.debugMessages" value="false"/>
+                <entry key="sfdc.debugMessagesFile" value="c:\dataloader\samples\status\sfdcSoapTrace.log"/>
+                <entry key="sfdc.endpoint" value="https://login.salesforce.com"/>
+                <entry key="sfdc.username" value="user@mycompany.com"/>
+                <!-- password specified below is invalid, please generate one using the encrypt.bat utility -->
+                <entry key="sfdc.password" value="1111111111111111"/>
+                <entry key="process.encryptionKeyFile" value="c:\users\username\sample.key"/>
+                <entry key="sfdc.timeoutSecs" value="600"/>
+                <entry key="sfdc.loadBatchSize" value="200"/>
+                <entry key="sfdc.entity" value="Account"/>
+                <entry key="sfdc.extractionRequestSize" value="500"/>
+                <entry key="sfdc.extractionSOQL" value="Select Id, Name, Type, ParentId, Phone, AccountNumber, Website, Sic, AnnualRevenue, NumberOfEmployees, TickerSymbol, Oracle_Id__c FROM Account"/>
+                <entry key="process.operation" value="extract"/>
+                <entry key="process.mappingFile" value="c:\dataloader\samples\conf\accountExtractToDbMap.sdl"/>
+                <entry key="dataAccess.type" value="databaseWrite"/>
+                <entry key="dataAccess.name" value="updateAccount"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="csvAccountExtractProcess"
+          class="com.salesforce.dataloader.process.ProcessRunner"
+          singleton="false">
+      <description>csvAccountExtract job gets account info from salesforce and saves info into a CSV file."</description>
+        <property name="name" value="csvAccountExtract"/>
+        <property name="configOverrideMap">
+            <map>
+                <entry key="sfdc.debugMessages" value="false"/>
+                <entry key="sfdc.debugMessagesFile" value="c:\dataloader\samples\status\sfdcSoapTrace.log"/>
+                <entry key="sfdc.endpoint" value="https://login.salesforce.com"/>
+                <entry key="sfdc.username" value="user@mycompany.com"/>
+                <!-- password specified below is invalid, please generate one using the encrypt.bat utility -->
+                <entry key="sfdc.password" value="1111111111111111"/>
+                <entry key="process.encryptionKeyFile" value="c:\users\username\sample.key"/>
+                <entry key="sfdc.timeoutSecs" value="600"/>
+                <entry key="sfdc.loadBatchSize" value="200"/>
+                <entry key="sfdc.entity" value="Account"/>
+                <entry key="sfdc.extractionRequestSize" value="500"/>
+                <entry key="sfdc.extractionSOQL" value="Select Id, Name, Type, ParentId, Phone, AccountNumber, Website, Sic, AnnualRevenue, NumberOfEmployees, TickerSymbol, Oracle_Id__c FROM Account"/>
+                <entry key="process.operation" value="extract"/>
+                <entry key="process.mappingFile" value="c:\dataloader\samples\conf\accountExtractMap.sdl"/>
+                <entry key="dataAccess.type" value="csvWrite"/>
+                <entry key="dataAccess.name" value="c:\dataloader\samples\data\extract.csv"/>
+            </map>
+        </property>
+    </bean>
+</beans>

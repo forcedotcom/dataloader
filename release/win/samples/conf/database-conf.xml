@@ -1,0 +1,140 @@
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+<bean id="dbDataSource"
+      class="org.apache.commons.dbcp.BasicDataSource"
+      destroy-method="close">
+    <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+    <property name="url" value="jdbc:oracle:thin:@my.server.com:1521:dataBaseName"/>
+    <property name="username" value="user"/>
+    <property name="password" value="password"/>
+</bean>
+<bean id="queryAccountAll"
+      class="com.salesforce.dataloader.dao.database.DatabaseConfig"
+      singleton="true">
+    <property name="sqlConfig" ref="queryAccountAllSql"/>
+    <property name="dataSource" ref="dbDataSource"/>
+</bean>
+<bean id="queryAccount"
+      class="com.salesforce.dataloader.dao.database.DatabaseConfig"
+      singleton="true">
+    <property name="sqlConfig" ref="queryAccountSql"/>
+    <property name="dataSource" ref="dbDataSource"/>
+</bean>
+<bean id="insertAccount"
+      class="com.salesforce.dataloader.dao.database.DatabaseConfig"
+      singleton="true">
+    <property name="sqlConfig" ref="insertAccountSql"/>
+    <property name="dataSource" ref="dbDataSource"/>
+</bean>
+<bean id="updateAccount"
+      class="com.salesforce.dataloader.dao.database.DatabaseConfig"
+      singleton="true">
+    <property name="sqlConfig" ref="updateAccountSql"/>
+    <property name="dataSource" ref="dbDataSource"/>
+</bean>
+<bean id="deleteAccountAll"
+      class="com.salesforce.dataloader.dao.database.DatabaseConfig"
+      singleton="true">
+    <property name="sqlConfig" ref="deleteAccountAllSql"/>
+    <property name="dataSource" ref="dbDataSource"/>
+</bean>
+<bean id="queryAccountAllSql"
+      class="com.salesforce.dataloader.dao.database.SqlConfig" singleton="true">
+    <property name="sqlString">
+        <value>
+            SELECT ACCOUNT_NAME, BUSINESS_PHONE, SFDC_ACCOUNT_ID, ACCOUNT_EXT_ID, ANNUAL_REVENUE, LAST_UPDATED, ACCOUNT_NUMBER
+            FROM TableOwner.Accounts
+        </value>
+    </property>
+    <property name="columnNames">
+        <list>
+            <value>account_name</value>
+            <value>business_phone</value>
+            <value>sfdc_account_id</value>
+            <value>account_ext_id</value>
+            <value>annual_revenue</value>
+            <value>last_updated</value>
+            <value>account_number</value>
+        </list>
+    </property>
+</bean>
+<bean id="queryAccountSql"
+      class="com.salesforce.dataloader.dao.database.SqlConfig" singleton="true">
+    <property name="sqlString">
+        <value>
+            SELECT ACCOUNT_NAME, BUSINESS_PHONE, ACCOUNT_EXT_ID, ANNUAL_REVENUE, LAST_UPDATED, ACCOUNT_NUMBER
+            FROM TableOwner.Accounts
+            WHERE LAST_UPDATED > @process.lastRunDate@
+        </value>
+    </property>
+    <property name="columnNames">
+        <list>
+            <value>account_name</value>
+            <value>business_phone</value>
+            <value>account_ext_id</value>
+            <value>annual_revenue</value>
+            <value>last_updated</value>
+            <value>account_number</value>
+        </list>
+    </property>
+    <property name="sqlParams">
+        <map>
+            <entry key="process.lastRunDate" value="java.sql.Timestamp"/>
+        </map>
+    </property>
+</bean>
+<!--- this is for updating Customers in Oracle based on SFDC Accounts -->
+<bean id="updateAccountSql"
+      class="com.salesforce.dataloader.dao.database.SqlConfig" singleton="true">
+    <property name="sqlString">
+        <value>
+            update TableOwner.Accounts accounts
+               set accounts.account_name = @account_name@,
+                   accounts.business_phone = @business_phone@,
+                   accounts.sfdc_account_id = @sfdc_account_id@,
+                   accounts.annual_revenue = @annual_revenue@,
+                   accounts.account_number = @account_number@
+            where
+                   accounts.ACCOUNT_EXT_ID = @account_ext_id@
+        </value>
+    </property>
+    <property name="sqlParams">
+        <map>
+            <entry key="account_name"    value="java.lang.String"/>
+            <entry key="business_phone"  value="java.lang.String"/>
+            <entry key="sfdc_account_id" value="java.lang.String"/>
+            <entry key="annual_revenue"  value="java.lang.Double"/>
+            <entry key="account_ext_id"  value="java.lang.String"/>
+            <entry key="account_number"  value="java.lang.String"/>
+        </map>
+    </property>
+</bean>
+<bean id="insertAccountSql"
+      class="com.salesforce.dataloader.dao.database.SqlConfig" singleton="true">
+    <property name="sqlString">
+        <value>
+            INSERT INTO TableOwner.Accounts (
+               ACCOUNT_NAME, BUSINESS_PHONE, SFDC_ACCOUNT_ID, ANNUAL_REVENUE, ACCOUNT_EXT_ID, ACCOUNT_NUMBER)
+            VALUES (@account_name@, @business_phone@, @sfdc_account_id@, @annual_revenue@, @account_ext_id@, @account_number@)
+        </value>
+    </property>
+    <property name="sqlParams">
+        <map>
+            <entry key="account_name"    value="java.lang.String"/>
+            <entry key="business_phone"  value="java.lang.String"/>
+            <entry key="sfdc_account_id" value="java.lang.String"/>
+            <entry key="annual_revenue"  value="java.lang.Double"/>
+            <entry key="account_ext_id"  value="java.lang.String"/>
+            <entry key="account_number"  value="java.lang.String"/>
+        </map>
+    </property>
+</bean>
+<bean id="deleteAccountAllSql"
+      class="com.salesforce.dataloader.dao.database.SqlConfig" singleton="true">
+    <property name="sqlString">
+        <value>
+            DELETE FROM TableOwner.Accounts
+        </value>
+    </property>
+</bean>
+</beans>
