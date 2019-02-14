@@ -35,8 +35,13 @@ mkdir -p "$DL_FULL_PATH"
 SHELL_PATH=$(dirname "$0")
 rsync -r "$SHELL_PATH"/.  "$DL_FULL_PATH"  --exclude='.*'
 rm ~/"$INSTALLATION_DIR_NAME"/install.command
+rm ~/"$INSTALLATION_DIR_NAME"/dataloader.ico
+rm ~/"$INSTALLATION_DIR_NAME"/fileicon
+
 
 sed -i '' 's|DATALODER_WORK_DIRECTORY|'"$DL_FULL_PATH"'|g'  "$DL_FULL_PATH"/dataloader.command
+
+"$SHELL_PATH"/fileicon set  "$DL_FULL_PATH"/dataloader.command "$SHELL_PATH"/dataloader.ico
 
 while true
 do
@@ -44,7 +49,9 @@ do
      case $input in
          [yY][eE][sS]|[yY])
               rm   $HOME/Desktop/dataloader.command 2>/dev/null
-              ln -s  "$DL_FULL_PATH/dataloader.command"  $HOME/Desktop/dataloader.command
+              ln -s  "$DL_FULL_PATH/dataloader.command"  $HOME/Desktop/DataLoader
+              "$SHELL_PATH"/fileicon set  $HOME/Desktop/DataLoader "$SHELL_PATH"/dataloader.ico
+
               break
           ;;
          [nN][oO]|[nN])
