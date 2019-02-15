@@ -5,50 +5,63 @@ REM echo Dataloader V45+ requires Openjdk 11 to launch.  You can download Zulu J
 REM echo For example, set JAVA_HOME=C:\Program Files\Zulu\zulu-11
 REM echo using Java at: "%JAVA_HOME%\bin"
 
+set version=45
 
-echo We need to create a directory in your home directory %userprofile% to install your Datalaoder Program.
-echo Run this with administractor privilege 
-set /p _dataloaderInstallationDirectory=Input the directory name,  press enter directly to use the default "dataloader" || set _dataloaderInstallationDirectory=dataloader
+echo.
+echo ******************************************************************
+echo **           Dataloader V45 Installation                        **
+echo **                                                              **
+echo ** The Data Loader helps you to perform bulk operations data in **
+echo ** your Force.com environment: insert, update, upsert and       **
+echo ** delete data, as well as export data from Force.com objects.  **
+echo ** You can use .csv files or relational databases as the source **
+echo ** or target for this data movement.                            **
+echo **                                                              **
+echo ** Java requirement: Zulu OpenJDK version 11 or higher          **
+echo **                                                              **
+echo ** https://github.com/forcedotcom/dataloader                    ** 
+echo ******************************************************************
+echo.
 
+echo Dataloader V%version% will be created in your home directory: %userprofile%
+set /p _dataloaderInstallationDirectory=Which folder in your home directory would you like to create in? [default: Dataloader] || set _dataloaderInstallationDirectory=Dataloader
 
-set _fullDir=%userprofile%\%_dataloaderInstallationDirectory%
-echo %_fullDir%
-REM %%si converts %%i to an 8.3 full path
-FOR %%i IN (%_fullDir%) DO IF EXIST %%~si\NUL (	
-		echo The directory:%_fullDir% already exists
-		goto DirExist
-		)
-goto CopyFiles
-		
+set installationDir=%userprofile%\%_dataloaderInstallationDirectory%\v%version%
+
+IF EXIST %installationDir% (
+    goto DirExist
+) ELSE (
+    goto CopyFiles
+)
+        
 :DirExist
-	set /p _deleteDirOrNot=Do you want to delete? If not, we will exit installation. y/n?
-	echo %_deleteDirOrNot%
-	if "%_deleteDirOrNot%" =="y" (
-	
-			echo Deleting existing dataloader installation directory!
-			FOR %%i IN (%_fullDir%) DO rd /s /q %%~si
-	) else (
-	echo 
-	goto Exit
-	)
+    echo.
+    echo We found an existing Dataloader V%version% in '%installationDir%'
+    set /p _deleteExistingDirOrNot= Would you like to delete the existing and create it again? Selecting no will quit this installation [y/n, default: n]
+    if "%_deleteExistingDirOrNot%"=="y" (
+        echo Deleting existing Dataloader V%version%...
+        rd /s /q %installationDir%
+        goto CopyFiles
+    ) else (
+        goto Exit
+    )
 
 :CopyFiles
-	REM Supress prompt with target as directory
-    echo d | xcopy /s %~dp0. %_fullDir%
+    echo.
+    echo Copying files to %installationDir%...
+    xcopy . "%installationDir%" /e /i
+    del "%installationDir%\install.bat" /q
+    echo Your Dataloader V%version% is created in '%installationDir%'
 
-:ModifyDataloaderBat	
-	REM Modifying dataloader.bat
-	
-	REM IF "%JAVA_HOME%" == "" (
-    powershell -Command "(gc %_fullDir%\dataloader.bat) -replace 'INSTALLATION_DIRECTORY', '%_fullDir%' | Out-File -encoding "UTF8" %_fullDir%\dataloader.bat"
-	REM cd /D C:\Users\xuehai\workspace\dataloader\release\win
-    REM "%JAVA_HOME%\bin\java"  -jar C:\Users\xuehai\workspace\dataloader\release\win\jars\dataloader-45.0.0-uber.jar salesforce.config.dir=C:\Users\xuehai\workspace\dataloader\release\win\configs	
-	del /s "%userprofile%\Desktop\dataloader.bat"
-	mklink "%userprofile%\Desktop\dataloader.bat" "%_fullDir%\dataloader.bat"
+:CreateShortcut
+    echo.
+    echo Creating shortcut in '%userprofile%\Desktop'...
+    
+    IF EXIST "%userprofile%\Desktop\Dataloader.bat" (
+        del /s "%userprofile%\Desktop\Dataloader.bat"
+    )
+    powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut(""""$Home\Desktop\Dataloader.lnk""""); $Shortcut.WorkingDirectory = """"$env:installationDir""""; $Shortcut.TargetPath = """"$env:installationDir\dataloader.bat""""; $Shortcut.IconLocation = """"$env:installationDir\dataloader.ico""""; $Shortcut.Save()"
+    echo Shortcut is created in your desktop - %userprofile%\Desktop\Dataloader.bat
 
 :Exit
-	set _dataloaderInstallationDirectory=
-	set _fullDir=
-	set _deleteDirOrNot=
-	Echo Done!
-
+    PAUSE

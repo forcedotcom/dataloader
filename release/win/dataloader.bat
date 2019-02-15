@@ -1,18 +1,26 @@
 @echo off 
-echo Dataloader V45  requires Openjdk 11 to launch.  You can download Zulu Java 11 
-echo from "https://www.azul.com/downloads/zulu".
-echo To run dataloader.bat, set the JAVA_HOME environment variable to the directory 
-echo where the Java Runtime Environment (JRE) is installed.
-echo For example, set JAVA_HOME=C:\Program Files\Zulu\zulu-11
-	
-echo Using Java at: "%JAVA_HOME%\bin"
  
-IF "%JAVA_HOME%" == "" (
-    echo To run dataloader.bat, set the JAVA_HOME environment variable to the directory where the Java Runtime Environment is installed.
-	echo For example, set JAVA_HOME=C:\Program Files\Zulu\zulu-11
-) ELSE (
-    echo Using Java at: %JAVA_HOME%\bin    
-	cd %~dp0      ;Change to batch file directory
-    "%JAVA_HOME%\bin\java"  -jar INSTALLATION_DIRECTORY\dataloader-45.0.0-uber.jar salesforce.config.dir=INSTALLATION_DIRECTORY\configs	
-)
+:CheckOpenJdk11
+	echo Dataloader V45 requires Zulu OpenJDK 11 or above. Checking if it is installed...
+	for /F "delims=" %%a in ('powershell -Command "foreach($path in (Get-ChildItem Env:Path).value -split ';') { if($path -like '*zulu*') { $jdkDir = $path -split 'bin\\' }}; echo $jdkDir"') do Set "zuluJdkDir=%%a"
+	if "%zuluJdkDir%"=="" (
+		echo Zulu OpenJdk 11 is not installed, please download it from https://www.azul.com/downloads/zulu/
+		goto Exit
+	) else (
+		echo Zulu OpenJdk 11 is installed in '%zuluJdkDir%'' Checking if JAVA_HOME is set to correct path...
+		if "%JAVA_HOME%"=="%zuluJdkDir%" (
+			echo JAVA_HOME is set correctly
+		) ELSE (
+			echo JAVA_HOME is currently set to '%JAVA_HOME%', for this session only we will change it to '%zuluJdkDir%'
+			echo Note that JAVA_HOME is NOT permanentely changed, the change is ONLY for this session. Changing 'JAVA_HOME'...
+			set JAVA_HOME=%zuluJdkDir%
+		)
+		goto Run
+	)
 
+:Run
+    echo.
+    echo Using Java from '%JAVA_HOME%bin' Dataloader starting...
+    "%JAVA_HOME%\bin\java"  -jar dataloader-45.0.0-uber.jar salesforce.config.dir=configs	
+
+:Exit
