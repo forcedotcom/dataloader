@@ -1,5 +1,23 @@
 #!/bin/bash
 
+echo ""
+echo "***************************************************************************"
+echo "**            ___  ____ ___ ____   _    ____ ____ ___  ____ ____         **"
+echo "**            |  \ |__|  |  |__|   |    |  | |__| |  \ |___ |__/         **"
+echo "**            |__/ |  |  |  |  |   |___ |__| |  | |__/ |___ |  \         **"
+echo "**                                                                       **"
+echo "**  Dataloder is a Salesforce supported Open Source project to help      **"
+echo "**  Salesforce user to import and export data with Salesforce platform.  **"
+echo "**  It requires Zulu OpenJDK 11 or higher to run.                        **"
+echo "**                                                                       **"
+echo "**  Github Project Url:                                                  **"
+echo "**       https://github.com/forcedotcom/dataloader                       **"
+echo "**  Salesforce Documentation:                                            **"
+echo "**       https://help.salesforce.com/articleView?id=data_loader.htm      **"
+echo "**                                                                       **"
+echo "***************************************************************************"
+echo ""
+
 export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 
 # Please change work directory accordingly, eg you create a folder "dataloader" in your user home directory.
