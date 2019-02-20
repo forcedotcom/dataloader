@@ -1,22 +1,24 @@
 @echo off
 setlocal
 
-set version=45
+set version=45.0.0
 
 echo.
-echo ******************************************************************
-echo **           Dataloader V45 Installation                        **
-echo **                                                              **
-echo ** The Data Loader helps you to perform bulk operations data in **
-echo ** your Force.com environment: insert, update, upsert and       **
-echo ** delete data, as well as export data from Force.com objects.  **
-echo ** You can use .csv files or relational databases as the source **
-echo ** or target for this data movement.                            **
-echo **                                                              **
-echo ** Java requirement: Zulu OpenJDK version 11 or higher          **
-echo **                                                              **
-echo ** https://github.com/forcedotcom/dataloader                    **
-echo ******************************************************************
+echo ***************************************************************************
+echo **            ___  ____ ___ ____   _    ____ ____ ___  ____ ____         **
+echo **            |  \ |__|  |  |__|   |    |  | |__| |  \ |___ |__/         **
+echo **            |__/ |  |  |  |  |   |___ |__| |  | |__/ |___ |  \         **
+echo **                                                                       **
+echo **  Dataloder v45 is a Salesforce supported Open Source project to help  **
+echo **  Salesforce user to import and export data with Salesforce platform.  **
+echo **  It requires Zulu OpenJDK 11 or higher to run.                        **
+echo **                                                                       **
+echo **  Github Project Url:                                                  **
+echo **       https://github.com/forcedotcom/dataloader                       **
+echo **  Salesforce Documentation:                                            **
+echo **       https://help.salesforce.com/articleView?id=data_loader.htm      **
+echo **                                                                       **
+echo ***************************************************************************
 echo.
 
 echo Dataloader V%version% will be created in your home directory: %userprofile%

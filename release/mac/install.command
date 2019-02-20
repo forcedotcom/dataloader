@@ -1,4 +1,7 @@
 #!/bin/bash
+DATALOADER_VERSION="45.0.0"
+DATALOADER_SHORT_VERSION="45"
+DATALOADER_UBER_JAR_NAME="dataloader-45.0.0-uber.jar"
 
 echo ""
 echo "***************************************************************************"
@@ -6,7 +9,7 @@ echo "**            ___  ____ ___ ____   _    ____ ____ ___  ____ ____         *
 echo "**            |  \ |__|  |  |__|   |    |  | |__| |  \ |___ |__/         **"
 echo "**            |__/ |  |  |  |  |   |___ |__| |  | |__/ |___ |  \         **"
 echo "**                                                                       **"
-echo "**  Dataloder is a Salesforce supported Open Source project to help      **"
+echo "**  Dataloder v$DATALOADER_SHORT_VERSION is a Salesforce supported Open Source project to help  **"
 echo "**  Salesforce user to import and export data with Salesforce platform.  **"
 echo "**  It requires Zulu OpenJDK 11 or higher to run.                        **"
 echo "**                                                                       **"
@@ -17,8 +20,6 @@ echo "**       https://help.salesforce.com/articleView?id=data_loader.htm      *
 echo "**                                                                       **"
 echo "***************************************************************************"
 echo ""
-
-DATALOADER_VERSION="45.0.0"
 
 echo We will create a directory in your home directory $HOME to install the Dataloader program.
 read -p "Please enter the directory name you want to use [Default: dataloader]: " INSTALLATION_DIR_NAME
@@ -59,8 +60,10 @@ rm $DL_FULL_PATH/install.command 1>/dev/null
 rm $DL_FULL_PATH/dataloader.ico 1>/dev/null
 rm $DL_FULL_PATH/fileicon 1>/dev/null
 
-
-sed -i '' 's|DATALODER_WORK_DIRECTORY|'"$DL_FULL_PATH"'|g'  "$DL_FULL_PATH"/dataloader.command
+sed -i '' 's|DATALODER_WORK_DIRECTORY_PLACEHOLDER|'"$DL_FULL_PATH"'|g'  "$DL_FULL_PATH"/dataloader.command
+sed -i '' 's|DATALOADER_VERSION_PLACEHOLDER|'"$DATALOADER_VERSION"'|g'  "$DL_FULL_PATH"/dataloader.command
+sed -i '' 's|DATALOADER_SHORT_VERSION_PLACEHOLDER|'"$DATALOADER_SHORT_VERSION"'|g'  "$DL_FULL_PATH"/dataloader.command
+sed -i '' 's|DATALOADER_UBER_JAR_NAME_PLACEHOLDER|'"$DATALOADER_UBER_JAR_NAME"'|g'  "$DL_FULL_PATH"/dataloader.command
 
 "$SHELL_PATH"/fileicon set  "$DL_FULL_PATH"/dataloader.command "$SHELL_PATH"/dataloader.ico
 
