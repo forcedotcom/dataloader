@@ -306,44 +306,6 @@ public class Controller {
         return isSuccessful;
     }
 
-    /**
-     * Returns current user's Dataloader configuration directory
-     * ie) For Windows -
-     *     C:\Users\{user}\AppData\Local\salesforce.com\Data Loader {version}\conf
-     * For Mac -
-     *     /Users/{user}/Library/Preferences/salesforce.com/Data Loader {version}/conf
-     * For *nix -
-     *     ~/.salesforce.com/Data Loader {version}/conf
-     *
-     * @return Current user's Dataloader configuration directory
-     */
-    private static File getUserConfigDir() {
-        if (OS_TYPE == null) {
-            logger.error("getUserConfigDir(): Control static values are not initialized.");
-            throw new RuntimeException("OS type not initialized correctly!");
-        }
-
-        File dir;
-        switch (OS_TYPE) {
-
-            case WINDOWS: {
-                dir = Paths.get(System.getProperty("user.home"), "AppData\\Local", APP_VENDOR, getProductName(), CONFIG_DIR).toFile();
-                break;
-            }
-            case MACOSX: {
-                dir = Paths.get(System.getProperty("user.home"), "Library/Preferences", APP_VENDOR, getProductName(), CONFIG_DIR).toFile();
-                break;
-            }
-            default:
-            case LINUX: {
-                dir = Paths.get(System.getProperty("user.home"), "." + APP_VENDOR, getProductName(), CONFIG_DIR).toFile();
-                break;
-            }
-
-        }
-        return dir;
-    }
-
     /* Append the osAppendix to the binPath starting at position endIdx */
 
     private static File getInstalledConfigDir(String binPath, int endIdx, String osAppendix) {
@@ -408,7 +370,7 @@ public class Controller {
 
         if (configDirPath == null) {
             // CONFIG_DIR_PROP param is NOT provided - use user's config dir
-            configDir = getUserConfigDir();
+            configDir = Paths.get(System.getProperty("user.dir"), "configs").toFile();
             logger.debug(String.format("OS: %s, '%s' NOT provided, setting config dir to : %s", OS_TYPE, CONFIG_DIR_PROP, configDir));
         } else {
             // CONFIG_DIR_PROP is provided - use provided config dir
@@ -499,7 +461,7 @@ public class Controller {
         }
 
         try {
-            File logConfXml = new File(getUserConfigDir(), LOG_CONF_OVERRIDE);
+            File logConfXml = Paths.get(System.getProperty("user.dir"), "configs", LOG_CONF_OVERRIDE).toFile();
             if (logConfXml.exists()) {
                 logger.info("Reading log-conf.xml in " + logConfXml.getAbsolutePath());
                 if (logConfXml.canRead()) {
