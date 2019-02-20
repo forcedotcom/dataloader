@@ -8,8 +8,8 @@ echo **            |  \ |__|  |  |__|   |    |  | |__| |  \ |___ |__/         **
 echo **            |__/ |  |  |  |  |   |___ |__| |  | |__/ |___ |  \         **
 echo **                                                                       **
 echo **  Dataloder v45 is a Salesforce supported Open Source project to help  **
-echo **  Salesforce user to import and export data with Salesforce platform.  **
-echo **  It requires Zulu OpenJDK 11 or higher to run.                        **
+echo **  you import data to and export data from your Salesforce org.         **
+echo **  It requires Zulu OpenJDK 11.0.x to run.                              **
 echo **                                                                       **
 echo **  Github Project Url:                                                  **
 echo **       https://github.com/forcedotcom/dataloader                       **
@@ -27,20 +27,11 @@ echo.
         PAUSE
         goto Exit
     ) else (
-        echo Zulu OpenJDK 11+ is installed in '%zuluJdkDir%' Checking if JAVA_HOME is set to correct path...
-        if "%JAVA_HOME%"=="%zuluJdkDir%" (
-            echo JAVA_HOME is set correctly
-        ) ELSE (
-            echo JAVA_HOME is currently set to '%JAVA_HOME%', for this session only we will change it to '%zuluJdkDir%'
-            echo Note that JAVA_HOME is NOT permanentely changed, the change is ONLY for this session. Changing 'JAVA_HOME'...
-            set JAVA_HOME=%zuluJdkDir%
-        )
+        set JAVA_HOME=%zuluJdkDir%
         goto Run
     )
 
 :Run
-    echo.
-    echo Using Java from '%JAVA_HOME%bin' Dataloader starting...
     "%JAVA_HOME%\bin\java"  -jar dataloader-45.0.0-uber.jar salesforce.config.dir=configs
 
 :Exit

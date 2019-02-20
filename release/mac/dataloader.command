@@ -7,8 +7,8 @@ echo "**            |  \ |__|  |  |__|   |    |  | |__| |  \ |___ |__/         *
 echo "**            |__/ |  |  |  |  |   |___ |__| |  | |__/ |___ |  \         **"
 echo "**                                                                       **"
 echo "**  Dataloder vDATALOADER_SHORT_VERSION_PLACEHOLDER is a Salesforce supported Open Source project to help  **"
-echo "**  Salesforce user to import and export data with Salesforce platform.  **"
-echo "**  It requires Zulu OpenJDK 11 or higher to run.                        **"
+echo "**  you import data to and export data from your Salesforce org.         **"
+echo "**  It requires Zulu OpenJDK 11 to run.                                  **"
 echo "**                                                                       **"
 echo "**  Github Project Url:                                                  **"
 echo "**       https://github.com/forcedotcom/dataloader                       **"
@@ -22,7 +22,7 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 
 if [ -z "$JAVA_HOME" ]
 then
-    echo "Please download Zulu Openjdk 11+ for mac here: https://www.azul.com/downloads/zulu/zulu-mac/"
+    echo "Zulu OpenJDK 11 is not installed.  Download Zulu OpenJDK 11 for macOS here: https://www.azul.com/downloads/zulu/zulu-mac/"
 else
     echo "$JAVA_HOME"
     cd DATALODER_WORK_DIRECTORY_PLACEHOLDER   #change to your own customized directory

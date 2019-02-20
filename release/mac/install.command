@@ -10,8 +10,8 @@ echo "**            |  \ |__|  |  |__|   |    |  | |__| |  \ |___ |__/         *
 echo "**            |__/ |  |  |  |  |   |___ |__| |  | |__/ |___ |  \         **"
 echo "**                                                                       **"
 echo "**  Dataloder v$DATALOADER_SHORT_VERSION is a Salesforce supported Open Source project to help  **"
-echo "**  Salesforce user to import and export data with Salesforce platform.  **"
-echo "**  It requires Zulu OpenJDK 11 or higher to run.                        **"
+echo "**  you import data to and export data from your Salesforce org.         **"
+echo "**  It requires Zulu OpenJDK 11 to run.                                  **"
 echo "**                                                                       **"
 echo "**  Github Project Url:                                                  **"
 echo "**       https://github.com/forcedotcom/dataloader                       **"
@@ -21,32 +21,34 @@ echo "**                                                                       *
 echo "***************************************************************************"
 echo ""
 
-echo We will create a directory in your home directory $HOME to install the Dataloader program.
-read -p "Please enter the directory name you want to use [Default: dataloader]: " INSTALLATION_DIR_NAME
+echo Data Loader installation creates a folder in your $HOME directory.
+read -p "Which folder path should it use? [Default: dataloader]: " INSTALLATION_DIR_NAME
 INSTALLATION_DIR_NAME=${INSTALLATION_DIR_NAME:-dataloader}
 DL_FULL_PATH="$HOME/$INSTALLATION_DIR_NAME/v$DATALOADER_VERSION"
 
-echo Dataloader v$DATALOADER_VERSION be installed to this directory: $DL_FULL_PATH
+echo Data Loader v$DATALOADER_VERSION will be installed in: $DL_FULL_PATH
 
 # make sure there is a directory to install files
 if [ -d "$DL_FULL_PATH" ]; then
-    echo Directory $DL_FULL_PATH already exists, we need to delete it in order to proceed the installation.
-    echo Make sure you saved your old data in $DL_FULL_PATH before deleting.
     while true
     do
-         read -r -p "Do you want to delete $DL_FULL_PATH? [Yes/No] " input
+         echo ""
+         echo Do you want to overwrite previously installed versions of Data Loader
+         echo v$DATALOADER_VERSION and configurations in $DL_FULL_PATH?
+         echo If not, installationw ill quit and you can restart installation using
+         read -r -p "another directory. Yes/No? " input
          case $input in
              [yY][eE][sS]|[yY])
-                  echo "Deleting existing directory: $DL_FULL_PATH ... "
-                  rm -rf "$DL_FULL_PATH"
-                  break
+                echo "Deleting existing Data Loader v$DATALOADER_VERSION ... "
+                rm -rf "$DL_FULL_PATH"
+                break
               ;;
              [nN][oO]|[nN])
-                echo  Quit dataloader installing script for now.
+                echo Data Loader installation is quitting.
                 exit
               ;;
              *)
-             echo "Invalid input..."
+                echo "Type Yes or No."
              ;;
          esac
     done
@@ -65,45 +67,48 @@ sed -i '' 's|DATALOADER_VERSION_PLACEHOLDER|'"$DATALOADER_VERSION"'|g'  "$DL_FUL
 sed -i '' 's|DATALOADER_SHORT_VERSION_PLACEHOLDER|'"$DATALOADER_SHORT_VERSION"'|g'  "$DL_FULL_PATH"/dataloader.command
 sed -i '' 's|DATALOADER_UBER_JAR_NAME_PLACEHOLDER|'"$DATALOADER_UBER_JAR_NAME"'|g'  "$DL_FULL_PATH"/dataloader.command
 
-"$SHELL_PATH"/fileicon set  "$DL_FULL_PATH"/dataloader.command "$SHELL_PATH"/dataloader.ico
+"$SHELL_PATH"/fileicon set  "$DL_FULL_PATH"/dataloader.command "$SHELL_PATH"/dataloader.ico 1>/dev/null
 
 while true
 do
-     read -r -p "Do you want to create a link called DataLoader in your desktop? [Yes/No] " input
+     echo ""
+     read -r -p "Do you want to create an icon to launch Data Loader from your Desktop? [Yes/No] " input
      case $input in
          [yY][eE][sS]|[yY])
-              rm   $HOME/Desktop/DataLoader 2>/dev/null
-              ln -s  "$DL_FULL_PATH/dataloader.command"  $HOME/Desktop/DataLoader
-              "$SHELL_PATH"/fileicon set  $HOME/Desktop/DataLoader "$SHELL_PATH"/dataloader.ico 1>/dev/null
-
-              break
+            rm   $HOME/Desktop/DataLoader 2>/dev/null
+            ln -s  "$DL_FULL_PATH/dataloader.command"  $HOME/Desktop/DataLoader
+            "$SHELL_PATH"/fileicon set  $HOME/Desktop/DataLoader "$SHELL_PATH"/dataloader.ico 1>/dev/null
+            break
           ;;
          [nN][oO]|[nN])
-              break
+            break
           ;;
          *)
-         echo "Invalid input..."
+            echo "Type Yes or No."
          ;;
      esac
 done
 
 while true
 do
-     read -r -p "Do you want to create a link called DataLoader in your Applications directory? [Yes/No] " input
+     echo ""
+     echo "Do you want to create a link to launch Data Loader from your Applications"
+     read -r -p "directory? [Yes/No] " input
      case $input in
          [yY][eE][sS]|[yY])
-              rm   /Applications/DataLoader 2>/dev/null
-              ln -s  "$DL_FULL_PATH/dataloader.command"  /Applications/DataLoader
-              "$SHELL_PATH"/fileicon set  /Applications/DataLoader "$SHELL_PATH"/dataloader.ico 1>/dev/null
-
-              break
+            rm   /Applications/DataLoader 2>/dev/null
+            ln -s  "$DL_FULL_PATH/dataloader.command"  /Applications/DataLoader
+            "$SHELL_PATH"/fileicon set  /Applications/DataLoader "$SHELL_PATH"/dataloader.ico 1>/dev/null
+            break
           ;;
          [nN][oO]|[nN])
-            echo  Quit dataloader installer
-            exit
+            break
           ;;
          *)
-         echo "Invalid input..."
+            echo "Type Yes or No."
          ;;
      esac
 done
+
+echo  Data Loader installation is quitting.
+echo ""

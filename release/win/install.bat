@@ -3,15 +3,19 @@ setlocal
 
 set version=45.0.0
 
+set DATALOADER_VERSION=45.0.0
+set DATALOADER_SHORT_VERSION=45
+set DATALOADER_UBER_JAR_NAME=dataloader-45.0.0-uber.jar
+
 echo.
 echo ***************************************************************************
 echo **            ___  ____ ___ ____   _    ____ ____ ___  ____ ____         **
 echo **            |  \ |__|  |  |__|   |    |  | |__| |  \ |___ |__/         **
 echo **            |__/ |  |  |  |  |   |___ |__| |  | |__/ |___ |  \         **
 echo **                                                                       **
-echo **  Dataloder v45 is a Salesforce supported Open Source project to help  **
-echo **  Salesforce user to import and export data with Salesforce platform.  **
-echo **  It requires Zulu OpenJDK 11 or higher to run.                        **
+echo **  Dataloder v%DATALOADER_SHORT_VERSION% is a Salesforce supported Open Source project to help  **
+echo **  you import data to and export data from your Salesforce org.         **
+echo **  It requires Zulu OpenJDK 11.0.x to run.                              **
 echo **                                                                       **
 echo **  Github Project Url:                                                  **
 echo **       https://github.com/forcedotcom/dataloader                       **
@@ -63,7 +67,6 @@ IF EXIST %installationDir% (
     )
     powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut(""""$Home\Desktop\Dataloader.lnk""""); $Shortcut.WorkingDirectory = """"$env:installationDir""""; $Shortcut.TargetPath = """"$env:installationDir\dataloader.bat""""; $Shortcut.IconLocation = """"$env:installationDir\dataloader.ico""""; $Shortcut.Save()"
     move "%userprofile%\Desktop\Dataloader.lnk" "%appdata%\Microsoft\Windows\Start Menu\Programs\Dataloader\DataloaderV%version%.lnk" >nul
-    echo Start menu shortcut is created
 
  :CreateDesktopShortcut
     echo.
@@ -74,7 +77,6 @@ IF EXIST %installationDir% (
     echo Creating desktop shortcut...
     powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut(""""$Home\Desktop\Dataloader.lnk""""); $Shortcut.WorkingDirectory = """"$env:installationDir""""; $Shortcut.TargetPath = """"$env:installationDir\dataloader.bat""""; $Shortcut.IconLocation = """"$env:installationDir\dataloader.ico""""; $Shortcut.Save()"
     move "%userprofile%\Desktop\Dataloader.lnk" "%userprofile%\Desktop\DataloaderV%version%.lnk" >nul
-    echo Desktop shortcut is created
 
 :Exit
     echo.
