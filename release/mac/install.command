@@ -18,19 +18,19 @@ echo "**                                                                       *
 echo "***************************************************************************"
 echo ""
 
+DATALOADER_VERSION="45.0.0"
 
-set version=45
-
-echo You are about to create a directory in your home directory to install Dataloader program.
-read -p "Please enter the directory name you want to use [dataloader]: " INSTALLATION_DIR_NAME
+echo We will create a directory in your home directory $HOME to install the Dataloader program.
+read -p "Please enter the directory name you want to use [Default: dataloader]: " INSTALLATION_DIR_NAME
 INSTALLATION_DIR_NAME=${INSTALLATION_DIR_NAME:-dataloader}
-DL_FULL_PATH="$HOME/$INSTALLATION_DIR_NAME"
-echo We will install it to this directory: $DL_FULL_PATH
+DL_FULL_PATH="$HOME/$INSTALLATION_DIR_NAME/v$DATALOADER_VERSION"
+
+echo Dataloader v$DATALOADER_VERSION be installed to this directory: $DL_FULL_PATH
 
 # make sure there is a directory to install files
 if [ -d "$DL_FULL_PATH" ]; then
-    echo Directory $DL_FULL_PATH exists, we need to delete it in order to proceed the installation.
-    echo Make sure you saved the data in $DL_FULL_PATH before deleting it.
+    echo Directory $DL_FULL_PATH already exists, we need to delete it in order to proceed the installation.
+    echo Make sure you saved your old data in $DL_FULL_PATH before deleting.
     while true
     do
          read -r -p "Do you want to delete $DL_FULL_PATH? [Yes/No] " input
@@ -55,9 +55,9 @@ echo  Creating directory: $DL_FULL_PATH
 mkdir -p "$DL_FULL_PATH"
 SHELL_PATH=$(dirname "$0")
 rsync -r "$SHELL_PATH"/.  "$DL_FULL_PATH"  --exclude='.*'
-rm ~/"$INSTALLATION_DIR_NAME"/install.command
-rm ~/"$INSTALLATION_DIR_NAME"/dataloader.ico
-rm ~/"$INSTALLATION_DIR_NAME"/fileicon
+rm $DL_FULL_PATH/install.command 1>/dev/null
+rm $DL_FULL_PATH/dataloader.ico 1>/dev/null
+rm $DL_FULL_PATH/fileicon 1>/dev/null
 
 
 sed -i '' 's|DATALODER_WORK_DIRECTORY|'"$DL_FULL_PATH"'|g'  "$DL_FULL_PATH"/dataloader.command
@@ -72,6 +72,26 @@ do
               rm   $HOME/Desktop/DataLoader 2>/dev/null
               ln -s  "$DL_FULL_PATH/dataloader.command"  $HOME/Desktop/DataLoader
               "$SHELL_PATH"/fileicon set  $HOME/Desktop/DataLoader "$SHELL_PATH"/dataloader.ico 1>/dev/null
+
+              break
+          ;;
+         [nN][oO]|[nN])
+              break
+          ;;
+         *)
+         echo "Invalid input..."
+         ;;
+     esac
+done
+
+while true
+do
+     read -r -p "Do you want to create a link called DataLoader in your Applications directory? [Yes/No] " input
+     case $input in
+         [yY][eE][sS]|[yY])
+              rm   /Applications/DataLoader 2>/dev/null
+              ln -s  "$DL_FULL_PATH/dataloader.command"  /Applications/DataLoader
+              "$SHELL_PATH"/fileicon set  /Applications/DataLoader "$SHELL_PATH"/dataloader.ico 1>/dev/null
 
               break
           ;;
