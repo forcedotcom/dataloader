@@ -1,8 +1,6 @@
 @echo off
 setlocal
 
-set version=45.0.0
-
 set DATALOADER_VERSION=45.0.0
 set DATALOADER_SHORT_VERSION=45
 set DATALOADER_UBER_JAR_NAME=dataloader-45.0.0-uber.jar
@@ -10,12 +8,12 @@ set DATALOADER_UBER_JAR_NAME=dataloader-45.0.0-uber.jar
 echo.
 echo ***************************************************************************
 echo **            ___  ____ ___ ____   _    ____ ____ ___  ____ ____         **
-echo **            |  \ |__|  |  |__|   |    |  | |__| |  \ |___ |__/         **
-echo **            |__/ |  |  |  |  |   |___ |__| |  | |__/ |___ |  \         **
+echo **            ^|  \ ^|__^|  ^|  ^|__^|   ^|    ^|  ^| ^|__^| ^|  \ ^|___ ^|__/         **
+echo **            ^|__/ ^|  ^|  ^|  ^|  ^|   ^|___ ^|__^| ^|  ^| ^|__/ ^|___ ^|  \         **
 echo **                                                                       **
 echo **  Dataloder v%DATALOADER_SHORT_VERSION% is a Salesforce supported Open Source project to help  **
 echo **  you import data to and export data from your Salesforce org.         **
-echo **  It requires Zulu OpenJDK 11.0.x to run.                              **
+echo **  It requires Zulu OpenJDK 11 to run.                                  **
 echo **                                                                       **
 echo **  Github Project Url:                                                  **
 echo **       https://github.com/forcedotcom/dataloader                       **
@@ -25,12 +23,12 @@ echo **                                                                       **
 echo ***************************************************************************
 echo.
 
-echo Dataloader V%version% will be created in your home directory: %userprofile%
-set /p dirName=Which folder in your home directory would you like to create in? [default: Dataloader] || set dirName=Dataloader
+echo Data Loader installation creates a folder in your %USERPROFILE% directory.
+set /p DIR_NAME=Which folder should it use? [default: dataloader] || set DIR_NAME=dataloader
 
-set installationDir=%userprofile%\%dirName%\v%version%
+set INSTALLATION_DIR=%USERPROFILE%\%DIR_NAME%\v%DATALOADER_VERSION%
 
-IF EXIST %installationDir% (
+IF EXIST %INSTALLATION_DIR% (
     goto ExistingDir
 ) ELSE (
     goto CopyFiles
@@ -38,48 +36,62 @@ IF EXIST %installationDir% (
 
 :ExistingDir
     echo.
-    echo We found an existing Dataloader V%version% in '%installationDir%'
-    set /p deleteExistingDir=Would you like to delete the existing and create it again? Selecting no will quit this installation [y/n, default: n]
-    if "%deleteExistingDir%"=="y" (
-        echo Deleting existing Dataloader V%version%...
-        rd /s /q %installationDir%
-        goto CopyFiles
-    ) else (
-        goto Exit
-    )
+    echo Do you want to overwrite previously installed versions of Data Loader V%DATALOADER_VERSION% and configurations in '%INSTALLATION_DIR%'
+    set /p DELETE_EXISTING_DIR=If not, installation will quit and you can restart installation using another directory.[Yes/No]
+    if /I "%DELETE_EXISTING_DIR%"=="Y" goto DeleteDirYes
+    if /I "%DELETE_EXISTING_DIR%"=="Yes" goto DeleteDirYes
+    if /I "%DELETE_EXISTING_DIR%"=="N" goto DeleteDirNo
+    if /I "%DELETE_EXISTING_DIR%"=="No" goto DeleteDirNo
+    echo Type Yes or No.
+    goto ExistingDir
+:DeleteDirYes
+    echo Deleting existing Dataloader V%DATALOADER_VERSION%...
+    rd /s /q %INSTALLATION_DIR%
+    goto CopyFiles
+:DeleteDirNo
+    goto Exit
 
 :CopyFiles
     echo.
-    echo Copying files to %installationDir%...
-    xcopy . "%installationDir%" /e /i
-    del "%installationDir%\install.bat" /q
-    echo Your Dataloader V%version% is created in '%installationDir%'
+    echo Copying files to %INSTALLATION_DIR%  ...
+    xcopy . "%INSTALLATION_DIR%" /e /i
+    del "%INSTALLATION_DIR%\install.bat" /q
+    echo Your Dataloader V%DATALOADER_VERSION% is created in '%INSTALLATION_DIR%'
 
-:CreateStartMenuShortcut
+:CreateStartMenuShortCut
     echo.
-    set /p createStartMenuShortcut=Would you like to create a start menu shortcut? [y/n, default: y]
-    if "%createStartMenuShortcut%"=="n" (
-        goto CreateDesktopShortcut
+    set /p REPLY=Would you like to create a start menu shortcut? [Yes/No]
+    if /I "%REPLY%"=="Y" goto StartMenuShortCutYes
+    if /I "%REPLY%"=="Yes" goto StartMenuShortCutYes
+    if /I "%REPLY%"=="N" goto StartMenuShortCutNo
+    if /I "%REPLY%"=="No" goto StartMenuShortCutNo
+    echo Type Yes or No.
+    goto CreateStartMenuShortCut
+:StartMenuShortCutNo
+    goto CreateDesktopShortcut
+:StartMenuShortCutYes
+    IF NOT EXIST "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Salesforce\" (
+        mkdir "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Salesforce"
     )
-    echo Creating start menu shortcut...
-    IF NOT EXIST "%appdata%\Microsoft\Windows\Start Menu\Programs\Salesforce\" (
-        mkdir "%appdata%\Microsoft\Windows\Start Menu\Programs\Salesforce"
-    )
-    powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut(""""$Home\Desktop\Dataloader.lnk""""); $Shortcut.WorkingDirectory = """"$env:installationDir""""; $Shortcut.TargetPath = """"$env:installationDir\dataloader.bat""""; $Shortcut.IconLocation = """"$env:installationDir\dataloader.ico""""; $Shortcut.Save()"
-    move "%userprofile%\Desktop\Dataloader.lnk" "%appdata%\Microsoft\Windows\Start Menu\Programs\Dataloader\DataloaderV%version%.lnk" >nul
+    powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut(""""$Home\Desktop\Dataloader.lnk""""); $Shortcut.WorkingDirectory = """"$env:INSTALLATION_DIR""""; $Shortcut.TargetPath = """"$env:INSTALLATION_DIR\dataloader.bat""""; $Shortcut.IconLocation = """"$env:INSTALLATION_DIR\dataloader.ico""""; $Shortcut.Save()"
+    move "%USERPROFILE%\Desktop\Dataloader.lnk" "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Salesforce\Dataloader %DATALOADER_VERSION%.lnk" >nul
 
- :CreateDesktopShortcut
+:CreateDesktopShortcut
     echo.
-    set /p createDesktopShortcut=Would you like to create a desktop shortcut? [y/n, default: y]
-    if "%createDesktopShortcut%"=="n" (
-        goto Exit
-    )
-    echo Creating desktop shortcut...
-    powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut(""""$Home\Desktop\Dataloader.lnk""""); $Shortcut.WorkingDirectory = """"$env:installationDir""""; $Shortcut.TargetPath = """"$env:installationDir\dataloader.bat""""; $Shortcut.IconLocation = """"$env:installationDir\dataloader.ico""""; $Shortcut.Save()"
-    move "%userprofile%\Desktop\Dataloader.lnk" "%userprofile%\Desktop\DataloaderV%version%.lnk" >nul
+    set /p REPLY=Would you like to create a desktop icon? [Yes/No]
+    if /I "%REPLY%"=="Y" goto StartMenuShortCutYes
+    if /I "%REPLY%"=="Yes" goto StartMenuShortCutYes
+    if /I "%REPLY%"=="N" goto StartMenuShortCutNo
+    if /I "%REPLY%"=="No" goto StartMenuShortCutNo
+    echo Type Yes or No.
+    goto CreateDesktopShortcut
+:StartMenuShortCutNo
+    goto Exit
+:StartMenuShortCutYes
+    powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut(""""$Home\Desktop\Dataloader.lnk""""); $Shortcut.WorkingDirectory = """"$env:INSTALLATION_DIR""""; $Shortcut.TargetPath = """"$env:INSTALLATION_DIR\dataloader.bat""""; $Shortcut.IconLocation = """"$env:INSTALLATION_DIR\dataloader.ico""""; $Shortcut.Save()"
+    move "%USERPROFILE%\Desktop\Dataloader.lnk" "%USERPROFILE%\Desktop\Dataloader %DATALOADER_VERSION%.lnk" >nul
 
 :Exit
     echo.
-    echo End of installation
     endlocal
     PAUSE

@@ -75,9 +75,9 @@ do
      read -r -p "Do you want to create an icon to launch Data Loader from your Desktop? [Yes/No] " input
      case $input in
          [yY][eE][sS]|[yY])
-            rm   $HOME/Desktop/DataLoader 2>/dev/null
-            ln -s  "$DL_FULL_PATH/dataloader.command"  $HOME/Desktop/DataLoader
-            "$SHELL_PATH"/fileicon set  $HOME/Desktop/DataLoader "$SHELL_PATH"/dataloader.ico 1>/dev/null
+            rm   "$HOME/Desktop/DataLoader $DATALOADER_VERSION" 2>/dev/null
+            ln -s  "$DL_FULL_PATH/dataloader.command"  "$HOME/Desktop/DataLoader $DATALOADER_VERSION"
+            "$SHELL_PATH"/fileicon set  "$HOME/Desktop/DataLoader $DATALOADER_VERSION" "$SHELL_PATH"/dataloader.ico 1>/dev/null
             break
           ;;
          [nN][oO]|[nN])
@@ -96,9 +96,9 @@ do
      read -r -p "directory? [Yes/No] " input
      case $input in
          [yY][eE][sS]|[yY])
-            rm   /Applications/DataLoader 2>/dev/null
-            ln -s  "$DL_FULL_PATH/dataloader.command"  /Applications/DataLoader
-            "$SHELL_PATH"/fileicon set  /Applications/DataLoader "$SHELL_PATH"/dataloader.ico 1>/dev/null
+            rm   "/Applications/DataLoader $DATALOADER_VERSION" 2>/dev/null
+            ln -s  "$DL_FULL_PATH/dataloader.command"  "/Applications/DataLoader $DATALOADER_VERSION"
+            "$SHELL_PATH"/fileicon set  "/Applications/DataLoader $DATALOADER_VERSION" "$SHELL_PATH"/dataloader.ico 1>/dev/null
             break
           ;;
          [nN][oO]|[nN])
