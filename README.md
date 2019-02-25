@@ -1,3 +1,7 @@
+# Switching from Oracle Java 8 to Zulu OpenJDK 11 to build Data Loader 
+
+As of January 2019, Oracle does not support Java 8 for commercial users. Data Loader Version 44 is the last version built with Oracle Java 8. Developers can checkout out Java 8 code base from the branch “DataloaderV44Release”. End users can download Data Loader Version 44 or older from the github project “releases” section.
+
 # Build Data Loader
 
     git clone git@github.com:forcedotcom/dataloader.git
