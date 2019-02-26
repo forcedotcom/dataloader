@@ -21,7 +21,7 @@ echo "**                                                                     **"
 echo "*************************************************************************"
 echo ""
 
-echo Data Loader installation creates a folder in your '$HOME' directory.
+echo Data Loader installation creates a folder in your \'$HOME\' directory.
 read -p "Which folder should it use? [default: dataloader]: " INSTALLATION_DIR_NAME
 INSTALLATION_DIR_NAME=${INSTALLATION_DIR_NAME:-dataloader}
 DL_FULL_PATH="$HOME/$INSTALLATION_DIR_NAME/v$DATALOADER_VERSION"
@@ -34,7 +34,7 @@ if [ -d "$DL_FULL_PATH" ]; then
     do
          echo ""
          echo Do you want to overwrite previously installed versions of Data Loader
-         echo v$DATALOADER_VERSION and configurations in '$DL_FULL_PATH'?
+         echo v$DATALOADER_VERSION and configurations in \'$DL_FULL_PATH\'?
          echo If not, installation will quit and you can restart installation using
          read -r -p "another directory.[Yes/No] " input
          case $input in
