@@ -23,7 +23,7 @@ echo **                                                                       **
 echo ***************************************************************************
 echo.
 
-echo Data Loader installation creates a folder in your %USERPROFILE% directory.
+echo Data Loader installation creates a folder in your '%USERPROFILE%' directory.
 set /p DIR_NAME=Which folder should it use? [default: dataloader] || set DIR_NAME=dataloader
 
 set INSTALLATION_DIR=%USERPROFILE%\%DIR_NAME%\v%DATALOADER_VERSION%
@@ -36,7 +36,7 @@ IF EXIST %INSTALLATION_DIR% (
 
 :ExistingDir
     echo.
-    echo Do you want to overwrite previously installed versions of Data Loader V%DATALOADER_VERSION% and configurations in '%INSTALLATION_DIR%'
+    echo Do you want to overwrite previously installed versions of Data Loader v%DATALOADER_VERSION% and configurations in '%INSTALLATION_DIR%'?
     set /p DELETE_EXISTING_DIR=If not, installation will quit and you can restart installation using another directory.[Yes/No]
     if /I "%DELETE_EXISTING_DIR%"=="Y" goto DeleteDirYes
     if /I "%DELETE_EXISTING_DIR%"=="Yes" goto DeleteDirYes
@@ -45,7 +45,7 @@ IF EXIST %INSTALLATION_DIR% (
     echo Type Yes or No.
     goto ExistingDir
 :DeleteDirYes
-    echo Deleting existing Dataloader V%DATALOADER_VERSION%...
+    echo Deleting existing Data Loader v%DATALOADER_VERSION%...
     rd /s /q %INSTALLATION_DIR%
     goto CopyFiles
 :DeleteDirNo
@@ -53,10 +53,10 @@ IF EXIST %INSTALLATION_DIR% (
 
 :CopyFiles
     echo.
-    echo Copying files to %INSTALLATION_DIR%  ...
+    echo Copying files to '%INSTALLATION_DIR%'  ...
     xcopy . "%INSTALLATION_DIR%" /e /i
     del "%INSTALLATION_DIR%\install.bat" /q
-    echo Your Dataloader V%DATALOADER_VERSION% is created in '%INSTALLATION_DIR%'
+    echo Your Data Loader v%DATALOADER_VERSION% is created in '%INSTALLATION_DIR%'
 
 :CreateStartMenuShortCut
     echo.
@@ -93,5 +93,6 @@ IF EXIST %INSTALLATION_DIR% (
 
 :Exit
     echo.
+    echo Data Loader installation is quitting.
     endlocal
     PAUSE
