@@ -2,21 +2,21 @@
 setlocal
 
 echo.
-echo ***************************************************************************
-echo **            ___  ____ ___ ____   _    ____ ____ ___  ____ ____         **
-echo **            ^|  \ ^|__^|  ^|  ^|__^|   ^|    ^|  ^| ^|__^| ^|  \ ^|___ ^|__/         **
-echo **            ^|__/ ^|  ^|  ^|  ^|  ^|   ^|___ ^|__^| ^|  ^| ^|__/ ^|___ ^|  \         **
-echo **                                                                       **
-echo **  Dataloder v45 is a Salesforce supported Open Source project to help  **
-echo **  you import data to and export data from your Salesforce org.         **
-echo **  It requires Zulu OpenJDK 11.0.x to run.                              **
-echo **                                                                       **
-echo **  Github Project Url:                                                  **
-echo **       https://github.com/forcedotcom/dataloader                       **
-echo **  Salesforce Documentation:                                            **
-echo **       https://help.salesforce.com/articleView?id=data_loader.htm      **
-echo **                                                                       **
-echo ***************************************************************************
+echo *************************************************************************
+echo **            ___  ____ ___ ____   _    ____ ____ ___  ____ ____       **
+echo **            ^|  \ ^|__^|  ^|  ^|__^|   ^|    ^|  ^| ^|__^| ^|  \ ^|___ ^|__/       **
+echo **            ^|__/ ^|  ^|  ^|  ^|  ^|   ^|___ ^|__^| ^|  ^| ^|__/ ^|___ ^|  \       **
+echo **                                                                     **
+echo **  Data Loader v45 is a Salesforce supported Open Source project to   **
+echo **  help you import data to and export data from your Salesforce org.  **
+echo **  It requires Zulu OpenJDK 11.0.x to run.                            **
+echo **                                                                     **
+echo **  Github Project Url:                                                **
+echo **       https://github.com/forcedotcom/dataloader                     **
+echo **  Salesforce Documentation:                                          **
+echo **       https://help.salesforce.com/articleView?id=data_loader.htm    **
+echo **                                                                     **
+echo *************************************************************************
 echo.
 
 :CheckOpenJdk11
