@@ -1,14 +1,12 @@
-# Release Dataloader 45.0.0
-Since Jan 2019,  Oracle will not support Java 8 for commercial user any more.  We switch to Zulu Openjdk 11 since Dataloader V45.  
-As the Java community adapts to the Oracle Java support policy change, we have not yet found a good maven plug in that packages Maven and Windows application easily.  We are shipping the runnable  Dataloader Jar as of V45.   
+# Release Notes for Data Loader v45.0.0
+ 
+Data Loader v45 is built with Zulu OpenJDK 11 and requires a 64-bit operating system. Download and install Zulu OpenJDK 11 before installing Data Loader.
+ 
+Data Loader v44 is the last version built with Oracle Java 8. Developers can check out code from the branch “DataloaderV44Release”. End users can download v44 or older from this project’s “releases” tab.
 
-
-
-
-
-
-
-
+# Java Requirement
+ 
+Developers need to download [Zulu OpenJDK 11](https://www.azul.com/downloads/zulu) before building Data Loader.
 # Build Data Loader
 
     git clone git@github.com:forcedotcom/dataloader.git
@@ -17,13 +15,12 @@ As the Java community adapts to the Oracle Java support policy change, we have n
     git submodule update
     mvn clean package -DskipTests
     
-The build will include the appropriate eclipse swt jar by detecting the operating system type.  If you would like to manually specify the eclipse swt jar, take a look at the pom.xml file to see a full list of available profiles.
+The build will include the appropriate eclipse swt jar by detecting your operating system type. If you would like to manually specify the eclipse swt jar, take a look at the pom.xml file to see a full list of available profiles.
 
-Note: salesforce.com officially supports dataloader on Windows XP and Windows 7.  The other platforms that dataloader can be compiled for are unofficial.
+Note: Salesforce officially supports Data Loader for 64-bit Windows and macOS. Any other platforms that Data Loader can be compiled for are unofficial.
 
-The build will generate a windows installer exe in the target directory when executing the build in a windows environment.  If you are packaging the windows installer for distribution, you must use the following command to specify the win32 profile because the installer is packaged with a 32-bit JRE.
+For macOS and Windows, the build will generate needed JARs in the target directory. 
 
-    mvn clean package -P win32,-win64 -DskipTests
     
 # Execute Data Loader
 
@@ -52,6 +49,12 @@ For example, the following command sets the operation to insert regardless of wh
 The process-conf.xml file can be used to define properties for multiple processes.  Look at src/main/nsis/samples/conf/process-conf.xml for examples on how to configure it.  The way to run a process defined in process-conf.xml is to specify process name on command line like this:
 
     java -cp target/dataloader-xx.0-uber.jar -Dsalesforce.config.dir=CONFIG_DIR com.salesforce.dataloader.process.ProcessRunner process.name=opportunityUpsertProcess
+
+# Execute Data Loader With Scripts for v45 and Later
+ 
+Launch scripts are provided to help end users launch Data Loader for Windows and macOS. Zip files are provided for macOS and Windows environments in the project's "releases" tab. There are specific installation instructions for [macOS](https://help.​salesforce.com/articleView?id=​loader_install_mac.htm) and [Windows](https://help.​salesforce.com/articleView?id=​loader_install_windows.htm).
+ 
+A new directory called "release" was added to the project’s root directory. Developers can build Data Loader and place the dataloader-xx.0-uber.jar inside "release/mac" or "release\win" directory to launch a customized build.
 
 
 # Test Data Loader
