@@ -51,12 +51,10 @@ import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.ws.ConnectionException;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -357,50 +355,6 @@ public class Controller {
         }
         logger.info("The installation configuration location is: " + dir.getAbsolutePath());
         return dir;
-    }
-
-    /*
-     *  SWT library has a .swt folder DLL loading  issue in user space that causes security issue.
-     *  Salesforce filed a bug to track this issue.   https://bugs.eclipse.org/bugs/show_bug.cgi?id=531823
-     *  Temporary fix is to delete dll/lib before launching the application and the application will generate it again.
-     *  We will also delete teh swt*dll file from C:\Users\<usesr>\AppData\Local\salesforce.com\Data Loader\ location with dataloader binary if found;
-     *  A sample dll name would be swt-win32-4626.dll
-     */
-
-    private static void deleteSwtDirectory() {
-        // only need to do this for windows.
-        if (OS_TYPE != OSInfo.OSType.WINDOWS)
-            return;
-
-        File directoryToBeDeleted = Paths.get(System.getProperty("user.home") + File.separator + ".swt").toFile();
-        if (directoryToBeDeleted.exists() && directoryToBeDeleted.isDirectory()) {
-            try {
-                FileUtils.deleteDirectory(directoryToBeDeleted);
-                logger.debug("Deleted swt directory: " + directoryToBeDeleted);
-            } catch (IOException e) {
-                logger.debug("Problems to delete swt directory: " + directoryToBeDeleted);
-            }
-        }
-
-        // Delete the dll files
-        try {
-            File localBinaryDirectory = Paths.get(System.getProperty("user.home"), "AppData\\Local", APP_VENDOR, getProductName()).toFile();
-            if (!localBinaryDirectory.isDirectory())
-                return;
-            final File[] files = localBinaryDirectory.listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(final File dir,
-                                      final String name) {
-                    return name.toLowerCase().startsWith("swt") && name.toLowerCase().endsWith("dll");
-                }
-            });
-            for (final File file : files) {
-                if (!file.isDirectory())
-                    file.delete();
-            }
-        } catch (Exception e) {
-            logger.debug("Problems to delete dll file with exceptions: " + e.toString());
-        }
     }
 
     /**
