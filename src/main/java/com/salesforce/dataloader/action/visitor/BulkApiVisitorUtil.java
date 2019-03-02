@@ -48,6 +48,7 @@ import com.sforce.async.ConcurrencyMode;
 import com.sforce.async.ContentType;
 import com.sforce.async.JobInfo;
 import com.sforce.async.OperationEnum;
+import com.sforce.async.JobStateEnum;
 
 class BulkApiVisitorUtil {
 
@@ -68,6 +69,7 @@ class BulkApiVisitorUtil {
     private final LoadRateCalculator rateCalc;
 
     private final boolean updateProgress;
+    private final boolean pkChunkingEnabled;
 
     BulkApiVisitorUtil(Controller ctl, ILoaderProgress monitor, LoadRateCalculator rateCalc, boolean updateProgress) {
         this.client = ctl.getBulkClient().getClient();
@@ -82,6 +84,7 @@ class BulkApiVisitorUtil {
         this.monitor = monitor;
         this.rateCalc = rateCalc;
         this.updateProgress = updateProgress;
+        this.pkChunkingEnabled = ctl.getConfig().getBoolean(Config.ENABLE_PK_CHUNKING);
     }
 
     BulkApiVisitorUtil(Controller ctl, ILoaderProgress monitor, LoadRateCalculator rateCalc) {
@@ -168,10 +171,16 @@ class BulkApiVisitorUtil {
         return this.jobInfo != null;
     }
 
-    void closeJob() throws AsyncApiException {
-        this.jobInfo = this.client.closeJob(getJobId());
-        updateJobStatus();
-        awaitJobCompletion();
+    void closeJob() throws AsyncApiException { 
+        logger.info("ENABLE_PK_CHUNKING: " + pkChunkingEnabled);
+        if(pkChunkingEnabled){ // PK Chunk will take time to complete job, cannot close while queries are being produced.
+            awaitJobCompletion();
+            this.jobInfo = this.client.closeJob(getJobId());
+        } else{
+           this.jobInfo = this.client.closeJob(getJobId());
+           updateJobStatus();
+           awaitJobCompletion();
+        }
     }
 
     private void updateJobStatus() {
@@ -193,6 +202,10 @@ class BulkApiVisitorUtil {
 
     CSVReader getBatchResults(String batchId) throws AsyncApiException {
         return new CSVReader(this.client.getBatchResultStream(getJobId(), batchId));
+    }
+
+    JobInfo getJobInfo() throws AsyncApiException{
+        return this.jobInfo;
     }
 
 }

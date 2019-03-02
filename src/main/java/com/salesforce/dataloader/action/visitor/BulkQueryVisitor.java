@@ -42,6 +42,7 @@ import com.salesforce.dataloader.exception.OperationException;
 import com.salesforce.dataloader.model.Row;
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.BatchInfo;
+import com.sforce.async.JobInfo;
 import com.sforce.async.BatchStateEnum;
 import com.sforce.async.CSVReader;
 import com.sforce.async.QueryResultList;
@@ -55,6 +56,7 @@ import com.sforce.async.QueryResultList;
 public class BulkQueryVisitor extends AbstractQueryVisitor {
 
     private BatchInfo batch;
+    private BulkApiVisitorUtil jobUtil;
 
     public BulkQueryVisitor(Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {
@@ -63,7 +65,7 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
 
     @Override
     protected int executeQuery(String soql) throws AsyncApiException, OperationException {
-        final BulkApiVisitorUtil jobUtil = new BulkApiVisitorUtil(getController(), getProgressMonitor(),
+        jobUtil = new BulkApiVisitorUtil(getController(), getProgressMonitor(),
                 getRateCalculator(), false);
         jobUtil.createJob(getConfig());
         try {
@@ -73,42 +75,48 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
         }
         jobUtil.closeJob();
         final BatchInfo b = jobUtil.getBatches().getBatchInfo()[0];
+        final JobInfo j = jobUtil.getJobInfo();
         if (b.getState() == BatchStateEnum.Failed) throw new ExtractException("Batch failed: " + b.getStateMessage());
         this.batch = b;
-        return b.getNumberRecordsProcessed();
+        return j.getNumberRecordsProcessed();
     }
 
     @Override
     protected void writeExtraction() throws AsyncApiException, ExtractException, DataAccessObjectException {
-        if (this.batch.getState() == BatchStateEnum.Failed)
+        for(BatchInfo b : jobUtil.getBatches().getBatchInfo()){
+            if (b.getState() == BatchStateEnum.Failed)
             throw new ExtractException("Batch failed: " + this.batch.getStateMessage());
-        final QueryResultList results = getController().getBulkClient().getClient()
-                .getQueryResultList(this.batch.getJobId(), this.batch.getId());
+            if (b.getState() == BatchStateEnum.NotProcessed) continue;
+            final QueryResultList results = getController().getBulkClient().getClient()
+                .getQueryResultList(b.getJobId(), b.getId());
+             getLogger().info(results);
+            for (final String resultId : results.getResult()) {
+                if (getProgressMonitor().isCanceled()) return;
 
-        for (final String resultId : results.getResult()) {
-            if (getProgressMonitor().isCanceled()) return;
-            try {
-                final InputStream resultStream = getController().getBulkClient().getClient()
-                        .getQueryResultStream(this.batch.getJobId(), this.batch.getId(), resultId);
                 try {
-                    final CSVReader rdr = new CSVReader(resultStream, Config.BULK_API_ENCODING);
-                    rdr.setMaxCharsInFile(Integer.MAX_VALUE);
-                    rdr.setMaxRowsInFile(Integer.MAX_VALUE);
-                    List<String> headers;
-                    headers = rdr.nextRecord();
-                    List<String> csvRow;
-                    while ((csvRow = rdr.nextRecord()) != null) {
-                        final StringBuilder id = new StringBuilder();
-                        final Row daoRow = getDaoRow(headers, csvRow, id);
-                        addResultRow(daoRow, id.toString());
+                    final InputStream resultStream = getController().getBulkClient().getClient()
+                            .getQueryResultStream(b.getJobId(), b.getId(), resultId);
+                    try {
+                        final CSVReader rdr = new CSVReader(resultStream, Config.BULK_API_ENCODING);
+                        rdr.setMaxCharsInFile(Integer.MAX_VALUE);
+                        rdr.setMaxRowsInFile(Integer.MAX_VALUE);
+                        List<String> headers;
+                        headers = rdr.nextRecord();
+                        List<String> csvRow;
+                        while ((csvRow = rdr.nextRecord()) != null) {
+                            final StringBuilder id = new StringBuilder();
+                            final Row daoRow = getDaoRow(headers, csvRow, id);
+                            addResultRow(daoRow, id.toString());
+                        }
+                    } finally {
+                        resultStream.close();
                     }
-                } finally {
-                    resultStream.close();
+                } catch (final IOException e) {
+                    throw new ExtractException(e);
                 }
-            } catch (final IOException e) {
-                throw new ExtractException(e);
             }
         }
+        
     }
 
     private Row getDaoRow(List<String> headers, List<String> csvRow, StringBuilder id) {

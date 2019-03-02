@@ -56,16 +56,30 @@ public class BulkClient extends ClientBase<BulkConnection> {
 
     @Override
     protected boolean connectPostLogin(ConnectorConfig cc) {
+
         try {
             // Set up a connection object with the given config
             this.client = new BulkConnection(cc);
-
         } catch (AsyncApiException e) {
             logger.error(Messages.getMessage(getClass(), "loginError", cc.getAuthEndpoint(), e.getExceptionMessage()),
                     e);
             // Wrap exception. Otherwise, we'll have to change lots of signatures
             throw new RuntimeException(e.getExceptionMessage(), e);
         }
+
+        // PK Chunking
+        if(config.getBoolean(Config.ENABLE_PK_CHUNKING) && config.getBoolean(Config.BULK_API_ENABLED)){
+            String pkChunkHeader = "chunkSize=" + config.getString(Config.PK_CHUNK_SIZE);
+            String pkChunkStartRow = config.getString(Config.PK_CHUNK_START_ROW);
+            if (pkChunkStartRow.length() > 14 && config.getBoolean(Config.ENABLE_PK_CHUNKING)) {
+                if (pkChunkStartRow.length() > 15) {
+                    pkChunkStartRow = pkChunkStartRow.substring(0, 15);
+                }
+                pkChunkHeader += "; startRow=" + pkChunkStartRow; 
+            }
+            getClient().addHeader("Sforce-Enable-PKChunking", pkChunkHeader);
+        }
+
         return true;
     }
 

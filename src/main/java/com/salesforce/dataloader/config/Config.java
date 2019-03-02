@@ -86,6 +86,7 @@ public class Config {
     public static final int MAX_BULK_API_BATCH_SIZE = 10000;
     public static final int DEFAULT_BULK_API_BATCH_SIZE = 2000;
     public static final long DEFAULT_BULK_API_CHECK_STATUS_INTERVAL = 5000L;
+    public static final int DEFAULT_PK_CHUNK_SIZE = 100000;
     public static final String DEFAULT_ENDPOINT_URL = "https://login.salesforce.com";
 
     /*
@@ -189,6 +190,10 @@ public class Config {
     public static final String EXTERNAL_ID_FIELD = "sfdc.externalIdField"; //$NON-NLS-1$
     public static final String EXTRACT_REQUEST_SIZE = "sfdc.extractionRequestSize"; //$NON-NLS-1$
     public static final String EXTRACT_SOQL = "sfdc.extractionSOQL"; //$NON-NLS-1$
+    public static final String BYPASS_DUPLICATES = "sfdc.duplicates"; //$NON-NLS-1$
+    public static final String ENABLE_PK_CHUNKING = "sfdc.enablePKChunking";
+    public static final String PK_CHUNK_SIZE = "sfdc.pkChunkSize";
+    public static final String PK_CHUNK_START_ROW = "sfdc.pkChunkStartRow";
 
     //
     // process configuration (action parameters)
@@ -330,6 +335,7 @@ public class Config {
         setValue(MIN_RETRY_SLEEP_SECS, DEFAULT_MIN_RETRY_SECS);
         setValue(ASSIGNMENT_RULE, ""); //$NON-NLS-1$
         setValue(INSERT_NULLS, false);
+        setValue(BYPASS_DUPLICATES, false);
         setValue(ENABLE_EXTRACT_STATUS_OUTPUT, false);
         setValue(ENABLE_LAST_RUN_OUTPUT, true);
         setValue(RESET_URL_ON_LOGIN, true);
@@ -337,6 +343,7 @@ public class Config {
         setValue(DAO_WRITE_BATCH_SIZE, DEFAULT_DAO_WRITE_BATCH_SIZE);
         setValue(DAO_READ_BATCH_SIZE, DEFAULT_DAO_READ_BATCH_SIZE);
         setValue(TRUNCATE_FIELDS, true);
+        setValue(PK_CHUNK_SIZE, DEFAULT_PK_CHUNK_SIZE);
         // TODO: When we're ready, make Bulk API turned on by default.
         setValue(BULK_API_ENABLED, useBulkApiByDefault());
         setValue(BULK_API_SERIAL_MODE, false);

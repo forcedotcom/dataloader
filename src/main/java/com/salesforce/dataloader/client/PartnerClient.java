@@ -260,6 +260,10 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         // TODO: make this configurable
         getClient().setDisableFeedTrackingHeader(true);
+
+        // Bypass Duplicate Rules
+        getClient().setDuplicateRuleHeader(config.getBoolean(Config.BYPASS_DUPLICATES), config.getBoolean(Config.BYPASS_DUPLICATES), config.getBoolean(Config.BYPASS_DUPLICATES));
+
         return true;
     }
 
