@@ -386,6 +386,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private Map<String, BatchInfo> createBatchInfoMap() throws AsyncApiException {
         Map<String, BatchInfo> batchInfoMap = new HashMap<String, BatchInfo>();
         for (BatchInfo bi : this.jobUtil.getBatches().getBatchInfo()) {
+            if(bi.getState() != BatchStateEnum.NotProcessed)
             batchInfoMap.put(bi.getId(), bi);
         }
         return batchInfoMap;

@@ -81,6 +81,8 @@ public class AdvancedSettingsDialog extends Dialog {
     private Text textProxyUsername;
     private Text textProxyPassword;
     private Text textTimezone;
+    private Text textPKChunkStartRow;
+    private Text textChunkSize;
 
     private final String defaultServer;
 
@@ -97,6 +99,8 @@ public class AdvancedSettingsDialog extends Dialog {
     private Button buttonCsvComma;
     private Button buttonCsvTab;
     private Button buttonCsvOther;
+    private Button buttonBypassDuplicates;
+    private Button buttonUsePKChunking;
 
     /**
      * InputDialog constructor
@@ -186,6 +190,13 @@ public class AdvancedSettingsDialog extends Dialog {
         setButtonEnabled(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent, enabled);
         setButtonEnabled(Config.INSERT_NULLS, buttonNulls, !enabled);
         setButtonEnabled(Config.TRUNCATE_FIELDS, buttonTruncateFields, !enabled);
+        setButtonEnabled(Config.BYPASS_DUPLICATES, buttonBypassDuplicates, !enabled);
+        setButtonEnabled(Config.ENABLE_PK_CHUNKING, buttonUsePKChunking, enabled);
+    }
+
+    private void initPKChunking(boolean enabled) {
+        textChunkSize.setEnabled(enabled);
+        textPKChunkStartRow.setEnabled(enabled);
     }
 
     private void setButtonEnabled(String configKey, Button b, boolean enabled) {
@@ -459,6 +470,13 @@ public class AdvancedSettingsDialog extends Dialog {
         data.widthHint = 25;
         textSplitterValue.setLayoutData(data);
 
+        Label labelBypassDuplicates = new Label(restComp, SWT.RIGHT);
+        labelBypassDuplicates.setText(Labels.getString("AdvancedSettingsDialog.bypassDuplicates"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelBypassDuplicates.setLayoutData(data);
+        buttonBypassDuplicates = new Button(restComp, SWT.CHECK);
+        buttonBypassDuplicates.setSelection(config.getBoolean(Config.BYPASS_DUPLICATES));        
+
         // Enable Bulk API Setting
         Label labelUseBulkApi = new Label(restComp, SWT.RIGHT);
         labelUseBulkApi.setText(Labels.getString("AdvancedSettingsDialog.useBulkApi")); //$NON-NLS-1$
@@ -499,6 +517,59 @@ public class AdvancedSettingsDialog extends Dialog {
         buttonBulkApiZipContent = new Button(restComp, SWT.CHECK);
         buttonBulkApiZipContent.setSelection(config.getBoolean(Config.BULK_API_SERIAL_MODE));
         buttonBulkApiZipContent.setEnabled(useBulkAPI);
+
+        // Enable PK Chunking
+        Label labelUsePKChunking = new Label(restComp, SWT.RIGHT);
+        labelUsePKChunking.setText(Labels.getString("AdvancedSettingsDialog.enablePKChunking")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelUsePKChunking.setLayoutData(data);
+        boolean usePKChunking = config.getBoolean(Config.ENABLE_PK_CHUNKING);
+        buttonUsePKChunking = new Button(restComp, SWT.CHECK);
+        buttonUsePKChunking.setSelection(usePKChunking);
+        buttonUsePKChunking.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                super.widgetSelected(e);
+                boolean enabled = buttonUsePKChunking.getSelection();
+                initPKChunking(enabled);
+            }
+        });
+
+        // Chunk size
+        Label labelChunkSize = new Label(restComp, SWT.RIGHT);
+        labelChunkSize.setText(Labels.getString("AdvancedSettingsDialog.pkChunkSize")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelChunkSize.setLayoutData(data);
+
+        textChunkSize = new Text(restComp, SWT.BORDER);
+        textChunkSize.setText(config.getString(Config.PK_CHUNK_SIZE));
+        textChunkSize.setTextLimit(6);
+        textChunkSize.setEnabled(false);
+        textChunkSize.addVerifyListener(new VerifyListener() {
+            @Override
+            public void verifyText(VerifyEvent event) {
+                event.doit = Character.isISOControl(event.character) || Character.isDigit(event.character);
+            }
+        });
+        data = new GridData();
+        data.widthHint = 50;
+        textChunkSize.setLayoutData(data);
+
+        // PK Chunk Start Row
+        Label labelPKChunkStartRow = new Label(restComp, SWT.RIGHT);
+        labelPKChunkStartRow.setText(Labels.getString("AdvancedSettingsDialog.pkChunkStartRow")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelPKChunkStartRow.setLayoutData(data);
+
+        textPKChunkStartRow = new Text(restComp, SWT.BORDER);
+        textPKChunkStartRow.setTextLimit(18);
+        data = new GridData();
+        data.widthHint = 115;
+        textPKChunkStartRow.setLayoutData(data);
+        textPKChunkStartRow.setEnabled(false);
+        textPKChunkStartRow.setText(config.getString(Config.PK_CHUNK_START_ROW));
+        initPKChunking(config.getBoolean(Config.ENABLE_PK_CHUNKING));
+
         // timezone
         textTimezone = createTextInput(restComp, "AdvancedSettingsDialog.timezone", Config.TIMEZONE, TimeZone.getDefault().getID(), 200);
 
@@ -686,6 +757,10 @@ public class AdvancedSettingsDialog extends Dialog {
                 config.setValue(Config.BULK_API_ENABLED, buttonUseBulkApi.getSelection());
                 config.setValue(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode.getSelection());
                 config.setValue(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
+                config.setValue(Config.ENABLE_PK_CHUNKING, buttonUsePKChunking.getSelection());
+                config.setValue(Config.PK_CHUNK_SIZE, textChunkSize.getText());
+                config.setValue(Config.PK_CHUNK_START_ROW, textPKChunkStartRow.getText());
+                config.setValue(Config.BYPASS_DUPLICATES, buttonBypassDuplicates.getSelection());
 
                 controller.saveConfig();
                 controller.logout();
