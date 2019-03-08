@@ -128,14 +128,16 @@ public class Controller {
     }
 
     private String getConfigDirFromArgMap(String[] args) {
-        //Process name=value config setting
         Map<String, String> argNameValuePair = new HashMap<>();
-        Arrays.stream(args).forEach(arg ->
-        {
-            String[] argArray = arg.split("=");
-            if (argArray.length == 2)
-                argNameValuePair.put(argArray[0], argArray[1]);
-        });
+        if (args != null) {
+            //Process name=value config setting
+            Arrays.stream(args).forEach(arg ->
+            {
+                String[] argArray = arg.split("=");
+                if (argArray.length == 2)
+                    argNameValuePair.put(argArray[0], argArray[1]);
+            });
+        }
 
         return argNameValuePair.containsKey(CONFIG_DIR_PROP) ?
                 argNameValuePair.get(CONFIG_DIR_PROP) : null;
