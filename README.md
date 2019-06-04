@@ -1,6 +1,6 @@
-# Release Notes for Data Loader v45.0.0
+# Notes for Data Loader v45.0.0 and later
  
-Data Loader v45 is built with Zulu OpenJDK 11 and requires a 64-bit operating system. Download and install Zulu OpenJDK 11 before installing Data Loader.
+Data Loader v45 and later is built with Zulu OpenJDK 11 and requires a 64-bit operating system. Download and install Zulu OpenJDK 11 before installing Data Loader. See instructions further down to install via scripts.
  
 Data Loader v44 is the last version built with Oracle Java 8. Developers can check out code from the branch “DataloaderV44Release”. End users can download v44 or older from this project’s “releases” tab.
 
