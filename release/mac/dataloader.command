@@ -26,5 +26,5 @@ then
 else
     echo "$JAVA_HOME"
     cd DATALODER_WORK_DIRECTORY_PLACEHOLDER   #change to your own customized directory
-    java -XstartOnFirstThread -jar dataloader-46.0.0-uber.jar salesforce.config.dir=DATALODER_WORK_DIRECTORY_PLACEHOLDER/configs
+    java -XstartOnFirstThread -jar dataloader-46.1.0-uber.jar salesforce.config.dir=DATALODER_WORK_DIRECTORY_PLACEHOLDER/configs
 fi

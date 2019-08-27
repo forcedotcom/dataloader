@@ -31,7 +31,7 @@ echo.
     )
 
 :Run
-    "%ZULU_JAVA_HOME%\bin\java"  -jar dataloader-46.0.0-uber.jar salesforce.config.dir=configs
+    "%ZULU_JAVA_HOME%\bin\java"  -jar dataloader-46.1.0-uber.jar salesforce.config.dir=configs
 
 :Exit
     endlocal
