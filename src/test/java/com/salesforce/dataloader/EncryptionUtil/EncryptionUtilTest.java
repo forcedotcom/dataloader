@@ -101,27 +101,32 @@ public class EncryptionUtilTest {
     
     @Test
     public void testAutoSetKeyFile() throws IOException, GeneralSecurityException {
-        EncryptionAesUtil encryptionAesUtil = new EncryptionAesUtil();
-        String passwordText = "somePassword6c3708b3";
-        String filePath = encryptionAesUtil.createUserProfileKeyName();
-        String filePathBak = filePath + ".bak";
-        Boolean cleanup = false;
-        if (Files.exists(Paths.get(filePath))) {
-            cleanup = true;
-            Files.move(Paths.get(filePath), Paths.get(filePathBak));
-        }
-        // without setting the default key
-        String encryptedMsg = encryptionAesUtil.encryptMsg(passwordText);
-        String decryptedMsg = encryptionAesUtil.decryptMsg(encryptedMsg);
+        boolean cleanup = false;
+        String filePath = null;
+        String filePathBak = null;
+        try {
+            EncryptionAesUtil encryptionAesUtil = new EncryptionAesUtil();
+            String passwordText = "somePassword6c3708b3";
+            filePath = encryptionAesUtil.createUserProfileKeyName();
+            filePathBak = filePath + ".bak";
+            if (Files.exists(Paths.get(filePath))) {
+                cleanup = true;
+                Files.move(Paths.get(filePath), Paths.get(filePathBak));
+            }
+            // without setting the default key
+            String encryptedMsg = encryptionAesUtil.encryptMsg(passwordText);
+            String decryptedMsg = encryptionAesUtil.decryptMsg(encryptedMsg);
 
-        Assert.assertTrue(Files.exists(Paths.get(filePath)));
-        Files.delete(Paths.get(filePath));
-        if (cleanup) {
-            Files.move(Paths.get(filePathBak), Paths.get(filePath));
-        }
+            Assert.assertTrue(Files.exists(Paths.get(filePath)));
+            Files.delete(Paths.get(filePath));
 
-        logger.info("\nEncrypted message:" + encryptedMsg.toString() + "\nText to be encrypted:" + passwordText + "\nDecrypted       text:" + decryptedMsg);
-        Assert.assertNotEquals("Encrpted message should be not be equal to original message", passwordText, new String(encryptedMsg));
-        Assert.assertEquals("Text recovered from encrypted message is as the expected: ", passwordText, decryptedMsg);
+            logger.info("\nEncrypted message:" + encryptedMsg.toString() + "\nText to be encrypted:" + passwordText + "\nDecrypted       text:" + decryptedMsg);
+            Assert.assertNotEquals("Encrypted message should be not be equal to original message", passwordText, encryptedMsg);
+            Assert.assertEquals("Text recovered from encrypted message is as the expected: ", passwordText, decryptedMsg);
+        } finally {
+             if (cleanup) {
+                Files.move(Paths.get(filePathBak), Paths.get(filePath));
+            }
+        }
     }
 }

@@ -119,7 +119,7 @@ public class OAuthTokenFlow extends OAuthFlow {
                 if (params.containsKey("issued_at")) {
                     String issued_at = params.get("issued_at");
                     if (issued_at != null && !issued_at.equals("")) {
-                        token.setIssuedAt(new Long(issued_at));
+                        token.setIssuedAt(Long.valueOf(issued_at));
                     }
                 }
 

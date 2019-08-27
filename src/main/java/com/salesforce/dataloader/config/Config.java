@@ -388,7 +388,7 @@ public class Config {
         if (value == null || value.length() == 0) return DOUBLE_DEFAULT;
         double ival;
         try {
-            ival = new Double(value).doubleValue();
+            ival = Double.parseDouble(value);
         } catch (NumberFormatException e) {
             String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{name,
                     Double.class.getName()});
@@ -408,7 +408,7 @@ public class Config {
         if (value == null || value.length() == 0) return FLOAT_DEFAULT;
         float ival = FLOAT_DEFAULT;
         try {
-            ival = new Float(value).floatValue();
+            ival = Float.parseFloat(value);
         } catch (NumberFormatException e) {
             String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{name,
                     Float.class.getName()});
