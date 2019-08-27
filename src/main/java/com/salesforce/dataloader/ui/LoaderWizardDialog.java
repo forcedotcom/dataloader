@@ -430,7 +430,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
         button.setText(IDialogConstants.CANCEL_LABEL);
         setButtonLayoutData(button);
         button.setFont(parent.getFont());
-        button.setData(new Integer(IDialogConstants.CANCEL_ID));
+        button.setData(Integer.valueOf(IDialogConstants.CANCEL_ID));
         button.addSelectionListener(cancelListener);
         return button;
     }
@@ -445,7 +445,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     @Override
     protected Button getButton(int id) {
         if (id == IDialogConstants.CANCEL_ID) return cancelButton;
-        return buttons.get(new Integer(id));
+        return buttons.get(Integer.valueOf(id));
     }
 
     /**
@@ -827,7 +827,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      */
     private void saveEnableStateAndSet(Control w, Map<String,Object> h, String key, boolean enabled) {
         if (w != null) {
-            h.put(key, new Boolean(w.getEnabled()));
+            h.put(key, Boolean.valueOf(w.getEnabled()));
             w.setEnabled(enabled);
         }
     }
@@ -1246,7 +1246,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
         Button button = new Button(parent, SWT.PUSH | SWT.FLAT);
         button.setText(label);
         button.setFont(JFaceResources.getDialogFont());
-        button.setData(new Integer(id));
+        button.setData(Integer.valueOf(id));
         button.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent event) {
                 buttonPressed(((Integer) event.widget.getData()).intValue());
@@ -1259,7 +1259,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
             }
         }
 
-        buttons.put(new Integer(id), button);
+        buttons.put(Integer.valueOf(id), button);
         setButtonLayoutData(button);
         return button;
 

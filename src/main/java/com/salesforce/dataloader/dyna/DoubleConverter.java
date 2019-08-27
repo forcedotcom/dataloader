@@ -84,10 +84,10 @@ public final class DoubleConverter implements Converter {
         }
         if (value instanceof Double) {
             return (value);
-        } else if (value instanceof Number) { return new Double(((Number)value).doubleValue()); }
+        } else if (value instanceof Number) { return ((Number) value).doubleValue(); }
 
         try {
-            return (new Double(value.toString()));
+            return (Double.valueOf(value.toString()));
         } catch (Exception e) {
             if (useDefault) {
                 return (defaultValue);

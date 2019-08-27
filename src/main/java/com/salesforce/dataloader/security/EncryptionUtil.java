@@ -43,7 +43,7 @@ public class EncryptionUtil {
             {
                 tmpValue = (tmpValue - 127) * -1;
             }
-            tmpInteger = new Integer(tmpValue);
+            tmpInteger = Integer.valueOf(tmpValue);
             baBytes[j] = tmpInteger.byteValue();
         }
 

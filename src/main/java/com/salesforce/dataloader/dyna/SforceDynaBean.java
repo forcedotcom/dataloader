@@ -287,12 +287,12 @@ public class SforceDynaBean {
     public static SObject getSObject(Controller controller, String entityName, DynaBean dynaBean) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, ParameterLoadException {
         SObject sObj = new SObject();
         sObj.setType(entityName);
-        Map<String, Object> fieldMap = BeanUtils.describe(dynaBean);
+        Map<String, String> fieldMap = BeanUtils.describe(dynaBean);
         for (String fName : fieldMap.keySet()) {
             if (fieldMap.get(fName) != null) {
                 // see if any entity foreign key references are embedded here
                 Object value = dynaBean.get(fName);
-                if (value != null && value instanceof SObjectReference) {
+                if (value instanceof SObjectReference) {
                     SObjectReference sObjRef = (SObjectReference)value;
                     if (!sObjRef.isNull()) sObjRef.addReferenceToSObject(controller, sObj, fName);
                 } else {

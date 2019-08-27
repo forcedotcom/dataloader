@@ -447,7 +447,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                     startRow = 0;
                 }
                 logger.error(Messages.getString("Client.itemError") //$NON-NLS-1$
-                        + new Integer((itemNbr + startRow)).toString());
+                        + Integer.valueOf(itemNbr + startRow).toString());
                 logger.error(Messages.getString("Client.errorCode") + err.getStatusCode().toString()); //$NON-NLS-1$
                 logger.error(Messages.getString("Client.errorMessage") + err.getMessage()); //$NON-NLS-1$
             }
