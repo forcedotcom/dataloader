@@ -25,26 +25,6 @@
  */
 package com.salesforce.dataloader;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Properties;
-import java.util.regex.Pattern;
-
-import org.apache.log4j.Logger;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TestName;
-import org.springframework.util.StringUtils;
-
 import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -57,6 +37,26 @@ import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
+
+import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
+import org.springframework.util.StringUtils;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * This class represents the base class for all data loader JUnit tests. TODO: ProcessScheduler test? TODO: Encryption
@@ -154,7 +154,7 @@ public abstract class TestBase {
 
         if (controller == null) {
             try {
-                controller = Controller.getInstance(testName.getMethodName(), true);
+                controller = Controller.getInstance(testName.getMethodName(), true, null);
             } catch (ControllerInitializationException e) {
                 fail("While initializing controller instance", e);
             }

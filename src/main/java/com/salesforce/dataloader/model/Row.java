@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Basically a Row is a set of column names and column values which can come from a CSV file, a database
@@ -50,7 +51,7 @@ public class Row implements Map<String, Object> {
     }
 
     public Row(int columnCount) {
-        internalMap = new HashMap<String, Object>(columnCount);
+        internalMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     }
 
     public Row(Map<String, Object> internalMap) {

@@ -85,11 +85,11 @@ public final class IntegerConverter implements Converter {
         if (value instanceof Integer) {
             return (value);
         } else if (value instanceof Number) {
-            return new Integer(((Number)value).intValue());
+            return Integer.valueOf(((Number)value).intValue());
         }
 
         try {
-            return (new Integer(value.toString()));
+            return (Integer.parseInt(value.toString()));
         } catch (Exception e) {
             if (useDefault) {
                 return (defaultValue);

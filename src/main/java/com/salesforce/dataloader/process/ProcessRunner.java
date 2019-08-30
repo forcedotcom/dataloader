@@ -55,21 +55,28 @@ package com.salesforce.dataloader.process;
  * @author Lexi Viripaeff
  */
 
-import java.util.*;
-import java.util.Calendar;
-
-import javax.xml.parsers.FactoryConfigurationError;
-
-import org.apache.log4j.Logger;
-import org.quartz.*;
-import org.springframework.beans.factory.InitializingBean;
-
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.progress.NihilistProgressAdapter;
-import com.salesforce.dataloader.config.*;
+import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.LastRun;
+import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.exception.*;
+import com.salesforce.dataloader.exception.ControllerInitializationException;
+import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.sforce.soap.partner.fault.ApiFault;
+
+import org.apache.log4j.Logger;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.InitializingBean;
+
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.parsers.FactoryConfigurationError;
 
 public class ProcessRunner implements InitializingBean, Job, Runnable {
 
@@ -107,7 +114,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         setThreadName(name);
 
         try {
-            controller = Controller.getInstance(name, true);
+            controller = Controller.getInstance(name, true, null);
         } catch (ControllerInitializationException e) {
             throw new RuntimeException(e);
         }
@@ -170,6 +177,12 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
     }
 
     private static void ensureLogging() throws FactoryConfigurationError {
+        try {
+            Controller.initStaticVariable();
+        } catch (ControllerInitializationException e) {
+            logger.error("ensureLogging(): Control not initialized", e );
+            throw new RuntimeException(e.getMessage());
+        }
         Controller.initLog();
     }
 

@@ -26,6 +26,13 @@
 
 package com.salesforce.dataloader.config;
 
+import com.salesforce.dataloader.action.OperationInfo;
+import com.salesforce.dataloader.exception.ConfigInitializationException;
+import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.security.EncryptionAesUtil;
+
+import org.apache.log4j.Logger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -34,19 +41,24 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
-
-import org.apache.log4j.Logger;
-
-import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.exception.ConfigInitializationException;
-import com.salesforce.dataloader.exception.ParameterLoadException;
-import com.salesforce.dataloader.security.EncryptionUtil;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringJoiner;
+import java.util.TimeZone;
 
 /**
  * @author Lexi Viripaeff
@@ -229,7 +241,7 @@ public class Config {
      * <code>encrypter</code> is a utility used internally in the config for reading/writing
      * encrypted values. Right now, the list of encrypted values is known to this class only.
      */
-    private final EncryptionUtil encrypter = new EncryptionUtil();
+    private final EncryptionAesUtil encrypter = new EncryptionAesUtil();
 
     private boolean isBatchMode = false;
 
@@ -376,7 +388,7 @@ public class Config {
         if (value == null || value.length() == 0) return DOUBLE_DEFAULT;
         double ival;
         try {
-            ival = new Double(value).doubleValue();
+            ival = Double.parseDouble(value);
         } catch (NumberFormatException e) {
             String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{name,
                     Double.class.getName()});
@@ -396,7 +408,7 @@ public class Config {
         if (value == null || value.length() == 0) return FLOAT_DEFAULT;
         float ival = FLOAT_DEFAULT;
         try {
-            ival = new Float(value).floatValue();
+            ival = Float.parseFloat(value);
         } catch (NumberFormatException e) {
             String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{name,
                     Float.class.getName()});
@@ -651,15 +663,20 @@ public class Config {
         initEncryption(propMap);
 
         // decrypt encrypted values
-        if (propMap.containsKey(PASSWORD)) {
-            String propValue = decryptProperty(encrypter, propMap, PASSWORD, isBatchMode());
+        decryptPasswordProperty(values, PASSWORD);
+        decryptPasswordProperty(values, PROXY_PASSWORD);
+        decryptPasswordProperty(values, OAUTH_ACCESSTOKEN);
+        decryptPasswordProperty(values, OAUTH_REFRESHTOKEN);
+
+    }
+
+    private void decryptPasswordProperty(Map values, String propertyName) throws ConfigInitializationException {
+        Map<String, String> propMap = values;
+        // initialize encryption
+        if (propMap.containsKey(propertyName)) {
+            String propValue = decryptProperty(encrypter, propMap, propertyName, isBatchMode());
             if (propValue == null) propValue = "";
-            propMap.put(PASSWORD, propValue);
-        }
-        if (propMap.containsKey(PROXY_PASSWORD)) {
-            String propValue = decryptProperty(encrypter, propMap, PROXY_PASSWORD, isBatchMode());
-            if (propValue == null) propValue = "";
-            propMap.put(PROXY_PASSWORD, propValue);
+            propMap.put(propertyName, propValue);
         }
     }
 
@@ -690,12 +707,12 @@ public class Config {
      *
      * @return decrypted property value
      */
-    static private String decryptProperty(EncryptionUtil encrypter, Map<String, String> propMap, String propName, boolean isBatch)
+    static private String decryptProperty(EncryptionAesUtil encrypter, Map<String, String> propMap, String propName, boolean isBatch)
             throws ParameterLoadException {
         String propValue = propMap.get(propName);
         if (propValue != null && propValue.length() > 0) {
             try {
-                return encrypter.decryptString(propValue);
+                return encrypter.decryptMsg(propValue);
             } catch (GeneralSecurityException e) {
                 // if running in the UI, we can ignore encryption errors
                 if (isBatch) {
@@ -725,13 +742,14 @@ public class Config {
         if (keyFile != null && keyFile.length() != 0) {
             try {
                 encrypter.setCipherKeyFromFilePath(keyFile);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 String errMsg = Messages.getFormattedString("Config.errorSecurityInit", new String[]{keyFile,
                         e.getMessage()});
                 logger.error(errMsg);
                 throw new ConfigInitializationException(errMsg);
             }
         }
+
     }
 
     /**
@@ -793,9 +811,10 @@ public class Config {
         // no great way to do this,
         String oldPassword = encryptProperty(PASSWORD);
         String oldProxyPassword = encryptProperty(PROXY_PASSWORD);
-
         String oauthAccessToken = getString(OAUTH_ACCESSTOKEN);
         String oauthRefreshToken = getString(OAUTH_REFRESHTOKEN);
+        putValue(PASSWORD, "");
+        putValue(PROXY_PASSWORD, "");
         putValue(OAUTH_ACCESSTOKEN, "");
         putValue(OAUTH_REFRESHTOKEN, "");
 
@@ -831,10 +850,11 @@ public class Config {
      * @param propName name of the property
      * @return old value of the property
      */
-    private String encryptProperty(String propName) throws GeneralSecurityException {
+    private String encryptProperty(String propName) throws GeneralSecurityException, UnsupportedEncodingException {
         String oldValue = getString(propName);
         if (oldValue != null && oldValue.length() > 0) {
-            putValue(propName, encrypter.encryptString(oldValue));
+
+            putValue(propName, encrypter.encryptMsg(oldValue));
         }
         return oldValue;
     }

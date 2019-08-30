@@ -29,22 +29,31 @@ package com.salesforce.dataloader.process;
  * @author Lexi Viripaeff
  * @input DataLoaderRunner -------------- @ * ----------------
  */
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.ui.UIUtils;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 public class DataLoaderRunner {
+
+    public static final String UI = "ui";
 
     public static void main(String[] args) {
         Controller controller;
+
+
         try {
-            controller = Controller.getInstance("ui", false);
+            controller = Controller.getInstance(UI, false, args);
             controller.createAndShowGUI();
         } catch (ControllerInitializationException e) {
             UIUtils.errorMessageBox(new Shell(new Display()), e);
         }
     }
+
+
+
+
 }

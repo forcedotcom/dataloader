@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration>
+    <appender name="fileAppender" class="org.apache.log4j.RollingFileAppender">
+        <param name="File"   value="${java.io.tmpdir}/sdl.log" />
+        <param name="Append" value="true" />
+        <param name="MaxFileSize" value="100KB" />
+        <param name="MaxBackupIndex" value="1" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" 
+                   value="%d %-5p [%t] %C{2} %M (%F:%L) - %m%n"/>
+        </layout>	    
+    </appender>
+    <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                   value="%d %-5p [%t] %C{2} %M (%F:%L) - %m%n"/>
+        </layout>	    
+    </appender>
+    
+    <category name="org.apache.log4j.xml">
+        <priority value="warn" />
+        <appender-ref ref="fileAppender" />
+        <appender-ref ref="STDOUT" />
+    </category>
+    
+    <logger name="org.apache" >
+            <level value ="warn" />
+    </logger>
+    
+    <root>
+        <priority value ="info" />
+        <appender-ref ref="fileAppender" />
+        <appender-ref ref="STDOUT" />
+    </root>
+</log4j:configuration>
+

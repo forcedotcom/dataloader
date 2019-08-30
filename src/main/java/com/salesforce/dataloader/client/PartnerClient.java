@@ -28,18 +28,10 @@ package com.salesforce.dataloader.client;
 
 /**
  * The sfdc api client class - implemented using the partner wsdl
- * 
+ *
  * @author Lexi Viripaeff
  * @since 6.0
  */
-
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
-
-import org.apache.commons.beanutils.DynaBean;
-import org.apache.log4j.Logger;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -47,11 +39,35 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
-import com.sforce.soap.partner.*;
+import com.sforce.soap.partner.Connector;
+import com.sforce.soap.partner.DeleteResult;
+import com.sforce.soap.partner.DescribeGlobalResult;
+import com.sforce.soap.partner.DescribeGlobalSObjectResult;
+import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Error;
+import com.sforce.soap.partner.Field;
+import com.sforce.soap.partner.LoginResult;
+import com.sforce.soap.partner.PartnerConnection;
+import com.sforce.soap.partner.QueryResult;
+import com.sforce.soap.partner.SaveResult;
+import com.sforce.soap.partner.UpsertResult;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.soap.partner.sobject.SObject;
-import com.sforce.ws.*;
+import com.sforce.ws.ConnectionException;
+import com.sforce.ws.ConnectorConfig;
+import com.sforce.ws.SessionRenewer;
+
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.log4j.Logger;
+
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.salesforce.dataloader.ui.UIUtils.validateHttpsUrlAndThrow;
 
 public class PartnerClient extends ClientBase<PartnerConnection> {
 
@@ -215,7 +231,8 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     @Override
     protected boolean connectPostLogin(ConnectorConfig cc) {
-        if (getClient() == null) throw new IllegalStateException("Client should be logged in already");
+        if (getClient() == null)
+            throw new IllegalStateException("Client should be logged in already");
 
         getClient().setCallOptions(ClientBase.getClientName(this.config), null);
         // query header
@@ -282,7 +299,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private SaveResult[] runSaveOperation(List<DynaBean> dynaBeans, ClientOperation<SaveResult[], SObject[]> op,
-            boolean isInsert) throws ApiFault, ConnectionException {
+                                          boolean isInsert) throws ApiFault, ConnectionException {
         SaveResult[] sr = runOperation(op, getSobjects(dynaBeans, op.getName()));
         String saveMessage = isInsert ? "Client.itemCreated" : "Client.itemUpdated";
         for (int j = 0; j < sr.length; j++) {
@@ -299,19 +316,19 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             return sobjects;
         } catch (IllegalAccessException ex) {
             logger.error(
-                    Messages.getFormattedString("Client.operationError", new String[] { opName, ex.getMessage() }), ex); //$NON-NLS-1$
+                    Messages.getFormattedString("Client.operationError", new String[]{opName, ex.getMessage()}), ex); //$NON-NLS-1$
             throw new RuntimeException(ex);
         } catch (InvocationTargetException ex) {
             logger.error(
-                    Messages.getFormattedString("Client.operationError", new String[] { opName, ex.getMessage() }), ex); //$NON-NLS-1$
+                    Messages.getFormattedString("Client.operationError", new String[]{opName, ex.getMessage()}), ex); //$NON-NLS-1$
             throw new RuntimeException(ex);
         } catch (NoSuchMethodException ex) {
             logger.error(
-                    Messages.getFormattedString("Client.operationError", new String[] { opName, ex.getMessage() }), ex); //$NON-NLS-1$
+                    Messages.getFormattedString("Client.operationError", new String[]{opName, ex.getMessage()}), ex); //$NON-NLS-1$
             throw new RuntimeException(ex);
         } catch (ParameterLoadException ex) {
             logger.error(
-                    Messages.getFormattedString("Client.operationError", new String[] { opName, ex.getMessage() }), ex); //$NON-NLS-1$
+                    Messages.getFormattedString("Client.operationError", new String[]{opName, ex.getMessage()}), ex); //$NON-NLS-1$
             throw new RuntimeException(ex);
         }
     }
@@ -326,12 +343,13 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         for (int tryNum = 0; tryNum < totalAttempts; tryNum++) {
             try {
                 R result = op.run(arg);
-                if (result == null) logger.info(Messages.getString("Client.resultNull")); //$NON-NLS-1$
+                if (result == null)
+                    logger.info(Messages.getString("Client.resultNull")); //$NON-NLS-1$
                 return result;
             } catch (ConnectionException ex) {
                 logger.error(
                         Messages.getFormattedString(
-                                "Client.operationError", new String[] { op.getName(), ex.getMessage() }), ex); //$NON-NLS-1$
+                                "Client.operationError", new String[]{op.getName(), ex.getMessage()}), ex); //$NON-NLS-1$
                 // check retries
                 if (!checkConnectionException(ex, op.getName(), tryNum)) throw ex;
                 connectionException = ex;
@@ -352,14 +370,13 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         String[] dels = new String[dynaBeans.size()];
         for (int i = 0; i < dynaBeans.size(); i++) {
             dynaBean = dynaBeans.get(i);
-            String id = (String)dynaBean.get("Id"); //$NON-NLS-1$
+            String id = (String) dynaBean.get("Id"); //$NON-NLS-1$
             if (id == null) {
                 id = "";
             }
             dels[i] = id;
         }
         logger.debug(Messages.getString("Client.arraySize") + dels.length); //$NON-NLS-1$
-
 
 
         DeleteResult[] result = runOperation(DELETE_OPERATION, dels);
@@ -372,7 +389,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     /**
      * Query next batch of records using the query cursor
-     * 
+     *
      * @param soql
      * @return query results
      * @throws ConnectionException
@@ -383,7 +400,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     /**
      * Query objects excluding the deleted objects
-     * 
+     *
      * @param soql
      * @return query results
      * @throws ConnectionException
@@ -394,7 +411,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     /**
      * Query objects including the deleted objects
-     * 
+     *
      * @param soql
      * @return query results
      */
@@ -405,7 +422,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     /**
      * Process result of a change operation that returns data success / errors (examples of operations with such
      * results: insert, update, upsert, delete, merge)
-     * 
+     *
      * @param success
      *            True if result is success
      * @param successMsgKey
@@ -430,7 +447,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                     startRow = 0;
                 }
                 logger.error(Messages.getString("Client.itemError") //$NON-NLS-1$
-                        + new Integer((itemNbr + startRow)).toString());
+                        + Integer.valueOf(itemNbr + startRow).toString());
                 logger.error(Messages.getString("Client.errorCode") + err.getStatusCode().toString()); //$NON-NLS-1$
                 logger.error(Messages.getString("Client.errorMessage") + err.getMessage()); //$NON-NLS-1$
             }
@@ -468,8 +485,12 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     boolean isSessionValid() {
-        if (config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) { return true; }
-        if (config.getString(Config.OAUTH_ACCESSTOKEN) != null && config.getString(Config.OAUTH_ACCESSTOKEN).trim().length() > 0) { return true; }
+        if (config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
+            return true;
+        }
+        if (config.getString(Config.OAUTH_ACCESSTOKEN) != null && config.getString(Config.OAUTH_ACCESSTOKEN).trim().length() > 0) {
+            return true;
+        }
         return isLoggedIn();
     }
 
@@ -483,7 +504,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         conn.setCallOptions(ClientBase.getClientName(this.config), null);
 
         String oauthAccessToken = config.getString(Config.OAUTH_ACCESSTOKEN);
-        if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0){
+        if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
             setConfiguredSessionId(conn, oauthAccessToken);
         } else if (config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
             setConfiguredSessionId(conn, config.getString(Config.SFDC_INTERNAL_SESSION_ID));
@@ -523,8 +544,9 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             logger.info(Messages.getMessage(getClass(), "sforceLoginDetail", cc.getAuthEndpoint(), cc.getUsername()));
             LoginResult loginResult = runOperation(LOGIN_OPERATION, conn);
             // if password has expired, throw an exception
-            if (loginResult.getPasswordExpired()) { throw new PasswordExpiredException(Messages
-                    .getString("Client.errorExpiredPassword")); //$NON-NLS-1$
+            if (loginResult.getPasswordExpired()) {
+                throw new PasswordExpiredException(Messages
+                        .getString("Client.errorExpiredPassword")); //$NON-NLS-1$
             }
             // update session id and service endpoint based on response
             conn.setSessionHeader(loginResult.getSessionId());
@@ -552,6 +574,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     private String getServerUrl(String serverUrl) {
         if (config.getBoolean(Config.RESET_URL_ON_LOGIN)) {
             try {
+                validateHttpsUrlAndThrow(serverUrl);
                 return getServerStringFromUrl(new URL(serverUrl));
             } catch (MalformedURLException e) {
                 logger.fatal("Unexpected error", e);
@@ -591,8 +614,8 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         // sleep between retries is based on the retry attempt #. Sleep for longer periods with each retry
         sleepSecs = sleepSecs + (retryNum * 10); // sleep for MIN_RETRY_SLEEP_SECS + 10, 20, 30, etc.
 
-        logger.info(Messages.getFormattedString("Client.retryOperation", new String[] { Integer.toString(retryNum + 1),
-                operationName, Integer.toString(sleepSecs) }));
+        logger.info(Messages.getFormattedString("Client.retryOperation", new String[]{Integer.toString(retryNum + 1),
+                operationName, Integer.toString(sleepSecs)}));
         try {
             Thread.sleep(sleepSecs * 1000);
         } catch (InterruptedException e) { // ignore
@@ -623,7 +646,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     /**
      * Set the map of references to object external id info for current entity
-     * 
+     *
      * @throws ConnectionException
      */
     public void setFieldReferenceDescribes() throws ConnectionException {
@@ -672,7 +695,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     /**
      * Gets the sobject describe for the given entity
-     * 
+     *
      * @throws ConnectionException
      */
     public void setFieldTypes() throws ConnectionException {
@@ -710,12 +733,13 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         if (serverUrl == null || serverUrl.length() == 0) {
             serverUrl = getServerStringFromUrl(DEFAULT_AUTH_ENDPOINT_URL);
         }
+        validateHttpsUrlAndThrow(serverUrl);
         return serverUrl;
     }
 
     /**
      * This function returns the describe call for an sforce entity
-     * 
+     *
      * @return DescribeSObjectResult
      * @throws ConnectionException
      */
@@ -735,7 +759,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
      * Checks whether retry makes sense for the given exception and given the number of current vs. max retries. If
      * retry makes sense, then before returning, this method will put current thread to sleep before allowing another
      * retry.
-     * 
+     *
      * @param ex
      * @param operationName
      * @return true if retry should be executed for operation. false if there's no retry.
@@ -765,7 +789,8 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     private Field lookupField(String apiName) {
         // look for field on target object
         for (Field f : getFieldTypes().getFields()) {
-            if (apiName.equals(f.getName().toLowerCase()) || apiName.equals(f.getLabel().toLowerCase())) return f;
+            if (apiName.equals(f.getName().toLowerCase()) || apiName.equals(f.getLabel().toLowerCase()))
+                return f;
         }
         // look for reference field on target object
         if (apiName.contains(":")) {

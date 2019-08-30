@@ -60,6 +60,17 @@ public class MappingViewerSorter extends ViewerSorter {
         }
     }
 
+    private int safeCompare(String s1, String s2)
+    {
+        if(s1 == null && s2 == null)
+            return 0;
+        if (s1 == null)
+            return -1;
+        if (s2 == null)
+            return 1;
+        return collator.compare(s1, s2);
+    }
+
     /**
      * Compares the object for sorting
      */
@@ -74,10 +85,10 @@ public class MappingViewerSorter extends ViewerSorter {
         // Determine which column and do the appropriate sort
         switch (column) {
         case MappingDialog.MAPPING_DAO:
-            rc = collator.compare(m1.getKey(), m2.getKey());
+            rc =safeCompare(m1.getKey(), m2.getKey());
             break;
         case MappingDialog.MAPPING_SFORCE:
-            rc = collator.compare(m1.getValue(), m2.getValue());
+            rc = safeCompare(m1.getValue(), m2.getValue());
             break;
         }
 

@@ -26,19 +26,28 @@
 
 package com.salesforce.dataloader.ui.extraction;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
-
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.ui.UIUtils;
 import com.sforce.soap.partner.Connector;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 public class ExtractionInputDialog extends Dialog {
     private String message;
@@ -233,7 +242,6 @@ public class ExtractionInputDialog extends Dialog {
             endpoint = Connector.END_POINT;
         }
         textEndpoint.setText(endpoint);
-
         Label labelCompression = new Label(restComp, SWT.RIGHT);
         labelCompression.setText(Labels.getString("ExtractionInputDialog.compression")); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);

@@ -1,0 +1,12 @@
+# Account master Mapping values for query from Oracle (left) and upsert to Salesforce (right)
+# OracleFieldName=SalesforceFieldName
+organization_name=Name
+account_number=Oracle_Id__c
+billing_address=BillingStreet
+city=BillingCity
+state=BillingState
+country=BillingCountry
+postal_code=BillingPostalCode
+sic_code=Sic
+recordTypeId=recordTypeId
+"valid"=Integration_Status__c
