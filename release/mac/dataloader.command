@@ -6,7 +6,7 @@ echo "**            ___  ____ ___ ____   _    ____ ____ ___  ____ ____       **"
 echo "**            |  \ |__|  |  |__|   |    |  | |__| |  \ |___ |__/       **"
 echo "**            |__/ |  |  |  |  |   |___ |__| |  | |__/ |___ |  \       **"
 echo "**                                                                     **"
-echo "**  Data Loader v47 is a Salesforce supported Open Source project to   **"
+echo "**  Data Loader v48 is a Salesforce supported Open Source project to   **"
 echo "**  help you import data to and export data from your Salesforce org.  **"
 echo "**  It requires Zulu OpenJDK 11 to run.                                **"
 echo "**                                                                     **"
@@ -26,5 +26,5 @@ then
 else
     echo "$JAVA_HOME"
     cd DATALODER_WORK_DIRECTORY_PLACEHOLDER   #change to your own customized directory
-    java -XstartOnFirstThread -jar dataloader-47.0.0-uber.jar salesforce.config.dir=DATALODER_WORK_DIRECTORY_PLACEHOLDER/configs
+    java -XstartOnFirstThread -jar dataloader-48.0.0-uber.jar salesforce.config.dir=DATALODER_WORK_DIRECTORY_PLACEHOLDER/configs
 fi
