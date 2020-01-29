@@ -522,7 +522,7 @@ public class AdvancedSettingsDialog extends Dialog {
 
         textProxyPort = new Text(restComp, SWT.BORDER);
         textProxyPort.setText(config.getString(Config.PROXY_PORT));
-        textProxyPort.setTextLimit(4);
+        textProxyPort.setTextLimit(5);
         textProxyPort.addVerifyListener(new VerifyListener() {
             @Override
             public void verifyText(VerifyEvent event) {
@@ -530,7 +530,7 @@ public class AdvancedSettingsDialog extends Dialog {
             }
         });
         data = new GridData();
-        data.widthHint = 25;
+        data.widthHint = 30;
         textProxyPort.setLayoutData(data);
 
         //Proxy Username
