@@ -1,7 +1,7 @@
 #!/bin/bash
-DATALOADER_VERSION="48.0.0"
-DATALOADER_SHORT_VERSION="48"
-DATALOADER_UBER_JAR_NAME="dataloader-48.0.0-uber.jar"
+DATALOADER_VERSION="49.0.0"
+DATALOADER_SHORT_VERSION="49"
+DATALOADER_UBER_JAR_NAME="dataloader-49.0.0-uber.jar"
 
 echo ""
 echo "*************************************************************************"
