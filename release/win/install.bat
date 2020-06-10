@@ -1,9 +1,9 @@
 @echo off
 setlocal
 
-set DATALOADER_VERSION=48.0.0
-set DATALOADER_SHORT_VERSION=48
-set DATALOADER_UBER_JAR_NAME=dataloader-48.0.0-uber.jar
+set DATALOADER_VERSION=49.0.0
+set DATALOADER_SHORT_VERSION=49
+set DATALOADER_UBER_JAR_NAME=dataloader-49.0.0-uber.jar
 
 echo.
 echo *************************************************************************
