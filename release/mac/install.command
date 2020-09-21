@@ -21,6 +21,16 @@ echo "**                                                                     **"
 echo "*************************************************************************"
 echo ""
 
+export JAVA_HOME=$(/usr/libexec/java_home -v 11)
+
+
+if [ -z "$JAVA_HOME" ]
+then
+    echo "Zulu OpenJDK 11 is not installed.  Download Zulu OpenJDK 11 for macOS here: https://www.azul.com/downloads/zulu/zulu-mac/"
+    exit -1
+fi
+
+
 echo Data Loader installation creates a folder in your \'$HOME\' directory.
 read -p "Which folder should it use? [default: dataloader]: " INSTALLATION_DIR_NAME
 INSTALLATION_DIR_NAME=${INSTALLATION_DIR_NAME:-dataloader}
@@ -55,12 +65,17 @@ if [ -d "$DL_FULL_PATH" ]; then
 fi
 
 echo  Creating directory: $DL_FULL_PATH
+
 mkdir -p "$DL_FULL_PATH"
 SHELL_PATH=$(dirname "$0")
 rsync -r "$SHELL_PATH"/.  "$DL_FULL_PATH"  --exclude='.*'
 rm $DL_FULL_PATH/install.command 1>/dev/null
 rm $DL_FULL_PATH/dataloader.ico 1>/dev/null
 rm $DL_FULL_PATH/fileicon 1>/dev/null
+jar xvf ${DL_FULL_PATH}/${DATALOADER_UBER_JAR_NAME} config.properties 
+jar xvf ${DL_FULL_PATH}/${DATALOADER_UBER_JAR_NAME} log4j.xml
+mv config.properties ${DL_FULL_PATH}/configs
+mv log4j.xml ${DL_FULL_PATH}/configs/log-conf.xml
 
 sed -i '' 's|DATALODER_WORK_DIRECTORY_PLACEHOLDER|'"$DL_FULL_PATH"'|g'  "$DL_FULL_PATH"/dataloader.command
 sed -i '' 's|DATALOADER_VERSION_PLACEHOLDER|'"$DATALOADER_VERSION"'|g'  "$DL_FULL_PATH"/dataloader.command

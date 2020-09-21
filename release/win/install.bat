@@ -56,6 +56,10 @@ IF EXIST %INSTALLATION_DIR% (
     echo Copying files to '%INSTALLATION_DIR%'  ...
     xcopy . "%INSTALLATION_DIR%" /e /i
     del "%INSTALLATION_DIR%\install.bat" /q
+    jar xvf "%INSTALLATION_DIR%\%DATALOADER_UBER_JAR_NAME%" config.properties
+    jar xvf "%INSTALLATION_DIR%\%DATALOADER_UBER_JAR_NAME%" log4j.xml
+    move config.properties "%INSTALLATION_DIR%\configs"
+    move log4j.xml "%INSTALLATION_DIR%\configs\log-conf.xml"
     echo Your Data Loader v%DATALOADER_VERSION% is created in '%INSTALLATION_DIR%'
 
 :CreateStartMenuShortCut

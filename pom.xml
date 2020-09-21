@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>50.0.0</version>
+  <version>46.0.0</version>
   <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -13,13 +13,14 @@
   </organization>
 
   <properties>
-    <force.wsc.version>50.0.0</force.wsc.version>
-    <force.partner.api.version>50.0.0</force.partner.api.version>
+    <force.wsc.version>${version}</force.wsc.version>
+    <force.partner.api.version>${version}</force.partner.api.version>
     <build.year>2020</build.year>
     <java.compile.version>11</java.compile.version>
     <minJvmVersion>1.11.0</minJvmVersion>
     <codesign>DONTSIGN</codesign>
     <jacob.version>1.14.3</jacob.version>
+    <make.dmg.skip>true</make.dmg.skip>
     <autoit.dll.path>autoitplaceholder</autoit.dll.path>
     <nsis.version>2.46</nsis.version>
     <spring.version>3.1.1.RELEASE</spring.version>
@@ -220,6 +221,13 @@
       <resource>
         <directory>src/main/nsis/bin</directory>
         <filtering>true</filtering>
+      </resource>
+      <resource>
+        <directory>${DLLFolder}</directory>
+        <filtering>false</filtering>
+        <includes>
+          <include>**/*.dll</include>
+        </includes>
       </resource>
     </resources>
 
@@ -459,6 +467,26 @@
       </dependencies>
     </profile>
     <profile>
+      <id>win32</id>
+      <activation>
+        <os>
+          <family>Windows</family>
+          <arch>x86</arch>
+        </os>
+        <property>
+          <name>DLLFolder</name>
+          <value>release/win</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
+          <version>4.5.1</version>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
       <id>mac64</id>
       <activation>
         <os>
@@ -475,28 +503,16 @@
       </dependencies>
     </profile>
     <profile>
-      <id>win32</id>
-      <activation>
-        <os>
-          <family>Windows</family>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
-          <version>4.5.1</version>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
       <id>win64</id>
       <activation>
         <os>
           <family>Windows</family>
           <arch>amd64</arch>
         </os>
+        <property>
+          <name>DLLFolder</name>
+          <value>release/win</value>
+        </property>
       </activation>
       <dependencies>
           <!-- https://mvnrepository.com/artifact/org.eclipse.swt.org.eclipse.swt.win32.win32.x86_64.4.3.swt/org.eclipse.swt.win32.win32.x86_64 -->
@@ -793,6 +809,9 @@
                   <groupId>org.codehaus.mojo</groupId>
                   <artifactId>exec-maven-plugin</artifactId>
                   <version>1.6.0</version>
+                  <configuration>
+                    <skip>${make.dmg.skip}</skip>
+                  </configuration>
                   <executions>
                     <execution>
                       <id>make-pretty-dmg</id>
