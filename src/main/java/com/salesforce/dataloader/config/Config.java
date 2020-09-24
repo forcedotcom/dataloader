@@ -87,6 +87,17 @@ public class Config {
     public static final int DEFAULT_BULK_API_BATCH_SIZE = 2000;
     public static final long DEFAULT_BULK_API_CHECK_STATUS_INTERVAL = 5000L;
     public static final String DEFAULT_ENDPOINT_URL = "https://login.salesforce.com";
+    public static final String OAUTH_PROD_ENVIRONMENT_VAL = "Production";
+    public static final String OAUTH_SB_ENVIRONMENT_VAL = "Sandbox";
+
+    public static final String OAUTH_PROD_SERVER_VAL = "https://login.salesforce.com/";
+    public static final String OAUTH_SB_SERVER_VAL = "https://test.salesforce.com/";
+
+    public static final String OAUTH_PROD_REDIRECTURI_VAL = "https://login.salesforce.com/services/oauth2/success";
+    public static final String OAUTH_SB_REDIRECTURI_VAL = "https://test.salesforce.com/services/oauth2/success";
+
+    public static final String OAUTH_BULK_CLIENTID_VAL = "DataLoaderBulkUI/";
+    public static final String OAUTH_PARTNER_CLIENTID_VAL = "DataLoaderPartnerUI/";
 
     /*
      * Issue #59 - Dataloader will not read all the database rows to get a total count
@@ -164,6 +175,7 @@ public class Config {
     public static final String WIRE_OUTPUT = "sfdc.wireOutput";
     public static final String TIMEZONE = "sfdc.timezone";
 
+    public static final String OAUTH_PREFIX = "sfdc.oauth.";
     public static final String OAUTH_PARTIAL_BULK = "bulk";
     public static final String OAUTH_PARTIAL_PARTNER = "partner";
     public static final String OAUTH_PARTIAL_SERVER = "server";
@@ -172,14 +184,14 @@ public class Config {
     public static final String OAUTH_PARTIAL_REDIRECTURI = "redirecturi";
     public static final String OAUTH_PARTIAL_BULK_CLIENTID = OAUTH_PARTIAL_BULK + "." + OAUTH_PARTIAL_CLIENTID;
     public static final String OAUTH_PARTIAL_PARTNER_CLIENTID = OAUTH_PARTIAL_PARTNER + "." + OAUTH_PARTIAL_CLIENTID;
-    public static final String OAUTH_ENVIRONMENTS = "sfdc.oauth.environments";
-    public static final String OAUTH_ENVIRONMENT = "sfdc.oauth.environment";
-    public static final String OAUTH_ACCESSTOKEN = "sfdc.oauth.accesstoken";
-    public static final String OAUTH_REFRESHTOKEN = "sfdc.oauth.refreshtoken";
-    public static final String OAUTH_SERVER = "sfdc.oauth." + OAUTH_PARTIAL_SERVER;
-    public static final String OAUTH_CLIENTSECRET = "sfdc.oauth." + OAUTH_PARTIAL_CLIENTSECRET;
-    public static final String OAUTH_CLIENTID = "sfdc.oauth." + OAUTH_PARTIAL_CLIENTID;
-    public static final String OAUTH_REDIRECTURI = "sfdc.oauth." + OAUTH_PARTIAL_REDIRECTURI;
+    public static final String OAUTH_ENVIRONMENTS = OAUTH_PREFIX + "environments";
+    public static final String OAUTH_ENVIRONMENT = OAUTH_PREFIX + "environment";
+    public static final String OAUTH_ACCESSTOKEN = OAUTH_PREFIX + "accesstoken";
+    public static final String OAUTH_REFRESHTOKEN = OAUTH_PREFIX + "refreshtoken";
+    public static final String OAUTH_SERVER = OAUTH_PREFIX + OAUTH_PARTIAL_SERVER;
+    public static final String OAUTH_CLIENTSECRET = OAUTH_PREFIX + OAUTH_PARTIAL_CLIENTSECRET;
+    public static final String OAUTH_CLIENTID = OAUTH_PREFIX + OAUTH_PARTIAL_CLIENTID;
+    public static final String OAUTH_REDIRECTURI = OAUTH_PREFIX + OAUTH_PARTIAL_REDIRECTURI;
 
     // salesforce operation parameters
     public static final String INSERT_NULLS = "sfdc.insertNulls"; //$NON-NLS-1$
@@ -352,8 +364,22 @@ public class Config {
         //oauth settings
         setValue(OAUTH_SERVER, DEFAULT_ENDPOINT_URL);
         setValue(OAUTH_REDIRECTURI, DEFAULT_ENDPOINT_URL);
-        setValue(OAUTH_ENVIRONMENTS, STRING_DEFAULT);
-        setValue(OAUTH_ENVIRONMENT, STRING_DEFAULT);
+        setValue(OAUTH_ENVIRONMENT, OAUTH_PROD_ENVIRONMENT_VAL);
+        setValue(OAUTH_ENVIRONMENTS, OAUTH_PROD_ENVIRONMENT_VAL + "," + OAUTH_SB_ENVIRONMENT_VAL);
+
+        /* sfdc.oauth.<env>.<bulk | partner>.clientid = DataLoaderBulkUI | DataLoaderPartnerUI */
+        setValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
+        setValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
+
+        setValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
+        setValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
+
+        /* production server and redirecturi, sandbox server and redirecturi */
+        setValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_SERVER, OAUTH_PROD_SERVER_VAL);
+        setValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI, OAUTH_PROD_REDIRECTURI_VAL);
+
+        setValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_SERVER, OAUTH_SB_SERVER_VAL);
+        setValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI, OAUTH_SB_REDIRECTURI_VAL);
     }
 
     /**
@@ -1039,11 +1065,11 @@ public class Config {
     }
 
     public String getOAuthEnvironmentString(String environmentName, String name) {
-        return getString("sfdc.oauth." + environmentName + "." + name);
+        return getString(OAUTH_PREFIX + environmentName + "." + name);
     }
 
     public void setOAuthEnvironmentString(String environmentName, String name, String... values) {
-        setValue("sfdc.oauth." + environmentName + "." + name, values);
+        setValue(OAUTH_PREFIX + environmentName + "." + name, values);
     }
 
     public void setOAuthEnvironment(String environment) {
