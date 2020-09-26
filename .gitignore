@@ -22,4 +22,4 @@ Thumbs.db
 
 #swpfiles
 config.properties~
-
+*.swp
