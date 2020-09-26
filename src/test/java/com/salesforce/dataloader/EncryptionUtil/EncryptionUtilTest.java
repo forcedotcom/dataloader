@@ -114,6 +114,7 @@ public class EncryptionUtilTest {
                 Files.move(Paths.get(filePath), Paths.get(filePathBak));
             }
             // without setting the default key
+            encryptionAesUtil.resetCipherKey();
             String encryptedMsg = encryptionAesUtil.encryptMsg(passwordText);
             String decryptedMsg = encryptionAesUtil.decryptMsg(encryptedMsg);
 
