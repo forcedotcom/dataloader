@@ -402,6 +402,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
         <configuration>
           <source>${java.compile.version}</source>
           <target>${java.compile.version}</target>
@@ -420,7 +421,7 @@
           </execution>
         </executions>
         <configuration>
-          <archive>target/dataloader-${version}-uber.jar</archive>
+          <archive>target/dataloader-${project.version}-uber.jar</archive>
           <skip>${jarsigner.skip}</skip>
         </configuration>
       </plugin>
