@@ -20,11 +20,13 @@
     <minJvmVersion>1.11.0</minJvmVersion>
     <codesign>DONTSIGN</codesign>
     <jacob.version>1.14.3</jacob.version>
+    <make.dmg.skip>true</make.dmg.skip>
     <autoit.dll.path>autoitplaceholder</autoit.dll.path>
     <nsis.version>2.46</nsis.version>
     <spring.version>3.1.1.RELEASE</spring.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <config.additional.properties></config.additional.properties>
+    <jarsigner.skip>true</jarsigner.skip>
 
     <!-- test properties -->
     <test.endpoint>http://testendpoint</test.endpoint>
@@ -221,6 +223,13 @@
         <directory>src/main/nsis/bin</directory>
         <filtering>true</filtering>
       </resource>
+      <resource>
+        <directory>${DLLFolder}</directory>
+        <filtering>false</filtering>
+        <includes>
+          <include>**/*.dll</include>
+        </includes>
+      </resource>
     </resources>
 
     <filters>
@@ -334,6 +343,7 @@
 
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
         <configuration>
           <source>${java.compile.version}</source>
           <target>${java.compile.version}</target>
@@ -401,9 +411,27 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
         <configuration>
           <source>${java.compile.version}</source>
           <target>${java.compile.version}</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jarsigner-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>sign</id>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <archive>target/dataloader-${project.version}-uber.jar</archive>
+          <skip>${jarsigner.skip}</skip>
         </configuration>
       </plugin>
     </plugins>
@@ -481,6 +509,10 @@
           <family>Windows</family>
           <arch>x86</arch>
         </os>
+        <property>
+          <name>DLLFolder</name>
+          <value>release/win</value>
+        </property>
       </activation>
       <dependencies>
         <dependency>
@@ -497,6 +529,10 @@
           <family>Windows</family>
           <arch>amd64</arch>
         </os>
+        <property>
+          <name>DLLFolder</name>
+          <value>release/win</value>
+        </property>
       </activation>
       <dependencies>
           <!-- https://mvnrepository.com/artifact/org.eclipse.swt.org.eclipse.swt.win32.win32.x86_64.4.3.swt/org.eclipse.swt.win32.win32.x86_64 -->
@@ -793,6 +829,9 @@
                   <groupId>org.codehaus.mojo</groupId>
                   <artifactId>exec-maven-plugin</artifactId>
                   <version>1.6.0</version>
+                  <configuration>
+                    <skip>${make.dmg.skip}</skip>
+                  </configuration>
                   <executions>
                     <execution>
                       <id>make-pretty-dmg</id>
