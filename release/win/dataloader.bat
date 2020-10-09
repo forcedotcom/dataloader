@@ -7,7 +7,7 @@ echo **            ___  ____ ___ ____   _    ____ ____ ___  ____ ____       **
 echo **            ^|  \ ^|__^|  ^|  ^|__^|   ^|    ^|  ^| ^|__^| ^|  \ ^|___ ^|__/       **
 echo **            ^|__/ ^|  ^|  ^|  ^|  ^|   ^|___ ^|__^| ^|  ^| ^|__/ ^|___ ^|  \       **
 echo **                                                                     **
-echo **  Data Loader v50 is a Salesforce supported Open Source project to   **
+echo **  Data Loader v@@SHORT_VERSION@@ is a Salesforce supported Open Source project to   **
 echo **  help you import data to and export data from your Salesforce org.  **
 echo **  It requires Zulu OpenJDK 11.0.x to run.                            **
 echo **                                                                     **
@@ -31,7 +31,7 @@ echo.
     )
 
 :Run
-    "%ZULU_JAVA_HOME%\bin\java"  -jar dataloader-50.0.0-uber.jar salesforce.config.dir=configs
+    "%ZULU_JAVA_HOME%\bin\java"  -jar dataloader-@@FULL_VERSION@@-uber.jar salesforce.config.dir=configs
 
 :Exit
     endlocal
