@@ -487,7 +487,7 @@
         </dependency>
       </dependencies>
       <properties>
-          <OSFolder>mac</OSFolder>
+          <OSType>mac</OSType>
       </properties>
     </profile>
     <profile>
@@ -506,7 +506,7 @@
         </dependency>
       </dependencies>
       <properties>
-          <OSFolder>mac</OSFolder>
+          <OSType>mac</OSType>
       </properties>
     </profile>
     <profile>
@@ -526,7 +526,7 @@
       </dependencies>
       <properties>
           <DLLFolder>release/win</DLLFolder>
-          <OSFolder>win</OSFolder>
+          <OSType>win</OSType>
       </properties>
     </profile>
     <profile>
@@ -547,7 +547,7 @@
       </dependencies>
       <properties>
           <DLLFolder>release/win</DLLFolder>
-          <OSFolder>win</OSFolder>
+          <OSType>win</OSType>
       </properties>
     </profile>
 
@@ -830,15 +830,21 @@
                           <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties" token="#placeholder" value="${config.additional.properties}"/>
                           <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties" token="\n" value="${line.separator}"/>
 
-                          <echo>creating version-specific files for the target OS: ${OSFolder}</echo>
-                          <mkdir dir="${basedir}/target/${OSFolder}"/>
-                          <copydir src="${basedir}/release/${OSFolder}" dest="${basedir}/target/${OSFolder}"/>
-                          <replace dir="${basedir}/target/${OSFolder}/" token="@@FULL_VERSION@@" value="${version}"/>
-                          <replace dir="${basedir}/target/${OSFolder}/" token="@@SHORT_VERSION@@" value="${short.version}"/>
-                          <chmod file="${basedir}/target/${OSFolder}/*" perm="755" />
+                          <echo>creating version-specific files for the target OS: ${OSType}</echo>
+                          <mkdir dir="${basedir}/target/${OSType}"/>
+                          <copydir src="${basedir}/release/${OSType}" dest="${basedir}/target/${OSType}"/>
+                          <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${version}"/>
+                          <replace dir="${basedir}/target/${OSType}/" token="@@SHORT_VERSION@@" value="${short.version}"/>
+                          <chmod file="${basedir}/target/${OSType}/*" perm="755" />
 
-                          <echo>copying uber jar to OS-specific folder</echo>
-                          <copy file="${basedir}/target/dataloader-${version}-uber.jar" todir="${basedir}/target/${OSFolder}"/>
+                          <echo>copying uber jar to OS-specific folder for the target OS: ${OSType}</echo>
+
+                          <copy file="${basedir}/target/dataloader-${version}-uber.jar" todir="${basedir}/target/${OSType}"/>
+                          <echo>zip OS-specific folder</echo>
+                          <zip update="true" destfile="${basedir}/target/${OSType}/dataloader_${OSType}.zip" >
+                            <zipfileset dirmode="755" filemode="755" dir="${basedir}/target/${OSType}" />
+                          </zip>
+
 
                         </tasks>
                     </configuration>
