@@ -486,6 +486,9 @@
           <version>4.6.1</version>
         </dependency>
       </dependencies>
+      <properties>
+          <OSFolder>mac</OSFolder>
+      </properties>
     </profile>
     <profile>
       <id>mac64</id>
@@ -502,6 +505,9 @@
           <version>4.6.1</version>
         </dependency>
       </dependencies>
+      <properties>
+          <OSFolder>mac</OSFolder>
+      </properties>
     </profile>
     <profile>
       <id>win32</id>
@@ -510,10 +516,6 @@
           <family>Windows</family>
           <arch>x86</arch>
         </os>
-        <property>
-          <name>DLLFolder</name>
-          <value>release/win</value>
-        </property>
       </activation>
       <dependencies>
         <dependency>
@@ -522,6 +524,10 @@
           <version>4.5.1</version>
         </dependency>
       </dependencies>
+      <properties>
+          <DLLFolder>release/win</DLLFolder>
+          <OSFolder>win</OSFolder>
+      </properties>
     </profile>
     <profile>
       <id>win64</id>
@@ -530,10 +536,6 @@
           <family>Windows</family>
           <arch>amd64</arch>
         </os>
-        <property>
-          <name>DLLFolder</name>
-          <value>release/win</value>
-        </property>
       </activation>
       <dependencies>
           <!-- https://mvnrepository.com/artifact/org.eclipse.swt.org.eclipse.swt.win32.win32.x86_64.4.3.swt/org.eclipse.swt.win32.win32.x86_64 -->
@@ -543,6 +545,10 @@
           <version>4.3</version>
       </dependency>
       </dependencies>
+      <properties>
+          <DLLFolder>release/win</DLLFolder>
+          <OSFolder>win</OSFolder>
+      </properties>
     </profile>
 
     <profile>
@@ -818,18 +824,22 @@
                     </executions>
                     <configuration>
                         <tasks>
-                          <echo>creating version-specific files</echo>
-                          <copydir src="${basedir}/release" dest="${basedir}/target"/>
-                          <replace dir="${basedir}/target/" token="@@FULL_VERSION@@" value="${version}"/>
-                          <replace dir="${basedir}/target/" token="@@SHORT_VERSION@@" value="${short.version}"/>
-                          <chmod file="${basedir}/target/mac/*" perm="755" />
-                          <chmod file="${basedir}/target/win/*" perm="755" />
-
                           <echo>Copying additional assets for DMG</echo>
                           <copy file="${basedir}/src/main/resources/Localizable.strings" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/en.lproj/Localizable.strings"/>
                           <copy file="${basedir}/src/main/nsis/config.properties" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties"/>
                           <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties" token="#placeholder" value="${config.additional.properties}"/>
                           <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties" token="\n" value="${line.separator}"/>
+
+                          <echo>creating version-specific files for the target OS: ${OSFolder}</echo>
+                          <mkdir dir="${basedir}/target/${OSFolder}"/>
+                          <copydir src="${basedir}/release/${OSFolder}" dest="${basedir}/target/${OSFolder}"/>
+                          <replace dir="${basedir}/target/${OSFolder}/" token="@@FULL_VERSION@@" value="${version}"/>
+                          <replace dir="${basedir}/target/${OSFolder}/" token="@@SHORT_VERSION@@" value="${short.version}"/>
+                          <chmod file="${basedir}/target/${OSFolder}/*" perm="755" />
+
+                          <echo>copying uber jar to OS-specific folder</echo>
+                          <copy file="${basedir}/target/dataloader-${version}-uber.jar" todir="${basedir}/target/${OSFolder}"/>
+
                         </tasks>
                     </configuration>
                 </plugin>
