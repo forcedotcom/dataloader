@@ -13,8 +13,9 @@
   </organization>
 
   <properties>
-    <force.wsc.version>50.0.0</force.wsc.version>
-    <force.partner.api.version>50.0.0</force.partner.api.version>
+    <short.version>50</short.version>
+    <force.wsc.version>${version}</force.wsc.version>
+    <force.partner.api.version>${version}</force.partner.api.version>
     <build.year>2020</build.year>
     <java.compile.version>11</java.compile.version>
     <minJvmVersion>1.11.0</minJvmVersion>
@@ -817,6 +818,13 @@
                     </executions>
                     <configuration>
                         <tasks>
+                          <echo>creating version-specific files</echo>
+                          <copydir src="${basedir}/release" dest="${basedir}/target"/>
+                          <replace dir="${basedir}/target/" token="@@FULL_VERSION@@" value="${version}"/>
+                          <replace dir="${basedir}/target/" token="@@SHORT_VERSION@@" value="${short.version}"/>
+                          <chmod file="${basedir}/target/mac/*" perm="755" />
+                          <chmod file="${basedir}/target/win/*" perm="755" />
+
                           <echo>Copying additional assets for DMG</echo>
                           <copy file="${basedir}/src/main/resources/Localizable.strings" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/en.lproj/Localizable.strings"/>
                           <copy file="${basedir}/src/main/nsis/config.properties" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties"/>
