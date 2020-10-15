@@ -486,6 +486,9 @@
           <version>4.6.1</version>
         </dependency>
       </dependencies>
+      <properties>
+          <OSType>mac</OSType>
+      </properties>
     </profile>
     <profile>
       <id>mac64</id>
@@ -502,6 +505,9 @@
           <version>4.6.1</version>
         </dependency>
       </dependencies>
+      <properties>
+          <OSType>mac</OSType>
+      </properties>
     </profile>
     <profile>
       <id>win32</id>
@@ -510,10 +516,6 @@
           <family>Windows</family>
           <arch>x86</arch>
         </os>
-        <property>
-          <name>DLLFolder</name>
-          <value>release/win</value>
-        </property>
       </activation>
       <dependencies>
         <dependency>
@@ -522,6 +524,10 @@
           <version>4.5.1</version>
         </dependency>
       </dependencies>
+      <properties>
+          <DLLFolder>release/win</DLLFolder>
+          <OSType>win</OSType>
+      </properties>
     </profile>
     <profile>
       <id>win64</id>
@@ -530,10 +536,6 @@
           <family>Windows</family>
           <arch>amd64</arch>
         </os>
-        <property>
-          <name>DLLFolder</name>
-          <value>release/win</value>
-        </property>
       </activation>
       <dependencies>
           <!-- https://mvnrepository.com/artifact/org.eclipse.swt.org.eclipse.swt.win32.win32.x86_64.4.3.swt/org.eclipse.swt.win32.win32.x86_64 -->
@@ -543,6 +545,10 @@
           <version>4.3</version>
       </dependency>
       </dependencies>
+      <properties>
+          <DLLFolder>release/win</DLLFolder>
+          <OSType>win</OSType>
+      </properties>
     </profile>
 
     <profile>
@@ -830,6 +836,23 @@
                           <copy file="${basedir}/src/main/nsis/config.properties" tofile="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties"/>
                           <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties" token="#placeholder" value="${config.additional.properties}"/>
                           <replace file="${basedir}/target/${project.build.finalName}/${project.name}.app/Contents/Resources/conf/defaultConfig.properties" token="\n" value="${line.separator}"/>
+
+                          <echo>creating version-specific files for the target OS: ${OSType}</echo>
+                          <mkdir dir="${basedir}/target/${OSType}"/>
+                          <copydir src="${basedir}/release/${OSType}" dest="${basedir}/target/${OSType}"/>
+                          <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${version}"/>
+                          <replace dir="${basedir}/target/${OSType}/" token="@@SHORT_VERSION@@" value="${short.version}"/>
+                          <chmod file="${basedir}/target/${OSType}/*" perm="755" />
+
+                          <echo>copying uber jar to OS-specific folder for the target OS: ${OSType}</echo>
+
+                          <copy file="${basedir}/target/dataloader-${version}-uber.jar" todir="${basedir}/target/${OSType}"/>
+                          <echo>zip OS-specific folder</echo>
+                          <zip update="true" destfile="${basedir}/target/${OSType}/dataloader_${OSType}.zip" >
+                            <zipfileset dirmode="755" filemode="755" dir="${basedir}/target/${OSType}" />
+                          </zip>
+
+
                         </tasks>
                     </configuration>
                 </plugin>

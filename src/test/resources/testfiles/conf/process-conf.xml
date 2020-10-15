@@ -33,10 +33,7 @@
                 <entry key="process.outputSuccess" value="${testfiles.dir}/status/upsertAccountDbSuccess.csv"/>
                 <entry key="process.outputError" value="${testfiles.dir}/status/upsertAccountDbError.csv"/>
                 <entry key="sfdc.debugMessagesFile" value="${testfiles.dir}/status/upsertAccountDbSoapTrace.log"/>
-                <!-- password below has been encrypted using key file, therefore it will not work without the key setting: process.encryptionKeyFile -->
-                <entry key="sfdc.password" value="3a4f908d34a43f2b"/>
                 <entry key="sfdc.externalIdField" value="Oracle_Id__c"/>
-                <entry key="process.encryptionKeyFile" value="${testfiles.dir}/conf/test.key"/>
                 <entry key="process.operation" value="upsert"/>
                 <entry key="process.mappingFile" value="${testfiles.dir}/data/upsertAccountDbMap.sdl"/>
                 <entry key="dataAccess.name" value="queryAccount"/>

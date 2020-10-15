@@ -110,18 +110,20 @@ public class EncryptionUtil {
                     String keyFilename = args[++i];
                     try {
                         enc.setCipherKeyFromFilePath(keyFilename);
-                        String encrypted = enc.encryptMsg(param);
-                        System.out.println("The output string of encryption is: \n" + encrypted);
                     } catch (Exception e) {
                         System.out.println("Error setting the key from file: "
                                 + keyFilename + ", error: " + e.getMessage());
                         System.exit(-1);
                     }
-                } else {
-                    System.out.println("Please provide correct parameters!");
-                    printUsage();
+                }
+                try {
+                    String encrypted = enc.encryptMsg(param);
+                    System.out.println("The output string of encryption is: \n" + encrypted);
+                } catch (Exception e) {
+                    System.out.println("Error setting the key: " + e.getMessage());
                     System.exit(-1);
                 }
+
                 break;
 
             case 'k':
@@ -148,15 +150,16 @@ public class EncryptionUtil {
                     String keyFilename = args[++i];
                     try {
                         encAes.setCipherKeyFromFilePath(keyFilename);
-                        String plainText = encAes.decryptMsg(encryptMsg);
-                        System.out.println("The output string of decryption is: \n" + plainText);
                     } catch (GeneralSecurityException e) {
                         System.out.println("Failed in decryption: " + e.getMessage() + "\n Make sure using the same keyfile to decrypt.");
                         System.exit(-1);
                     }
-                } else {
-                    System.out.println("Please provide correct parameters!");
-                    printUsage();
+                }
+                try {
+                    String plainText = encAes.decryptMsg(encryptMsg);
+                    System.out.println("The output string of decryption is: \n" + plainText);
+                } catch (Exception e) {
+                    System.out.println("Failed in decryption: " + e.getMessage() + "\n Make sure using the same keyfile to decrypt.");
                     System.exit(-1);
                 }
                 break;
