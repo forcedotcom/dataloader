@@ -216,6 +216,11 @@ public class CSVFileReader implements DataReader {
                     String.valueOf(currentRowNumber), String.valueOf(record.size()), String.valueOf(headerRow.size())});
             throw new DataAccessRowException(errMsg);
         }
+        if (record.size() < headerRow.size()) {
+            String errMsg = Messages.getFormattedString("CSVFileDAO.errorRowTooSmall", new String[]{
+                    String.valueOf(currentRowNumber), String.valueOf(record.size()), String.valueOf(headerRow.size())});
+            throw new DataAccessRowException(errMsg);
+        }
 
         Row row = new Row(record.size());
 

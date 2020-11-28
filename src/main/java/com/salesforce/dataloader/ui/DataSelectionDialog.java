@@ -147,9 +147,9 @@ public class DataSelectionDialog extends Dialog {
                         dataReader.checkConnection();
                         dataReader.open();
 
-                        String warning = DAORowUtil.validateColumns(dataReader);
-                        if(warning != null && warning.length() != 0) {
-                            int response = UIUtils.warningConfMessageBox(shell, warning + "\n" + Labels.getString("DataSelectionDialog.warningConf"));
+                        String error = DAORowUtil.validateColumns(dataReader);
+                        if(error != null && error.length() != 0) {
+                            int response = UIUtils.errorMessageBox(shell, error);
                             // in case user doesn't want to continue, treat this as an error
                             if(response != SWT.YES) {
                                 success = false;
