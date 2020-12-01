@@ -106,21 +106,21 @@ public class DAORowUtil {
      */
     public static String validateColumns(DataAccessObject dao) {
         HashSet<String> uniqueHeaders = new HashSet<String>();
-        String warning = null;
+        String error = null;
         for (String header : dao.getColumnNames()) {
             if (header == null || header.length() == 0) {
-                warning = Messages.getString("RowUtil.warningEmptyColumn"); //$NON-NLS-1$
+            	error = Messages.getString("RowUtil.warningEmptyColumn"); //$NON-NLS-1$
                 break;
             } else if (uniqueHeaders.contains(header)) {
-                warning = Messages.getFormattedString("RowUtil.warningDuplicateColumn", header); //$NON-NLS-1$
+            	error = Messages.getFormattedString("RowUtil.warningDuplicateColumn", header); //$NON-NLS-1$
                 break;
             }
             uniqueHeaders.add(header);
         }
-        if (warning != null) {
-            logger.warn(warning);
+        if (error != null) {
+            logger.error(error);
         }
-        return warning;
+        return error;
     }
 
     public void skipRowToStartOffset(Config cfg, DataReader rdr, ILoaderProgress mon, boolean updateProgress)
