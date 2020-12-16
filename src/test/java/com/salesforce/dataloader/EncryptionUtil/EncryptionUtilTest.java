@@ -28,7 +28,7 @@ package com.salesforce.dataloader.EncryptionUtil;
 
 import com.salesforce.dataloader.security.EncryptionAesUtil;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -45,7 +45,7 @@ import java.security.GeneralSecurityException;
  */
 public class EncryptionUtilTest {
 
-    private static final Logger logger = Logger.getLogger(EncryptionUtilTest.class);
+    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(EncryptionUtilTest.class);
 
     @Test /* test for single line encryption */
     public void testEncryption() throws Exception {

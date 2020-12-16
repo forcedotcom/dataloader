@@ -29,7 +29,7 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.SessionInfo.NotLoggedInException;
 import com.salesforce.dataloader.config.Config;
@@ -47,7 +47,7 @@ import com.sforce.ws.ConnectorConfig;
  */
 public abstract class ClientBase<ClientType> {
 
-    private static Logger LOG = Logger.getLogger(PartnerClient.class);
+    private static Logger LOG = org.apache.logging.log4j.LogManager.getLogger(PartnerClient.class);
 
     protected static final URL DEFAULT_AUTH_ENDPOINT_URL;
     static {

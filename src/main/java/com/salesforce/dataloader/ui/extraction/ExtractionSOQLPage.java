@@ -29,7 +29,7 @@ package com.salesforce.dataloader.ui.extraction;
 import java.util.*;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
@@ -54,7 +54,7 @@ import com.sforce.soap.partner.*;
 public class ExtractionSOQLPage extends ExtractionPage {
 
     private final Controller controller;
-    private final Logger logger = Logger.getLogger(ExtractionSOQLPage.class);
+    private final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ExtractionSOQLPage.class);
     private Text soqlText;
     private Field[] fields;
     private CheckboxTableViewer fieldViewer;

@@ -30,7 +30,7 @@ import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
 import org.apache.commons.beanutils.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.client.DescribeRefObject;
@@ -51,7 +51,7 @@ import com.sforce.soap.partner.sobject.SObject;
 public class SforceDynaBean {
 
     //logger
-    public static Logger logger = Logger.getLogger(DAOLoadVisitor.class);
+    public static Logger logger = org.apache.logging.log4j.LogManager.getLogger(DAOLoadVisitor.class);
 
     /**
      *

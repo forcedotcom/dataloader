@@ -27,7 +27,7 @@
 package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.config.Config;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;

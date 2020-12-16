@@ -54,7 +54,7 @@ package com.salesforce.dataloader.process;
 
 import java.io.File;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
@@ -70,7 +70,7 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
  */
 public class ProcessConfig {
 
-    private static Logger logger = Logger.getLogger(ProcessConfig.class);
+    private static Logger logger = org.apache.logging.log4j.LogManager.getLogger(ProcessConfig.class);
 
     public final static String DEFAULT_CONFIG_FILENAME = "process-conf.xml";
     private final static String DEFAULT_SCHEDULER_FACTORY_NAME = "schedulerFactory";

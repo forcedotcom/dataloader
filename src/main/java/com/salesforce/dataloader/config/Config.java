@@ -31,7 +31,7 @@ import com.salesforce.dataloader.exception.ConfigInitializationException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.security.EncryptionAesUtil;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,7 +65,7 @@ import java.util.TimeZone;
  * @since 6.0
  */
 public class Config {
-    private static Logger logger = Logger.getLogger(Config.class);
+    private static Logger logger = org.apache.logging.log4j.LogManager.getLogger(Config.class);
 
     /**
      * Default values for specific parameters

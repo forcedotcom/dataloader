@@ -45,8 +45,10 @@ import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.util.DAORowUtil;
 import com.sforce.ws.ConnectionException;
+import org.apache.logging.log4j.Logger;
 
 public class DataSelectionDialog extends Dialog {
+    private final Logger logger = org.apache.logging.log4j.LogManager.getLogger(MappingPage.class);
     private String message;
     private boolean success;
     private Controller controller;
@@ -156,6 +158,7 @@ public class DataSelectionDialog extends Dialog {
                                 ok.setEnabled(true);
                                 label.setText(Labels.getString("DataSelectionDialog.errorCSVFormat")); //$NON-NLS-1$
                                 shell.setText(Labels.getString("DataSelectionDialog.titleError"));
+                                logger.error(Labels.getString("DataSelectionDialog.errorCSVFormat"));
                                 return;
                             }
                         }
@@ -167,6 +170,7 @@ public class DataSelectionDialog extends Dialog {
                             ok.setEnabled(true);
                             label.setText(Labels.getString("DataSelectionDialog.errorCSVFormat")); //$NON-NLS-1$
                             shell.setText(Labels.getString("DataSelectionDialog.titleError"));
+                            logger.error(Labels.getString("DataSelectionDialog.errorCSVFormat"));
                             return;
                         }
 
@@ -174,6 +178,7 @@ public class DataSelectionDialog extends Dialog {
                         success = false;
                         ok.setEnabled(true);
                         label.setText(Labels.getString("DataSelectionDialog.errorCSVFormat") + "  " + e.getMessage()); //$NON-NLS-1$
+                        logger.error(Labels.getString("DataSelectionDialog.errorCSVFormat"));
                         Point size = label.computeSize(SWT.DEFAULT, SWT.DEFAULT);
                         label.setSize(shell.getClientArea().width, size.y);
                         shell.setText(Labels.getString("DataSelectionDialog.titleError"));

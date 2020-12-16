@@ -40,7 +40,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.sforce.soap.partner.Field;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Messages;
@@ -56,7 +56,7 @@ import com.salesforce.dataloader.model.Row;
  */
 public abstract class Mapper {
 
-    private static final Logger logger = Logger.getLogger(Mapper.class);
+    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(Mapper.class);
 
     public static class InvalidMappingException extends RuntimeException {
         public InvalidMappingException(String msg, Throwable e) {

@@ -29,7 +29,7 @@ package com.salesforce.dataloader.dao.csv;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Describe your class here.
@@ -47,7 +47,7 @@ public class CSVColumnVisitor {
     private Writer writer;
 
     //logger
-    private static Logger logger = Logger.getLogger(CSVColumnVisitor.class);
+    private static Logger logger = org.apache.logging.log4j.LogManager.getLogger(CSVColumnVisitor.class);
 
     public CSVColumnVisitor(Writer writer) {
         this.writer = writer;

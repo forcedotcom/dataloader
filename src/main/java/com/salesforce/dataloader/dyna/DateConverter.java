@@ -33,7 +33,7 @@ import com.salesforce.dataloader.model.NACalendarValue;
 import com.salesforce.dataloader.model.NATextValue;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.Converter;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 public final class DateConverter implements Converter {
 
@@ -41,7 +41,7 @@ public final class DateConverter implements Converter {
     private static final List<String> supportedEuropeanPatterns = getSupportedPatterns(true);
     private static final List<String> supportedRegularPatterns = getSupportedPatterns(false);
 
-    static Logger logger = Logger.getLogger(DateConverter.class);
+    static Logger logger = org.apache.logging.log4j.LogManager.getLogger(DateConverter.class);
     /**
      * The default value specified to our Constructor, if any.
      */

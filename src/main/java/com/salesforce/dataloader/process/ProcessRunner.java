@@ -66,7 +66,7 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.sforce.soap.partner.fault.ApiFault;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -86,7 +86,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
     public static final String PROCESS_NAME = "process.name";
 
     //logger
-    private static final Logger logger = Logger.getLogger(ProcessRunner.class);
+    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ProcessRunner.class);
 
     // Name of the current engine runner.  Improves readability of the log output
     String name;

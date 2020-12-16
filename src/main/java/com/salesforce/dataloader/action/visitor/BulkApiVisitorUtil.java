@@ -31,7 +31,7 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
@@ -51,7 +51,7 @@ import com.sforce.async.OperationEnum;
 
 class BulkApiVisitorUtil {
 
-    private static final Logger logger = Logger.getLogger(BulkApiVisitorUtil.class);
+    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(BulkApiVisitorUtil.class);
 
     private final BulkConnection client;
 

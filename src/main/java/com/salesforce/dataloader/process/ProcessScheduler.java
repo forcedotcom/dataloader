@@ -52,7 +52,7 @@ package com.salesforce.dataloader.process;
 
 import java.util.Timer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.controller.Controller;
 
@@ -67,7 +67,7 @@ public class ProcessScheduler extends Timer {
     protected static ProcessScheduler processScheduler;
 
     /** Log4J */
-    private static Logger logger = Logger.getLogger(ProcessScheduler.class);
+    private static Logger logger = org.apache.logging.log4j.LogManager.getLogger(ProcessScheduler.class);
 
     public ProcessScheduler() {
         Controller.initLog();

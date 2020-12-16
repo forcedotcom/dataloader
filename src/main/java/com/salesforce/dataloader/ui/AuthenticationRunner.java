@@ -33,7 +33,7 @@ import com.salesforce.dataloader.model.LoginCriteria;
 import com.salesforce.dataloader.util.ExceptionUtil;
 import com.sforce.soap.partner.fault.LoginFault;
 import com.sforce.soap.partner.fault.UnexpectedErrorFault;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -44,7 +44,7 @@ import java.util.function.Consumer;
  * AuthenticationRunner is the UI orchestration of logging in.
  */
 public class AuthenticationRunner {
-    private static Logger logger = Logger.getLogger(AuthenticationRunner.class);
+    private static Logger logger = org.apache.logging.log4j.LogManager.getLogger(AuthenticationRunner.class);
 
     private final Config config;
     private final Controller controller;

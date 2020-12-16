@@ -3,7 +3,7 @@
     <!-- For the absolute paths below, replace with a better mechanism, eg. config.properties param for base location -->
     <bean id="maximumBatchRowsDbProcess"
           class="com.salesforce.dataloader.process.ProcessRunner"
-          singleton="false">
+          scope="prototype">
         <description>maximumBatchRowsDb job gets the Account updates from database and uploads them to salesforce using 'upsert'.</description>
         <property name="name" value="maximumBatchRowsDbProcess"/>
         <property name="configOverrideMap">
@@ -23,7 +23,7 @@
     </bean>
     <bean id="upsertAccountDbProcess"
           class="com.salesforce.dataloader.process.ProcessRunner"
-          singleton="false">
+          scope="prototype">
         <description>upsertAccountDb job gets the Account updates from database and uploads them to salesforce using 'upsert'.</description>
         <property name="name" value="upsertAccountDbProcess"/>
         <property name="configOverrideMap">
@@ -48,7 +48,7 @@
     </bean>
     <bean id="extractAccountDbProcess"
           class="com.salesforce.dataloader.process.ProcessRunner"
-          singleton="false">
+          scope="prototype">
         <description>extractAccountDb job gets account info from salesforce and updates or inserts info into database."</description>
         <property name="name" value="extractAccountDbProcess"/>
         <property name="configOverrideMap">
@@ -70,7 +70,7 @@
     </bean>
     <bean id="extractAccountCsvProcess"
           class="com.salesforce.dataloader.process.ProcessRunner"
-          singleton="false">
+          scope="prototype">
       <description>extractAccountCsv job gets account info from salesforce and saves info into a CSV file."</description>
         <property name="name" value="extractAccountCsvProcess"/>
         <property name="configOverrideMap">
@@ -89,7 +89,7 @@
     </bean>
     <bean id="updateAccountCsvProcess"
           class="com.salesforce.dataloader.process.ProcessRunner"
-          singleton="false">
+          scope="prototype">
       <description>updateAccountCsv job gets account info to salesforce and saves from a CSV file."</description>
         <property name="name" value="updateAccountCsvProcess"/>
         <property name="configOverrideMap">
@@ -106,7 +106,7 @@
     </bean>
     <bean id="insertNullsDBProcess"
           class="com.salesforce.dataloader.process.ProcessRunner"
-          singleton="false">
+          scope="prototype">
         <description>insertNullsDBProcess job gets the Account updates from database and uploads them to salesforce using 'upsert'.</description>
         <property name="name" value="insertNullsDBProcess"/>
         <property name="configOverrideMap">

@@ -29,7 +29,7 @@ package com.salesforce.dataloader.ui.extraction;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.swt.SWT;
 
@@ -43,7 +43,7 @@ import com.salesforce.dataloader.ui.*;
  */
 public class ExtractionWizard extends BaseWizard {
 
-    private static final Logger logger = Logger.getLogger(ExtractionWizard.class);
+    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ExtractionWizard.class);
 
     /**
      * ExtractionWizard constructor

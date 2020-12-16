@@ -34,7 +34,7 @@ import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.mapping.Mapper;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.LoadRateCalculator;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 public abstract class AbstractVisitor implements IVisitor {
 
@@ -50,7 +50,7 @@ public abstract class AbstractVisitor implements IVisitor {
 
     public AbstractVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
-        this.logger = Logger.getLogger(getClass());
+        this.logger = org.apache.logging.log4j.LogManager.getLogger(getClass());
         this.controller = controller;
         this.monitor = monitor;
         this.successWriter = successWriter;

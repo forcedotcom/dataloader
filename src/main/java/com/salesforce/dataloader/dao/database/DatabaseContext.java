@@ -31,7 +31,7 @@ import java.util.Date;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -57,7 +57,7 @@ public class DatabaseContext {
     public static final String DEFAULT_CONFIG_FILENAME = "database-conf.xml";
 
     // logger
-    private static Logger logger = Logger.getLogger(DatabaseContext.class);
+    private static Logger logger = org.apache.logging.log4j.LogManager.getLogger(DatabaseContext.class);
 
     public DatabaseContext(String dbConfigName) {
         this.dbConfigName = dbConfigName;

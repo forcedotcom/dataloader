@@ -51,8 +51,10 @@ import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.ws.ConnectionException;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import  org.apache.logging.log4j.core.LoggerContext;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -82,7 +84,8 @@ import javax.xml.parsers.FactoryConfigurationError;
 public class Controller {
 
     private static final String LOG_CONF_OVERRIDE = "log-conf.xml";
-    private static boolean isLogInitialized = false; // make sure log is initialized only once
+
+	private static boolean isLogInitialized = false; // make sure log is initialized only once
 
     /**
      * the system property name used to determine the config directory
@@ -113,7 +116,7 @@ public class Controller {
     private PartnerClient partnerClient;
 
     // logger
-    private static Logger logger = Logger.getLogger(Controller.class);
+    private static Logger logger;
     private String appPath;
 
     private Controller(String name, boolean isBatchMode, String[] args) throws ControllerInitializationException {
@@ -462,24 +465,24 @@ public class Controller {
             return;
         }
 
-        try {
-            File logConfXml = Paths.get(System.getProperty("user.dir"), "configs", LOG_CONF_OVERRIDE).toFile();
-            if (logConfXml.exists()) {
-                logger.info("Reading log-conf.xml in " + logConfXml.getAbsolutePath());
-                if (logConfXml.canRead()) {
-                    DOMConfigurator.configure(logConfXml.getAbsolutePath());
-                } else {
-                    logger.warn("Unable to read log-conf.xml in " + logConfXml.getAbsolutePath());
-                }
-            } else {
-                logger.info("Using built-in logging configuration, no log-conf.xml in " + logConfXml.getAbsolutePath());
-            }
-            logger.info(Messages.getString("Controller.logInit")); //$NON-NLS-1$
-        } catch (Exception ex) {
-            logger.error(Messages.getString("Controller.errorLogInit")); //$NON-NLS-1$
-            logger.error(ex);
-            System.exit(1);
+        File logConfXml = Paths.get(System.getProperty("user.dir"), "configs", LOG_CONF_OVERRIDE).toFile();
+        if (logConfXml.exists()) {
+        	System.setProperty("log4j.configurationFile", logConfXml.getAbsolutePath());
+        } else {
+            System.out.println("Using built-in logging configuration, no log-conf.xml in " + logConfXml.getAbsolutePath());
         }
+        logger = LogManager.getLogger(Controller.class);
+        LoggerContext context = (LoggerContext) LogManager.getContext();
+        String logConfigLocation = context.getConfiguration().getConfigurationSource().getLocation();
+        if (logConfigLocation == null) {
+        	logger.error("Unable to initialize logging using log4j2 config file at "
+        			+ logConfXml.getAbsolutePath()
+        			+ ". All error messages will be logged on STDOUT.");
+        } else {
+        	logger.info("Using log4j2 configuration file at location: " + logConfigLocation);
+        }
+
+        logger.info(Messages.getString("Controller.logInit")); //$NON-NLS-1$
         Controller.isLogInitialized = true;
     }
 

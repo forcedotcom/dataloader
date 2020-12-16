@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>50.0.0</version>
+  <version>51.0.0</version>
   <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -13,7 +13,7 @@
   </organization>
 
   <properties>
-    <short.version>50</short.version>
+    <short.version>51</short.version>
     <force.wsc.version>${version}</force.wsc.version>
     <force.partner.api.version>${version}</force.partner.api.version>
     <build.year>2020</build.year>
@@ -24,7 +24,7 @@
     <make.dmg.skip>true</make.dmg.skip>
     <autoit.dll.path>autoitplaceholder</autoit.dll.path>
     <nsis.version>2.46</nsis.version>
-    <spring.version>3.1.1.RELEASE</spring.version>
+    <spring.version>5.2.7.RELEASE</spring.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <config.additional.properties></config.additional.properties>
     <jarsigner.skip>true</jarsigner.skip>
@@ -117,10 +117,20 @@
       <version>4.13.1</version>
       <scope>test</scope>
     </dependency>
+
+
+<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.14.0</version>
+    </dependency>
+
+<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.14.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
