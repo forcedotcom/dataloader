@@ -35,7 +35,7 @@ import com.salesforce.dataloader.ui.SettingsPage;
 public class ExtractionSettingsPage extends SettingsPage {
 
     // logger
-    // private static Logger logger = org.apache.logging.log4j.LogManager.getLogger(ExtractionSettingsPage.class);
+    // private static Logger logger = LogManager.getLogger(ExtractionSettingsPage.class);
 
     public ExtractionSettingsPage(Controller controller) {
         super(controller);

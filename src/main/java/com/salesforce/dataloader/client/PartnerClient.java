@@ -59,6 +59,7 @@ import com.sforce.ws.SessionRenewer;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
@@ -71,7 +72,7 @@ import static com.salesforce.dataloader.ui.UIUtils.validateHttpsUrlAndThrow;
 
 public class PartnerClient extends ClientBase<PartnerConnection> {
 
-    private static Logger LOG = org.apache.logging.log4j.LogManager.getLogger(PartnerClient.class);
+    private static Logger LOG = LogManager.getLogger(PartnerClient.class);
 
     PartnerConnection client;
 

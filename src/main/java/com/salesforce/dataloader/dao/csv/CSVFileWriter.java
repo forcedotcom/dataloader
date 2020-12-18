@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -52,7 +53,7 @@ import com.salesforce.dataloader.model.Row;
 public class CSVFileWriter implements DataWriter {
 
     //logger
-    private static Logger logger = org.apache.logging.log4j.LogManager.getLogger(CSVFileWriter.class);
+    private static Logger logger = LogManager.getLogger(CSVFileWriter.class);
 
     private final String fileName;
     private BufferedWriter fileOut;

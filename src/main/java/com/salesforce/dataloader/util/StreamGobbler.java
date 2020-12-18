@@ -26,8 +26,6 @@
 
 package com.salesforce.dataloader.util;
 
-import org.apache.logging.log4j.Logger;
-
 import java.io.*;
 
 /**

@@ -85,7 +85,7 @@ public class Controller {
 
     private static final String LOG_CONF_OVERRIDE = "log-conf.xml";
 
-	private static boolean isLogInitialized = false; // make sure log is initialized only once
+    private static boolean isLogInitialized = false; // make sure log is initialized only once
 
     /**
      * the system property name used to determine the config directory
@@ -468,8 +468,6 @@ public class Controller {
         File logConfXml = Paths.get(System.getProperty("user.dir"), "configs", LOG_CONF_OVERRIDE).toFile();
         if (logConfXml.exists()) {
         	System.setProperty("log4j.configurationFile", logConfXml.getAbsolutePath());
-        } else {
-            System.out.println("Using built-in logging configuration, no log-conf.xml in " + logConfXml.getAbsolutePath());
         }
         logger = LogManager.getLogger(Controller.class);
         LoggerContext context = (LoggerContext) LogManager.getContext();

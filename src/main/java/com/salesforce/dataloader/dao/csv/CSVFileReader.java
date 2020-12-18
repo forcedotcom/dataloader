@@ -36,6 +36,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -55,7 +56,7 @@ import com.sforce.async.CSVReader;
  */
 public class CSVFileReader implements DataReader {
 
-    private static final Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger(CSVFileReader.class);
+    private static final Logger LOGGER = LogManager.getLogger(CSVFileReader.class);
     private final Object lock = new Object();
     private File file;
     private FileInputStream input;

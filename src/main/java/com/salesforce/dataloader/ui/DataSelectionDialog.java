@@ -46,9 +46,10 @@ import com.salesforce.dataloader.exception.DataAccessObjectInitializationExcepti
 import com.salesforce.dataloader.util.DAORowUtil;
 import com.sforce.ws.ConnectionException;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class DataSelectionDialog extends Dialog {
-    private final Logger logger = org.apache.logging.log4j.LogManager.getLogger(MappingPage.class);
+    private final Logger logger = LogManager.getLogger(MappingPage.class);
     private String message;
     private boolean success;
     private Controller controller;

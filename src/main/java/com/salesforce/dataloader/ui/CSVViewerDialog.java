@@ -33,6 +33,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -65,7 +67,7 @@ import com.salesforce.dataloader.util.StreamGobbler;
 public class CSVViewerDialog extends Dialog {
     private String input;
 
-    private Logger logger = org.apache.logging.log4j.LogManager.getLogger(CSVViewerDialog.class);
+    private Logger logger = LogManager.getLogger(CSVViewerDialog.class);
     private String filename;
     private boolean useCustomSplitter = false;
     private int numberOfRows;

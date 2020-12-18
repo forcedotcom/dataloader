@@ -33,6 +33,8 @@ import com.salesforce.dataloader.controller.Controller;
 import com.sforce.soap.partner.Connector;
 
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -84,7 +86,7 @@ public class AdvancedSettingsDialog extends Dialog {
 
     private final String defaultServer;
 
-    private final Logger logger = org.apache.logging.log4j.LogManager.getLogger(AdvancedSettingsDialog.class);
+    private final Logger logger = LogManager.getLogger(AdvancedSettingsDialog.class);
     private Button buttonHideWelcomeScreen;
     private Button buttonOutputExtractStatus;
     private Button buttonReadUtf8;

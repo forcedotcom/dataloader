@@ -31,6 +31,8 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.swt.SWT;
 
@@ -43,7 +45,7 @@ import com.salesforce.dataloader.exception.ProcessInitializationException;
  */
 public abstract class LoadWizard extends BaseWizard {
 
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(LoadWizard.class);
+    private static final Logger logger = LogManager.getLogger(LoadWizard.class);
 
     /**
      * LoadWizard constructor

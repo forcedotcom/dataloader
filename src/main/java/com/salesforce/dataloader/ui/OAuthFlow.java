@@ -28,6 +28,8 @@ package com.salesforce.dataloader.ui;
 import com.salesforce.dataloader.config.Config;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Dialog;
@@ -45,7 +47,7 @@ import java.util.Map;
  * by individuals using connected apps as it requires storing a secret which cannot be done for the normal login
  */
 public abstract class OAuthFlow extends Dialog {
-    protected static Logger logger = org.apache.logging.log4j.LogManager.getLogger(OAuthFlow.class);
+    protected static Logger logger = LogManager.getLogger(OAuthFlow.class);
     protected final Config config;
     private String reasonPhrase;
     private int statusCode;

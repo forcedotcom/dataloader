@@ -32,6 +32,8 @@ import java.io.*;
 import java.util.*;
 
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.junit.Assert;
 import org.junit.Before;
 
@@ -60,7 +62,7 @@ import com.sforce.ws.util.FileUtil;
  */
 public abstract class ProcessTestBase extends ConfigTestBase {
 
-    private static Logger logger = org.apache.logging.log4j.LogManager.getLogger(TestBase.class);
+    private static Logger logger = LogManager.getLogger(TestBase.class);
 
     protected ProcessTestBase() {
         super(Collections.<String, String>emptyMap());

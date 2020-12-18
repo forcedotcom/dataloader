@@ -32,6 +32,8 @@ import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.AccountRowComparator;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,7 +57,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class DatabaseTest extends TestBase {
 
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(DatabaseReader.class);
+    private static final Logger logger = LogManager.getLogger(DatabaseReader.class);
     
     private static final String[] VALIDATE_COLS = { DatabaseTestUtil.EXT_ID_COL, DatabaseTestUtil.SFDC_ID_COL,
         DatabaseTestUtil.NAME_COL, DatabaseTestUtil.PHONE_COL, DatabaseTestUtil.REVENUE_COL,

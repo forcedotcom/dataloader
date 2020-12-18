@@ -31,6 +31,8 @@ import java.util.Map.Entry;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -59,7 +61,7 @@ public class MappingPage extends LoadPage {
 
     private final Controller controller;
     private TableViewer mappingTblViewer;
-    private final Logger logger = org.apache.logging.log4j.LogManager.getLogger(MappingPage.class);
+    private final Logger logger = LogManager.getLogger(MappingPage.class);
     private Map<String, Field> relatedFields;
 
     public MappingPage(Controller controller) {

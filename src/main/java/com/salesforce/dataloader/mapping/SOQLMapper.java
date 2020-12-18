@@ -39,6 +39,7 @@ import com.sforce.ws.ConnectionException;
 import com.sforce.ws.bind.XmlObject;
 
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ import javax.xml.namespace.QName;
  */
 public class SOQLMapper extends Mapper {
 
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(SOQLMapper.class);
+    private static final Logger logger = LogManager.getLogger(SOQLMapper.class);
 
     private SOQLInfo soqlInfo;
 
