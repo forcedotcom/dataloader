@@ -94,7 +94,8 @@ public class HttpClientTransport implements Transport {
     @Override
     public InputStream getContent() throws IOException {
         InputStream input;
-        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create().useSystemProperties();
+        
         if (config.getProxy().address() != null) {
             String proxyUser = config.getProxyUsername() == null ? "" : config.getProxyUsername();
             String proxyPassword = config.getProxyPassword() == null ? "" : config.getProxyPassword();
