@@ -28,7 +28,8 @@ package com.salesforce.dataloader.config;
 import java.io.*;
 import java.util.*;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Class to manage last run information.  Currently based on properties.
@@ -42,7 +43,7 @@ public class LastRun extends Properties {
      */
     private static final long serialVersionUID = 1L;
 
-    private static Logger logger = Logger.getLogger(LastRun.class);
+    private static Logger logger = LogManager.getLogger(LastRun.class);
 
     // last run statistics
     public static final String LAST_LOAD_BATCH_ROW = "process.lastLoadBatchRow"; //$NON-NLS-1$

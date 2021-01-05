@@ -31,7 +31,9 @@ import com.salesforce.dataloader.exception.DataAccessObjectInitializationExcepti
 import com.salesforce.dataloader.model.Row;
 import junit.framework.TestCase;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
@@ -55,7 +57,7 @@ import java.util.Map;
  */
 public class DatabaseTestUtil {
 
-    private static final Logger logger = Logger.getLogger(DatabaseTestUtil.class);
+    private static final Logger logger = LogManager.getLogger(DatabaseTestUtil.class);
 
     public enum DateType {CALENDAR, DATE, STRING, VALIDATION, NULL;};
 

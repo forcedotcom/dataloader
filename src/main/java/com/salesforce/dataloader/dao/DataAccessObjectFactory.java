@@ -25,7 +25,8 @@
  */
 package com.salesforce.dataloader.dao;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -37,7 +38,7 @@ import com.salesforce.dataloader.exception.DataAccessObjectInitializationExcepti
 import com.salesforce.dataloader.exception.UnsupportedDataAccessObjectException;
 
 public class DataAccessObjectFactory {
-    private static Logger logger = Logger.getLogger(DataAccessObjectFactory.class);
+    private static Logger logger = LogManager.getLogger(DataAccessObjectFactory.class);
 
     static public final String CSV_READ_TYPE = "csvRead";
     static public final String CSV_WRITE_TYPE = "csvWrite";

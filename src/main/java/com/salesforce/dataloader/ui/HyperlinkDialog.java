@@ -31,7 +31,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceColors;
 import org.eclipse.jface.resource.JFaceResources;
@@ -58,7 +60,7 @@ public class HyperlinkDialog extends Dialog {
         this.linkURL = linkURL;
     }
 
-    private Logger logger = Logger.getLogger(HyperlinkDialog.class);
+    private Logger logger = LogManager.getLogger(HyperlinkDialog.class);
     private Text messageLabel;
     private Label titleLabel;
     private Label titleImage;

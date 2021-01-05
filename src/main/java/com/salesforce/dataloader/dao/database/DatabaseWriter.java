@@ -31,7 +31,8 @@ import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -47,7 +48,7 @@ import com.salesforce.dataloader.exception.*;
 public class DatabaseWriter implements DataWriter {
 
     // logger
-    private static Logger logger = Logger.getLogger(DatabaseReader.class);
+    private static Logger logger = LogManager.getLogger(DatabaseReader.class);
 
     private final BasicDataSource dataSource;
     private final Config config;

@@ -30,7 +30,8 @@ import java.io.IOException;
 import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOSizeVisitor;
@@ -54,7 +55,7 @@ public class DAORowUtil {
         return INSTANCE;
     }
 
-    static Logger logger = Logger.getLogger(DAORowUtil.class);
+    static Logger logger = LogManager.getLogger(DAORowUtil.class);
 
     /**
      * Utility function for calculating the total number of rows available to current DAO instance
