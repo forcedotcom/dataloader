@@ -31,7 +31,6 @@
     <test.user.restricted>standard@org.com</test.user.restricted>
     <test.password></test.password><!-- use the encrypted password -->
     <test.redirect>false</test.redirect>
-
   </properties>
 
   <repositories>
@@ -114,23 +113,6 @@
       <artifactId>org.eclipse.jface</artifactId>
       <version>3.22.0</version>
     </dependency>
-<!--
-    <dependency>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.core.commands</artifactId>
-      <version>3.9.700</version>
-    </dependency>      
-    <dependency>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.equinox.common</artifactId>
-      <version>3.13.0</version>
-    </dependency>      
-    <dependency>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.equinox.bidi</artifactId>
-      <version>1.3.0</version>
-    </dependency>
--->
 <!-- Testing dependencies -->
     <dependency>
       <groupId>com.h2database</groupId>
@@ -210,24 +192,24 @@
     </pluginManagement>
 
     <plugins>
-        <plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-resources-plugin</artifactId>
-			<version>3.1.0</version>
-			<configuration>
-			    <useDefaultDelimiters>false</useDefaultDelimiters>
-			    <delimiters>
-			        <delimiter>${*}</delimiter>
-			    </delimiters>
-			    <nonFilteredFileExtensions>
-			        <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
-			        <nonFilteredFileExtension>swf</nonFilteredFileExtension>
-			        <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
-			        <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
-			        <nonFilteredFileExtension>png</nonFilteredFileExtension>
-			    </nonFilteredFileExtensions>
-			</configuration>
-		</plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+            <useDefaultDelimiters>false</useDefaultDelimiters>
+            <delimiters>
+              <delimiter>${*}</delimiter>
+            </delimiters>
+            <nonFilteredFileExtensions>
+              <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+              <nonFilteredFileExtension>swf</nonFilteredFileExtension>
+              <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
+              <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
+              <nonFilteredFileExtension>png</nonFilteredFileExtension>
+            </nonFilteredFileExtensions>
+        </configuration>
+      </plugin>
 	
       <!-- we might want to use the maven-shade-plugin in the future instead 
         of maven-assembly-plugin -->
@@ -370,15 +352,6 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
-        <configuration>
-          <source>${java.compile.version}</source>
-          <target>${java.compile.version}</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jarsigner-plugin</artifactId>
         <version>3.0.0</version>
         <executions>
@@ -399,57 +372,6 @@
 
   <profiles>
     <profile>
-      <id>linux32</id>
-      <activation>
-        <os>
-          <family>Unix</family>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.gtk.linux.x86</artifactId>
-          <version>4.5.1</version>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>linux64</id>
-      <activation>
-        <os>
-          <family>Unix</family>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.eclipse.swt</groupId>
-          <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
-          <version>4.5.1</version>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>mac32</id>
-      <activation>
-        <os>
-          <family>mac</family>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>local.swt</groupId>
-          <artifactId>swtmac</artifactId>
-          <version>4.18</version>
-        </dependency>
-      </dependencies>
-      <properties>
-          <OSType>mac</OSType>
-      </properties>
-    </profile>
-    <profile>
       <id>mac64</id>
       <activation>
         <os>
@@ -468,25 +390,7 @@
           <OSType>mac</OSType>
       </properties>
     </profile>
-    <profile>
-      <id>win32</id>
-      <activation>
-        <os>
-          <family>Windows</family>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>local.swt</groupId>
-          <artifactId>swtwin</artifactId>
-          <version>4.18</version>
-        </dependency>
-      </dependencies>
-      <properties>
-          <OSType>win</OSType>
-      </properties>
-    </profile>
+
     <profile>
       <id>win64</id>
       <activation>
@@ -575,6 +479,5 @@
       </build>
     </profile>
   </profiles>
-
 
 </project>
