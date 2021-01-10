@@ -62,7 +62,7 @@ rm $DL_FULL_PATH/install.command 1>/dev/null
 rm $DL_FULL_PATH/dataloader.ico 1>/dev/null
 rm $DL_FULL_PATH/fileicon 1>/dev/null
 
-sed -i '' 's|DATALODER_WORK_DIRECTORY_PLACEHOLDER|'"$DL_FULL_PATH"'|g'  "$DL_FULL_PATH"/dataloader.command
+sed -i '' 's|DATALOADER_WORK_DIRECTORY_PLACEHOLDER|'"$DL_FULL_PATH"'|g'  "$DL_FULL_PATH"/dataloader.command
 sed -i '' 's|DATALOADER_VERSION_PLACEHOLDER|'"$DATALOADER_VERSION"'|g'  "$DL_FULL_PATH"/dataloader.command
 sed -i '' 's|DATALOADER_SHORT_VERSION_PLACEHOLDER|'"$DATALOADER_SHORT_VERSION"'|g'  "$DL_FULL_PATH"/dataloader.command
 sed -i '' 's|DATALOADER_UBER_JAR_NAME_PLACEHOLDER|'"$DATALOADER_UBER_JAR_NAME"'|g'  "$DL_FULL_PATH"/dataloader.command

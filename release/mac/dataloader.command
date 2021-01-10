@@ -25,6 +25,6 @@ then
     echo "Zulu OpenJDK 11 is not installed.  Download Zulu OpenJDK 11 for macOS here: https://www.azul.com/downloads/zulu/zulu-mac/"
 else
     echo "$JAVA_HOME"
-    cd DATALODER_WORK_DIRECTORY_PLACEHOLDER   #change to your own customized directory
-    java -XstartOnFirstThread -jar dataloader-@@FULL_VERSION@@-uber.jar salesforce.config.dir=DATALODER_WORK_DIRECTORY_PLACEHOLDER/configs
+    cd DATALOADER_WORK_DIRECTORY_PLACEHOLDER 
+    java -XstartOnFirstThread -jar dataloader-@@FULL_VERSION@@-uber.jar salesforce.config.dir=DATALOADER_WORK_DIRECTORY_PLACEHOLDER/configs
 fi
