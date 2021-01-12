@@ -14,7 +14,7 @@
 
   <properties>
     <short.version>51</short.version>
-    <force.wsc.version>${short.version}.0.0</force.wsc.version>
+    <force.wsc.version>51.0.0</force.wsc.version>
     <force.partner.api.version>${force.wsc.version}</force.partner.api.version>
     <build.year>2021</build.year>
     <java.compile.version>11</java.compile.version>
