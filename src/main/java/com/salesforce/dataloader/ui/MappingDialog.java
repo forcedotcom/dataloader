@@ -277,8 +277,6 @@ public class MappingDialog extends Dialog {
             public void widgetSelected(SelectionEvent event) {
                 FileDialog dlg = new FileDialog(shell, SWT.SAVE);
                 Config config = controller.getConfig();
-                dlg.setFileName(config.getString(Config.MAPPING_FILE));
-                dlg.setFilterPath(config.getString(Config.MAPPING_FILE));
                 dlg.setFilterExtensions(new String[] { "*.sdl" });
                 String filename = dlg.open();
                 boolean cancel = false;
