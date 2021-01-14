@@ -2,7 +2,7 @@
 <beans>
     <bean id="accountMasterProcess"
           class="com.salesforce.dataloader.process.ProcessRunner"
-          singleton="false">
+          scope="prototype">
         <description>AccountMaster job gets the Customer record updates from ERP (Oracle financials) and uploads them to salesforce using 'upsert'.</description>
         <property name="name" value="accountMasterProcess"/>
         <property name="configOverrideMap">
@@ -29,7 +29,7 @@
     </bean>
     <bean id="opportunityUpsertProcess"
           class="com.salesforce.dataloader.process.ProcessRunner"
-          singleton="false">
+          scope="prototype">
         <description>Opportunity Upsert job gets the Customer record updates from a CSV file and uploads them to salesforce using 'upsert'.</description>
         <property name="name" value="opportunityUpsertProcess"/>
         <property name="configOverrideMap">
@@ -54,7 +54,7 @@
     </bean>
     <bean id="databaseAccountExtractProcess"
           class="com.salesforce.dataloader.process.ProcessRunner"
-          singleton="false">
+          scope="prototype">
         <description>DatabaseAccountExtract job gets account info from salesforce and updates or inserts info into database."</description>
         <property name="name" value="databaseAccountExtract"/>
         <property name="configOverrideMap">
@@ -80,7 +80,7 @@
     </bean>
     <bean id="csvAccountExtractProcess"
           class="com.salesforce.dataloader.process.ProcessRunner"
-          singleton="false">
+          scope="prototype">
       <description>csvAccountExtract job gets account info from salesforce and saves info into a CSV file."</description>
         <property name="name" value="csvAccountExtract"/>
         <property name="configOverrideMap">
