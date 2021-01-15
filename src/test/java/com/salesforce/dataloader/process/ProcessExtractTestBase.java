@@ -218,15 +218,9 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         final ExtractContactGenerator contactGenerator = new ExtractContactGenerator();
         final String soql = contactGenerator.getSOQL("Contact.Id, Contact.Account.id");
         final Map<String, String> argmap = getTestConfig(soql, "Contact", false);
-        if (isBulkAPIEnabled(argmap)) {
-            runProcessNegative(
-                    argmap,
-                    "Batch failed: InvalidBatch : Failed to process query: FUNCTIONALITY_NOT_ENABLED: Foreign Key Relationships not supported in Bulk Query");
-        } else {
-            final String[] contactIds = insertExtractTestRecords(10, contactGenerator);
-            Controller control = runProcess(argmap, contactIds.length);
-            verifyIdsInCSV(control, contactIds);
-        }
+        final String[] contactIds = insertExtractTestRecords(10, contactGenerator);
+        Controller control = runProcess(argmap, contactIds.length);
+        verifyIdsInCSV(control, contactIds);
     }
 
     // Tests common to both that need to be implemented
@@ -268,25 +262,19 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
 
         final Map<String, String> argMap = getTestConfig(soql, "Contact", true);
 
-        if (isBulkAPIEnabled(argMap)) {
-            runProcessNegative(
-                    argMap,
-                    "Batch failed: InvalidBatch : Failed to process query: FUNCTIONALITY_NOT_ENABLED: Foreign Key Relationships not supported in Bulk Query");
-        } else {
-            runProcess(argMap, 1);
-            final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME), getController());
-            try {
-                final Row resultRow = resultReader.readRow();
-                assertEquals("Query returned incorrect Contact ID", contactId, resultRow.get("CONTACT_ID"));
-                assertEquals("Query returned incorrect Contact Name", "First 000000 Last 000000",
-                        resultRow.get("CONTACT_NAME"));
-                assertEquals("Query returned incorrect Account ID", accountId, resultRow.get("ACCOUNT_ID"));
-                assertEquals("Query returned incorrect Account Name", "account insert#000000",
-                        resultRow.get("ACCOUNT_NAME"));
+        runProcess(argMap, 1);
+        final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME), getController());
+        try {
+            final Row resultRow = resultReader.readRow();
+            assertEquals("Query returned incorrect Contact ID", contactId, resultRow.get("CONTACT_ID"));
+            assertEquals("Query returned incorrect Contact Name", "First 000000 Last 000000",
+                    resultRow.get("CONTACT_NAME"));
+            assertEquals("Query returned incorrect Account ID", accountId, resultRow.get("ACCOUNT_ID"));
+            assertEquals("Query returned incorrect Account Name", "account insert#000000",
+                    resultRow.get("ACCOUNT_NAME"));
 
-            } finally {
-                resultReader.close();
-            }
+        } finally {
+            resultReader.close();
         }
     }
 

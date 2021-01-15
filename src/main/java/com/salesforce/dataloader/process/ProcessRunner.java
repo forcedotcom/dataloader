@@ -66,7 +66,9 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.sforce.soap.partner.fault.ApiFault;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -86,7 +88,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
     public static final String PROCESS_NAME = "process.name";
 
     //logger
-    private static final Logger logger = Logger.getLogger(ProcessRunner.class);
+    private static final Logger logger;
 
     // Name of the current engine runner.  Improves readability of the log output
     String name;
@@ -96,6 +98,15 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
 
     private Controller controller;
 
+    static {
+        try {
+            Controller.initLog();
+        } catch (ControllerInitializationException e) {
+            System.out.println("ProcessRunner: Controller not initialized" + e );
+            throw new RuntimeException(e.getMessage());
+        }
+        logger = LogManager.getLogger(ProcessRunner.class);
+    }
     /**
      * Enforce use of factory method - getInstance() by hiding the constructor
      */
@@ -176,16 +187,6 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         }
     }
 
-    private static void ensureLogging() throws FactoryConfigurationError {
-        try {
-            Controller.initStaticVariable();
-        } catch (ControllerInitializationException e) {
-            logger.error("ensureLogging(): Control not initialized", e );
-            throw new RuntimeException(e.getMessage());
-        }
-        Controller.initLog();
-    }
-
     private void setThreadName(final String name) {
         if (name != null && name.length() > 0) {
             try {
@@ -247,7 +248,6 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
     }
 
     private static void topLevelError(String message, Throwable err) {
-        ensureLogging();
         logger.fatal(message, err);
         System.exit(-1);
     }
@@ -276,8 +276,6 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
      * @throws ProcessInitializationException
      */
     private static ProcessRunner getInstance(String[] args) throws ProcessInitializationException {
-        ensureLogging();
-
         if(!validateCmdLineArgs(args)) {
             return null;
         }

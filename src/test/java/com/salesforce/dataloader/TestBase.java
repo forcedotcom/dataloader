@@ -38,7 +38,9 @@ import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -115,7 +117,7 @@ public abstract class TestBase {
     protected static final int SAVE_RECORD_LIMIT = 200;
 
     // logger
-    private static Logger logger = Logger.getLogger(TestBase.class);
+    private static Logger logger = LogManager.getLogger(TestBase.class);
 
     protected String baseName; // / base name of the test (without the "test")
     private Controller controller;

@@ -26,8 +26,8 @@
 
 package com.salesforce.dataloader.action.progress;
 
-import org.apache.log4j.Logger;
-
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * This class implements the ILoaderProgress but does nothing with
@@ -46,7 +46,7 @@ public enum NihilistProgressAdapter implements ILoaderProgress {
     }
 
     //logger
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     @Override
     public void beginTask(String name, int totalWork) {

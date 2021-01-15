@@ -45,8 +45,11 @@ import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.util.DAORowUtil;
 import com.sforce.ws.ConnectionException;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class DataSelectionDialog extends Dialog {
+    private final Logger logger = LogManager.getLogger(MappingPage.class);
     private String message;
     private boolean success;
     private Controller controller;
@@ -147,15 +150,16 @@ public class DataSelectionDialog extends Dialog {
                         dataReader.checkConnection();
                         dataReader.open();
 
-                        String warning = DAORowUtil.validateColumns(dataReader);
-                        if(warning != null && warning.length() != 0) {
-                            int response = UIUtils.warningConfMessageBox(shell, warning + "\n" + Labels.getString("DataSelectionDialog.warningConf"));
+                        String error = DAORowUtil.validateColumns(dataReader);
+                        if(error != null && error.length() != 0) {
+                            int response = UIUtils.errorMessageBox(shell, error);
                             // in case user doesn't want to continue, treat this as an error
                             if(response != SWT.YES) {
                                 success = false;
                                 ok.setEnabled(true);
                                 label.setText(Labels.getString("DataSelectionDialog.errorCSVFormat")); //$NON-NLS-1$
                                 shell.setText(Labels.getString("DataSelectionDialog.titleError"));
+                                logger.error(Labels.getString("DataSelectionDialog.errorCSVFormat"));
                                 return;
                             }
                         }
@@ -167,6 +171,7 @@ public class DataSelectionDialog extends Dialog {
                             ok.setEnabled(true);
                             label.setText(Labels.getString("DataSelectionDialog.errorCSVFormat")); //$NON-NLS-1$
                             shell.setText(Labels.getString("DataSelectionDialog.titleError"));
+                            logger.error(Labels.getString("DataSelectionDialog.errorCSVFormat"));
                             return;
                         }
 
@@ -174,6 +179,7 @@ public class DataSelectionDialog extends Dialog {
                         success = false;
                         ok.setEnabled(true);
                         label.setText(Labels.getString("DataSelectionDialog.errorCSVFormat") + "  " + e.getMessage()); //$NON-NLS-1$
+                        logger.error(Labels.getString("DataSelectionDialog.errorCSVFormat"));
                         Point size = label.computeSize(SWT.DEFAULT, SWT.DEFAULT);
                         label.setSize(shell.getClientArea().width, size.y);
                         shell.setText(Labels.getString("DataSelectionDialog.titleError"));

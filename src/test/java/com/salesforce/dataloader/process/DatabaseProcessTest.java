@@ -31,7 +31,9 @@ import java.io.File;
 import java.text.ParseException;
 import java.util.*;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -56,7 +58,7 @@ import com.salesforce.dataloader.model.Row;
 @RunWith(Parameterized.class)
 public class DatabaseProcessTest extends ProcessTestBase {
 
-    private static final Logger logger = Logger.getLogger(DatabaseReader.class);
+    private static final Logger logger = LogManager.getLogger(DatabaseReader.class);
     private static final int NUM_ROWS = 1000;
     private static final int BATCH_SIZE = 100;
 

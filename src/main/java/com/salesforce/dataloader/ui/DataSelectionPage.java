@@ -29,7 +29,9 @@ package com.salesforce.dataloader.ui;
 import java.util.*;
 import java.util.Map.Entry;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -57,7 +59,7 @@ import com.sforce.soap.partner.DescribeGlobalSObjectResult;
  */
 public class DataSelectionPage extends LoadPage {
 
-    private final Logger logger = Logger.getLogger(DataSelectionPage.class);
+    private final Logger logger = LogManager.getLogger(DataSelectionPage.class);
 
     private final Controller controller;
 

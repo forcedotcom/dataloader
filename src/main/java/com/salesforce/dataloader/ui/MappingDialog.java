@@ -32,7 +32,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -56,7 +58,7 @@ public class MappingDialog extends Dialog {
     private String input;
 
     private Controller controller;
-    private final Logger logger = Logger.getLogger(MappingDialog.class);
+    private final Logger logger = LogManager.getLogger(MappingDialog.class);
 
     //the two tableViewers
     private TableViewer sforceTblViewer;
@@ -275,8 +277,6 @@ public class MappingDialog extends Dialog {
             public void widgetSelected(SelectionEvent event) {
                 FileDialog dlg = new FileDialog(shell, SWT.SAVE);
                 Config config = controller.getConfig();
-                dlg.setFileName(config.getString(Config.MAPPING_FILE));
-                dlg.setFilterPath(config.getString(Config.MAPPING_FILE));
                 dlg.setFilterExtensions(new String[] { "*.sdl" });
                 String filename = dlg.open();
                 boolean cancel = false;

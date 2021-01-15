@@ -2,7 +2,8 @@
 <beans>
 <bean id="dbDataSource"
       class="org.apache.commons.dbcp.BasicDataSource"
-      destroy-method="close">
+      destroy-method="close"
+      scope="prototype">
     <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
     <property name="url" value="jdbc:oracle:thin:@my.server.com:1521:dataBaseName"/>
     <property name="username" value="user"/>
@@ -10,36 +11,37 @@
 </bean>
 <bean id="queryAccountAll"
       class="com.salesforce.dataloader.dao.database.DatabaseConfig"
-      singleton="true">
+      scope="singleton">
     <property name="sqlConfig" ref="queryAccountAllSql"/>
     <property name="dataSource" ref="dbDataSource"/>
 </bean>
 <bean id="queryAccount"
       class="com.salesforce.dataloader.dao.database.DatabaseConfig"
-      singleton="true">
+      scope="singleton">
     <property name="sqlConfig" ref="queryAccountSql"/>
     <property name="dataSource" ref="dbDataSource"/>
 </bean>
 <bean id="insertAccount"
       class="com.salesforce.dataloader.dao.database.DatabaseConfig"
-      singleton="true">
+      scope="singleton">
     <property name="sqlConfig" ref="insertAccountSql"/>
     <property name="dataSource" ref="dbDataSource"/>
 </bean>
 <bean id="updateAccount"
       class="com.salesforce.dataloader.dao.database.DatabaseConfig"
-      singleton="true">
+      scope="singleton">
     <property name="sqlConfig" ref="updateAccountSql"/>
     <property name="dataSource" ref="dbDataSource"/>
 </bean>
 <bean id="deleteAccountAll"
       class="com.salesforce.dataloader.dao.database.DatabaseConfig"
-      singleton="true">
+      scope="singleton">
     <property name="sqlConfig" ref="deleteAccountAllSql"/>
     <property name="dataSource" ref="dbDataSource"/>
 </bean>
 <bean id="queryAccountAllSql"
-      class="com.salesforce.dataloader.dao.database.SqlConfig" singleton="true">
+      class="com.salesforce.dataloader.dao.database.SqlConfig"
+      scope="singleton">
     <property name="sqlString">
         <value>
             SELECT ACCOUNT_NAME, BUSINESS_PHONE, SFDC_ACCOUNT_ID, ACCOUNT_EXT_ID, ANNUAL_REVENUE, LAST_UPDATED, ACCOUNT_NUMBER
@@ -59,7 +61,8 @@
     </property>
 </bean>
 <bean id="queryAccountSql"
-      class="com.salesforce.dataloader.dao.database.SqlConfig" singleton="true">
+      class="com.salesforce.dataloader.dao.database.SqlConfig"
+      scope="singleton">
     <property name="sqlString">
         <value>
             SELECT ACCOUNT_NAME, BUSINESS_PHONE, ACCOUNT_EXT_ID, ANNUAL_REVENUE, LAST_UPDATED, ACCOUNT_NUMBER
@@ -85,7 +88,8 @@
 </bean>
 <!--- this is for updating Customers in Oracle based on SFDC Accounts -->
 <bean id="updateAccountSql"
-      class="com.salesforce.dataloader.dao.database.SqlConfig" singleton="true">
+      class="com.salesforce.dataloader.dao.database.SqlConfig"
+      scope="singleton">
     <property name="sqlString">
         <value>
             update TableOwner.Accounts accounts
@@ -110,7 +114,8 @@
     </property>
 </bean>
 <bean id="insertAccountSql"
-      class="com.salesforce.dataloader.dao.database.SqlConfig" singleton="true">
+      class="com.salesforce.dataloader.dao.database.SqlConfig"
+      scope="singleton">
     <property name="sqlString">
         <value>
             INSERT INTO TableOwner.Accounts (
@@ -130,7 +135,8 @@
     </property>
 </bean>
 <bean id="deleteAccountAllSql"
-      class="com.salesforce.dataloader.dao.database.SqlConfig" singleton="true">
+      class="com.salesforce.dataloader.dao.database.SqlConfig"
+      scope="singleton">
     <property name="sqlString">
         <value>
             DELETE FROM TableOwner.Accounts

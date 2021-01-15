@@ -52,9 +52,11 @@ package com.salesforce.dataloader.process;
 
 import java.util.Timer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.exception.ControllerInitializationException;
 
 /**
  * Abstract class that should be extended to manage
@@ -62,15 +64,22 @@ import com.salesforce.dataloader.controller.Controller;
  * sheduled processes.
  */
 public class ProcessScheduler extends Timer {
-
     /** Instance of this class so it can be called from the command line */
     protected static ProcessScheduler processScheduler;
 
     /** Log4J */
-    private static Logger logger = Logger.getLogger(ProcessScheduler.class);
-
+    private static Logger logger;
+	static {
+        try {
+            Controller.initLog();
+        } catch (ControllerInitializationException e) {
+            System.out.println("ProcessScheduler: Controller not initialized" + e );
+            throw new RuntimeException(e.getMessage());
+        }
+        logger = LogManager.getLogger(ProcessScheduler.class);
+	}
+	
     public ProcessScheduler() {
-        Controller.initLog();
     }
 
     /**

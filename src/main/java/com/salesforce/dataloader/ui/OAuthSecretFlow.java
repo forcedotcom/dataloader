@@ -36,7 +36,9 @@ import com.salesforce.dataloader.model.OAuthToken;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.widgets.Shell;
@@ -56,7 +58,7 @@ import java.util.Optional;
  * it prompts for authentication but not authorization (once it's been authorized at least once).
  */
 public class OAuthSecretFlow extends OAuthFlow {
-    protected static Logger logger = Logger.getLogger(OAuthFlow.class);
+    protected static Logger logger = LogManager.getLogger(OAuthFlow.class);
 
     public OAuthSecretFlow(Shell parent, Config config) {
         super(parent, config);

@@ -32,7 +32,9 @@ import com.salesforce.dataloader.config.LastRun;
 import com.salesforce.dataloader.controller.Controller;
 import com.sforce.soap.partner.Connector;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -84,7 +86,7 @@ public class AdvancedSettingsDialog extends Dialog {
 
     private final String defaultServer;
 
-    private final Logger logger = Logger.getLogger(AdvancedSettingsDialog.class);
+    private final Logger logger = LogManager.getLogger(AdvancedSettingsDialog.class);
     private Button buttonHideWelcomeScreen;
     private Button buttonOutputExtractStatus;
     private Button buttonReadUtf8;
@@ -522,7 +524,7 @@ public class AdvancedSettingsDialog extends Dialog {
 
         textProxyPort = new Text(restComp, SWT.BORDER);
         textProxyPort.setText(config.getString(Config.PROXY_PORT));
-        textProxyPort.setTextLimit(4);
+        textProxyPort.setTextLimit(5);
         textProxyPort.addVerifyListener(new VerifyListener() {
             @Override
             public void verifyText(VerifyEvent event) {
@@ -530,7 +532,7 @@ public class AdvancedSettingsDialog extends Dialog {
             }
         });
         data = new GridData();
-        data.widthHint = 25;
+        data.widthHint = 30;
         textProxyPort.setLayoutData(data);
 
         //Proxy Username

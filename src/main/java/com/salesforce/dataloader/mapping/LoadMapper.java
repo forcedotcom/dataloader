@@ -31,7 +31,8 @@ import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.Field;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.util.StringUtils;
 
 import java.util.Collection;
@@ -47,7 +48,7 @@ import java.util.Map.Entry;
  */
 public class LoadMapper extends Mapper {
 
-    private static final Logger logger = Logger.getLogger(Mapper.class);
+    private static final Logger logger = LogManager.getLogger(Mapper.class);
 
     public LoadMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {

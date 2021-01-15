@@ -28,7 +28,8 @@ package com.salesforce.dataloader.dao;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.security.EncryptionAesUtil;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /*
  * This class can be substituted for org.apache.commons.dbcp.BasicDataSource in
@@ -93,5 +94,5 @@ public class EncryptedDataSource extends org.apache.commons.dbcp.BasicDataSource
     
     private final EncryptionAesUtil encrypter = new EncryptionAesUtil();
     
-    private static Logger logger = Logger.getLogger(EncryptedDataSource.class);
+    private static Logger logger = LogManager.getLogger(EncryptedDataSource.class);
 }

@@ -6,7 +6,7 @@ echo "**            ___  ____ ___ ____   _    ____ ____ ___  ____ ____       **"
 echo "**            |  \ |__|  |  |__|   |    |  | |__| |  \ |___ |__/       **"
 echo "**            |__/ |  |  |  |  |   |___ |__| |  | |__/ |___ |  \       **"
 echo "**                                                                     **"
-echo "**  Data Loader v47 is a Salesforce supported Open Source project to   **"
+echo "**  Data Loader v@@SHORT_VERSION@@ is a Salesforce supported Open Source project to   **"
 echo "**  help you import data to and export data from your Salesforce org.  **"
 echo "**  It requires Zulu OpenJDK 11 to run.                                **"
 echo "**                                                                     **"
@@ -25,6 +25,6 @@ then
     echo "Zulu OpenJDK 11 is not installed.  Download Zulu OpenJDK 11 for macOS here: https://www.azul.com/downloads/zulu/zulu-mac/"
 else
     echo "$JAVA_HOME"
-    cd DATALODER_WORK_DIRECTORY_PLACEHOLDER   #change to your own customized directory
-    java -XstartOnFirstThread -jar dataloader-47.0.0-uber.jar salesforce.config.dir=DATALODER_WORK_DIRECTORY_PLACEHOLDER/configs
+    cd DATALOADER_WORK_DIRECTORY_PLACEHOLDER 
+    java -XstartOnFirstThread -jar dataloader-@@FULL_VERSION@@-uber.jar salesforce.config.dir=DATALOADER_WORK_DIRECTORY_PLACEHOLDER/configs
 fi
