@@ -1,0 +1,4 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Thu Jan 14 21:16:07 PST 2021
+swtmac-4.18.jar>=
+swtmac-4.18.pom>=
