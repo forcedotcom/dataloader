@@ -13,7 +13,6 @@
   </organization>
 
   <properties>
-    <short.version>51</short.version>
     <force.wsc.version>51.0.0</force.wsc.version>
     <force.partner.api.version>${force.wsc.version}</force.partner.api.version>
     <build.year>2021</build.year>
@@ -433,7 +432,6 @@
 	             <mkdir dir="${basedir}/target/${OSType}"/>
 	             <copydir src="${basedir}/release/${OSType}" dest="${basedir}/target/${OSType}"/>
 	             <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${version}"/>
-	             <replace dir="${basedir}/target/${OSType}/" token="@@SHORT_VERSION@@" value="${short.version}"/>
 	             <chmod file="${basedir}/target/${OSType}/*" perm="755" />
 	
 	             <echo>copying uber jar to OS-specific folder for the target OS: ${OSType}</echo>

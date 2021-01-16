@@ -1,13 +1,19 @@
 @echo off
 setlocal
 
+set DATALOADER_VERSION=@@FULL_VERSION@@
+for /f "tokens=1 delims=." %%a in ("%DATALOADER_VERSION%") do (
+  set DATALOADER_SHORT_VERSION=%%a
+)
+set DATALOADER_UBER_JAR_NAME=dataloader-%DATALOADER_VERSION%-uber.jar
+
 echo.
 echo *************************************************************************
 echo **            ___  ____ ___ ____   _    ____ ____ ___  ____ ____       **
 echo **            ^|  \ ^|__^|  ^|  ^|__^|   ^|    ^|  ^| ^|__^| ^|  \ ^|___ ^|__/       **
 echo **            ^|__/ ^|  ^|  ^|  ^|  ^|   ^|___ ^|__^| ^|  ^| ^|__/ ^|___ ^|  \       **
 echo **                                                                     **
-echo **  Data Loader v@@SHORT_VERSION@@ is a Salesforce supported Open Source project to   **
+echo **  Data Loader v%DATALOADER_SHORT_VERSION% is a Salesforce supported Open Source project to   **
 echo **  help you import data to and export data from your Salesforce org.  **
 echo **  It requires Zulu OpenJDK 11.0.x to run.                            **
 echo **                                                                     **
@@ -35,7 +41,7 @@ echo.
     )
 
 :Run
-    "%ZULU_JAVA_HOME%\bin\java"  -jar dataloader-@@FULL_VERSION@@-uber.jar salesforce.config.dir=configs
+    "%ZULU_JAVA_HOME%\bin\java"  -jar %DATALOADER_UBER_JAR_NAME% salesforce.config.dir=configs
 
 :Exit
     endlocal

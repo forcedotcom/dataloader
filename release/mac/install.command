@@ -1,7 +1,7 @@
 #!/bin/bash
 DATALOADER_VERSION="@@FULL_VERSION@@"
-DATALOADER_SHORT_VERSION="@@SHORT_VERSION@@"
-DATALOADER_UBER_JAR_NAME="dataloader-@@FULL_VERSION@@-uber.jar"
+DATALOADER_SHORT_VERSION=$(echo ${DATALOADER_VERSION} | cut -d'.' -f 1)
+DATALOADER_UBER_JAR_NAME="dataloader-${DATALOADER_VERSION}-uber.jar"
 
 echo ""
 echo "*************************************************************************"

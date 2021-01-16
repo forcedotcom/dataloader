@@ -1,4 +1,7 @@
 #!/bin/bash
+DATALOADER_VERSION="@@FULL_VERSION@@"
+DATALOADER_SHORT_VERSION=$(echo ${DATALOADER_VERSION} | cut -d'.' -f 1)
+DATALOADER_UBER_JAR_NAME="dataloader-${DATALOADER_VERSION}-uber.jar"
 
 echo ""
 echo "*************************************************************************"
@@ -6,7 +9,7 @@ echo "**            ___  ____ ___ ____   _    ____ ____ ___  ____ ____       **"
 echo "**            |  \ |__|  |  |__|   |    |  | |__| |  \ |___ |__/       **"
 echo "**            |__/ |  |  |  |  |   |___ |__| |  | |__/ |___ |  \       **"
 echo "**                                                                     **"
-echo "**  Data Loader v@@SHORT_VERSION@@ is a Salesforce supported Open Source project to   **"
+echo "**  Data Loader v${DATALOADER_SHORT_VERSION} is a Salesforce supported Open Source project to   **"
 echo "**  help you import data to and export data from your Salesforce org.  **"
 echo "**  It requires Zulu OpenJDK 11 to run.                                **"
 echo "**                                                                     **"
@@ -26,5 +29,5 @@ then
 else
     echo "$JAVA_HOME"
     cd DATALOADER_WORK_DIRECTORY_PLACEHOLDER 
-    java -XstartOnFirstThread -jar dataloader-@@FULL_VERSION@@-uber.jar salesforce.config.dir=DATALOADER_WORK_DIRECTORY_PLACEHOLDER/configs
+    java -XstartOnFirstThread -jar ${DATALOADER_UBER_JAR_NAME} salesforce.config.dir=DATALOADER_WORK_DIRECTORY_PLACEHOLDER/configs
 fi

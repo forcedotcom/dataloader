@@ -2,8 +2,10 @@
 setlocal
 
 set DATALOADER_VERSION=@@FULL_VERSION@@
-set DATALOADER_SHORT_VERSION=@@SHORT_VERSION@@
-set DATALOADER_UBER_JAR_NAME=dataloader-@@FULL_VERSION@@-uber.jar
+for /f "tokens=1 delims=." %%a in ("%DATALOADER_VERSION%") do (
+  set DATALOADER_SHORT_VERSION=%%a
+)
+set DATALOADER_UBER_JAR_NAME=dataloader-%DATALOADER_VERSION%-uber.jar
 
 echo.
 echo *************************************************************************
