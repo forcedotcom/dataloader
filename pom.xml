@@ -17,7 +17,6 @@
     <force.partner.api.version>${force.wsc.version}</force.partner.api.version>
     <build.year>2021</build.year>
     <java.compile.version>11</java.compile.version>
-    <minJvmVersion>1.11.0</minJvmVersion>
     <codesign>DONTSIGN</codesign>
     <spring.version>5.2.7.RELEASE</spring.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
