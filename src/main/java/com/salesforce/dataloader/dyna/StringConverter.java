@@ -156,6 +156,10 @@ public final class StringConverter implements Converter {
             default:
                 if (((c >= 0x20) && (c <= 0xD7FF)) || ((c >= 0xE000) && (c <= 0xFFFD))) {
                     buff.append(c);
+                } else if (Character.isHighSurrogate(c) && (i + 1) < value.length() && Character.isLowSurrogate(value.charAt(i + 1))) {
+                    buff.append(c);
+                    buff.append(value.charAt(i + 1));
+                    i++;
                 }
                 // For chars outside these ranges (such as control chars),
                 // do nothing; it's not legal XML to print these chars,
