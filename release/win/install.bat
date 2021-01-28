@@ -2,8 +2,11 @@
 setlocal
 
 set DATALOADER_VERSION=@@FULL_VERSION@@
-set DATALOADER_SHORT_VERSION=@@SHORT_VERSION@@
-set DATALOADER_UBER_JAR_NAME=dataloader-@@FULL_VERSION@@-uber.jar
+for /f "tokens=1 delims=." %%a in ("%DATALOADER_VERSION%") do (
+  set DATALOADER_SHORT_VERSION=%%a
+)
+set DATALOADER_UBER_JAR_NAME=dataloader-%DATALOADER_VERSION%-uber.jar
+set MIN_JAVA_VERSION=@@MIN_JAVA_VERSION@@
 
 echo.
 echo *************************************************************************
@@ -13,7 +16,7 @@ echo **            ^|__/ ^|  ^|  ^|  ^|  ^|   ^|___ ^|__^| ^|  ^| ^|__/ ^|___ ^|
 echo **                                                                     **
 echo **  Data Loader v%DATALOADER_SHORT_VERSION% is a Salesforce supported Open Source project to   **
 echo **  help you import data to and export data from your Salesforce org.  **
-echo **  It requires Zulu OpenJDK 11 to run.                                **
+echo **  It requires Java JRE %MIN_JAVA_VERSION% or later to run.                           **
 echo **                                                                     **
 echo **  Github Project Url:                                                **
 echo **       https://github.com/forcedotcom/dataloader                     **

@@ -1,7 +1,8 @@
 #!/bin/bash
 DATALOADER_VERSION="@@FULL_VERSION@@"
-DATALOADER_SHORT_VERSION="@@SHORT_VERSION@@"
-DATALOADER_UBER_JAR_NAME="dataloader-@@FULL_VERSION@@-uber.jar"
+DATALOADER_SHORT_VERSION=$(echo ${DATALOADER_VERSION} | cut -d'.' -f 1)
+DATALOADER_UBER_JAR_NAME="dataloader-${DATALOADER_VERSION}-uber.jar"
+MIN_JAVA_VERSION=@@MIN_JAVA_VERSION@@
 
 echo ""
 echo "*************************************************************************"
@@ -11,7 +12,7 @@ echo "**            |__/ |  |  |  |  |   |___ |__| |  | |__/ |___ |  \       **"
 echo "**                                                                     **"
 echo "**  Data Loader v$DATALOADER_SHORT_VERSION is a Salesforce supported Open Source project to   **"
 echo "**  help you import data to and export data from your Salesforce org.  **"
-echo "**  It requires Zulu OpenJDK 11 to run.                                **"
+echo "**  It requires Java JRE ${MIN_JAVA_VERSION} or later to run.                           **"
 echo "**                                                                     **"
 echo "**  Github Project Url:                                                **"
 echo "**       https://github.com/forcedotcom/dataloader                     **"
@@ -63,9 +64,6 @@ rm $DL_FULL_PATH/dataloader.ico 1>/dev/null
 rm $DL_FULL_PATH/fileicon 1>/dev/null
 
 sed -i '' 's|DATALOADER_WORK_DIRECTORY_PLACEHOLDER|'"$DL_FULL_PATH"'|g'  "$DL_FULL_PATH"/dataloader.command
-sed -i '' 's|DATALOADER_VERSION_PLACEHOLDER|'"$DATALOADER_VERSION"'|g'  "$DL_FULL_PATH"/dataloader.command
-sed -i '' 's|DATALOADER_SHORT_VERSION_PLACEHOLDER|'"$DATALOADER_SHORT_VERSION"'|g'  "$DL_FULL_PATH"/dataloader.command
-sed -i '' 's|DATALOADER_UBER_JAR_NAME_PLACEHOLDER|'"$DATALOADER_UBER_JAR_NAME"'|g'  "$DL_FULL_PATH"/dataloader.command
 
 "$SHELL_PATH"/fileicon set  "$DL_FULL_PATH"/dataloader.command "$SHELL_PATH"/dataloader.ico 1>/dev/null
 
