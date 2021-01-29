@@ -69,6 +69,10 @@ class BulkApiVisitorUtil {
     private final LoadRateCalculator rateCalc;
 
     private final boolean updateProgress;
+    
+    private final boolean enablePKChunking;
+    private int queryChunkSize;
+    private String queryChunkStartRow = "";
 
     BulkApiVisitorUtil(Controller ctl, ILoaderProgress monitor, LoadRateCalculator rateCalc, boolean updateProgress) {
         this.client = ctl.getBulkClient().getClient();
@@ -79,6 +83,22 @@ class BulkApiVisitorUtil {
                     : Config.DEFAULT_BULK_API_CHECK_STATUS_INTERVAL;
         } catch (ParameterLoadException e) {
             throw new RuntimeException("Failed to initialize check status interval", e);
+        }
+        this.enablePKChunking = ctl.getConfig().getBoolean(Config.ENABLE_BULK_QUERY_PK_CHUNKING);
+        if (this.enablePKChunking) {
+            try {
+                int chunkSize = ctl.getConfig().getInt(Config.BULK_QUERY_PK_CHUNK_SIZE);
+                if (chunkSize < 1 || chunkSize > Config.MAX_BULK_QUERY_PK_CHUNK_SIZE) {
+                    chunkSize = Config.DEFAULT_BULK_QUERY_PK_CHUNK_SIZE;
+                }
+                this.queryChunkSize = chunkSize;
+            } catch (ParameterLoadException e) {
+                throw new RuntimeException("Failed to initialize bulk query chunk size", e);
+            }
+            queryChunkStartRow = ctl.getConfig().getString(Config.BULK_QUERY_PK_CHUNK_START_ROW);
+            if (queryChunkStartRow == null) {
+                queryChunkStartRow = "";
+            } 
         }
         this.monitor = monitor;
         this.rateCalc = rateCalc;
@@ -110,6 +130,19 @@ class BulkApiVisitorUtil {
             final String assRule = cfg.getString(Config.ASSIGNMENT_RULE);
             if (assRule != null && (assRule.length() == 15 || assRule.length() == 18)) {
                 job.setAssignmentRuleId(assRule);
+            }
+        } else if (op == OperationEnum.query || op == OperationEnum.queryAll) {
+            if (this.enablePKChunking) {
+                String startRowParam = "";
+                // startRow parameter of "Sforce-Enable-PKChunking" header has to be a valid
+                // 15 or 18 char ID.
+                if (this.queryChunkStartRow != null 
+                    && (this.queryChunkStartRow.length() == 15 || this.queryChunkStartRow.length() == 18)) {
+                    startRowParam = "; startRow=" + this.queryChunkStartRow;
+                }
+                this.client.addHeader("Sforce-Enable-PKChunking", 
+                        "chunkSize=" + this.queryChunkSize
+                        + startRowParam);
             }
         }
         job = this.client.createJob(job);
@@ -169,10 +202,11 @@ class BulkApiVisitorUtil {
         return this.jobInfo != null;
     }
 
-    void closeJob() throws AsyncApiException {
-        this.jobInfo = this.client.closeJob(getJobId());
+    void awaitCompletionAndCloseJob() throws AsyncApiException {
+        this.jobInfo = this.client.getJobStatus(getJobId());
         updateJobStatus();
         awaitJobCompletion();
+        this.jobInfo = this.client.closeJob(getJobId());
     }
 
     private void updateJobStatus() {
