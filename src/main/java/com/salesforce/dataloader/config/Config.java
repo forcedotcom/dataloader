@@ -256,7 +256,11 @@ public class Config {
     public static final String ENABLE_BULK_QUERY_PK_CHUNKING = PILOT_PROPERTY_PREFIX + "sfdc.enableBulkQueryPKChunking";
     public static final String BULK_QUERY_PK_CHUNK_SIZE =  PILOT_PROPERTY_PREFIX + "sfdc.bulkQueryPKChunkSize";
     public static final String BULK_QUERY_PK_CHUNK_START_ROW = PILOT_PROPERTY_PREFIX + "sfdc.bulkQueryChunkStartRow";
-
+    
+    public static final String DUPLICATE_RULE_ALLOW_SAVE = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.allowSave"; //$NON-NLS-1$
+    public static final String DUPLICATE_RULE_INCLUDE_RECORD_DETAILS = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.includeRecordDetails"; //$NON-NLS-1$
+    public static final String DUPLICATE_RULE_RUN_AS_CURRENT_USER = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.runAsCurrentUser"; //$NON-NLS-1$
+    
     /*
      * ===============================
      * End of config properties
@@ -411,6 +415,10 @@ public class Config {
         setDefaultValue(ENABLE_BULK_QUERY_PK_CHUNKING, false);
         setDefaultValue(BULK_QUERY_PK_CHUNK_SIZE, DEFAULT_BULK_QUERY_PK_CHUNK_SIZE);
         setDefaultValue(BULK_QUERY_PK_CHUNK_START_ROW, "");
+        setDefaultValue(DUPLICATE_RULE_ALLOW_SAVE, false);
+        setDefaultValue(DUPLICATE_RULE_INCLUDE_RECORD_DETAILS, false);
+        setDefaultValue(DUPLICATE_RULE_RUN_AS_CURRENT_USER, false);
+
         
     }
 
