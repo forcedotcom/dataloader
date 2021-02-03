@@ -70,7 +70,7 @@ class BulkApiVisitorUtil {
 
     private final boolean updateProgress;
     
-    private final boolean enablePKChunking;
+    private final boolean enablePKChunking = false;
     private int queryChunkSize;
     private String queryChunkStartRow = "";
 
@@ -84,6 +84,10 @@ class BulkApiVisitorUtil {
         } catch (ParameterLoadException e) {
             throw new RuntimeException("Failed to initialize check status interval", e);
         }
+        
+        /*
+         * ======== Start code block to support PK chunking
+         *
         this.enablePKChunking = ctl.getConfig().getBoolean(Config.ENABLE_BULK_QUERY_PK_CHUNKING);
         if (this.enablePKChunking) {
             try {
@@ -100,6 +104,9 @@ class BulkApiVisitorUtil {
                 queryChunkStartRow = "";
             } 
         }
+         *
+         * ======== End code block to support PK chunking
+         */
         this.monitor = monitor;
         this.rateCalc = rateCalc;
         this.updateProgress = updateProgress;
