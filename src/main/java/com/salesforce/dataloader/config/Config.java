@@ -99,8 +99,9 @@ public class Config {
 
     public static final String OAUTH_BULK_CLIENTID_VAL = "DataLoaderBulkUI/";
     public static final String OAUTH_PARTNER_CLIENTID_VAL = "DataLoaderPartnerUI/";
-
-
+    
+    public static final int DEFAULT_BULK_QUERY_PK_CHUNK_SIZE = 100000;
+    public static final int MAX_BULK_QUERY_PK_CHUNK_SIZE = 250000;
 
     /*
      * Issue #59 - Dataloader will not read all the database rows to get a total count
@@ -202,9 +203,6 @@ public class Config {
     public static final String ENTITY = "sfdc.entity"; //$NON-NLS-1$
     public static final String LOAD_BATCH_SIZE = "sfdc.loadBatchSize"; //$NON-NLS-1$
     public static final String ASSIGNMENT_RULE = "sfdc.assignmentRule"; //$NON-NLS-1$
-    public static final String DUPLICATE_RULE_ALLOW_SAVE = "sfdc.duplicateRule.allowSave"; //$NON-NLS-1$
-    public static final String DUPLICATE_RULE_INCLUDE_RECORD_DETAILS = "sfdc.duplicateRule.includeRecordDetails"; //$NON-NLS-1$
-    public static final String DUPLICATE_RULE_RUN_AS_CURRENT_USER = "sfdc.duplicateRule.runAsCurrentUser"; //$NON-NLS-1$
     public static final String EXTERNAL_ID_FIELD = "sfdc.externalIdField"; //$NON-NLS-1$
     public static final String EXTRACT_REQUEST_SIZE = "sfdc.extractionRequestSize"; //$NON-NLS-1$
     public static final String EXTRACT_SOQL = "sfdc.extractionSOQL"; //$NON-NLS-1$
@@ -242,6 +240,35 @@ public class Config {
     public static final String READ_UTF8 = "dataAccess.readUTF8"; //$NON-NLS-1$
     public static final String WRITE_UTF8 = "dataAccess.writeUTF8"; //$NON-NLS-1$
 
+    
+    /**
+     *  ===============  PILOT config properties ========
+     * - These properties are used for the features in pilot phase. These features are
+     *   not supported. Also, they may not be complete.
+     *   
+     * - The property name is prefixed with "pilot". Remove the prefix and move the property
+     *   declaration above this comment section when the feature is complete and supported.
+     * 
+     * - DO NOT EXPOSE THEM THROUGH THE UI.
+     * ===================================================
+     */
+    public static final String PILOT_PROPERTY_PREFIX = "pilot.";
+    
+    /*
+    public static final String ENABLE_BULK_QUERY_PK_CHUNKING = PILOT_PROPERTY_PREFIX + "sfdc.enableBulkQueryPKChunking";
+    public static final String BULK_QUERY_PK_CHUNK_SIZE =  PILOT_PROPERTY_PREFIX + "sfdc.bulkQueryPKChunkSize";
+    public static final String BULK_QUERY_PK_CHUNK_START_ROW = PILOT_PROPERTY_PREFIX + "sfdc.bulkQueryChunkStartRow";
+    */
+    public static final String DUPLICATE_RULE_ALLOW_SAVE = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.allowSave"; //$NON-NLS-1$
+    public static final String DUPLICATE_RULE_INCLUDE_RECORD_DETAILS = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.includeRecordDetails"; //$NON-NLS-1$
+    public static final String DUPLICATE_RULE_RUN_AS_CURRENT_USER = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.runAsCurrentUser"; //$NON-NLS-1$
+    
+    /*
+     * ===============================
+     * End of config properties
+     * ===============================
+     */
+    
     /**
      * Indicates whether a value as been changed
      */
@@ -332,65 +359,71 @@ public class Config {
      * This sets the current defaults.
      */
     public void setDefaults() {
-        setValue(HIDE_WELCOME_SCREEN, true);
+        setDefaultValue(HIDE_WELCOME_SCREEN, true);
 
-        setValue(CSV_DELIMETER_COMMA, true);
-        setValue(CSV_DELIMETER_TAB, true);
-        setValue(CSV_DELIMETER_OTHER, false);
-        setValue(CSV_DELIMETER_OTHER_VALUE, "-");
+        setDefaultValue(CSV_DELIMETER_COMMA, true);
+        setDefaultValue(CSV_DELIMETER_TAB, true);
+        setDefaultValue(CSV_DELIMETER_OTHER, false);
+        setDefaultValue(CSV_DELIMETER_OTHER_VALUE, "-");
 
-        setValue(ENDPOINT, DEFAULT_ENDPOINT_URL);
-        setValue(LOAD_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
-        setValue(LOAD_ROW_TO_START_AT, 0);
-        setValue(TIMEOUT_SECS, DEFAULT_TIMEOUT_SECS);
-        setValue(CONNECTION_TIMEOUT_SECS, DEFAULT_CONNECTION_TIMEOUT_SECS);
-        setValue(ENABLE_RETRIES, true);
-        setValue(MAX_RETRIES, DEFAULT_MAX_RETRIES);
-        setValue(MIN_RETRY_SLEEP_SECS, DEFAULT_MIN_RETRY_SECS);
-        setValue(ASSIGNMENT_RULE, ""); //$NON-NLS-1$
-        setValue(DUPLICATE_RULE_ALLOW_SAVE, false);
-        setValue(DUPLICATE_RULE_INCLUDE_RECORD_DETAILS, false);
-        setValue(DUPLICATE_RULE_RUN_AS_CURRENT_USER, false);
-        setValue(INSERT_NULLS, false);
-        setValue(ENABLE_EXTRACT_STATUS_OUTPUT, false);
-        setValue(ENABLE_LAST_RUN_OUTPUT, true);
-        setValue(RESET_URL_ON_LOGIN, true);
-        setValue(EXTRACT_REQUEST_SIZE, DEFAULT_EXTRACT_REQUEST_SIZE);
-        setValue(DAO_WRITE_BATCH_SIZE, DEFAULT_DAO_WRITE_BATCH_SIZE);
-        setValue(DAO_READ_BATCH_SIZE, DEFAULT_DAO_READ_BATCH_SIZE);
-        setValue(TRUNCATE_FIELDS, true);
+        setDefaultValue(ENDPOINT, DEFAULT_ENDPOINT_URL);
+        setDefaultValue(LOAD_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
+        setDefaultValue(LOAD_ROW_TO_START_AT, 0);
+        setDefaultValue(TIMEOUT_SECS, DEFAULT_TIMEOUT_SECS);
+        setDefaultValue(CONNECTION_TIMEOUT_SECS, DEFAULT_CONNECTION_TIMEOUT_SECS);
+        setDefaultValue(ENABLE_RETRIES, true);
+        setDefaultValue(MAX_RETRIES, DEFAULT_MAX_RETRIES);
+        setDefaultValue(MIN_RETRY_SLEEP_SECS, DEFAULT_MIN_RETRY_SECS);
+        setDefaultValue(ASSIGNMENT_RULE, ""); //$NON-NLS-1$
+        setDefaultValue(INSERT_NULLS, false);
+        setDefaultValue(ENABLE_EXTRACT_STATUS_OUTPUT, false);
+        setDefaultValue(ENABLE_LAST_RUN_OUTPUT, true);
+        setDefaultValue(RESET_URL_ON_LOGIN, true);
+        setDefaultValue(EXTRACT_REQUEST_SIZE, DEFAULT_EXTRACT_REQUEST_SIZE);
+        setDefaultValue(DAO_WRITE_BATCH_SIZE, DEFAULT_DAO_WRITE_BATCH_SIZE);
+        setDefaultValue(DAO_READ_BATCH_SIZE, DEFAULT_DAO_READ_BATCH_SIZE);
+        setDefaultValue(TRUNCATE_FIELDS, true);
         // TODO: When we're ready, make Bulk API turned on by default.
-        setValue(BULK_API_ENABLED, useBulkApiByDefault());
-        setValue(BULK_API_SERIAL_MODE, false);
-        setValue(BULK_API_ZIP_CONTENT, false);
-        setValue(BULK_API_CHECK_STATUS_INTERVAL, DEFAULT_BULK_API_CHECK_STATUS_INTERVAL);
-        setValue(WIRE_OUTPUT, false);
-        setValue(TIMEZONE, TimeZone.getDefault().getID());
+        setDefaultValue(BULK_API_ENABLED, useBulkApiByDefault());
+        setDefaultValue(BULK_API_SERIAL_MODE, false);
+        setDefaultValue(BULK_API_ZIP_CONTENT, false);
+        setDefaultValue(BULK_API_CHECK_STATUS_INTERVAL, DEFAULT_BULK_API_CHECK_STATUS_INTERVAL);
+        setDefaultValue(WIRE_OUTPUT, false);
+        setDefaultValue(TIMEZONE, TimeZone.getDefault().getID());
         //sfdcInternal settings
-        setValue(SFDC_INTERNAL, false);
-        setValue(SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
-        setValue(SFDC_INTERNAL_SESSION_ID, (String) null);
+        setDefaultValue(SFDC_INTERNAL, false);
+        setDefaultValue(SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
+        setDefaultValue(SFDC_INTERNAL_SESSION_ID, (String) null);
 
         //oauth settings
-        setValue(OAUTH_SERVER, DEFAULT_ENDPOINT_URL);
-        setValue(OAUTH_REDIRECTURI, DEFAULT_ENDPOINT_URL);
-        setValue(OAUTH_ENVIRONMENT, OAUTH_PROD_ENVIRONMENT_VAL);
-        setValue(OAUTH_ENVIRONMENTS, OAUTH_PROD_ENVIRONMENT_VAL + "," + OAUTH_SB_ENVIRONMENT_VAL);
+        setDefaultValue(OAUTH_SERVER, DEFAULT_ENDPOINT_URL);
+        setDefaultValue(OAUTH_REDIRECTURI, DEFAULT_ENDPOINT_URL);
+        setDefaultValue(OAUTH_ENVIRONMENT, OAUTH_PROD_ENVIRONMENT_VAL);
+        setDefaultValue(OAUTH_ENVIRONMENTS, OAUTH_PROD_ENVIRONMENT_VAL + "," + OAUTH_SB_ENVIRONMENT_VAL);
 
         /* sfdc.oauth.<env>.<bulk | partner>.clientid = DataLoaderBulkUI | DataLoaderPartnerUI */
-        setValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
-        setValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
+        setDefaultValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
+        setDefaultValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
 
-        setValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
-        setValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
+        setDefaultValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
+        setDefaultValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
 
         /* production server and redirecturi, sandbox server and redirecturi */
-        setValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_SERVER, OAUTH_PROD_SERVER_VAL);
-        setValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI, OAUTH_PROD_REDIRECTURI_VAL);
+        setDefaultValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_SERVER, OAUTH_PROD_SERVER_VAL);
+        setDefaultValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI, OAUTH_PROD_REDIRECTURI_VAL);
 
-        setValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_SERVER, OAUTH_SB_SERVER_VAL);
-        setValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI, OAUTH_SB_REDIRECTURI_VAL);
+        setDefaultValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_SERVER, OAUTH_SB_SERVER_VAL);
+        setDefaultValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI, OAUTH_SB_REDIRECTURI_VAL);
+        /*
+        setDefaultValue(ENABLE_BULK_QUERY_PK_CHUNKING, false);
+        setDefaultValue(BULK_QUERY_PK_CHUNK_SIZE, DEFAULT_BULK_QUERY_PK_CHUNK_SIZE);
+        setDefaultValue(BULK_QUERY_PK_CHUNK_START_ROW, "");
+        */
+        setDefaultValue(DUPLICATE_RULE_ALLOW_SAVE, false);
+        setDefaultValue(DUPLICATE_RULE_INCLUDE_RECORD_DETAILS, false);
+        setDefaultValue(DUPLICATE_RULE_RUN_AS_CURRENT_USER, false);
 
+        
     }
 
     /**
@@ -616,14 +649,30 @@ public class Config {
     /**
      * @return parameter value
      */
+    
     private String getParamValue(String name) {
-        String value;
+        String propValue;
+
         if (lastRun.hasParameter(name)) {
-            value = lastRun.getProperty(name);
+            propValue = lastRun.getProperty(name);
         } else {
-            value = properties != null ? properties.getProperty(name) : null;
+            propValue = properties != null ? properties.getProperty(name) : null;
         }
-        return value;
+        
+        // check if a property's value is configured when it used to be a pilot property
+        // if value not set.
+        if (propValue == null && !name.startsWith(PILOT_PROPERTY_PREFIX)) { 
+            String pilotName = PILOT_PROPERTY_PREFIX + name;
+            String pilotValue = getParamValue(pilotName);
+            if (pilotValue != null && !pilotValue.isEmpty()) {
+                // if picking up the value from a pilot property that is no longer in pilot,
+                // set the value for the new property to be the same as the value of the pilot property
+                doSetPropertyAndUpdateConfig(name, propValue, pilotValue);
+            }
+            propValue = pilotValue;
+        }
+        
+        return propValue;
     }
 
     /**
@@ -939,81 +988,89 @@ public class Config {
         return filename;
     }
 
-
-    /**
-     * Sets a double
+    /*
+     * Sets a date
      */
-    public void setValue(String name, double value) {
-        setProperty(name, Double.toString(value));
+    public void setValue(String name, Date value) {
+        setValue(name, value, false);
+    }
+    
+    private void setDefaultValue(String name, Date value) {
+        setValue(name, value, true);
+    }
+    
+    private void setValue(String name, Date value, boolean skipIfAlreadySet) {
+        setProperty(name, DATE_FORMATTER.format(value), skipIfAlreadySet);
     }
 
     /**
-     * Sets a float
-     */
-    public void setValue(String name, float value) {
-        setProperty(name, Float.toString(value));
-    }
-
-    /**
-     * Sets an int
-     */
-    public void setValue(String name, int value) {
-        setProperty(name, Integer.toString(value));
-    }
-
-    /**
-     * Sets a long
-     */
-    public void setValue(String name, long value) {
-        setProperty(name, Long.toString(value));
-    }
-
-    /**
-     * Sets a string
+     * Sets a list of String values
      */
     public void setValue(String name, String... values) {
+        setValue(name, false, values);
+    }
+    
+    private void setDefaultValue(String name, String... values) {
+        setValue(name, true, values);
+    }
+    
+    private void setValue(String name,  boolean skipIfAlreadySet, String... values) {
         if (values != null && values.length > 1) {
             StringJoiner joiner = new StringJoiner(",");
             for (String value : values) {
                 joiner.add(value);
             }
-            setProperty(name, joiner.toString());
+            setProperty(name, joiner.toString(), skipIfAlreadySet);
         } else if (values != null && values.length > 0) {
-            setProperty(name, values[0]);
+            setProperty(name, values[0], skipIfAlreadySet);
         } else {
-            setProperty(name, null);
+            setProperty(name, null, skipIfAlreadySet);
         }
 
     }
 
     /**
-     * Sets a boolean
+     * Sets a value other than a date or a list of String values
      */
-    public void setValue(String name, boolean value) {
-        setProperty(name, Boolean.toString(value));
+    public <T> void setValue(String name, T value) {
+        setValue(name, value, false);
     }
 
-    public void setValue(String name, Date value) {
-        setProperty(name, DATE_FORMATTER.format(value));
+    
+    private <T> void setDefaultValue(String name, T value) {
+        setValue(name, value, true);
     }
-
+    
+    private <T> void setValue(String name, T value, boolean skipIfAlreadySet) {
+        if (value != null) {
+            setProperty(name, value.toString(), skipIfAlreadySet);
+        }
+    }
+    
     /**
      * @param name
      * @param newValue
      */
-    private void setProperty(String name, String newValue) {
+    private void setProperty(String name, String newValue, boolean skipIfAlreadySet) {
         final String oldValue = getString(name);
+        if (skipIfAlreadySet && oldValue != null && !oldValue.isEmpty()) {
+            // do not override the old value
+            return;
+        }
         final boolean paramChanged = (oldValue == null || oldValue.length() == 0) ? (newValue != null && newValue
                 .length() > 0) : !oldValue.equals(newValue);
         if (paramChanged) {
-            this.dirty = true;
-            configChanged(name, oldValue, newValue);
-            if (lastRun.hasParameter(name)) {
-                lastRun.put(name, newValue);
-            } else {
-                properties.put(name, newValue);
-            }
-
+            doSetPropertyAndUpdateConfig(name, oldValue, newValue);
+        }
+    }
+    
+    private void doSetPropertyAndUpdateConfig(String name, String oldValue, String newValue) {
+        this.dirty = true;
+        configChanged(name, oldValue, newValue);
+        if (lastRun.hasParameter(name)) {
+            lastRun.put(name, newValue);
+        } else {
+            properties.put(name, newValue);
         }
     }
 

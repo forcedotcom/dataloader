@@ -148,10 +148,10 @@ public class Controller {
     }
 
     private static synchronized void initStaticVariable() throws ControllerInitializationException {
-    	if (areStaticVarsInitialized) {
-    		return;
-    	}
-    	Properties versionProps = new Properties();
+        if (areStaticVarsInitialized) {
+            return;
+        }
+        Properties versionProps = new Properties();
         try {
             versionProps.load(Controller.class.getClassLoader().getResourceAsStream("com/salesforce/dataloader/version.properties"));
         } catch (IOException e) {
@@ -164,7 +164,7 @@ public class Controller {
         APP_VERSION = versionProps.getProperty("dataloader.version");
         String apiVersionStr = versionProps.getProperty("dataloader.apiversion");
         if ( apiVersionStr == null || apiVersionStr.isEmpty()) {
-        	apiVersionStr = APP_VERSION;
+            apiVersionStr = APP_VERSION;
         }
         String[] apiVersion = apiVersionStr.split("\\.");
         API_VERSION = apiVersion[0] + "." + apiVersion[1];
@@ -444,10 +444,10 @@ public class Controller {
         try {
             String lastRunFileName = name + LAST_RUN_FILE_SUFFIX;
             config = new Config(getAppPath(), configPath, lastRunFileName);
-            // set default before actual values are loaded
+            config.load();
+            // set default - it does not override loaded values
             config.setDefaults();
             config.setBatchMode(isBatchMode);
-            config.load();
             logger.info(Messages.getMessage(getClass(), "configInit")); //$NON-NLS-1$
         } catch (IOException e) {
             throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorConfigLoad", configPath), e);
@@ -473,20 +473,20 @@ public class Controller {
             return;
         }
 
-    	try {
-    		initStaticVariable();
-    	} catch (ControllerInitializationException ex) {
-    		System.out.println("Controller.initLog(): Unable to initialize Controller static vars: " + ex.getMessage());
-    		throw ex;
-    	}
+        try {
+            initStaticVariable();
+        } catch (ControllerInitializationException ex) {
+            System.out.println("Controller.initLog(): Unable to initialize Controller static vars: " + ex.getMessage());
+            throw ex;
+        }
 
-    	String log4jConfigFile = System.getenv(
-    			"LOG4J_CONFIGURATION_FILE");
-    	if (log4jConfigFile == null || log4jConfigFile.isEmpty()) { // use the override
+        String log4jConfigFile = System.getenv(
+                "LOG4J_CONFIGURATION_FILE");
+        if (log4jConfigFile == null || log4jConfigFile.isEmpty()) { // use the override
             File logConfXml = Paths.get(System.getProperty("user.dir"), "configs", LOG_CONF_OVERRIDE).toFile();
-    		log4jConfigFile =  logConfXml.getAbsolutePath();
+            log4jConfigFile =  logConfXml.getAbsolutePath();
             if (logConfXml.exists()) {
-            	System.setProperty("log4j2.configurationFile", log4jConfigFile);
+                System.setProperty("log4j2.configurationFile", log4jConfigFile);
             }
         }
 
@@ -494,11 +494,11 @@ public class Controller {
         LoggerContext context = (LoggerContext) LogManager.getContext();
         String logConfigLocation = context.getConfiguration().getConfigurationSource().getLocation();
         if (logConfigLocation == null) {
-        	logger.error("Unable to initialize logging using log4j2 config file at "
-        			+ log4jConfigFile
-        			+ ". All error messages will be logged on STDOUT.");
+            logger.error("Unable to initialize logging using log4j2 config file at "
+                    + log4jConfigFile
+                    + ". All error messages will be logged on STDOUT.");
         } else {
-        	logger.info("Using log4j2 configuration file at location: " + logConfigLocation);
+            logger.info("Using log4j2 configuration file at location: " + logConfigLocation);
         }
 
         logger.info(Messages.getString("Controller.logInit")); //$NON-NLS-1$

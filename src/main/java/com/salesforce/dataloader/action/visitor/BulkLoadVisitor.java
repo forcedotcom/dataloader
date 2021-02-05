@@ -282,7 +282,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         super.flushRemaining();
         if (this.jobUtil.hasJob()) {
             try {
-                this.jobUtil.closeJob();
+                this.jobUtil.awaitCompletionAndCloseJob();
             } catch (final AsyncApiException e) {
                 logger.warn("Failed to close job", e);
             }
