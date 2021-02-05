@@ -70,7 +70,7 @@ class BulkApiVisitorUtil {
 
     private final boolean updateProgress;
     
-    private final boolean enablePKChunking = false;
+    private final boolean enablePKchunking = false;
     private int queryChunkSize;
     private String queryChunkStartRow = "";
 
@@ -88,8 +88,8 @@ class BulkApiVisitorUtil {
         /*
          * ======== Start code block to support PK chunking
          *
-        this.enablePKChunking = ctl.getConfig().getBoolean(Config.ENABLE_BULK_QUERY_PK_CHUNKING);
-        if (this.enablePKChunking) {
+        this.enablePKchunking = ctl.getConfig().getBoolean(Config.ENABLE_BULK_QUERY_PK_CHUNKING);
+        if (this.enablePKchunking) {
             try {
                 int chunkSize = ctl.getConfig().getInt(Config.BULK_QUERY_PK_CHUNK_SIZE);
                 if (chunkSize < 1 || chunkSize > Config.MAX_BULK_QUERY_PK_CHUNK_SIZE) {
@@ -139,7 +139,7 @@ class BulkApiVisitorUtil {
                 job.setAssignmentRuleId(assRule);
             }
         } else if (op == OperationEnum.query || op == OperationEnum.queryAll) {
-            if (this.enablePKChunking) {
+            if (this.enablePKchunking) {
                 String startRowParam = "";
                 // startRow parameter of "Sforce-Enable-PKChunking" header has to be a valid
                 // 15 or 18 char ID.
@@ -148,8 +148,7 @@ class BulkApiVisitorUtil {
                     startRowParam = "; startRow=" + this.queryChunkStartRow;
                 }
                 this.client.addHeader("Sforce-Enable-PKChunking", 
-                        "chunkSize=" + this.queryChunkSize
-                        + startRowParam);
+                                      "chunkSize=" + this.queryChunkSize + startRowParam);
             }
         }
         job = this.client.createJob(job);

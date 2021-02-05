@@ -74,15 +74,15 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
         jobUtil.awaitCompletionAndCloseJob();
         
         int recordsProcessed = 0;
-        final BatchInfo[] ba = jobUtil.getBatches().getBatchInfo();
-        for (BatchInfo b : ba) {
-            if (b.getState() == BatchStateEnum.Failed) {
-                throw new ExtractException("Batch failed: " + b.getStateMessage());
+        final BatchInfo[] batchInfoArray = jobUtil.getBatches().getBatchInfo();
+        for (BatchInfo batchInfo : batchInfoArray) {
+            if (batchInfo.getState() == BatchStateEnum.Failed) {
+                throw new ExtractException("Batch failed: " + batchInfo.getStateMessage());
             }
-            recordsProcessed += b.getNumberRecordsProcessed();
+            recordsProcessed += batchInfo.getNumberRecordsProcessed();
         }
 
-        this.batches = ba;
+        this.batches = batchInfoArray;
         return recordsProcessed;
     }
 
