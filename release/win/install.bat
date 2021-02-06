@@ -26,10 +26,23 @@ echo **                                                                     **
 echo *************************************************************************
 echo.
 
-echo Data Loader installation creates a folder in your '%USERPROFILE%' directory.
-set /p DIR_NAME=Which folder should it use? [default: dataloader] || set DIR_NAME=dataloader
+echo Data Loader installation requires you to provide an installation directory to create a version-specific subdirectory for the installation artifacts.
+echo It uses '%USERPROFILE%\^<relative path^>' as the installation directory if you provide a relative path for the installation directory.
+echo.
+set /p DIR_NAME=Provide the installation directory [default: dataloader] : || set DIR_NAME=dataloader
 
-set INSTALLATION_DIR=%USERPROFILE%\%DIR_NAME%\v%DATALOADER_VERSION%
+if "%DIR_NAME%":~1,1%" == ":" (
+    REM absolute path specified
+    set INSTALLATION_DIR=%DIR_NAME%\v%DATALOADER_VERSION%
+) else (
+    if "%DIR_NAME:~0,1%" == "\" (
+        REM absolute path specified
+        set INSTALLATION_DIR=%DIR_NAME%\v%DATALOADER_VERSION%
+    ) else (
+        REM relative path specified
+        set INSTALLATION_DIR=%USERPROFILE%\%DIR_NAME%\v%DATALOADER_VERSION%
+    )
+)
 
 IF EXIST %INSTALLATION_DIR% (
     goto ExistingDir

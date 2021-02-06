@@ -22,10 +22,13 @@ echo "**                                                                     **"
 echo "*************************************************************************"
 echo ""
 
-echo Data Loader installation creates a folder in your \'$HOME\' directory.
-read -p "Which folder should it use? [default: dataloader]: " INSTALLATION_DIR_NAME
+echo Data Loader installation requires you to provide an installation directory to create a version-specific subdirectory for the installation artifacts. 
+echo It uses \'${HOME}\/\<relative path\>\' as the installation directory if you provide a relative path for the installation directory.
+echo ""
+read -p "Provide the installation directory [default: dataloader] : " INSTALLATION_DIR_NAME
 INSTALLATION_DIR_NAME=${INSTALLATION_DIR_NAME:-dataloader}
-DL_FULL_PATH="$HOME/$INSTALLATION_DIR_NAME/v$DATALOADER_VERSION"
+
+[[ ${INSTALLATION_DIR_NAME} = /* ]] && DL_FULL_PATH="${INSTALLATION_DIR_NAME}/v${DATALOADER_VERSION}" || DL_FULL_PATH="${HOME}/${INSTALLATION_DIR_NAME}/v${DATALOADER_VERSION}"
 
 echo Data Loader v$DATALOADER_VERSION will be installed in: $DL_FULL_PATH
 

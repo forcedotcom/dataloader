@@ -49,7 +49,7 @@ echo.
     )
 
 :Run
-    java -jar %DATALOADER_UBER_JAR_NAME% salesforce.config.dir=configs
+    java -jar %DATALOADER_UBER_JAR_NAME% %*
     goto SuccessExit
 
 :SuccessExit
