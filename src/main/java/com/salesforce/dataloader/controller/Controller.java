@@ -92,6 +92,7 @@ public class Controller {
      * the system property name used to determine the config directory
      */
     public static final String CONFIG_DIR_PROP = "salesforce.config.dir";
+    public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
 
     public static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
     public static final String DEFAULT_CONFIG_FILE = "defaultConfig.properties"; //$NON-NLS-1$
@@ -383,8 +384,8 @@ public class Controller {
         File configDir;
 
         if (configDirPath == null) {
-            // CONFIG_DIR_PROP param is NOT provided - use user's config dir
-            configDir = Paths.get(System.getProperty("user.dir"), "configs").toFile();
+            // CONFIG_DIR_PROP param is NOT provided through command line or system property - use user's config dir
+            configDir = Paths.get(System.getProperty("user.dir"), CONFIG_DIR_DEFAULT_VALUE).toFile();
             logger.debug(String.format("OS: %s, '%s' NOT provided, setting config dir to : %s", OS_TYPE, CONFIG_DIR_PROP, configDir));
         } else {
             // CONFIG_DIR_PROP is provided - use provided config dir

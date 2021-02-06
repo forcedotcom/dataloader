@@ -29,5 +29,5 @@ then
     echo "Java JRE ${MIN_JAVA_VERSION} or later is not installed. For example, download and install Zulu OpenJDK ${MIN_JAVA_VERSION} or later JRE for macOS from https://www.azul.com/downloads/zulu/zulu-mac/"
 else
     cd DATALOADER_WORK_DIRECTORY_PLACEHOLDER 
-    java -XstartOnFirstThread -jar ${DATALOADER_UBER_JAR_NAME} salesforce.config.dir=DATALOADER_WORK_DIRECTORY_PLACEHOLDER/configs
+    java -XstartOnFirstThread -jar ${DATALOADER_UBER_JAR_NAME} $@
 fi
