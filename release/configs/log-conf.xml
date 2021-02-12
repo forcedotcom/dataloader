@@ -10,11 +10,11 @@
   </appenders>
   <loggers>
     <logger name="org.apache.log4j.xml" level="warn">
-      <appender-ref ref="fileAppender"/>
+      <AppenderRef ref="fileAppender"/>
       <AppenderRef ref="STDOUT" />
     </logger>
     <logger name="org.apache" level="warn">
-      <appender-ref ref="fileAppender"/>
+      <AppenderRef ref="fileAppender"/>
       <AppenderRef ref="STDOUT" />
     </logger>
     <root level="info">

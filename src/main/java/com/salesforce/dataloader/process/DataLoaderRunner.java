@@ -34,26 +34,36 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.ui.UIUtils;
 
+import java.util.Map;
+
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 public class DataLoaderRunner {
 
     public static final String UI = "ui";
+    public static final String RUN_MODE = "run.mode";
+    public static final String RUN_MODE_BATCH = "batch";
+    public static final String RUN_MODE_UI = "ui";
 
-    public static void main(String[] args) {
-        Controller controller;
-
-
-        try {
-            controller = Controller.getInstance(UI, false, args);
-            controller.createAndShowGUI();
-        } catch (ControllerInitializationException e) {
-            UIUtils.errorMessageBox(new Shell(new Display()), e);
-        }
+    private static boolean isProcessMode(String[] args) {
+        Map<String, String> argNameValuePair = Controller.getArgMapFromArgArray(args);
+        
+        return argNameValuePair.containsKey(RUN_MODE) ?
+                RUN_MODE_BATCH.equalsIgnoreCase(argNameValuePair.get(RUN_MODE)) : false;
     }
 
-
-
-
+    public static void main(String[] args) {
+        if (isProcessMode(args)) {
+            ProcessRunner.main(args);
+        } else {
+            /* Run in the UI mode, get the controller instance with batchMode == false */
+            try {
+                Controller controller = Controller.getInstance(UI, false, args);
+                controller.createAndShowGUI();
+            } catch (ControllerInitializationException e) {
+                UIUtils.errorMessageBox(new Shell(new Display()), e);
+            }
+        }
+    }
 }

@@ -22,6 +22,15 @@ echo "**                                                                     **"
 echo "*************************************************************************"
 echo ""
 
+CONFIG_DIR_OPTION=""
+for var in "$@"
+do
+    if [[ ${var} == salesforce.config.dir* ]] ;
+    then
+        CONFIG_DIR_OPTION="-D${var}"
+    fi
+done
+
 JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d'"' -f 2 | cut -d'.' -f 1)
 
 if [ -z "${JAVA_VERSION}" ] | [ ${JAVA_VERSION} \< ${MIN_JAVA_VERSION} ]
@@ -29,5 +38,5 @@ then
     echo "Java JRE ${MIN_JAVA_VERSION} or later is not installed. For example, download and install Zulu OpenJDK ${MIN_JAVA_VERSION} or later JRE for macOS from https://www.azul.com/downloads/zulu/zulu-mac/"
 else
     cd DATALOADER_WORK_DIRECTORY_PLACEHOLDER 
-    java -XstartOnFirstThread -jar ${DATALOADER_UBER_JAR_NAME} $@
+    java -XstartOnFirstThread ${CONFIG_DIR_OPTION} -jar ${DATALOADER_UBER_JAR_NAME} $@
 fi

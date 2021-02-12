@@ -49,7 +49,17 @@ echo.
     )
 
 :Run
-    java -jar %DATALOADER_UBER_JAR_NAME% %*
+    set CONFIG_DIR_OPTION=
+:Loop
+    IF "%1"=="" GOTO Continue
+    set CLI_OPTION=%1
+    if "%CLI_OPTION%"=="salesforce.config.dir" (
+        set CONFIG_DIR_OPTION=-Dsalesforce.config.dir=%2
+    )   
+    SHIFT
+    GOTO Loop
+:Continue
+    java %CONFIG_DIR_OPTION% -jar %DATALOADER_UBER_JAR_NAME% %*
     goto SuccessExit
 
 :SuccessExit

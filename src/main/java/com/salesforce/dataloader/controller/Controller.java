@@ -54,13 +54,16 @@ import com.sforce.ws.ConnectionException;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import  org.apache.logging.log4j.core.LoggerContext;
-
+import org.apache.logging.log4j.core.config.ConfigurationSource;
+import org.apache.logging.log4j.core.config.Configurator;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
@@ -83,7 +86,7 @@ import javax.xml.parsers.FactoryConfigurationError;
  */
 public class Controller {
 
-    private static final String LOG_CONF_OVERRIDE = "log-conf.xml";
+    public static final String LOG_CONF_DEFAULT = "log-conf.xml";
 
     private static boolean isLogInitialized = false; // make sure log is initialized only once
     private static boolean areStaticVarsInitialized = false; // make sure log is initialized only once
@@ -98,6 +101,7 @@ public class Controller {
     public static final String DEFAULT_CONFIG_FILE = "defaultConfig.properties"; //$NON-NLS-1$
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
     private static final String CONFIG_DIR = "conf"; //$NON-NLS-1$
+    public static final String SYS_PROP_LOG_CONFIG_FILE = "log4j2.configurationFile";
     private static String APP_NAME; //$NON-NLS-1$
     public static String APP_VERSION; //$NON-NLS-1$
     public static String API_VERSION;
@@ -125,27 +129,31 @@ public class Controller {
         initStaticVariable();
         // if name is passed to controller, use it to create a unique run file name
         try {
-            initConfig(name, isBatchMode, getConfigDirFromArgMap(args));
+            initConfig(name, isBatchMode, args);
         } catch (Exception e) {
             logger.error("Exception happened in initConfig:", e);
             throw e;
         }
     }
-
-    private String getConfigDirFromArgMap(String[] args) {
-        Map<String, String> argNameValuePair = new HashMap<>();
-        if (args != null) {
+    
+    public static Map<String, String> getArgMapFromArgArray(String[] argArray){
+        Map<String, String> argMap = new HashMap<>();
+        if (argArray != null) {
             //Process name=value config setting
-            Arrays.stream(args).forEach(arg ->
+            Arrays.stream(argArray).forEach(arg ->
             {
-                String[] argArray = arg.split("=");
-                if (argArray.length == 2)
-                    argNameValuePair.put(argArray[0], argArray[1]);
+                String[] nameValuePair = arg.split("=");
+                if (nameValuePair.length == 2)
+                    argMap.put(nameValuePair[0], nameValuePair[1]);
             });
         }
+        return argMap;
+    }
 
-        return argNameValuePair.containsKey(CONFIG_DIR_PROP) ?
-                argNameValuePair.get(CONFIG_DIR_PROP) : null;
+    private static String getConfigDirFromArgMap(String[] args) {
+        Map<String, String> argMap = getArgMapFromArgArray(args);
+        return argMap.containsKey(CONFIG_DIR_PROP) ?
+                argMap.get(CONFIG_DIR_PROP) : null;
     }
 
     private static synchronized void initStaticVariable() throws ControllerInitializationException {
@@ -375,12 +383,13 @@ public class Controller {
     /**
      * Get the current config.properties and load it into the config bean.
      */
-    protected void initConfig(String name, boolean isBatchMode, String configDirParameter) throws ControllerInitializationException {
+    protected void initConfig(String name, boolean isBatchMode, String[] args) throws ControllerInitializationException {
 
-        // Initialize log first to use correct logging level
+        // Initialize the log first to use correct logging level
         initLog();
-
-        String configDirPath = configDirParameter != null ? configDirParameter : getConfigDir();
+        
+        setConfigDir(args);
+        String configDirPath = getConfigDir();
         File configDir;
 
         if (configDirPath == null) {
@@ -469,45 +478,76 @@ public class Controller {
     }
 
     public static synchronized void initLog() throws FactoryConfigurationError, ControllerInitializationException {
-        // init the log if not initialized already
-        if (Controller.isLogInitialized) {
-            return;
-        }
-
         try {
             initStaticVariable();
         } catch (ControllerInitializationException ex) {
-            System.out.println("Controller.initLog(): Unable to initialize Controller static vars: " + ex.getMessage());
+            System.out.println("Controller.configureLog(): Unable to initialize Controller static vars: " + ex.getMessage());
             throw ex;
         }
 
-        String log4jConfigFile = System.getenv(
-                "LOG4J_CONFIGURATION_FILE");
-        if (log4jConfigFile == null || log4jConfigFile.isEmpty()) { // use the override
-            File logConfXml = Paths.get(System.getProperty("user.dir"), "configs", LOG_CONF_OVERRIDE).toFile();
-            log4jConfigFile =  logConfXml.getAbsolutePath();
-            if (logConfXml.exists()) {
-                System.setProperty("log4j2.configurationFile", log4jConfigFile);
-            }
+        if (Controller.isLogInitialized) {
+            return;
+        }
+        
+        String log4jConfigFilePath = System.getenv("LOG4J_CONFIGURATION_FILE");
+        if (log4jConfigFilePath == null || log4jConfigFilePath.isEmpty()) {
+            // check if the system property is specified
+            log4jConfigFilePath = System.getProperty(SYS_PROP_LOG_CONFIG_FILE);
+        }
+        
+        if (log4jConfigFilePath == null || log4jConfigFilePath.isEmpty()) { // use the default
+            log4jConfigFilePath = Paths.get(getConfigDir(), LOG_CONF_DEFAULT).toString();
+        }
+       
+        Path p = Paths.get(log4jConfigFilePath);
+        File logConfFile;
+        if (p.isAbsolute()) {
+            logConfFile = Paths.get(log4jConfigFilePath).toFile();
+        } else {
+            logConfFile = Paths.get(System.getProperty("user.dir"), log4jConfigFilePath).toFile();
         }
 
+        String log4jConfigFileAbsolutePath =  logConfFile.getAbsolutePath();
+        if (logConfFile.exists()) {
+            System.setProperty(Controller.SYS_PROP_LOG_CONFIG_FILE, log4jConfigFileAbsolutePath);
+        }
         logger = LogManager.getLogger(Controller.class);
-        LoggerContext context = (LoggerContext) LogManager.getContext();
-        String logConfigLocation = context.getConfiguration().getConfigurationSource().getLocation();
+        
+        // Make sure that logger is able to use the config file
+        LoggerContext loggerContext = (LoggerContext) LogManager.getContext();
+        String logConfigLocation = loggerContext.getConfiguration().getConfigurationSource().getLocation();
         if (logConfigLocation == null) {
             logger.error("Unable to initialize logging using log4j2 config file at "
-                    + log4jConfigFile
+                    + log4jConfigFileAbsolutePath
                     + ". All error messages will be logged on STDOUT.");
         } else {
             logger.info("Using log4j2 configuration file at location: " + logConfigLocation);
         }
+        logger = LogManager.getLogger(Controller.class);
 
         logger.info(Messages.getString("Controller.logInit")); //$NON-NLS-1$
         Controller.isLogInitialized = true;
     }
 
+    private static void setConfigDir(String[] args) {
+        String configDir = getConfigDirFromArgMap(args);
+        
+        if (configDir == null || configDir.isEmpty()) {
+            configDir = System.getProperty(CONFIG_DIR_PROP);
+        }
+        
+        if (configDir == null || configDir.isEmpty()) {
+            configDir = Controller.CONFIG_DIR_DEFAULT_VALUE;
+        }
+        System.setProperty(CONFIG_DIR_PROP, configDir);
+    }
+    
     public static String getConfigDir() {
-        return System.getProperty(CONFIG_DIR_PROP);
+        String configDir = System.getProperty(CONFIG_DIR_PROP);
+        if (configDir == null || configDir.isEmpty()) {
+            configDir = Controller.CONFIG_DIR_DEFAULT_VALUE;
+        }
+        return configDir;
     }
 
     public PartnerClient getPartnerClient() {

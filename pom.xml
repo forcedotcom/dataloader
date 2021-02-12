@@ -29,6 +29,7 @@
     <test.user.restricted>standard@org.com</test.user.restricted>
     <test.password></test.password><!-- use the encrypted password -->
     <test.redirect>false</test.redirect>
+    <testfiles.dir>${project.build.testOutputDirectory}/testfiles</testfiles.dir>
   </properties>
 
   <repositories>
@@ -430,6 +431,8 @@
 	             <echo>creating version-specific files for the target OS: ${OSType}</echo>
 	             <mkdir dir="${basedir}/target/${OSType}"/>
 	             <copydir src="${basedir}/release/${OSType}" dest="${basedir}/target/${OSType}"/>
+	             <copydir src="${basedir}/release/configs" dest="${basedir}/target/${OSType}/configs"/>
+	             <copydir src="${basedir}/release/samples" dest="${basedir}/target/${OSType}/samples"/>
 	             <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${version}"/>
 	             <replace dir="${basedir}/target/${OSType}/" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
 	             <chmod file="${basedir}/target/${OSType}/*" perm="755" />

@@ -31,7 +31,7 @@ echo It uses '%USERPROFILE%\^<relative path^>' as the installation directory if 
 echo.
 set /p DIR_NAME=Provide the installation directory [default: dataloader] : || set DIR_NAME=dataloader
 
-if "%DIR_NAME%":~1,1%" == ":" (
+if "%DIR_NAME:~1,1%" == ":" (
     REM absolute path specified
     set INSTALLATION_DIR=%DIR_NAME%\v%DATALOADER_VERSION%
 ) else (
