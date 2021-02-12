@@ -481,7 +481,7 @@ public class Controller {
         try {
             initStaticVariable();
         } catch (ControllerInitializationException ex) {
-            System.out.println("Controller.configureLog(): Unable to initialize Controller static vars: " + ex.getMessage());
+            System.out.println("Controller.initLog(): Unable to initialize Controller static vars: " + ex.getMessage());
             throw ex;
         }
 
