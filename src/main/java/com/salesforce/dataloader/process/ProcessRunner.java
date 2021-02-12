@@ -253,7 +253,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         System.exit(-1);
     }
     
-    public static void main(String[] args) {
+    public static void runBatchMode(String[] args) {
         ProcessRunner runner = null;
         try {
             // create the process

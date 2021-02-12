@@ -46,7 +46,7 @@ public class DataLoaderRunner {
     public static final String RUN_MODE_BATCH = "batch";
     public static final String RUN_MODE_UI = "ui";
 
-    private static boolean isProcessMode(String[] args) {
+    private static boolean isBatchMode(String[] args) {
         Map<String, String> argNameValuePair = Controller.getArgMapFromArgArray(args);
         
         return argNameValuePair.containsKey(RUN_MODE) ?
@@ -54,8 +54,8 @@ public class DataLoaderRunner {
     }
 
     public static void main(String[] args) {
-        if (isProcessMode(args)) {
-            ProcessRunner.main(args);
+        if (isBatchMode(args)) {
+            ProcessRunner.runBatchMode(args);
         } else {
             /* Run in the UI mode, get the controller instance with batchMode == false */
             try {
