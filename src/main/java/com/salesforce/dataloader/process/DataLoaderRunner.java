@@ -54,6 +54,7 @@ public class DataLoaderRunner {
     }
 
     public static void main(String[] args) {
+        Controller.setConfigDir(args);
         if (isBatchMode(args)) {
             ProcessRunner.runBatchMode(args);
         } else {

@@ -150,8 +150,7 @@ public class Controller {
         return argMap;
     }
 
-    private static String getConfigDirFromArgMap(String[] args) {
-        Map<String, String> argMap = getArgMapFromArgArray(args);
+    private static String getConfigDirFromArgMap(Map<String, String> argMap) {
         return argMap.containsKey(CONFIG_DIR_PROP) ?
                 argMap.get(CONFIG_DIR_PROP) : null;
     }
@@ -529,8 +528,12 @@ public class Controller {
         Controller.isLogInitialized = true;
     }
 
-    private static void setConfigDir(String[] args) {
-        String configDir = getConfigDirFromArgMap(args);
+    public static void setConfigDir(String[] args) {
+        setConfigDir(getArgMapFromArgArray(args));
+    }
+    
+    public static void setConfigDir(Map<String, String> argMap) {
+        String configDir = getConfigDirFromArgMap(argMap);
         
         if (configDir == null || configDir.isEmpty()) {
             configDir = System.getProperty(CONFIG_DIR_PROP);

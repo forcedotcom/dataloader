@@ -433,6 +433,8 @@
 	             <copydir src="${basedir}/release/${OSType}" dest="${basedir}/target/${OSType}"/>
 	             <copydir src="${basedir}/release/configs" dest="${basedir}/target/${OSType}/configs"/>
 	             <copydir src="${basedir}/release/samples" dest="${basedir}/target/${OSType}/samples"/>
+	             <copy file="${basedir}/release/configs/log-conf.xml" 
+	                   todir="${basedir}/target/${OSType}/samples/conf"/>
 	             <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${version}"/>
 	             <replace dir="${basedir}/target/${OSType}/" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
 	             <chmod file="${basedir}/target/${OSType}/*" perm="755" />

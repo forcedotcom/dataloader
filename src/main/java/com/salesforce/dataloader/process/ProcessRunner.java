@@ -88,7 +88,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
     public static final String PROCESS_NAME = "process.name";
 
     //logger
-    private static final Logger logger;
+    private static Logger logger;
 
     // Name of the current engine runner.  Improves readability of the log output
     String name;
@@ -99,13 +99,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
     private Controller controller;
     
     static {
-        try {
-            Controller.initLog();
-        } catch (ControllerInitializationException e) {
-            System.out.println("ProcessRunner: log not configured" + e );
-            throw new RuntimeException(e.getMessage());
-        }
-        logger = LogManager.getLogger(ProcessRunner.class);
+
     }
     
     /**
@@ -280,7 +274,6 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         if(!validateCmdLineArgs(args)) {
             return null;
         }
-        
         Map<String,String> argMap = Controller.getArgMapFromArgArray(args);
         return getInstance(argMap);
     }
@@ -292,6 +285,15 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
      */
     public static ProcessRunner getInstance(Map<String, String> argMap) throws ProcessInitializationException {
         ProcessRunner runner;
+        Controller.setConfigDir(argMap);
+        try {
+            Controller.initLog();
+        } catch (ControllerInitializationException e) {
+            System.out.println("ProcessRunner: log not configured" + e );
+            throw new RuntimeException(e.getMessage());
+        }
+        logger = LogManager.getLogger(ProcessRunner.class);
+        
         if(argMap != null && argMap.containsKey(PROCESS_NAME)) {
             // if process name is specified, get it from configuration
             String processName = argMap.get(PROCESS_NAME);

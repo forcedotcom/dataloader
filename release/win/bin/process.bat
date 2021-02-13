@@ -44,7 +44,7 @@ IF "%JAVA_HOME%" == "" (
     IF NOT EXIST "%JAVA_HOME%" (
         echo We couldn't find the Java Runtime Environment ^(JRE^) in directory "%JAVA_HOME%". To run process.bat, set the JAVA_HOME environment variable to the directory where the JRE is installed.
     ) ELSE (
-        "%JAVA_HOME%\bin\java" -cp "%EXE_PATH%\..\dataloader-%DATALOADER_VERSION%-uber.jar" -Dsalesforce.config.dir=%1 com.salesforce.dataloader.process.DataLoaderRunner run.mode=batch %PROCESS_OPTION%
+        "%JAVA_HOME%\bin\java" -cp "%EXE_PATH%\..\dataloader-%DATALOADER_VERSION%-uber.jar" com.salesforce.dataloader.process.DataLoaderRunner salesforce.config.dir=%1 run.mode=batch %PROCESS_OPTION%
     )
 )
 
