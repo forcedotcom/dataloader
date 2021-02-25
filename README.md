@@ -52,7 +52,7 @@ The process-conf.xml file can be used to define properties for multiple processe
 
 # Execute Data Loader With Scripts for v45 and Later
  
-Launch scripts are provided to help end users launch Data Loader for Windows and macOS. Zip files are provided for macOS and Windows environments in the project's "releases" tab. There are specific installation instructions for [macOS](https://help.​salesforce.com/articleView?id=​loader_install_mac.htm) and [Windows](https://help.​salesforce.com/articleView?id=​loader_install_windows.htm).
+Launch scripts are provided to help end users launch Data Loader for Windows and macOS. Zip files are provided for macOS and Windows environments in the project's "releases" tab. There are specific installation instructions for [macOS](https://help.salesforce.com/articleView?id=sf.loader_install_mac.htm) and [Windows](https://help.​salesforce.com/articleView?id=​loader_install_windows.htm).
  
 A new directory called "release" was added to the project’s root directory. Developers can build Data Loader and place the dataloader-xx.0-uber.jar inside "release/mac" or "release\win" directory to launch a customized build.
 
