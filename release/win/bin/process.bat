@@ -49,3 +49,4 @@ IF "%JAVA_HOME%" == "" (
 )
 
 :end
+exit /b %errorlevel%
