@@ -30,11 +30,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -146,7 +148,7 @@ public class CSVFileReader implements DataReader {
     /**
      * Checks the Bytes for the UTF-8 BOM if found, returns true, else false
      */
-    private boolean isUTF8File(File file) {
+    private boolean isUTF8FileWithBOM(File file) {
 
         FileInputStream stream = null;
 
@@ -172,6 +174,7 @@ public class CSVFileReader implements DataReader {
         }
         return false;
     }
+    
 
     @Override
     public List<Row> readRowList(int maxRows) throws DataAccessObjectException {
@@ -291,8 +294,9 @@ public class CSVFileReader implements DataReader {
 
         try {
             input = new FileInputStream(file);
-            if (forceUTF8 || isUTF8File(file)) {
-                csvReader = new CSVReader(input, "UTF-8", csvDelimiters);
+            if (forceUTF8 || isUTF8FileWithBOM(file)) {
+                BOMInputStream bomInputStream = new BOMInputStream(input);
+                csvReader = new CSVReader(bomInputStream, "UTF-8", csvDelimiters);
             } else {
                 csvReader = new CSVReader(input, csvDelimiters);
             }
