@@ -88,7 +88,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
     public static final String PROCESS_NAME = "process.name";
 
     //logger
-    private static final Logger logger;
+    private static Logger logger;
 
     // Name of the current engine runner.  Improves readability of the log output
     String name;
@@ -97,16 +97,11 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
     private final Map<String, String> configOverrideMap = new HashMap<String, String>();
 
     private Controller controller;
-
+    
     static {
-        try {
-            Controller.initLog();
-        } catch (ControllerInitializationException e) {
-            System.out.println("ProcessRunner: Controller not initialized" + e );
-            throw new RuntimeException(e.getMessage());
-        }
-        logger = LogManager.getLogger(ProcessRunner.class);
+
     }
+    
     /**
      * Enforce use of factory method - getInstance() by hiding the constructor
      */
@@ -251,8 +246,8 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         logger.fatal(message, err);
         System.exit(-1);
     }
-
-    public static void main(String[] args) {
+    
+    public static void runBatchMode(String[] args) {
         ProcessRunner runner = null;
         try {
             // create the process
@@ -279,10 +274,8 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         if(!validateCmdLineArgs(args)) {
             return null;
         }
-
-        Map<String,String> argMap = getArgMap(args);
-        ProcessRunner runner = getInstance(argMap);
-        return runner;
+        Map<String,String> argMap = Controller.getArgMapFromArgArray(args);
+        return getInstance(argMap);
     }
 
     /**
@@ -292,6 +285,15 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
      */
     public static ProcessRunner getInstance(Map<String, String> argMap) throws ProcessInitializationException {
         ProcessRunner runner;
+        Controller.setConfigDir(argMap);
+        try {
+            Controller.initLog();
+        } catch (ControllerInitializationException e) {
+            System.out.println("ProcessRunner: log not configured" + e );
+            throw new RuntimeException(e.getMessage());
+        }
+        logger = LogManager.getLogger(ProcessRunner.class);
+        
         if(argMap != null && argMap.containsKey(PROCESS_NAME)) {
             // if process name is specified, get it from configuration
             String processName = argMap.get(PROCESS_NAME);
@@ -304,19 +306,6 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
             runner.setConfigOverrideMap(argMap);
         }
         return runner;
-    }
-
-    private static Map<String, String> getArgMap(String[] args) {
-        //every arg is a name=value config setting, save it in a map of name/value pairs
-        Map<String,String> argMap = new HashMap<String,String>();
-        for (int i = 0; i < args.length; i++) {
-            String[] argArray = args[i].split("="); //$NON-NLS-1$
-
-            if (argArray.length == 2) {
-                argMap.put(argArray[0], argArray[1]);
-            }
-        }
-        return argMap;
     }
 
     /**

@@ -22,7 +22,7 @@ echo "**                                                                     **"
 echo "*************************************************************************"
 echo ""
 
-JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d'"' -f 2 | cut -d'.' -f 1)
+JAVA_VERSION=$(java -version 2>&1 | grep -i version | cut -d'"' -f 2 | cut -d'.' -f 1)
 
 if [ -z "${JAVA_VERSION}" ] | [ ${JAVA_VERSION} \< ${MIN_JAVA_VERSION} ]
 then

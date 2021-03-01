@@ -54,7 +54,7 @@ echo.
 
 :SuccessExit
     endlocal
-    exit /b 0
+    exit /b %errorlevel%
 
 :NoJavaErrorExit
     echo Did not find java command.

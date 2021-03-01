@@ -57,6 +57,7 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -73,10 +74,45 @@ public abstract class TestBase {
     private static final Pattern INSIDE_BRACKETS_TEST_PARAMETERS = Pattern.compile("\\[.+\\]");
     @Rule
     public TestName testName = new TestName();
+    
+    /* *********
+     * Start of the section declaring
+     * static variables that need to be initialized after loading test properties
+     * *********
+     */
     private static final Properties TEST_PROPS;
+    private static final String TEST_FILES_DIR;
+    private static final String TEST_CONF_DIR;
+    private static final String TEST_DATA_DIR;
+    private static final String TEST_STATUS_DIR;
 
+    protected static final String DEFAULT_ACCOUNT_EXT_ID_FIELD;
+
+    // logger
+    private static Logger logger;
+    /* *********
+     * End of the section declaring
+     * static variables that need to be initialized after loading test properties
+     * *********
+     */
+    
     static {
+        // initialize the static variables that are dependent on test properties.
         TEST_PROPS = loadTestProperties();
+        TEST_FILES_DIR = getProperty("testfiles.dir");
+        TEST_CONF_DIR = TEST_FILES_DIR + File.separator + "conf";
+        TEST_DATA_DIR = TEST_FILES_DIR + File.separator + "data";
+        TEST_STATUS_DIR = TEST_FILES_DIR + File.separator + "status";
+        DEFAULT_ACCOUNT_EXT_ID_FIELD = getProperty("test.account.extid");
+        
+        try {
+            String logConfFilePath = Paths.get(getTestConfDir(), Controller.LOG_CONF_DEFAULT).toString();
+            System.setProperty(Controller.SYS_PROP_LOG_CONFIG_FILE, logConfFilePath);
+            Controller.initLog();
+        } catch (ControllerInitializationException ex) {
+            System.out.println(ex.getMessage());
+        }
+        logger = LogManager.getLogger(TestBase.class);
     }
 
     private static Properties loadTestProperties() {
@@ -102,12 +138,6 @@ public abstract class TestBase {
 
     private static final String API_CLIENT_NAME = "DataLoaderBatch/" + Controller.APP_VERSION;
 
-    private static final String TEST_FILES_DIR = getProperty("testfiles.dir");
-    private static final String TEST_CONF_DIR = TEST_FILES_DIR + File.separator + "conf";
-    private static final String TEST_DATA_DIR = TEST_FILES_DIR + File.separator + "data";
-    private static final String TEST_STATUS_DIR = TEST_FILES_DIR + File.separator + "status";
-
-    protected static final String DEFAULT_ACCOUNT_EXT_ID_FIELD = getProperty("test.account.extid");
     protected static final String DEFAULT_CONTACT_EXT_ID_FIELD = "NumberId__c";
 
     protected static final String ACCOUNT_NUMBER_PREFIX = "ACCT";
@@ -115,9 +145,6 @@ public abstract class TestBase {
     protected static final String CONTACT_TITLE_PREFIX = "CONTTL";
     protected static final String CONTACT_WHERE_CLAUSE = "Title like '" + CONTACT_TITLE_PREFIX + "%'";
     protected static final int SAVE_RECORD_LIMIT = 200;
-
-    // logger
-    private static Logger logger = LogManager.getLogger(TestBase.class);
 
     protected String baseName; // / base name of the test (without the "test")
     private Controller controller;
@@ -269,7 +296,7 @@ public abstract class TestBase {
         return getTestFile(path).getAbsolutePath();
     }
 
-    protected String getTestConfDir() {
+    protected static String getTestConfDir() {
         return TEST_CONF_DIR;
     }
 

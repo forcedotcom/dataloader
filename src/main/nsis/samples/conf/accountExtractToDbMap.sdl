@@ -1,8 +1,0 @@
-# Account Insert Mapping values for query from Salesforce (left) and insert/update to Oracle (right)
-# SalesforceFieldName=OracleFieldName
-Id=account_number
-Name=name
-Phone=phone
-### These fields can be used for REP.INT_PARTIES table
-##BillingStreet=billing_address
-##Sic=sic_code

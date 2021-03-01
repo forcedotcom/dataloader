@@ -89,16 +89,16 @@ public final class BooleanConverter implements Converter {
     @Override
     public Object convert(Class type, Object value) {
 
-        if (value == null || String.valueOf(value).length()==0) {
+        if (value == null || value instanceof Boolean) {
+            return value;
+        }
+      
+        String stringValue = value.toString().trim();
+        if (stringValue.length()==0) {
             return null;
         }
 
-        if (value instanceof Boolean) {
-            return (value);
-        }
-
         try {
-            String stringValue = value.toString();
             if (stringValue.equalsIgnoreCase("yes") ||
                     stringValue.equalsIgnoreCase("y") ||
                     stringValue.equalsIgnoreCase("true") ||
