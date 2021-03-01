@@ -29,7 +29,7 @@
     <test.user.restricted>standard@org.com</test.user.restricted>
     <test.password></test.password><!-- use the encrypted password -->
     <test.redirect>false</test.redirect>
-    <testfiles.dir>${project.build.testOutputDirectory}/testfiles</testfiles.dir>
+    <test.testfiles.directory>${project.build.testOutputDirectory}/testfiles</test.testfiles.directory>
   </properties>
 
   <repositories>
