@@ -41,10 +41,9 @@ import org.eclipse.swt.widgets.Shell;
 
 public class DataLoaderRunner {
 
-    public static final String UI = "ui";
-    public static final String RUN_MODE = "run.mode";
-    public static final String RUN_MODE_BATCH = "batch";
-    public static final String RUN_MODE_UI = "ui";
+    private static final String UI = "ui";
+    private static final String RUN_MODE = "run.mode";
+    private static final String RUN_MODE_BATCH = "batch";
 
     private static boolean isBatchMode(String[] args) {
         Map<String, String> argNameValuePair = Controller.getArgMapFromArgArray(args);

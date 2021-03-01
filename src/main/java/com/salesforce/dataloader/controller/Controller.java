@@ -86,8 +86,6 @@ import javax.xml.parsers.FactoryConfigurationError;
  */
 public class Controller {
 
-    public static final String LOG_CONF_DEFAULT = "log-conf.xml";
-
     private static boolean isLogInitialized = false; // make sure log is initialized only once
     private static boolean areStaticVarsInitialized = false; // make sure log is initialized only once
 
@@ -100,8 +98,9 @@ public class Controller {
     public static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
     public static final String DEFAULT_CONFIG_FILE = "defaultConfig.properties"; //$NON-NLS-1$
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
-    private static final String CONFIG_DIR = "conf"; //$NON-NLS-1$
     public static final String SYS_PROP_LOG_CONFIG_FILE = "log4j2.configurationFile";
+    public static final String LOG_CONF_DEFAULT = "log-conf.xml";
+
     private static String APP_NAME; //$NON-NLS-1$
     public static String APP_VERSION; //$NON-NLS-1$
     public static String API_VERSION;
