@@ -594,7 +594,15 @@ public class MappingDialog extends Dialog {
         ArrayList<Field> mappableFieldList = new ArrayList<Field>();
         ArrayList<Field> allFieldList = new ArrayList<Field>();
         Field field;
-        OperationInfo operation = controller.getConfig().getOperationInfo();
+        Config config = controller.getConfig();
+        OperationInfo operation = config.getOperationInfo();
+        String extIdField = config.getString(Config.EXTERNAL_ID_FIELD);
+        if(extIdField == null) {
+            extIdField = "";
+        } else {
+            extIdField = extIdField.toLowerCase();
+        }
+
         for (int i = 0; i < sforceFieldInfo.length; i++) {
 
             field = sforceFieldInfo[i];
@@ -613,7 +621,9 @@ public class MappingDialog extends Dialog {
                 break;
             case upsert:
                 if (field.isUpdateable() || field.isCreateable()
-                        || field.getType().toString().toLowerCase().equals("id")) {
+                        // also add idLookup-Fields (such as Id, Name) IF they are used as extIdField in this upsert
+                        // (no need to add them otherwise, if they are not updateable/createable)
+                        || (field.isIdLookup() && extIdField.equals(field.getName().toLowerCase()))) {
                     isMappable = true;
                 }
                 break;
