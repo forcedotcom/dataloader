@@ -81,7 +81,6 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private static final String ERROR_RESULT_COL = "Error";
     private static final String ID_RESULT_COL = "Id";
     private static final String CREATED_RESULT_COL = "Created";
-    private static final String SKIP_BATCH_ID = "SKIP";
 
     private final boolean isDelete;
     private static final DateFormat DATE_FMT;
@@ -94,7 +93,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
     // This keeps track of all the batches we send in order so that we know whats what when processsing results
     private final List<BatchData> allBatchesInOrder = new ArrayList<BatchData>();
-
+    
     /** DataLoader uses this to help match batch results from SFDC to the rows in our input */
     private class BatchData {
         final String batchId;
@@ -171,6 +170,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private void doOneBatch(PrintStream out, ByteArrayOutputStream os, List<DynaBean> rows) throws OperationException,
             AsyncApiException {
         int recordsInBatch = 0;
+        int bytesInBatch = 0;
         final List<String> userColumns = getController().getDao().getColumnNames();
         List<String> headerColumns = null;
         for (int i = 0; i < rows.size(); i++) {
@@ -181,10 +181,13 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             }
             writeRow(row, out, os, recordsInBatch, headerColumns);
             recordsInBatch++;
+            bytesInBatch += os.size();
 
-            if (os.size() > Config.MAX_BULK_API_BATCH_BYTES) {
+            if (bytesInBatch > Config.MAX_BULK_API_BATCH_BYTES) {
                 createBatch(os, recordsInBatch); // resets outputstream
+                // reset for the next batch
                 recordsInBatch = 0;
+                bytesInBatch = 0;
             }
         }
         if (recordsInBatch > 0) createBatch(os, recordsInBatch);
@@ -306,11 +309,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         // go through all the batches we sent to sfdc in the same order and process the batch results for
         // each one by looking them up in batchInfoMap
         for (final BatchData clientBatchInfo : this.allBatchesInOrder) {
-            if (clientBatchInfo.batchId == SKIP_BATCH_ID) {
-                skipDataRows(dataReader, clientBatchInfo.numRows);
-            } else {
-                processResults(dataReader, batchInfoMap.get(clientBatchInfo.batchId), clientBatchInfo);
-            }
+            processResults(dataReader, batchInfoMap.get(clientBatchInfo.batchId), clientBatchInfo);
         }
     }
 
@@ -328,11 +327,28 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final String stateMessage = (batch.getState() == BatchStateEnum.Completed) ? null : batch.getStateMessage();
         final String errorMessage = stateMessage == null ? null : Messages.getMessage(getClass(), "batchError",
                 stateMessage);
+        
+        final int dataReaderRowNumBase = dataReader.getCurrentRowNumber();
+        int totalRowsToReadFromDataReader = clientBatchInfo.numRows;
+        int additionalRowsToReadFromDataReader = 0;
+        int rowCount = 0;
 
-        final List<Row> rows = dataReader.readRowList(clientBatchInfo.numRows);
+        //Add rows that encountered processing error to the number of rows to be read
+        // from the DataReader
+        while (rowCount < clientBatchInfo.numRows) {
+            boolean conversionSuccessOfRow = isRowConversionSuccessful(dataReaderRowNumBase + rowCount + additionalRowsToReadFromDataReader);
+            if (conversionSuccessOfRow) {
+                rowCount++;
+            } else {
+                additionalRowsToReadFromDataReader++;
+            }
+        }
+        totalRowsToReadFromDataReader += additionalRowsToReadFromDataReader;
+        
+        final List<Row> rows = dataReader.readRowList(totalRowsToReadFromDataReader);
         if (batch.getState() == BatchStateEnum.Completed || batch.getNumberRecordsProcessed() > 0) {
             try {
-                processBatchResults(batch, errorMessage, batch.getState(), rows);
+                processBatchResults(batch, errorMessage, batch.getState(), rows, dataReaderRowNumBase);
             } catch (IOException e) {
                 throw new LoadException("IOException while reading batch results", e);
             }
@@ -343,13 +359,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         }
     }
 
-    private void skipDataRows(DataReader dataReader, int numRows) throws DataAccessObjectException {
-        List<Row> skippedRows = dataReader.readRowList(numRows);
-        assert skippedRows.size() == numRows;
-    }
-
     private void processBatchResults(final BatchInfo batch, final String errorMessage, final BatchStateEnum state,
-            final List<Row> rows) throws DataAccessObjectException, IOException, AsyncApiException {
+            final List<Row> rows, final int dataReaderRowNumBase) throws DataAccessObjectException, IOException, AsyncApiException {
 
         // get the batch csv result stream from sfdc
         final CSVReader resultRdr = this.jobUtil.getBatchResults(batch.getId());
@@ -361,8 +372,12 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final int idIdx = hdrIndices.get(ID_RESULT_COL);
         final int errIdx = hdrIndices.get(ERROR_RESULT_COL);
         hdrIndices = null;
-
+        int dataReaderRowCount = 0;
         for (final Row row : rows) {
+            boolean conversionSuccessOfRow = isRowConversionSuccessful(dataReaderRowNumBase + dataReaderRowCount++);
+            if (!conversionSuccessOfRow) {
+                continue; // this DAO row failed to convert and was not part of the batch sent to the server. Go to the next one
+            }
             final List<String> res = resultRdr.nextRecord();
 
             // no result for this column. In this case it failed, and we should use the batch state message
@@ -476,6 +491,5 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             OperationException {
         super.conversionFailed(row, errMsg);
         getLogger().warn("Skipping results for row " + row + " which failed before upload to Saleforce.com");
-        allBatchesInOrder.add(new BatchData(SKIP_BATCH_ID, 1));
     }
 }

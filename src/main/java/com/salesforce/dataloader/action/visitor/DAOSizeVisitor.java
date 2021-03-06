@@ -41,8 +41,9 @@ public class DAOSizeVisitor implements DAORowVisitor {
     private int numberOfRows = 0;
 
     @Override
-    public void visit(Row row) {
+    public boolean visit(Row row) {
         numberOfRows++;
+        return true;
     }
 
     public int getNumberOfRows() {

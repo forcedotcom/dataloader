@@ -56,6 +56,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     // this stores the dynabeans, which convert types correctly
     protected final List<DynaBean> dynaArray;
     protected final List<Row> dataArray;
+    private HashMap<Integer, Boolean> rowConversionFailureMap;
 
     protected final BasicDynaClass dynaClass;
     protected final DynaProperty[] dynaProps;
@@ -77,10 +78,25 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         dynaClass = SforceDynaBean.getDynaBeanInstance(dynaProps);
 
         this.batchSize = getConfig().getLoadBatchSize();
+        rowConversionFailureMap = new HashMap<Integer, Boolean>();
+    }
+    
+    public void setRowConversionStatus(int dataSourceRow, boolean conversionSuccess) {
+        if (!conversionSuccess) {
+            this.rowConversionFailureMap.put(dataSourceRow, true);
+        }
+    }
+    
+    protected boolean isRowConversionSuccessful(int dataSourceRow) {
+        Boolean conversionFailure = this.rowConversionFailureMap.get(dataSourceRow);
+        if (conversionFailure != null && conversionFailure.booleanValue()) {
+            return false;
+        }
+        return true;   // no entry in the list of failed conversions means successful conversion
     }
 
     @Override
-    public final void visit(Row row) throws OperationException, DataAccessObjectException,
+    public final boolean visit(Row row) throws OperationException, DataAccessObjectException,
     ConnectionException {
         initLoadRateCalculator();
         // the result are sforce fields mapped to data
@@ -94,7 +110,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
             conversionFailed(row, errMsg);
             // this row cannot be added since conversion has failed
-            return;
+            return false;
         }
 
         // add the data for writing to the result files
@@ -104,6 +120,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         if (dynaArray.size() >= this.batchSize) {
             loadBatch();
         }
+        return true;
     }
 
     /**
