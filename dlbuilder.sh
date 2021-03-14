@@ -9,10 +9,10 @@ if [ "$#" -ne 3 ]; then
   exit 1
 fi
 
-mvn clean package -DskipTests -D"jarsigner.storepass=$1" -D"jarsigner.keystore=$2" -D"tsa.url=$3" -D'jarsigner.skip=false' -D'jarsigner.alias=1' -Pzip
+mvn clean package -DskipTests -D"jarsigner.storepass=$1" -D"jarsigner.keystore=$2" -D"jarsigner.tsa=$3" -D'jarsigner.skip=false' -D'jarsigner.alias=1' -Pzip
 
 cp target/mac/dataloader_mac.zip .
 
-mvn clean package -DskipTests -D"jarsigner.storepass=$1" -D"jarsigner.keystore=$2" -D"tsa.url=$3" -D'jarsigner.skip=false' -D'jarsigner.alias=1' -Pwin64,zip,-mac64
+mvn clean package -DskipTests -D"jarsigner.storepass=$1" -D"jarsigner.keystore=$2" -D"jarsigner.tsa=$3" -D'jarsigner.skip=false' -D'jarsigner.alias=1' -Pwin64,zip,-mac64
 
 cp target/win/dataloader_win.zip .

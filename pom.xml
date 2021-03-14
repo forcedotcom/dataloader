@@ -364,10 +364,6 @@
         <configuration>
           <archive>target/dataloader-${project.version}-uber.jar</archive>
           <skip>${jarsigner.skip}</skip>
-          <arguments>
-            <argument>-tsa</argument>
-            <argument>${tsa.url}</argument>
-          </arguments>
         </configuration>
       </plugin>
     </plugins>
