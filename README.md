@@ -6,7 +6,7 @@ Data Loader v44 is the last version built with Oracle Java 8. Developers can che
 
 # Java Requirement
  
-Developers need to download [Zulu OpenJDK 11](https://www.azul.com/downloads/zulu) before building Data Loader.
+Developers need to use JDK 11 or later such as [Zulu OpenJDK](https://www.azul.com/downloads/zulu) before building Data Loader.
 # Build Data Loader
 
     git clone git@github.com:forcedotcom/dataloader.git
@@ -38,13 +38,14 @@ To run data loader for debug
 
 To run Data Loader from the command line, use the following command:
 
-java -jar target/dataloader-x.y.z-uber.jar run.mode=batch process.name=<process name> salesforce.config.dir=<path to config dir containing process-conf.xml and config.properties files>
+    java -jar target/dataloader-x.y.z-uber.jar run.mode=batch process.name=<process name> salesforce.config.dir=<path to config dir containing process-conf.xml and config.properties files>
 
 Data Loader documentation provides details of running in batch mode for Windows platform at https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_batchmode_intro.htm. Batch mode is not supported for other platforms.
 
 Commands to encrypt password:
-java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -k <path to keyfile>
-java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -e <password in plain text> <path to keyfile>
+
+    java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -k <path to keyfile>
+    java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -e <password in plain text> <path to keyfile>
 
 # Execute Data Loader With Scripts for v45 and Later
  
