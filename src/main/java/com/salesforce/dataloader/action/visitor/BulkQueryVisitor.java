@@ -101,10 +101,10 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
             throw new ExtractException("Batch failed: " + batch.getStateMessage());
         final QueryResultList results = getController().getBulkClient().getClient()
                 .getQueryResultList(batch.getJobId(), batch.getId());
+        final boolean bufferResults = getConfig().getBoolean(Config.BUFFER_UNPROCESSED_BULK_QUERY_RESULTS);
 
         for (final String resultId : results.getResult()) {
             if (getProgressMonitor().isCanceled()) return;
-            boolean bufferResults = getController().getConfig().getBoolean(Config.BUFFER_UNPROCESSED_BULK_QUERY_RESULTS);
             OutputStream bufferingFileWriter = null;
             File bufferingFile = null;
             try {

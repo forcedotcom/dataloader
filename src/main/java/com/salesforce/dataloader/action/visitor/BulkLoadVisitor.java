@@ -329,7 +329,6 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 stateMessage);
         
         final int dataReaderRowNumBase = dataReader.getCurrentRowNumber();
-        int totalRowsToReadFromDataReader = clientBatchInfo.numRows;
         int additionalRowsToReadFromDataReader = 0;
         int rowCount = 0;
 
@@ -343,7 +342,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 additionalRowsToReadFromDataReader++;
             }
         }
-        totalRowsToReadFromDataReader += additionalRowsToReadFromDataReader;
+        final int totalRowsToReadFromDataReader = clientBatchInfo.numRows + additionalRowsToReadFromDataReader;
         
         final List<Row> rows = dataReader.readRowList(totalRowsToReadFromDataReader);
         if (batch.getState() == BatchStateEnum.Completed || batch.getNumberRecordsProcessed() > 0) {
