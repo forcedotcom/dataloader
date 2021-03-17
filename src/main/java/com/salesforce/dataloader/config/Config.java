@@ -147,6 +147,7 @@ public class Config {
     public static final String CSV_DELIMETER_TAB = "loader.csvTab";
     public static final String CSV_DELIMETER_OTHER = "loader.csvOther";
     public static final String CSV_DELIMETER_OTHER_VALUE = "loader.csvOtherValue";
+    public static final String BUFFER_UNPROCESSED_BULK_QUERY_RESULTS = "loader.bufferUnprocessedBulkQueryResults";
 
     //Special Internal Configs
     public static final String SFDC_INTERNAL = "sfdcInternal"; //$NON-NLS-1$
@@ -239,7 +240,6 @@ public class Config {
      */
     public static final String READ_UTF8 = "dataAccess.readUTF8"; //$NON-NLS-1$
     public static final String WRITE_UTF8 = "dataAccess.writeUTF8"; //$NON-NLS-1$
-
     
     /**
      *  ===============  PILOT config properties ========
@@ -422,8 +422,7 @@ public class Config {
         setDefaultValue(DUPLICATE_RULE_ALLOW_SAVE, false);
         setDefaultValue(DUPLICATE_RULE_INCLUDE_RECORD_DETAILS, false);
         setDefaultValue(DUPLICATE_RULE_RUN_AS_CURRENT_USER, false);
-
-        
+        setDefaultValue(BUFFER_UNPROCESSED_BULK_QUERY_RESULTS, false);
     }
 
     /**

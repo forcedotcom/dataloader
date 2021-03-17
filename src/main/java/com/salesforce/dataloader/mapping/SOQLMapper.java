@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 
 import javax.xml.namespace.QName;
 
@@ -102,6 +103,7 @@ public class SOQLMapper extends Mapper {
                     //this causes weirdness in the output format and timezone correction that we don't want
                     //convert the type back to a string before a later handler mis-handles it
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                    formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
                     value = formatter.format(value);
                 }
                 map.put(localName, value);

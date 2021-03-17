@@ -27,8 +27,12 @@
 package com.salesforce.dataloader.action.visitor;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
@@ -97,12 +101,36 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
             throw new ExtractException("Batch failed: " + batch.getStateMessage());
         final QueryResultList results = getController().getBulkClient().getClient()
                 .getQueryResultList(batch.getJobId(), batch.getId());
+        final boolean bufferResults = getConfig().getBoolean(Config.BUFFER_UNPROCESSED_BULK_QUERY_RESULTS);
 
         for (final String resultId : results.getResult()) {
             if (getProgressMonitor().isCanceled()) return;
+            OutputStream bufferingFileWriter = null;
+            File bufferingFile = null;
             try {
-                final InputStream resultStream = getController().getBulkClient().getClient()
+                final InputStream serverResultStream = getController().getBulkClient().getClient()
                         .getQueryResultStream(batch.getJobId(), batch.getId(), resultId);
+                
+                InputStream resultStream = serverResultStream; //read directly from server by default
+                if (bufferResults) {
+                    //temp csv
+                    bufferingFile = File.createTempFile("sdl", ".csv");
+                    String bufferingFilePath = bufferingFile.getAbsolutePath();
+                    getLogger().info("Downloading result chunk " + resultId + " to " + bufferingFilePath);
+                    
+                    //download results into the buffering file
+                    int bytesRead;
+                    byte[] buffer = new byte[8 * 1024];
+                    bufferingFileWriter = new FileOutputStream(bufferingFile);
+                    while ((bytesRead = resultStream.read(buffer)) != -1) {
+                        bufferingFileWriter.write(buffer, 0, bytesRead);
+                    }
+                    bufferingFileWriter.close();
+                    serverResultStream.close();
+                    
+                    //stream from csv file
+                    resultStream = new FileInputStream(new File(bufferingFilePath));
+                }
                 try {
                     final CSVReader rdr = new CSVReader(resultStream, Config.BULK_API_ENCODING);
                     rdr.setMaxCharsInFile(Integer.MAX_VALUE);
@@ -120,6 +148,10 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
                 }
             } catch (final IOException e) {
                 throw new ExtractException(e);
+            } finally {
+                if (bufferingFile != null) {
+                    bufferingFile.delete();
+                }
             }
         }
     }

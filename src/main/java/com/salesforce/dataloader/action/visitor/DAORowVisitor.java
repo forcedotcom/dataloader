@@ -38,6 +38,6 @@ import com.sforce.ws.ConnectionException;
  */
 public interface DAORowVisitor {
 
-    public void visit(Row row) throws OperationException, DataAccessObjectException, ConnectionException;
+    public boolean visit(Row row) throws OperationException, DataAccessObjectException, ConnectionException;
 
 }

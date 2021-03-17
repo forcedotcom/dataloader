@@ -26,35 +26,31 @@ For macOS and Windows, the build will generate needed JARs in the target directo
 
 To run the Data Loader GUI, run the command
 
-    java -jar target/dataloader-xx.0-uber.jar
+    java -jar target/dataloader-x.y.z-uber.jar
     
 Use the command below to run the Data Loader GUI on Mac
 
-    java -XstartOnFirstThread -jar target/dataloader-xx.0-uber.jar
+    java -XstartOnFirstThread -jar target/dataloader-x.y.z-uber.jar
 
 To run data loader for debug
 
-    java -XstartOnFirstThread -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005  target/dataloader-xx.0.0-uber.jar
+    java -XstartOnFirstThread -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005  target/dataloader-x.y.z-uber.jar
 
-To run Data Loader from the command line, use the command:
+To run Data Loader from the command line, use the following command:
 
-    java -cp target/dataloader-xx.0-uber.jar -Dsalesforce.config.dir=CONFIG_DIR com.salesforce.dataloader.process.ProcessRunner
+java -jar target/dataloader-x.y.z-uber.jar run.mode=batch process.name=<process name> salesforce.config.dir=<path to config dir containing process-conf.xml and config.properties files>
 
-The command-line version runs with whatever properties you have in your config.properties file, but you can also pass paramters at runtime as arguments to the program.
+Data Loader documentation provides details of running in batch mode for Windows platform at https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_batchmode_intro.htm. Batch mode is not supported for other platforms.
 
-For example, the following command sets the operation to insert regardless of what settings are contained in the config.properties file:
-
-    java -cp target/dataloader-xx.0-uber.jar -Dsalesforce.config.dir=CONFIG_DIR com.salesforce.dataloader.process.ProcessRunner process.operation=insert
-
-The process-conf.xml file can be used to define properties for multiple processes.  Look at src/main/nsis/samples/conf/process-conf.xml for examples on how to configure it.  The way to run a process defined in process-conf.xml is to specify process name on command line like this:
-
-    java -cp target/dataloader-xx.0-uber.jar -Dsalesforce.config.dir=CONFIG_DIR com.salesforce.dataloader.process.ProcessRunner process.name=opportunityUpsertProcess
+Commands to encrypt password:
+java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -k <path to keyfile>
+java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -e <password in plain text> <path to keyfile>
 
 # Execute Data Loader With Scripts for v45 and Later
  
 Launch scripts are provided to help end users launch Data Loader for Windows and macOS. Zip files are provided for macOS and Windows environments in the project's "releases" tab. There are specific installation instructions for [macOS](https://help.salesforce.com/articleView?id=sf.loader_install_mac.htm) and [Windows](https://help.​salesforce.com/articleView?id=​loader_install_windows.htm).
  
-A new directory called "release" was added to the project’s root directory. Developers can build Data Loader and place the dataloader-xx.0-uber.jar inside "release/mac" or "release\win" directory to launch a customized build.
+A new directory called "release" was added to the project’s root directory. Developers can build Data Loader and place the dataloader-x.y.z-uber.jar inside "release/mac" or "release\win" directory to launch a customized build.
 
 
 # Test Data Loader
