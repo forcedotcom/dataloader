@@ -1,6 +1,6 @@
 # Notes for Data Loader v45.0.0 and later
  
-Data Loader v45 and later is built with Zulu OpenJDK 11 and requires a 64-bit operating system. Download and install Zulu OpenJDK 11 before installing Data Loader. See instructions further down to install via scripts.
+Data Loader v45 and later is built with JDK 11 and requires a 64-bit operating system. Install JRE 11 or later before installing Data Loader. See instructions further down to install via scripts.
  
 Data Loader v44 is the last version built with Oracle Java 8. Developers can check out code from the branch “DataloaderV44Release”. End users can download v44 or older from this project’s “releases” tab.
 
@@ -40,7 +40,7 @@ To run Data Loader from the command line, use the following command:
 
     java -jar target/dataloader-x.y.z-uber.jar run.mode=batch process.name=<process name> salesforce.config.dir=<path to config dir containing process-conf.xml and config.properties files>
 
-Data Loader documentation provides details of running in batch mode for Windows platform at https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_batchmode_intro.htm. Batch mode is not supported for other platforms.
+Data Loader documentation provides details of running in [batch mode for Windows platform](https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_batchmode_intro.htm]). Batch mode is not supported for other platforms.
 
 Commands to encrypt password:
 
