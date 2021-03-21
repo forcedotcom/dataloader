@@ -40,6 +40,7 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 
+import com.salesforce.dataloader.controller.Controller;
 import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.tools.VersionInfo;
 import com.sforce.ws.transport.*;
@@ -58,11 +59,12 @@ import org.apache.http.impl.client.HttpClientBuilder;
  */
 public class HttpClientTransport implements Transport {
 
-    private ConnectorConfig config;
+    private static ConnectorConfig config = null;
     private boolean successful;
     private HttpPost post;
     private OutputStream output;
     private ByteArrayOutputStream entityByteOut;
+    private static CloseableHttpClient httpClient = null;
 
     public HttpClientTransport() {
     }
@@ -72,10 +74,22 @@ public class HttpClientTransport implements Transport {
     }
 
     @Override
-    public void setConfig(ConnectorConfig config) {
-        this.config = config;
+    public synchronized void setConfig(ConnectorConfig newConfig) {
+        if (config == null || newConfig == null || !config.equals(newConfig) ) {
+            // close old connection if it was open because there is a change in the config
+            if (httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (IOException ex) {
+                    // do nothing
+                    ex.printStackTrace();
+                }
+            }
+            httpClient = null;
+        }
+        config = newConfig;
     }
-
+    
     @Override
     public OutputStream connect(String url, String soapAction) throws IOException {
         if (soapAction == null) {
@@ -90,47 +104,62 @@ public class HttpClientTransport implements Transport {
 
         return connect(url, header);
     }
+    
+    private static synchronized void initializeHttpClient() throws UnknownHostException {
+        if (!Controller.doReuseClientConnection() && httpClient != null) {
+            try {
+                httpClient.close();
+            } catch (IOException ex) {
+                // ignore
+            }
+            httpClient = null;
+        }
+        if (httpClient == null) {
+            HttpClientBuilder httpClientBuilder = HttpClientBuilder.create().useSystemProperties();
+            
+            if (config.getProxy().address() != null) {
+                String proxyUser = config.getProxyUsername() == null ? "" : config.getProxyUsername();
+                String proxyPassword = config.getProxyPassword() == null ? "" : config.getProxyPassword();
 
-    @Override
-    public InputStream getContent() throws IOException {
-        InputStream input;
-        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create().useSystemProperties();
-        
-        if (config.getProxy().address() != null) {
-            String proxyUser = config.getProxyUsername() == null ? "" : config.getProxyUsername();
-            String proxyPassword = config.getProxyPassword() == null ? "" : config.getProxyPassword();
+                Credentials credentials;
 
-            Credentials credentials;
+                if (config.getNtlmDomain() != null && !config.getNtlmDomain().equals("")) {
+                    String computerName = InetAddress.getLocalHost().getCanonicalHostName();
+                    credentials = new NTCredentials(proxyUser, proxyPassword, computerName, config.getNtlmDomain());
+                } else {
+                    credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
+                }
 
-            if (config.getNtlmDomain() != null && !config.getNtlmDomain().equals("")) {
-                String computerName = InetAddress.getLocalHost().getCanonicalHostName();
-                credentials = new NTCredentials(proxyUser, proxyPassword, computerName, config.getNtlmDomain());
-            } else {
-                credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
+                InetSocketAddress proxyAddress = (InetSocketAddress) config.getProxy().address();
+                HttpHost proxyHost = new HttpHost(proxyAddress.getHostName(), proxyAddress.getPort(), "http");
+                httpClientBuilder.setProxy(proxyHost);
+
+                CredentialsProvider credentialsprovider = new BasicCredentialsProvider();
+                AuthScope scope = new AuthScope(proxyAddress.getHostName(), proxyAddress.getPort(), null, null);
+                credentialsprovider.setCredentials(scope, credentials);
+                httpClientBuilder.setDefaultCredentialsProvider(credentialsprovider);
             }
 
-            InetSocketAddress proxyAddress = (InetSocketAddress) config.getProxy().address();
-            HttpHost proxyHost = new HttpHost(proxyAddress.getHostName(), proxyAddress.getPort(), "http");
-            httpClientBuilder.setProxy(proxyHost);
+            httpClient = httpClientBuilder.build();
 
-            CredentialsProvider credentialsprovider = new BasicCredentialsProvider();
-            AuthScope scope = new AuthScope(proxyAddress.getHostName(), proxyAddress.getPort(), null, null);
-            credentialsprovider.setCredentials(scope, credentials);
-            httpClientBuilder.setDefaultCredentialsProvider(credentialsprovider);
         }
+    }
 
-        try (CloseableHttpClient httpClient = httpClientBuilder.build()) {
-
+    @Override
+    public synchronized InputStream getContent() throws IOException {
+        try {
+            InputStream input;
+            initializeHttpClient();
             byte[] entityBytes = entityByteOut.toByteArray();
             HttpEntity entity = new ByteArrayEntity(entityBytes);
             post.setEntity(entity);
-
+    
             if (config.getNtlmDomain() != null && !config.getNtlmDomain().equals("")) {
                 // need to send a HEAD request to trigger NTLM authentication
                 try (CloseableHttpResponse ignored = httpClient.execute(new HttpHead("http://salesforce.com"))) {
                 }
             }
-
+    
             try (CloseableHttpResponse response = httpClient.execute(post)) {
                 successful = true;
                 if (response.getStatusLine().getStatusCode() > 399) {
@@ -139,7 +168,6 @@ public class HttpClientTransport implements Transport {
                         throw new RuntimeException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
                     }
                 }
-
                 // copy input stream data into a new input stream because releasing the connection will close the input stream
                 ByteArrayOutputStream bOut = new ByteArrayOutputStream();
                 try (InputStream inStream = response.getEntity().getContent()) {
@@ -150,8 +178,13 @@ public class HttpClientTransport implements Transport {
                     }
                 }
             }
+            return input;
+        } finally {
+            if (!Controller.doReuseClientConnection() && httpClient != null) {
+                httpClient.close();
+                httpClient = null;
+            }
         }
-        return input;
     }
 
     @Override
@@ -200,6 +233,13 @@ public class HttpClientTransport implements Transport {
         }
 
         return output;
+    }
+    
+    public static void cleanup() throws IOException {
+        if (httpClient != null) {
+            httpClient.close();
+        }
+        httpClient = null;
     }
 
 }

@@ -198,7 +198,8 @@ public class Config {
     public static final String OAUTH_CLIENTSECRET = OAUTH_PREFIX + OAUTH_PARTIAL_CLIENTSECRET;
     public static final String OAUTH_CLIENTID = OAUTH_PREFIX + OAUTH_PARTIAL_CLIENTID;
     public static final String OAUTH_REDIRECTURI = OAUTH_PREFIX + OAUTH_PARTIAL_REDIRECTURI;
-
+    public static final String REUSE_CLIENT_CONNECTION = "sfdc.reuseClientConnection";
+    
     // salesforce operation parameters
     public static final String INSERT_NULLS = "sfdc.insertNulls"; //$NON-NLS-1$
     public static final String ENTITY = "sfdc.entity"; //$NON-NLS-1$
@@ -414,6 +415,7 @@ public class Config {
 
         setDefaultValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_SERVER, OAUTH_SB_SERVER_VAL);
         setDefaultValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI, OAUTH_SB_REDIRECTURI_VAL);
+        setDefaultValue(REUSE_CLIENT_CONNECTION, true);
         /*
         setDefaultValue(ENABLE_BULK_QUERY_PK_CHUNKING, false);
         setDefaultValue(BULK_QUERY_PK_CHUNK_SIZE, DEFAULT_BULK_QUERY_PK_CHUNK_SIZE);

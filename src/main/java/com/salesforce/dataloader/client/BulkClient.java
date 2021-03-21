@@ -45,6 +45,7 @@ import com.sforce.ws.ConnectorConfig;
 public class BulkClient extends ClientBase<BulkConnection> {
     private static Logger LOG = LogManager.getLogger(BulkClient.class);
     private BulkConnection client;
+    private ConnectorConfig connectorConfig = null;
 
     public BulkClient(Controller controller) {
         super(controller, LOG);
@@ -71,10 +72,12 @@ public class BulkClient extends ClientBase<BulkConnection> {
     }
 
     @Override
-    protected ConnectorConfig getConnectorConfig() {
-        ConnectorConfig cc = super.getConnectorConfig();
-        cc.setTraceMessage(config.getBoolean(Config.WIRE_OUTPUT));
-        return cc;
+    protected synchronized ConnectorConfig getConnectorConfig() {
+        if (this.connectorConfig == null || !this.config.getBoolean(Config.REUSE_CLIENT_CONNECTION)) {
+            this.connectorConfig = super.getConnectorConfig();
+            this.connectorConfig.setTraceMessage(config.getBoolean(Config.WIRE_OUTPUT));
+        }
+        return this.connectorConfig;
     }
 
 }
