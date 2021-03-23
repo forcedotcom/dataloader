@@ -57,11 +57,7 @@ public class DataLoaderRunner extends Thread {
     
     public void run() {
         // called just before the program closes
-        try {
-            HttpClientTransport.cleanup();
-        } catch (IOException ex) {
-            // ignore
-        }
+        HttpClientTransport.closeConnections();
     }
 
     public static void main(String[] args) {

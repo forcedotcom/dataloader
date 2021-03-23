@@ -59,35 +59,31 @@ import org.apache.http.impl.client.HttpClientBuilder;
  */
 public class HttpClientTransport implements Transport {
 
-    private static ConnectorConfig config = null;
+    private static ConnectorConfig currentConfig = null;
     private boolean successful;
     private HttpPost post;
     private OutputStream output;
     private ByteArrayOutputStream entityByteOut;
-    private static CloseableHttpClient httpClient = null;
+    private static CloseableHttpClient currentHttpClient = null;
 
     public HttpClientTransport() {
     }
 
-    public HttpClientTransport(ConnectorConfig config) {
-        setConfig(config);
+    public HttpClientTransport(ConnectorConfig newConfig) {
+        setConfig(newConfig);
     }
 
     @Override
     public synchronized void setConfig(ConnectorConfig newConfig) {
-        if (config == null || newConfig == null || !config.equals(newConfig) ) {
-            // close old connection if it was open because there is a change in the config
-            if (httpClient != null) {
-                try {
-                    httpClient.close();
-                } catch (IOException ex) {
-                    // do nothing
-                    ex.printStackTrace();
-                }
+        if (!areEquivalentConfigs(currentConfig, newConfig) && currentHttpClient != null) {
+            try {
+                currentHttpClient.close();
+            } catch (IOException ex) {
+                // do nothing
             }
-            httpClient = null;
+            currentHttpClient = null;
         }
-        config = newConfig;
+        currentConfig = newConfig;
     }
     
     @Override
@@ -105,32 +101,80 @@ public class HttpClientTransport implements Transport {
         return connect(url, header);
     }
     
-    private static synchronized void initializeHttpClient() throws UnknownHostException {
-        if (!Controller.doReuseClientConnection() && httpClient != null) {
-            try {
-                httpClient.close();
-            } catch (IOException ex) {
-                // ignore
-            }
-            httpClient = null;
+    private boolean areEquivalentConfigs(ConnectorConfig config1, ConnectorConfig config2) {
+        if (config1 == null && config2 == null) {
+            return true;
+        } else if (config1 == null || config2 == null) {
+            // one of the configs is null, other isn't. They can't be equal.
+            return false;
+        } else if (config1.equals(config2)) {
+            return true;
         }
-        if (httpClient == null) {
+        
+        InetSocketAddress socketAddress1 = (InetSocketAddress)config1.getProxy().address();
+        InetSocketAddress socketAddress2 = (InetSocketAddress)config2.getProxy().address();
+
+        if (socketAddress1 == null && socketAddress2 == null) {
+            return true;
+        } else if (socketAddress1 == null || socketAddress2 == null) {
+            return false;
+        } else {
+            String field1, field2;
+            field1 = config1.getProxyUsername() == null ? "" : config1.getProxyUsername();
+            field2 = config2.getProxyUsername() == null ? "" : config2.getProxyUsername();      
+            if (field1.compareTo(field2) != 0) {
+                return false;
+            }
+            
+            field1 = config1.getProxyPassword() == null ? "" : config1.getProxyPassword();
+            field2 = config2.getProxyPassword() == null ? "" : config2.getProxyPassword();
+            if (field1.compareTo(field2) != 0) {
+                return false;
+            }
+    
+            field1 = config1.getNtlmDomain() == null ? "" : config1.getNtlmDomain();
+            field2 = config2.getNtlmDomain() == null ? "" : config2.getNtlmDomain();
+            if (field1.compareTo(field2) != 0) {
+                return false;
+            }
+    
+            field1 = socketAddress1.getHostName() == null ? "" : socketAddress1.getHostName();
+            field2 = socketAddress2.getHostName() == null ? "" : socketAddress2.getHostName();
+            if (field1.compareTo(field2) != 0) {
+                return false;
+            }
+            
+            int intField1 = socketAddress1.getPort();
+            int intField2 = socketAddress2.getPort();
+            if (intField1 != intField2) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private static synchronized void initializeHttpClient() throws UnknownHostException {
+        if (!Controller.doReuseClientConnection()) {
+            closeConnections();
+            currentHttpClient = null;
+        }
+        if (currentHttpClient == null) {
             HttpClientBuilder httpClientBuilder = HttpClientBuilder.create().useSystemProperties();
             
-            if (config.getProxy().address() != null) {
-                String proxyUser = config.getProxyUsername() == null ? "" : config.getProxyUsername();
-                String proxyPassword = config.getProxyPassword() == null ? "" : config.getProxyPassword();
+            if (currentConfig.getProxy().address() != null) {
+                String proxyUser = currentConfig.getProxyUsername() == null ? "" : currentConfig.getProxyUsername();
+                String proxyPassword = currentConfig.getProxyPassword() == null ? "" : currentConfig.getProxyPassword();
 
                 Credentials credentials;
 
-                if (config.getNtlmDomain() != null && !config.getNtlmDomain().equals("")) {
+                if (currentConfig.getNtlmDomain() != null && !currentConfig.getNtlmDomain().equals("")) {
                     String computerName = InetAddress.getLocalHost().getCanonicalHostName();
-                    credentials = new NTCredentials(proxyUser, proxyPassword, computerName, config.getNtlmDomain());
+                    credentials = new NTCredentials(proxyUser, proxyPassword, computerName, currentConfig.getNtlmDomain());
                 } else {
                     credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
                 }
 
-                InetSocketAddress proxyAddress = (InetSocketAddress) config.getProxy().address();
+                InetSocketAddress proxyAddress = (InetSocketAddress) currentConfig.getProxy().address();
                 HttpHost proxyHost = new HttpHost(proxyAddress.getHostName(), proxyAddress.getPort(), "http");
                 httpClientBuilder.setProxy(proxyHost);
 
@@ -140,8 +184,7 @@ public class HttpClientTransport implements Transport {
                 httpClientBuilder.setDefaultCredentialsProvider(credentialsprovider);
             }
 
-            httpClient = httpClientBuilder.build();
-
+            currentHttpClient = httpClientBuilder.build();
         }
     }
 
@@ -154,13 +197,13 @@ public class HttpClientTransport implements Transport {
             HttpEntity entity = new ByteArrayEntity(entityBytes);
             post.setEntity(entity);
     
-            if (config.getNtlmDomain() != null && !config.getNtlmDomain().equals("")) {
+            if (currentConfig.getNtlmDomain() != null && !currentConfig.getNtlmDomain().equals("")) {
                 // need to send a HEAD request to trigger NTLM authentication
-                try (CloseableHttpResponse ignored = httpClient.execute(new HttpHead("http://salesforce.com"))) {
+                try (CloseableHttpResponse ignored = currentHttpClient.execute(new HttpHead("http://salesforce.com"))) {
                 }
             }
     
-            try (CloseableHttpResponse response = httpClient.execute(post)) {
+            try (CloseableHttpResponse response = currentHttpClient.execute(post)) {
                 successful = true;
                 if (response.getStatusLine().getStatusCode() > 399) {
                     successful = false;
@@ -180,9 +223,8 @@ public class HttpClientTransport implements Transport {
             }
             return input;
         } finally {
-            if (!Controller.doReuseClientConnection() && httpClient != null) {
-                httpClient.close();
-                httpClient = null;
+            if (!Controller.doReuseClientConnection()) {
+                closeConnections();
             }
         }
     }
@@ -215,31 +257,35 @@ public class HttpClientTransport implements Transport {
         entityByteOut = new ByteArrayOutputStream();
         output = entityByteOut;
 
-        if (config.getMaxRequestSize() > 0) {
-            output = new LimitingOutputStream(config.getMaxRequestSize(), output);
+        if (currentConfig.getMaxRequestSize() > 0) {
+            output = new LimitingOutputStream(currentConfig.getMaxRequestSize(), output);
         }
 
-        if (enableCompression && config.isCompression()) {
+        if (enableCompression && currentConfig.isCompression()) {
             output = new GZIPOutputStream(output);
         }
 
-        if (config.isTraceMessage()) {
-            output = config.teeOutputStream(output);
+        if (currentConfig.isTraceMessage()) {
+            output = currentConfig.teeOutputStream(output);
         }
 
-        if (config.hasMessageHandlers()) {
+        if (currentConfig.hasMessageHandlers()) {
             URL url = new URL(endpoint);
-            output = new MessageHandlerOutputStream(config, url, output);
+            output = new MessageHandlerOutputStream(currentConfig, url, output);
         }
 
         return output;
     }
     
-    public static void cleanup() throws IOException {
-        if (httpClient != null) {
-            httpClient.close();
+    public static void closeConnections() {
+        if (currentHttpClient != null) {
+            try {
+                currentHttpClient.close();
+            } catch (IOException ex) {
+                // do nothing
+            }
+            currentHttpClient = null;
         }
-        httpClient = null;
     }
 
 }
