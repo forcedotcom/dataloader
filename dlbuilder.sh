@@ -9,10 +9,15 @@ if [ "$#" -ne 3 ]; then
   exit 1
 fi
 
-mvn clean package -DskipTests -D"jarsigner.storepass=$1" -D"jarsigner.keystore=$2" -D"jarsigner.tsa=$3" -D'jarsigner.skip=false' -D'jarsigner.alias=1' -Pzip
+# build for macx86_64 platform
+#mvn clean package -DskipTests -D"jarsigner.storepass=$1" -D"jarsigner.keystore=$2" -D"jarsigner.tsa=$3" -D'jarsigner.skip=false' -D'jarsigner.alias=1' -Pmacx86_64,zip,-win32_x86_64,-macarm64
+
+# build for Mac ARM platform
+mvn clean package -DskipTests -D"jarsigner.storepass=$1" -D"jarsigner.keystore=$2" -D"jarsigner.tsa=$3" -D'jarsigner.skip=false' -D'jarsigner.alias=1' -Pmacarm64,zip,-win32_x86_64,-macx86_64
 
 cp target/mac/dataloader_mac.zip .
 
-mvn clean package -DskipTests -D"jarsigner.storepass=$1" -D"jarsigner.keystore=$2" -D"jarsigner.tsa=$3" -D'jarsigner.skip=false' -D'jarsigner.alias=1' -Pwin64,zip,-mac64
+# build for Windows platform
+mvn clean package -DskipTests -D"jarsigner.storepass=$1" -D"jarsigner.keystore=$2" -D"jarsigner.tsa=$3" -D'jarsigner.skip=false' -D'jarsigner.alias=1' -Pwin32_x86_64,zip,-macarm64,-macx86_64
 
 cp target/win/dataloader_win.zip .
