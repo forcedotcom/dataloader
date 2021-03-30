@@ -107,6 +107,7 @@ public class Controller {
     private static String APP_VENDOR; //$NON-NLS-1$
 
     private static AppUtil.OSType OS_TYPE;
+    private static boolean reuseClientConnection = true;
 
     /**
      * <code>config</code> is an instance of configuration that's tied to this instance of
@@ -457,6 +458,7 @@ public class Controller {
             config.setDefaults();
             config.setBatchMode(isBatchMode);
             logger.info(Messages.getMessage(getClass(), "configInit")); //$NON-NLS-1$
+            setReuseClientConnection(config.getBoolean(Config.REUSE_CLIENT_CONNECTION));
         } catch (IOException e) {
             throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorConfigLoad", configPath), e);
         } catch (ProcessInitializationException e) {
@@ -466,6 +468,14 @@ public class Controller {
         if (daoFactory == null) {
             daoFactory = new DataAccessObjectFactory();
         }
+    }
+    
+    private static synchronized void setReuseClientConnection(boolean reuse) {
+        reuseClientConnection = reuse;
+    }
+    
+    public static boolean doReuseClientConnection() {
+        return reuseClientConnection;
     }
 
     /**

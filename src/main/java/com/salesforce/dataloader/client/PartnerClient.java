@@ -75,6 +75,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     private static Logger LOG = LogManager.getLogger(PartnerClient.class);
 
     PartnerConnection client;
+    private ConnectorConfig connectorConfig = null;
 
     private static interface ClientOperation<RESULT, ARG> {
         String getName();
@@ -728,12 +729,14 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         return cc;
     }
 
-    private ConnectorConfig getLoginConnectorConfig() {
-        ConnectorConfig cc = getConnectorConfig();
-        String serverUrl = getDefaultServer();
-        cc.setAuthEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());
-        cc.setServiceEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());
-        return cc;
+    private synchronized ConnectorConfig getLoginConnectorConfig() {
+        if (this.connectorConfig == null || !this.config.getBoolean(Config.REUSE_CLIENT_CONNECTION)) {
+            this.connectorConfig = getConnectorConfig();
+            String serverUrl = getDefaultServer();
+            this.connectorConfig.setAuthEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());
+            this.connectorConfig.setServiceEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());
+        }
+        return this.connectorConfig;
     }
 
     private String getDefaultServer() {

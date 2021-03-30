@@ -25,6 +25,8 @@
  */
 package com.salesforce.dataloader.process;
 
+import com.salesforce.dataloader.client.HttpClientTransport;
+
 /**
  * @author Lexi Viripaeff
  * @input DataLoaderRunner -------------- @ * ----------------
@@ -34,12 +36,13 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.ui.UIUtils;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-public class DataLoaderRunner {
+public class DataLoaderRunner extends Thread {
 
     private static final String UI = "ui";
     private static final String RUN_MODE = "run.mode";
@@ -51,8 +54,14 @@ public class DataLoaderRunner {
         return argNameValuePair.containsKey(RUN_MODE) ?
                 RUN_MODE_BATCH.equalsIgnoreCase(argNameValuePair.get(RUN_MODE)) : false;
     }
+    
+    public void run() {
+        // called just before the program closes
+        HttpClientTransport.closeConnections();
+    }
 
     public static void main(String[] args) {
+        Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
         Controller.setConfigDir(args);
         if (isBatchMode(args)) {
             ProcessRunner.runBatchMode(args);
