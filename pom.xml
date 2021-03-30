@@ -371,7 +371,7 @@
 
   <profiles>
     <profile>
-      <id>mac64</id>
+      <id>macx86_64</id>
       <activation>
         <os>
           <family>mac</family>
@@ -381,8 +381,8 @@
       <dependencies>
         <dependency>
           <groupId>local.swt</groupId>
-          <artifactId>swtmac</artifactId>
-          <version>4.18</version>
+          <artifactId>swtmacx86_64</artifactId>
+          <version>4.19</version>
         </dependency>
       </dependencies>
       <properties>
@@ -391,7 +391,27 @@
     </profile>
 
     <profile>
-      <id>win64</id>
+      <id>macarm64</id>
+      <activation>
+        <os>
+          <family>mac</family>
+          <arch>arm64</arch>
+        </os>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>local.swt</groupId>
+          <artifactId>swtmacarm64</artifactId>
+          <version>4.19</version>
+        </dependency>
+      </dependencies>
+      <properties>
+          <OSType>mac</OSType>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>win32_x86_64</id>
       <activation>
         <os>
           <family>Windows</family>
@@ -401,8 +421,8 @@
       <dependencies>
         <dependency>
           <groupId>local.swt</groupId>
-          <artifactId>swtwin</artifactId>
-          <version>4.18</version>
+          <artifactId>swtwin32_x86_64</artifactId>
+          <version>4.19</version>
         </dependency>
       </dependencies>
       <properties>
