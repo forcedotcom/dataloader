@@ -41,6 +41,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.util.LoadRateCalculator;
 import com.sforce.async.AsyncApiException;
+import com.sforce.async.AsyncExceptionCode;
 import com.sforce.async.BatchInfo;
 import com.sforce.async.BatchInfoList;
 import com.sforce.async.BulkConnection;
@@ -70,12 +71,14 @@ class BulkApiVisitorUtil {
 
     private final boolean updateProgress;
     
-    private final boolean enablePKchunking = false;
+    private boolean enablePKchunking = false;
     private int queryChunkSize;
     private String queryChunkStartRow = "";
+    private Config config = null;
 
     BulkApiVisitorUtil(Controller ctl, ILoaderProgress monitor, LoadRateCalculator rateCalc, boolean updateProgress) {
         this.client = ctl.getBulkClient().getClient();
+        this.config = ctl.getConfig();
         try {
             // getLong will return 0 if no value is provided
             long checkStatusInt = ctl.getConfig().getLong(Config.BULK_API_CHECK_STATUS_INTERVAL);
@@ -104,7 +107,7 @@ class BulkApiVisitorUtil {
                 queryChunkStartRow = "";
             } 
         }
-         *
+        /*
          * ======== End code block to support PK chunking
          */
         this.monitor = monitor;
@@ -184,10 +187,31 @@ class BulkApiVisitorUtil {
     long periodicCheckStatus() throws AsyncApiException {
         if (this.monitor.isCanceled()) return 0;
         final long timeRemaining = this.checkStatusInterval - (System.currentTimeMillis() - this.lastStatusUpdate);
+        int retryCount = 0;
+        int maxAttemptsCount = 0;
+        
+        try {
+            // limit the number of max retries in case limit is exceeded
+            maxAttemptsCount = 1 + Math.min(Config.MAX_RETRIES_LIMIT, this.config.getInt(Config.MAX_RETRIES));
+        } catch (ParameterLoadException e) {
+            maxAttemptsCount = 1 + Config.DEFAULT_MAX_RETRIES;
+        }
         if (timeRemaining <= 0) {
-            this.jobInfo = this.client.getJobStatus(getJobId());
-            updateJobStatus();
-            return this.checkStatusInterval;
+            while (retryCount++ < maxAttemptsCount) {
+                try {
+                    this.jobInfo = this.client.getJobStatus(getJobId());
+                    updateJobStatus();
+                    return this.checkStatusInterval;
+                } catch (AsyncApiException ex) {
+                    if (retryCount < maxAttemptsCount) {
+                        try {
+                            Thread.sleep(this.checkStatusInterval);
+                        } catch (final InterruptedException e) {}
+                    } else {
+                        throw ex;
+                    }
+                }          
+            }
         }
         monitor.setNumberBatchesTotal(jobInfo.getNumberBatchesTotal());
         return timeRemaining;
