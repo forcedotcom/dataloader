@@ -69,7 +69,7 @@ public abstract class OAuthFlow extends Dialog {
         // Create the dialog window
         Display display = getParent().getDisplay();
         Shell shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.FILL);
-        Grid12 grid = new Grid12(shell, 30, 600);
+        Grid12 grid = new Grid12(shell, 32, 600);
 
         // Create the web browser
         Browser browser = new Browser(shell, SWT.NONE);
