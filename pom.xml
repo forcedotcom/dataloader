@@ -313,32 +313,9 @@
           <version>1.8.0</version>
           <configuration>
               <header>license.txt</header>
-              <excludes>
-                  <exclude>**/*.bat</exclude>
-                  <exclude>**/*.html</exclude>
-                  <exclude>**/*.txt</exclude>
-                  <exclude>**/*.xml</exclude>
-                  <exclude>**/*.md</exclude>
-                  <exclude>**/*.nsi</exclude>
-                  <exclude>**/*.properties</exclude>
-                  <exclude>**/*.sh</exclude>
-                  <exclude>windows-dependencies/**</exclude>
-                  <exclude>local-proj-repo/**</exclude>
-                  <exclude>src/main/resources/**</exclude>
-                  <exclude>src/test/resources/**</exclude>
-                  <exclude>.gitignore</exclude>
-                  <exclude>.gitmodules</exclude>
-                  <exclude>**/*.csv</exclude>
-                  <exclude>**/*.rtf</exclude>
-                  <exclude>**/*.sdl</exclude>
-                  <exclude>**/*.log</exclude>
-                  <exclude>**/*.command</exclude>
-                  <exclude>**/*.jks</exclude>
-                  <exclude>release/**</exclude>
-                  <exclude>yoursway-create-dmg/**</exclude>
-                  <exclude>src/main/nsis/**</exclude>
-                  <exclude>configs/**</exclude>
-              </excludes>
+              <includes>
+                  <include>**/*.java</include>
+              </includes>
           </configuration>
           <executions>
               <execution>
