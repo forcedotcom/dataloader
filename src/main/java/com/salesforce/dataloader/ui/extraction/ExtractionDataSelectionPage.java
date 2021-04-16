@@ -62,7 +62,7 @@ public class ExtractionDataSelectionPage extends WizardPage {
     private final Controller controller;
 
     // These filter extensions are used to filter which files are displayed.
-    private final EntityFilter filter = new EntityFilter();
+    private EntityFilter filter;
     private ListViewer lv;
     private Text fileText;
     public Composite comp;
@@ -104,6 +104,18 @@ public class ExtractionDataSelectionPage extends WizardPage {
         filterAll.setText(Labels.getString("ExtractionDataSelectionPage.showAll")); //$NON-NLS-1$
         data = new GridData();
         filterAll.setLayoutData(data);
+        
+        Text search = new Text(comp, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH);
+        data = new GridData(GridData.FILL, GridData.FILL, true, true);
+        data.widthHint = 140;
+        search.setLayoutData(data);
+        search.addSelectionListener(new SelectionAdapter() {
+            public void widgetDefaultSelected(SelectionEvent e) {
+                lv.refresh();
+            }
+        });
+        
+        this.filter = new EntityFilter(search, filterAll);
 
         lv = new ListViewer(comp, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
         lv.setContentProvider(new EntityContentProvider());
@@ -131,10 +143,7 @@ public class ExtractionDataSelectionPage extends WizardPage {
         filterAll.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                if (((Button)event.widget).getSelection())
-                    lv.removeFilter(filter);
-                else
-                    lv.addFilter(filter);
+                lv.refresh();
             }
         });
 

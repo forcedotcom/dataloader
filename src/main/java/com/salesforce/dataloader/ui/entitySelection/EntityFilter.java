@@ -28,6 +28,8 @@ package com.salesforce.dataloader.ui.entitySelection;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Text;
 
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 
@@ -35,6 +37,13 @@ import com.sforce.soap.partner.DescribeGlobalSObjectResult;
  * This class filters the entity list
  */
 public class EntityFilter extends ViewerFilter {
+    private Text searchText;
+    private Button filterAllCheckbox;
+    public EntityFilter(Text search, Button filterButton) {
+        super();
+        this.searchText = search;
+        this.filterAllCheckbox = filterButton;
+    }
     /**
      * Returns whether the specified element passes this filter
      *
@@ -50,17 +59,36 @@ public class EntityFilter extends ViewerFilter {
     public boolean select(Viewer arg0, Object arg1, Object arg2) {
 
         String entityName = ((DescribeGlobalSObjectResult)arg2).getName();
-        /*
-         * Account Case Contact Event Lead Opportunity Pricebook2 Product2 Task User Custom Objects
-         */
-        if (entityName.equals("Account") || entityName.equals("Case") || entityName.equals("Contact")
-                || entityName.equals("Event") || entityName.equals("Lead") || entityName.equals("Opportunity")
-                || entityName.equals("Pricebook2") || entityName.equals("Product2") || entityName.equals("Task")
-                || entityName.equals("User")) {
-            return true;
-        } else if (entityName.endsWith("__c")) {
+        boolean filterAllChecked = this.filterAllCheckbox.getSelection();
+        if (filterAllChecked) {
+            return filterBySearchText(entityName);
+        } else {
+            /*
+             * Account Case Contact Event Lead Opportunity Pricebook2 Product2 Task User Custom Objects
+             */
+            if (entityName.equals("Account") || entityName.equals("Case") || entityName.equals("Contact")
+                    || entityName.equals("Event") || entityName.equals("Lead") || entityName.equals("Opportunity")
+                    || entityName.equals("Pricebook2") || entityName.equals("Product2") || entityName.equals("Task")
+                    || entityName.equals("User")) {
+                return filterBySearchText(entityName);
+            } else if (entityName.endsWith("__c")) {
+                return filterBySearchText(entityName);
+            }
+            return false;
+        }
+    }
+    
+    private boolean filterBySearchText(String entityName) {
+        String searchText = this.searchText.getText();
+        if (searchText != null && !searchText.isEmpty() && entityName != null) {
+            searchText = searchText.toLowerCase();
+            if (entityName.toLowerCase().contains(searchText)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else { // no search text specified
             return true;
         }
-        return false;
     }
 }
