@@ -45,6 +45,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.MappingInitializationException;
+import com.salesforce.dataloader.ui.EntitySelectionListViewerUtil;
 import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.ui.UIUtils;
 import com.salesforce.dataloader.ui.entitySelection.*;
@@ -93,40 +94,7 @@ public class ExtractionDataSelectionPage extends WizardPage {
 
         comp = new Composite(parent, SWT.NONE);
         comp.setLayout(gridLayout);
-
-        Label label = new Label(comp, SWT.RIGHT);
-        label.setText(Labels.getString("ExtractionDataSelectionPage.selectSforce")); //$NON-NLS-1$
-        GridData data = new GridData();
-        label.setLayoutData(data);
-
-        // Add a checkbox to toggle filter
-        Button filterAll = new Button(comp, SWT.CHECK);
-        filterAll.setText(Labels.getString("ExtractionDataSelectionPage.showAll")); //$NON-NLS-1$
-        data = new GridData();
-        filterAll.setLayoutData(data);
-        
-        Text search = new Text(comp, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH);
-        data = new GridData(GridData.FILL, GridData.FILL, true, true);
-        data.widthHint = 140;
-        search.setLayoutData(data);
-        search.addSelectionListener(new SelectionAdapter() {
-            public void widgetDefaultSelected(SelectionEvent e) {
-                lv.refresh();
-            }
-        });
-        
-        this.filter = new EntityFilter(search, filterAll);
-
-        lv = new ListViewer(comp, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-        lv.setContentProvider(new EntityContentProvider());
-        lv.setLabelProvider(new EntityLabelProvider());
-        lv.setInput(null);
-        data = new GridData(GridData.FILL, GridData.FILL, true, true);
-        data.heightHint = 140;
-        data.widthHint = 140;
-        lv.getControl().setLayoutData(data);
-        lv.addFilter(filter);
-        lv.setSorter(new EntityViewerSorter());
+        lv = EntitySelectionListViewerUtil.getEntitySelectionListViewer(comp);
         lv.addSelectionChangedListener(new ISelectionChangedListener() {
             @Override
             public void selectionChanged(SelectionChangedEvent event) {
@@ -140,15 +108,8 @@ public class ExtractionDataSelectionPage extends WizardPage {
             setInput(controller.getEntityDescribes());
         }
 
-        filterAll.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent event) {
-                lv.refresh();
-            }
-        });
-
         Label clearLabel = new Label(comp, SWT.NONE);
-        data = new GridData(GridData.VERTICAL_ALIGN_END);
+        GridData data = new GridData(GridData.VERTICAL_ALIGN_END);
         data.heightHint = 20;
         clearLabel.setLayoutData(data);
 
