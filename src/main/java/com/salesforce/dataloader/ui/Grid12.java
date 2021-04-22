@@ -49,7 +49,7 @@ public class Grid12 {
     private boolean grabExcessVerticalSpace;
 
     public Grid12(Composite composite, int columnWidth){
-        this(composite, columnWidth, -1);
+        this(composite, columnWidth, SWT.DEFAULT);
     }
     public Grid12(Composite composite, int columnWidth, int cellHeight){
         this(composite, columnWidth, cellHeight, false, true);

@@ -93,7 +93,11 @@ public class AuthenticationRunner {
                         message = Labels.getFormattedString("SettingsPage.proxyError", flow.getReasonPhrase());
                     }
 
-                    logger.info("Login failed:" + flow.getReasonPhrase());
+                    if (flow.getReasonPhrase() == null) {
+                        logger.info("OAuth login dialog closed without logging in");
+                    } else {
+                        logger.info("Login failed:" + flow.getReasonPhrase());
+                    }
                     messenger.accept(message);
                     complete.accept(false);
                     return;
