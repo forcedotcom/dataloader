@@ -36,11 +36,11 @@ To run data loader for debug
 
     java -XstartOnFirstThread -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005  target/dataloader-x.y.z-uber.jar
 
-To run Data Loader from the command line, use the following command:
+To run Data Loader in Batch mode on Windows, see [Batch mode for Windows platform](https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_batchmode_intro.htm]). Batch mode is supported only on Windows platform.
+
+Data Loader can be executed in Batch mode on other unsupported platforms using the following command:
 
     java -jar target/dataloader-x.y.z-uber.jar run.mode=batch process.name=<process name> salesforce.config.dir=<path to config dir containing process-conf.xml and config.properties files>
-
-Data Loader documentation provides details of running in [batch mode for Windows platform](https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_batchmode_intro.htm]). Batch mode is not supported for other platforms.
 
 Commands to encrypt password:
 
