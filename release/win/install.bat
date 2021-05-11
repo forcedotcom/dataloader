@@ -69,8 +69,11 @@ IF EXIST %INSTALLATION_DIR% (
 
 :CopyFiles
     echo.
-    echo Copying files to '%INSTALLATION_DIR%'  ...
-    xcopy . "%INSTALLATION_DIR%" /e /i
+    pushd %~dp0
+    set script_dir=%CD%
+    popd
+    echo Copying files from '%script_dir%' to '%INSTALLATION_DIR%'  ...
+    xcopy "%script_dir%" "%INSTALLATION_DIR%" /e /i
     del "%INSTALLATION_DIR%\install.bat" /q
     echo Your Data Loader v%DATALOADER_VERSION% is created in '%INSTALLATION_DIR%'
 
