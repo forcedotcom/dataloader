@@ -32,7 +32,7 @@ echo.
     PATH=%PATH%;%JAVA_HOME%\bin\;%ZULU_JAVA_HOME%\bin\;
 
     java -version 1>nul 2>nul || (
-        goto JavaErrorExit
+        goto NoJavaErrorExit
     )
 
     for /f "tokens=3" %%a in ('java -version 2^>^&1 ^| findstr /i "version"') do (
