@@ -62,7 +62,7 @@ IF EXIST %INSTALLATION_DIR% (
     goto ExistingDir
 :DeleteDirYes
     echo Deleting existing Data Loader v%DATALOADER_VERSION%...
-    rd /s /q %INSTALLATION_DIR%
+    rd /s /q "%INSTALLATION_DIR%"
     goto CopyFiles
 :DeleteDirNo
     goto Exit
