@@ -58,10 +58,12 @@ public class EntityFilter extends ViewerFilter {
     @Override
     public boolean select(Viewer arg0, Object arg1, Object arg2) {
 
-        String entityName = ((DescribeGlobalSObjectResult)arg2).getName();
+        DescribeGlobalSObjectResult describeSObjectResult = (DescribeGlobalSObjectResult)arg2;
+        String entityName = describeSObjectResult.getName();
+        String entityLabel = describeSObjectResult.getLabel();
         boolean filterAllChecked = this.filterAllCheckbox.getSelection();
         if (filterAllChecked) {
-            return filterBySearchText(entityName);
+            return filterBySearchText(entityName, entityLabel);
         } else {
             /*
              * Account Case Contact Event Lead Opportunity Pricebook2 Product2 Task User Custom Objects
@@ -70,19 +72,20 @@ public class EntityFilter extends ViewerFilter {
                     || entityName.equals("Event") || entityName.equals("Lead") || entityName.equals("Opportunity")
                     || entityName.equals("Pricebook2") || entityName.equals("Product2") || entityName.equals("Task")
                     || entityName.equals("User")) {
-                return filterBySearchText(entityName);
+                return filterBySearchText(entityName, entityLabel);
             } else if (entityName.endsWith("__c")) {
-                return filterBySearchText(entityName);
+                return filterBySearchText(entityName, entityLabel);
             }
             return false;
         }
     }
     
-    private boolean filterBySearchText(String entityName) {
+    private boolean filterBySearchText(String entityName, String entityLabel) {
         String searchText = this.searchText.getText();
         if (searchText != null && !searchText.isEmpty() && entityName != null) {
             searchText = searchText.toLowerCase();
-            if (entityName.toLowerCase().contains(searchText)) {
+            if (entityName.toLowerCase().contains(searchText) 
+                    || entityLabel.toLowerCase().contains(searchText)) {
                 return true;
             } else {
                 return false;
