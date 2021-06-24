@@ -82,10 +82,10 @@ public class EntityFilter extends ViewerFilter {
     
     private boolean filterBySearchText(String entityName, String entityLabel) {
         String searchText = this.searchText.getText();
-        if (searchText != null && !searchText.isEmpty() && entityName != null) {
+        if (searchText != null && !searchText.isEmpty()) {
             searchText = searchText.toLowerCase();
-            if (entityName.toLowerCase().contains(searchText) 
-                    || entityLabel.toLowerCase().contains(searchText)) {
+            if ((entityName != null && entityName.toLowerCase().contains(searchText)) 
+               || (entityLabel != null && entityLabel.toLowerCase().contains(searchText))) {
                 return true;
             } else {
                 return false;
