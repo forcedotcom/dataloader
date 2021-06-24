@@ -170,7 +170,6 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private void doOneBatch(PrintStream out, ByteArrayOutputStream os, List<DynaBean> rows) throws OperationException,
             AsyncApiException {
         int recordsInBatch = 0;
-        int bytesInBatch = 0;
         final List<String> userColumns = getController().getDao().getColumnNames();
         List<String> headerColumns = null;
         for (int i = 0; i < rows.size(); i++) {
@@ -179,22 +178,19 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             if (recordsInBatch == 0) {
                 headerColumns = addHeader(out, os, row, userColumns);
             }
-            writeRow(row, out, os, recordsInBatch, headerColumns);
+            writeRow(row, out, recordsInBatch, headerColumns);
             recordsInBatch++;
-            bytesInBatch += os.size();
 
-            if (bytesInBatch > Config.MAX_BULK_API_BATCH_BYTES) {
-                createBatch(os, recordsInBatch); // resets outputstream
+            if (os.size() > Config.MAX_BULK_API_BATCH_BYTES) {                createBatch(os, recordsInBatch); // resets outputstream
                 // reset for the next batch
                 recordsInBatch = 0;
-                bytesInBatch = 0;
             }
         }
         if (recordsInBatch > 0) createBatch(os, recordsInBatch);
         this.jobUtil.periodicCheckStatus();
     }
 
-    private void writeRow(DynaBean row, PrintStream out, ByteArrayOutputStream os, int recordsInBatch,
+    private void writeRow(DynaBean row, PrintStream out, int recordsInBatch,
             List<String> header) throws LoadException {
         boolean notFirst = false;
         for (final String column : header) {
