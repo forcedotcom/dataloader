@@ -326,23 +326,6 @@
               </execution>
           </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jarsigner-plugin</artifactId>
-        <version>3.0.0</version>
-        <executions>
-          <execution>
-            <id>sign</id>
-            <goals>
-              <goal>sign</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <archive>target/dataloader-${project.version}-uber.jar</archive>
-          <skip>${jarsigner.skip}</skip>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 
@@ -411,44 +394,82 @@
       <id>zip</id>
       <build>
         <plugins>
-	      <plugin>
-	        <groupId>org.apache.maven.plugins</groupId>
-	        <artifactId>maven-antrun-plugin</artifactId>
-	        <version>1.8</version>
-	        <executions>
-	           <execution>
-	             <phase>package</phase>
-	             <goals>
-	               <goal>run</goal>
-	             </goals>
-	           </execution>
-	         </executions>
-	         <configuration>
-	           <tasks>      
-	             <echo>creating version-specific files for the target OS: ${OSType}</echo>
-	             <mkdir dir="${basedir}/target/${OSType}"/>
-	             <copydir src="${basedir}/release/${OSType}" dest="${basedir}/target/${OSType}"/>
-	             <copydir src="${basedir}/release/configs" dest="${basedir}/target/${OSType}/configs"/>
-	             <copydir src="${basedir}/release/samples" dest="${basedir}/target/${OSType}/samples"/>
-	             <copy file="${basedir}/release/configs/log-conf.xml" 
-	                   todir="${basedir}/target/${OSType}/samples/conf"/>
-	             <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${version}"/>
-	             <replace dir="${basedir}/target/${OSType}/" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
-	             <chmod file="${basedir}/target/${OSType}/*" perm="755" />
-	
-	             <echo>copying uber jar to OS-specific folder for the target OS: ${OSType}</echo>
-	             <copy file="${basedir}/target/dataloader-${version}-uber.jar" 
-	                   todir="${basedir}/target/${OSType}"/>
-	             
-	             <echo>zip OS-specific folder</echo>
-	             <zip update="true" destfile="${basedir}/target/${OSType}/dataloader_${OSType}.zip" >
-	               <zipfileset dirmode="755" filemode="755" 
-	                           dir="${basedir}/target/${OSType}" />
-	             </zip>
-	
-	            </tasks>
-	          </configuration>
-	      </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>1.8</version>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath"/>
+                    <if>
+                      <isfalse value="${jarsigner.skip}" />
+                      <then>
+                        <echo>signing target/dataloader-${version}-uber.jar</echo>
+                        <signjar
+                          jar="${basedir}/target/dataloader-${version}-uber.jar"
+                          alias="${jarsigner.alias}"
+                          tsaurl="${jarsigner.tsa}"
+                          storepass="${jarsigner.storepass}"
+                          keystore="${jarsigner.keystore}" />
+                      </then>
+                    </if>
+                    <echo>creating version-specific files for the target OS: ${OSType}</echo>
+                    <mkdir dir="${basedir}/target/${OSType}"/>
+                    <copydir src="${basedir}/release/${OSType}" dest="${basedir}/target/${OSType}"/>
+                    <copydir src="${basedir}/release/configs" dest="${basedir}/target/${OSType}/configs"/>
+                    <copydir src="${basedir}/release/samples" dest="${basedir}/target/${OSType}/samples"/>
+                    <copy file="${basedir}/release/configs/log-conf.xml" 
+                        todir="${basedir}/target/${OSType}/samples/conf"/>
+                    <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${version}"/>
+                    <replace dir="${basedir}/target/${OSType}/" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
+                    <chmod file="${basedir}/target/${OSType}/*" perm="755" />
+    
+     
+                    <echo>copying uber jar to OS-specific folder for the target OS: ${OSType}</echo>
+                    <copy file="${basedir}/target/dataloader-${version}-uber.jar" 
+                       todir="${basedir}/target/${OSType}"/>
+                 
+                    <echo>zip OS-specific folder</echo>
+                    <zip update="true" destfile="${basedir}/target/${OSType}/dataloader_${OSType}.zip" >
+                      <zipfileset dirmode="755" filemode="755" 
+                        dir="${basedir}/target/${OSType}" />
+                     </zip>
+                     <if>
+                       <isfalse value="${jarsigner.skip}" />
+                       <then>
+                         <signjar
+                          jar="${basedir}/target/${OSType}/dataloader_${OSType}.zip"
+                          alias="${jarsigner.alias}"
+                          tsaurl="${jarsigner.tsa}"
+                          storepass="${jarsigner.storepass}"
+                          keystore="${jarsigner.keystore}" />
+                       </then>
+                     </if>
+
+                  </target>
+                </configuration>
+             </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+              <groupId>ant-contrib</groupId>
+              <artifactId>ant-contrib</artifactId>
+              <version>1.0b3</version>
+              <exclusions>
+                <exclusion>
+                  <groupId>ant</groupId>
+                  <artifactId>ant</artifactId>
+                </exclusion>
+              </exclusions>
+            </dependency>
+          </dependencies>
+          </plugin>
         </plugins>
       </build>
     </profile>

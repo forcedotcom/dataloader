@@ -12,10 +12,12 @@ fi
 # build for macx86_64 platform
 mvn clean package -DskipTests -D"jarsigner.storepass=$1" -D"jarsigner.keystore=$2" -D"jarsigner.tsa=$3" -D'jarsigner.skip=false' -D'jarsigner.alias=1' -Pmacx86_64,zip,-win32_x86_64,-macarm64
 
+cp target/mac/dataloader_mac.zip .
+
 # build for Mac ARM platform
 #mvn clean package -DskipTests -D"jarsigner.storepass=$1" -D"jarsigner.keystore=$2" -D"jarsigner.tsa=$3" -D'jarsigner.skip=false' -D'jarsigner.alias=1' -Pmacarm64,zip,-win32_x86_64,-macx86_64
 
-cp target/mac/dataloader_mac.zip .
+#cp target/mac/dataloader_mac_arm64.zip .
 
 # build for Windows platform
 mvn clean package -DskipTests -D"jarsigner.storepass=$1" -D"jarsigner.keystore=$2" -D"jarsigner.tsa=$3" -D'jarsigner.skip=false' -D'jarsigner.alias=1' -Pwin32_x86_64,zip,-macarm64,-macx86_64
