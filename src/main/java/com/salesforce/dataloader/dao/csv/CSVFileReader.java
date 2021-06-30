@@ -32,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -299,6 +300,7 @@ public class CSVFileReader implements DataReader {
                 csvReader = new CSVReader(bomInputStream, "UTF-8", csvDelimiters);
             } else {
                 csvReader = new CSVReader(input, csvDelimiters);
+                LOGGER.debug(this.getClass().getName(), "encoding used to write to CSV file is " + Charset.defaultCharset().name());
             }
             csvReader.setMaxRowsInFile(Integer.MAX_VALUE);
             csvReader.setMaxCharsInFile(Integer.MAX_VALUE);
