@@ -179,6 +179,7 @@ public class Config {
     public static final String BULK_API_ZIP_CONTENT = "sfdc.bulkApiZipContent";
     public static final String WIRE_OUTPUT = "sfdc.wireOutput";
     public static final String TIMEZONE = "sfdc.timezone";
+    public static final String ADJUST_DATE_VALUE_FOR_TIMEZONE = "sfdc.timezone.adjustdate";
 
     public static final String OAUTH_PREFIX = "sfdc.oauth.";
     public static final String OAUTH_PARTIAL_BULK = "bulk";
@@ -391,6 +392,7 @@ public class Config {
         setDefaultValue(BULK_API_CHECK_STATUS_INTERVAL, DEFAULT_BULK_API_CHECK_STATUS_INTERVAL);
         setDefaultValue(WIRE_OUTPUT, false);
         setDefaultValue(TIMEZONE, TimeZone.getDefault().getID());
+        setDefaultValue(ADJUST_DATE_VALUE_FOR_TIMEZONE, true);
         //sfdcInternal settings
         setDefaultValue(SFDC_INTERNAL, false);
         setDefaultValue(SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);

@@ -73,6 +73,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
@@ -108,6 +109,8 @@ public class Controller {
 
     private static AppUtil.OSType OS_TYPE;
     private static boolean reuseClientConnection = true;
+    
+    private static HashMap<Long, Controller> controllerForThreadMap = new HashMap<Long, Controller>(); 
 
     /**
      * <code>config</code> is an instance of configuration that's tied to this instance of
@@ -287,10 +290,30 @@ public class Controller {
         saveConfig();
     }
 
-    public static Controller getInstance(String name, boolean isBatchMode, String[] args) throws ControllerInitializationException {
-        return new Controller(name, isBatchMode, args);
+    public static synchronized Controller getInstance(String name, boolean isBatchMode, String[] args) throws ControllerInitializationException {
+        Controller controller = new Controller(name, isBatchMode, args);
+        long threadID = Thread.currentThread().getId();
+        
+        // Following may override existing Controller ref for the thread.
+        // However, this keeps the current behavior.
+        controllerForThreadMap.put(threadID, controller);
+        return controller;
     }
-
+    
+    public static Controller getInstanceForCurrentThread() {
+        return controllerForThreadMap.get(Thread.currentThread().getId());
+    }
+    
+    public static Controller getAnInstanceAcrossAllThreads() {
+        Set<Long> threadIdSet = controllerForThreadMap.keySet();
+        for (Long threadId : threadIdSet) {
+            Controller controller = controllerForThreadMap.get(threadId);
+            if (controller != null) {
+                return controller;
+            }
+        }
+        return null;
+    }
 
     public synchronized boolean saveConfig() {
         try {

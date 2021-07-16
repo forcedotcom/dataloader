@@ -28,6 +28,7 @@ package com.salesforce.dataloader.dyna;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import com.salesforce.dataloader.util.DateOnlyCalendar;
 import com.salesforce.dataloader.model.Row;
 import org.apache.commons.beanutils.*;
 import org.apache.logging.log4j.Logger;
@@ -174,7 +175,7 @@ public class SforceDynaBean {
             classType = Boolean.class;
             break;
         case date:
-            classType = Calendar.class;
+            classType = DateOnlyCalendar.class;
             break;
         case base64Binary:
             classType = byte[].class;
@@ -313,6 +314,7 @@ public class SforceDynaBean {
         final TimeZone tz = cfg.getTimeZone();
         // Register DynaBean type conversions
         ConvertUtils.register(new DateConverter(tz, useEuroDates), Calendar.class);
+        ConvertUtils.register(new DateOnlyConverter(tz, useEuroDates), DateOnlyCalendar.class);
         ConvertUtils.register(new DoubleConverter(), Double.class);
         ConvertUtils.register(new IntegerConverter(null), Integer.class);
         ConvertUtils.register(new BooleanConverter(), Boolean.class);
