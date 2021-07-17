@@ -36,7 +36,7 @@ import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
-import com.salesforce.dataloader.dyna.DateConverter;
+import com.salesforce.dataloader.dyna.DateTimeConverter;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 
@@ -289,7 +289,7 @@ public class DatabaseContext {
             return ((Date)paramValue).getTime();
         }
         else if(paramValue instanceof String) {
-            Calendar cal = (Calendar)new DateConverter(tz).convert(java.util.Calendar.class, paramValue);
+            Calendar cal = (Calendar)new DateTimeConverter(tz).convert(java.util.Calendar.class, paramValue);
             return cal.getTimeInMillis();
         } else {
             throw new IllegalArgumentException(Messages.getFormattedString("DatabaseDAO.errorParamMappingType", paramValue.getClass().getName()));

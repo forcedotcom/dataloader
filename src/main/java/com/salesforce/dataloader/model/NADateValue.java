@@ -23,50 +23,42 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package com.salesforce.dataloader.model;
 
-package com.salesforce.dataloader.util;
-
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
 
-import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.controller.Controller;
+public class NADateValue  extends Date {
 
-public class DateOnlyCalendar extends GregorianCalendar {
+    private static final NADateValue INSTANCE = new NADateValue();
+    private static final String NA_VALUE = "#N/A";
 
-    public DateOnlyCalendar() {
+    private NADateValue() {
         super();
     }
-    
-    private DateOnlyCalendar(TimeZone tz) {
-        // Use the timezone param to update the date by 1 in setDate()
-        super(tz);
+
+    public static NADateValue getInstance() {
+        return INSTANCE;
     }
-    
-    public void setTimeInMillis(long specifiedTimeInMilliSeconds) {
-        TimeZone myTimeZone = super.getTimeZone();
-        Calendar cal = Calendar.getInstance(myTimeZone);
-        cal.setTimeInMillis(specifiedTimeInMilliSeconds);
-        boolean adjustDateValueForTZ = true;
-        Controller controller = Controller.getAnInstanceAcrossAllThreads();
-        if (controller != null) {
-            Config config = controller.getConfig();
-            adjustDateValueForTZ = config.getBoolean(Config.ADJUST_DATE_VALUE_FOR_TIMEZONE);
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
         }
-        TimeZone gmt = TimeZone.getTimeZone("GMT");
-        if (adjustDateValueForTZ && myTimeZone != null) {
-            int timeZoneDifference = myTimeZone.getRawOffset() - gmt.getRawOffset() + myTimeZone.getDSTSavings() - gmt.getDSTSavings();
-            if (timeZoneDifference > 0) {
-                // timezone is ahead of GMT, add 1 day to the specified time in milliseconds
-                cal.add(Calendar.DATE, 1);
-            }
+        if (obj == null) {
+            return false;
         }
-        super.setTimeInMillis(cal.getTimeInMillis());
+
+        return NA_VALUE.equals(obj.toString());
     }
-    
-    public static DateOnlyCalendar getInstance(TimeZone timeZone) {
-        return new DateOnlyCalendar(timeZone);
+
+    @Override
+    public int hashCode() {
+        return NA_VALUE.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return NA_VALUE;
     }
 }

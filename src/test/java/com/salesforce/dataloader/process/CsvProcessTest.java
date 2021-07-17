@@ -45,7 +45,8 @@ import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
-import com.salesforce.dataloader.dyna.DateConverter;
+import com.salesforce.dataloader.dyna.DateTimeConverter;
+import com.salesforce.dataloader.dyna.DateOnlyConverter;
 import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.sobject.SObject;
 
@@ -362,7 +363,7 @@ public class CsvProcessTest extends ProcessTestBase {
 
         TimeZone TZ = TimeZone.getTimeZone("GMT");
 
-        DateConverter converter = new DateConverter(TZ, false);
+        DateTimeConverter converter = new DateTimeConverter(TZ, false);
         //find the csv file
         Map<String, String> argumentMap = getTestConfig(OperationInfo.insert,
                 getTestDataDir() + "/timeZoneFormatTesting.csv", false);
@@ -416,7 +417,7 @@ public class CsvProcessTest extends ProcessTestBase {
 
         TimeZone TZ = TimeZone.getTimeZone("GMT");
 
-        DateConverter converter = new DateConverter(TZ, false);
+        DateTimeConverter converter = new DateTimeConverter(TZ, false);
         //find the csv file
         Map<String, String> argumentMap = getTestConfig(OperationInfo.insert, getTestDataDir()
                 + "/timeZoneFormatTestingWithErrors.csv", false);

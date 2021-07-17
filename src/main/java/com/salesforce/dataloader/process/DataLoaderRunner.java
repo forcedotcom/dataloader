@@ -47,13 +47,31 @@ public class DataLoaderRunner extends Thread {
     private static final String UI = "ui";
     private static final String RUN_MODE = "run.mode";
     private static final String RUN_MODE_BATCH = "batch";
+    private static final String GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
+    private static boolean useGMTForDateFieldValue = true;
+    private static Map<String, String> argNameValuePair;
 
-    private static boolean isBatchMode(String[] args) {
-        Map<String, String> argNameValuePair = Controller.getArgMapFromArgArray(args);
-        
+    private static boolean isBatchMode() {        
         return argNameValuePair.containsKey(RUN_MODE) ?
                 RUN_MODE_BATCH.equalsIgnoreCase(argNameValuePair.get(RUN_MODE)) : false;
     }
+    
+    public static boolean doUseGMTForDateFieldValue() {
+        return useGMTForDateFieldValue;
+    }
+    
+    private static void setUseGMTForDateFieldValue() {
+        if (argNameValuePair.containsKey(GMT_FOR_DATE_FIELD_VALUE)) {
+            if ("false".equalsIgnoreCase(argNameValuePair.get(GMT_FOR_DATE_FIELD_VALUE))) {
+                useGMTForDateFieldValue = false;
+            }
+        }
+    }
+    
+    public static void setUseGMTForDateFieldValue(boolean doUseGMT) {
+        useGMTForDateFieldValue = doUseGMT;
+    }
+
     
     public void run() {
         // called just before the program closes
@@ -62,8 +80,10 @@ public class DataLoaderRunner extends Thread {
 
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
+        argNameValuePair = Controller.getArgMapFromArgArray(args);
         Controller.setConfigDir(args);
-        if (isBatchMode(args)) {
+        setUseGMTForDateFieldValue();
+        if (isBatchMode()) {
             ProcessRunner.runBatchMode(args);
         } else {
             /* Run in the UI mode, get the controller instance with batchMode == false */

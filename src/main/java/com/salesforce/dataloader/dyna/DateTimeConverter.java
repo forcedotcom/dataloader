@@ -36,13 +36,13 @@ import org.apache.commons.beanutils.Converter;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-public class DateConverter implements Converter {
+public class DateTimeConverter implements Converter {
 
     static final TimeZone GMT_TZ = TimeZone.getTimeZone("GMT");
     static final List<String> supportedEuropeanPatterns = getSupportedPatterns(true);
     static final List<String> supportedRegularPatterns = getSupportedPatterns(false);
 
-    static Logger logger = LogManager.getLogger(DateConverter.class);
+    static Logger logger = LogManager.getLogger(DateTimeConverter.class);
     /**
      * The default value specified to our Constructor, if any.
      */
@@ -57,27 +57,27 @@ public class DateConverter implements Converter {
 
 
 
-    public DateConverter(TimeZone tz) {
+    public DateTimeConverter(TimeZone tz) {
         this(tz, null, false, false);
 
     }
 
-    public DateConverter(TimeZone tz, boolean useEuroDateFormat) {
+    public DateTimeConverter(TimeZone tz, boolean useEuroDateFormat) {
         this(tz, null, useEuroDateFormat, false);
     }
 
-    public DateConverter(TimeZone tz, Object defaultValue, boolean useEuroDateFormat) {
+    public DateTimeConverter(TimeZone tz, Object defaultValue, boolean useEuroDateFormat) {
         this(tz, defaultValue, useEuroDateFormat, true);
     }
 
-    private DateConverter(TimeZone tz, Object defaultValue, boolean useEuroDateFormat, boolean useDefault) {
+    private DateTimeConverter(TimeZone tz, Object defaultValue, boolean useEuroDateFormat, boolean useDefault) {
         this.timeZone = tz;
         this.defaultValue = defaultValue;
         this.useDefault = useDefault;
         this.useEuroDates = useEuroDateFormat;
     }
 
-    public DateConverter(TimeZone tz, Object defaultValue) {
+    public DateTimeConverter(TimeZone tz, Object defaultValue) {
         this(tz, defaultValue, false, true);
     }
 
