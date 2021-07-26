@@ -73,6 +73,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
@@ -108,7 +109,7 @@ public class Controller {
 
     private static AppUtil.OSType OS_TYPE;
     private static boolean reuseClientConnection = true;
-
+    
     /**
      * <code>config</code> is an instance of configuration that's tied to this instance of
      * controller in a multithreaded environment
@@ -287,10 +288,9 @@ public class Controller {
         saveConfig();
     }
 
-    public static Controller getInstance(String name, boolean isBatchMode, String[] args) throws ControllerInitializationException {
+    public static synchronized Controller getInstance(String name, boolean isBatchMode, String[] args) throws ControllerInitializationException {
         return new Controller(name, isBatchMode, args);
     }
-
 
     public synchronized boolean saveConfig() {
         try {

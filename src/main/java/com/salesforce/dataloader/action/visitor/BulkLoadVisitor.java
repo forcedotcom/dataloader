@@ -58,6 +58,7 @@ import com.salesforce.dataloader.exception.DataAccessObjectInitializationExcepti
 import com.salesforce.dataloader.exception.LoadException;
 import com.salesforce.dataloader.exception.OperationException;
 import com.salesforce.dataloader.model.NACalendarValue;
+import com.salesforce.dataloader.model.NADateValue;
 import com.salesforce.dataloader.model.NATextValue;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.DAORowUtil;
@@ -207,7 +208,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private void writeSingleColumn(PrintStream out, String fieldName, Object fieldValue) throws LoadException {
         if (fieldValue != null) {
             Object col = fieldValue;
-            if (fieldValue instanceof NACalendarValue) {
+            if (fieldValue instanceof NACalendarValue || fieldValue instanceof NADateValue) {
                 col = fieldValue.toString();
             } else if (fieldValue instanceof Calendar) {
                 col = DATE_FMT.format(((Calendar) fieldValue).getTime());

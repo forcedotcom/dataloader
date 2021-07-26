@@ -131,7 +131,7 @@ public class SforceDynaBean {
             classType = Boolean.class;
             break;
         case date:
-            classType = Calendar.class;
+            classType = Date.class;
             break;
         case base64Binary:
             classType = byte[].class;
@@ -174,7 +174,7 @@ public class SforceDynaBean {
             classType = Boolean.class;
             break;
         case date:
-            classType = Calendar.class;
+            classType = Date.class;
             break;
         case base64Binary:
             classType = byte[].class;
@@ -312,7 +312,8 @@ public class SforceDynaBean {
         final boolean useEuroDates = cfg.getBoolean(Config.EURO_DATES);
         final TimeZone tz = cfg.getTimeZone();
         // Register DynaBean type conversions
-        ConvertUtils.register(new DateConverter(tz, useEuroDates), Calendar.class);
+        ConvertUtils.register(new DateTimeConverter(tz, useEuroDates), Calendar.class);
+        ConvertUtils.register(new DateOnlyConverter(tz, useEuroDates), Date.class);
         ConvertUtils.register(new DoubleConverter(), Double.class);
         ConvertUtils.register(new IntegerConverter(null), Integer.class);
         ConvertUtils.register(new BooleanConverter(), Boolean.class);

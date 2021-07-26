@@ -36,52 +36,52 @@ import org.apache.commons.beanutils.Converter;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-public final class DateConverter implements Converter {
+public class DateTimeConverter implements Converter {
 
-    private static final TimeZone GMT_TZ = TimeZone.getTimeZone("GMT");
-    private static final List<String> supportedEuropeanPatterns = getSupportedPatterns(true);
-    private static final List<String> supportedRegularPatterns = getSupportedPatterns(false);
+    static final TimeZone GMT_TZ = TimeZone.getTimeZone("GMT");
+    static final List<String> supportedEuropeanPatterns = getSupportedPatterns(true);
+    static final List<String> supportedRegularPatterns = getSupportedPatterns(false);
 
-    static Logger logger = LogManager.getLogger(DateConverter.class);
+    static Logger logger = LogManager.getLogger(DateTimeConverter.class);
     /**
      * The default value specified to our Constructor, if any.
      */
-    private final Object defaultValue;
+    final Object defaultValue;
 
     /**
      * Should we return the default value on conversion errors?
      */
-    private final boolean useDefault;
-    private final boolean useEuroDates;
-    private final TimeZone timeZone;
+    final boolean useDefault;
+    final boolean useEuroDates;
+    final TimeZone timeZone;
 
 
 
-    public DateConverter(TimeZone tz) {
+    public DateTimeConverter(TimeZone tz) {
         this(tz, null, false, false);
 
     }
 
-    public DateConverter(TimeZone tz, boolean useEuroDateFormat) {
+    public DateTimeConverter(TimeZone tz, boolean useEuroDateFormat) {
         this(tz, null, useEuroDateFormat, false);
     }
 
-    public DateConverter(TimeZone tz, Object defaultValue, boolean useEuroDateFormat) {
+    public DateTimeConverter(TimeZone tz, Object defaultValue, boolean useEuroDateFormat) {
         this(tz, defaultValue, useEuroDateFormat, true);
     }
 
-    private DateConverter(TimeZone tz, Object defaultValue, boolean useEuroDateFormat, boolean useDefault) {
+    private DateTimeConverter(TimeZone tz, Object defaultValue, boolean useEuroDateFormat, boolean useDefault) {
         this.timeZone = tz;
         this.defaultValue = defaultValue;
         this.useDefault = useDefault;
         this.useEuroDates = useEuroDateFormat;
     }
 
-    public DateConverter(TimeZone tz, Object defaultValue) {
+    public DateTimeConverter(TimeZone tz, Object defaultValue) {
         this(tz, defaultValue, false, true);
     }
 
-    private Calendar parseDate(TimeZone tz, String dateString, String pattern) {
+    Calendar parseDate(TimeZone tz, String dateString, String pattern) {
         final DateFormat df = new SimpleDateFormat(pattern);
         df.setTimeZone(tz);
         return parseDate(dateString, df);
@@ -93,8 +93,8 @@ public final class DateConverter implements Converter {
         final Date date = fmt.parse(dateString, pos);
         // we only want to use the date if parsing succeeded and used the entire string
         if (date != null && pos.getIndex() == dateString.length()) {
-            Calendar cal = Calendar.getInstance(timeZone);
-            cal.setTime(date);
+            Calendar cal = getCalendar();
+            cal.setTimeInMillis(date.getTime());
             return cal;
         }
         return null;
@@ -126,13 +126,13 @@ public final class DateConverter implements Converter {
         }
 
         if(value instanceof NATextValue) {
-            return NACalendarValue.getInstance();
+            return getNAValueCalendar();
         }
         
-        Calendar cal = Calendar.getInstance(this.timeZone);
+        Calendar cal = getCalendar();
 
         if (value instanceof Date) {
-            cal.setTime((Date)value);
+            cal.setTimeInMillis(((Date)value).getTime());
             return cal;
         }
 
@@ -194,9 +194,17 @@ public final class DateConverter implements Converter {
             throw new ConversionException("Failed to parse date: " + value);
         }
     }
+    
+    Calendar getCalendar() {
+        return Calendar.getInstance(this.timeZone);
+    }
+    
+    Calendar getNAValueCalendar() {
+        return NACalendarValue.getInstance();
+    }
 
     /* Helper function to produce all the patterns that DL supports */
-    private static List<String> getSupportedPatterns(boolean europeanDates) {
+    static List<String> getSupportedPatterns(boolean europeanDates) {
 
         List<String> basePatterns = new ArrayList<String>();
 
