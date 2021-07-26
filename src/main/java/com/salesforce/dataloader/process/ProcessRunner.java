@@ -78,8 +78,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.parsers.FactoryConfigurationError;
-
 public class ProcessRunner implements InitializingBean, Job, Runnable {
 
     /**
@@ -89,14 +87,23 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
 
     //logger
     private static Logger logger;
-
-    // Name of the current engine runner.  Improves readability of the log output
-    String name;
+    
+    private String name; // name of the loaded process DynaBean
 
     // config override parameters
     private final Map<String, String> configOverrideMap = new HashMap<String, String>();
 
     private Controller controller;
+    
+    private static final String PROP_NAME_ARRAY[] = {
+            Config.OPERATION,
+            Config.ENDPOINT,
+            Config.USERNAME,
+            Config.PASSWORD,
+            Config.DAO_TYPE,
+            Config.DAO_NAME,
+            Config.ENTITY,
+    };
     
     static {
 
@@ -131,6 +138,9 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
             // load parameter overrides (from command line or caller context)
             logger.info(Messages.getString("Process.loadingParameters")); //$NON-NLS-1$
             config.loadParameterOverrides(getConfigOverrideMap());
+            
+            // Make sure that the required properties are specified.
+            validateConfigProperties(config);
 
             // create files for status output unless it's an extract and status output is disabled
             if (!config.getOperationInfo().isExtraction() || config.getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT)) {
@@ -243,7 +253,11 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
     }
 
     private static void topLevelError(String message, Throwable err) {
-        logger.fatal(message, err);
+        if (logger == null) {
+            System.err.println(message);
+        } else {
+            logger.fatal(message, err);
+        }
         System.exit(-1);
     }
     
@@ -283,7 +297,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
      * @return instance of ProcessRunner
      * @throws ProcessInitializationException
      */
-    public static ProcessRunner getInstance(Map<String, String> argMap) throws ProcessInitializationException {
+    public static synchronized ProcessRunner getInstance(Map<String, String> argMap) throws ProcessInitializationException {
         ProcessRunner runner;
         Controller.setConfigDir(argMap);
         try {
@@ -294,17 +308,37 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         }
         logger = LogManager.getLogger(ProcessRunner.class);
         
-        if(argMap != null && argMap.containsKey(PROCESS_NAME)) {
-            // if process name is specified, get it from configuration
-            String processName = argMap.get(PROCESS_NAME);
-            runner = ProcessConfig.getProcessInstance(processName);
-            // command line param values override the ones in config file
-            runner.getConfigOverrideMap().putAll(argMap);
-        } else {
-            // if process.name is not given, load defaults & override with command-line args
-            runner = new ProcessRunner();
-            runner.setConfigOverrideMap(argMap);
+        try {
+            // get a controller instance to load the properties except for the
+            // runtime properties stored in XXX_lastRun.properties file.
+            Controller controller = Controller.getInstance("", true, null);
+            logger.info(Messages.getString("Process.initializingEngine")); //$NON-NLS-1$
+            Config config = controller.getConfig();
+            // load parameter overrides (from command line or caller context)
+            logger.info(Messages.getString("Process.loadingParameters")); //$NON-NLS-1$
+            config.loadParameterOverrides(argMap);
+            String processName = config.getString(PROCESS_NAME);
+            logger.debug("process name is " + processName);
+            if (processName == null || processName.isEmpty()) {
+                logger.info(PROCESS_NAME + "is not set in the command line or config.properties file.");
+                // operation and other process params are specified through properties
+                if (!validateConfigProperties(config)) {
+                    logger.fatal(Messages.getFormattedString("Process.missingRequiredArg", PROCESS_NAME));
+                    throw new ParameterLoadException(Messages.getFormattedString("Process.missingRequiredArg", PROCESS_NAME));
+                } else {
+                    runner = new ProcessRunner();
+                    runner.setName(config.getString(Config.OPERATION));
+                    runner.setConfigOverrideMap(argMap);
+                }
+            } else {
+                // process DynaBean name specified.
+                runner = ProcessConfig.getProcessInstance(processName);
+                runner.getConfigOverrideMap().putAll(argMap);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+                
         return runner;
     }
 
@@ -328,5 +362,19 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
 
     public Controller getController() {
         return controller;
+    }
+    
+    private static boolean validateConfigProperties(Config config) throws ProcessInitializationException {
+        if (config == null) {
+            throw new ProcessInitializationException("Configuration not initialized");
+        }
+
+        for (String propName : PROP_NAME_ARRAY) {
+            String propVal = config.getString(propName);
+            if (propVal == null || propVal.isEmpty()) {
+                throw new ProcessInitializationException("Couldn't find value for " + propName);
+            }
+        }
+        return true;
     }
 }
