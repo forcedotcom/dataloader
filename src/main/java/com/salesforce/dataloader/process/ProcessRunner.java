@@ -308,7 +308,6 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         }
         logger = LogManager.getLogger(ProcessRunner.class);
         
-        try {
             // get a controller instance to load the properties except for the
             // runtime properties stored in XXX_lastRun.properties file.
             Controller controller = Controller.getInstance("", true, null);
@@ -322,22 +321,16 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
             if (processName == null || processName.isEmpty()) {
                 logger.info(PROCESS_NAME + "is not set in the command line or config.properties file.");
                 // operation and other process params are specified through properties
-                if (!validateConfigProperties(config)) {
-                    logger.fatal(Messages.getFormattedString("Process.missingRequiredArg", PROCESS_NAME));
-                    throw new ParameterLoadException(Messages.getFormattedString("Process.missingRequiredArg", PROCESS_NAME));
-                } else {
-                    runner = new ProcessRunner();
-                    runner.setName(config.getString(Config.OPERATION));
-                    runner.setConfigOverrideMap(argMap);
-                }
+                validateConfigProperties(config);
+                runner = new ProcessRunner();
+                runner.setName(config.getString(Config.OPERATION));
+                runner.setConfigOverrideMap(argMap);
             } else {
                 // process DynaBean name specified.
                 runner = ProcessConfig.getProcessInstance(processName);
                 runner.getConfigOverrideMap().putAll(argMap);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        
                 
         return runner;
     }
@@ -364,7 +357,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         return controller;
     }
     
-    private static boolean validateConfigProperties(Config config) throws ProcessInitializationException {
+    private static void validateConfigProperties(Config config) throws ProcessInitializationException {
         if (config == null) {
             throw new ProcessInitializationException("Configuration not initialized");
         }
@@ -372,9 +365,9 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         for (String propName : PROP_NAME_ARRAY) {
             String propVal = config.getString(propName);
             if (propVal == null || propVal.isEmpty()) {
-                throw new ProcessInitializationException("Couldn't find value for " + propName);
+                logger.fatal(Messages.getFormattedString("Config.errorNoRequiredParameter", propName));
+                throw new ParameterLoadException(Messages.getFormattedString("Config.errorNoRequiredParameter", propName));
             }
         }
-        return true;
     }
 }
