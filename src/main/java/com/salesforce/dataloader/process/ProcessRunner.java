@@ -303,7 +303,7 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
         try {
             Controller.initLog();
         } catch (ControllerInitializationException e) {
-            System.out.println("ProcessRunner: log not configured" + e );
+            System.err.println("ProcessRunner: log not configured" + e );
             throw new RuntimeException(e.getMessage());
         }
         logger = LogManager.getLogger(ProcessRunner.class);
