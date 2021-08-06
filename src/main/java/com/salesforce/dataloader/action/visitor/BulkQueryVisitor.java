@@ -48,6 +48,7 @@ import com.sforce.async.AsyncApiException;
 import com.sforce.async.BatchInfo;
 import com.sforce.async.BatchStateEnum;
 import com.sforce.async.CSVReader;
+import com.sforce.async.JobInfo;
 import com.sforce.async.QueryResultList;
 
 /**
@@ -59,6 +60,7 @@ import com.sforce.async.QueryResultList;
 public class BulkQueryVisitor extends AbstractQueryVisitor {
 
     private BatchInfo[] batches;
+    private String jobId;
 
     public BulkQueryVisitor(Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {
@@ -69,31 +71,29 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
     protected int executeQuery(String soql) throws AsyncApiException, OperationException {
         final BulkApiVisitorUtil jobUtil = new BulkApiVisitorUtil(getController(), getProgressMonitor(),
                 getRateCalculator(), false);
-        jobUtil.createJob(getConfig());
+        jobUtil.createJob();
+        this.jobId = jobUtil.getJobId();
         try {
             jobUtil.createBatch(new ByteArrayInputStream(soql.getBytes(Config.BULK_API_ENCODING)));
         } catch (final UnsupportedEncodingException e) {
             throw new ExtractException(e);
         }
         jobUtil.awaitCompletionAndCloseJob();
-        
-        int recordsProcessed = 0;
-        final BatchInfo[] batchInfoArray = jobUtil.getBatches().getBatchInfo();
-        for (BatchInfo batchInfo : batchInfoArray) {
-            if (batchInfo.getState() == BatchStateEnum.Failed) {
-                throw new ExtractException("Batch failed: " + batchInfo.getStateMessage());
-            }
-            recordsProcessed += batchInfo.getNumberRecordsProcessed();
+        if (!this.getConfig().getBoolean(Config.ENABLE_BULK_V2_QUERY)) {
+            this.batches = jobUtil.getBatches().getBatchInfo();
         }
-
-        this.batches = batchInfoArray;
-        return recordsProcessed;
+        return jobUtil.getRecordsProcessed();
     }
 
     @Override
     protected void writeExtraction() throws AsyncApiException, ExtractException, DataAccessObjectException {
-        for (BatchInfo b : this.batches) {
-            writeExtractionForBatch(b);
+        if (this.getConfig().getBoolean(Config.ENABLE_BULK_V2_QUERY)) {
+            writeExtractionForBulkV2();
+        } else {
+            // bulk v1
+            for (BatchInfo b : this.batches) {
+                writeExtractionForBatch(b);
+            }
         }
     }
     private void writeExtractionForBatch(BatchInfo batch) throws AsyncApiException, ExtractException, DataAccessObjectException {
@@ -101,57 +101,79 @@ public class BulkQueryVisitor extends AbstractQueryVisitor {
             throw new ExtractException("Batch failed: " + batch.getStateMessage());
         final QueryResultList results = getController().getBulkClient().getClient()
                 .getQueryResultList(batch.getJobId(), batch.getId());
-        final boolean bufferResults = getConfig().getBoolean(Config.BUFFER_UNPROCESSED_BULK_QUERY_RESULTS);
 
         for (final String resultId : results.getResult()) {
             if (getProgressMonitor().isCanceled()) return;
-            OutputStream bufferingFileWriter = null;
-            File bufferingFile = null;
             try {
                 final InputStream serverResultStream = getController().getBulkClient().getClient()
                         .getQueryResultStream(batch.getJobId(), batch.getId(), resultId);
-                
-                InputStream resultStream = serverResultStream; //read directly from server by default
-                if (bufferResults) {
-                    //temp csv
-                    bufferingFile = File.createTempFile("sdl", ".csv");
-                    String bufferingFilePath = bufferingFile.getAbsolutePath();
-                    getLogger().info("Downloading result chunk " + resultId + " to " + bufferingFilePath);
-                    
-                    //download results into the buffering file
-                    int bytesRead;
-                    byte[] buffer = new byte[8 * 1024];
-                    bufferingFileWriter = new FileOutputStream(bufferingFile);
-                    while ((bytesRead = resultStream.read(buffer)) != -1) {
-                        bufferingFileWriter.write(buffer, 0, bytesRead);
-                    }
-                    bufferingFileWriter.close();
-                    serverResultStream.close();
-                    
-                    //stream from csv file
-                    resultStream = new FileInputStream(new File(bufferingFilePath));
-                }
-                try {
-                    final CSVReader rdr = new CSVReader(resultStream, Config.BULK_API_ENCODING);
-                    rdr.setMaxCharsInFile(Integer.MAX_VALUE);
-                    rdr.setMaxRowsInFile(Integer.MAX_VALUE);
-                    List<String> headers;
-                    headers = rdr.nextRecord();
-                    List<String> csvRow;
-                    while ((csvRow = rdr.nextRecord()) != null) {
-                        final StringBuilder id = new StringBuilder();
-                        final Row daoRow = getDaoRow(headers, csvRow, id);
-                        addResultRow(daoRow, id.toString());
-                    }
-                } finally {
-                    resultStream.close();
-                }
-            } catch (final IOException e) {
+                writeExtractionForServerStream(serverResultStream);
+            }  catch (final IOException e) {
                 throw new ExtractException(e);
-            } finally {
-                if (bufferingFile != null) {
-                    bufferingFile.delete();
+            }
+        }
+    }
+    
+    protected void writeExtractionForBulkV2() throws AsyncApiException, ExtractException, DataAccessObjectException {
+        BulkV2Connection v2Conn = getController().getBulkV2Client().getClient();
+        try {
+            InputStream serverResultStream = v2Conn.getQueryResultStream(this.jobId, "");
+            writeExtractionForServerStream(serverResultStream);
+            String locator = v2Conn.getQueryLocator();
+            while (!"null".equalsIgnoreCase(locator)) {
+                serverResultStream = v2Conn.getQueryResultStream(this.jobId, locator);
+                writeExtractionForServerStream(serverResultStream);
+                locator = v2Conn.getQueryLocator();
+            }
+        }   catch (final IOException e) {
+            throw new ExtractException(e);
+        }
+    }
+    
+    private void writeExtractionForServerStream(InputStream serverResultStream) throws IOException, DataAccessObjectException {
+        File bufferingFile = null;
+        final boolean bufferResults = getConfig().getBoolean(Config.BUFFER_UNPROCESSED_BULK_QUERY_RESULTS);
+        OutputStream bufferingFileWriter = null;
+
+        InputStream resultStream = serverResultStream; //read directly from server by default
+        try {
+            if (bufferResults) {
+                //temp csv
+                bufferingFile = File.createTempFile("sdl", ".csv");
+                String bufferingFilePath = bufferingFile.getAbsolutePath();
+                getLogger().info("Downloading result chunk to " + bufferingFilePath);
+                
+                //download results into the buffering file
+                int bytesRead;
+                byte[] buffer = new byte[8 * 1024];
+                bufferingFileWriter = new FileOutputStream(bufferingFile);
+                while ((bytesRead = resultStream.read(buffer)) != -1) {
+                    bufferingFileWriter.write(buffer, 0, bytesRead);
                 }
+                bufferingFileWriter.close();
+                serverResultStream.close();
+                
+                //stream from csv file
+                resultStream = new FileInputStream(new File(bufferingFilePath));
+            }
+            try {
+                final CSVReader rdr = new CSVReader(resultStream, Config.BULK_API_ENCODING);
+                rdr.setMaxCharsInFile(Integer.MAX_VALUE);
+                rdr.setMaxRowsInFile(Integer.MAX_VALUE);
+                List<String> headers;
+                headers = rdr.nextRecord();
+                List<String> csvRow;
+                while ((csvRow = rdr.nextRecord()) != null) {
+                    final StringBuilder id = new StringBuilder();
+                    final Row daoRow = getDaoRow(headers, csvRow, id);
+                    addResultRow(daoRow, id.toString());
+                }
+            } finally {
+                resultStream.close();
+            }
+        } finally {
+            if (bufferingFile != null) {
+                bufferingFile.delete();
             }
         }
     }

@@ -131,7 +131,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     @Override
     protected void loadBatch() throws DataAccessObjectException, OperationException {
         try {
-            if (!this.jobUtil.hasJob()) this.jobUtil.createJob(getConfig());
+            if (!this.jobUtil.hasJob()) this.jobUtil.createJob();
             createBatches();
             clearArrays();
         } catch (final AsyncApiException e) {

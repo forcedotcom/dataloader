@@ -23,43 +23,36 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 package com.salesforce.dataloader.client;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.salesforce.dataloader.action.visitor.BulkV2Connection;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.sforce.async.AsyncApiException;
-import com.sforce.async.BulkConnection;
 import com.sforce.ws.ConnectorConfig;
 
-/**
- * Wrapper for the async api client
- *
- * @author Colin Jarvis
- * @since 17.0
- */
-public class BulkClient extends ClientBase<BulkConnection> {
+public class BulkV2Client extends ClientBase<BulkV2Connection> {
     private static Logger LOG = LogManager.getLogger(BulkClient.class);
-    private BulkConnection client;
+    private BulkV2Connection client;
     private ConnectorConfig connectorConfig = null;
 
-    public BulkClient(Controller controller) {
+    public BulkV2Client(Controller controller) {
         super(controller, LOG);
     }
-
-    @Override
-    public BulkConnection getClient() {
+    
+    public BulkV2Connection getClient() {
         return client;
     }
-
+    
     @Override
     protected boolean connectPostLogin(ConnectorConfig cc) {
         try {
             // Set up a connection object with the given config
-            this.client = new BulkConnection(cc);
+            this.client = new BulkV2Connection(cc);
 
         } catch (AsyncApiException e) {
             logger.error(Messages.getMessage(getClass(), "loginError", cc.getAuthEndpoint(), e.getExceptionMessage()),
@@ -70,13 +63,17 @@ public class BulkClient extends ClientBase<BulkConnection> {
         return true;
     }
 
-    @Override
     protected synchronized ConnectorConfig getConnectorConfig() {
         if (this.connectorConfig == null || !this.config.getBoolean(Config.REUSE_CLIENT_CONNECTION)) {
             this.connectorConfig = super.getConnectorConfig();
+            
+            // override the restEndpoint value set in the superclass
+            String server = getSession().getServer();
+            if (server != null) {
+                this.connectorConfig.setRestEndpoint(server + BULKV2_ENDPOINT);
+            }
             this.connectorConfig.setTraceMessage(config.getBoolean(Config.WIRE_OUTPUT));
         }
         return this.connectorConfig;
     }
-
 }

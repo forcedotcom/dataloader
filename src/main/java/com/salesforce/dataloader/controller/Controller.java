@@ -29,6 +29,7 @@ import com.salesforce.dataloader.action.IAction;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.client.BulkClient;
+import com.salesforce.dataloader.client.BulkV2Client;
 import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.client.PartnerClient;
@@ -120,6 +121,7 @@ public class Controller {
     private DataAccessObjectFactory daoFactory;
     private DataAccessObject dao;
     private BulkClient bulkClient;
+    private BulkV2Client bulkV2Client;
     private PartnerClient partnerClient;
 
     // logger
@@ -578,7 +580,15 @@ public class Controller {
         }
         return this.bulkClient;
     }
-
+    
+    public BulkV2Client getBulkV2Client() {
+        if (this.bulkV2Client == null) {
+            this.bulkV2Client = new BulkV2Client(this);
+            loginIfSessionExists(this.bulkV2Client);
+        }
+        return this.bulkV2Client;
+    }
+    
     /**
      * @return Instance of configuration
      */
