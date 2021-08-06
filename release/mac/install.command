@@ -61,10 +61,13 @@ fi
 echo  Creating directory: $DL_FULL_PATH
 mkdir -p "$DL_FULL_PATH"
 SHELL_PATH=$(dirname "$0")
-rsync -r "$SHELL_PATH"/.  "$DL_FULL_PATH"  --exclude='.*'
-rm $DL_FULL_PATH/install.command 1>/dev/null
-rm $DL_FULL_PATH/dataloader.ico 1>/dev/null
-rm $DL_FULL_PATH/fileicon 1>/dev/null
+rsync -r "$SHELL_PATH"/.  "$DL_FULL_PATH" \
+  --exclude='.*' \
+  --exclude="install.command" \
+  --exclude="dataloader.ico" \
+  --exclude="fileicon" \
+  --exclude="*.zip" \
+  --exclude="META-INF"
 
 sed -i '' 's|DATALOADER_WORK_DIRECTORY_PLACEHOLDER|'"$DL_FULL_PATH"'|g'  "$DL_FULL_PATH"/dataloader.command
 
