@@ -426,7 +426,8 @@ public class Config {
         setDefaultValue(DUPLICATE_RULE_INCLUDE_RECORD_DETAILS, false);
         setDefaultValue(DUPLICATE_RULE_RUN_AS_CURRENT_USER, false);
         setDefaultValue(BUFFER_UNPROCESSED_BULK_QUERY_RESULTS, false);
-        setDefaultValue(ENABLE_BULK_V2_QUERY, false);
+        
+        setValue(ENABLE_BULK_V2_QUERY, false);
     }
 
     /**
@@ -906,7 +907,9 @@ public class Config {
         putValue(PROXY_PASSWORD, "");
         putValue(OAUTH_ACCESSTOKEN, "");
         putValue(OAUTH_REFRESHTOKEN, "");
-
+        
+        // do not save a value for enabling Bulk V2 query
+        this.properties.remove(ENABLE_BULK_V2_QUERY);
 
         FileOutputStream out = null;
         try {

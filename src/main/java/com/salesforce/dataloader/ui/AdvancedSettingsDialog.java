@@ -509,11 +509,16 @@ public class AdvancedSettingsDialog extends Dialog {
         labelUseBulkV2Query.setText(Labels.getString("AdvancedSettingsDialog.enableBulkV2Query")); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelUseBulkV2Query.setLayoutData(data);
+        // hide the label to enable/disable Bulk V2 query
+        labelUseBulkV2Query.setVisible(false);
 
         boolean useBulkV2Query = useBulkAPI && config.getBoolean(Config.ENABLE_BULK_V2_QUERY);
         buttonUseBulkV2Query = new Button(restComp, SWT.CHECK);
         buttonUseBulkV2Query.setSelection(useBulkV2Query);
         buttonUseBulkV2Query.setEnabled(useBulkAPI);
+        
+        // hide the checkbox to enable/disable Bulk V2 query
+        buttonUseBulkV2Query.setVisible(false);
 
         // timezone
         textTimezone = createTextInput(restComp, "AdvancedSettingsDialog.timezone", Config.TIMEZONE, TimeZone.getDefault().getID(), 200);
