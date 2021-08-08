@@ -908,8 +908,7 @@ public class Config {
         putValue(OAUTH_ACCESSTOKEN, "");
         putValue(OAUTH_REFRESHTOKEN, "");
         
-        // do not save a value for enabling Bulk V2 query
-        this.properties.remove(ENABLE_BULK_V2_QUERY);
+        skipSaveOfUnsupportedProperties();
 
         FileOutputStream out = null;
         try {
@@ -930,7 +929,11 @@ public class Config {
         lastRun.save();
     }
 
-
+    private void skipSaveOfUnsupportedProperties() {
+        // do not save a value for enabling Bulk V2 query
+        this.properties.remove(ENABLE_BULK_V2_QUERY);
+    }
+    
     /**
      * Save statistics from the last run
      */
