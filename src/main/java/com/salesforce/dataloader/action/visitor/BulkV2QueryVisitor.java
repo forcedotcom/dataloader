@@ -26,23 +26,17 @@
 
 package com.salesforce.dataloader.action.visitor;
 
-import java.io.ByteArrayInputStream;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ExtractException;
 import com.salesforce.dataloader.exception.OperationException;
 import com.sforce.async.AsyncApiException;
-import com.sforce.async.BatchInfo;
-import com.sforce.async.BatchStateEnum;
-import com.sforce.async.QueryResultList;
+
 
 /**
  * Query visitor for bulk api extract operations.
@@ -50,11 +44,11 @@ import com.sforce.async.QueryResultList;
  * @author Colin Jarvis
  * @since 21.0
  */
-public class BulkQueryVisitor extends AbstractBulkQueryVisitor {
+public class BulkV2QueryVisitor extends AbstractBulkQueryVisitor {
 
-    private BatchInfo[] batches;
+    private String jobId;
 
-    public BulkQueryVisitor(Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
+    public BulkV2QueryVisitor(Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {
         super(controller, monitor, queryWriter, successWriter, errorWriter);
     }
@@ -64,39 +58,25 @@ public class BulkQueryVisitor extends AbstractBulkQueryVisitor {
         final BulkApiVisitorUtil jobUtil = new BulkApiVisitorUtil(getController(), getProgressMonitor(),
                 getRateCalculator(), false);
         jobUtil.createJob();
-        try {
-            jobUtil.createBatch(new ByteArrayInputStream(soql.getBytes(Config.BULK_API_ENCODING)));
-        } catch (final UnsupportedEncodingException e) {
-            throw new ExtractException(e);
-        }
+        this.jobId = jobUtil.getJobId();
         jobUtil.awaitCompletionAndCloseJob();
-        if (!this.getConfig().getBoolean(Config.ENABLE_BULK_V2_QUERY)) {
-            this.batches = jobUtil.getBatches().getBatchInfo();
-        }
         return jobUtil.getRecordsProcessed();
     }
 
     @Override
     protected void writeExtraction() throws AsyncApiException, ExtractException, DataAccessObjectException {
-        for (BatchInfo b : this.batches) {
-            writeExtractionForBatch(b);
-        }
-    }
-    private void writeExtractionForBatch(BatchInfo batch) throws AsyncApiException, ExtractException, DataAccessObjectException {
-        if (batch.getState() == BatchStateEnum.Failed)
-            throw new ExtractException("Batch failed: " + batch.getStateMessage());
-        final QueryResultList results = getController().getBulkClient().getClient()
-                .getQueryResultList(batch.getJobId(), batch.getId());
-
-        for (final String resultId : results.getResult()) {
-            if (getProgressMonitor().isCanceled()) return;
-            try {
-                final InputStream serverResultStream = getController().getBulkClient().getClient()
-                        .getQueryResultStream(batch.getJobId(), batch.getId(), resultId);
+        BulkV2Connection v2Conn = getController().getBulkV2Client().getClient();
+        try {
+            InputStream serverResultStream = v2Conn.getQueryResultStream(this.jobId, "");
+            writeExtractionForServerStream(serverResultStream);
+            String locator = v2Conn.getQueryLocator();
+            while (!"null".equalsIgnoreCase(locator)) {
+                serverResultStream = v2Conn.getQueryResultStream(this.jobId, locator);
                 writeExtractionForServerStream(serverResultStream);
-            }  catch (final IOException e) {
-                throw new ExtractException(e);
+                locator = v2Conn.getQueryLocator();
             }
+        }   catch (final IOException e) {
+            throw new ExtractException(e);
         }
     }
 }

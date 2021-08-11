@@ -26,12 +26,9 @@
 
 package com.salesforce.dataloader.action.visitor;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
@@ -45,49 +42,61 @@ import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.xml.namespace.QName;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.salesforce.dataloader.config.Config;
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.AsyncExceptionCode;
 import com.sforce.async.AsyncXmlOutputStream;
-import com.sforce.async.BatchInfo;
-import com.sforce.async.BulkConnection;
 import com.sforce.async.ContentType;
 import com.sforce.async.JobInfo;
-import com.sforce.async.JobStateEnum;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.MessageHandler;
 import com.sforce.ws.MessageHandlerWithHeaders;
 import com.sforce.ws.bind.CalendarCodec;
+import com.sforce.ws.bind.TypeMapper;
 import com.sforce.ws.parser.PullParserException;
 import com.sforce.ws.parser.XmlInputStream;
 import com.sforce.ws.parser.XmlOutputStream;
 import com.sforce.ws.transport.Transport;
 import com.sforce.ws.util.FileUtil;
 
-public class BulkV2Connection extends BulkConnection {
+public class BulkV2Connection  {
     private static final JsonFactory JSON_FACTORY = new JsonFactory(new ObjectMapper());
     private static final String URI_STEM_QUERY = "query/";
     private static final String AUTH_HEADER = "Authorization";
     private static final String AUTH_HEADER_VALUE_PREFIX = "Bearer ";
-    
+    public static final String NAMESPACE = "http://www.force.com/2009/06/asyncapi/dataload";
+    public static final String SESSION_ID = "X-SFDC-Session";
+    public static final String XML_CONTENT_TYPE = "application/xml";
+    public static final String CSV_CONTENT_TYPE = "text/csv";
+    public static final String JSON_CONTENT_TYPE = "application/json";
+    public static final String ZIP_XML_CONTENT_TYPE = "zip/xml";
+    public static final String ZIP_CSV_CONTENT_TYPE = "zip/csv";
+    public static final String ZIP_JSON_CONTENT_TYPE = "zip/json";
+    public static final QName JOB_QNAME = new QName(NAMESPACE, "jobInfo");
+
     private String authHeaderValue = "";
     private String queryLocator = "";
-    private String queryResultNumberOfRecords = "";
+    private int numberOfRecordsInQueryResult = 0;
+    private ConnectorConfig config;
+    private HashMap<String, String> headers = new HashMap<String, String>();
+    public static final TypeMapper typeMapper = new TypeMapper(null, null, false);
 
     public BulkV2Connection(ConnectorConfig connectorConfig) throws AsyncApiException {
-        super(connectorConfig);
+        this.config = connectorConfig;
     }
     
     public JobInfo createJob(JobInfo job) throws AsyncApiException {
-        return createOrUpdateJob(job, job.getContentType() == null ? ContentType.JSON
-            : job.getContentType());
+        ContentType type = job.getContentType();
+        if (type != null && type != ContentType.CSV) {
+            throw new AsyncApiException("Unsupported Content Type", AsyncExceptionCode.FeatureNotEnabled);
+        }
+        return createOrUpdateJob(job, ContentType.CSV);
     }
     
     private JobInfo createOrUpdateJob(JobInfo job, ContentType contentType) throws AsyncApiException {
@@ -96,7 +105,6 @@ public class BulkV2Connection extends BulkConnection {
         // hardcoded header for OAuth2 auth bearer token
         // TODO: figure a way to get OAuth2 auth bearer token from session id
         this.authHeaderValue = AUTH_HEADER_VALUE_PREFIX + getConfig().getSessionId();
-        HashMap<String, String> headers = getHeaders(JSON_CONTENT_TYPE);
 
         // Bulk v2 uses OAuth 2 access token for Auth
 
@@ -104,11 +112,12 @@ public class BulkV2Connection extends BulkConnection {
             Transport transport = getConfig().createTransport();
             OutputStream out;
             if (contentType == ContentType.XML || contentType == ContentType.ZIP_XML) {
-                out = transport.connect(getConfig().getRestEndpoint() + URI_STEM_QUERY, headers);
+                out = transport.connect(getConfig().getRestEndpoint() + URI_STEM_QUERY, getHeaders(XML_CONTENT_TYPE));
                 XmlOutputStream xout = new AsyncXmlOutputStream(out, true);
+                job.write(JOB_QNAME, xout, typeMapper);
                 xout.close();
             } else {
-                out = transport.connect(getConfig().getRestEndpoint() + URI_STEM_QUERY, headers);
+                out = transport.connect(getConfig().getRestEndpoint() + URI_STEM_QUERY, getHeaders(JSON_CONTENT_TYPE));
                 BulkV2QueryJobJSON queryObj = new BulkV2QueryJobJSON(soqlStr);
                 serializeToJson (out, queryObj);
                 out.close();
@@ -139,6 +148,14 @@ public class BulkV2Connection extends BulkConnection {
         }
         return null;
     }
+
+    public void addHeader(String headerName, String headerValue) {
+        headers.put(headerName, headerValue);
+    }
+    
+    private ConnectorConfig getConfig() {
+        return config;
+    }
     
     static void parseAndThrowException(InputStream in, ContentType type) throws AsyncApiException {
         try {
@@ -157,6 +174,9 @@ public class BulkV2Connection extends BulkConnection {
 
     private HashMap<String, String> getHeaders(String contentType) {
         HashMap<String, String> newMap = new HashMap<String, String>();
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            newMap.put(entry.getKey(), entry.getValue());
+        }
         newMap.put("Content-Type", contentType);
         newMap.put(AUTH_HEADER, this.authHeaderValue);
         return newMap;
@@ -175,15 +195,7 @@ public class BulkV2Connection extends BulkConnection {
         // By default, ObjectMapper generates Calendar instances with UTC TimeZone.
         // Here, override that to "GMT" to better match the behavior of the WSC XML parser.
         mapper.setTimeZone(TimeZone.getTimeZone("GMT"));
-        InputStreamReader isReader = new InputStreamReader(in);
-        BufferedReader reader = new BufferedReader(isReader);
-        StringBuffer sb = new StringBuffer();
-        String str;
-        while((str = reader.readLine())!= null){
-           sb.append(str);
-        }
-        str = sb.toString();
-        return mapper.readValue(str, tmpClass);
+        return mapper.readValue(in, tmpClass);
     }
 
     public JobInfo getJobStatus(String jobId) throws AsyncApiException {
@@ -196,7 +208,7 @@ public class BulkV2Connection extends BulkConnection {
             endpoint += URI_STEM_QUERY + jobId;
             URL url = new URL(endpoint);
     
-            InputStream in = doHttpGet(url);
+            InputStream in = doGetJobStatusStream(url);
     
             if (contentType == ContentType.JSON  || contentType == ContentType.ZIP_JSON) {
                 return deserializeJsonToObject(in, JobInfo.class);
@@ -222,21 +234,36 @@ public class BulkV2Connection extends BulkConnection {
             resultsURL += "?locator=" + locator;
         }
         try {
-            return doHttpGet(new URL(resultsURL));
+            return doGetQueryResultStream(new URL(resultsURL));
         } catch (IOException e) {
             throw new AsyncApiException("Failed to get result ", AsyncExceptionCode.ClientInputError, e);
         }
     }
     
-    private InputStream doHttpGet(URL url) throws IOException, AsyncApiException {
+    private InputStream doGetQueryResultStream(URL resultsURL) throws IOException, AsyncApiException {
+        HttpURLConnection httpConnection = openHttpConnection(resultsURL);
+        InputStream is = doHttpGet(httpConnection, resultsURL);
+        this.queryLocator = httpConnection.getHeaderField("Sforce-Locator");
+        this.numberOfRecordsInQueryResult = Integer.valueOf(httpConnection.getHeaderField("Sforce-NumberOfRecords"));
+        return is;
+    }
+    
+    private InputStream doGetJobStatusStream(URL jobStatusURL) throws IOException, AsyncApiException {
+        HttpURLConnection httpConnection = openHttpConnection(jobStatusURL);
+        return doHttpGet(httpConnection, jobStatusURL);
+    }
+    
+    private HttpURLConnection openHttpConnection(URL url) throws IOException {
         HttpURLConnection connection = getConfig().createConnection(url, null);
         SSLContext sslContext = getConfig().getSslContext();
         if (sslContext != null && connection instanceof HttpsURLConnection) {
             ((HttpsURLConnection)connection).setSSLSocketFactory(sslContext.getSocketFactory());
         }
         connection.setRequestProperty(AUTH_HEADER, this.authHeaderValue);
-        // connection.setRequestProperty(SESSION_ID, getConfig().getSessionId());
-
+        return connection;
+    }
+    
+    private InputStream doHttpGet(HttpURLConnection connection, URL url) throws IOException, AsyncApiException {
         boolean success = true;
         InputStream in;
         try {
@@ -302,25 +329,15 @@ public class BulkV2Connection extends BulkConnection {
             }
             parseAndThrowException(in, type);
         }
-
-        this.queryLocator = connection.getHeaderField("Sforce-Locator");
-        this.queryResultNumberOfRecords = connection.getHeaderField("Sforce-NumberOfRecords");
         return in;
     }
     
     public String getQueryLocator() {
         return this.queryLocator;
     }
-
-    public JobInfo closeJob(String jobId) throws AsyncApiException {
-        
-        JobInfo job = new JobInfo();
-        job.setId(jobId);
-        job.setState(JobStateEnum.Closed);
-        return job;
-        /*
-        return updateJob(job);
-        */
+    
+    public int getNumberOfRecordsInQueryResult() {
+        return this.numberOfRecordsInQueryResult;
     }
 }
 

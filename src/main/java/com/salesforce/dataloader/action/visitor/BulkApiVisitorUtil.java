@@ -57,7 +57,7 @@ class BulkApiVisitorUtil {
 
     private static final Logger logger = LogManager.getLogger(BulkApiVisitorUtil.class);
 
-    private final BulkConnection client;
+    private final BulkClientConnection client;
 
     private JobInfo jobInfo;
     private int recordsProcessed;
@@ -77,13 +77,15 @@ class BulkApiVisitorUtil {
     private int queryChunkSize;
     private String queryChunkStartRow = "";
     private Config config = null;
+    private Controller controller;
 
     BulkApiVisitorUtil(Controller ctl, ILoaderProgress monitor, LoadRateCalculator rateCalc, boolean updateProgress) {
         this.config = ctl.getConfig();
+        this.controller = ctl;
         if (isBulkV2QueryJob()) {
-            this.client = ctl.getBulkV2Client().getClient();
+            this.client = new BulkClientConnection(ctl.getBulkV2Client().getClient());
         } else {
-            this.client = ctl.getBulkClient().getClient();
+            this.client = new BulkClientConnection(ctl.getBulkClient().getClient());
         }
 
         try {
@@ -197,10 +199,11 @@ class BulkApiVisitorUtil {
         if (isBulkV2QueryJob()) {
             return null;
         }
+        BulkConnection connectionClient = this.controller.getBulkClient().getClient();
         if (this.jobInfo.getContentType() == ContentType.ZIP_CSV) {
-            batch = this.client.createBatchWithInputStreamAttachments(this.jobInfo, batchContent, this.attachments);
+            batch = connectionClient.createBatchWithInputStreamAttachments(this.jobInfo, batchContent, this.attachments);
         } else {
-            batch = this.client.createBatchFromStream(this.jobInfo, batchContent);
+            batch = connectionClient.createBatchFromStream(this.jobInfo, batchContent);
         }
         logger.info(Messages.getMessage(getClass(), "logBatchLoaded", batch.getId()));
         return batch;
@@ -274,7 +277,9 @@ class BulkApiVisitorUtil {
         this.jobInfo = this.client.getJobStatus(getJobId());
         updateJobStatus();
         awaitJobCompletion();
-        this.jobInfo = this.client.closeJob(getJobId());
+        if (!isBulkV2QueryJob()) {
+        	this.jobInfo = this.client.closeJob(getJobId());
+        }
     }
 
     private void updateJobStatus() {
@@ -291,11 +296,13 @@ class BulkApiVisitorUtil {
     }
 
     BatchInfoList getBatches() throws AsyncApiException {
-        return this.client.getBatchInfoList(getJobId());
+        BulkConnection connectionClient = this.controller.getBulkClient().getClient();
+        return connectionClient.getBatchInfoList(getJobId());
     }
 
     CSVReader getBatchResults(String batchId) throws AsyncApiException {
-        return new CSVReader(this.client.getBatchResultStream(getJobId(), batchId));
+        BulkConnection connectionClient = this.controller.getBulkClient().getClient();
+        return new CSVReader(connectionClient.getBatchResultStream(getJobId(), batchId));
     }
     
     int getRecordsProcessed() throws ExtractException, AsyncApiException {
