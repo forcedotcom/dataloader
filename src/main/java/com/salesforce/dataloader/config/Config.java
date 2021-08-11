@@ -263,6 +263,7 @@ public class Config {
     public static final String DUPLICATE_RULE_ALLOW_SAVE = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.allowSave"; //$NON-NLS-1$
     public static final String DUPLICATE_RULE_INCLUDE_RECORD_DETAILS = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.includeRecordDetails"; //$NON-NLS-1$
     public static final String DUPLICATE_RULE_RUN_AS_CURRENT_USER = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.runAsCurrentUser"; //$NON-NLS-1$
+    public static final String ENABLE_BULK_V2_QUERY = PILOT_PROPERTY_PREFIX + "sfdc.enableBulkV2Query";
     
     /*
      * ===============================
@@ -425,6 +426,7 @@ public class Config {
         setDefaultValue(DUPLICATE_RULE_INCLUDE_RECORD_DETAILS, false);
         setDefaultValue(DUPLICATE_RULE_RUN_AS_CURRENT_USER, false);
         setDefaultValue(BUFFER_UNPROCESSED_BULK_QUERY_RESULTS, false);
+        setDefaultValue(ENABLE_BULK_V2_QUERY, false);
     }
 
     /**
@@ -904,7 +906,8 @@ public class Config {
         putValue(PROXY_PASSWORD, "");
         putValue(OAUTH_ACCESSTOKEN, "");
         putValue(OAUTH_REFRESHTOKEN, "");
-
+        
+        skipSaveOfUnsupportedProperties();
 
         FileOutputStream out = null;
         try {
@@ -925,7 +928,11 @@ public class Config {
         lastRun.save();
     }
 
-
+    private void skipSaveOfUnsupportedProperties() {
+        // do not save a value for enabling Bulk V2 query
+        this.properties.remove(ENABLE_BULK_V2_QUERY);
+    }
+    
     /**
      * Save statistics from the last run
      */

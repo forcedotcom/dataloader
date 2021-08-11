@@ -94,6 +94,7 @@ public class AdvancedSettingsDialog extends Dialog {
     private Button buttonEuroDates;
     private Button buttonTruncateFields;
     private Button buttonUseBulkApi;
+    private Button buttonUseBulkV2Query;
     private Button buttonBulkApiSerialMode;
     private Button buttonBulkApiZipContent;
     private Button buttonCsvComma;
@@ -188,6 +189,7 @@ public class AdvancedSettingsDialog extends Dialog {
         setButtonEnabled(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent, enabled);
         setButtonEnabled(Config.INSERT_NULLS, buttonNulls, !enabled);
         setButtonEnabled(Config.TRUNCATE_FIELDS, buttonTruncateFields, !enabled);
+        setButtonEnabled(Config.ENABLE_BULK_V2_QUERY, buttonUseBulkV2Query, enabled);
     }
 
     private void setButtonEnabled(String configKey, Button b, boolean enabled) {
@@ -501,6 +503,23 @@ public class AdvancedSettingsDialog extends Dialog {
         buttonBulkApiZipContent = new Button(restComp, SWT.CHECK);
         buttonBulkApiZipContent.setSelection(config.getBoolean(Config.BULK_API_SERIAL_MODE));
         buttonBulkApiZipContent.setEnabled(useBulkAPI);
+        
+        // Enable Bulk API Setting
+        Label labelUseBulkV2Query = new Label(restComp, SWT.RIGHT);
+        labelUseBulkV2Query.setText(Labels.getString("AdvancedSettingsDialog.enableBulkV2Query")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelUseBulkV2Query.setLayoutData(data);
+        // hide the label to enable/disable Bulk V2 query
+        labelUseBulkV2Query.setVisible(false);
+
+        boolean useBulkV2Query = useBulkAPI && config.getBoolean(Config.ENABLE_BULK_V2_QUERY);
+        buttonUseBulkV2Query = new Button(restComp, SWT.CHECK);
+        buttonUseBulkV2Query.setSelection(useBulkV2Query);
+        buttonUseBulkV2Query.setEnabled(useBulkAPI);
+        
+        // hide the checkbox to enable/disable Bulk V2 query
+        buttonUseBulkV2Query.setVisible(false);
+
         // timezone
         textTimezone = createTextInput(restComp, "AdvancedSettingsDialog.timezone", Config.TIMEZONE, TimeZone.getDefault().getID(), 200);
 
@@ -688,6 +707,7 @@ public class AdvancedSettingsDialog extends Dialog {
                 config.setValue(Config.BULK_API_ENABLED, buttonUseBulkApi.getSelection());
                 config.setValue(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode.getSelection());
                 config.setValue(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
+                config.setValue(Config.ENABLE_BULK_V2_QUERY, buttonUseBulkV2Query.getSelection());
 
                 controller.saveConfig();
                 controller.logout();

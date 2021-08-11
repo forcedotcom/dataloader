@@ -62,7 +62,8 @@ public abstract class ClientBase<ClientType> {
         DEFAULT_AUTH_ENDPOINT_URL = loginUrl;
     }
 
-    public static final String REST_ENDPOINT = "/services/async/" + Controller.API_VERSION;
+    public static final String BULKV1_ENDPOINT = "/services/async/" + Controller.API_VERSION;
+    public static final String BULKV2_ENDPOINT = "/services/data/v" + Controller.API_VERSION + "/jobs/";
 
     protected final Logger logger;
     protected final Controller controller;
@@ -192,7 +193,7 @@ public abstract class ClientBase<ClientType> {
         if (server != null) {
             cc.setAuthEndpoint(server + DEFAULT_AUTH_ENDPOINT_URL.getPath());
             cc.setServiceEndpoint(server + DEFAULT_AUTH_ENDPOINT_URL.getPath());
-            cc.setRestEndpoint(server + REST_ENDPOINT);
+            cc.setRestEndpoint(server + BULKV1_ENDPOINT);
         }
 
         return cc;

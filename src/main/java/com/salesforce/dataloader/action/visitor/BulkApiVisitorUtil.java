@@ -38,24 +38,26 @@ import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.exception.ExtractException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.util.LoadRateCalculator;
 import com.sforce.async.AsyncApiException;
-import com.sforce.async.AsyncExceptionCode;
 import com.sforce.async.BatchInfo;
 import com.sforce.async.BatchInfoList;
+import com.sforce.async.BatchStateEnum;
 import com.sforce.async.BulkConnection;
 import com.sforce.async.CSVReader;
 import com.sforce.async.ConcurrencyMode;
 import com.sforce.async.ContentType;
 import com.sforce.async.JobInfo;
+import com.sforce.async.JobStateEnum;
 import com.sforce.async.OperationEnum;
 
 class BulkApiVisitorUtil {
 
     private static final Logger logger = LogManager.getLogger(BulkApiVisitorUtil.class);
 
-    private final BulkConnection client;
+    private final BulkClientConnection client;
 
     private JobInfo jobInfo;
     private int recordsProcessed;
@@ -75,10 +77,17 @@ class BulkApiVisitorUtil {
     private int queryChunkSize;
     private String queryChunkStartRow = "";
     private Config config = null;
+    private Controller controller;
 
     BulkApiVisitorUtil(Controller ctl, ILoaderProgress monitor, LoadRateCalculator rateCalc, boolean updateProgress) {
-        this.client = ctl.getBulkClient().getClient();
         this.config = ctl.getConfig();
+        this.controller = ctl;
+        if (isBulkV2QueryJob()) {
+            this.client = new BulkClientConnection(ctl.getBulkV2Client().getClient());
+        } else {
+            this.client = new BulkClientConnection(ctl.getBulkClient().getClient());
+        }
+
         try {
             // getLong will return 0 if no value is provided
             long checkStatusInt = ctl.getConfig().getLong(Config.BULK_API_CHECK_STATUS_INTERVAL);
@@ -122,22 +131,30 @@ class BulkApiVisitorUtil {
     String getJobId() {
         return this.jobInfo.getId();
     }
+    
+    public JobInfo getJobInfo() {
+        return this.jobInfo;
+    }
+    
+    public void setJobInfo(JobInfo jinfo) {
+        this.jobInfo = jinfo;
+    }
 
-    void createJob(Config cfg) throws AsyncApiException {
+    void createJob() throws AsyncApiException {
         JobInfo job = new JobInfo();
-        final OperationEnum op = cfg.getOperationInfo().getOperationEnum();
+        final OperationEnum op = this.config.getOperationInfo().getOperationEnum();
         job.setOperation(op);
         if (op == OperationEnum.upsert) {
-            job.setExternalIdFieldName(cfg.getString(Config.EXTERNAL_ID_FIELD));
+            job.setExternalIdFieldName(this.config.getString(Config.EXTERNAL_ID_FIELD));
         }
-        job.setObject(cfg.getString(Config.ENTITY));
-        job.setContentType(cfg.getBoolean(Config.BULK_API_ZIP_CONTENT) && op != OperationEnum.query ? ContentType.ZIP_CSV
+        job.setObject(this.config.getString(Config.ENTITY));
+        job.setContentType(this.config.getBoolean(Config.BULK_API_ZIP_CONTENT) && op != OperationEnum.query ? ContentType.ZIP_CSV
                 : ContentType.CSV);
-        job.setConcurrencyMode(cfg.getBoolean(Config.BULK_API_SERIAL_MODE) ? ConcurrencyMode.Serial
+        job.setConcurrencyMode(this.config.getBoolean(Config.BULK_API_SERIAL_MODE) ? ConcurrencyMode.Serial
                 : ConcurrencyMode.Parallel);
 
         if (op == OperationEnum.update || op == OperationEnum.upsert || op == OperationEnum.insert) {
-            final String assRule = cfg.getString(Config.ASSIGNMENT_RULE);
+            final String assRule = this.config.getString(Config.ASSIGNMENT_RULE);
             if (assRule != null && (assRule.length() == 15 || assRule.length() == 18)) {
                 job.setAssignmentRuleId(assRule);
             }
@@ -153,6 +170,10 @@ class BulkApiVisitorUtil {
                 this.client.addHeader("Sforce-Enable-PKChunking", 
                                       "chunkSize=" + this.queryChunkSize + startRowParam);
             }
+        }
+        if (isBulkV2QueryJob()) {
+            job.setObject(this.config.getString(Config.EXTRACT_SOQL));
+            logger.info("going to create BulkV2 query job");
         }
         job = this.client.createJob(job);
         logger.info(Messages.getMessage(getClass(), "logJobCreated", job.getId()));
@@ -174,11 +195,15 @@ class BulkApiVisitorUtil {
     }
 
     BatchInfo createBatch(InputStream batchContent) throws AsyncApiException {
-        BatchInfo batch;
+        BatchInfo batch = null;
+        if (isBulkV2QueryJob()) {
+            return null;
+        }
+        BulkConnection connectionClient = this.controller.getBulkClient().getClient();
         if (this.jobInfo.getContentType() == ContentType.ZIP_CSV) {
-            batch = this.client.createBatchWithInputStreamAttachments(this.jobInfo, batchContent, this.attachments);
+            batch = connectionClient.createBatchWithInputStreamAttachments(this.jobInfo, batchContent, this.attachments);
         } else {
-            batch = this.client.createBatchFromStream(this.jobInfo, batchContent);
+            batch = connectionClient.createBatchFromStream(this.jobInfo, batchContent);
         }
         logger.info(Messages.getMessage(getClass(), "logBatchLoaded", batch.getId()));
         return batch;
@@ -219,12 +244,28 @@ class BulkApiVisitorUtil {
 
     private void awaitJobCompletion() throws AsyncApiException {
         long sleepTime = periodicCheckStatus();
-        while (this.jobInfo.getNumberBatchesQueued() > 0 || this.jobInfo.getNumberBatchesInProgress() > 0) {
+        
+        while (!isJobCompleted()) {
             if (this.monitor.isCanceled()) return;
             try {
                 Thread.sleep(sleepTime);
             } catch (final InterruptedException e) {}
             sleepTime = periodicCheckStatus();
+        }
+    }
+    
+    private boolean isBulkV2QueryJob() {
+        final OperationEnum op = this.config.getOperationInfo().getOperationEnum();
+        return (op == OperationEnum.query || op == OperationEnum.queryAll)
+        && this.config.getBoolean(Config.ENABLE_BULK_V2_QUERY);
+    }
+    
+    private boolean isJobCompleted() {
+        if (isBulkV2QueryJob()) {
+            return this.jobInfo.getState() == JobStateEnum.JobComplete;
+        } else { // bulk v1 flavor
+            return this.jobInfo.getNumberBatchesQueued() == 0 
+                    && this.jobInfo.getNumberBatchesInProgress() == 0;
         }
     }
 
@@ -236,7 +277,9 @@ class BulkApiVisitorUtil {
         this.jobInfo = this.client.getJobStatus(getJobId());
         updateJobStatus();
         awaitJobCompletion();
-        this.jobInfo = this.client.closeJob(getJobId());
+        if (!isBulkV2QueryJob()) {
+        	this.jobInfo = this.client.closeJob(getJobId());
+        }
     }
 
     private void updateJobStatus() {
@@ -244,8 +287,8 @@ class BulkApiVisitorUtil {
             this.monitor.worked(this.jobInfo.getNumberRecordsProcessed() - this.recordsProcessed);
             this.monitor.setSubTask(this.rateCalc.calculateSubTask(this.jobInfo.getNumberRecordsProcessed(),
                     this.jobInfo.getNumberRecordsFailed()));
-            this.recordsProcessed = this.jobInfo.getNumberRecordsProcessed();
         }
+        this.recordsProcessed = this.jobInfo.getNumberRecordsProcessed();
         this.lastStatusUpdate = System.currentTimeMillis();
         logger.info(Messages.getMessage(getClass(), "logJobStatus", this.jobInfo.getNumberBatchesQueued(),
                 this.jobInfo.getNumberBatchesInProgress(), this.jobInfo.getNumberBatchesCompleted(),
@@ -253,11 +296,25 @@ class BulkApiVisitorUtil {
     }
 
     BatchInfoList getBatches() throws AsyncApiException {
-        return this.client.getBatchInfoList(getJobId());
+        BulkConnection connectionClient = this.controller.getBulkClient().getClient();
+        return connectionClient.getBatchInfoList(getJobId());
     }
 
     CSVReader getBatchResults(String batchId) throws AsyncApiException {
-        return new CSVReader(this.client.getBatchResultStream(getJobId(), batchId));
+        BulkConnection connectionClient = this.controller.getBulkClient().getClient();
+        return new CSVReader(connectionClient.getBatchResultStream(getJobId(), batchId));
     }
-
+    
+    int getRecordsProcessed() throws ExtractException, AsyncApiException {
+        if (!isBulkV2QueryJob()) {
+            final BatchInfo[] batchInfoArray = getBatches().getBatchInfo();
+            for (BatchInfo batchInfo : batchInfoArray) {
+                if (batchInfo.getState() == BatchStateEnum.Failed) {
+                    throw new ExtractException("Batch failed: " + batchInfo.getStateMessage());
+                }
+                this.recordsProcessed += batchInfo.getNumberRecordsProcessed();
+            }
+        }
+        return this.recordsProcessed;
+    }
 }

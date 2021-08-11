@@ -62,8 +62,12 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getParameters() {
         return Arrays.asList(
-                TestVariant.defaultSettings(),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED));
+                // partner API
+                TestVariant.forSettings(TestSetting.BULK_API_DISABLED, TestSetting.BULK_V2_QUERY_DISABLED),
+                // Bulk API
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_QUERY_DISABLED),
+                // Bulk V2 Query API
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_QUERY_ENABLED));
     }
 
     protected class ExtractContactGenerator extends ContactGenerator {
@@ -231,9 +235,14 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
 
         final String soql = "select id from " + nonQueryableType;
         final Map<String, String> argmap = getTestConfig(soql, nonQueryableType, false);
-        argmap.put(Config.OPERATION, OperationInfo.extract_all.name());
 
-        runProcessNegative(argmap, "entity type " + nonQueryableType + " does not support query");
+        if (isBulkV2QueryEnabled(argmap) || !isBulkAPIEnabled(argmap)) {
+            // Partner or Bulk v2 query 
+            runProcessNegative(argmap, "entity type " + nonQueryableType + " does not support query");
+        } else {
+            // Bulk v1 query
+            runProcessNegative(argmap, "Entity '" + nonQueryableType + "' is not supported by the Bulk API.");
+        }
     }
 
     public abstract void testMalformedQueries() throws Exception;
@@ -368,7 +377,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         if (isBulkAPIEnabled(argMap)) {
             runProcessNegative(
                     argMap,
-                    "Batch failed: InvalidBatch : Failed to process query: FUNCTIONALITY_NOT_ENABLED: Aggregate Relationships not supported in Bulk Query");
+                    "Aggregate Relationships not supported in Bulk Query");
         } else {
             runProcess(argMap, 1, true);
             final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME), getController());
@@ -394,5 +403,8 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         // bulk api is not used for query all
         return !isExtractAll() && super.isBulkAPIEnabled(argMap);
     }
-
+    protected boolean isBulkV2QueryEnabled(Map<String, String> argMap) {
+        // bulk api is not used for query all
+        return !isExtractAll() && super.isBulkAPIEnabled(argMap) && isSettingEnabled(argMap, Config.ENABLE_BULK_V2_QUERY);
+    }
 }
