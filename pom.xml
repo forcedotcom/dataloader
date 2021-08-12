@@ -342,7 +342,7 @@
         <dependency>
           <groupId>local.swt</groupId>
           <artifactId>swtmacx86_64</artifactId>
-          <version>4.19</version>
+          <version>4.20</version>
         </dependency>
       </dependencies>
       <properties>
@@ -362,7 +362,7 @@
         <dependency>
           <groupId>local.swt</groupId>
           <artifactId>swtmacarm64</artifactId>
-          <version>4.19</version>
+          <version>4.20</version>
         </dependency>
       </dependencies>
       <properties>
@@ -382,7 +382,7 @@
         <dependency>
           <groupId>local.swt</groupId>
           <artifactId>swtwin32_x86_64</artifactId>
-          <version>4.19</version>
+          <version>4.20</version>
         </dependency>
       </dependencies>
       <properties>
