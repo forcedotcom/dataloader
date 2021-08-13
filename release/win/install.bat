@@ -74,7 +74,6 @@ IF EXIST %INSTALLATION_DIR% (
     echo Copying files from '%SRC_DIR%' to '%INSTALLATION_DIR%'  ...
     xcopy "%SRC_DIR%" "%INSTALLATION_DIR%" /e /i
     del "%INSTALLATION_DIR%\install.bat" /q
-    del "%INSTALLATION_DIR%\dataloader.ico" /q
     rmdir "%INSTALLATION_DIR%\META-INF" /s /q
     echo Your Data Loader v%DATALOADER_VERSION% is created in '%INSTALLATION_DIR%'
 
