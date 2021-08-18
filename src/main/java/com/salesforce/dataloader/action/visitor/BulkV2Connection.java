@@ -26,17 +26,24 @@
 
 package com.salesforce.dataloader.action.visitor;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.FileOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
 
@@ -44,15 +51,15 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.xml.namespace.QName;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.salesforce.dataloader.client.HttpClientTransport;
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.AsyncExceptionCode;
-import com.sforce.async.AsyncXmlOutputStream;
 import com.sforce.async.ContentType;
 import com.sforce.async.JobInfo;
+import com.sforce.async.OperationEnum;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.MessageHandler;
@@ -61,13 +68,19 @@ import com.sforce.ws.bind.CalendarCodec;
 import com.sforce.ws.bind.TypeMapper;
 import com.sforce.ws.parser.PullParserException;
 import com.sforce.ws.parser.XmlInputStream;
-import com.sforce.ws.parser.XmlOutputStream;
 import com.sforce.ws.transport.Transport;
 import com.sforce.ws.util.FileUtil;
 
+enum HttpMethod {
+    GET,
+    POST,
+    PATCH,
+    PUT
+}
+
 public class BulkV2Connection  {
-    private static final JsonFactory JSON_FACTORY = new JsonFactory(new ObjectMapper());
     private static final String URI_STEM_QUERY = "query/";
+    private static final String URI_STEM_INGEST = "ingest/";
     private static final String AUTH_HEADER = "Authorization";
     private static final String AUTH_HEADER_VALUE_PREFIX = "Bearer ";
     public static final String NAMESPACE = "http://www.force.com/2009/06/asyncapi/dataload";
@@ -78,17 +91,26 @@ public class BulkV2Connection  {
     public static final String ZIP_XML_CONTENT_TYPE = "zip/xml";
     public static final String ZIP_CSV_CONTENT_TYPE = "zip/csv";
     public static final String ZIP_JSON_CONTENT_TYPE = "zip/json";
+    public static final String UTF_8 = "UTF-8";
+    public static final String INGEST_RESULTS_SUCCESSFUL = "successfulResults";
+    public static final String INGEST_RESULTS_UNSUCCESSFUL = "failedResults";
+    public static final String INGEST_RECORDS_UNPROCESSED = "unprocessedrecords";
     public static final QName JOB_QNAME = new QName(NAMESPACE, "jobInfo");
 
     private String authHeaderValue = "";
     private String queryLocator = "";
     private int numberOfRecordsInQueryResult = 0;
     private ConnectorConfig config;
-    private HashMap<String, String> headers = new HashMap<String, String>();
     public static final TypeMapper typeMapper = new TypeMapper(null, null, false);
 
+    /**********************************
+     * 
+     * public, common methods 
+     * 
+     **********************************/
     public BulkV2Connection(ConnectorConfig connectorConfig) throws AsyncApiException {
         this.config = connectorConfig;
+        this.authHeaderValue = AUTH_HEADER_VALUE_PREFIX + getConfig().getSessionId();
     }
     
     public JobInfo createJob(JobInfo job) throws AsyncApiException {
@@ -99,134 +121,36 @@ public class BulkV2Connection  {
         return createOrUpdateJob(job, ContentType.CSV);
     }
     
-    private JobInfo createOrUpdateJob(JobInfo job, ContentType contentType) throws AsyncApiException {
-        String soqlStr = job.getObject();
-        
-        // hardcoded header for OAuth2 auth bearer token
-        // TODO: figure a way to get OAuth2 auth bearer token from session id
-        this.authHeaderValue = AUTH_HEADER_VALUE_PREFIX + getConfig().getSessionId();
-
-        // Bulk v2 uses OAuth 2 access token for Auth
-
-        try {
-            Transport transport = getConfig().createTransport();
-            OutputStream out;
-            if (contentType == ContentType.XML || contentType == ContentType.ZIP_XML) {
-                out = transport.connect(getConfig().getRestEndpoint() + URI_STEM_QUERY, getHeaders(XML_CONTENT_TYPE));
-                XmlOutputStream xout = new AsyncXmlOutputStream(out, true);
-                job.write(JOB_QNAME, xout, typeMapper);
-                xout.close();
-            } else {
-                out = transport.connect(getConfig().getRestEndpoint() + URI_STEM_QUERY, getHeaders(JSON_CONTENT_TYPE));
-                BulkV2QueryJobJSON queryObj = new BulkV2QueryJobJSON(soqlStr);
-                serializeToJson (out, queryObj);
-                out.close();
-            }
-
-            InputStream in = transport.getContent();
-
-            if (transport.isSuccessful()) {
-                if (contentType == ContentType.ZIP_XML || contentType == ContentType.XML) {
-                    XmlInputStream xin = new XmlInputStream();
-                    xin.setInput(in, "UTF-8");
-                    JobInfo result = new JobInfo();
-                    result.load(xin, typeMapper);
-                    return result;
-                } else {
-                    JobInfo result = deserializeJsonToObject(in, JobInfo.class);
-                    return result;
-                }
-            } else {
-                parseAndThrowException(in, contentType);
-            }
-        } catch (PullParserException e) {
-            throw new AsyncApiException("Failed to create job ", AsyncExceptionCode.ClientInputError, e);
-        } catch (IOException e) {
-            throw new AsyncApiException("Failed to create job ", AsyncExceptionCode.ClientInputError, e);
-        } catch (ConnectionException e) {
-            throw new AsyncApiException("Failed to create job ", AsyncExceptionCode.ClientInputError, e);
+    public JobInfo getJobStatus(String jobId, boolean isQuery) throws AsyncApiException {
+        return getJobStatus(jobId, isQuery, ContentType.JSON);
+    }
+    
+    public JobInfo getJobStatus(String jobId, boolean isQuery, ContentType contentType) throws AsyncApiException {
+        String urlString = getConfig().getRestEndpoint();
+        if (isQuery) {
+        	urlString += URI_STEM_QUERY + jobId;
+        } else {
+        	urlString += URI_STEM_INGEST + jobId;
         }
-        return null;
-    }
-
-    public void addHeader(String headerName, String headerValue) {
-        headers.put(headerName, headerValue);
-    }
-    
-    private ConnectorConfig getConfig() {
-        return config;
-    }
-    
-    static void parseAndThrowException(InputStream in, ContentType type) throws AsyncApiException {
-        try {
-            AsyncApiException exception;
-            BulkV2QueryError[] errorList = deserializeJsonToObject(in, BulkV2QueryError[].class);
-            if (errorList[0].message.contains("Aggregate Relationships not supported in Bulk Query")) {
-                exception = new AsyncApiException(errorList[0].message, AsyncExceptionCode.FeatureNotEnabled);
-            } else {
-                exception = new AsyncApiException(errorList[0].errorCode + errorList[0].message, AsyncExceptionCode.Unknown);
-            }
-            throw exception;
-        } catch (IOException e) {
-            throw new AsyncApiException("Failed to parse exception", AsyncExceptionCode.ClientInputError, e);
-        }
-    }
-
-    private HashMap<String, String> getHeaders(String contentType) {
-        HashMap<String, String> newMap = new HashMap<String, String>();
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            newMap.put(entry.getKey(), entry.getValue());
-        }
-        newMap.put("Content-Type", contentType);
-        newMap.put(AUTH_HEADER, this.authHeaderValue);
-        return newMap;
+        HashMap<String, String> headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
+    	// there is nothing in the request body.
+    	return doSendJobRequestToServer(urlString, 
+										headers,
+										HttpMethod.GET,
+										ContentType.JSON,
+										null,
+										true,
+										"Failed to get job status");
     }
     
-    static void serializeToJson(OutputStream out, Object value) throws IOException{
-        JsonGenerator generator = JSON_FACTORY.createJsonGenerator(out);
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setDateFormat(CalendarCodec.getDateFormat());
-        mapper.writeValue(generator, value);
-    }
-    
-    static <T> T deserializeJsonToObject (InputStream in, Class<T> tmpClass) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-        // By default, ObjectMapper generates Calendar instances with UTC TimeZone.
-        // Here, override that to "GMT" to better match the behavior of the WSC XML parser.
-        mapper.setTimeZone(TimeZone.getTimeZone("GMT"));
-        return mapper.readValue(in, tmpClass);
-    }
-
-    public JobInfo getJobStatus(String jobId) throws AsyncApiException {
-        return getJobStatus(jobId, ContentType.JSON);
-    }
-    
-    public JobInfo getJobStatus(String jobId, ContentType contentType) throws AsyncApiException {
-        try {
-            String endpoint = getConfig().getRestEndpoint();
-            endpoint += URI_STEM_QUERY + jobId;
-            URL url = new URL(endpoint);
-    
-            InputStream in = doGetJobStatusStream(url);
-    
-            if (contentType == ContentType.JSON  || contentType == ContentType.ZIP_JSON) {
-                return deserializeJsonToObject(in, JobInfo.class);
-            } else {
-                JobInfo result = new JobInfo();
-                XmlInputStream xin = new XmlInputStream();
-                xin.setInput(in, "UTF-8");
-                result.load(xin, typeMapper);
-                return result;
-            }
-        } catch (PullParserException e) {
-            throw new AsyncApiException("Failed to get job status ", AsyncExceptionCode.ClientInputError, e);
-        } catch (IOException e) {
-            throw new AsyncApiException("Failed to get job status ", AsyncExceptionCode.ClientInputError, e);
-        } catch (ConnectionException e) {
-            throw new AsyncApiException("Failed to get job status ", AsyncExceptionCode.ClientInputError, e);
-        }
-    }
+    /**********************************
+     * 
+     * public, extract (aka query) methods 
+     * 
+     **********************************/
+    public JobInfo getExtractJobStatus(String jobId) throws AsyncApiException {
+        return getJobStatus(jobId, true);
+    }        
 
     public InputStream getQueryResultStream(String jobId, String locator) throws AsyncApiException {
         String resultsURL = getConfig().getRestEndpoint() + URI_STEM_QUERY + jobId + "/results";
@@ -234,35 +158,264 @@ public class BulkV2Connection  {
             resultsURL += "?locator=" + locator;
         }
         try {
-            return doGetQueryResultStream(new URL(resultsURL));
+            return doGetQueryResultStream(new URL(resultsURL), getHeaders(JSON_CONTENT_TYPE, CSV_CONTENT_TYPE));
         } catch (IOException e) {
             throw new AsyncApiException("Failed to get result ", AsyncExceptionCode.ClientInputError, e);
         }
     }
     
-    private InputStream doGetQueryResultStream(URL resultsURL) throws IOException, AsyncApiException {
-        HttpURLConnection httpConnection = openHttpConnection(resultsURL);
-        InputStream is = doHttpGet(httpConnection, resultsURL);
-        this.queryLocator = httpConnection.getHeaderField("Sforce-Locator");
-        this.numberOfRecordsInQueryResult = Integer.valueOf(httpConnection.getHeaderField("Sforce-NumberOfRecords"));
-        return is;
+    public String getQueryLocator() {
+        return this.queryLocator;
     }
     
-    private InputStream doGetJobStatusStream(URL jobStatusURL) throws IOException, AsyncApiException {
-        HttpURLConnection httpConnection = openHttpConnection(jobStatusURL);
-        return doHttpGet(httpConnection, jobStatusURL);
+    public int getNumberOfRecordsInQueryResult() {
+        return this.numberOfRecordsInQueryResult;
     }
     
-    private HttpURLConnection openHttpConnection(URL url) throws IOException {
+    /**********************************
+     * 
+     * public, ingest (create, update, upsert, delete) methods 
+     * 
+     **********************************/
+    // needed for all upload operations (non-query operations)
+    public JobInfo startIngest(String jobId, String csvFileName) throws AsyncApiException {
+    	File csvFile = new File(csvFileName);
+    	if (!csvFile.exists()) {
+    		throw new AsyncApiException(csvFileName + " not found.", AsyncExceptionCode.ClientInputError);
+    	}
+    	// Bulk V2 inges does not accept CSV exceeding 150 MB in size
+    	if (csvFile.length() > 150 * 1024 * 1024) {
+    		throw new AsyncApiException(csvFileName + " size exceeds the max file size accepted by Bulk V2 (150 MB)", AsyncExceptionCode.ClientInputError);
+    	}
+    	
+        String urlString = getConfig().getRestEndpoint() + URI_STEM_INGEST + jobId + "/batches/";
+        HashMap<String, String> headers = getHeaders(CSV_CONTENT_TYPE, JSON_CONTENT_TYPE);
+        try {
+        	HttpClientTransport transport = (HttpClientTransport)getConfig().createTransport();
+            OutputStream serverRequestStream;
+            serverRequestStream = transport.connectPut(urlString, headers, true, new FileInputStream(csvFile), CSV_CONTENT_TYPE);
+            if (serverRequestStream != null) {
+            	serverRequestStream.close();
+            }
+            
+            // Following is needed to actually send the request to the server
+            InputStream serverResponseStream = transport.getContent();
+            if (!transport.isSuccessful()) {
+	            parseAndThrowException(serverResponseStream, ContentType.JSON);
+            }
+            // server does not send back any response.
+        }catch (IOException e) {
+            throw new AsyncApiException("Failed to send contents of " + csvFileName + " to server", AsyncExceptionCode.ClientInputError, e);
+        } catch (ConnectionException e) {
+            throw new AsyncApiException("Failed to send contents of " + csvFileName + " to server", AsyncExceptionCode.ClientInputError, e);
+        }
+        
+        // Mark upload as completed
+        urlString = getConfig().getRestEndpoint()+ URI_STEM_INGEST + jobId;
+        headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
+    	HashMap<Object, Object> requestBodyMap = new HashMap<Object, Object>();
+    	requestBodyMap.put("state", "UploadComplete");
+    	doSendJobRequestToServer(urlString,
+									headers,
+									HttpMethod.PATCH,
+									ContentType.JSON,
+									requestBodyMap,
+									false,
+									"Failed to mark completion of the upload");
+    	return getIngestJobStatus(jobId);
+    }
+    
+    public JobInfo getIngestJobStatus(String jobId) throws AsyncApiException {
+        return getJobStatus(jobId, false);
+    }
+    
+    public void saveIngestSuccessResults(String jobId, String filename) throws AsyncApiException {
+    	doSaveIngestResults(jobId, filename, INGEST_RESULTS_SUCCESSFUL);
+    }
+    
+    public void saveIngestFailureResults(String jobId, String filename) throws AsyncApiException {
+    	doSaveIngestResults(jobId, filename, INGEST_RESULTS_UNSUCCESSFUL);
+    }
+    
+    public void saveIngestUnprocessedRecords(String jobId, String filename) throws AsyncApiException {
+    	doSaveIngestResults(jobId, filename, INGEST_RECORDS_UNPROCESSED);
+    }
+    
+    public InputStream getIngestSuccessResultsStream(String jobId) throws AsyncApiException {
+    	return doGetIngestResultsStream(jobId, INGEST_RESULTS_SUCCESSFUL);
+    }
+
+    public InputStream getIngestFailedResultsStream(String jobId) throws AsyncApiException {
+    	return doGetIngestResultsStream(jobId, INGEST_RESULTS_UNSUCCESSFUL);
+    }
+
+    public InputStream getIngestUnprocessedRecordsStream(String jobId) throws AsyncApiException {
+    	return doGetIngestResultsStream(jobId, INGEST_RECORDS_UNPROCESSED);
+    }
+    
+    /**********************************
+     * 
+     * private, common methods 
+     * 
+     **********************************/
+    private JobInfo createOrUpdateJob(JobInfo job, ContentType contentType) throws AsyncApiException {
+        ContentType type = job.getContentType();
+        if (type != null && type != ContentType.CSV) {
+            throw new AsyncApiException("Unsupported Content Type", AsyncExceptionCode.FeatureNotEnabled);
+        }
+        OperationEnum operation = job.getOperation();
+        String urlString = getConfig().getRestEndpoint();
+        HashMap<String, String>headers = null;
+        
+    	HashMap<Object, Object> requestBodyMap = new HashMap<Object, Object>();
+    	requestBodyMap.put("operation", job.getOperation().toString());
+        if (operation.equals(OperationEnum.query)) {
+        	urlString += URI_STEM_QUERY;
+        	headers = getHeaders(JSON_CONTENT_TYPE, CSV_CONTENT_TYPE);
+        	requestBodyMap.put("query", job.getObject());        	
+        } else {
+        	urlString += URI_STEM_INGEST;
+        	headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
+        	requestBodyMap.put("object", job.getObject());
+        	requestBodyMap.put("contentType", "CSV");
+        }
+        return doSendJobRequestToServer(urlString, 
+										headers,
+										HttpMethod.POST,
+										ContentType.JSON,
+										requestBodyMap,
+										true,
+										"Failed to create job");
+    }
+    
+    private JobInfo doSendJobRequestToServer(String urlString, 
+    		HashMap<String, String> headers,
+    		HttpMethod requestMethod,
+    		ContentType responseContentType,
+    		HashMap<Object, Object> requestBodyMap,
+    		boolean processServerResponse,
+    		String exceptionMessageString) throws AsyncApiException 
+    {
+		try {
+	        InputStream in;
+	        boolean successfulRequest = true;
+	        if (requestMethod == HttpMethod.GET) {
+	        	if (requestBodyMap != null && !requestBodyMap.isEmpty()) {
+	        		Set<Object> paramNameSet = requestBodyMap.keySet();
+	        		boolean firstParam = true;
+	        		for (Object paramName : paramNameSet) {
+	        			if (firstParam) {
+	        				urlString += "?" + paramName.toString() + "=" + requestBodyMap.get(paramName);
+	        				firstParam = false;
+	        			} else {
+	        				urlString += "&" + paramName.toString() + "=" + requestBodyMap.get(paramName);
+	        			}
+	        		}
+	        	}
+	        	// make a get request
+	            HttpURLConnection httpConnection = openHttpConnection(new URL(urlString), headers);
+	            in = doHttpGet(httpConnection, new URL(urlString));
+	        } else {
+		        HttpClientTransport transport = (HttpClientTransport) getConfig().createTransport();
+		        OutputStream out;
+		        if (requestMethod == HttpMethod.PATCH) {
+		        	out = transport.connectPatch(urlString, headers, true, null, null);
+		        } else if (requestMethod == HttpMethod.PUT) {
+		        	out = transport.connectPut(urlString, headers, true, null, null);
+		        } else { // assume post method
+		        	out = transport.connect(urlString, headers);
+		        }
+	    		String requestContent = serializeToJson(requestBodyMap);
+		        out.write(requestContent.getBytes(UTF_8));
+		        out.close();
+		        in = transport.getContent();
+		        successfulRequest = transport.isSuccessful();
+	        }
+	        if (!processServerResponse) {
+	        	// sent the request to server, return without processing the response
+	        	return null;
+	        }
+	    	JobInfo result = null;
+	        if (successfulRequest) {
+	            if (responseContentType == ContentType.ZIP_XML || responseContentType == ContentType.XML) {
+	                XmlInputStream xin = new XmlInputStream();
+	                xin.setInput(in, UTF_8);
+	                result = new JobInfo();
+	                result.load(xin, typeMapper);
+	            } else {
+	                result = deserializeJsonToObject(in, JobInfo.class);
+	            }
+	        } else {
+	            parseAndThrowException(in, responseContentType);
+	        }
+	        return result;
+	    }  catch (IOException e) {
+	        throw new AsyncApiException(exceptionMessageString, AsyncExceptionCode.ClientInputError, e);
+	    } catch (ConnectionException e) {
+	        throw new AsyncApiException(exceptionMessageString, AsyncExceptionCode.ClientInputError, e);
+	    } catch (PullParserException e) {
+	        throw new AsyncApiException(exceptionMessageString, AsyncExceptionCode.ClientInputError, e);
+		}
+	}
+    
+	private ConnectorConfig getConfig() {
+	    return config;
+	}
+	
+	static void parseAndThrowException(InputStream in, ContentType type) throws AsyncApiException {
+	    try {
+	        AsyncApiException exception;
+	        BulkV2Error[] errorList = deserializeJsonToObject(in, BulkV2Error[].class);
+	        if (errorList[0].message.contains("Aggregate Relationships not supported in Bulk Query")) {
+	            exception = new AsyncApiException(errorList[0].message, AsyncExceptionCode.FeatureNotEnabled);
+	        } else {
+	            exception = new AsyncApiException(errorList[0].errorCode + " : " + errorList[0].message, AsyncExceptionCode.Unknown);
+	        }
+	        throw exception;
+	    } catch (IOException e) {
+	        throw new AsyncApiException("Failed to parse exception", AsyncExceptionCode.ClientInputError, e);
+	    }
+	}
+	
+	private HashMap<String, String> getHeaders(String requestContentType, String acceptContentType) {
+	    HashMap<String, String> newMap = new HashMap<String, String>();
+	    newMap.put("Content-Type", requestContentType);
+	    newMap.put("ACCEPT", acceptContentType);
+	    newMap.put(AUTH_HEADER, this.authHeaderValue);
+	    return newMap;
+	}
+	
+	static String serializeToJson(HashMap<Object, Object> nameValueMap) throws JsonProcessingException {
+	    ObjectMapper mapper = new ObjectMapper();
+	    mapper.setDateFormat(CalendarCodec.getDateFormat());
+	    return mapper.writeValueAsString(nameValueMap);
+	}
+	
+	static <T> T deserializeJsonToObject (InputStream in, Class<T> tmpClass) throws IOException {
+	    ObjectMapper mapper = new ObjectMapper();
+	    mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+	    // By default, ObjectMapper generates Calendar instances with UTC TimeZone.
+	    // Here, override that to "GMT" to better match the behavior of the WSC XML parser.
+	    mapper.setTimeZone(TimeZone.getTimeZone("GMT"));
+	    return mapper.readValue(in, tmpClass);
+	}
+	
+    private HttpURLConnection openHttpConnection(URL url, HashMap<String, String> headers) throws IOException {
         HttpURLConnection connection = getConfig().createConnection(url, null);
         SSLContext sslContext = getConfig().getSslContext();
         if (sslContext != null && connection instanceof HttpsURLConnection) {
             ((HttpsURLConnection)connection).setSSLSocketFactory(sslContext.getSocketFactory());
         }
+        if (headers != null && !headers.isEmpty()) {
+        	Set<String> headerNameSet = headers.keySet();
+        	for (String headerName : headerNameSet) {
+        		connection.setRequestProperty(headerName, headers.get(headerName));
+        	}
+        }
         connection.setRequestProperty(AUTH_HEADER, this.authHeaderValue);
         return connection;
     }
-    
+        
     private InputStream doHttpGet(HttpURLConnection connection, URL url) throws IOException, AsyncApiException {
         boolean success = true;
         InputStream in;
@@ -332,49 +485,59 @@ public class BulkV2Connection  {
         return in;
     }
     
-    public String getQueryLocator() {
-        return this.queryLocator;
+    /**********************************
+     * 
+     * private, extract (aka query) methods 
+     * 
+     **********************************/
+    private InputStream doGetQueryResultStream(URL resultsURL, HashMap<String, String> headers) throws IOException, AsyncApiException {
+        HttpURLConnection httpConnection = openHttpConnection(resultsURL, headers);
+        InputStream is = doHttpGet(httpConnection, resultsURL);
+        this.queryLocator = httpConnection.getHeaderField("Sforce-Locator");
+        this.numberOfRecordsInQueryResult = Integer.valueOf(httpConnection.getHeaderField("Sforce-NumberOfRecords"));
+        return is;
     }
     
-    public int getNumberOfRecordsInQueryResult() {
-        return this.numberOfRecordsInQueryResult;
+    /**********************************
+     * 
+     * private, ingest methods 
+     * @throws AsyncApiException 
+     * 
+     **********************************/
+
+    private InputStream doGetIngestResultsStream(String jobId, String resultsType) throws AsyncApiException {
+        String resultsURLString = getConfig().getRestEndpoint() + URI_STEM_INGEST + jobId + "/" + resultsType;
+        try {
+        	URL resultsURL = new URL(resultsURLString);
+            HttpURLConnection httpConnection = openHttpConnection(resultsURL, getHeaders(JSON_CONTENT_TYPE, CSV_CONTENT_TYPE));
+            return doHttpGet(httpConnection, resultsURL);
+        } catch (IOException e) {
+            throw new AsyncApiException("Failed to get " + resultsType + " for job id " + jobId, AsyncExceptionCode.ClientInputError, e);
+        }
+    }
+    
+    private void doSaveIngestResults(String jobId, String filename, String resultsType) throws AsyncApiException {
+    	BufferedOutputStream bos;
+    	try {
+    		bos = new BufferedOutputStream(new FileOutputStream(filename));
+    	} catch (FileNotFoundException e) {
+	        throw new AsyncApiException("File " + filename + " not found", AsyncExceptionCode.ClientInputError, e);
+    	}
+    	BufferedInputStream bis = new BufferedInputStream(doGetIngestResultsStream(jobId, resultsType));
+        byte[] buffer = new byte[2048];
+        try {
+	        for(int len; (len = bis.read(buffer)) > 0;) {
+	            bos.write(buffer, 0, len);
+	        }
+        	bis.close();
+        	bos.close();
+        } catch (IOException e) {
+            throw new AsyncApiException("Failed to get " + resultsType + " for job id " + jobId, AsyncExceptionCode.ClientInputError, e);
+        }
     }
 }
 
-/*
- * represent body of the request. Example:
- * {
- *   "operation": "query",
- *   "query": "SELECT Id FROM Account"
- * }
- */
-class BulkV2QueryJobJSON implements Serializable {
-    private static final long serialVersionUID = 2L;
-    String operation = "query";
-    String query = "";
-    
-    BulkV2QueryJobJSON(String query) {
-        this.query = query;
-    }
-    
-    public void setOperation(String operation) {
-        this.operation = operation;
-    }
-    
-    public String getOperation() {
-        return this.operation;
-    }
-    
-    public void setQuery(String query) {
-        this.query = query;
-    }
-    
-    public String getQuery() {
-        return this.query;
-    }
-}
-
-class BulkV2QueryError implements Serializable {
+class BulkV2Error implements Serializable {
     private static final long serialVersionUID = 3L;
     public String errorCode = "";
     public String message = "";
