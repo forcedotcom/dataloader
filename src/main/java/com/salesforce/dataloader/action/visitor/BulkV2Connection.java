@@ -24,6 +24,62 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**********************************
+ * A code snippet showing Bulk v2 Ingest using BulkV2Connection
+ * 
+ *    public static void main(String[] args) {
+        String insertFilename = "./insertAccountCsv.csv";
+        String deleteFilename = "./deleteAccountCsv.csv";
+        String successFilename = "./ingestSuccessResults.csv";
+        failureFilename = "./ingestFailureResults.csv";
+        String unprocessedFilename = "./ingestUnprocessedRecords.csv";
+        String username = "";
+        String password = "";
+        String serverUrlString = "https://login.salesforce.com";
+        String restEndpoint = "https://<mydomain prefix>.my.salesforce.com/services/data/v52.0/jobs/";
+
+        try {
+                URL DEFAULT_AUTH_ENDPOINT_URL = new URL(Connector.END_POINT);
+                URL serverUrl = new URL(serverUrlString);
+
+                ConnectorConfig cc = new ConnectorConfig();
+                cc.setTransport(HttpClientTransport.class);
+                cc.setUsername(username);
+                cc.setPassword(password);
+                cc.setAuthEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());
+                cc.setServiceEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());
+                cc.setRestEndpoint(restEndpoint);
+                final PartnerConnection conn = Connector.newConnection(cc);
+                LoginResult loginResult = conn.login(username, password);
+                cc.setSessionId(loginResult.getSessionId());
+                
+                // BulkV2Connection use example
+                BulkV2Connection v2conn = new BulkV2Connection(cc);
+                JobInfo job = executeJob("account", OperationEnum.insert, v2conn, insertFilename);
+                v2conn.saveIngestSuccessResults(job.getId(), successFilename);
+                v2conn.saveIngestFailureResults(job.getId(), failureFilename);
+                v2conn.saveIngestUnprocessedRecords(job.getId(), unprocessedFilename);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                System.exit(-1);
+            }
+    }
+
+    private static JobInfo executeJob(String objectName, OperationEnum operation,
+                BulkV2Connection v2conn, String ingestFilename) throws Exception {
+        JobInfo job = new JobInfo();
+        job.setObject(objectName);
+        job.setOperation(operation);
+        job = v2conn.createJob(job);
+        job = v2conn.startIngest(job.getId(), ingestFilename);
+        while (job.getState() == JobStateEnum.UploadComplete) {
+                Thread.sleep(10,000);
+                job = v2conn.getIngestJobStatus(job.getId());
+        }
+        return job;
+    }
+ **************************/
+
 package com.salesforce.dataloader.action.visitor;
 
 import java.io.BufferedInputStream;
@@ -59,6 +115,7 @@ import com.sforce.async.AsyncApiException;
 import com.sforce.async.AsyncExceptionCode;
 import com.sforce.async.ContentType;
 import com.sforce.async.JobInfo;
+import com.sforce.async.JobStateEnum;
 import com.sforce.async.OperationEnum;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
@@ -118,7 +175,7 @@ public class BulkV2Connection  {
         if (type != null && type != ContentType.CSV) {
             throw new AsyncApiException("Unsupported Content Type", AsyncExceptionCode.FeatureNotEnabled);
         }
-        return createOrUpdateJob(job, ContentType.CSV);
+        return createJob(job, ContentType.CSV);
     }
     
     public JobInfo getJobStatus(String jobId, boolean isQuery) throws AsyncApiException {
@@ -126,12 +183,7 @@ public class BulkV2Connection  {
     }
     
     public JobInfo getJobStatus(String jobId, boolean isQuery, ContentType contentType) throws AsyncApiException {
-        String urlString = getConfig().getRestEndpoint();
-        if (isQuery) {
-        	urlString += URI_STEM_QUERY + jobId;
-        } else {
-        	urlString += URI_STEM_INGEST + jobId;
-        }
+        String urlString = constructRequestURL(jobId, isQuery);
         HashMap<String, String> headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
     	// there is nothing in the request body.
     	return doSendJobRequestToServer(urlString, 
@@ -140,7 +192,26 @@ public class BulkV2Connection  {
 										ContentType.JSON,
 										null,
 										true,
-										"Failed to get job status");
+										"Failed to get job status for job " + jobId);
+    }
+    
+    public JobInfo abortJob(String jobId, boolean isQuery) throws AsyncApiException {
+        return setJobState(jobId, isQuery, JobStateEnum.Aborted, "Failed to abort job " + jobId);
+    }
+    
+    public JobInfo setJobState(String jobId, boolean isQuery, JobStateEnum state, String errorMessage) throws AsyncApiException {
+        String urlString = constructRequestURL(jobId, isQuery);
+        HashMap<String, String> headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
+    	HashMap<Object, Object> requestBodyMap = new HashMap<Object, Object>();
+    	requestBodyMap.put("state", state.toString());
+
+        return doSendJobRequestToServer(urlString, 
+										headers,
+										HttpMethod.PATCH,
+										ContentType.JSON,
+										requestBodyMap,
+										true,
+										errorMessage);
     }
     
     /**********************************
@@ -153,14 +224,14 @@ public class BulkV2Connection  {
     }        
 
     public InputStream getQueryResultStream(String jobId, String locator) throws AsyncApiException {
-        String resultsURL = getConfig().getRestEndpoint() + URI_STEM_QUERY + jobId + "/results";
+    	String urlString =  constructRequestURL(jobId, true) + "results/";
         if (locator != null && !locator.isEmpty() && !"null".equalsIgnoreCase(locator)) {
-            resultsURL += "?locator=" + locator;
+        	urlString += "?locator=" + locator;
         }
         try {
-            return doGetQueryResultStream(new URL(resultsURL), getHeaders(JSON_CONTENT_TYPE, CSV_CONTENT_TYPE));
+            return doGetQueryResultStream(new URL(urlString), getHeaders(JSON_CONTENT_TYPE, CSV_CONTENT_TYPE));
         } catch (IOException e) {
-            throw new AsyncApiException("Failed to get result ", AsyncExceptionCode.ClientInputError, e);
+            throw new AsyncApiException("Failed to get query results for job " + jobId, AsyncExceptionCode.ClientInputError, e);
         }
     }
     
@@ -188,7 +259,7 @@ public class BulkV2Connection  {
     		throw new AsyncApiException(csvFileName + " size exceeds the max file size accepted by Bulk V2 (150 MB)", AsyncExceptionCode.ClientInputError);
     	}
     	
-        String urlString = getConfig().getRestEndpoint() + URI_STEM_INGEST + jobId + "/batches/";
+        String urlString = constructRequestURL(jobId, false) + "batches/";
         HashMap<String, String> headers = getHeaders(CSV_CONTENT_TYPE, JSON_CONTENT_TYPE);
         try {
         	HttpClientTransport transport = (HttpClientTransport)getConfig().createTransport();
@@ -205,23 +276,16 @@ public class BulkV2Connection  {
             }
             // server does not send back any response.
         }catch (IOException e) {
-            throw new AsyncApiException("Failed to send contents of " + csvFileName + " to server", AsyncExceptionCode.ClientInputError, e);
+            throw new AsyncApiException("Failed to send contents of " + csvFileName + " to server for job " + jobId, AsyncExceptionCode.ClientInputError, e);
         } catch (ConnectionException e) {
-            throw new AsyncApiException("Failed to send contents of " + csvFileName + " to server", AsyncExceptionCode.ClientInputError, e);
+            throw new AsyncApiException("Failed to send contents of " + csvFileName + " to server for job " + jobId, AsyncExceptionCode.ClientInputError, e);
         }
         
         // Mark upload as completed
-        urlString = getConfig().getRestEndpoint()+ URI_STEM_INGEST + jobId;
+        urlString = constructRequestURL(jobId, false);
         headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
-    	HashMap<Object, Object> requestBodyMap = new HashMap<Object, Object>();
-    	requestBodyMap.put("state", "UploadComplete");
-    	doSendJobRequestToServer(urlString,
-									headers,
-									HttpMethod.PATCH,
-									ContentType.JSON,
-									requestBodyMap,
-									false,
-									"Failed to mark completion of the upload");
+
+    	setJobState(jobId, false, JobStateEnum.UploadComplete, "Failed to mark completion of the upload");
     	return getIngestJobStatus(jobId);
     }
     
@@ -258,23 +322,34 @@ public class BulkV2Connection  {
      * private, common methods 
      * 
      **********************************/
-    private JobInfo createOrUpdateJob(JobInfo job, ContentType contentType) throws AsyncApiException {
+    private String constructRequestURL(String jobId, boolean isQuery) {
+        String urlString = getConfig().getRestEndpoint();
+        if (jobId == null) {
+        	jobId = "";
+        }
+        if (isQuery) {
+        	urlString += URI_STEM_QUERY + jobId + "/";
+        } else {
+        	urlString += URI_STEM_INGEST + jobId + "/";
+        }
+        return urlString;
+    }
+    
+    private JobInfo createJob(JobInfo job, ContentType contentType) throws AsyncApiException {
         ContentType type = job.getContentType();
         if (type != null && type != ContentType.CSV) {
             throw new AsyncApiException("Unsupported Content Type", AsyncExceptionCode.FeatureNotEnabled);
         }
         OperationEnum operation = job.getOperation();
-        String urlString = getConfig().getRestEndpoint();
+        String urlString = constructRequestURL(job.getId(), operation.equals(OperationEnum.query));
         HashMap<String, String>headers = null;
         
     	HashMap<Object, Object> requestBodyMap = new HashMap<Object, Object>();
     	requestBodyMap.put("operation", job.getOperation().toString());
         if (operation.equals(OperationEnum.query)) {
-        	urlString += URI_STEM_QUERY;
         	headers = getHeaders(JSON_CONTENT_TYPE, CSV_CONTENT_TYPE);
         	requestBodyMap.put("query", job.getObject());        	
         } else {
-        	urlString += URI_STEM_INGEST;
         	headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
         	requestBodyMap.put("object", job.getObject());
         	requestBodyMap.put("contentType", "CSV");
@@ -296,6 +371,9 @@ public class BulkV2Connection  {
     		boolean processServerResponse,
     		String exceptionMessageString) throws AsyncApiException 
     {
+    	if (headers == null) {
+            headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
+    	}
 		try {
 	        InputStream in;
 	        boolean successfulRequest = true;
@@ -506,7 +584,7 @@ public class BulkV2Connection  {
      **********************************/
 
     private InputStream doGetIngestResultsStream(String jobId, String resultsType) throws AsyncApiException {
-        String resultsURLString = getConfig().getRestEndpoint() + URI_STEM_INGEST + jobId + "/" + resultsType;
+        String resultsURLString = constructRequestURL(jobId, false) + resultsType;
         try {
         	URL resultsURL = new URL(resultsURLString);
             HttpURLConnection httpConnection = openHttpConnection(resultsURL, getHeaders(JSON_CONTENT_TYPE, CSV_CONTENT_TYPE));
@@ -532,7 +610,7 @@ public class BulkV2Connection  {
         	bis.close();
         	bos.close();
         } catch (IOException e) {
-            throw new AsyncApiException("Failed to get " + resultsType + " for job id " + jobId, AsyncExceptionCode.ClientInputError, e);
+            throw new AsyncApiException("Failed to get " + resultsType + " for job " + jobId, AsyncExceptionCode.ClientInputError, e);
         }
     }
 }
