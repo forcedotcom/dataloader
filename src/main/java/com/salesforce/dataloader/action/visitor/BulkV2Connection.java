@@ -67,12 +67,37 @@ public class TestBulkIngest {
                 LoginResult loginResult = conn.login(username, password);
                 cc.setSessionId(loginResult.getSessionId());
                 
-                // BulkV2Connection use example
+                // bulkv2 insert
                 BulkV2Connection v2conn = new BulkV2Connection(cc);
                 JobInfo job = executeJob("account", OperationEnum.insert, v2conn, insertFilename);
                 v2conn.saveIngestSuccessResults(job.getId(), successFilename);
                 v2conn.saveIngestFailureResults(job.getId(), failureFilename);
                 v2conn.saveIngestUnprocessedRecords(job.getId(), unprocessedFilename);
+                
+	            // bulkv2 query
+		        job = new JobInfo();
+		        job.setOperation(OperationEnum.query);
+		        job.setObject("account");
+		        job.setContentType(ContentType.CSV);
+	            job.setObject("select id from Account");
+	            job = v2conn.createJob(job);
+	            while (job.getState() != JobStateEnum.JobComplete) {
+	            	Thread.sleep(10,000);
+	            	job = v2conn.getExtractJobStatus(job.getId());
+	            }
+	            
+	            BufferedInputStream resultsStream = new BufferedInputStream(v2conn.getQueryResultStream(job.getId(), ""));
+	            BufferedOutputStream csvFileStream = new BufferedOutputStream(new FileOutputStream(bulkQueryResultsFilename));
+	            writeTo(resultsStream, csvFileStream);
+	            resultsStream.close();
+	            String locator = v2conn.getQueryLocator();
+	            while (!"null".equalsIgnoreCase(locator)) {
+	                resultsStream = new BufferedInputStream(v2conn.getQueryResultStream(job.getId(), locator));
+	                writeTo(resultsStream, csvFileStream);
+	                resultsStream.close();
+	                locator = v2conn.getQueryLocator();
+	            }
+	            csvFileStream.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
                 System.exit(-1);
@@ -91,6 +116,13 @@ public class TestBulkIngest {
                 job = v2conn.getIngestJobStatus(job.getId());
         }
         return job;
+    }
+    
+    private static void writeTo(BufferedInputStream bis, BufferedOutputStream bos) throws IOException {
+        byte[] buffer = new byte[2048];
+        for(int len; (len = bis.read(buffer)) > 0;) {
+            bos.write(buffer, 0, len);
+        }
     }
 }
  **************************/
