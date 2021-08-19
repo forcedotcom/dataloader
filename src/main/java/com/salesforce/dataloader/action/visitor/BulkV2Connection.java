@@ -27,7 +27,21 @@
 /**********************************
  * A code snippet showing Bulk v2 Ingest using BulkV2Connection
  * 
- *    public static void main(String[] args) {
+
+import java.net.URL;
+
+import com.salesforce.dataloader.action.visitor.BulkV2Connection;
+import com.salesforce.dataloader.client.HttpClientTransport;
+import com.sforce.async.JobInfo;
+import com.sforce.async.JobStateEnum;
+import com.sforce.async.OperationEnum;
+import com.sforce.soap.partner.Connector;
+import com.sforce.soap.partner.LoginResult;
+import com.sforce.soap.partner.PartnerConnection;
+import com.sforce.ws.ConnectorConfig;
+
+public class TestBulkIngest {
+    public static void main(String[] args) {
         String insertFilename = "./insertAccountCsv.csv";
         String deleteFilename = "./deleteAccountCsv.csv";
         String successFilename = "./ingestSuccessResults.csv";
@@ -78,6 +92,7 @@
         }
         return job;
     }
+}
  **************************/
 
 package com.salesforce.dataloader.action.visitor;
