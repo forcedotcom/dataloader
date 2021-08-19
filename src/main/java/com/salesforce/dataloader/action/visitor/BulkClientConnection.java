@@ -27,7 +27,6 @@ package com.salesforce.dataloader.action.visitor;
 
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.BulkConnection;
-import com.sforce.async.ContentType;
 import com.sforce.async.JobInfo;
 
 public class BulkClientConnection {
@@ -53,34 +52,24 @@ public class BulkClientConnection {
     public void addHeader(String headerName, String headerValue) {
         if (this.bulkV1Connection != null) {
             this.bulkV1Connection.addHeader(headerName, headerValue);
-        } else if (this.bulkV2Connection != null) {
-            this.bulkV2Connection.addHeader(headerName, headerValue);
         }
+        // not available for bulkv2
     }
 
-    public JobInfo getJobStatus(String jobId) throws AsyncApiException {
+    public JobInfo getJobStatus(String jobId, boolean isQuery) throws AsyncApiException {
         if (this.bulkV1Connection != null) {
             return this.bulkV1Connection.getJobStatus(jobId);
         } else if (this.bulkV2Connection != null) {
-            return this.bulkV2Connection.getJobStatus(jobId);
+            return this.bulkV2Connection.getJobStatus(jobId, isQuery);
         }
         return null;
     }
-    
-    public JobInfo getJobStatus(String jobId, ContentType contentType) throws AsyncApiException {
-        if (this.bulkV1Connection != null) {
-            return this.bulkV1Connection.getJobStatus(jobId, contentType);
-        } else if (this.bulkV2Connection != null) {
-            return this.bulkV2Connection.getJobStatus(jobId, contentType);
-        }
-        return null;
-    }
-    
-    public JobInfo closeJob(String jobId) throws AsyncApiException {
+
+    public JobInfo closeJob(String jobId, boolean isQuery) throws AsyncApiException {
         if (this.bulkV1Connection != null) {
             return this.bulkV1Connection.closeJob(jobId);
         } else if (this.bulkV2Connection != null) {
-            return this.bulkV2Connection.getJobStatus(jobId);
+            return this.bulkV2Connection.getJobStatus(jobId, isQuery);
         }
         return null;
     }

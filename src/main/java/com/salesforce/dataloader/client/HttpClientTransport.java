@@ -35,12 +35,19 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
 import org.apache.http.auth.*;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
 
-import com.salesforce.dataloader.controller.Controller;
 import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.tools.VersionInfo;
 import com.sforce.ws.transport.*;
@@ -61,10 +68,11 @@ public class HttpClientTransport implements Transport {
 
     private static ConnectorConfig currentConfig = null;
     private boolean successful;
-    private HttpPost post;
+    private HttpEntityEnclosingRequestBase httpMethod;
     private OutputStream output;
     private ByteArrayOutputStream entityByteOut;
     private static CloseableHttpClient currentHttpClient = null;
+    private static boolean reuseConnection = true;
 
     public HttpClientTransport() {
     }
@@ -100,7 +108,7 @@ public class HttpClientTransport implements Transport {
 
         return connect(url, header);
     }
-    
+        
     private boolean areEquivalentConfigs(ConnectorConfig config1, ConnectorConfig config2) {
         if (config1 == null && config2 == null) {
             return true;
@@ -154,7 +162,7 @@ public class HttpClientTransport implements Transport {
     }
     
     private static synchronized void initializeHttpClient() throws UnknownHostException {
-        if (!Controller.doReuseClientConnection()) {
+        if (!isReuseConnection()) {
             closeConnections();
             currentHttpClient = null;
         }
@@ -187,15 +195,21 @@ public class HttpClientTransport implements Transport {
             currentHttpClient = httpClientBuilder.build();
         }
     }
-
+    
     @Override
     public synchronized InputStream getContent() throws IOException {
+        initializeHttpClient();
+    	if (this.httpMethod.getEntity() == null) {
+	        byte[] entityBytes = entityByteOut.toByteArray();
+	        HttpEntity entity = new ByteArrayEntity(entityBytes);
+	    	currentConfig.setUseChunkedPost(false);
+	    	this.httpMethod.setEntity(entity);
+    	}
+        InputStream input;
         try {
-            InputStream input;
-            initializeHttpClient();
-            byte[] entityBytes = entityByteOut.toByteArray();
-            HttpEntity entity = new ByteArrayEntity(entityBytes);
-            post.setEntity(entity);
+            HttpClientContext context = HttpClientContext.create();
+            RequestConfig config = RequestConfig.custom().setExpectContinueEnabled(currentConfig.useChunkedPost()).build();
+            context.setRequestConfig(config);
     
             if (currentConfig.getNtlmDomain() != null && !currentConfig.getNtlmDomain().equals("")) {
                 // need to send a HEAD request to trigger NTLM authentication
@@ -203,7 +217,7 @@ public class HttpClientTransport implements Transport {
                 }
             }
     
-            try (CloseableHttpResponse response = currentHttpClient.execute(post)) {
+            try (CloseableHttpResponse response = currentHttpClient.execute(this.httpMethod, context)) {
                 successful = true;
                 if (response.getStatusLine().getStatusCode() > 399) {
                     successful = false;
@@ -221,12 +235,12 @@ public class HttpClientTransport implements Transport {
                     }
                 }
             }
-            return input;
         } finally {
-            if (!Controller.doReuseClientConnection()) {
+            if (isReuseConnection()) {
                 closeConnections();
             }
         }
+        return input;
     }
 
     @Override
@@ -241,17 +255,46 @@ public class HttpClientTransport implements Transport {
 
     @Override
     public OutputStream connect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression) throws IOException {
-        post = new HttpPost(endpoint);
+    	return connectPost(endpoint, httpHeaders, enableCompression, null, null);
+    }
+    
+    public OutputStream connectPost(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression, InputStream requestInputStream, String contentTypeStr) throws IOException {
+    	this.httpMethod = new HttpPost(endpoint);
+    	return doConnect(endpoint, httpHeaders, enableCompression, requestInputStream, contentTypeStr);
+    }
+    
+    public OutputStream connectPatch(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression, InputStream requestInputStream, String contentTypeStr) throws IOException {
+    	this.httpMethod = new HttpPatch(endpoint);
+    	return doConnect(endpoint, httpHeaders, enableCompression, requestInputStream, contentTypeStr);
+    }
+
+    public OutputStream connectPut(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression, InputStream requestInputStream, String contentTypeStr) throws IOException {
+    	this.httpMethod = new HttpPut(endpoint);
+    	return doConnect(endpoint, httpHeaders, enableCompression, requestInputStream, contentTypeStr);
+    }
+
+    private OutputStream doConnect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression, InputStream requestInputStream, String contentTypeStr) throws IOException {
 
         for (String name : httpHeaders.keySet()) {
-            post.addHeader(name, httpHeaders.get(name));
+            this.httpMethod.addHeader(name, httpHeaders.get(name));
         }
 
-        post.addHeader("User-Agent", VersionInfo.info());
+        this.httpMethod.addHeader("User-Agent", VersionInfo.info());
+        
+        if (requestInputStream != null) {
+        	ContentType contentType = ContentType.DEFAULT_TEXT;
+        	if (contentTypeStr != null) {
+        		contentType = ContentType.create(contentTypeStr);
+        	}
+        	BufferedHttpEntity entity = new BufferedHttpEntity(new InputStreamEntity(requestInputStream, contentType));
+        	currentConfig.setUseChunkedPost(true);
+        	this.httpMethod.setEntity(entity);
+        	return null;
+        }
 
         if (enableCompression) {
-            post.addHeader("Content-Encoding", "gzip");
-            post.addHeader("Accept-Encoding", "gzip");
+            this.httpMethod.addHeader("Content-Encoding", "gzip");
+            this.httpMethod.addHeader("Accept-Encoding", "gzip");
         }
 
         entityByteOut = new ByteArrayOutputStream();
@@ -287,5 +330,12 @@ public class HttpClientTransport implements Transport {
             currentHttpClient = null;
         }
     }
-
+    
+    public static void setReuseConnection(boolean reuse) {
+    	reuseConnection = reuse;
+    }
+    
+    public static boolean isReuseConnection() {
+    	return reuseConnection;
+    }
 }

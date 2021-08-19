@@ -224,7 +224,7 @@ class BulkApiVisitorUtil {
         if (timeRemaining <= 0) {
             while (retryCount++ < maxAttemptsCount) {
                 try {
-                    this.jobInfo = this.client.getJobStatus(getJobId());
+                    this.jobInfo = this.client.getJobStatus(getJobId(), this.jobInfo.getOperation() == OperationEnum.query);
                     updateJobStatus();
                     return this.checkStatusInterval;
                 } catch (AsyncApiException ex) {
@@ -274,11 +274,11 @@ class BulkApiVisitorUtil {
     }
 
     void awaitCompletionAndCloseJob() throws AsyncApiException {
-        this.jobInfo = this.client.getJobStatus(getJobId());
+        this.jobInfo = this.client.getJobStatus(getJobId(), this.jobInfo.getOperation() == OperationEnum.query);
         updateJobStatus();
         awaitJobCompletion();
         if (!isBulkV2QueryJob()) {
-        	this.jobInfo = this.client.closeJob(getJobId());
+        	this.jobInfo = this.client.closeJob(getJobId(), this.jobInfo.getOperation() == OperationEnum.query);
         }
     }
 
