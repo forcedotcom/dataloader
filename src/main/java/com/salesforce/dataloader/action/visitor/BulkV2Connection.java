@@ -40,13 +40,14 @@ import com.sforce.soap.partner.LoginResult;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.ws.ConnectorConfig;
 
-public class TestBulkIngest {
+public class TestBulkV2 {
     public static void main(String[] args) {
         String insertFilename = "./insertAccountCsv.csv";
         String deleteFilename = "./deleteAccountCsv.csv";
         String successFilename = "./ingestSuccessResults.csv";
         failureFilename = "./ingestFailureResults.csv";
         String unprocessedFilename = "./ingestUnprocessedRecords.csv";
+        String bulkQueryResultsFilename = "./queryResults.csv";
         String username = "";
         String password = "";
         String serverUrlString = "https://login.salesforce.com";
