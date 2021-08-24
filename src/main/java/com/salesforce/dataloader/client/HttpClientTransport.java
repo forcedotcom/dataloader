@@ -64,7 +64,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
  * @author Jeff Lai
  * @since 25.0.2
  */
-public class HttpClientTransport implements Transport {
+public class HttpClientTransport implements HttpTransportInterface {
 
     private static ConnectorConfig currentConfig = null;
     private boolean successful;
@@ -255,26 +255,33 @@ public class HttpClientTransport implements Transport {
 
     @Override
     public OutputStream connect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression) throws IOException {
-    	return connectPost(endpoint, httpHeaders, enableCompression, null, null);
+    	return connect(endpoint, httpHeaders, enableCompression, SupportedHttpMethodType.POST);
     }
     
-    public OutputStream connectPost(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression, InputStream requestInputStream, String contentTypeStr) throws IOException {
-    	this.httpMethod = new HttpPost(endpoint);
-    	return doConnect(endpoint, httpHeaders, enableCompression, requestInputStream, contentTypeStr);
-    }
-    
-    public OutputStream connectPatch(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression, InputStream requestInputStream, String contentTypeStr) throws IOException {
-    	this.httpMethod = new HttpPatch(endpoint);
-    	return doConnect(endpoint, httpHeaders, enableCompression, requestInputStream, contentTypeStr);
-    }
+	@Override
+	public OutputStream connect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression,
+			SupportedHttpMethodType httpMethod) throws IOException {
+		return doConnect(endpoint, httpHeaders, enableCompression, httpMethod, null, null);
+	}
 
-    public OutputStream connectPut(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression, InputStream requestInputStream, String contentTypeStr) throws IOException {
-    	this.httpMethod = new HttpPut(endpoint);
-    	return doConnect(endpoint, httpHeaders, enableCompression, requestInputStream, contentTypeStr);
-    }
+	@Override
+	public void connect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression,
+			SupportedHttpMethodType httpMethod, InputStream contentInputStream, String contentEncoding)
+			throws IOException {
+		doConnect(endpoint, httpHeaders, enableCompression, httpMethod, contentInputStream, contentEncoding);
+	}
 
-    private OutputStream doConnect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression, InputStream requestInputStream, String contentTypeStr) throws IOException {
-
+    private OutputStream doConnect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression, SupportedHttpMethodType httpMethodType, InputStream requestInputStream, String contentTypeStr) throws IOException {
+    	switch (httpMethodType) {
+    		case PATCH :
+    			this.httpMethod = new HttpPatch(endpoint);
+    			break;
+    		case PUT :
+    			this.httpMethod = new HttpPut(endpoint);
+    			break;
+    		default:
+    			this.httpMethod = new HttpPost(endpoint);
+    	}
         for (String name : httpHeaders.keySet()) {
             this.httpMethod.addHeader(name, httpHeaders.get(name));
         }
