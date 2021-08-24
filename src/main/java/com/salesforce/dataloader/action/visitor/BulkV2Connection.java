@@ -158,7 +158,7 @@ import javax.xml.namespace.QName;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.salesforce.dataloader.client.HttpClientTransport;
+import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.AsyncExceptionCode;
 import com.sforce.async.ContentType;
@@ -173,7 +173,6 @@ import com.sforce.ws.bind.CalendarCodec;
 import com.sforce.ws.bind.TypeMapper;
 import com.sforce.ws.parser.PullParserException;
 import com.sforce.ws.parser.XmlInputStream;
-import com.sforce.ws.transport.Transport;
 import com.sforce.ws.util.FileUtil;
 
 enum HttpMethod {
@@ -302,7 +301,7 @@ public class BulkV2Connection  {
     	if (!csvFile.exists()) {
     		throw new AsyncApiException(csvFileName + " not found.", AsyncExceptionCode.ClientInputError);
     	}
-    	// Bulk V2 inges does not accept CSV exceeding 150 MB in size
+    	// Bulk V2 ingest does not accept CSV exceeding 150 MB in size
     	if (csvFile.length() > 150 * 1024 * 1024) {
     		throw new AsyncApiException(csvFileName + " size exceeds the max file size accepted by Bulk V2 (150 MB)", AsyncExceptionCode.ClientInputError);
     	}
@@ -310,19 +309,14 @@ public class BulkV2Connection  {
         String urlString = constructRequestURL(jobId, false) + "batches/";
         HashMap<String, String> headers = getHeaders(CSV_CONTENT_TYPE, JSON_CONTENT_TYPE);
         try {
-        	HttpClientTransport transport = (HttpClientTransport)getConfig().createTransport();
-            OutputStream serverRequestStream;
-            serverRequestStream = transport.connectPut(urlString, headers, true, new FileInputStream(csvFile), CSV_CONTENT_TYPE);
-            if (serverRequestStream != null) {
-            	serverRequestStream.close();
-            }
-            
+        	HttpTransportInterface transport = (HttpTransportInterface)getConfig().createTransport();
+            transport.connect(urlString, headers, true, HttpTransportInterface.SupportedHttpMethodType.PUT, new FileInputStream(csvFile), CSV_CONTENT_TYPE);
+
             // Following is needed to actually send the request to the server
             InputStream serverResponseStream = transport.getContent();
             if (!transport.isSuccessful()) {
 	            parseAndThrowException(serverResponseStream, ContentType.JSON);
             }
-            // server does not send back any response.
         }catch (IOException e) {
             throw new AsyncApiException("Failed to send contents of " + csvFileName + " to server for job " + jobId, AsyncExceptionCode.ClientInputError, e);
         } catch (ConnectionException e) {
@@ -442,14 +436,14 @@ public class BulkV2Connection  {
 	            HttpURLConnection httpConnection = openHttpConnection(new URL(urlString), headers);
 	            in = doHttpGet(httpConnection, new URL(urlString));
 	        } else {
-		        HttpClientTransport transport = (HttpClientTransport) getConfig().createTransport();
+	        	HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
 		        OutputStream out;
 		        if (requestMethod == HttpMethod.PATCH) {
-		        	out = transport.connectPatch(urlString, headers, true, null, null);
+		        	out = transport.connect(urlString, headers, true, HttpTransportInterface.SupportedHttpMethodType.PATCH);
 		        } else if (requestMethod == HttpMethod.PUT) {
-		        	out = transport.connectPut(urlString, headers, true, null, null);
+		        	out = transport.connect(urlString, headers, true, HttpTransportInterface.SupportedHttpMethodType.PUT);
 		        } else { // assume post method
-		        	out = transport.connect(urlString, headers);
+		        	out = transport.connect(urlString, headers, true, HttpTransportInterface.SupportedHttpMethodType.POST);
 		        }
 	    		String requestContent = serializeToJson(requestBodyMap);
 		        out.write(requestContent.getBytes(UTF_8));
@@ -650,12 +644,13 @@ public class BulkV2Connection  {
 	        throw new AsyncApiException("File " + filename + " not found", AsyncExceptionCode.ClientInputError, e);
     	}
     	BufferedInputStream bis = new BufferedInputStream(doGetIngestResultsStream(jobId, resultsType));
-        byte[] buffer = new byte[2048];
         try {
+            byte[] buffer = new byte[2048];
 	        for(int len; (len = bis.read(buffer)) > 0;) {
 	            bos.write(buffer, 0, len);
 	        }
         	bis.close();
+        	bos.flush();
         	bos.close();
         } catch (IOException e) {
             throw new AsyncApiException("Failed to get " + resultsType + " for job " + jobId, AsyncExceptionCode.ClientInputError, e);
