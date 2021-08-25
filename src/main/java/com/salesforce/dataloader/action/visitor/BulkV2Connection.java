@@ -50,12 +50,12 @@ public class TestBulkV2 {
         String bulkQueryResultsFilename = "./queryResults.csv";
         String username = "";
         String password = "";
-        String serverUrlString = "https://login.salesforce.com";
-        String restEndpoint = "https://<mydomain prefix>.my.salesforce.com/services/data/v52.0/jobs/";
+		static final String myDomainURLString = "https://<mydomain prefix>.my.salesforce.com";
+		static final String restEndpoint = myDomainURLString + "/services/data/v52.0/jobs/";
 
         try {
                 URL DEFAULT_AUTH_ENDPOINT_URL = new URL(Connector.END_POINT);
-                URL serverUrl = new URL(serverUrlString);
+                URL serverUrl = new URL(myDomainURLString);
 
                 ConnectorConfig cc = new ConnectorConfig();
                 cc.setTransport(HttpClientTransport.class);
@@ -65,8 +65,6 @@ public class TestBulkV2 {
                 cc.setServiceEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());
                 cc.setRestEndpoint(restEndpoint);
                 final PartnerConnection conn = Connector.newConnection(cc);
-                LoginResult loginResult = conn.login(username, password);
-                cc.setSessionId(loginResult.getSessionId());
                 
                 // bulkv2 insert
                 BulkV2Connection v2conn = new BulkV2Connection(cc);
@@ -112,7 +110,7 @@ public class TestBulkV2 {
         job.setOperation(operation);
         job = v2conn.createJob(job);
         job = v2conn.startIngest(job.getId(), ingestFilename);
-        while (job.getState() == JobStateEnum.UploadComplete) {
+        while (job.getState() != JobStateEnum.JobComplete) {
                 Thread.sleep(10,000);
                 job = v2conn.getIngestJobStatus(job.getId());
         }
