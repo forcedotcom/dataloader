@@ -1,5 +1,0 @@
-Run("notepad.exe")
-WinWait("[CLASS:Notepad]")
-ControlSetText("[CLASS:Notepad]", "", "Edit1", "New Text Here")
-Local $sText = ControlGetText("[CLASS:Notepad]", "", "Edit1")
-MsgBox(0, "ControlGetText Example", "The control text is: " & $sText)
