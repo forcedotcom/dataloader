@@ -1,7 +1,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 <bean id="dbDataSource"
-      class="org.apache.commons.dbcp.BasicDataSource"
+      class="org.apache.commons.dbcp2.BasicDataSource"
       destroy-method="close"
       scope="prototype">
     <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>

@@ -69,16 +69,13 @@ import com.sforce.soap.partner.fault.ApiFault;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.InitializingBean;
 
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ProcessRunner implements InitializingBean, Job, Runnable {
+public class ProcessRunner implements InitializingBean, Runnable {
 
     /**
      * Comment for <code>PROCESS_NAME</code>
@@ -343,14 +340,6 @@ public class ProcessRunner implements InitializingBean, Job, Runnable {
      */
     public static ProcessRunner getInstance(String processName) throws ProcessInitializationException {
         return ProcessConfig.getProcessInstance(processName);
-    }
-
-    /* (non-Javadoc)
-     * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
-     */
-    @Override
-    public void execute(JobExecutionContext arg0) throws JobExecutionException {
-        run();
     }
 
     public Controller getController() {

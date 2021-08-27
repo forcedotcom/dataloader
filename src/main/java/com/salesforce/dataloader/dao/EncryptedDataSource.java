@@ -54,14 +54,14 @@ import org.apache.logging.log4j.LogManager;
  *
  */
 
-public class EncryptedDataSource extends org.apache.commons.dbcp.BasicDataSource {
+public class EncryptedDataSource extends org.apache.commons.dbcp2.BasicDataSource {
 
     public EncryptedDataSource() {
         super();
     }
 
     public synchronized void setPassword(String encodedPassword) {
-    	this.password = decode(encodedPassword);
+    	setPassword(decode(encodedPassword));
     }
     
     private String decode(String password) {

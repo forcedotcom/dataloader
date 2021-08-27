@@ -30,7 +30,7 @@ import java.sql.*;
 import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

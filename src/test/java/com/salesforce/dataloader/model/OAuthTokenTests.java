@@ -25,8 +25,8 @@
  */
 package com.salesforce.dataloader.model;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Created by rmazzeo on 12/9/15.
@@ -40,7 +40,7 @@ public class OAuthTokenTests {
         target.setAccessToken(expected);
         String actual = target.getAccessToken();
 
-        Assert.assertEquals(actual, expected, "Access tokens differed");
+        Assert.assertEquals("Access tokens differed", actual, expected);
     }
 
     @Test
@@ -51,7 +51,7 @@ public class OAuthTokenTests {
         target.setTokenType(expected);
         String actual = target.getTokenType();
 
-        Assert.assertEquals(actual, expected, "Token type differed");
+        Assert.assertEquals("Token type differed", actual, expected);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class OAuthTokenTests {
         target.setSignature(expected);
         String actual = target.getSignature();
 
-        Assert.assertEquals(actual, expected, "Signature differed");
+        Assert.assertEquals("Signature differed", actual, expected);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class OAuthTokenTests {
         target.setInstanceUrl(expected);
         String actual = target.getInstanceUrl();
 
-        Assert.assertEquals(actual, expected, "Instance Url differed");
+        Assert.assertEquals("Instance Url differed", actual, expected);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class OAuthTokenTests {
         target.setScope(expected);
         String actual = target.getScope();
 
-        Assert.assertEquals(actual, expected, "Scope differed");
+        Assert.assertEquals("Scope differed", actual, expected);
     }
 
     @Test
@@ -95,7 +95,7 @@ public class OAuthTokenTests {
         target.setId(expected);
         String actual = target.getId();
 
-        Assert.assertEquals(actual, expected, "Id differed");
+        Assert.assertEquals("Id differed", actual, expected);
     }
 
     @Test
@@ -106,7 +106,7 @@ public class OAuthTokenTests {
         target.setIssuedAt(expected);
         Long actual = target.getIssuedAt();
 
-        Assert.assertEquals(actual, expected, "IssuedAt differed");
+        Assert.assertEquals("IssuedAt differed", actual, expected);
     }
 
     @Test
@@ -117,6 +117,6 @@ public class OAuthTokenTests {
         target.setRefreshToken(expected);
         String actual = target.getRefreshToken();
 
-        Assert.assertEquals(actual, expected, "RefreshToken differed");
+        Assert.assertEquals("RefreshToken differed", actual, expected);
     }
 }

@@ -121,7 +121,7 @@ public class DatabaseTest extends TestBase {
     }
 
     private void doTestDatabaseDateMapping(DatabaseTestUtil.DateType dateType, boolean verifyDates) throws Exception {
-        List<Class<? extends Date>> dateClass = Arrays.asList(java.sql.Date.class, Time.class, Timestamp.class);
+        List<Class<? extends Date>> dateClass = Arrays.asList(java.sql.Date.class, Timestamp.class);
         for (Class<? extends Date> sqlType : dateClass) {
             try {
                 // insert some data
