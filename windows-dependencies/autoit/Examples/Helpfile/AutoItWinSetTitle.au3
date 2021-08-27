@@ -1,1 +1,0 @@
-AutoItWinSetTitle("My AutoIt Window")

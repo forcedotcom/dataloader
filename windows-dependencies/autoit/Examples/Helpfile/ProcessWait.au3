@@ -1,1 +1,0 @@
-ProcessWait("notepad.exe")

@@ -1,1 +1,0 @@
-WinKill("[CLASS:Notepad] ", "")
