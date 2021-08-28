@@ -22,3 +22,12 @@ Thumbs.db
 
 #swpfiles
 config.properties~
+*.csr
+*.key
+
+#python files
+__pycache__/
+
+# local-proj-repo files
+local-proj-repo/
+!local-proj-repo/local
