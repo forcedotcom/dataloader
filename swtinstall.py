@@ -12,8 +12,13 @@ from os.path import expanduser
 # Prerequisites:
 # - Directory containing mvn command in PATH environment variable.
 # - Python BeautifulSoup installed locally. Run 'pip3 install beautifulsoup4'
-# - Zip contents are extracted in ~/Downloads directory.
 #
+# Side-effects:
+# - Zip content extracted in ~/Downloads directory
+# - SWT jar files installed in <git clone root>/local-proj-repo subdirectories
+#
+# Follow-on manual steps:
+# - Update version value for SWT dependencies in pom.xml with the downloaded SWT version.
 #
 # Outline of the steps taken:
 # - Start at https://download.eclipse.org/eclipse/downloads/
