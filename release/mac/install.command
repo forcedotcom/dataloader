@@ -69,9 +69,7 @@ rsync -r "$SHELL_PATH"/.  "$DL_FULL_PATH" \
   --exclude="*.zip" \
   --exclude="META-INF"
 
-sed -i '' 's|DATALOADER_WORK_DIRECTORY_PLACEHOLDER|'"$DL_FULL_PATH"'|g'  "$DL_FULL_PATH"/dataloader.command
-
-"$SHELL_PATH"/fileicon set  "$DL_FULL_PATH"/dataloader.command "$SHELL_PATH"/dataloader.ico 1>/dev/null
+"$SHELL_PATH"/fileicon set  "$DL_FULL_PATH"/dataloader.app "$SHELL_PATH"/dataloader.ico 1>/dev/null
 
 while true
 do
@@ -80,7 +78,7 @@ do
      case $input in
          [yY][eE][sS]|[yY])
             rm   "$HOME/Desktop/DataLoader $DATALOADER_VERSION" 2>/dev/null
-            ln -s  "$DL_FULL_PATH/dataloader.command"  "$HOME/Desktop/DataLoader $DATALOADER_VERSION"
+            ln -s  "$DL_FULL_PATH/dataloader.app"  "$HOME/Desktop/DataLoader $DATALOADER_VERSION"
             "$SHELL_PATH"/fileicon set  "$HOME/Desktop/DataLoader $DATALOADER_VERSION" "$SHELL_PATH"/dataloader.ico 1>/dev/null
             break
           ;;
@@ -101,7 +99,7 @@ do
      case $input in
          [yY][eE][sS]|[yY])
             rm   "/Applications/DataLoader $DATALOADER_VERSION" 2>/dev/null
-            ln -s  "$DL_FULL_PATH/dataloader.command"  "/Applications/DataLoader $DATALOADER_VERSION"
+            ln -s  "$DL_FULL_PATH/dataloader.app"  "/Applications/DataLoader $DATALOADER_VERSION"
             "$SHELL_PATH"/fileicon set  "/Applications/DataLoader $DATALOADER_VERSION" "$SHELL_PATH"/dataloader.ico 1>/dev/null
             break
           ;;
