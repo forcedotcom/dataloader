@@ -128,15 +128,24 @@ results = soup.find(id="Latest_Release").find_next("a")['href']
 downloadsPage = URL + results
 page = requests.get(downloadsPage)
 soup = BeautifulSoup(page.content, "html.parser")
+
+# Windows
 results = getSWTDownloadLinkForPlatform(soup, "Windows (64 bit version)")
 unzippedDir = downloadAndExtractZip(downloadsPage + results)
 installInLocalMavenRepo(unzippedDir, "swtwin32_x86_64", sys.argv[1])
 
+# Mac x86
 results = getSWTDownloadLinkForPlatform(soup, "Mac OSX (64 bit version)")
-downloadAndExtractZip(downloadsPage + results)
+unzippedDir = downloadAndExtractZip(downloadsPage + results)
 installInLocalMavenRepo(unzippedDir, "swtmacx86_64", sys.argv[1])
 
+# Mac ARM
 results = getSWTDownloadLinkForPlatform(soup, "Mac OSX (64 bit version for Arm64/AArch64)")
-downloadAndExtractZip(downloadsPage + results)
+unzippedDir = downloadAndExtractZip(downloadsPage + results)
 installInLocalMavenRepo(unzippedDir, "swtmacarm64", sys.argv[1])
+
+# Linux
+#results = getSWTDownloadLinkForPlatform(soup, "Linux (64 bit version)")
+#unzippedDir = downloadAndExtractZip(downloadsPage + results)
+#installInLocalMavenRepo(unzippedDir, "swtlinux_x86_64", sys.argv[1])
 
