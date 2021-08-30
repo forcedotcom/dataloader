@@ -65,11 +65,8 @@ rsync -r "$SHELL_PATH"/.  "$DL_FULL_PATH" \
   --exclude='.*' \
   --exclude="install.command" \
   --exclude="dataloader.ico" \
-  --exclude="fileicon" \
   --exclude="*.zip" \
   --exclude="META-INF"
-
-"$SHELL_PATH"/fileicon set  "$DL_FULL_PATH"/dataloader.app "$SHELL_PATH"/dataloader.ico 1>/dev/null
 
 while true
 do
@@ -79,7 +76,6 @@ do
          [yY][eE][sS]|[yY])
             rm   "$HOME/Desktop/DataLoader $DATALOADER_VERSION" 2>/dev/null
             ln -s  "$DL_FULL_PATH/dataloader.app"  "$HOME/Desktop/DataLoader $DATALOADER_VERSION"
-            "$SHELL_PATH"/fileicon set  "$HOME/Desktop/DataLoader $DATALOADER_VERSION" "$SHELL_PATH"/dataloader.ico 1>/dev/null
             break
           ;;
          [nN][oO]|[nN])
@@ -100,7 +96,6 @@ do
          [yY][eE][sS]|[yY])
             rm   "/Applications/DataLoader $DATALOADER_VERSION" 2>/dev/null
             ln -s  "$DL_FULL_PATH/dataloader.app"  "/Applications/DataLoader $DATALOADER_VERSION"
-            "$SHELL_PATH"/fileicon set  "/Applications/DataLoader $DATALOADER_VERSION" "$SHELL_PATH"/dataloader.ico 1>/dev/null
             break
           ;;
          [nN][oO]|[nN])
