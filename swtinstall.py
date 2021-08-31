@@ -10,8 +10,10 @@ from os.path import expanduser
 # python3 swtinstall.py <git clone root>
 # 
 # Prerequisites:
+# - Python 3.9 or higher
 # - Directory containing mvn command in PATH environment variable.
 # - Python BeautifulSoup installed locally. Run 'pip3 install beautifulsoup4'
+# - Python requests installed locally. Run 'pip3 install requests'
 #
 # Side-effects:
 # - Zip content extracted in ~/Downloads directory
@@ -145,7 +147,7 @@ unzippedDir = downloadAndExtractZip(downloadsPage + results)
 installInLocalMavenRepo(unzippedDir, "swtmacarm64", sys.argv[1])
 
 # Linux
-#results = getSWTDownloadLinkForPlatform(soup, "Linux (64 bit version)")
-#unzippedDir = downloadAndExtractZip(downloadsPage + results)
-#installInLocalMavenRepo(unzippedDir, "swtlinux_x86_64", sys.argv[1])
+results = getSWTDownloadLinkForPlatform(soup, "Linux (64 bit version)")
+unzippedDir = downloadAndExtractZip(downloadsPage + results)
+installInLocalMavenRepo(unzippedDir, "swtlinux_x86_64", sys.argv[1])
 
