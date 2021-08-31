@@ -107,6 +107,12 @@
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.jface</artifactId>
       <version>3.22.200</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.platform</groupId>
+          <artifactId>org.eclipse.swt</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 <!-- Testing dependencies -->
     <dependency>
@@ -173,11 +179,6 @@
           <artifactId>osxappbundle-maven-plugin</artifactId>
           <version>1.2.0</version>
         </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-shade-plugin</artifactId>
-          <version>3.2.1</version>
-        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -227,6 +228,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.4</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -240,9 +242,16 @@
                 <filter>
                   <artifact>*:*</artifact>
                   <excludes>
+                    <exclude>module-info.class</exclude>
                     <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.MF</exclude>
+                    <exclude>META-INF/*.txt</exclude>
+                    <exclude>META-INF/LICENSE</exclude>
+                    <exclude>META-INF/NOTICE</exclude>
+                    <exclude>META-INF/DEPENDENCIES</exclude>
                     <exclude>META-INF/*.DSA</exclude>
                     <exclude>META-INF/*.RSA</exclude>
+                    <exclude>*.*</exclude>
                   </excludes>
                 </filter>
               </filters>
@@ -321,17 +330,32 @@
               </execution>
           </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-help-plugin</artifactId>
+        <version>3.2.0</version>
+          <executions>
+            <execution>
+              <id>show-profiles</id>
+              <phase>compile</phase>
+              <goals>
+                <goal>active-profiles</goal>
+              </goals>
+            </execution>
+          </executions>
+      </plugin>
     </plugins>
   </build>
 
   <profiles>
     <profile>
-      <id>macx86_64</id>
+      <id>macos_x86_64</id>
       <activation>
-        <os>
-          <family>mac</family>
-          <arch>x86_64</arch>
-        </os>
+        <property>
+          <name>targetOS</name>
+          <value>macos_x86_64</value>
+        </property>
       </activation>
       <dependencies>
         <dependency>
@@ -346,12 +370,12 @@
     </profile>
 
     <profile>
-      <id>macarm64</id>
+      <id>macos_arm_64</id>
       <activation>
-        <os>
-          <family>mac</family>
-          <arch>arm64</arch>
-        </os>
+        <property>
+          <name>targetOS</name>
+          <value>macos_arm_64</value>
+        </property>
       </activation>
       <dependencies>
         <dependency>
@@ -366,12 +390,12 @@
     </profile>
 
     <profile>
-      <id>win32_x86_64</id>
+      <id>windows_x86_64</id>
       <activation>
-        <os>
-          <family>Windows</family>
-          <arch>amd64</arch>
-        </os>
+        <property>
+          <name>targetOS</name>
+          <value>windows_x86_64</value>
+        </property>
       </activation>
       <dependencies>
         <dependency>
@@ -388,10 +412,10 @@
     <profile>
       <id>linux_x86_64</id>
       <activation>
-        <os>
-          <family>linux</family>
-          <arch>x86_64</arch>
-        </os>
+        <property>
+          <name>targetOS</name>
+          <value>linux_x86_64</value>
+        </property>
       </activation>
       <dependencies>
         <dependency>
@@ -425,9 +449,9 @@
                     <if>
                       <isfalse value="${jarsigner.skip}" />
                       <then>
-                        <echo>signing target/dataloader-${version}-uber.jar</echo>
+                        <echo>signing target/dataloader-${project.version}-uber.jar</echo>
                         <signjar
-                          jar="${basedir}/target/dataloader-${version}-uber.jar"
+                          jar="${basedir}/target/dataloader-${project.version}-uber.jar"
                           alias="${jarsigner.alias}"
                           tsaurl="${jarsigner.tsa}"
                           storepass="${jarsigner.storepass}"
@@ -441,13 +465,13 @@
                     <copydir src="${basedir}/release/samples" dest="${basedir}/target/${OSType}/samples"/>
                     <copy file="${basedir}/release/configs/log-conf.xml" 
                         todir="${basedir}/target/${OSType}/samples/conf"/>
-                    <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${version}"/>
+                    <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${project.version}"/>
                     <replace dir="${basedir}/target/${OSType}/" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
                     <chmod file="${basedir}/target/${OSType}/*" perm="755" />
     
      
                     <echo>copying uber jar to OS-specific folder for the target OS: ${OSType}</echo>
-                    <copy file="${basedir}/target/dataloader-${version}-uber.jar" 
+                    <copy file="${basedir}/target/dataloader-${project.version}-uber.jar" 
                        todir="${basedir}/target/${OSType}"/>
                  
                     <echo>zip OS-specific folder</echo>

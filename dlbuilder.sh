@@ -25,21 +25,21 @@ if [ ${unsignedArtifacts} = false ]; then
   signingOptions="-Djarsigner.storepass=$1 -Djarsigner.keystore=$2 -Djarsigner.tsa=$3 -Djarsigner.skip=false -Djarsigner.alias=1"
 fi
 
-mvn clean package -DskipTests ${signingOptions} -Pmacx86_64,zip,-win32_x86_64,-macarm64,-linux_x86_64
+mvn clean package -DskipTests ${signingOptions} -DtargetOS=macos_x86_64 -Pzip
 
 cp target/mac/dataloader_mac.zip .
 
 # build for Mac ARM platform
-#mvn clean package -DskipTests ${signingOptions} -Pmacarm64,zip,-win32_x86_64,-macx86_64,-linux_x86_64
+#mvn clean package -DskipTests ${signingOptions} -DtargetOS=macos_arm_64 -Pzip
 
-#cp target/mac/dataloader_mac_arm64.zip .
+#cp target/mac/dataloader_mac.zip ./dataloader_mac_arm64.zip
 
 # build for Windows platform
-mvn clean package -DskipTests ${signingOptions} -Pwin32_x86_64,zip,-macarm64,-macx86_64,-linux_x86_64
+mvn clean package -DskipTests ${signingOptions} -DtargetOS=windows_x86_64 -Pzip
 
 cp target/win/dataloader_win.zip .
 
 # build for linux platform
-#mvn clean package -DskipTests ${signingOptions} -Plinux_x86_64,zip,-macarm64,-macx86_64,-win32_x86_64
+#mvn clean package -DskipTests ${signingOptions} -DtargetOS=linux_x86_64 -Pzip
 
 #cp target/linux/dataloader_linux.zip .
