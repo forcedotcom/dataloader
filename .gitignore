@@ -29,5 +29,7 @@ config.properties~
 __pycache__/
 
 # local-proj-repo files
-local-proj-repo/
-!local-proj-repo/local
+local-proj-repo/classworlds/
+local-proj-repo/com/
+local-proj-repo/junit/
+local-proj-repo/org/

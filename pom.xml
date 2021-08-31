@@ -386,6 +386,26 @@
     </profile>
     
     <profile>
+      <id>linux_x86_64</id>
+      <activation>
+        <os>
+          <family>linux</family>
+          <arch>x86_64</arch>
+        </os>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>local.swt</groupId>
+          <artifactId>swtlinux_x86_64</artifactId>
+          <version>4.20</version>
+        </dependency>
+      </dependencies>
+      <properties>
+          <OSType>linux</OSType>
+      </properties>
+    </profile>
+
+    <profile>
       <id>zip</id>
       <build>
         <plugins>
