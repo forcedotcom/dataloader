@@ -5,8 +5,9 @@
 
 usage() {
   echo "Usage: "
-  echo "$0 -u [-n <macos_x86_64 | macos_arm_64 | windows_x86_64 | linux_x86_64>]"
+  echo "$0 -u"
   echo "$0 <Keystore Password> <Keystore File> <TSA URL>" >&2
+  echo "$0 -n macos_x86_64 | macos_arm_64 | windows_x86_64 | linux_x86_64"
   exit 1
 }
 
@@ -31,6 +32,8 @@ run_mvn() {
   then
     from=target/linux/dataloader_linux.zip
     to=./dataloader_linux.zip
+  else
+    usage
   fi
 
   zipOption=""
@@ -59,6 +62,7 @@ do
         n) 
           targetOS=${OPTARG}
           doZip=false
+          unsignedArtifacts=true
           ;;
         *)
           usage
