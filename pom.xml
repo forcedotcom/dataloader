@@ -55,6 +55,12 @@
       <groupId>com.force.api</groupId>
       <artifactId>force-wsc</artifactId>
       <version>${force.wsc.version}</version>
+      <exclusions>
+      	<exclusion>
+      		<groupId>commons-logging</groupId>
+      		<artifactId>commons-logging</artifactId>
+      	</exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.force.api</groupId>
@@ -66,6 +72,12 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-dbcp2</artifactId>
       <version>2.9.0</version>
+      <exclusions>
+      	<exclusion>
+      		<groupId>commons-logging</groupId>
+      		<artifactId>commons-logging</artifactId>
+      	</exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -90,6 +102,12 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>4.5.13</version>
+      <exclusions>
+      	<exclusion>
+      		<groupId>commons-logging</groupId>
+      		<artifactId>commons-logging</artifactId>
+      	</exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -312,14 +330,17 @@
       </plugin>
 
       <plugin>
-          <groupId>com.mycila.maven-license-plugin</groupId>
-          <artifactId>maven-license-plugin</artifactId>
-          <version>1.8.0</version>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>4.1</version>
           <configuration>
               <header>license.txt</header>
               <includes>
                   <include>**/*.java</include>
               </includes>
+              <properties>
+                <strictChecking>true</strictChecking>
+              </properties>
           </configuration>
           <executions>
               <execution>
@@ -328,21 +349,6 @@
                       <goal>check</goal>
                   </goals>
               </execution>
-          </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-help-plugin</artifactId>
-        <version>3.2.0</version>
-          <executions>
-            <execution>
-              <id>show-profiles</id>
-              <phase>compile</phase>
-              <goals>
-                <goal>active-profiles</goal>
-              </goals>
-            </execution>
           </executions>
       </plugin>
     </plugins>
@@ -460,9 +466,15 @@
                     </if>
                     <echo>creating version-specific files for the target OS: ${OSType}</echo>
                     <mkdir dir="${basedir}/target/${OSType}"/>
-                    <copydir src="${basedir}/release/${OSType}" dest="${basedir}/target/${OSType}"/>
-                    <copydir src="${basedir}/release/configs" dest="${basedir}/target/${OSType}/configs"/>
-                    <copydir src="${basedir}/release/samples" dest="${basedir}/target/${OSType}/samples"/>
+                    <copy todir="${basedir}/target/${OSType}">
+                      <fileset dir="${basedir}/release/${OSType}"/>
+                    </copy>
+                    <copy todir="${basedir}/target/${OSType}/configs">
+                      <fileset dir="${basedir}/release/configs"/>
+                    </copy>
+                    <copy todir="${basedir}/target/${OSType}/samples">
+                      <fileset dir="${basedir}/release/samples"/>
+                    </copy>
                     <copy file="${basedir}/release/configs/log-conf.xml" 
                         todir="${basedir}/target/${OSType}/samples/conf"/>
                     <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${project.version}"/>
