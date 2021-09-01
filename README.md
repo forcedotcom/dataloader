@@ -13,7 +13,9 @@ Developers need to use JDK 11 or later such as [Zulu OpenJDK](https://www.azul.c
     cd dataloader
     git submodule init
     git submodule update
-    mvn clean package -DskipTests
+    mvn clean package -DskipTests -DtargetOS=<windows_x86_64 | macos_x86_64 | macos_arm_64 | linux_x86_64>
+    
+NOTE: Specify one and only one of the targetOS values listed above.
     
 The build will include the appropriate eclipse swt jar by detecting your operating system type. If you would like to manually specify the eclipse swt jar, take a look at the pom.xml file to see a full list of available profiles.
 
