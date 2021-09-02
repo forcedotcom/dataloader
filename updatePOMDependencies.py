@@ -4,6 +4,8 @@ import requests, zipfile, io, shutil, os, sys
 import subprocess
 from bs4 import BeautifulSoup
 from os.path import expanduser
+import urllib.request
+import re
 
 ####################################################################
 # Usage:
@@ -48,6 +50,8 @@ def which(program):
                 return exe_file
 
     return None
+
+###########################################################
 
 def getSWTDownloadLinkForPlatform(soup, platformString):
     results = soup.find(id="SWT").find_next("td").string
@@ -117,7 +121,7 @@ def installInLocalMavenRepo(unzippedSWTDir, mvnArtifactId, gitCloneRootDir):
 
 ######## end of installInLocalMavenRepo  ##########
 
-def getLatestSWTVersion(gitCloneRootDir, mvnArtifactId):
+def getLatestSWTVersionFromLocalRepo(gitCloneRootDir, mvnArtifactId):
     swtContentList = os.listdir(gitCloneRootDir 
                          + "/local-proj-repo/local/swt/" + mvnArtifactId)
     maxNumberItem = "1.0"
@@ -128,9 +132,9 @@ def getLatestSWTVersion(gitCloneRootDir, mvnArtifactId):
             maxNumberItem = item
     return maxNumberItem
 
-######## end of getLatestSWTVersion ##############
+######## end of getLatestSWTVersionFromLocalRepo ##############
 
-def updatePOM(gitCloneRootDir, mvnArtifactId, version):
+def updatePOMForSWTVersion(gitCloneRootDir, mvnArtifactId, version):
     newPom = open(gitCloneRootDir + "/pom.xml.new", "w")
 
     with open(gitCloneRootDir + '/pom.xml') as pom:
@@ -149,51 +153,95 @@ def updatePOM(gitCloneRootDir, mvnArtifactId, version):
     os.rename(gitCloneRootDir + '/pom.xml', gitCloneRootDir + '/pom.xml.save')
     os.rename(gitCloneRootDir + '/pom.xml.new', gitCloneRootDir + '/pom.xml')
 
-######## end of updatePOM ########################
+######## end of updatePOMForSWTVersion ########################
+
+def getLatestArtifactVersion(artifactURL):
+    hdr = {
+        'User-Agent': 'Mozilla/5.0', 
+        'Accept-Language': 'en-US,en;q=0.8'
+        }
+
+    req = urllib.request.Request(
+        artifactURL,
+        headers=hdr
+        )
+
+    page = ""
+    with urllib.request.urlopen(req) as f:
+        line = f.read().decode('utf-8')
+        page = page + line
+
+    content = BeautifulSoup(page, "html.parser").find('table', attrs={'class': 'grid versions'})
+    versionNumber = content.find('a').contents[0]
+    return versionNumber
+
+######## end of getLatestArtifactVersion ###########
+
+def updatePOMForRemoteMVNArtifacts(gitCloneRootDir):
+    newPom = open(gitCloneRootDir + "/pom.xml.new", "w")
+    latestArtifactVersion = ""
+
+    with open(gitCloneRootDir + '/pom.xml') as pom:
+        for line in pom:
+            output = line
+            if "<!-- https://mvnrepository.com/artifact/" in line:
+                artifactURL = line.split(' ')[1]
+                print(artifactURL)
+                latestArtifactVersion = getLatestArtifactVersion(artifactURL)
+                print(latestArtifactVersion)
+
+            if "</dependency>" in line:
+                latestArtifactVersion = ""
+
+            if latestArtifactVersion != "" and "<version>" in line:
+                leadingWhitespace = line.split('<')[0]
+                output = leadingWhitespace + "<version>" \
+                           + latestArtifactVersion + "</version>\n"
+
+            newPom.write(output)
+
+    newPom.close()
+    pom.close()
+    os.rename(gitCloneRootDir + '/pom.xml', gitCloneRootDir + '/pom.xml.save')
+    os.rename(gitCloneRootDir + '/pom.xml.new', gitCloneRootDir + '/pom.xml')
+
+######## end of updatePOMForRemoteMVNArtifacts ########################
+
+def updateSWTAndPOM(mvnArtifactId, downloadPageLabel, gitCloneRootDir):
+    URL = "https://download.eclipse.org/eclipse/downloads/"
+    page = requests.get(URL)
+
+    soup = BeautifulSoup(page.content, "html.parser")
+    results = soup.find(id="Latest_Release").find_next("a")['href']
+
+    downloadsPage = URL + results
+    page = requests.get(downloadsPage)
+    soup = BeautifulSoup(page.content, "html.parser")
+    
+    results = getSWTDownloadLinkForPlatform(soup, downloadPageLabel)
+    unzippedDir = downloadAndExtractZip(downloadsPage + results)
+    installInLocalMavenRepo(unzippedDir, mvnArtifactId, gitCloneRootDir)
+    latestVersion = getLatestSWTVersionFromLocalRepo(gitCloneRootDir, mvnArtifactId)
+    updatePOMForSWTVersion(gitCloneRootDir, mvnArtifactId, latestVersion)
+
+######## end of updateSWTAndPOM #########################
+
 
 if (len(sys.argv) < 2):
    print('Usage: python3 swtinstall.py <git clone root>')
    sys.exit(2)
 
-URL = "https://download.eclipse.org/eclipse/downloads/"
-page = requests.get(URL)
-
-soup = BeautifulSoup(page.content, "html.parser")
-results = soup.find(id="Latest_Release").find_next("a")['href']
-
-downloadsPage = URL + results
-page = requests.get(downloadsPage)
-soup = BeautifulSoup(page.content, "html.parser")
-
 # Windows
-mvnArtifactId = "swtwin32_x86_64"
-#results = getSWTDownloadLinkForPlatform(soup, "Windows (64 bit version)")
-#unzippedDir = downloadAndExtractZip(downloadsPage + results)
-#installInLocalMavenRepo(unzippedDir, mvnArtifactId, sys.argv[1])
-latestVersion = getLatestSWTVersion(sys.argv[1], mvnArtifactId)
-print(latestVersion)
-updatePOM(sys.argv[1], mvnArtifactId, latestVersion)
+updateSWTAndPOM("swtwin32_x86_64", "Windows (64 bit version)", sys.argv[1])
 
 # Mac x86
-mvnArtifactId = "swtmacx86_64"
-#results = getSWTDownloadLinkForPlatform(soup, "Mac OSX (64 bit version)")
-#unzippedDir = downloadAndExtractZip(downloadsPage + results)
-#installInLocalMavenRepo(unzippedDir, mvnArtifactId, sys.argv[1])
-#latestVersion = getLatestSWTVersion(sys.argv[1], mvnArtifactId)
-#updatePOM(sys.argv[1], mvnArtifactId, latestVersion)
+updateSWTAndPOM("swtmacx86_64", "Mac OSX (64 bit version)", sys.argv[1])
 
 # Mac ARM
-mvnArtifactId = "swtmacarm64"
-#results = getSWTDownloadLinkForPlatform(soup, "Mac OSX (64 bit version for Arm64/AArch64)")
-#unzippedDir = downloadAndExtractZip(downloadsPage + results)
-#installInLocalMavenRepo(unzippedDir, mvnArtifactId, sys.argv[1])
-#latestVersion = getLatestSWTVersion(sys.argv[1], mvnArtifactId)
-#updatePOM(sys.argv[1], mvnArtifactId, latestVersion)
+updateSWTAndPOM("swtmacarm64", "Mac OSX (64 bit version for Arm64/AArch64)", sys.argv[1])
 
 # Linux
-mvnArtifactId = "swtlinux_x86_64"
-#results = getSWTDownloadLinkForPlatform(soup, "Linux (64 bit version)")
-#unzippedDir = downloadAndExtractZip(downloadsPage + results)
-#installInLocalMavenRepo(unzippedDir, mvnArtifactId, sys.argv[1])
-#latestVersion = getLatestSWTVersion(sys.argv[1], mvnArtifactId)
-#updatePOM(sys.argv[1], mvnArtifactId, latestVersion)
+updateSWTAndPOM("swtlinux_x86_64", "Linux (64 bit version)", sys.argv[1])
+
+# update other dependencies in POM
+updatePOMForRemoteMVNArtifacts(sys.argv[1])
