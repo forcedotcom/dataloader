@@ -441,7 +441,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-antrun-plugin</artifactId>
-            <version>1.8</version>
+            <version>3.0.0</version>
             <executions>
               <execution>
                 <phase>package</phase>
@@ -507,6 +507,7 @@
              </execution>
             </executions>
             <dependencies>
+<!-- https://mvnrepository.com/artifact/ant-contrib/ant-contrib -->
               <dependency>
               <groupId>ant-contrib</groupId>
               <artifactId>ant-contrib</artifactId>
@@ -531,12 +532,13 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.13</version>
+            <version>3.0.0-M5</version>
             <dependencies>
+<!-- https://mvnrepository.com/artifact/org.apache.maven.surefire/surefire-junit4 -->
               <dependency>
                 <groupId>org.apache.maven.surefire</groupId>
                 <artifactId>surefire-junit4</artifactId>
-                <version>2.13</version>
+                <version>3.0.0-M5</version>
               </dependency>
             </dependencies>
             <configuration>
