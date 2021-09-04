@@ -62,4 +62,4 @@ sed -i '' "s/admin@org.com/${2}/g" pomtest.xml
 sed -i '' "s/standard@org.com/${3}/g" pomtest.xml
 sed -i '' "s/<test\.password>/<test\.password>${4}/g" pomtest.xml
 
-mvn -f pomtest.xml -DtargetOS=macos_x86_64 clean test -P integration-test ${debug} ${test}
+mvn -f pomtest.xml -DtargetOS=macos_x86_64 clean test -Pintegration-test ${debug} ${test}

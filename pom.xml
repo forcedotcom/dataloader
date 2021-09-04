@@ -18,7 +18,6 @@
     <build.year>2021</build.year>
     <java.compile.version>11</java.compile.version>
     <codesign>DONTSIGN</codesign>
-    <spring.version>5.3.9</spring.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <config.additional.properties></config.additional.properties>
     <jarsigner.skip>true</jarsigner.skip>
@@ -46,6 +45,7 @@
   </repositories>
 
   <dependencies>
+<!-- Runtime dependencies -->
 <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -128,6 +128,7 @@
         </exclusion>
       </exclusions>
     </dependency>
+    
 <!-- Testing dependencies -->
 <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
     <dependency>
@@ -189,21 +190,12 @@
       </testResource>
     </testResources>
 
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>osxappbundle-maven-plugin</artifactId>
-          <version>1.2.0</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-
     <plugins>
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-resources-plugin -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.0</version>
         <configuration>
             <useDefaultDelimiters>false</useDefaultDelimiters>
             <delimiters>
@@ -218,11 +210,8 @@
             </nonFilteredFileExtensions>
         </configuration>
       </plugin>
-	
-      <!-- we might want to use the maven-shade-plugin in the future instead 
-        of maven-assembly-plugin -->
-
-
+      
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
@@ -236,15 +225,17 @@
         </configuration>
       </plugin>
 
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.1</version>
+        <version>3.0.0-M5</version>
           <dependencies>
+<!-- https://mvnrepository.com/artifact/org.apache.maven.surefire/surefire-junit4 -->
               <dependency>
                   <groupId>org.apache.maven.surefire</groupId>
                   <artifactId>surefire-junit4</artifactId>
-                  <version>3.0.0-M2</version>
+                  <version>3.0.0-M5</version>
               </dependency>
           </dependencies>
         <configuration>
@@ -260,6 +251,7 @@
         </configuration>
       </plugin>
 
+<!-- https://mvnrepository.com/artifact/com.mycila/license-maven-plugin -->
       <plugin>
           <groupId>com.mycila</groupId>
           <artifactId>license-maven-plugin</artifactId>
@@ -373,8 +365,12 @@
       </activation>
       <build>
         <plugins>
+          <!-- we might want to use the maven-shade-plugin in the future instead 
+               of maven-assembly-plugin -->
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-assembly-plugin -->
           <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.3.0</version>
             <configuration>
               <archive>
                 <manifest>
@@ -395,6 +391,8 @@
 	          </execution>
 	        </executions>
 	      </plugin>
+	      
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin -->
 	      <plugin>
 	        <artifactId>maven-shade-plugin</artifactId>
 	        <version>3.2.4</version>
@@ -450,6 +448,7 @@
       <id>zip</id>
       <build>
         <plugins>
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-antrun-plugin -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-antrun-plugin</artifactId>
@@ -541,6 +540,7 @@
       <id>integration-test</id>
       <build>
         <plugins>
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
