@@ -2,7 +2,7 @@
 
 usage() {
   echo "Usage: "
-  echo "$0 [-v <version number such as 52.0.0>] [-d] [-t <test class name without the package prefix com.salesforce.dataloader e.g. dyna.DateConverterTest>] <test org URL> <test admin username> <test regular user username> <encrypted test password>"
+  echo "$0 [-v <version number such as 52.0.0>] [-d] [-t <test class name without the package prefix com.salesforce.dataloader e.g. dyna.DateConverterTest>] <targetOS macos_x86_64 | windows_x86_64 | macos_arm_64 | linux_x86_64> <test org URL> <test admin username> <test regular user username> <encrypted test password>"
   echo "listening on port 5005 for IDE to start the debugging session if -d is specified."
   exit 1
 }
@@ -57,9 +57,9 @@ then
   sed -i '' "s/<force.wsc.version>[0-9][0-9]\.[0-9]\.[0-9]<\/force.wsc.version>/<force.wsc.version>${version}<\/force.wsc.version>/g" pomtest.xml
 fi
 
-sed -i '' "s/http:\/\/testendpoint/${1}/g" pomtest.xml
-sed -i '' "s/admin@org.com/${2}/g" pomtest.xml
-sed -i '' "s/standard@org.com/${3}/g" pomtest.xml
-sed -i '' "s/<test\.password>/<test\.password>${4}/g" pomtest.xml
+sed -i '' "s/http:\/\/testendpoint/${2}/g" pomtest.xml
+sed -i '' "s/admin@org.com/${3}/g" pomtest.xml
+sed -i '' "s/standard@org.com/${4}/g" pomtest.xml
+sed -i '' "s/<test\.password>/<test\.password>${5}/g" pomtest.xml
 
-mvn -f pomtest.xml -DtargetOS=macos_x86_64 clean test -Pintegration-test ${debug} ${test}
+mvn -f pomtest.xml -DtargetOS=${1} clean test -Pintegration-test ${debug} ${test}
