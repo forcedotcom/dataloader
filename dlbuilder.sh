@@ -64,7 +64,7 @@ run_mvn() {
   fi
 
   # build uber jar
-#  mvn clean package -DskipTests -DtargetOS=$2 
+  mvn clean package -DskipTests -DtargetOS=$2 
 
   jarfile=`find ./target -name dataloader-*-uber.jar -not -path "./target/win/*" -not -path "./target/mac/*" -not -path "./target/linux/*" -print -quit` 
   # sign uber jar if -u flag not set
@@ -113,6 +113,7 @@ do
           ;;
     esac
 done
+shift $((OPTIND -1))
 
 if [ ${unsignedArtifacts} = false  -a  "$#" -ne 6 ]; then
   usage
