@@ -188,9 +188,8 @@ def updatePOMForRemoteMVNArtifacts(gitCloneRootDir):
                 artifactURL = line.split(' ')[1]
                 print(artifactURL)
                 latestArtifactVersion = getLatestArtifactVersion(artifactURL)
-                print(latestArtifactVersion)
 
-            if "</dependency>" in line:
+            if "</dependency>" or "</plugin>" in line:
                 latestArtifactVersion = ""
 
             if latestArtifactVersion != "" and "<version>" in line:
