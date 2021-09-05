@@ -68,8 +68,6 @@ Questions can be directed to the [open source forum](https://developer.salesforc
 
 # Dependencies and plugins
 
-Force Web Service Connector version is here. [Force Wsc and Patner API](https://mvnrepository.com/artifact/com.force.api)
+Update SWT by running `python3 <root of the git clone>/updatePOMDependencies.py <root of the git clone>`. Requires python 3.9 or later.
 
-Update all dependencies and plugins by running `python3 <root of the git clone>/updatePOMDependencies.py <root of the git clone>`. Requires python 3.9 or later.
-
-Alternately, run `mvn versions:display-dependency-updates` to see which dependencies need an update. It will list all dependencies whose specified version in pom.xml needs an update except SWT. Run `mvn versions:use-latest-releases` to update these dependencies. Run `mvn versions:display-plugin-updates` to check which plugins need an update and update their versions manually.
+All other dependencies and plugins are downloaded by maven from the central maven repo. Run `mvn versions:display-dependency-updates` to see which dependencies need an update. It will list all dependencies whose specified version in pom.xml needs an update. Run `mvn versions:use-latest-releases` to update these dependencies. Run `mvn versions:display-plugin-updates` to check which plugins need an update and update their versions manually.
