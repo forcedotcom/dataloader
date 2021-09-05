@@ -189,7 +189,10 @@ def updatePOMForRemoteMVNArtifacts(gitCloneRootDir):
                 print(artifactURL)
                 latestArtifactVersion = getLatestArtifactVersion(artifactURL)
 
-            if "</dependency>" or "</plugin>" in line:
+            if "</dependency>" in line:
+                latestArtifactVersion = ""
+
+            if "</plugin>" in line:
                 latestArtifactVersion = ""
 
             if latestArtifactVersion != "" and "<version>" in line:
@@ -243,4 +246,4 @@ updateSWTAndPOM("swtmacarm64", "Mac OSX (64 bit version for Arm64/AArch64)", sys
 updateSWTAndPOM("swtlinux_x86_64", "Linux (64 bit version)", sys.argv[1])
 
 # update other dependencies in POM
-updatePOMForRemoteMVNArtifacts(sys.argv[1])
+#updatePOMForRemoteMVNArtifacts(sys.argv[1])
