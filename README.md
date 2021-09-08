@@ -48,6 +48,12 @@ Commands to encrypt password:
 
     java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -k <path to keyfile>
     java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -e <password in plain text> <path to keyfile>
+    
+In case you experience "Invalid Api version specified on URL" on login, you need to change the Api version in pom.xml to specify the WSC version of your server. Simply change the following line and rebuild the project:
+
+    ...
+        <force.wsc.version>53.0.0</force.wsc.version>
+    ...
 
 # Execute Data Loader With Scripts for v45 and Later
  
