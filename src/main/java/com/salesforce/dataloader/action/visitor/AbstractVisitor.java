@@ -45,8 +45,8 @@ public abstract class AbstractVisitor implements IVisitor {
     private final ILoaderProgress monitor;
     private final DataWriter successWriter;
     private final DataWriter errorWriter;
-    private int errors;
-    private int successes;
+    private long errors;
+    private long successes;
     private final LoadRateCalculator rateCalculator;
 
     public AbstractVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
@@ -64,19 +64,27 @@ public abstract class AbstractVisitor implements IVisitor {
     protected void addSuccess() {
         this.successes++;
     }
+    
+    protected void setSuccesses(long num) {
+    	this.successes = num;
+    }
+    
+    protected void setErrors(long num) {
+    	this.errors = num;
+    }
 
     @Override
-    public int getNumberOfRows() {
+    public long getNumberOfRows() {
         return getNumberErrors() + getNumberSuccesses();
     }
 
     @Override
-    public int getNumberErrors() {
+    public long getNumberErrors() {
         return this.errors;
     }
 
     @Override
-    public int getNumberSuccesses() {
+    public long getNumberSuccesses() {
         return this.successes;
     }
 
@@ -98,6 +106,14 @@ public abstract class AbstractVisitor implements IVisitor {
 
     protected Mapper getMapper() {
         return getController().getMapper();
+    }
+    
+    protected DataWriter getErrorWriter() {
+    	return this.errorWriter;
+    }
+    
+    protected DataWriter getSuccessWriter() {
+    	return this.successWriter;
     }
 
     protected void writeSuccess(Row row, String id, String message) throws DataAccessObjectException {

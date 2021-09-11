@@ -63,11 +63,12 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
     public static Collection<Object[]> getParameters() {
         return Arrays.asList(
                 // partner API
-                TestVariant.forSettings(TestSetting.BULK_API_DISABLED, TestSetting.BULK_V2_QUERY_DISABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_DISABLED, TestSetting.BULK_V2_API_DISABLED)
                 // Bulk API
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_QUERY_DISABLED),
+                , TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_DISABLED)
                 // Bulk V2 Query API
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_QUERY_ENABLED));
+                , TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED)
+                );
     }
 
     protected class ExtractContactGenerator extends ContactGenerator {
@@ -236,7 +237,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         final String soql = "select id from " + nonQueryableType;
         final Map<String, String> argmap = getTestConfig(soql, nonQueryableType, false);
 
-        if (isBulkV2QueryEnabled(argmap) || !isBulkAPIEnabled(argmap)) {
+        if (isBulkV2APIEnabled(argmap) || !isBulkAPIEnabled(argmap)) {
             // Partner or Bulk v2 query 
             runProcessNegative(argmap, "entity type " + nonQueryableType + " does not support query");
         } else {
@@ -403,8 +404,8 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         // bulk api is not used for query all
         return !isExtractAll() && super.isBulkAPIEnabled(argMap);
     }
-    protected boolean isBulkV2QueryEnabled(Map<String, String> argMap) {
-        // bulk api is not used for query all
-        return !isExtractAll() && super.isBulkAPIEnabled(argMap) && isSettingEnabled(argMap, Config.ENABLE_BULK_V2_QUERY);
+    protected boolean isBulkV2APIEnabled(Map<String, String> argMap) {
+        // bulk v2 api is not used for query all
+        return !isExtractAll() && super.isBulkAPIEnabled(argMap) && isSettingEnabled(argMap, Config.BULKV2_API_ENABLED);
     }
 }

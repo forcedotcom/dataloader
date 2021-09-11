@@ -642,11 +642,21 @@ public class Controller {
         if (generateFiles || errorPath == null || errorPath.length() == 0) {
             errorPath = new File(statusDir, "error" + timestamp + ".csv").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
         }
+        /*
+         * TODO: Bulk V2 has the endpoint to download unprocessed records from the submitted
+         * job. Uncomment the following lines to download them.
+        String unprocessedRecordsPath = config.getString(Config.OUTPUT_UNPROCESSED_RECORDS);
+        if (generateFiles || unprocessedRecordsPath == null || unprocessedRecordsPath.length() == 0) {
+        	unprocessedRecordsPath = new File(statusDir, "unprocessedRecords" + timestamp + ".csv").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        */
 
         // next validate the error and success csv
         try {
             validateFile(successPath);
             validateFile(errorPath);
+            // TODO for unprocessed records
+            // validateFile(unprocessedRecordsPath);
         } catch (IOException e) {
             throw new ProcessInitializationException(e.getMessage(), e);
         }
@@ -654,6 +664,8 @@ public class Controller {
         config.setValue(Config.OUTPUT_STATUS_DIR, statusDirName);
         config.setValue(Config.OUTPUT_SUCCESS, successPath);
         config.setValue(Config.OUTPUT_ERROR, errorPath);
+        // TODO for unprocessed records
+        // config.setValue(Config.OUTPUT_UNPROCESSED_RECORDS, unprocessedRecordsPath);
     }
 
     private void validateFile(String filePath) throws IOException {

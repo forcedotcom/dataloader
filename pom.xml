@@ -269,6 +269,8 @@
               <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
               <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
               <nonFilteredFileExtension>png</nonFilteredFileExtension>
+              <nonFilteredFileExtension>swp</nonFilteredFileExtension>
+              <nonFilteredFileExtension>*~*</nonFilteredFileExtension>
             </nonFilteredFileExtensions>
         </configuration>
       </plugin>
@@ -598,6 +600,11 @@
       </build>
     </profile>
     
+<!-- "integration-test" profile declares surefire-plugin again with fewer exclusions
+      than surefire-plugin declaration run during test phase, thereby ensuring that
+      "mvn test" runs unit tests whereas "mvn test -Pintegration-test" runs all
+      tests.
+ -->
     <profile>
       <id>integration-test</id>
       <build>

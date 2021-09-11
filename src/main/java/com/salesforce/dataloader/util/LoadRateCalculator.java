@@ -52,10 +52,10 @@ public class LoadRateCalculator {
         this.totalRecords = numRecords;
     }
 
-    public String calculateSubTask(int numProcessed, int numErrors) {
+    public String calculateSubTask(long l, long m) {
 
         final Date currentLoadTime = new Date();
-        final int numSuccess = numProcessed - numErrors;
+        final long numSuccess = l - m;
         final long currentPerMin = numSuccess * 60 * 60;
         long rate;
 
@@ -76,8 +76,8 @@ public class LoadRateCalculator {
 
         final long seconds = remainingSeconds - mins * 60;
 
-        return Messages.getMessage(getClass(), "processed", numProcessed, this.totalRecords, rate, mins, seconds,
+        return Messages.getMessage(getClass(), "processed", l, this.totalRecords, rate, mins, seconds,
                 numSuccess,
-                numErrors);
+                m);
     }
 }

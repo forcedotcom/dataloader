@@ -34,10 +34,10 @@ package com.salesforce.dataloader.action.visitor;
  */
 public interface IVisitor {
 
-    int getNumberErrors();
+    long getNumberErrors();
 
-    int getNumberOfRows();
+    long getNumberOfRows();
 
-    int getNumberSuccesses();
+    long getNumberSuccesses();
 
 }
