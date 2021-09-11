@@ -294,7 +294,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
     ConnectionException {
         // insert accounts so there's something to query
         final ExtractAccountGenerator accountGen = new ExtractAccountGenerator();
-        final int numRecords = 1;
+        final int numRecords = 100;
         final String[] accountIds = insertExtractTestRecords(numRecords, accountGen);
         final String soql = accountGen
                 .getSOQL("ID, NAME, TYPE, PHONE, ACCOUNTNUMBER__C, WEBSITE, ANNUALREVENUE, LASTMODIFIEDDATE, ORACLE_ID__C");

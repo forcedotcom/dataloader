@@ -25,10 +25,15 @@
  */
 
 /**********************************
- * A code snippet showing Bulk v2 Ingest using BulkV2Connection
+ * A code snippet showing Bulk v2 Ingest using BulkV2Connection. 
+ * Requires dataloader-<version>-uber.jar in the classpath to compile.
  * 
 
 import java.net.URL;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import com.salesforce.dataloader.action.visitor.BulkV2Connection;
 import com.salesforce.dataloader.client.HttpClientTransport;
@@ -80,18 +85,16 @@ public class TestBulkV2 {
 		        job.setContentType(ContentType.CSV);
 	            job.setObject("select id from Account");
 	            job = v2conn.createJob(job);
+	            // wait for the job to complete
 	            while (job.getState() != JobStateEnum.JobComplete) {
 	            	Thread.sleep(10,000);
 	            	job = v2conn.getExtractJobStatus(job.getId());
 	            }
-	            
-	            BufferedInputStream resultsStream = new BufferedInputStream(v2conn.getQueryResultStream(job.getId(), ""));
+	            // download query results
 	            BufferedOutputStream csvFileStream = new BufferedOutputStream(new FileOutputStream(bulkQueryResultsFilename));
-	            writeTo(resultsStream, csvFileStream);
-	            resultsStream.close();
 	            String locator = v2conn.getQueryLocator();
 	            while (!"null".equalsIgnoreCase(locator)) {
-	                resultsStream = new BufferedInputStream(v2conn.getQueryResultStream(job.getId(), locator));
+	                BufferedInputStream resultsStream = new BufferedInputStream(v2conn.getQueryResultStream(job.getId(), locator));
 	                writeTo(resultsStream, csvFileStream);
 	                resultsStream.close();
 	                locator = v2conn.getQueryLocator();
