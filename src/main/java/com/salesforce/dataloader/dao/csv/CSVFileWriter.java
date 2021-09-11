@@ -131,6 +131,10 @@ public class CSVFileWriter implements DataWriter {
             }
         }
     }
+    
+    public String getFileName() {
+    	return this.fileName;
+    }
 
     private void writeHeaderRow() throws DataAccessObjectInitializationException {
         CSVColumnVisitor visitor = new CSVColumnVisitor(fileOut);

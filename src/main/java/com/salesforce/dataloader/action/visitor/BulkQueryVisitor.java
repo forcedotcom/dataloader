@@ -70,7 +70,7 @@ public class BulkQueryVisitor extends AbstractBulkQueryVisitor {
             throw new ExtractException(e);
         }
         jobUtil.awaitCompletionAndCloseJob();
-        if (!this.getConfig().getBoolean(Config.ENABLE_BULK_V2_QUERY)) {
+        if (!this.getConfig().isBulkV2APIEnabled()) {
             this.batches = jobUtil.getBatches().getBatchInfo();
         }
         return jobUtil.getRecordsProcessed();

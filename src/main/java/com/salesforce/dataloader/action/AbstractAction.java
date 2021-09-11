@@ -250,9 +250,17 @@ abstract class AbstractAction implements IAction {
 
     private void openErrorWriter(List<String> headers) throws OperationException {
         headers = new LinkedList<String>(headers);
+        Config config = this.controller.getConfig();
 
-        // add the ERROR column
-        headers.add(Config.ERROR_COLUMN_NAME);
+        if (config.isBulkV2APIEnabled()
+        	&& !config.getString(Config.OPERATION).equals(OperationInfo.extract.name())
+        	&& !config.getString(Config.OPERATION).equals(OperationInfo.extract_all.name())) {
+        	headers.add(0, "salesforce__id");
+        	headers.add(1, Config.ERROR_COLUMN_NAME);
+        } else {
+	        // add the ERROR column
+	        headers.add(Config.ERROR_COLUMN_NAME);
+        }
         try {
             getErrorWriter().open();
             getErrorWriter().setColumnNames(headers);
@@ -264,12 +272,20 @@ abstract class AbstractAction implements IAction {
 
     private void openSuccessWriter(List<String> headers) throws LoadException {
         headers = new LinkedList<String>(headers);
+        Config config = this.controller.getConfig();
 
         // add the ID column if not there already
-        if (!Config.ID_COLUMN_NAME.equals(headers.get(0))) {
-            headers.add(0, Config.ID_COLUMN_NAME);
+        if (config.isBulkV2APIEnabled()
+        	&& !config.getString(Config.OPERATION).equals(OperationInfo.extract.name())
+        	&& !config.getString(Config.OPERATION).equals(OperationInfo.extract_all.name())) {
+        	headers.add(0, "salesforce__id");
+        	headers.add(1, "created?");
+        } else {
+	        if (!Config.ID_COLUMN_NAME.equals(headers.get(0))) {
+	            headers.add(0, Config.ID_COLUMN_NAME);
+	        }
+	        headers.add(Config.STATUS_COLUMN_NAME);
         }
-        headers.add(Config.STATUS_COLUMN_NAME);
         try {
             getSuccessWriter().open();
             getSuccessWriter().setColumnNames(headers);

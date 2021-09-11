@@ -26,15 +26,21 @@
 
 package com.salesforce.dataloader.process;
 
+import com.salesforce.dataloader.TestSetting;
+import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -49,7 +55,17 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(Parameterized.class)
 public class CsvExtractProcessTest extends ProcessExtractTestBase {
-
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getParameters() {
+        return Arrays.asList(
+                // partner API
+                TestVariant.forSettings(TestSetting.BULK_API_DISABLED, TestSetting.BULK_V2_API_DISABLED),
+                // Bulk API
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_DISABLED),
+                // Bulk V2 Query API
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED));
+    }
+    
     public CsvExtractProcessTest(Map<String, String> config) {
         super(config);
     }

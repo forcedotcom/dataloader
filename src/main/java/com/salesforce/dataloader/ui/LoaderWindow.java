@@ -33,6 +33,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.*;
@@ -193,8 +194,9 @@ public class LoaderWindow extends ApplicationWindow {
         Composite comp = new Composite(parent, SWT.BORDER);
         setBackground(comp);
         comp.setLayout(new FillLayout(SWT.VERTICAL));
-        Label label = new Label(comp, SWT.CENTER);
+        CLabel label = new CLabel(comp, SWT.CENTER);
         setBackground(label);
+        label.setMargins(0, 30, 0, 0);
         label.setImage(UIUtils.getImageRegistry().get("title_logo"));
         comp.pack();
 

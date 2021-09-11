@@ -652,7 +652,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         res.put(Config.DAO_TYPE, isExtraction ? DataAccessObjectFactory.CSV_WRITE_TYPE
                 : DataAccessObjectFactory.CSV_READ_TYPE);
         res.put(Config.OUTPUT_STATUS_DIR, getTestStatusDir());
-        String apiType = isBulkAPIEnabled(res) ? "Bulk" : "Soap";
+        String apiType = isBulkAPIEnabled(res) || isBulkV2APIEnabled(res) ? "Bulk" : "Soap";
         res.put(Config.OUTPUT_SUCCESS, getSuccessFilePath(apiType));
         res.put(Config.OUTPUT_ERROR, getErrorFilePath(apiType));
 
@@ -882,7 +882,10 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     protected boolean isBulkAPIEnabled(Map<String, String> argMap) {
         return isSettingEnabled(argMap, Config.BULK_API_ENABLED);
     }
-
+    
+    protected boolean isBulkV2APIEnabled(Map<String, String> argMap) {
+        return isBulkAPIEnabled(argMap) && isSettingEnabled(argMap, Config.BULKV2_API_ENABLED);
+    }
     protected boolean isSettingEnabled(Map<String, String> argMap, String configKey) {
         return Config.TRUE.equalsIgnoreCase(argMap.get(configKey));
     }

@@ -26,10 +26,16 @@
 
 package com.salesforce.dataloader.process;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import com.salesforce.dataloader.TestSetting;
+import com.salesforce.dataloader.TestVariant;
+
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -40,6 +46,14 @@ import java.util.Map;
  */
 @RunWith(Parameterized.class)
 public class CsvExtractAllProcessTest extends ProcessExtractTestBase {
+
+// Data Loader supports Query All only through Partner API
+	@Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> getParameters() {
+    	Object[][] configVariantsArray = new Object[1][0];
+    	configVariantsArray[0] = TestVariant.forSettings(TestSetting.BULK_API_DISABLED, TestSetting.BULK_V2_API_DISABLED);
+        return Arrays.asList(configVariantsArray);
+    }
 
     public CsvExtractAllProcessTest(Map<String, String> config) throws Exception {
         super(config);

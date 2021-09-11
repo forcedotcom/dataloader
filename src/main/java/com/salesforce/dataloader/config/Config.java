@@ -223,6 +223,7 @@ public class Config {
     public static final String ENABLE_LAST_RUN_OUTPUT = "process.enableLastRunOutput"; //$NON-NLS-1$
     public static final String LAST_RUN_OUTPUT_DIR = "process.lastRunOutputDirectory"; //$NON-NLS-1$
     public static final String OUTPUT_ERROR = "process.outputError"; //$NON-NLS-1$
+    public static final String OUTPUT_UNPROCESSED_RECORDS = "process.unprocessedRecords"; //$NON-NLS-1$
     public static final String LOAD_ROW_TO_START_AT = "process.loadRowToStartAt"; //$NON-NLS-1$
     public static final String INITIAL_LAST_RUN_DATE = "process.initialLastRunDate";
     public static final String ENCRYPTION_KEY_FILE = "process.encryptionKeyFile"; //$NON-NLS-1$
@@ -263,8 +264,8 @@ public class Config {
     public static final String DUPLICATE_RULE_ALLOW_SAVE = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.allowSave"; //$NON-NLS-1$
     public static final String DUPLICATE_RULE_INCLUDE_RECORD_DETAILS = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.includeRecordDetails"; //$NON-NLS-1$
     public static final String DUPLICATE_RULE_RUN_AS_CURRENT_USER = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.runAsCurrentUser"; //$NON-NLS-1$
-    public static final String ENABLE_BULK_V2_QUERY = PILOT_PROPERTY_PREFIX + "sfdc.enableBulkV2Query";
-    
+    public static final String BULKV2_API_ENABLED = PILOT_PROPERTY_PREFIX + "sfdc.useBulkV2Api";
+
     /*
      * ===============================
      * End of config properties
@@ -426,7 +427,7 @@ public class Config {
         setDefaultValue(DUPLICATE_RULE_INCLUDE_RECORD_DETAILS, false);
         setDefaultValue(DUPLICATE_RULE_RUN_AS_CURRENT_USER, false);
         setDefaultValue(BUFFER_UNPROCESSED_BULK_QUERY_RESULTS, false);
-        setDefaultValue(ENABLE_BULK_V2_QUERY, false);
+        setDefaultValue(BULKV2_API_ENABLED, false);
     }
 
     /**
@@ -929,8 +930,8 @@ public class Config {
     }
 
     private void skipSaveOfUnsupportedProperties() {
-        // do not save a value for enabling Bulk V2 query
-        this.properties.remove(ENABLE_BULK_V2_QUERY);
+        // do not save a value for enabling Bulk V2 
+        this.properties.remove(BULKV2_API_ENABLED);
     }
     
     /**
@@ -1111,6 +1112,10 @@ public class Config {
 
     public boolean isBulkAPIEnabled() {
         return getBoolean(BULK_API_ENABLED);
+    }
+    
+    public boolean isBulkV2APIEnabled() {
+        return isBulkAPIEnabled() && getBoolean(BULKV2_API_ENABLED);
     }
 
     private boolean isBulkApiOperation() {

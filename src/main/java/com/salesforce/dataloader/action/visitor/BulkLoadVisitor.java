@@ -28,13 +28,17 @@ package com.salesforce.dataloader.action.visitor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.RandomAccessFile;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +57,7 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.LoadException;
@@ -177,12 +182,13 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             final DynaBean row = rows.get(i);
 
             if (recordsInBatch == 0) {
-                headerColumns = addHeader(out, os, row, userColumns);
+                headerColumns = addHeader(out, row, userColumns);
             }
             writeRow(row, out, recordsInBatch, headerColumns);
             recordsInBatch++;
 
-            if (os.size() > Config.MAX_BULK_API_BATCH_BYTES) {                createBatch(os, recordsInBatch); // resets outputstream
+            if (os.size() > Config.MAX_BULK_API_BATCH_BYTES) {
+            	createBatch(os, recordsInBatch); // resets outputstream
                 // reset for the next batch
                 recordsInBatch = 0;
             }
@@ -230,7 +236,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         out.print('"');
     }
 
-    private List<String> addHeader(PrintStream out, ByteArrayOutputStream os, DynaBean row, List<String> columns)
+    private List<String> addHeader(PrintStream out, DynaBean row, List<String> columns)
             throws LoadException {
         boolean first = true;
         final List<String> cols = new ArrayList<String>();
@@ -287,17 +293,84 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 logger.warn("Failed to close job", e);
             }
             try {
+            	if (this.getConfig().isBulkAPIEnabled())
                 getResults();
             } catch (AsyncApiException e) {
                 throw new LoadException("Failed to get batch results", e);
             }
         }
     }
+    
+    private long transferCSVContent(String fromFileName, String toFileName) throws OperationException {
+        RandomAccessFile fromFile, toFile;
+        long contentRowCount = 0;
+		try {
+			fromFile = new RandomAccessFile(fromFileName, "rw");
+			toFile = new RandomAccessFile(toFileName, "rw");
+			//first line is the header row                                  
+			fromFile.readLine();
+			toFile.readLine();
+
+			// go to end of to file
+			while (toFile.readLine() != null) {
+				contentRowCount++;
+			}
+			String contentRow = null;
+			while ((contentRow = fromFile.readLine()) != null) {
+				contentRow += System.lineSeparator();
+				toFile.write(contentRow.getBytes());
+				contentRowCount++;
+			}
+			toFile.close();
+			
+			// truncate the fromFile
+			fromFile.setLength(0);
+			fromFile.close();
+			return contentRowCount;
+		} catch (FileNotFoundException e) {
+			throw new OperationException(e.getMessage());
+		} catch (IOException e) {
+			throw new OperationException(e.getMessage());
+		}          
+    }
+
+    private void getBulkV2LoadJobResults() throws AsyncApiException, OperationException, DataAccessObjectException {
+    	this.getSuccessWriter().close();
+    	this.getErrorWriter().close();
+    	
+    	Config config = this.getConfig();
+    	String successWriterFile = config.getString(Config.OUTPUT_SUCCESS);
+    	String errorWriterFile = config.getString(Config.OUTPUT_ERROR);
+    	// TODO for unprocessed records. Also uncomment in Controller.java to set the right value
+    	// for Config.OUTPUT_UNPROCESSED_RECORDS
+    	// String unprocessedRecordsWriterFile = config.getString(Config.OUTPUT_UNPROCESSED_RECORDS);
+
+        File tmpFile = new File(this.jobUtil.getStagingFileInOutputStatusDir("temp", ".csv"));
+        String tmpFileName = tmpFile.getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
+
+    	this.jobUtil.getBulkV2LoadSuccessResults(tmpFileName);
+    	long rowCount = transferCSVContent(tmpFileName, successWriterFile);
+    	this.setSuccesses(rowCount);
+
+    	this.jobUtil.getBulkV2LoadErrorResults(tmpFileName);
+    	rowCount = transferCSVContent(tmpFileName, errorWriterFile);
+    	this.setErrors(rowCount);
+
+        // TODO for unprocessed records
+    	// this.jobUtil.getBulkV2LoadUnprocessedRecords(tmpFileName);
+    	// transferCSVContent(tmpFileName, unprocessedRecordsWriterFile);
+
+    	tmpFile.delete();
+    }
 
     private void getResults() throws AsyncApiException, OperationException, DataAccessObjectException {
 
         getProgressMonitor().setSubTask(Messages.getMessage(getClass(), "retrievingResults"));
 
+        if (this.getConfig().isBulkV2APIEnabled()) {
+        	getBulkV2LoadJobResults();
+        	return;
+        }
         final DataReader dataReader = resetDAO();
 
         // create a map of batch infos by batch id. Each batchinfo has the final processing state of the batch
