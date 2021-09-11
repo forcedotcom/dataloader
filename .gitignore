@@ -28,6 +28,10 @@ config.properties~
 #python files
 __pycache__/
 
+#command line editor working and backup files
+*.swp
+*.*~
+
 # local-proj-repo files
 local-proj-repo/classworlds/
 local-proj-repo/com/
