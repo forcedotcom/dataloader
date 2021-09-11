@@ -170,12 +170,18 @@
         <includes>
           <include>**/*.properties</include>
         </includes>
+        <excludes>
+          <exclude>**/*.swp</exclude>
+          <exclude>**/*.*~*</exclude>
+        </excludes>
       </resource>
       <resource>
         <directory>src/main/resources</directory>
         <filtering>false</filtering>
         <excludes>
           <exclude>**/*.properties</exclude>
+          <exclude>**/*.swp</exclude>
+          <exclude>**/*.*~*</exclude>
         </excludes>
       </resource>
     </resources>
@@ -269,8 +275,6 @@
               <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
               <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
               <nonFilteredFileExtension>png</nonFilteredFileExtension>
-              <nonFilteredFileExtension>swp</nonFilteredFileExtension>
-              <nonFilteredFileExtension>*~*</nonFilteredFileExtension>
             </nonFilteredFileExtensions>
         </configuration>
       </plugin>
