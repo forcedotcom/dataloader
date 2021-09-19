@@ -686,7 +686,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                         Field[] refObjectFields = describeSObject(refEntityName).getFields();
                         Map<String, Field> refFieldInfo = new HashMap<String, Field>();
                         for (Field refField : refObjectFields) {
-                            if (refField.isExternalId()) {
+                            if (refField.isExternalId() || refField.isIdLookup()) {
                                 refField.setCreateable(entityField.isCreateable());
                                 refField.setUpdateable(entityField.isUpdateable());
                                 refFieldInfo.put(refField.getName(), refField);
