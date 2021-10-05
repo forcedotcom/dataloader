@@ -33,9 +33,10 @@ import com.salesforce.dataloader.config.Config;
  */
 public class LoginCriteria {
 
-    public static final int Default = 0;
-    public static final int Standard = 1;
-    public static final int Advanced = 2;
+    public static final int OAuthLoginDefault = 0;
+    public static final int UsernamePasswordLoginStandard = 1;
+    public static final int UsernamePasswordLoginAdvanced = 2;
+    public static final int OAuthLoginFromBrowser = 3;
 
     String instanceUrl;
     String userName;
@@ -101,18 +102,19 @@ public class LoginCriteria {
         config.setValue(Config.OAUTH_ENVIRONMENT, config.STRING_DEFAULT);
 
         switch (getMode()){
-            case LoginCriteria.Standard:
+            case LoginCriteria.UsernamePasswordLoginStandard:
                 config.setValue(Config.USERNAME, getUserName().trim());
                 config.setValue(Config.PASSWORD, getPassword().trim());
                 config.setValue(Config.ENDPOINT, getInstanceUrl().trim());
                 break;
-            case LoginCriteria.Advanced:
+            case LoginCriteria.UsernamePasswordLoginAdvanced:
                 config.setValue(Config.USERNAME, getUserName().trim());
                 config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
                 config.setValue(Config.SFDC_INTERNAL_SESSION_ID, getSessionId().trim());
                 config.setValue(Config.ENDPOINT, getInstanceUrl().trim());
                 break;
-            case LoginCriteria.Default:
+            case LoginCriteria.OAuthLoginDefault:
+            case LoginCriteria.OAuthLoginFromBrowser:
                 config.setOAuthEnvironment(getEnvironment());
                 break;
         }

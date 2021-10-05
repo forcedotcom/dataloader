@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.*;
 /**
  * LoginAdvancedControl is used to connect to SF with a sessionid
  */
-public class LoginAdvancedControl extends Composite {
+public class UsernamePasswordLoginAdvancedControl extends Composite {
     private final Text loginUrl;
     private final Button loginButton;
     private final Text sessionId;
@@ -42,7 +42,7 @@ public class LoginAdvancedControl extends Composite {
     private final Label loginLabel;
     private final Text userName;
 
-    public LoginAdvancedControl(Composite parent, int style, AuthenticationRunner authenticator) {
+    public UsernamePasswordLoginAdvancedControl(Composite parent, int style, AuthenticationRunner authenticator) {
         super(parent, style);
         this.authenticator = authenticator;
 
@@ -67,7 +67,7 @@ public class LoginAdvancedControl extends Composite {
     }
 
     private void loginButton_Clicked(Event event) {
-        LoginCriteria criteria = new LoginCriteria(LoginCriteria.Advanced);
+        LoginCriteria criteria = new LoginCriteria(LoginCriteria.UsernamePasswordLoginAdvanced);
         criteria.setInstanceUrl(loginUrl.getText());
         criteria.setSessionId(sessionId.getText());
         criteria.setUserName(userName.getText());

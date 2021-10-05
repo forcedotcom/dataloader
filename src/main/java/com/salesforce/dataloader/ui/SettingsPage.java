@@ -46,9 +46,9 @@ public class SettingsPage extends WizardPage {
     private final Controller controller;
 
     private AuthenticationRunner authenticator;
-    private LoginDefaultControl defaultControl;
-    private LoginStandardControl standardControl;
-    private LoginAdvancedControl advancedControl;
+    private OAuthLoginDefaultControl defaultControl;
+    private UsernamePasswordLoginStandardControl standardControl;
+    private UsernamePasswordLoginAdvancedControl advancedControl;
     private Grid12 grid;
     private Composite control;
 
@@ -81,11 +81,11 @@ public class SettingsPage extends WizardPage {
         layouts[2] = grid.createButton(2, SWT.RADIO, Labels.getString("SettingsPage.loginAdvanced"));
         grid.createPadding(2);
 
-        defaultControl = new LoginDefaultControl(control, SWT.FILL, authenticator);
+        defaultControl = new OAuthLoginDefaultControl(control, SWT.FILL, authenticator);
         defaultControl.setLayoutData(grid.createCell(12));
-        standardControl = new LoginStandardControl(control, SWT.FILL, authenticator);
+        standardControl = new UsernamePasswordLoginStandardControl(control, SWT.FILL, authenticator);
         standardControl.setLayoutData(grid.createCell(12));
-        advancedControl = new LoginAdvancedControl(control, SWT.FILL, authenticator);
+        advancedControl = new UsernamePasswordLoginAdvancedControl(control, SWT.FILL, authenticator);
         advancedControl.setLayoutData(grid.createCell(12));
 
         setControl(control);
