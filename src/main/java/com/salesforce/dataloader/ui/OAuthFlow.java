@@ -25,7 +25,12 @@
  */
 package com.salesforce.dataloader.ui;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.model.OAuthToken;
+
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -36,6 +41,10 @@ import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -104,6 +113,24 @@ public abstract class OAuthFlow extends Dialog {
         Map<String, String> params = new HashMap<>();
         new URIBuilder(url).getQueryParams().stream().forEach(kvp -> params.put(kvp.getName(), kvp.getValue()));
         return params;
+    }
+    
+    protected static void processSuccessfulLogin(InputStream httpResponseInputStream, Config config) throws IOException {
+
+        StringBuilder builder = new StringBuilder();
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpResponseInputStream, "UTF-8"));
+        for (int c = bufferedReader.read(); c != -1; c = bufferedReader.read()) {
+            builder.append((char) c);
+        }
+
+        String jsonTokenResult = builder.toString();
+        Gson gson = new GsonBuilder()
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .create();
+        OAuthToken token = gson.fromJson(jsonTokenResult, OAuthToken.class);
+        config.setValue(Config.OAUTH_ACCESSTOKEN, token.getAccessToken());
+        config.setValue(Config.OAUTH_REFRESHTOKEN, token.getRefreshToken());
+        config.setValue(Config.ENDPOINT, token.getInstanceUrl());
     }
 
 }

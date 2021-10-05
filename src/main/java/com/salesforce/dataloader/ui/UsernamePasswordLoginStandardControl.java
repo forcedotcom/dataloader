@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.*;
 /**
  * LoginStandardControl is the way to login to the api
  */
-public class LoginStandardControl extends Composite {
+public class UsernamePasswordLoginStandardControl extends Composite {
 
     private final Grid12 grid;
     private final Button loginButton;
@@ -44,7 +44,7 @@ public class LoginStandardControl extends Composite {
     private final AuthenticationRunner authentication;
     private final Label loginLabel;
 
-    public LoginStandardControl(Composite parent, int style, AuthenticationRunner authentication) {
+    public UsernamePasswordLoginStandardControl(Composite parent, int style, AuthenticationRunner authentication) {
         super(parent, style);
         this.authentication = authentication;
         grid = new Grid12(this, 40, 20);
@@ -68,7 +68,7 @@ public class LoginStandardControl extends Composite {
     }
 
     private void loginButton_Clicked(Event event) {
-        LoginCriteria criteria = new LoginCriteria(LoginCriteria.Standard);
+        LoginCriteria criteria = new LoginCriteria(LoginCriteria.UsernamePasswordLoginStandard);
         criteria.setInstanceUrl(instanceUrl.getText());
         criteria.setUserName(userName.getText());
         criteria.setPassword(password.getText());

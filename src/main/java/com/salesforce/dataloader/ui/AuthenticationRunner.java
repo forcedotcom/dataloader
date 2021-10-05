@@ -83,7 +83,18 @@ public class AuthenticationRunner {
         try {
             messenger.accept(Labels.getString("SettingsPage.verifyingLogin"));
 
-            if (criteria.getMode() == LoginCriteria.Default){
+            if ((criteria.getMode() == LoginCriteria.OAuthLoginDefault)
+            	&& config.getBoolean(Config.OAUTH_LOGIN_FROM_BROWSER)
+            	&& config.getString(Config.OAUTH_CLIENTID) != null
+            	&& !config.getString(Config.OAUTH_CLIENTID).isEmpty()) {
+            	LoginCriteria existingCriteria = criteria;
+            	criteria = new LoginCriteria(LoginCriteria.OAuthLoginFromBrowser);
+            	criteria.setEnvironment(existingCriteria.getEnvironment());
+            	criteria.setInstanceUrl(existingCriteria.getInstanceUrl());
+            	criteria.setUserName(existingCriteria.getUserName());
+            	criteria.setPassword(existingCriteria.getPassword());
+            }
+            if (criteria.getMode() == LoginCriteria.OAuthLoginDefault){
 
                 boolean hasSecret = !config.getString(Config.OAUTH_CLIENTSECRET).trim().equals("");
                 OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, config) : new OAuthTokenFlow(shell, config);
@@ -102,6 +113,14 @@ public class AuthenticationRunner {
                     complete.accept(false);
                     return;
                 }
+            } else if (criteria.getMode() == LoginCriteria.OAuthLoginFromBrowser) {
+            	OAuthLoginFromBrowserFlow flow = new OAuthLoginFromBrowserFlow(shell, config);
+            	if (!flow.open()) {
+	                String message = Labels.getString("SettingsPage.invalidLogin");
+	                messenger.accept(message);
+	                complete.accept(false);
+	                return;
+            	}
             }
             if (controller.login() && controller.setEntityDescribes()) {
                 messenger.accept(Labels.getString("SettingsPage.loginSuccessful"));

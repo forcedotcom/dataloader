@@ -39,13 +39,13 @@ import java.util.ArrayList;
 /**
  * Login default control is the oauth login
  */
-public class LoginDefaultControl extends Composite {
+public class OAuthLoginDefaultControl extends Composite {
     private final Button loginButton;
-    private final CCombo environment;
-    private final AuthenticationRunner authenticator;
-    private final Label loginLabel;
+    protected final CCombo environment;
+    protected final AuthenticationRunner authenticator;
+    protected final Label loginLabel;
 
-    public LoginDefaultControl(Composite parent, int style, AuthenticationRunner authenticator) {
+    public OAuthLoginDefaultControl(Composite parent, int style, AuthenticationRunner authenticator) {
         super(parent, style);
         this.authenticator = authenticator;
 
@@ -67,8 +67,8 @@ public class LoginDefaultControl extends Composite {
         grid.createPadding(2);
     }
 
-    private void loginButton_Clicked(Event event) {
-        LoginCriteria criteria = new LoginCriteria(LoginCriteria.Default);
+    protected void loginButton_Clicked(Event event) {
+        LoginCriteria criteria = new LoginCriteria(LoginCriteria.OAuthLoginDefault);
         criteria.setEnvironment(environment.getText());
         authenticator.login(criteria, loginLabel::setText);
     }

@@ -198,6 +198,7 @@ public class Config {
     public static final String OAUTH_CLIENTSECRET = OAUTH_PREFIX + OAUTH_PARTIAL_CLIENTSECRET;
     public static final String OAUTH_CLIENTID = OAUTH_PREFIX + OAUTH_PARTIAL_CLIENTID;
     public static final String OAUTH_REDIRECTURI = OAUTH_PREFIX + OAUTH_PARTIAL_REDIRECTURI;
+    public static final String OAUTH_LOGIN_FROM_BROWSER = OAUTH_PREFIX + "loginfrombrowser";
     public static final String REUSE_CLIENT_CONNECTION = "sfdc.reuseClientConnection";
     
     // salesforce operation parameters
@@ -428,6 +429,7 @@ public class Config {
         setDefaultValue(DUPLICATE_RULE_RUN_AS_CURRENT_USER, false);
         setDefaultValue(BUFFER_UNPROCESSED_BULK_QUERY_RESULTS, false);
         setDefaultValue(BULKV2_API_ENABLED, false);
+        setDefaultValue(OAUTH_LOGIN_FROM_BROWSER, false);
     }
 
     /**
