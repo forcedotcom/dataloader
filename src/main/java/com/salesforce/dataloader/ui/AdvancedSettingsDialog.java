@@ -83,6 +83,7 @@ public class AdvancedSettingsDialog extends Dialog {
     private Text textProxyUsername;
     private Text textProxyPassword;
     private Text textTimezone;
+    private Button buttonLocalSystemTimezone;
     private Text textProductionClientID;
     private Text textSandboxClientID;
 
@@ -524,7 +525,7 @@ public class AdvancedSettingsDialog extends Dialog {
         buttonUseBulkV2Api.setVisible(false);
 
         // timezone
-        textTimezone = createTextInput(restComp, "AdvancedSettingsDialog.timezone", Config.TIMEZONE, TimeZone.getDefault().getID(), 200);
+        textTimezone = createTimezoneTextInput(restComp, "AdvancedSettingsDialog.timezone", Config.TIMEZONE, TimeZone.getDefault().getID(), 200);
 
         // proxy Host
         Label labelProxyHost = new Label(restComp, SWT.RIGHT | SWT.WRAP);
@@ -799,16 +800,32 @@ public class AdvancedSettingsDialog extends Dialog {
         sc.setExpandVertical(true);
     }
 
-    private Text createTextInput(Composite parent, String labelKey, String configKey, String defaultValue, int widthHint) {
-        // TODO: use this method to create all text inputs
+    private Text createTimezoneTextInput(Composite parent, String labelKey, String configKey, String defaultValue, int widthHint) {
         createLabel(parent, labelKey);
-        final Text t = new Text(parent, SWT.BORDER);
+        
+        Composite timezoneComp = new Composite(parent, SWT.RIGHT);
+        GridData data = new GridData(GridData.FILL_BOTH);
+        timezoneComp.setLayoutData(data);
+        GridLayout layout = new GridLayout(2, false);
+        layout.verticalSpacing = 10;
+        timezoneComp.setLayout(layout);
+
+        final Text t = new Text(timezoneComp, SWT.BORDER);
         final GridData gd = new GridData();
         if (widthHint > 0) gd.widthHint = widthHint;
         t.setLayoutData(gd);
         String val = controller.getConfig().getString(configKey);
         if ("".equals(val) && defaultValue != null) val = defaultValue;
         t.setText(String.valueOf(val));
+        
+        buttonLocalSystemTimezone = new Button(timezoneComp, SWT.PUSH | SWT.FLAT);
+        buttonLocalSystemTimezone.setText(Labels.getString("AdvancedSettingsDialog.setClientSystemTimezone")); //$NON-NLS-1$
+        buttonLocalSystemTimezone.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipSetClientSystemTimezone"));
+        buttonLocalSystemTimezone.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent event) {
+                t.setText(TimeZone.getDefault().getID());
+            }
+        });
         return t;
     }
 
