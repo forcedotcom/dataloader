@@ -37,9 +37,8 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.*;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
 
@@ -48,9 +47,6 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Config.ConfigListener;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.uiActions.*;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 
 /**
  * The main class for the Loader UI.
@@ -179,7 +175,7 @@ public class LoaderWindow extends ApplicationWindow {
 
         Config config = controller.getConfig();
 
-        if (!config.getBoolean(config.HIDE_WELCOME_SCREEN)) {
+        if (!config.getBoolean(Config.HIDE_WELCOME_SCREEN)) {
             displayTitleDialog(Display.getDefault(), this.operationActionsByIndex, this.controller.getConfig());
         }
 
@@ -187,29 +183,40 @@ public class LoaderWindow extends ApplicationWindow {
         parent.pack();
 
         return parent;
-
     }
 
     private Composite createContainer(Composite parent) {
         Composite comp = new Composite(parent, SWT.BORDER);
-        setBackground(comp);
         comp.setLayout(new FillLayout(SWT.VERTICAL));
-        CLabel label = new CLabel(comp, SWT.CENTER);
-        setBackground(label);
-        label.setMargins(0, 30, 0, 0);
+        
+        Composite logoComp = new Composite(comp, SWT.NONE);
+        logoComp.setLayout(new FillLayout(SWT.HORIZONTAL));
+        CLabel label = new CLabel(logoComp, SWT.RIGHT);
         label.setImage(UIUtils.getImageRegistry().get("title_logo"));
+        GridData gridData = new GridData();
+        gridData.horizontalAlignment = GridData.BEGINNING;
+        gridData.grabExcessHorizontalSpace = false;
+        gridData.verticalAlignment = GridData.VERTICAL_ALIGN_CENTER;
+        gridData.grabExcessVerticalSpace = true;
+        label.setLayoutData(gridData);
+        
+        label = new CLabel(logoComp, SWT.NONE);
+        FontData fd = new FontData("Verdana", 28, SWT.NORMAL);
+        label.setFont(new Font(Display.getCurrent(), fd));
+        label.setText("data loader");
+        gridData = new GridData();
+        gridData.horizontalAlignment = GridData.BEGINNING;
+        gridData.grabExcessHorizontalSpace = false;
+        gridData.verticalAlignment = GridData.VERTICAL_ALIGN_FILL;
+        gridData.grabExcessVerticalSpace = true;
+        label.setLayoutData(gridData);
+
         comp.pack();
-
         return comp;
-    }
-
-    private void setBackground(Control comp) {
-        comp.setBackground(new Color(Display.getCurrent(), 238,241,246));
     }
 
     private void createButtons(Composite parent) {
         Composite buttons = new Composite(parent, SWT.NONE);
-        setBackground(buttons);
         RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
         rowLayout.wrap = true;
         rowLayout.pack = false;
@@ -233,7 +240,6 @@ public class LoaderWindow extends ApplicationWindow {
         butt.setText(info.getLabel());
         butt.setEnabled(info.isOperationAllowed(this.controller.getConfig()));
         butt.setImage(info.getIconImage());
-        butt.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         butt.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent selectionEvent) {
