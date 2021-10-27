@@ -39,7 +39,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
 
@@ -176,7 +175,7 @@ public class LoaderWindow extends ApplicationWindow {
 
         Config config = controller.getConfig();
 
-        if (!config.getBoolean(config.HIDE_WELCOME_SCREEN)) {
+        if (!config.getBoolean(Config.HIDE_WELCOME_SCREEN)) {
             displayTitleDialog(Display.getDefault(), this.operationActionsByIndex, this.controller.getConfig());
         }
 
@@ -184,7 +183,6 @@ public class LoaderWindow extends ApplicationWindow {
         parent.pack();
 
         return parent;
-
     }
 
     private Composite createContainer(Composite parent) {
