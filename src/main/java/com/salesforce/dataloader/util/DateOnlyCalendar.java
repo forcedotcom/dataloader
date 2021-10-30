@@ -23,42 +23,42 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader.model;
 
-import java.util.Date;
+package com.salesforce.dataloader.util;
 
-public class NADateValue  extends Date {
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
-    private static final NADateValue INSTANCE = new NADateValue();
-    private static final String NA_VALUE = "#N/A";
 
-    private NADateValue() {
+public class DateOnlyCalendar extends GregorianCalendar {
+
+    public DateOnlyCalendar() {
         super();
     }
 
-    public static NADateValue getInstance() {
-        return INSTANCE;
+    private DateOnlyCalendar(TimeZone tz) {
+        // Use the timezone param to update the date by 1 in setDate()
+        super(tz);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
+    public void setTimeInMillis(long specifiedTimeInMilliSeconds) {
+        TimeZone myTimeZone = super.getTimeZone();
+        Calendar cal = Calendar.getInstance(myTimeZone);
+        cal.setTimeInMillis(specifiedTimeInMilliSeconds);
+
+        TimeZone gmt = TimeZone.getTimeZone("GMT");
+        if (myTimeZone != null) {
+            int timeZoneDifference = myTimeZone.getRawOffset() - gmt.getRawOffset() + myTimeZone.getDSTSavings() - gmt.getDSTSavings();
+            if (timeZoneDifference > 0) {
+                // timezone is ahead of GMT, add 1 day to the specified time in milliseconds
+                cal.add(Calendar.DATE, 1);
+            }
         }
-        if (obj == null) {
-            return false;
-        }
-
-        return NA_VALUE.equals(obj.toString());
+        super.setTimeInMillis(cal.getTimeInMillis());
     }
 
-    @Override
-    public int hashCode() {
-        return NA_VALUE.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return NA_VALUE;
+    public static DateOnlyCalendar getInstance(TimeZone timeZone) {
+        return new DateOnlyCalendar(timeZone);
     }
 }

@@ -23,38 +23,42 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-package com.salesforce.dataloader.dyna;
-
-import java.util.*;
+package com.salesforce.dataloader.model;
 
 import com.salesforce.dataloader.util.DateOnlyCalendar;
-import com.salesforce.dataloader.model.NADateOnlyCalendarValue;
-import org.apache.commons.beanutils.Converter;
 
-public class DateOnlyConverter extends DateTimeConverter implements Converter {
+public class NADateOnlyCalendarValue  extends DateOnlyCalendar {
 
-    public DateOnlyConverter(TimeZone tz) {
-        super(tz);
+    private static final NADateOnlyCalendarValue INSTANCE = new NADateOnlyCalendarValue();
+    private static final String NA_VALUE = "#N/A";
+
+    private NADateOnlyCalendarValue() {
+        super();
     }
 
-    public DateOnlyConverter(TimeZone tz, boolean useEuroDateFormat) {
-        super(tz, useEuroDateFormat);
+    public static NADateOnlyCalendarValue getInstance() {
+        return INSTANCE;
     }
 
-    public DateOnlyConverter(TimeZone tz, Object defaultValue, boolean useEuroDateFormat) {
-        super(tz, defaultValue, useEuroDateFormat);
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+
+        return NA_VALUE.equals(obj.toString());
     }
 
-    public DateOnlyConverter(TimeZone tz, Object defaultValue) {
-       super(tz, defaultValue);
+    @Override
+    public int hashCode() {
+        return NA_VALUE.hashCode();
     }
 
-    Calendar getCalendar() {
-        return DateOnlyCalendar.getInstance(this.timeZone);
+    @Override
+    public String toString() {
+        return NA_VALUE;
     }
-
-    Calendar getNAValueCalendar() {
-        return NADateOnlyCalendarValue.getInstance();
-    }
-} 
+}

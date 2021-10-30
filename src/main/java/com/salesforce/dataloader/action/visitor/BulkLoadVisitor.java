@@ -38,7 +38,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,13 +56,12 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.DataWriter;
-import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.LoadException;
 import com.salesforce.dataloader.exception.OperationException;
 import com.salesforce.dataloader.model.NACalendarValue;
-import com.salesforce.dataloader.model.NADateValue;
+import com.salesforce.dataloader.model.NADateOnlyCalendarValue;
 import com.salesforce.dataloader.model.NATextValue;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.DAORowUtil;
@@ -214,7 +212,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private void writeSingleColumn(PrintStream out, String fieldName, Object fieldValue) throws LoadException {
         if (fieldValue != null) {
             Object col = fieldValue;
-            if (fieldValue instanceof NACalendarValue || fieldValue instanceof NADateValue) {
+            if (fieldValue instanceof NACalendarValue || fieldValue instanceof NADateOnlyCalendarValue) {
                 col = fieldValue.toString();
             } else if (fieldValue instanceof Calendar) {
                 col = DATE_FMT.format(((Calendar) fieldValue).getTime());
