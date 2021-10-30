@@ -654,33 +654,16 @@ public class DateConverterTest {
         assertEquals(TimeZone.getTimeZone("GMT"), result.getTimeZone());
 
         // DateConverter should always return the Calendar in GMT.
-        Date resultDate = (Date) AsianTZDateOnlyConverter.convert(null, "6/22/2012");
-        result = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-        result.setTime(resultDate);
+        result = (Calendar) AsianTZDateOnlyConverter.convert(null, "6/22/2012");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
-        assertEquals(22, result.get(Calendar.DAY_OF_MONTH));
-        
-        // configure to simulate old behavior
-        DataLoaderRunner.setUseGMTForDateFieldValue(false);
-        AsianTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("Asia/Tokyo"), false);
-        resultDate = (Date) AsianTZDateOnlyConverter.convert(null, "6/22/2012");
-        result.setTime(resultDate);
-        assertEquals(6, result.get(Calendar.MONTH) + 1);
-        // Add 1 to the day stored in the calendar to compensate for the fact that
-        // the date returned by DateOnlyConverter is in a timezone ahead of GMT
-        // whereas the result calendar's timezone is GMT, to simulate behavior
-        // of the server when storing date values.
-        assertEquals(22, result.get(Calendar.DAY_OF_MONTH) + 1);
+        assertEquals(23, result.get(Calendar.DAY_OF_MONTH));
 
-        // switch back to new behavior
         DataLoaderRunner.setUseGMTForDateFieldValue(true);
-        resultDate = (Date) USTZDateOnlyConverter.convert(null, "6/22/2012");
-        result.setTime(resultDate);
+        result = (Calendar) USTZDateOnlyConverter.convert(null, "6/22/2012");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(22, result.get(Calendar.DAY_OF_MONTH));
 
-        resultDate = (Date) GMTTZDateOnlyConverter.convert(null, "6/22/2012");
-        result.setTime(resultDate);
+        result = (Calendar) GMTTZDateOnlyConverter.convert(null, "6/22/2012");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(22, result.get(Calendar.DAY_OF_MONTH));
 

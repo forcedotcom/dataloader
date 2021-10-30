@@ -8,3 +8,4 @@ ANNUALREVENUE=AnnualRevenue
 PHONE=Phone
 ORACLE_ID__C=Oracle_Id__c
 DATE=CustomDateTime__c
+DATE_ONLY=CustomDateOnly__c
