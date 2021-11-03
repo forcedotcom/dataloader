@@ -147,6 +147,7 @@ public class Config {
     public static final String CSV_DELIMETER_TAB = "loader.csvTab";
     public static final String CSV_DELIMETER_OTHER = "loader.csvOther";
     public static final String CSV_DELIMETER_OTHER_VALUE = "loader.csvOtherValue";
+    public static final String CSV_ESCAPE_FORMULA_IN_FIELD_VALUE = "loader.csvEscapeFormulaInFieldValue";
     public static final String BUFFER_UNPROCESSED_BULK_QUERY_RESULTS = "loader.bufferUnprocessedBulkQueryResults";
 
     //Special Internal Configs
@@ -430,6 +431,7 @@ public class Config {
         setDefaultValue(BUFFER_UNPROCESSED_BULK_QUERY_RESULTS, false);
         setDefaultValue(BULKV2_API_ENABLED, false);
         setDefaultValue(OAUTH_LOGIN_FROM_BROWSER, false);
+        setDefaultValue(CSV_ESCAPE_FORMULA_IN_FIELD_VALUE, true);
     }
 
     /**
