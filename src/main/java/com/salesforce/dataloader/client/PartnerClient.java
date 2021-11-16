@@ -730,12 +730,10 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private synchronized ConnectorConfig getLoginConnectorConfig() {
-        if (this.connectorConfig == null || !this.config.getBoolean(Config.REUSE_CLIENT_CONNECTION)) {
-            this.connectorConfig = getConnectorConfig();
-            String serverUrl = getDefaultServer();
-            this.connectorConfig.setAuthEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());
-            this.connectorConfig.setServiceEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());
-        }
+        this.connectorConfig = getConnectorConfig();
+        String serverUrl = getDefaultServer();
+        this.connectorConfig.setAuthEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());
+        this.connectorConfig.setServiceEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());
         return this.connectorConfig;
     }
 
