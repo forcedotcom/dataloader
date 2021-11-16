@@ -237,10 +237,10 @@ if (len(sys.argv) < 2):
 updateSWTAndPOM("swtwin32_x86_64", "Windows (64 bit version)", sys.argv[1])
 
 # Mac x86
-updateSWTAndPOM("swtmacx86_64", "Mac OSX (64 bit version)", sys.argv[1])
+updateSWTAndPOM("swtmac_x86_64", "Mac OSX (64 bit version)", sys.argv[1])
 
 # Mac ARM
-updateSWTAndPOM("swtmacarm64", "Mac OSX (64 bit version for Arm64/AArch64)", sys.argv[1])
+updateSWTAndPOM("swtmac_aarch64", "Mac OSX (64 bit version for Arm64/AArch64)", sys.argv[1])
 
 # Linux
 updateSWTAndPOM("swtlinux_x86_64", "Linux (64 bit version)", sys.argv[1])
