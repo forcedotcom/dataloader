@@ -21,6 +21,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <config.additional.properties></config.additional.properties>
     <jarsigner.skip>true</jarsigner.skip>
+    <swt.version>4.21</swt.version>
 
     <!-- test properties -->
     <test.endpoint>http://testendpoint</test.endpoint>
@@ -279,6 +280,90 @@
         </configuration>
       </plugin>
       
+<!-- https://mvnrepository.com/artifact/com.coderplus.maven.plugins/copy-rename-maven-plugin -->
+      <plugin>
+        <groupId>com.coderplus.maven.plugins</groupId>
+        <artifactId>copy-rename-maven-plugin</artifactId>
+        <version>1.0.1</version>
+        <executions>
+            <execution>
+                <id>copy-file</id>
+                <phase>generate-sources</phase>
+                <goals>
+                    <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <fileSets>
+                    <fileSet>
+		              <sourceFile>local-proj-repo/local/swt/swtmac_x86_64/${swt.version}/swtmac_x86_64-${swt.version}.jar</sourceFile>
+		              <destinationFile>target/swtmac_x86_64/swtmac_x86_64.jar</destinationFile>
+                    </fileSet>
+                    <fileSet>
+			          <sourceFile>local-proj-repo/local/swt/swtmac_aarch64/${swt.version}/swtmac_aarch64-${swt.version}.jar</sourceFile>
+			          <destinationFile>target/swtmac_aarch64/swtmac_aarch64.jar</destinationFile>
+                    </fileSet>
+                    <fileSet>
+			          <sourceFile>local-proj-repo/local/swt/swtwin32_x86_64/${swt.version}/swtwin32_x86_64-${swt.version}.jar</sourceFile>
+			          <destinationFile>target/swtwin32_x86_64/swtwin32_x86_64.jar</destinationFile>
+                    </fileSet>
+                    <fileSet>
+			          <sourceFile>local-proj-repo/local/swt/swtlinux_x86_64/${swt.version}/swtlinux_x86_64-${swt.version}.jar</sourceFile>
+			          <destinationFile>target/swtlinux_x86_64/swtlinux_x86_64.jar</destinationFile>
+                    </fileSet>
+                  </fileSets>
+                </configuration>
+            </execution>
+        </executions>
+      </plugin>
+      
+<!--  https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-dependency-plugin -->
+	  <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>local.swt</groupId>
+                  <artifactId>swtwin32_x86_64</artifactId>
+                  <version>${swt.version}</version>
+                  <outputDirectory>target/swtwin32_x86_64</outputDirectory>
+                  <includes>**\/*.jnilib, **\/*.dll, **\/*.so, **\/*.so.*</includes>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>local.swt</groupId>
+                  <artifactId>swtmac_x86_64</artifactId>
+                  <version>${swt.version}</version>
+                  <outputDirectory>target/swtmac_x86_64</outputDirectory>
+                  <includes>**\/*.jnilib, **\/*.dll, **\/*.so, **\/*.so.*</includes>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>local.swt</groupId>
+                  <artifactId>swtmac_aarch64</artifactId>
+                  <version>${swt.version}</version>
+                  <outputDirectory>target/swtmac_aarch64</outputDirectory>
+                  <includes>**\/*.jnilib, **\/*.dll, **\/*.so, **\/*.so.*</includes>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>local.swt</groupId>
+                  <artifactId>swtlinux_x86_64</artifactId>
+                  <version>${swt.version}</version>
+                  <outputDirectory>target/swtlinux_x86_64</outputDirectory>
+                  <includes>**\/*.jnilib, **\/*.dll, **\/*.so, **\/*.so.*</includes>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
 <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -357,8 +442,8 @@
       <dependencies>
         <dependency>
           <groupId>local.swt</groupId>
-          <artifactId>swtmacx86_64</artifactId>
-          <version>4.20</version>
+          <artifactId>swtmac_x86_64</artifactId>
+          <version>${swt.version}</version>
         </dependency>
       </dependencies>
       <properties>
@@ -377,8 +462,8 @@
       <dependencies>
         <dependency>
           <groupId>local.swt</groupId>
-          <artifactId>swtmacarm64</artifactId>
-          <version>4.20</version>
+          <artifactId>swtmac_aarch64</artifactId>
+          <version>${swt.version}</version>
         </dependency>
       </dependencies>
       <properties>
@@ -398,7 +483,7 @@
         <dependency>
           <groupId>local.swt</groupId>
           <artifactId>swtwin32_x86_64</artifactId>
-          <version>4.20</version>
+          <version>${swt.version}</version>
         </dependency>
       </dependencies>
       <properties>
@@ -418,7 +503,7 @@
         <dependency>
           <groupId>local.swt</groupId>
           <artifactId>swtlinux_x86_64</artifactId>
-          <version>4.20</version>
+          <version>${swt.version}</version>
         </dependency>
       </dependencies>
       <properties>
@@ -444,6 +529,10 @@
                 <manifest>
                   <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
                 </manifest>
+                <manifestEntries>
+                  <Premain-Class>com.salesforce.dataloader.process.SWTLoader</Premain-Class>
+                  <Agent-Class>com.salesforce.dataloader.process.SWTLoader</Agent-Class>
+                </manifestEntries>
               </archive>
               <descriptors>
                 <descriptor>src/main/assembly/uber.xml</descriptor>
@@ -559,11 +648,26 @@
                     <replace dir="${basedir}/target/${OSType}/" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
                     <chmod file="${basedir}/target/${OSType}/*" perm="755" />
     
-     
                     <echo>copying uber jar to OS-specific folder for the target OS: ${OSType}</echo>
                     <copy file="${basedir}/target/dataloader-${project.version}-uber.jar" 
                        todir="${basedir}/target/${OSType}"/>
-                 
+
+                    <copy todir="${basedir}/target/${OSType}/swtmac_x86_64">
+                      <fileset dir="${basedir}/target/swtmac_x86_64"/>
+                    </copy> 
+
+                    <copy todir="${basedir}/target/${OSType}/swtmac_aarch64">
+                      <fileset dir="${basedir}/target/swtmac_aarch64"/>
+                    </copy> 
+
+                    <copy todir="${basedir}/target/${OSType}/swtwin32_x86_64">
+                      <fileset dir="${basedir}/target/swtwin32_x86_64"/>
+                    </copy> 
+
+                    <copy todir="${basedir}/target/${OSType}/swtlinux_x86_64">
+                      <fileset dir="${basedir}/target/swtlinux_x86_64"/>
+                    </copy> 
+
                     <echo>zip OS-specific folder</echo>
                     <zip update="true" destfile="${basedir}/target/${OSType}/dataloader_${OSType}.zip" >
                       <zipfileset dirmode="755" filemode="755" 

@@ -36,6 +36,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.ui.UIUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -48,6 +49,7 @@ public class DataLoaderRunner extends Thread {
     private static final String RUN_MODE = "run.mode";
     private static final String RUN_MODE_BATCH = "batch";
     private static final String GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
+    private static final String SWT_JAR_NAME = "swt.jar.name";
     private static boolean useGMTForDateFieldValue = true;
     private static Map<String, String> argNameValuePair;
 
@@ -72,7 +74,6 @@ public class DataLoaderRunner extends Thread {
         useGMTForDateFieldValue = doUseGMT;
     }
 
-    
     public void run() {
         // called just before the program closes
         HttpClientTransport.closeConnections();
@@ -88,9 +89,22 @@ public class DataLoaderRunner extends Thread {
         } else {
             /* Run in the UI mode, get the controller instance with batchMode == false */
             try {
+                String SWTDirStr = System.getProperty("java.library.path");
+                if (SWTDirStr == null || SWTDirStr.isBlank() || SWTDirStr.equalsIgnoreCase("null")) {
+                    System.err.println("Unable to find SWT directory.");
+                    System.exit(-1);
+                }
+                String swtJarName = SWTLoader.buildNameFromOSAndArch("swt", ".jar");
+                if (argNameValuePair.containsKey(SWT_JAR_NAME)) {
+                    String jarname = argNameValuePair.get(swtJarName);
+                    if (jarname != null && !jarname.isEmpty()) {
+                        swtJarName = jarname;
+                    }
+                }
+                SWTLoader.addToClassPath(new File(SWTDirStr + "/" + swtJarName));
                 Controller controller = Controller.getInstance(UI, false, args);
                 controller.createAndShowGUI();
-            } catch (ControllerInitializationException e) {
+            } catch (IOException | ControllerInitializationException e) {
                 UIUtils.errorMessageBox(new Shell(new Display()), e);
             }
         }

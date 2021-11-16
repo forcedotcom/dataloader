@@ -49,7 +49,12 @@ echo.
     )
 
 :Run
-    java -D"org.eclipse.swt.browser.IEVersion=12001" -jar %DATALOADER_UBER_JAR_NAME% %*
+    
+    set GET_SWT_DIR_CMD="java -cp %DATALOADER_UBER_JAR_NAME% com.salesforce.dataloader.process.GetSWTDir"
+    FOR /F "tokens=* USEBACKQ" %%F IN (`%GET_SWT_DIR_CMD%`) DO (
+        SET SWT_DIR=%%F
+    )
+    java -Djava.library.path=%SWT_DIR% -D"org.eclipse.swt.browser.IEVersion=12001" -javaagent:%DATALOADER_UBER_JAR_NAME% -jar %DATALOADER_UBER_JAR_NAME% %*
     goto SuccessExit
 
 :SuccessExit
