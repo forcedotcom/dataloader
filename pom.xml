@@ -652,18 +652,26 @@
                     <copy file="${basedir}/target/dataloader-${project.version}-uber.jar" 
                        todir="${basedir}/target/${OSType}"/>
 
-                    <copy todir="${basedir}/target/${OSType}/swtmac_x86_64">
-                      <fileset dir="${basedir}/target/swtmac_x86_64"/>
-                    </copy> 
+                    <if>
+                      <contains string="${OSType}" substring="mac" />
+                      <then>
+	                    <copy todir="${basedir}/target/${OSType}/swtmac_x86_64">
+	                      <fileset dir="${basedir}/target/swtmac_x86_64"/>
+	                    </copy> 
+	                    <copy todir="${basedir}/target/${OSType}/swtmac_aarch64">
+	                      <fileset dir="${basedir}/target/swtmac_aarch64"/>
+	                    </copy> 
+					  </then>
+					</if>
 
-                    <copy todir="${basedir}/target/${OSType}/swtmac_aarch64">
-                      <fileset dir="${basedir}/target/swtmac_aarch64"/>
-                    </copy> 
-
-                    <copy todir="${basedir}/target/${OSType}/swtwin32_x86_64">
-                      <fileset dir="${basedir}/target/swtwin32_x86_64"/>
-                    </copy> 
-
+                    <if>
+                      <contains string="${OSType}" substring="win" />
+                      <then>
+	                    <copy todir="${basedir}/target/${OSType}/swtwin32_x86_64">
+	                      <fileset dir="${basedir}/target/swtwin32_x86_64"/>
+	                    </copy> 
+					  </then>
+					</if>
                     <echo>zip OS-specific folder</echo>
                     <zip update="true" destfile="${basedir}/target/${OSType}/dataloader_${OSType}.zip" >
                       <zipfileset dirmode="755" filemode="755" 
