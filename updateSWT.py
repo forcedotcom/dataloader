@@ -1,4 +1,4 @@
-#/usr/bin/env python3
+#!/usr/bin/env python3
 
 import requests, zipfile, io, shutil, os, sys
 import subprocess
@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from os.path import expanduser
 import urllib.request
 import re
+import argparse
 
 ####################################################################
 # Usage:
@@ -121,39 +122,6 @@ def installInLocalMavenRepo(unzippedSWTDir, mvnArtifactId, gitCloneRootDir):
 
 ######## end of installInLocalMavenRepo  ##########
 
-def getLatestSWTVersionFromLocalRepo(gitCloneRootDir, mvnArtifactId):
-    swtContentList = os.listdir(gitCloneRootDir 
-                         + "/local-proj-repo/local/swt/" + mvnArtifactId)
-    maxNumberItem = "1.0"
-    for item in swtContentList:
-        if ".xml" in item:
-            continue
-        if float(item) > float(maxNumberItem):
-            maxNumberItem = item
-    return maxNumberItem
-
-######## end of getLatestSWTVersionFromLocalRepo ##############
-
-def updatePOMForSWTVersion(gitCloneRootDir, mvnArtifactId, version):
-    newPom = open(gitCloneRootDir + "/pom.xml.new", "w")
-
-    with open(gitCloneRootDir + '/pom.xml') as pom:
-        for line in pom:
-            output = line
-            if "<artifactId>"+mvnArtifactId+"</artifactId>" in line:
-                newPom.write(output)
-                line = pom.readline()
-                leadingWhitespace = line.split('<')[0]
-                output = leadingWhitespace + "<version>" + version + "</version>\n" 
-
-            newPom.write(output)
-       
-    newPom.close()
-    pom.close()
-    os.rename(gitCloneRootDir + '/pom.xml', gitCloneRootDir + '/pom.xml.save')
-    os.rename(gitCloneRootDir + '/pom.xml.new', gitCloneRootDir + '/pom.xml')
-
-######## end of updatePOMForSWTVersion ########################
 
 def getLatestArtifactVersion(artifactURL):
     hdr = {
@@ -177,45 +145,25 @@ def getLatestArtifactVersion(artifactURL):
 
 ######## end of getLatestArtifactVersion ###########
 
-def updatePOMForRemoteMVNArtifacts(gitCloneRootDir):
-    newPom = open(gitCloneRootDir + "/pom.xml.new", "w")
-    latestArtifactVersion = ""
 
-    with open(gitCloneRootDir + '/pom.xml') as pom:
-        for line in pom:
-            output = line
-            if "<!-- https://mvnrepository.com/artifact/" in line:
-                artifactURL = line.split(' ')[1]
-                print(artifactURL)
-                latestArtifactVersion = getLatestArtifactVersion(artifactURL)
-
-            if "</dependency>" in line:
-                latestArtifactVersion = ""
-
-            if "</plugin>" in line:
-                latestArtifactVersion = ""
-
-            if latestArtifactVersion != "" and "<version>" in line:
-                leadingWhitespace = line.split('<')[0]
-                output = leadingWhitespace + "<version>" \
-                           + latestArtifactVersion + "</version>\n"
-
-            newPom.write(output)
-
-    newPom.close()
-    pom.close()
-    os.rename(gitCloneRootDir + '/pom.xml', gitCloneRootDir + '/pom.xml.save')
-    os.rename(gitCloneRootDir + '/pom.xml.new', gitCloneRootDir + '/pom.xml')
-
-######## end of updatePOMForRemoteMVNArtifacts ########################
-
-def updateSWTAndPOM(mvnArtifactId, downloadPageLabel, gitCloneRootDir):
+def updateSWT(mvnArtifactId, downloadPageLabel, gitCloneRootDir, version):
     URL = "https://download.eclipse.org/eclipse/downloads/"
     page = requests.get(URL)
 
     soup = BeautifulSoup(page.content, "html.parser")
-    results = soup.find(id="Latest_Release").find_next("a")['href']
+    results = ""
+    if version == "" :
+        results = soup.find(id="Latest_Release").find_next("a")['href']
+        
+    else:
+        for link in soup.findAll('a', href=True):
+            if version in link.text :
+                results = link['href']
+                break
 
+    if results == "" :
+        print("version " + version + " not found for download")
+        sys.exit(-1)
     downloadsPage = URL + results
     page = requests.get(downloadsPage)
     soup = BeautifulSoup(page.content, "html.parser")
@@ -223,27 +171,33 @@ def updateSWTAndPOM(mvnArtifactId, downloadPageLabel, gitCloneRootDir):
     results = getSWTDownloadLinkForPlatform(soup, downloadPageLabel)
     unzippedDir = downloadAndExtractZip(downloadsPage + results)
     installInLocalMavenRepo(unzippedDir, mvnArtifactId, gitCloneRootDir)
-    latestVersion = getLatestSWTVersionFromLocalRepo(gitCloneRootDir, mvnArtifactId)
-    updatePOMForSWTVersion(gitCloneRootDir, mvnArtifactId, latestVersion)
 
 ######## end of updateSWTAndPOM #########################
 
+parser = argparse.ArgumentParser(description = "my parser")
+parser.add_argument("-v", "--version", required = False, default = "")
+parser.add_argument("-c", "--cloneroot", required = False, default = os.getcwd())
 
-if (len(sys.argv) < 2):
-   print('Usage: python3 swtinstall.py <git clone root>')
-   sys.exit(2)
+argument = parser.parse_args()
+version = ""
+rootdir = os.getcwd()
+
+if argument.version:
+    version = argument.version
+if argument.cloneroot:
+    rootdir = argument.cloneroot
 
 # Windows
-updateSWTAndPOM("swtwin32_x86_64", "Windows (64 bit version)", sys.argv[1])
+updateSWT("swtwin32_x86_64", "Windows (64 bit version)", rootdir, version)
 
 # Mac x86
-updateSWTAndPOM("swtmac_x86_64", "Mac OSX (64 bit version)", sys.argv[1])
+updateSWT("swtmac_x86_64", "Mac OSX (64 bit version)", rootdir, version)
 
 # Mac ARM
-updateSWTAndPOM("swtmac_aarch64", "Mac OSX (64 bit version for Arm64/AArch64)", sys.argv[1])
+updateSWT("swtmac_aarch64", "Mac OSX (64 bit version for Arm64/AArch64)", rootdir, version)
 
 # Linux
-updateSWTAndPOM("swtlinux_x86_64", "Linux (64 bit version)", sys.argv[1])
+updateSWT("swtlinux_x86_64", "Linux (64 bit version)", rootdir, version)
 
 # update other dependencies in POM
 #updatePOMForRemoteMVNArtifacts(sys.argv[1])
