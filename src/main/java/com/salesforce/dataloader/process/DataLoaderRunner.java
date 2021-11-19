@@ -38,6 +38,9 @@ import com.salesforce.dataloader.ui.UIUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import org.eclipse.swt.widgets.Display;
@@ -50,6 +53,7 @@ public class DataLoaderRunner extends Thread {
     private static final String RUN_MODE_BATCH = "batch";
     private static final String GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
     private static final String SWT_JAR_NAME = "swt.jar.name";
+    private static final String BUILD_DIR = "target/";
     private static boolean useGMTForDateFieldValue = true;
     private static Map<String, String> argNameValuePair;
 
@@ -90,8 +94,15 @@ public class DataLoaderRunner extends Thread {
             /* Run in the UI mode, get the controller instance with batchMode == false */
             try {
                 String SWTDirStr = System.getProperty("java.library.path");
-                if (SWTDirStr == null || SWTDirStr.isBlank() || SWTDirStr.equalsIgnoreCase("null")) {
-                    System.err.println("Unable to find SWT directory.");
+                if (SWTDirStr == null 
+                        || SWTDirStr.isBlank() 
+                        || SWTDirStr.equalsIgnoreCase("null")
+                        || !(Files.exists(Paths.get(SWTDirStr))
+                             || Files.exists(Paths.get(BUILD_DIR + SWTDirStr)))
+                     ) {
+                    System.err.println("Unable to find SWT directory: " + SWTDirStr);
+                    System.err.println("Native JRE for " + System.getProperty("os.arch") + " not supported.");
+                    System.err.println("Try JRE for the supported platform in emulation mode.");
                     System.exit(-1);
                 }
                 String swtJarName = SWTLoader.buildNameFromOSAndArch("swt", ".jar");
@@ -100,6 +111,10 @@ public class DataLoaderRunner extends Thread {
                     if (jarname != null && !jarname.isEmpty()) {
                         swtJarName = jarname;
                     }
+                }
+                Path SWTDirPath = Paths.get(SWTDirStr);
+                if (!Files.exists(SWTDirPath)) {
+                    SWTDirStr = BUILD_DIR + SWTDirStr;
                 }
                 SWTLoader.addToClassPath(new File(SWTDirStr + "/" + swtJarName));
                 Controller controller = Controller.getInstance(UI, false, args);

@@ -30,11 +30,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
 import java.util.jar.JarFile;
 
 
@@ -181,16 +176,7 @@ public class SWTLoader {
     }
     
     public static String getSWTDir() {
-        String SWTDirStr = buildNameFromOSAndArch("./swt", "");
-        Path SWTDirPath = Paths.get(SWTDirStr);
-        if (Files.exists(SWTDirPath)) {
-            return SWTDirStr;
-        }
-        SWTDirStr = buildNameFromOSAndArch("target/swt", "");
-        SWTDirPath = Paths.get(SWTDirStr);
-        if (Files.exists(SWTDirPath)) {
-            return SWTDirStr;
-        }
-        return null;
+        String SWTDirStr = buildNameFromOSAndArch("swt", "");
+        return SWTDirStr;
     }
 }
