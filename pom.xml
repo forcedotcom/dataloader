@@ -410,13 +410,17 @@
           <artifactId>license-maven-plugin</artifactId>
           <version>4.1</version>
           <configuration>
+            <licenseSets>
+              <licenseSet>
               <header>license.txt</header>
               <includes>
                   <include>**/*.java</include>
               </includes>
-              <properties>
-                <strictChecking>true</strictChecking>
-              </properties>
+                <properties>
+                  <strictChecking>true</strictChecking>
+                </properties>
+              </licenseSet>
+            </licenseSets>
           </configuration>
           <executions>
               <execution>
@@ -548,55 +552,6 @@
 	          </execution>
 	        </executions>
 	      </plugin>
-	      
-<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin -->
-	      <plugin>
-	        <artifactId>maven-shade-plugin</artifactId>
-	        <version>3.2.4</version>
-	        <executions>
-	          <execution>
-	            <phase>package</phase>
-	            <goals>
-	              <goal>shade</goal>
-	            </goals>
-	            <configuration>
-	              <shadedArtifactAttached>true</shadedArtifactAttached>
-	              <shadedClassifierName>shade</shadedClassifierName> <!-- Any name that makes sense -->
-	              <filters>
-	                <filter>
-	                  <artifact>*:*</artifact>
-	                  <excludes>
-	                    <exclude>module-info.class</exclude>
-	                    <exclude>META-INF/*.SF</exclude>
-	                    <exclude>META-INF/*.MF</exclude>
-	                    <exclude>META-INF/*.txt</exclude>
-	                    <exclude>META-INF/LICENSE</exclude>
-	                    <exclude>META-INF/NOTICE</exclude>
-	                    <exclude>META-INF/DEPENDENCIES</exclude>
-	                    <exclude>META-INF/*.DSA</exclude>
-	                    <exclude>META-INF/*.RSA</exclude>
-	                    <exclude>*.*</exclude>
-	                  </excludes>
-	                </filter>
-	              </filters>
-	              <transformers>
-	                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-	                  <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-	                </transformer>
-	                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-	                  <resource>META-INF/spring.handlers</resource>
-	                </transformer>
-	                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-	                  <resource>META-INF/spring.schemas</resource>
-	                </transformer>
-	                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-	                  <resource>META-INF/spring.tooling</resource>
-	                </transformer>
-	              </transformers>
-	            </configuration>
-	          </execution>
-	        </executions>
-	      </plugin>
         </plugins>
       </build>
     </profile>
@@ -613,9 +568,6 @@
             <executions>
               <execution>
                 <phase>package</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
                 <configuration>
                   <target>
                     <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath"/>
@@ -688,9 +640,11 @@
                           keystore="${jarsigner.keystore}" />
                        </then>
                      </if>
-
-                  </target>
+                   </target>
                 </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
              </execution>
             </executions>
             <dependencies>
