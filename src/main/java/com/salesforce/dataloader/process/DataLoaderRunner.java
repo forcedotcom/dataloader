@@ -53,7 +53,6 @@ public class DataLoaderRunner extends Thread {
     private static final String RUN_MODE_BATCH = "batch";
     private static final String GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
     private static final String SWT_JAR_NAME = "swt.jar.name";
-    private static final String BUILD_DIR = "target/";
     private static boolean useGMTForDateFieldValue = true;
     private static Map<String, String> argNameValuePair;
 
@@ -97,9 +96,7 @@ public class DataLoaderRunner extends Thread {
                 if (SWTDirStr == null 
                         || SWTDirStr.isBlank() 
                         || SWTDirStr.equalsIgnoreCase("null")
-                        || !(Files.exists(Paths.get(SWTDirStr))
-                             || Files.exists(Paths.get(BUILD_DIR + SWTDirStr)))
-                     ) {
+                        || !(Files.exists(Paths.get(SWTDirStr)))) {
                     System.err.println("Unable to find SWT directory: " + SWTDirStr);
                     System.err.println("Native JRE for " + System.getProperty("os.arch") + " not supported.");
                     System.err.println("Try JRE for the supported platform in emulation mode.");
@@ -111,10 +108,6 @@ public class DataLoaderRunner extends Thread {
                     if (jarname != null && !jarname.isEmpty()) {
                         swtJarName = jarname;
                     }
-                }
-                Path SWTDirPath = Paths.get(SWTDirStr);
-                if (!Files.exists(SWTDirPath)) {
-                    SWTDirStr = BUILD_DIR + SWTDirStr;
                 }
                 SWTLoader.addToClassPath(new File(SWTDirStr + "/" + swtJarName));
                 Controller controller = Controller.getInstance(UI, false, args);
