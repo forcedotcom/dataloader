@@ -36,11 +36,15 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.ui.UIUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.eclipse.swt.widgets.Display;
@@ -53,6 +57,7 @@ public class DataLoaderRunner extends Thread {
     private static final String RUN_MODE_BATCH = "batch";
     private static final String GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
     private static final String SWT_JAR_NAME = "swt.jar.name";
+    private static final String SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
     private static boolean useGMTForDateFieldValue = true;
     private static Map<String, String> argNameValuePair;
 
@@ -89,7 +94,8 @@ public class DataLoaderRunner extends Thread {
         setUseGMTForDateFieldValue();
         if (isBatchMode()) {
             ProcessRunner.runBatchMode(args);
-        } else {
+        } else if (argNameValuePair.containsKey(SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
+                && "true".equalsIgnoreCase(argNameValuePair.get(SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
             /* Run in the UI mode, get the controller instance with batchMode == false */
             try {
                 String SWTDirStr = System.getProperty("java.library.path");
@@ -115,6 +121,75 @@ public class DataLoaderRunner extends Thread {
             } catch (IOException | ControllerInitializationException e) {
                 UIUtils.errorMessageBox(new Shell(new Display()), e);
             }
+        } else { // SWT_NATIVE_LIB_IN_JAVA_LIB_PATH not set
+            rerunWithSWTNativeLib(args);
+        }
+    }
+    
+    private static void rerunWithSWTNativeLib(String[] args) {
+        String separator = System.getProperty("file.separator");
+        String classpath = System.getProperty("java.class.path");
+        String javaExecutablePath = null;
+        try {
+            javaExecutablePath = ProcessHandle.current()
+                .info()
+                .command()
+                .orElseThrow();
+        } catch (Exception e) {
+            // fail silently
+        }
+        if (javaExecutablePath == null) {
+            javaExecutablePath = System.getProperty("java.home")
+                    + separator + "bin" + separator + "java";
+        }
+        // java command is the first argument
+        ArrayList<String> jvmArgs = new ArrayList<String>(128);
+        jvmArgs.add(javaExecutablePath);
+
+        // JVM options
+        // set -XstartOnFirstThread for MacOS
+        String osName = System.getProperty("os.name").toLowerCase();
+        if ((osName.contains("mac")) || (osName.startsWith("darwin"))) {
+            jvmArgs.add("-XstartOnFirstThread");
+        }
+        
+        // set JVM arguments
+        String SWTDir = SWTLoader.getSWTDir();
+        jvmArgs.add("-Djava.library.path=" + SWTDir);
+        jvmArgs.add("-javaagent:" + classpath);
+        jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
+        
+        // set classpath
+        jvmArgs.add("-cp");
+        jvmArgs.add(classpath);
+        
+        // specify name of the class with main method
+        jvmArgs.add(DataLoaderRunner.class.getName());
+        
+        // specify application arguments
+        for (int i = 0; i < args.length; i++) {
+          jvmArgs.add(args[i]);
+        }
+        
+        // add the argument to indicate that JAVA_LIB_PATH has the directory containing SWT native libraries
+        jvmArgs.add(SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
+        ProcessBuilder processBuilder = new ProcessBuilder(jvmArgs);
+        processBuilder.redirectErrorStream(true);
+        try {
+            Process process = processBuilder.start();
+            InputStream is = process.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+
+            while ((line = br.readLine()) != null) {
+              System.out.println(line);
+            }
+
+            process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 }
