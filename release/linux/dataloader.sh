@@ -29,6 +29,5 @@ then
     echo "Java JRE ${MIN_JAVA_VERSION} or later is not installed. For example, download and install Zulu OpenJDK ${MIN_JAVA_VERSION} or later JRE from https://www.azul.com/downloads/zulu/zulu-mac/"
 else
     cd `dirname $0`
-    SWTDIR=`java -cp ${DATALOADER_UBER_JAR_NAME} com.salesforce.dataloader.process.GetSWTDir`
-    java -Djava.library.path=${SWTDIR} -javaagent:${DATALOADER_UBER_JAR_NAME} -jar ${DATALOADER_UBER_JAR_NAME} $@
+    java -jar ${DATALOADER_UBER_JAR_NAME} $@
 fi
