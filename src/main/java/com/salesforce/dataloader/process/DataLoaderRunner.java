@@ -25,8 +25,6 @@
  */
 package com.salesforce.dataloader.process;
 
-import com.salesforce.dataloader.client.HttpClientTransport;
-
 /**
  * @author Lexi Viripaeff
  * @input DataLoaderRunner -------------- @ * ----------------
@@ -37,7 +35,6 @@ import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.ui.UIUtils;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -50,6 +47,8 @@ import java.util.Map;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.salesforce.dataloader.client.HttpClientTransport;
+
 public class DataLoaderRunner extends Thread {
 
     private static final String UI = "ui";
@@ -58,6 +57,7 @@ public class DataLoaderRunner extends Thread {
     private static final String GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
     private static final String SWT_JAR_NAME = "swt.jar.name";
     private static final String SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
+    private static final String BUILD_DIR = "./target/";
     private static boolean useGMTForDateFieldValue = true;
     private static Map<String, String> argNameValuePair;
 
@@ -104,21 +104,22 @@ public class DataLoaderRunner extends Thread {
                         || SWTDirStr.equalsIgnoreCase("null")
                         || !(Files.exists(Paths.get(SWTDirStr)))) {
                     System.err.println("Unable to find SWT directory: " + SWTDirStr);
-                    System.err.println("Native JRE for " + System.getProperty("os.arch") + " not supported.");
+                    System.err.println("Native JRE for " 
+                      + System.getProperty("os.name") + " : "
+                      + System.getProperty("os.arch") + " not supported.");
                     System.err.println("Try JRE for the supported platform in emulation mode.");
                     System.exit(-1);
                 }
-                String swtJarName = SWTLoader.buildNameFromOSAndArch("swt", ".jar");
+                String swtJarName = buildNameFromOSAndArch("swt", ".jar");
                 if (argNameValuePair.containsKey(SWT_JAR_NAME)) {
                     String jarname = argNameValuePair.get(swtJarName);
                     if (jarname != null && !jarname.isEmpty()) {
                         swtJarName = jarname;
                     }
                 }
-                SWTLoader.addToClassPath(new File(SWTDirStr + "/" + swtJarName));
                 Controller controller = Controller.getInstance(UI, false, args);
                 controller.createAndShowGUI();
-            } catch (IOException | ControllerInitializationException e) {
+            } catch (ControllerInitializationException e) {
                 UIUtils.errorMessageBox(new Shell(new Display()), e);
             }
         } else { // SWT_NATIVE_LIB_IN_JAVA_LIB_PATH not set
@@ -154,12 +155,16 @@ public class DataLoaderRunner extends Thread {
         }
         
         // set JVM arguments
-        String SWTDir = SWTLoader.getSWTDir();
+        String SWTDir = getSWTDir();
         jvmArgs.add("-Djava.library.path=" + SWTDir);
-        jvmArgs.add("-javaagent:" + classpath);
         jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
         
         // set classpath
+        String pathSeparator = System.getProperty("path.separator");
+        if (classpath != null && !classpath.isBlank()) {
+            classpath = classpath + pathSeparator;
+        }
+        classpath = classpath + getSWTDir() + "/" + buildNameFromOSAndArch("swt", ".jar");
         jvmArgs.add("-cp");
         jvmArgs.add(classpath);
         
@@ -191,5 +196,50 @@ public class DataLoaderRunner extends Thread {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+    
+    
+    private static String buildNameFromOSAndArch(String prefix, String suffix) {
+        prefix = prefix == null ? "" : prefix;
+        suffix = suffix == null ? "" : suffix;
+        
+        String osNameStr = getOSName();
+        String archStr = System.getProperty("os.arch");
+        if (osNameStr.equalsIgnoreCase("win32") && archStr.toLowerCase().contains("amd")) {
+            archStr = "x86_64";
+        }
+
+        return prefix 
+               + osNameStr + "_" + archStr
+               + suffix;       
+    }
+
+    private static String getOSName() {
+        String osNameProperty = System.getProperty("os.name");
+    
+        if (osNameProperty == null) {
+            throw new RuntimeException("os.name property is not set");
+        }
+        else {
+            osNameProperty = osNameProperty.toLowerCase();
+        }
+    
+        if (osNameProperty.contains("win")) {
+           return "win32";
+        } else if (osNameProperty.contains("mac")) {
+           return "mac";
+        } else if (osNameProperty.contains("linux") || osNameProperty.contains("nix")) {
+           return "linux";
+        } else {
+           throw new RuntimeException("Unknown OS name: " + osNameProperty);
+        }
+    }
+    
+    private static String getSWTDir() {
+        String SWTDirStr = buildNameFromOSAndArch("swt", "");
+        if (!Files.exists(Paths.get(SWTDirStr))) {
+            return BUILD_DIR + SWTDirStr;
+        }
+        return SWTDirStr;
     }
 }
