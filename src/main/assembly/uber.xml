@@ -12,10 +12,7 @@
       <unpack>true</unpack>
       <scope>runtime</scope>
       <excludes>      
-        <exclude>local.swt:swtmac_aarch64:</exclude>
-        <exclude>local.swt:swtmac_x86_64:</exclude>
-        <exclude>local.swt:swtwin32_x86_64:</exclude>
-        <exclude>local.swt:swtlinux_x86_64:</exclude>
+        <exclude>local.swt:swt${targetOS}:</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>

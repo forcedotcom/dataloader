@@ -19,7 +19,7 @@ usage() {
   echo "Usage: "
   echo "$0 -u"
   echo "$0 <keystore password> <PKCS11 config file> <signature algorithm, e.g. RSA1024, RSA2048, ECCP256, ECCP384> <TSA URL> <certchain file> <keystore alias>"
-  echo "$0 -n macos_x86_64 | macos_arm_64 | windows_x86_64 | linux_x86_64"
+  echo "$0 -n mac_x86_64 | mac_aarch64 | win32_x86_64 | linux_x86_64"
   exit 1
 }
 
@@ -35,19 +35,19 @@ run_mvn() {
 # $9 - keystore alias
 
   osSuffix=""
-  if [ "$2" = macos_x86_64 ]
+  if [ "$2" = mac_x86_64 ]
   then
     osSuffix="mac"
     zipdir="target/${osSuffix}"
     from="${zipdir}/dataloader_${osSuffix}.zip"
     to=./dataloader_${osSuffix}.zip
-  elif [ "$2" = macos_arm_64 ] 
+  elif [ "$2" = mac_aarch64 ] 
   then
     osSuffix="mac"
     zipdir="target/${osSuffix}"
     from="${zipdir}/dataloader_${osSuffix}.zip"
     to=./dataloader_${osSuffix}_arm64.zip
-  elif [ "$2" = windows_x86_64 ] 
+  elif [ "$2" = win32_x86_64 ] 
   then
     osSuffix="win"
     zipdir="target/${osSuffix}"
@@ -125,9 +125,9 @@ if [ ${unsignedArtifacts} = false ]; then
 fi
 
 if [ ${doZip} = true ]; then
-  run_mvn "${unsignedArtifacts}" "macos_x86_64" ${doZip} "$1" "$2" "$3" "$4" "$5" "$6"
-  run_mvn "${unsignedArtifacts}" "windows_x86_64" ${doZip} "$1" "$2" "$3" "$4" "$5" "$6"
-#  run_mvn "${unsignedArtifacts}" "macos_arm_64" ${doZip} "$1" "$2" "$3" "$4" "$5" "$6"
+  run_mvn "${unsignedArtifacts}" "mac_x86_64" ${doZip} "$1" "$2" "$3" "$4" "$5" "$6"
+  run_mvn "${unsignedArtifacts}" "win32_x86_64" ${doZip} "$1" "$2" "$3" "$4" "$5" "$6"
+#  run_mvn "${unsignedArtifacts}" "mac_aarch64" ${doZip} "$1" "$2" "$3" "$4" "$5" "$6"
 #  run_mvn "${unsignedArtifacts}" "linux_x86_64" ${doZip} "$1" "$2" "$3" "$4" "$5" "$6"
 else
   run_mvn "${unsignedArtifacts}" "${targetOS}" ${doZip} "$1" "$2" "$3" "$4" "$5" "$6"

@@ -436,11 +436,11 @@
 
   <profiles>
     <profile>
-      <id>macos_x86_64</id>
+      <id>mac_x86_64</id>
       <activation>
         <property>
           <name>targetOS</name>
-          <value>macos_x86_64</value>
+          <value>mac_x86_64</value>
         </property>
       </activation>
       <dependencies>
@@ -456,11 +456,11 @@
     </profile>
 
     <profile>
-      <id>macos_arm_64</id>
+      <id>mac_aarch64</id>
       <activation>
         <property>
           <name>targetOS</name>
-          <value>macos_arm_64</value>
+          <value>mac_aarch64</value>
         </property>
       </activation>
       <dependencies>
@@ -476,11 +476,11 @@
     </profile>
 
     <profile>
-      <id>windows_x86_64</id>
+      <id>win32_x86_64</id>
       <activation>
         <property>
           <name>targetOS</name>
-          <value>windows_x86_64</value>
+          <value>win32_x86_64</value>
         </property>
       </activation>
       <dependencies>
