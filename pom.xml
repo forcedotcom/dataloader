@@ -533,10 +533,6 @@
                 <manifest>
                   <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
                 </manifest>
-                <manifestEntries>
-                  <Premain-Class>com.salesforce.dataloader.process.SWTLoader</Premain-Class>
-                  <Agent-Class>com.salesforce.dataloader.process.SWTLoader</Agent-Class>
-                </manifestEntries>
               </archive>
               <descriptors>
                 <descriptor>src/main/assembly/uber.xml</descriptor>
