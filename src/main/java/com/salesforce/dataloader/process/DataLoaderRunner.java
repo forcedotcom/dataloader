@@ -55,9 +55,8 @@ public class DataLoaderRunner extends Thread {
     private static final String RUN_MODE = "run.mode";
     private static final String RUN_MODE_BATCH = "batch";
     private static final String GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
-    private static final String SWT_JAR_NAME = "swt.jar.name";
     private static final String SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
-    private static final String BUILD_DIR = "./target/";
+    private static final String BUILD_DIR = "target/";
     private static boolean useGMTForDateFieldValue = true;
     private static Map<String, String> argNameValuePair;
 
@@ -109,13 +108,6 @@ public class DataLoaderRunner extends Thread {
                       + System.getProperty("os.arch") + " not supported.");
                     System.err.println("Try JRE for the supported platform in emulation mode.");
                     System.exit(-1);
-                }
-                String swtJarName = buildNameFromOSAndArch("swt", ".jar");
-                if (argNameValuePair.containsKey(SWT_JAR_NAME)) {
-                    String jarname = argNameValuePair.get(swtJarName);
-                    if (jarname != null && !jarname.isEmpty()) {
-                        swtJarName = jarname;
-                    }
                 }
                 Controller controller = Controller.getInstance(UI, false, args);
                 controller.createAndShowGUI();
