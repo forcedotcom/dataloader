@@ -15,9 +15,9 @@ Developers need to use JDK 11 or later such as [Zulu OpenJDK](https://www.azul.c
     git submodule update
     mvn clean package -DskipTests 
         or
-    ./dlbuilder.sh -n
+    ./dlbuilder.sh -n  (on Mac or Linux desktop)
     
-# Build unsigned zip files for Mac, Windows, and Linux
+# Build unsigned zip files for Mac, Windows, and Linux on Mac or Linux or when running bash in a Windows command terminal
     ./dlbuilder.sh
         
 The build will include the appropriate eclipse swt jar by detecting your operating system type. If you would like to manually specify the eclipse swt jar, take a look at the pom.xml file to see a full list of available profiles.
