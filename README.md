@@ -13,7 +13,9 @@ Developers need to use JDK 11 or later such as [Zulu OpenJDK](https://www.azul.c
     cd dataloader
     git submodule init
     git submodule update
-    mvn clean package -DskipTests
+    mvn clean package -DskipTests 
+        or
+    ./dlbuilder.sh -n
     
 # Build unsigned zip files for Mac, Windows, and Linux
     ./dlbuilder.sh
