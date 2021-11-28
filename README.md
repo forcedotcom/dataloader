@@ -13,16 +13,14 @@ Developers need to use JDK 11 or later such as [Zulu OpenJDK](https://www.azul.c
     cd dataloader
     git submodule init
     git submodule update
-    mvn clean package -DskipTests -DtargetOS=<windows_x86_64 | macos_x86_64 | macos_arm_64 | linux_x86_64>
+    mvn clean package -DskipTests
     
-NOTE: Specify one and only one of the targetOS values listed above.
-    
+# Build unsigned zip files for Mac, Windows, and Linux
+    ./dlbuilder.sh
+        
 The build will include the appropriate eclipse swt jar by detecting your operating system type. If you would like to manually specify the eclipse swt jar, take a look at the pom.xml file to see a full list of available profiles.
 
-Note: Salesforce officially supports Data Loader for 64-bit Windows and macOS. Any other platforms that Data Loader can be compiled for are unofficial.
-
-For macOS and Windows, the build will generate needed JARs in the target directory. 
-
+Note: Salesforce officially supports Data Loader for 64-bit Windows 10 and macOS. Any other platforms that Data Loader can be compiled for are unofficial.
     
 # Execute Data Loader
 
@@ -34,7 +32,7 @@ Use the command below to run the Data Loader GUI on Mac
 
     java -XstartOnFirstThread -jar target/dataloader-x.y.z-uber.jar
 
-To run data loader for debug
+To run data loader for debug on macOS
 
     java -XstartOnFirstThread -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005  target/dataloader-x.y.z-uber.jar
 
@@ -46,8 +44,11 @@ Data Loader can be executed in Batch mode on other unsupported platforms using t
 
 Commands to encrypt password:
 
-    java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -k <path to keyfile>
-    java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -e <password in plain text> <path to keyfile>
+Generate a key file and saves it in ${HOME}/.dataloader/dataloader.key on mac/linux (%userprofile%\.dataloader\dataLoader.key on Windows) if the path is not specified. Store this file with care as you use it for encryption and decryption.
+    java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -k [<path to keyfile>]
+ 
+ Encrypt a key.
+    java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -e <password in plain text> [<path to keyfile if it is other than the default path>]
     
 In case you experience "Invalid Api version specified on URL" on login, you need to change the Api version in pom.xml to specify the WSC version of your server. Simply change the following line and rebuild the project:
 
@@ -58,8 +59,6 @@ In case you experience "Invalid Api version specified on URL" on login, you need
 # Execute Data Loader With Scripts for v45 and Later
  
 Launch scripts are provided to help end users launch Data Loader for Windows and macOS. Zip files are provided for macOS and Windows environments in the project's "releases" tab. There are specific installation instructions for [macOS](https://help.salesforce.com/articleView?id=sf.loader_install_mac.htm) and [Windows](https://help.​salesforce.com/articleView?id=​loader_install_windows.htm).
- 
-A new directory called "release" was added to the project’s root directory. Developers can build Data Loader and place the dataloader-x.y.z-uber.jar inside "release/mac" or "release\win" directory to launch a customized build.
 
 
 # Test Data Loader
@@ -76,4 +75,4 @@ Questions can be directed to the [open source forum](https://developer.salesforc
 
 Update SWT by running `python3 <root of the git clone>/updateSWT.py <root of the git clone>`. Requires python 3.9 or later.
 
-All other dependencies and plugins are downloaded by maven from the central maven repo. Run `mvn versions:display-dependency-updates` to see which dependencies need an update. It will list all dependencies whose specified version in pom.xml needs an update. Run `mvn versions:use-latest-releases` to update these dependencies. Run `mvn versions:display-plugin-updates` to check which plugins need an update and update their versions manually.
+All other dependencies and plugins are downloaded by maven from the central maven repo. Run `mvn versions:display-dependency-updates` to see which dependencies need an update. It will list all dependencies whose specified version in pom.xml needs an update. Run `mvn versions:use-latest-releases` to update these dependencies. Run `mvn versions:display-plugin-updates` again to check which plugins still need an update and update their versions manually.
