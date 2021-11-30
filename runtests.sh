@@ -63,4 +63,4 @@ sed -i '' "s/standard@org.com/${4}/g" pomtest.xml
 sed -i '' "s/<test\.password>/<test\.password>${5}/g" pomtest.xml
 
 mvn -f pomtest.xml clean test -Pintegration-test ${debug} ${test}
-rm pomtest.sh
+rm pomtest.xml
