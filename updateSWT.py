@@ -39,6 +39,13 @@ import argparse
 def is_exe(fpath):
     return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
+def exitWithError(errorStr):
+    if os.path.isdir("../local-proj-repo-save"):
+        shutil.move("../local-proj-repo-save/", "./local-proj-repo")
+    print(errorStr)
+    sys.exit(-1)
+
+
 def which(program):
     fpath, fname = os.path.split(program)
     if fpath:
@@ -107,8 +114,8 @@ def installInLocalMavenRepo(unzippedSWTDir, mvnArtifactId, gitCloneRootDir):
 #    print(swtVersion)
 
     if which("mvn") == None :
-        print("did not find mvn command in the execute path")
-        sys.exit(2)
+        exitWithError("did not find mvn command in the execute path")
+
         
     mavenCommand = "mvn install:install-file " \
                     + "-Dfile=" + unzippedSWTDir + "swt.jar " \
@@ -162,8 +169,9 @@ def updateSWT(mvnArtifactId, downloadPageLabel, gitCloneRootDir, version):
                 break
 
     if results == "" :
-        print("version " + version + " not found for download")
-        sys.exit(-1)
+        exitWithError("version " + version + " not found for download")
+        
+
     downloadsPage = URL + results
     page = requests.get(downloadsPage)
     soup = BeautifulSoup(page.content, "html.parser")
@@ -187,6 +195,9 @@ if argument.version:
 if argument.cloneroot:
     rootdir = argument.cloneroot
 
+if os.path.isdir("local-proj-repo"):
+    shutil.move("./local-proj-repo/", "../local-proj-repo-save")
+    
 # Windows
 updateSWT("swtwin32_x86_64", "Windows (64 bit version)", rootdir, version)
 
@@ -198,6 +209,13 @@ updateSWT("swtmac_aarch64", "Mac OSX (64 bit version for Arm64/AArch64)", rootdi
 
 # Linux
 updateSWT("swtlinux_x86_64", "Linux (64 bit version)", rootdir, version)
+
+if os.path.isdir("../local-proj-repo-save"):
+    shutil.rmtree("../local-proj-repo-save")
+
+for subdir in os.listdir("./local-proj-repo/"):
+    if subdir != "local" :
+        shutil.rmtree("./local-proj-repo/" + subdir)
 
 # update other dependencies in POM
 #updatePOMForRemoteMVNArtifacts(sys.argv[1])
