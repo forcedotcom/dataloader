@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="maven-antrun-" default="main"  >
+	<target name="main">
+	  <copy todir="${basedir}/target/" >
+		<fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swt*/*/*.jar"/>
+	  </copy>
+	  <taskdef resource="net/sf/antcontrib/antcontrib.properties" />
+	  <foreach param="fileName" target="unzip">
+	    <path>
+	    <dirset dir="${basedir}/target/">
+	      <include name="swt*" />
+	    </dirset>
+	    </path>
+	  </foreach>
+	</target>
+	<target name="unzip">
+	  <move todir="${fileName}" flatten="true">
+		<fileset dir="${fileName}/">
+		  <include name="**/*.jar"/>
+		</fileset>
+	  </move>
+	  <unzip dest="${fileName}">
+		<patternset>
+		  <include name="**/*.jnilib"/>
+		  <include name="**/*.dll"/>
+		  <include name="**/*.so"/>
+		</patternset>
+		<fileset dir="${fileName}">
+		  <include name="**/*.jar"/>
+		</fileset>
+	  </unzip>
+	</target>
+</project>

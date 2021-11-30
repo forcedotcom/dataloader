@@ -35,6 +35,8 @@ import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.ui.UIUtils;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -44,6 +46,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -56,7 +59,7 @@ public class DataLoaderRunner extends Thread {
     private static final String RUN_MODE_BATCH = "batch";
     private static final String GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
     private static final String SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
-    private static final String BUILD_DIR = "target/";
+    private static final String LOCAL_SWT_DIR = "target/";
     private static boolean useGMTForDateFieldValue = true;
     private static Map<String, String> argNameValuePair;
 
@@ -156,7 +159,7 @@ public class DataLoaderRunner extends Thread {
         if (classpath != null && !classpath.isBlank()) {
             classpath = classpath + pathSeparator;
         }
-        classpath = classpath + getSWTDir() + "/" + buildNameFromOSAndArch("swt", ".jar");
+        classpath = classpath + getSWTJarPath();
         jvmArgs.add("-cp");
         jvmArgs.add(classpath);
         
@@ -191,7 +194,7 @@ public class DataLoaderRunner extends Thread {
     }
     
     
-    private static String buildNameFromOSAndArch(String prefix, String suffix) {
+    private static String buildPathStringFromOSAndArch(String prefix, String suffix, String version, String separator) {
         prefix = prefix == null ? "" : prefix;
         suffix = suffix == null ? "" : suffix;
         
@@ -201,9 +204,12 @@ public class DataLoaderRunner extends Thread {
             archStr = "x86_64";
         }
 
-        return prefix 
-               + osNameStr + "_" + archStr
-               + suffix;       
+        String pathStr = prefix 
+                + osNameStr + "_" + archStr
+                + separator + version
+                + suffix;
+        
+        return pathStr;
     }
 
     private static String getOSName() {
@@ -228,10 +234,35 @@ public class DataLoaderRunner extends Thread {
     }
     
     private static String getSWTDir() {
-        String SWTDirStr = buildNameFromOSAndArch("swt", "");
-        if (!Files.exists(Paths.get(SWTDirStr))) {
-            return BUILD_DIR + SWTDirStr;
+        String SWTDirStr = buildPathStringFromOSAndArch("swt", "", "", "");
+        if (Files.exists(Paths.get(SWTDirStr))) {
+            return SWTDirStr;
+        }
+
+        SWTDirStr = buildPathStringFromOSAndArch(LOCAL_SWT_DIR + "swt", "", "", "");
+
+        if (SWTDirStr == null) {
+            System.err.println("Unable to find SWT directory for " 
+                    + System.getProperty("os.name") + " : "
+                    + System.getProperty("os.arch"));
+            System.exit(-1); // did not find SWT directory. Can't continue execution.
         }
         return SWTDirStr;
+    }
+    
+    private static String getSWTJarPath() {
+        String SWTDirStr = getSWTDir();
+        String SWTJarStr = buildPathStringFromOSAndArch("swt", "*.jar", "", "");
+        
+        File dir = new File(SWTDirStr);
+        FileFilter fileFilter = new WildcardFileFilter(SWTJarStr);
+        File[] files = dir.listFiles(fileFilter);        
+        if (files.length == 0) { // no jar file starting with swt found
+            System.err.println("Unable to find SWT jar for " 
+                    + System.getProperty("os.name") + " : "
+                    + System.getProperty("os.arch"));
+            System.exit(-1);
+        }
+        return files[0].getPath();
     }
 }
