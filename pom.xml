@@ -453,21 +453,21 @@
                 <phase>compile</phase>
                 <configuration>
                   <target>
- 					<ant antfile="${basedir}/extractSWTJar.xml" inheritAll="true" />
-					<delete includeEmptyDirs="true">
-					  <dirset dir="${basedir}/target/">
+                    <ant antfile="${basedir}/extractSWTJar.xml" inheritAll="true" />
+                    <delete includeEmptyDirs="true">
+                      <dirset dir="${basedir}/target/">
                         <patternset>
                           <include name="**/${swt.version}"/>
-                        </patternset>
-					  </dirset>
-					</delete>
- 				  </target>
-	            </configuration>
+                         </patternset>
+                      </dirset>
+                    </delete>
+                  </target>
+                </configuration>
                 <goals>
                   <goal>run</goal>
                 </goals>
-   	          </execution>
-	        </executions>
+              </execution>
+            </executions>
 	        <dependencies>
 <!-- https://mvnrepository.com/artifact/ant-contrib/ant-contrib -->
               <dependency>
