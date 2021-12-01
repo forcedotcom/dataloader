@@ -47,10 +47,14 @@ Data Loader can be executed in Batch mode on other unsupported platforms using t
 Commands to encrypt password:
 
 Generate a key file and saves it in ${HOME}/.dataloader/dataloader.key on mac/linux (%userprofile%\.dataloader\dataLoader.key on Windows) if the path is not specified. Store this file with care as you use it for encryption and decryption.
+    `
     java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -k [<path to keyfile>]
+    `
  
  Encrypt a key.
+    `
     java -cp target/dataloader-x.y.z-uber.jar com.salesforce.dataloader.security.EncryptionUtil -e <password in plain text> [<path to keyfile if it is other than the default path>]
+    `
     
 In case you experience "Invalid Api version specified on URL" on login, you need to change the Api version in pom.xml to specify the WSC version of your server. Simply change the following line and rebuild the project:
 
