@@ -4,7 +4,7 @@
       class="org.apache.commons.dbcp2.BasicDataSource"
       destroy-method="close" scope="singleton">
     <property name="driverClassName" value="org.h2.Driver" />
-    <property name="url" value="jdbc:h2:~/target/h2"/>
+    <property name="url" value="jdbc:h2:./target/h2"/>
     <property name="username" value="sa"/>
     <property name="password" value=""/>
 </bean>
