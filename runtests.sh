@@ -57,10 +57,10 @@ then
   sed -i '' "s/<force.wsc.version>[0-9][0-9]\.[0-9]\.[0-9]<\/force.wsc.version>/<force.wsc.version>${version}<\/force.wsc.version>/g" pomtest.xml
 fi
 
-sed -i '' "s/http:\/\/testendpoint/${2}/g" pomtest.xml
-sed -i '' "s/admin@org.com/${3}/g" pomtest.xml
-sed -i '' "s/standard@org.com/${4}/g" pomtest.xml
-sed -i '' "s/<test\.password>/<test\.password>${5}/g" pomtest.xml
+sed -i '' "s/http:\/\/testendpoint/${1}/g" pomtest.xml
+sed -i '' "s/admin@org.com/${2}/g" pomtest.xml
+sed -i '' "s/standard@org.com/${3}/g" pomtest.xml
+sed -i '' "s/<test\.password>/<test\.password>${4}/g" pomtest.xml
 
 mvn -f pomtest.xml clean test -Pintegration-test ${debug} ${test}
 rm pomtest.xml
