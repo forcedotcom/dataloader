@@ -62,6 +62,5 @@ sed -i '' "s/admin@org.com/${2}/g" pomtest.xml
 sed -i '' "s/standard@org.com/${3}/g" pomtest.xml
 sed -i '' "s/<test\.password>/<test\.password>${4}/g" pomtest.xml
 
-# delete H2 directory left by previous test run
 mvn -f pomtest.xml clean test -Pintegration-test ${debug} ${test}
 rm pomtest.xml
