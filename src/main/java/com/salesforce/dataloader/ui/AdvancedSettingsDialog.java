@@ -103,7 +103,6 @@ public class AdvancedSettingsDialog extends Dialog {
     private Button buttonCsvComma;
     private Button buttonCsvTab;
     private Button buttonCsvOther;
-    private Button buttonCsvEscapeFormulaValue;
     private Button buttonLoginFromBrowser;
 
     /**
@@ -468,14 +467,6 @@ public class AdvancedSettingsDialog extends Dialog {
         data.widthHint = 25;
         textSplitterValue.setLayoutData(data);
         
-        Label labelEscapeFormulaInFieldValue = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelEscapeFormulaInFieldValue.setText(Labels.getString("AdvancedSettingsDialog.escapeFormulaInFieldValue"));
-        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        labelEscapeFormulaInFieldValue.setLayoutData(data);
-        buttonCsvEscapeFormulaValue = new Button(restComp, SWT.CHECK);
-        buttonCsvEscapeFormulaValue.setSelection(config.getBoolean(Config.CSV_ESCAPE_FORMULA_IN_FIELD_VALUE));
-
-
         // Enable Bulk API Setting
         Label labelUseBulkApi = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelUseBulkApi.setText(Labels.getString("AdvancedSettingsDialog.useBulkApi")); //$NON-NLS-1$
@@ -726,7 +717,6 @@ public class AdvancedSettingsDialog extends Dialog {
                         || textSplitterValue.getText().length() == 0)) {
                     return;
                 }
-                config.setValue(Config.CSV_ESCAPE_FORMULA_IN_FIELD_VALUE, buttonCsvEscapeFormulaValue.getSelection());
                 config.setValue(Config.CSV_DELIMETER_OTHER_VALUE, textSplitterValue.getText());
                 config.setValue(Config.CSV_DELIMETER_COMMA, buttonCsvComma.getSelection());
                 config.setValue(Config.CSV_DELIMETER_TAB, buttonCsvTab.getSelection());
