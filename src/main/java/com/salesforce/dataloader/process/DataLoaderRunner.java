@@ -94,9 +94,7 @@ public class DataLoaderRunner extends Thread {
         argNameValuePair = Controller.getArgMapFromArgArray(args);
         Controller.setConfigDir(args);
         setUseGMTForDateFieldValue();
-        if (isBatchMode()) {
-            ProcessRunner.runBatchMode(args);
-        } else if (argNameValuePair.containsKey(SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
+        if (argNameValuePair.containsKey(SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
                 && "true".equalsIgnoreCase(argNameValuePair.get(SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
             /* Run in the UI mode, get the controller instance with batchMode == false */
             try {
@@ -112,8 +110,12 @@ public class DataLoaderRunner extends Thread {
                     System.err.println("Try JRE for the supported platform in emulation mode.");
                     System.exit(-1);
                 }
-                Controller controller = Controller.getInstance(UI, false, args);
-                controller.createAndShowGUI();
+                if (isBatchMode()) {
+                    ProcessRunner.runBatchMode(args);
+                } else {
+                    Controller controller = Controller.getInstance(UI, false, args);
+                    controller.createAndShowGUI();
+                }
             } catch (ControllerInitializationException e) {
                 UIUtils.errorMessageBox(new Shell(new Display()), e);
             }
@@ -238,7 +240,13 @@ public class DataLoaderRunner extends Thread {
         if (Files.exists(Paths.get(SWTDirStr))) {
             return SWTDirStr;
         }
-
+        
+        // Look in the parent directory - batch mode
+        SWTDirStr = buildPathStringFromOSAndArch("../swt", "", "", "");
+        if (Files.exists(Paths.get(SWTDirStr))) {
+            return SWTDirStr;
+        }
+        
         SWTDirStr = buildPathStringFromOSAndArch(LOCAL_SWT_DIR + "swt", "", "", "");
 
         if (SWTDirStr == null) {
@@ -256,8 +264,8 @@ public class DataLoaderRunner extends Thread {
         
         File dir = new File(SWTDirStr);
         FileFilter fileFilter = new WildcardFileFilter(SWTJarStr);
-        File[] files = dir.listFiles(fileFilter);        
-        if (files.length == 0) { // no jar file starting with swt found
+        File[] files = dir.listFiles(fileFilter);
+        if (files == null || files.length == 0) { // no jar file starting with swt found
             System.err.println("Unable to find SWT jar for " 
                     + System.getProperty("os.name") + " : "
                     + System.getProperty("os.arch"));
