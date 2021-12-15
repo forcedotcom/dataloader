@@ -30,8 +30,11 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
+import com.salesforce.dataloader.process.DataLoaderRunner;
+
 
 public class DateOnlyCalendar extends GregorianCalendar {
+    static final TimeZone GMT_TZ = TimeZone.getTimeZone("GMT");
 
     public DateOnlyCalendar() {
         super();
@@ -59,6 +62,9 @@ public class DateOnlyCalendar extends GregorianCalendar {
     }
 
     public static DateOnlyCalendar getInstance(TimeZone timeZone) {
+        if (DataLoaderRunner.doUseGMTForDateFieldValue()) {
+            timeZone = GMT_TZ;
+        } 
         return new DateOnlyCalendar(timeZone);
     }
 }
