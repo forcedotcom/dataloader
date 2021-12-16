@@ -51,7 +51,7 @@ public class DateOnlyCalendar extends GregorianCalendar {
         cal.setTimeInMillis(specifiedTimeInMilliSeconds);
 
         TimeZone gmt = TimeZone.getTimeZone("GMT");
-        if (myTimeZone != null) {
+        if (!DataLoaderRunner.doUseGMTForDateFieldValue() && myTimeZone != null) {
             int timeZoneDifference = myTimeZone.getRawOffset() - gmt.getRawOffset() + myTimeZone.getDSTSavings() - gmt.getDSTSavings();
             if (timeZoneDifference > 0) {
                 // timezone is ahead of GMT, add 1 day to the specified time in milliseconds

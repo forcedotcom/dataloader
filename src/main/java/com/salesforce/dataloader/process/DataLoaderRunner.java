@@ -60,7 +60,7 @@ public class DataLoaderRunner extends Thread {
     private static final String GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
     private static final String SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
     private static final String LOCAL_SWT_DIR = "target/";
-    private static boolean useGMTForDateFieldValue = true;
+    private static boolean useGMTForDateFieldValue = false;
     private static Map<String, String> argNameValuePair;
 
     private static boolean isBatchMode() {        
@@ -202,10 +202,11 @@ public class DataLoaderRunner extends Thread {
         
         String osNameStr = getOSName();
         String archStr = System.getProperty("os.arch");
-        if (osNameStr.equalsIgnoreCase("win32") && archStr.toLowerCase().contains("amd")) {
+
+        if ((osNameStr.equalsIgnoreCase("win32")|| osNameStr.equalsIgnoreCase("linux"))
+             && archStr.toLowerCase().contains("amd")) {
             archStr = "x86_64";
         }
-
         String pathStr = prefix 
                 + osNameStr + "_" + archStr
                 + separator + version

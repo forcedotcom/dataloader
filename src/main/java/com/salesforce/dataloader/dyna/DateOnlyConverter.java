@@ -50,8 +50,8 @@ public class DateOnlyConverter extends DateTimeConverter implements Converter {
        super(tz, defaultValue);
     }
 
-    Calendar getCalendar() {
-        return DateOnlyCalendar.getInstance(this.timeZone);
+    Calendar getCalendar(TimeZone tz) {
+        return DateOnlyCalendar.getInstance(tz);
     }
 
     Calendar getNAValueCalendar() {
