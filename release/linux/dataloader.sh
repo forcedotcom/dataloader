@@ -22,6 +22,12 @@ echo "**                                                                     **"
 echo "*************************************************************************"
 echo ""
 
+if [ ! -z "${DATALOADER_JAVA_HOME}" ]
+then
+    JAVA_HOME=${DATALOADER_JAVA_HOME}
+    PATH=${JAVA_HOME}/bin:${PATH}
+fi
+
 JAVA_VERSION=$(java -version 2>&1 | grep -i version | cut -d'"' -f 2 | cut -d'.' -f 1)
 
 if [ -z "${JAVA_VERSION}" ] | [ ${JAVA_VERSION} \< ${MIN_JAVA_VERSION} ]

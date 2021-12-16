@@ -27,15 +27,8 @@ set DATALOADER_VERSION=@@FULL_VERSION@@
 set PROCESS_OPTION=
 if not [%2]==[] set PROCESS_OPTION=process.name=%2
 
-
-IF "%JAVA_HOME%" == "" (
-    for /f "tokens=*" %%i in ('dataloader-%DATALOADER_VERSION%-java-home.exe') do (
-        IF EXIST "%%i" (
-            set JAVA_HOME=%%i
-        ) ELSE (
-            echo %%i
-        )
-    )
+IF NOT "%DATALOADER_JAVA_HOME%" == "" (
+    set JAVA_HOME="%DATALOADER_JAVA_HOME%"
 )
 
 IF "%JAVA_HOME%" == "" (
