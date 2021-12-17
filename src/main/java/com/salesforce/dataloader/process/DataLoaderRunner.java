@@ -203,8 +203,7 @@ public class DataLoaderRunner extends Thread {
         String osNameStr = getOSName();
         String archStr = System.getProperty("os.arch");
 
-        if ((osNameStr.equalsIgnoreCase("win32")|| osNameStr.equalsIgnoreCase("linux"))
-             && archStr.toLowerCase().contains("amd")) {
+        if (archStr.toLowerCase().contains("amd")) {
             archStr = "x86_64";
         }
         String pathStr = prefix 
