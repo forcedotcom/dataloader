@@ -239,7 +239,7 @@ public class LoaderWindow extends ApplicationWindow {
         final Button butt = new Button(parent, SWT.PUSH | SWT.FLAT);
         butt.setText(info.getLabel());
         butt.setEnabled(info.isOperationAllowed(this.controller.getConfig()));
-        butt.setImage(info.getIconImage());
+        butt.setImage(info.getUIHelper().getIconImage());
         butt.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent selectionEvent) {

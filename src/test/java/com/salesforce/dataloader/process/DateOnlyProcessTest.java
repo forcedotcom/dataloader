@@ -31,6 +31,8 @@ import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.sforce.soap.partner.QueryResult;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -108,10 +110,18 @@ public class DateOnlyProcessTest extends ProcessTestBase {
         
      // need to do this before calling runProcess to avoid incorrect timezone setting for DateOnlyConverter
         testConfig.put(Config.TIMEZONE, "IST");
-        runProcess(testConfig, 1);
+        runProcess(testConfig, 2);
         QueryResult qr = getBinding().query("select CustomDateOnly__c from Account where AccountNumber__c='ACCT_0'");
         assertEquals(1, qr.getSize());
 
+        // 1st entry specifies the date-only field in Zulu format
+        assertEquals("2010-10-14", (String)qr.getRecords()[0].getField("CustomDateOnly__c"));
+
+        qr = getBinding().query("select CustomDateOnly__c from Account where AccountNumber__c='ACCT_1'");
+        assertEquals(1, qr.getSize());
+
+        // 2nd entry specifies the date-only field without 'Z'
         assertEquals("2010-10-15", (String)qr.getRecords()[0].getField("CustomDateOnly__c"));
+
     }
 }

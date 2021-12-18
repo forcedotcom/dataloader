@@ -105,7 +105,7 @@ public class DateProcessTest extends ProcessTestBase {
 
     @Test
     public void testDateWithTimeZone() throws Exception {
-        runProcess(getTestConfig(OperationInfo.insert, false), 1);
+        runProcess(getTestConfig(OperationInfo.insert, false), 2);
         QueryResult qr = getBinding().query("select CustomDateTime__c from Account where AccountNumber__c='ACCT_0'");
         assertEquals(1, qr.getSize());
 

@@ -94,7 +94,9 @@ public class DataLoaderRunner extends Thread {
         argNameValuePair = Controller.getArgMapFromArgArray(args);
         Controller.setConfigDir(args);
         setUseGMTForDateFieldValue();
-        if (argNameValuePair.containsKey(SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
+        if (isBatchMode()) {
+            ProcessRunner.runBatchMode(args);
+        } else if (argNameValuePair.containsKey(SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
                 && "true".equalsIgnoreCase(argNameValuePair.get(SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
             /* Run in the UI mode, get the controller instance with batchMode == false */
             try {
@@ -110,12 +112,8 @@ public class DataLoaderRunner extends Thread {
                     System.err.println("Try JRE for the supported platform in emulation mode.");
                     System.exit(-1);
                 }
-                if (isBatchMode()) {
-                    ProcessRunner.runBatchMode(args);
-                } else {
-                    Controller controller = Controller.getInstance(UI, false, args);
-                    controller.createAndShowGUI();
-                }
+                Controller controller = Controller.getInstance(UI, false, args);
+                controller.createAndShowGUI();
             } catch (ControllerInitializationException e) {
                 UIUtils.errorMessageBox(new Shell(new Display()), e);
             }

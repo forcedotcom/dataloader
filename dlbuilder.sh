@@ -37,6 +37,8 @@ run_mvn() {
   mvn clean package -DskipTests 
 
   jarfile=`find ./target -name dataloader-*-uber.jar -not -path "./target/win/*" -not -path "./target/mac/*" -not -path "./target/linux/*" -print -quit` 
+  # remove JndiLookup class from log4j
+  zip -q -d ${jarfile} org/apache/logging/log4j/core/lookup/JndiLookup.class
   # sign uber jar 
   if [ $1 = true ]; then
     jarsigner -storepass "$3" -verbose -providerClass sun.security.pkcs11.SunPKCS11 -providerArg "$4" -keystore NONE -storetype PKCS11 -sigalg "$5" -tsa "$6" -certchain "$7" ${jarfile} "$8"
