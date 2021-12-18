@@ -105,7 +105,7 @@ public class LoaderTitleDialog extends LoaderTitleAreaDialog {
         for (OperationInfo info : OperationInfo.ALL_OPERATIONS_IN_ORDER) {
             final Button butt = createButton(parent, info.getDialogIdx(), info.getLabel(), false);
             butt.setEnabled(info.isOperationAllowed(this.config));
-            Image img = info.getIconImage();
+            Image img = info.getUIHelper().getIconImage();
             butt.setImage(img);
             GridData gd = (GridData)butt.getLayoutData();
             gd.grabExcessHorizontalSpace = true;
