@@ -295,40 +295,33 @@ public class ProcessRunner implements InitializingBean, Runnable {
      * @throws ProcessInitializationException
      */
     public static synchronized ProcessRunner getInstance(Map<String, String> argMap) throws ProcessInitializationException {
-        ProcessRunner runner;
-        Controller.setConfigDir(argMap);
-        try {
-            Controller.initLog();
-        } catch (ControllerInitializationException e) {
-            System.err.println("ProcessRunner: log not configured" + e );
-            throw new RuntimeException(e.getMessage());
-        }
         logger = LogManager.getLogger(ProcessRunner.class);
         
-            // get a controller instance to load the properties except for the
-            // runtime properties stored in XXX_lastRun.properties file.
-            Controller controller = Controller.getInstance("", true, null);
-            logger.info(Messages.getString("Process.initializingEngine")); //$NON-NLS-1$
-            Config config = controller.getConfig();
-            // load parameter overrides (from command line or caller context)
-            logger.info(Messages.getString("Process.loadingParameters")); //$NON-NLS-1$
-            config.loadParameterOverrides(argMap);
-            String processName = config.getString(PROCESS_NAME);
-            logger.debug("process name is " + processName);
-            if (processName == null || processName.isEmpty()) {
-                logger.info(PROCESS_NAME + "is not set in the command line or config.properties file.");
-                // operation and other process params are specified through properties
-                validateConfigProperties(config);
-                runner = new ProcessRunner();
-                runner.setName(config.getString(Config.OPERATION));
-                runner.setConfigOverrideMap(argMap);
-            } else {
-                // process DynaBean name specified.
-                runner = ProcessConfig.getProcessInstance(processName);
-                runner.getConfigOverrideMap().putAll(argMap);
-            }
+        // get a controller instance to load the properties except for the
+        // runtime properties stored in XXX_lastRun.properties file.
+        Controller controller = Controller.getInstance("", true, null);
+        logger.info(Messages.getString("Process.initializingEngine")); //$NON-NLS-1$
+        Config config = controller.getConfig();
         
-                
+        // load parameter overrides (from command line or caller context)
+        logger.info(Messages.getString("Process.loadingParameters")); //$NON-NLS-1$
+        config.loadParameterOverrides(argMap);
+        String processName = config.getString(PROCESS_NAME);
+        logger.debug("process name is " + processName);
+        
+        ProcessRunner runner;
+        if (processName == null || processName.isEmpty()) {
+            logger.info(PROCESS_NAME + "is not set in the command line or config.properties file.");
+            // operation and other process params are specified through properties
+            validateConfigProperties(config);
+            runner = new ProcessRunner();
+            runner.setName(config.getString(Config.OPERATION));
+            runner.setConfigOverrideMap(argMap);
+        } else {
+            // process DynaBean name specified.
+            runner = ProcessConfig.getProcessInstance(processName);
+            runner.getConfigOverrideMap().putAll(argMap);
+        }
         return runner;
     }
 
