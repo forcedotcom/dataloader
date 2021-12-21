@@ -105,13 +105,8 @@ public abstract class TestBase {
         TEST_STATUS_DIR = TEST_FILES_DIR + File.separator + "status";
         DEFAULT_ACCOUNT_EXT_ID_FIELD = getProperty("test.account.extid");
         
-        try {
-            String logConfFilePath = Paths.get(getTestConfDir(), Controller.LOG_CONF_DEFAULT).toString();
-            System.setProperty(Controller.SYS_PROP_LOG_CONFIG_FILE, logConfFilePath);
-            Controller.initLog();
-        } catch (ControllerInitializationException ex) {
-            System.out.println(ex.getMessage());
-        }
+        String logConfFilePath = Paths.get(getTestConfDir(), Controller.LOG_CONF_DEFAULT).toString();
+        System.setProperty(Controller.SYS_PROP_LOG_CONFIG_FILE, logConfFilePath);
         logger = LogManager.getLogger(TestBase.class);
     }
 
