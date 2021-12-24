@@ -346,7 +346,11 @@ public class ProcessRunner implements InitializingBean, Runnable {
 
         for (String propName : PROP_NAME_ARRAY) {
             String propVal = config.getString(propName);
-            if (propVal == null || propVal.isEmpty()) {
+            if (propName.equals(Config.PASSWORD) && (propVal == null || propVal.isBlank())) {
+                // OAuth access token must be specified if password is not specified
+                propVal = config.getString(Config.OAUTH_ACCESSTOKEN);
+            }
+            if (propVal == null || propVal.isBlank()) {
                 logger.fatal(Messages.getFormattedString("Config.errorNoRequiredParameter", propName));
                 throw new ParameterLoadException(Messages.getFormattedString("Config.errorNoRequiredParameter", propName));
             }
