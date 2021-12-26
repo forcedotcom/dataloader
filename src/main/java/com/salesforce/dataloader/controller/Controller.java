@@ -57,12 +57,15 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.CodeSource;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -536,7 +539,7 @@ public class Controller {
         }
         
         if (configDir == null || configDir.isEmpty()) {
-            configDir = Controller.CONFIG_DIR_DEFAULT_VALUE;
+            configDir = getDefaultConfigDir();
         }
         System.setProperty(CONFIG_DIR_PROP, configDir);
         // initialize logger
@@ -551,11 +554,41 @@ public class Controller {
         String configDir = System.getProperty(CONFIG_DIR_PROP);
         if (configDir == null || configDir.isEmpty()) {
             System.err.println("salesforce.config.dir not initialized. Using default config directory");
-            configDir = Controller.CONFIG_DIR_DEFAULT_VALUE;
+            configDir = getDefaultConfigDir();
         }
         return configDir;
     }
-
+    
+    private static String getDefaultConfigDir() {
+        return getDirContainingClassJar(Controller.class) 
+                + "/" 
+                + Controller.CONFIG_DIR_DEFAULT_VALUE;
+    }
+    
+    public static String getDirContainingClassJar(Class aClass) {
+        CodeSource codeSource = aClass.getProtectionDomain().getCodeSource();
+    
+        File jarFile = null;
+    
+        if (codeSource != null && codeSource.getLocation() != null) {
+            try {
+                jarFile = new File(codeSource.getLocation().toURI());
+            } catch (URISyntaxException e) {
+                return null;
+            }
+        } else {
+          String path = aClass.getResource(aClass.getSimpleName() + ".class").getPath();
+          String jarFilePath = path.substring(path.indexOf(":") + 1, path.indexOf("!"));
+          try {
+              jarFilePath = URLDecoder.decode(jarFilePath, "UTF-8");
+          } catch (UnsupportedEncodingException e) {
+              // fail silently;
+          }
+          jarFile = new File(jarFilePath);
+        }
+        return jarFile.getParentFile().getAbsolutePath();
+    }
+    
     public PartnerClient getPartnerClient() {
         if (this.partnerClient == null) this.partnerClient = new PartnerClient(this);
         return this.partnerClient;

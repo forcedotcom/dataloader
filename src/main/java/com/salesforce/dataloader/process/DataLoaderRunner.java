@@ -245,7 +245,7 @@ public class DataLoaderRunner extends Thread {
     }
     
     private static String getSWTDir() {
-        String path = getDirContainingClassJar(DataLoaderRunner.class);
+        String path = Controller.getDirContainingClassJar(DataLoaderRunner.class);
         if (path == null) {
             path = ".";
         }
@@ -286,28 +286,4 @@ public class DataLoaderRunner extends Thread {
         }
         return files[0].getPath();
     }
-    
-    private static String getDirContainingClassJar(Class aClass) {
-        CodeSource codeSource = aClass.getProtectionDomain().getCodeSource();
-    
-        File jarFile = null;
-    
-        if (codeSource != null && codeSource.getLocation() != null) {
-            try {
-                jarFile = new File(codeSource.getLocation().toURI());
-            } catch (URISyntaxException e) {
-                return null;
-            }
-        } else {
-          String path = DataLoaderRunner.class.getResource(aClass.getSimpleName() + ".class").getPath();
-          String jarFilePath = path.substring(path.indexOf(":") + 1, path.indexOf("!"));
-          try {
-              jarFilePath = URLDecoder.decode(jarFilePath, "UTF-8");
-          } catch (UnsupportedEncodingException e) {
-              // fail silently;
-          }
-          jarFile = new File(jarFilePath);
-        }
-        return jarFile.getParentFile().getAbsolutePath();
-      }
 }
