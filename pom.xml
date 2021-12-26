@@ -19,7 +19,7 @@
     <java.compile.version>11</java.compile.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <config.additional.properties></config.additional.properties>
-    <swt.version>4.21</swt.version>
+    <swt.version>4.22</swt.version>
 
     <!-- test properties -->
     <test.endpoint>http://testendpoint</test.endpoint>
