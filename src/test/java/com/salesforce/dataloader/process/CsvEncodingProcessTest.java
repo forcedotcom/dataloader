@@ -90,20 +90,12 @@ public class CsvEncodingProcessTest extends ProcessTestBase {
     @Before
     public void overrideSystemFileEncoding() throws Exception {
         originalFileEncoding = System.getProperty(FILE_ENCODING_SYSTEM_PROPERTY);
-        setSystemFileEncoding(fileEncoding);
+        System.setProperty(FILE_ENCODING_SYSTEM_PROPERTY, this.fileEncoding);
     }
 
     @After
     public void restoreOriginalSystemFileEncoding() throws Exception {
-        setSystemFileEncoding(originalFileEncoding);
-    }
-
-    private void setSystemFileEncoding(String encoding) throws NoSuchFieldException, IllegalAccessException {
-        System.setProperty(FILE_ENCODING_SYSTEM_PROPERTY, encoding);
-        // following is necessary for new value to be properly read because default charset is cached
-        Field charset = Charset.class.getDeclaredField("defaultCharset");
-        charset.setAccessible(true);
-        charset.set(null, null);
+        System.setProperty(FILE_ENCODING_SYSTEM_PROPERTY, this.originalFileEncoding);
     }
 
     @Test
