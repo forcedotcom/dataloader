@@ -1,4 +1,4 @@
 #NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
-#Sun Nov 14 09:39:10 PST 2021
-swtlinux_x86_64-4.21.jar>=
-swtlinux_x86_64-4.21.pom>=
+#Sun Dec 26 11:56:49 PST 2021
+swtlinux_x86_64-4.22.jar>=
+swtlinux_x86_64-4.22.pom>=
