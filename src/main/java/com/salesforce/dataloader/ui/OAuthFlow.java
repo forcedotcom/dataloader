@@ -77,7 +77,7 @@ public abstract class OAuthFlow extends Dialog {
     public boolean open() throws UnsupportedEncodingException {
         // Create the dialog window
         Display display = getParent().getDisplay();
-        Shell shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.FILL);
+        Shell shell = new Shell(getParent(), SWT.RESIZE | SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.FILL);
         Grid12 grid = new Grid12(shell, 32, 600);
 
         // Create the web browser
