@@ -762,13 +762,26 @@ public class Config {
 
     }
 
+    private static final String DECRYPTED_SUFFIX = ".decrypted";
     private void decryptPasswordProperty(Map values, String propertyName) throws ConfigInitializationException {
         Map<String, String> propMap = values;
         // initialize encryption
         if (propMap.containsKey(propertyName)) {
+            if (propMap.containsKey(propertyName + DECRYPTED_SUFFIX)) {
+                String decryptedPropValue = propMap.get(propertyName + DECRYPTED_SUFFIX);
+                String propValueToBeDecrypted = propMap.get(propertyName);
+                if (decryptedPropValue != null 
+                        && propValueToBeDecrypted != null
+                        && decryptedPropValue.equals(propValueToBeDecrypted)) {
+                    return; // do not decrypt an already decrypted value
+                }
+            }
             String propValue = decryptProperty(encrypter, propMap, propertyName, isBatchMode());
             if (propValue == null) propValue = "";
             propMap.put(propertyName, propValue);
+            
+            // cache decrypted value
+            propMap.put(propertyName + DECRYPTED_SUFFIX, propValue);
         }
     }
 
