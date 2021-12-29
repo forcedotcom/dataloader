@@ -67,6 +67,7 @@ import java.util.TimeZone;
  */
 public class Config {
     private static Logger logger = LogManager.getLogger(Config.class);
+    private static final String DECRYPTED_SUFFIX = ".decrypted";
 
     /**
      * Default values for specific parameters
@@ -762,7 +763,6 @@ public class Config {
 
     }
 
-    private static final String DECRYPTED_SUFFIX = ".decrypted";
     private void decryptPasswordProperty(Map values, String propertyName) throws ConfigInitializationException {
         Map<String, String> propMap = values;
         // initialize encryption
@@ -924,6 +924,7 @@ public class Config {
         putValue(OAUTH_REFRESHTOKEN, "");
         
         skipSaveOfUnsupportedProperties();
+        skipSaveOfDecryptedProperties();
 
         FileOutputStream out = null;
         try {
@@ -947,6 +948,13 @@ public class Config {
     private void skipSaveOfUnsupportedProperties() {
         // do not save a value for enabling Bulk V2 
         this.properties.remove(BULKV2_API_ENABLED);
+    }
+    
+    private void skipSaveOfDecryptedProperties() {
+        this.properties.remove(PASSWORD + DECRYPTED_SUFFIX);
+        this.properties.remove(PROXY_PASSWORD + DECRYPTED_SUFFIX);
+        this.properties.remove(OAUTH_ACCESSTOKEN + DECRYPTED_SUFFIX);
+        this.properties.remove(OAUTH_REFRESHTOKEN + DECRYPTED_SUFFIX);
     }
     
     /**
