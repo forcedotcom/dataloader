@@ -206,8 +206,11 @@ updateSWT("swtmac_x86_64", "Mac OSX (64 bit version)", rootdir, version, forceUp
 # Mac ARM
 updateSWT("swtmac_aarch64", "Mac OSX (64 bit version for Arm64/AArch64)", rootdir, version, forceUpdate)
 
-# Linux
+# Linux x86
 updateSWT("swtlinux_x86_64", "Linux (64 bit version)", rootdir, version, forceUpdate)
+
+# Linux ARM
+updateSWT("swtlinux_aarch64", "Linux (64 bit version for AArch64)", rootdir, version, forceUpdate)
 
 if os.path.isdir(LOCAL_REPO_SAVE_DIR):
     shutil.rmtree(LOCAL_REPO_SAVE_DIR)
