@@ -57,14 +57,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.salesforce.dataloader.client.HttpClientTransport;
+import com.salesforce.dataloader.config.Config;
 
 public class DataLoaderRunner extends Thread {
 
-    private static final String UI = "ui";
-    private static final String RUN_MODE = "run.mode";
-    private static final String RUN_MODE_BATCH = "batch";
-    private static final String GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
-    private static final String SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
     private static final String LOCAL_SWT_DIR = "target/";
     private static final String PATH_SEPARATOR = System.getProperty("path.separator");
     private static final String FILE_SEPARATOR = System.getProperty("file.separator");
@@ -73,8 +69,8 @@ public class DataLoaderRunner extends Thread {
     private static Logger logger;
 
     private static boolean isBatchMode() {        
-        return argNameValuePair.containsKey(RUN_MODE) ?
-                RUN_MODE_BATCH.equalsIgnoreCase(argNameValuePair.get(RUN_MODE)) : false;
+        return argNameValuePair.containsKey(Config.CLI_OPTION_RUN_MODE) ?
+                Config.RUN_MODE_BATCH_VAL.equalsIgnoreCase(argNameValuePair.get(Config.CLI_OPTION_RUN_MODE)) : false;
     }
     
     public static boolean doUseGMTForDateFieldValue() {
@@ -82,8 +78,8 @@ public class DataLoaderRunner extends Thread {
     }
     
     private static void setUseGMTForDateFieldValue() {
-        if (argNameValuePair.containsKey(GMT_FOR_DATE_FIELD_VALUE)) {
-            if ("false".equalsIgnoreCase(argNameValuePair.get(GMT_FOR_DATE_FIELD_VALUE))) {
+        if (argNameValuePair.containsKey(Config.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE)) {
+            if ("false".equalsIgnoreCase(argNameValuePair.get(Config.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE))) {
                 useGMTForDateFieldValue = false;
             }
         }
@@ -99,18 +95,18 @@ public class DataLoaderRunner extends Thread {
     }
 
     public static void main(String[] args) {
-        Controller.initializeConfigDirAndLog(args);
-        Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
         argNameValuePair = Controller.getArgMapFromArgArray(args);
+        Controller.initializeConfigDirAndLog(argNameValuePair);
+        Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
         logger = LogManager.getLogger(DataLoaderRunner.class);
         setUseGMTForDateFieldValue();
         if (isBatchMode()) {
             ProcessRunner.runBatchMode(args);
-        } else if (argNameValuePair.containsKey(SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
-                && "true".equalsIgnoreCase(argNameValuePair.get(SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
+        } else if (argNameValuePair.containsKey(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
+                && "true".equalsIgnoreCase(argNameValuePair.get(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
             /* Run in the UI mode, get the controller instance with batchMode == false */
             try {
-                Controller controller = Controller.getInstance(UI, false, args);
+                Controller controller = Controller.getInstance(Config.RUN_MODE_UI_VAL, false, args);
                 controller.createAndShowGUI();
             } catch (ControllerInitializationException e) {
                 UIUtils.errorMessageBox(new Shell(new Display()), e);
@@ -182,8 +178,8 @@ public class DataLoaderRunner extends Thread {
         }
         
         // add the argument to indicate that JAVA_LIB_PATH has the directory containing SWT native libraries
-        jvmArgs.add(SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
-        logger.debug("    " + SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
+        jvmArgs.add(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
+        logger.debug("    " + Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
         ProcessBuilder processBuilder = new ProcessBuilder(jvmArgs);
         processBuilder.redirectErrorStream(true);
         try {

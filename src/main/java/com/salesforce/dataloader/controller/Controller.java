@@ -92,8 +92,6 @@ public class Controller {
     /**
      * the system property name used to determine the config directory
      */
-    public static final String CONFIG_DIR_PROP = "salesforce.config.dir";
-    public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
 
     public static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
     public static final String DEFAULT_CONFIG_FILE = "defaultConfig.properties"; //$NON-NLS-1$
@@ -125,10 +123,10 @@ public class Controller {
     private static Logger logger;
     private String appPath;
 
-    private Controller(String name, boolean isBatchMode, String[] args) throws ControllerInitializationException {
+    private Controller(String name, boolean isBatchMode, Map<String, String> argMap) throws ControllerInitializationException {
         // if name is passed to controller, use it to create a unique run file name
         try {
-            initConfig(name, isBatchMode, args);
+            initConfig(name, isBatchMode, argMap);
         } catch (Exception e) {
             logger.error("Exception happened in initConfig:", e);
             throw e;
@@ -150,8 +148,8 @@ public class Controller {
     }
 
     private static String getConfigDirFromArgMap(Map<String, String> argMap) {
-        return argMap.containsKey(CONFIG_DIR_PROP) ?
-                argMap.get(CONFIG_DIR_PROP) : null;
+        return argMap.containsKey(Config.CLI_OPTION_CONFIG_DIR_PROP) ?
+                argMap.get(Config.CLI_OPTION_CONFIG_DIR_PROP) : null;
     }
 
     private static synchronized void initStaticVariable() throws ControllerInitializationException {
@@ -287,9 +285,13 @@ public class Controller {
     }
 
     public static synchronized Controller getInstance(String name, boolean isBatchMode, String[] args) throws ControllerInitializationException {
-        return new Controller(name, isBatchMode, args);
+        return getInstance(name, isBatchMode, getArgMapFromArgArray(args));
     }
 
+    public static synchronized Controller getInstance(String name, boolean isBatchMode, Map<String, String> argMap) throws ControllerInitializationException {
+        return new Controller(name, isBatchMode, argMap);
+    }
+    
     public synchronized boolean saveConfig() {
         try {
             config.save();
@@ -326,73 +328,22 @@ public class Controller {
         return isSuccessful;
     }
 
-    /* Append the osAppendix to the binPath starting at position endIdx */
-
-    private static File getInstalledConfigDir(String binPath, int endIdx, String osAppendix) {
-        if (endIdx != -1) {
-            binPath = binPath.substring(0, endIdx);
-        }
-        return new File(binPath, osAppendix);
-    }
-
-    /**
-     * Returns default Dataloader installed configuration directory
-     *
-     * @return Default Dataloader configuration directory
-     */
-    private static File getInstalledConfigDir() {
-
-        URI uri;
-        String path;
-        try {
-            // This return the jar's location
-            // The current recommendation (with JDK 1.7+) is to convert URL → URI → Path.
-            uri = Controller.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-            path = Paths.get(uri).toFile().getAbsolutePath();
-            logger.debug("The installation binary location is: " + path);
-        } catch (URISyntaxException e) {
-            logger.error("Can find binary's location", e);
-            throw new RuntimeException(e);
-        }
-
-        File dir;
-        switch (OS_TYPE) {
-            case WINDOWS: {
-                //For windows,﻿filepath is﻿C:\Program Files\salesforce.com\Data Loader\dataloader-xxx-uber.jar
-                dir = getInstalledConfigDir(path, path.lastIndexOf(File.separator), "conf");
-                break;
-            }
-            case MACOSX: {
-                // For mac, ﻿filepath is /Applications/Data Loader.app/Contents/Java/com/force/dataloader/xx.0.0/***.jar
-                dir = getInstalledConfigDir(path, path.lastIndexOf("/Contents"), "Contents/Resources/conf");
-                break;
-            }
-            default:
-            case LINUX: {
-                dir = getInstalledConfigDir(path, path.lastIndexOf(File.separator), "conf");
-                break;
-            }
-        }
-        logger.info("The installation configuration location is: " + dir.getAbsolutePath());
-        return dir;
-    }
-
     /**
      * Get the current config.properties and load it into the config bean.
      */
-    protected void initConfig(String name, boolean isBatchMode, String[] args) throws ControllerInitializationException {
-        initializeConfigDirAndLog(args);
+    protected void initConfig(String name, boolean isBatchMode, Map<String, String> argMap) throws ControllerInitializationException {
+        initializeConfigDirAndLog(argMap);
         String configDirPath = getConfigDir();
         File configDir;
 
         if (configDirPath == null) {
             // CONFIG_DIR_PROP param is NOT provided through command line or system property - use user's config dir
-            configDir = Paths.get(System.getProperty("user.dir"), CONFIG_DIR_DEFAULT_VALUE).toFile();
-            logger.debug(String.format("OS: %s, '%s' NOT provided, setting config dir to : %s", OS_TYPE, CONFIG_DIR_PROP, configDir));
+            configDir = Paths.get(getConfigDir(), Config.CONFIG_DIR_DEFAULT_VALUE).toFile();
+            logger.debug(String.format("OS: %s, '%s' NOT provided, setting config dir to : %s", OS_TYPE, Config.CLI_OPTION_CONFIG_DIR_PROP, configDir));
         } else {
             // CONFIG_DIR_PROP is provided - use provided config dir
             configDir = new File(configDirPath);
-            logger.debug(String.format("OS: %s, '%s' provided, setting config dir to : %s", OS_TYPE, CONFIG_DIR_PROP, configDir));
+            logger.debug(String.format("OS: %s, '%s' provided, setting config dir to : %s", OS_TYPE, Config.CLI_OPTION_CONFIG_DIR_PROP, configDir));
         }
 
         // Create dir if it doesn't exist
@@ -411,7 +362,7 @@ public class Controller {
         logger.info("Looking for file in config path: " + configPath);
         if (!configFile.exists()) {
 
-            File defaultConfigFile = new File(getInstalledConfigDir(), DEFAULT_CONFIG_FILE);
+            File defaultConfigFile = new File(configDir, DEFAULT_CONFIG_FILE);
             logger.debug("Looking for file in config file " + defaultConfigFile.getAbsolutePath());
             // If default config exists, copy the default to user config
             // If doesn't exist, create a blank user config
@@ -453,6 +404,7 @@ public class Controller {
             config.setBatchMode(isBatchMode);
             logger.info(Messages.getMessage(getClass(), "configInit")); //$NON-NLS-1$
             HttpClientTransport.setReuseConnection(config.getBoolean(Config.REUSE_CLIENT_CONNECTION));
+            config.loadParameterOverrides(argMap);
         } catch (IOException e) {
             throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorConfigLoad", configPath), e);
         } catch (ProcessInitializationException e) {
@@ -526,22 +478,18 @@ public class Controller {
         logger.info(Messages.getString("Controller.logInit")); //$NON-NLS-1$
         Controller.isLogInitialized = true;
     }
-
-    public static void initializeConfigDirAndLog(String[] args) {
-        initializeConfigDirAndLog(getArgMapFromArgArray(args));
-    }
     
     public static void initializeConfigDirAndLog(Map<String, String> argMap) {
         String configDir = getConfigDirFromArgMap(argMap);
         
         if (configDir == null || configDir.isEmpty()) {
-            configDir = System.getProperty(CONFIG_DIR_PROP);
+            configDir = System.getProperty(Config.CLI_OPTION_CONFIG_DIR_PROP);
         }
         
         if (configDir == null || configDir.isEmpty()) {
             configDir = getDefaultConfigDir();
         }
-        System.setProperty(CONFIG_DIR_PROP, configDir);
+        System.setProperty(Config.CLI_OPTION_CONFIG_DIR_PROP, configDir);
         // initialize logger
         try {
             initLog();
@@ -551,7 +499,7 @@ public class Controller {
     }
     
     public static String getConfigDir() {
-        String configDir = System.getProperty(CONFIG_DIR_PROP);
+        String configDir = System.getProperty(Config.CLI_OPTION_CONFIG_DIR_PROP);
         if (configDir == null || configDir.isEmpty()) {
             System.err.println("salesforce.config.dir not initialized. Using default config directory");
             configDir = getDefaultConfigDir();
@@ -562,7 +510,7 @@ public class Controller {
     private static String getDefaultConfigDir() {
         return getDirContainingClassJar(Controller.class) 
                 + "/" 
-                + Controller.CONFIG_DIR_DEFAULT_VALUE;
+                + Config.CONFIG_DIR_DEFAULT_VALUE;
     }
     
     public static String getDirContainingClassJar(Class aClass) {
