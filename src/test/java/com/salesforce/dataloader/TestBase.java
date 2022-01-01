@@ -173,12 +173,12 @@ public abstract class TestBase {
 
     protected void setupController() {
         // configure the Controller to point to our testing config
-        if (!System.getProperties().contains(Controller.CONFIG_DIR_PROP))
-            System.setProperty(Controller.CONFIG_DIR_PROP, getTestConfDir());
+        if (!System.getProperties().contains(Config.CLI_OPTION_CONFIG_DIR_PROP))
+            System.setProperty(Config.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
 
         if (controller == null) {
             try {
-                controller = Controller.getInstance(testName.getMethodName(), true, null);
+                controller = Controller.getInstance(testName.getMethodName(), true, (String[])null);
             } catch (ControllerInitializationException e) {
                 fail("While initializing controller instance", e);
             }
