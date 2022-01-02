@@ -145,12 +145,11 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
             throws ProcessInitializationException, DataAccessObjectException, ConnectionException, IOException {
 
         if (argMap == null) argMap = getTestConfig();
-
-        final ProcessRunner runner = ProcessRunner.getInstance(argMap);
-        runner.setName(this.baseName);
+        argMap.put(ProcessRunner.PROCESS_THREAD_NAME, this.baseName);
 
         final TestProgressMontitor monitor = new TestProgressMontitor();
-        runner.run(monitor);
+        final ProcessRunner runner = ProcessRunner.runBatchMode(argMap, monitor);
+
         Controller controller = runner.getController();
 
         // verify process completed as expected
