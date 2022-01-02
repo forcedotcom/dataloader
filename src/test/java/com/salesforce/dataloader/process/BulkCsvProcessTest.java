@@ -95,11 +95,11 @@ public class BulkCsvProcessTest extends ProcessTestBase {
     }
 
     private TestProgressMontitor runProcess(Map<String, String> argMap, int numInserts, int numUpdates, int numFailures, boolean emptyId) throws Exception {
-        final ProcessRunner runner = ProcessRunner.getInstance(argMap);
-        runner.setName(baseName);
 
+        argMap.put(ProcessRunner.PROCESS_THREAD_NAME, baseName);
         final TestProgressMontitor monitor = new TestProgressMontitor();
-        runner.run(monitor);
+        final ProcessRunner runner = ProcessRunner.runBatchMode(argMap, monitor);
+
         Controller controller = runner.getController();
 
         assertTrue("Process failed", monitor.isSuccess());

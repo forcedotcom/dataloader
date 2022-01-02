@@ -75,17 +75,18 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ProcessRunner implements InitializingBean, Runnable {
+public class ProcessRunner implements InitializingBean {
 
     /**
-     * Comment for <code>PROCESS_NAME</code>
+     * Comment for <code>DYNABEAN_ID</code>
      */
-    public static final String PROCESS_NAME = "process.name";
+    public static final String DYNABEAN_ID = "process.name";
+    public static final String PROCESS_THREAD_NAME = "process.thread.name";
 
     //logger
     private static Logger logger;
     
-    private String name; // name of the loaded process DynaBean
+    private String name = null; // name of the loaded process DynaBean
 
     // config override parameters
     private final Map<String, String> configOverrideMap = new HashMap<String, String>();
@@ -102,24 +103,18 @@ public class ProcessRunner implements InitializingBean, Runnable {
             Config.ENTITY,
     };
     
-    static {
-
-    }
-    
     /**
      * Enforce use of factory method - getInstance() by hiding the constructor
      */
     protected ProcessRunner() {
     }
 
-    @Override
-    public synchronized void run() {
-        run(NihilistProgressAdapter.get());
-    }
-
     public synchronized void run(ILoaderProgress monitor) {
+        if (monitor == null) {
+            monitor = NihilistProgressAdapter.get();
+        }
         final String oldName = Thread.currentThread().getName();
-        final String name = getName();
+        String name = getName();
 
         if (name != null && !name.isBlank()) {
             setThreadName(name);
@@ -136,6 +131,12 @@ public class ProcessRunner implements InitializingBean, Runnable {
             Config config = controller.getConfig();
             // Make sure that the required properties are specified.
             validateConfigProperties(config);
+            if (name == null || name.isBlank()) {
+                // this can occur only if "process.name" is not specified as a  command line option
+                name = config.getString("process.operation");
+                this.setName(name);
+                setThreadName(name);
+            };
 
             // create files for status output unless it's an extract and status output is disabled
             if (!config.getOperationInfo().isExtraction() || config.getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT)) {
@@ -230,24 +231,7 @@ public class ProcessRunner implements InitializingBean, Runnable {
         }
     }
 
-    private static boolean validateCmdLineArgs (String[] args) {
-
-        for (int i = 0; i < args.length; i++) {
-            String arg = args[i];
-            if ("-help".equals(arg) ) {
-                System.out.println(Messages.getString("Process.help1"));
-                System.out.println(Messages.getString("Process.help2"));
-                System.out.println(Messages.getString("Process.help3"));
-                System.out.println(Messages.getString("Process.help4"));
-                System.out.println(Messages.getString("Process.help5"));
-                System.out.println(Messages.getString("Process.help6"));
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static void topLevelError(String message, Throwable err) {
+    private static void logErrorAndExitProcess(String message, Throwable err) {
         if (logger == null) {
             System.err.println(message);
         } else {
@@ -257,20 +241,26 @@ public class ProcessRunner implements InitializingBean, Runnable {
     }
     
     public static void runBatchMode(String[] args) {
+        Map<String,String> argMap = Controller.getArgMapFromArgArray(args);
+        try {
+            runBatchMode(argMap, null);
+        } catch (Throwable t) {
+            logErrorAndExitProcess("Unable to run process", t);
+        }
+    }
+    
+    public static ProcessRunner runBatchMode(Map<String, String> argMap, ILoaderProgress monitor) {
         ProcessRunner runner = null;
         try {
             // create the process
-            runner = ProcessRunner.getInstance(args);
-            if (runner == null) topLevelError("Process runner is null", new NullPointerException());
+            runner = ProcessRunner.getInstance(argMap);
+            if (runner == null) logErrorAndExitProcess("Process runner is null", new NullPointerException());
         } catch (Throwable t) {
-            topLevelError("Failed to create process", t);
+            logErrorAndExitProcess("Failed to create process", t);
         }
-        try {
-            // run the process
-            runner.run();
-        } catch (Throwable e) {
-            topLevelError("Unable to run process " + runner.getName(), e);
-        }
+        // run the process
+        runner.run(monitor);
+        return runner;
     }
 
     /**
@@ -279,33 +269,31 @@ public class ProcessRunner implements InitializingBean, Runnable {
      * @param args String set of name=value pairs of arguments for the runner
      * @throws ProcessInitializationException
      */
-    private static ProcessRunner getInstance(String[] args) throws ProcessInitializationException {
-        if(!validateCmdLineArgs(args)) {
-            return null;
-        }
-        Map<String,String> argMap = Controller.getArgMapFromArgArray(args);
-        return getInstance(argMap);
-    }
 
     /**
      * @param argMap
      * @return instance of ProcessRunner
      * @throws ProcessInitializationException
      */
-    public static synchronized ProcessRunner getInstance(Map<String, String> argMap) throws ProcessInitializationException {
+    private static synchronized ProcessRunner getInstance(Map<String, String> argMap) throws ProcessInitializationException {
         logger = LogManager.getLogger(ProcessRunner.class);
         logger.info(Messages.getString("Process.initializingEngine")); //$NON-NLS-1$
-        String dynaBeanID = argMap.get(PROCESS_NAME);        
+        String dynaBeanID = argMap.get(DYNABEAN_ID);
         ProcessRunner runner;
         if (dynaBeanID == null || dynaBeanID.isEmpty()) {
             // operation and other process params are specified through config.properties
-            logger.info(PROCESS_NAME 
+            logger.info(DYNABEAN_ID 
                     + "is not specified in the command line. Loading the process properties from config.properties.");
             runner = new ProcessRunner();
+            
+            if (argMap.containsKey(PROCESS_THREAD_NAME)) {
+                runner.setName(argMap.get(PROCESS_THREAD_NAME));
+                argMap.remove(PROCESS_THREAD_NAME); // avoid this option from being considered as a property
+            }
         } else {
             // process name specified in the command line arg. 
             // Load its DynaBean through process-conf.xml
-            logger.info(PROCESS_NAME 
+            logger.info(DYNABEAN_ID 
                         + "is specified in the command line. Loading DynaBean with id " 
                         + dynaBeanID 
                         + " from process-conf.xml located in directory "
