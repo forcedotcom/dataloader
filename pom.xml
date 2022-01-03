@@ -585,28 +585,6 @@
               <excludes>
                 <!-- INTEGRATION UNIT TESTS: revise to remove works in progress -->
                 <exclude>**/integration/**</exclude>
-                <exclude>**/action/**</exclude>
-                <exclude>**/client/**</exclude>
-                <exclude>**/dao/**</exclude>
-                <exclude>**/dyna/**</exclude>
-                <exclude>**/EncryptionUtil/**</exclude>
-                <exclude>**/mapping/**</exclude>
-                <exclude>**/model/**</exclude>
-                <exclude>**/ui/**</exclude>
-                <exclude>**/process.BulkCsvProcessTest/**</exclude>
-                <exclude>**/process.CsvEncodingProcessTest/**</exclude>
-                <exclude>**/process.CsvExtractAggregateQueryProcessTest/**</exclude>
-                <exclude>**/process.CsvExtractAllProcessTest/**</exclude>
-                <exclude>**/process.CsvExtractProcessTest/**</exclude>
-                <exclude>**/process.CsvHardDeleteTest/**</exclude>
-                <exclude>**/process.CsvProcessAttachmentTest/**</exclude>
-                <exclude>**/process.CsvProcessTest/**</exclude>
-                <exclude>**/process.CsvProcessWithOffsetTest/**</exclude>
-                <exclude>**/process.CsvUpsertProcessTest/**</exclude>
-                <exclude>**/process.DatabaseProcessTest</exclude>
-                <exclude>**/process.DateProcessTest/**</exclude>
-                <exclude>**/process.NAProcessTest/**</exclude>
-                <exclude>**/dao.database/**</exclude>
               </excludes>
             </configuration>
           </plugin>
