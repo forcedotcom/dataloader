@@ -30,11 +30,19 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.salesforce.dataloader.process.DataLoaderRunner;
 
 
 public class DateOnlyCalendar extends GregorianCalendar {
     static final TimeZone GMT_TZ = TimeZone.getTimeZone("GMT");
+    static final Logger logger;
+    
+    static {
+        logger = LogManager.getLogger(DateOnlyCalendar.class);
+    }
 
     public DateOnlyCalendar() {
         super();
@@ -47,6 +55,12 @@ public class DateOnlyCalendar extends GregorianCalendar {
 
     public void setTimeInMillis(long specifiedTimeInMilliSeconds) {
         TimeZone myTimeZone = super.getTimeZone();
+        
+        if (myTimeZone == null) {
+            logger.info("timezone is null");
+        } else {
+            logger.info("Timezone is " + myTimeZone.getDisplayName());
+        }
         Calendar cal = Calendar.getInstance(myTimeZone);
         cal.setTimeInMillis(specifiedTimeInMilliSeconds);
 

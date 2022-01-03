@@ -43,6 +43,7 @@ run_mvn() {
   echo "removing JndiLookup.class from ${log4j_version_num}"
   zip -q -d ${HOME}/.m2/repository/org/apache/logging/log4j/log4j-core/${log4j_version_num}/log4j-core-${log4j_version_num}.jar org/apache/logging/log4j/core/lookup/JndiLookup.class
   zip -q -d ${HOME}/.m2/repository/org/apache/logging/log4j/log4j-core/${log4j_version_num}/log4j-core-${log4j_version_num}.jar org/apache/logging/log4j/core/appender/mom/JmsAppender.class
+  zip -q -d ${HOME}/.m2/repository/org/apache/logging/log4j/log4j-core/${log4j_version_num}/log4j-core-${log4j_version_num}.jar org/apache/logging/log4j/core/appender/db/jdbc/JdbcAppender.class
 
   # build uber jar
   mvn clean package -DskipTests 
