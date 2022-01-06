@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>53.0.3</version>
+  <version>54.0.0</version>
   <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -13,7 +13,7 @@
   </organization>
 
   <properties>
-    <force.wsc.version>53.0.0</force.wsc.version>
+    <force.wsc.version>54.0.0</force.wsc.version>
     <force.partner.api.version>${force.wsc.version}</force.partner.api.version>
     <build.year>2021</build.year>
     <java.compile.version>11</java.compile.version>
