@@ -662,6 +662,7 @@ public class DateConverterTest {
         result = (Calendar) USTZDateOnlyConverter.convert(null, "6/22/2012");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(22, result.get(Calendar.DAY_OF_MONTH));
+        DataLoaderRunner.setUseGMTForDateFieldValue(false);
 
         result = (Calendar) GMTTZDateOnlyConverter.convert(null, "6/22/2012");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
