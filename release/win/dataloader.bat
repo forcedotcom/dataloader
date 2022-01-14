@@ -54,7 +54,7 @@ IF NOT "%DATALOADER_JAVA_HOME%" == "" (
 
 :Run
     
-    java -D"org.eclipse.swt.browser.IEVersion=12001" -jar %DATALOADER_UBER_JAR_NAME% %*
+    java -D"org.eclipse.swt.browser.IEVersion=11001" -jar %DATALOADER_UBER_JAR_NAME% %*
     goto SuccessExit
 
 :SuccessExit
