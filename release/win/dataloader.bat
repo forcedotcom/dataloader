@@ -53,8 +53,20 @@ IF NOT "%DATALOADER_JAVA_HOME%" == "" (
     )
 
 :Run
-    
-    java -D"org.eclipse.swt.browser.IEVersion=12001" -jar %DATALOADER_UBER_JAR_NAME% %*
+
+:loop
+    IF NOT "%1"=="" (
+        IF "%1"=="-skipieversion" (
+            set SKIP_IE_VERSION=true
+        )
+        SHIFT
+        goto :loop
+    )
+    IF "%SKIP_IE_VERSION%"=="" (
+        java -D"org.eclipse.swt.browser.IEVersion=12001" -jar %DATALOADER_UBER_JAR_NAME% %*
+    ) ELSE (
+        java -jar %DATALOADER_UBER_JAR_NAME% %*
+    )
     goto SuccessExit
 
 :SuccessExit

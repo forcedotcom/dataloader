@@ -99,6 +99,9 @@ public class DataLoaderRunner extends Thread {
         Controller.initializeConfigDirAndLog(argNameValuePair);
         Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
         logger = LogManager.getLogger(DataLoaderRunner.class);
+        for (String arg : args) {
+            logger.debug(arg);
+        }
         setUseGMTForDateFieldValue();
         if (isBatchMode()) {
             ProcessRunner.runBatchMode(args);
@@ -155,6 +158,14 @@ public class DataLoaderRunner extends Thread {
         logger.debug("set java.library.path=" + librarypath);
         jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
         
+        if ("win32".equalsIgnoreCase(getOSName())) {
+            String ieVersion = System.getProperty("org.eclipse.swt.browser.IEVersion");
+            if (ieVersion == null) {
+                logger.debug("org.eclipse.swt.browser.IEVersion is not set");
+            } else {
+                logger.debug("org.eclipse.swt.browser.IEVersion is set to " + ieVersion);
+            }
+        }
         // set classpath
         String classpath = System.getProperty("java.class.path");
         if (classpath != null && !classpath.isBlank()) {
