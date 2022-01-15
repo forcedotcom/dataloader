@@ -99,8 +99,10 @@ public class DataLoaderRunner extends Thread {
         Controller.initializeConfigDirAndLog(argNameValuePair);
         Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
         logger = LogManager.getLogger(DataLoaderRunner.class);
-        for (String arg : args) {
-            logger.debug(arg);
+        if (args != null) {
+            for (String arg : args) {
+                logger.debug(arg);
+            }
         }
         setUseGMTForDateFieldValue();
         if (isBatchMode()) {
