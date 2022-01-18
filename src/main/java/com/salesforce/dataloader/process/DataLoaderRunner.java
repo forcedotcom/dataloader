@@ -111,13 +111,11 @@ public class DataLoaderRunner extends Thread {
                 && "true".equalsIgnoreCase(argNameValuePair.get(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
             /* Run in the UI mode, get the controller instance with batchMode == false */
             try {
-                if ("win32".equalsIgnoreCase(getOSName())) {
-                    String ieVersion = System.getProperty("org.eclipse.swt.browser.IEVersion");
-                    if (ieVersion == null) {
-                        logger.debug("org.eclipse.swt.browser.IEVersion not set for UI mode on Windows");
-                    } else {
-                        logger.debug("org.eclipse.swt.browser.IEVersion set to " + ieVersion + " for UI mode on Windows");
-                    }
+                String defaultBrowser = System.getProperty("org.eclipse.swt.browser.DefaultType");
+                if (defaultBrowser == null) {
+                    logger.debug("org.eclipse.swt.browser.DefaultType not set for UI mode on Windows");
+                } else {
+                    logger.debug("org.eclipse.swt.browser.DefaultType set to " + defaultBrowser + " for UI mode on Windows");
                 }
                 Controller controller = Controller.getInstance(Config.RUN_MODE_UI_VAL, false, args);
                 controller.createAndShowGUI();
@@ -166,16 +164,6 @@ public class DataLoaderRunner extends Thread {
         }
         jvmArgs.add("-Djava.library.path=" + librarypath);
         logger.debug("set java.library.path=" + librarypath);
-        
-        if ("win32".equalsIgnoreCase(getOSName())) {
-            String ieVersion = System.getProperty("org.eclipse.swt.browser.IEVersion");
-            if (ieVersion == null) {
-                logger.debug("setting org.eclipse.swt.browser.IEVersion=12001");
-                jvmArgs.add("-Dorg.eclipse.swt.browser.IEVersion=12001");
-            } else {
-                logger.debug("org.eclipse.swt.browser.IEVersion is set to " + ieVersion);
-            }
-        }
         
         // add JVM arguments specified in the command line
         jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
