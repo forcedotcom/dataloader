@@ -3,10 +3,10 @@ if not [%1]==[] goto run
 echo.
 echo Usage: process ^<configuration directory^> ^[batch process bean id^]
 echo.
-echo      configuration directory -- directory that contains configuration files,
+echo      configuration directory -- required -- directory that contains configuration files,
 echo          i.e. config.properties, process-conf.xml, database-conf.xml
 echo.
-echo      batch process bean id -- optional bean id of a batch process bean in process-conf.xml,
+echo      batch process bean id -- optional -- id of a batch process bean in process-conf.xml,
 echo          for example:
 echo.
 echo              process ../myconfigdir AccountInsert
