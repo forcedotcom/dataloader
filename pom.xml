@@ -133,7 +133,7 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>2.0.206</version>
+      <version>2.1.210</version>
       <scope>test</scope>
     </dependency>
 <!-- https://mvnrepository.com/artifact/junit/junit -->
@@ -518,6 +518,13 @@
                     <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${project.version}"/>
                     <replace dir="${basedir}/target/${OSType}/" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
                     <chmod file="${basedir}/target/${OSType}/*" perm="755" />
+                    <if>
+                        <equals arg1="${OSType}" arg2="win"/>
+                        <then>
+                            <fixcrlf srcdir="${basedir}/target/win/"
+                                        includes="**/*.bat" eol="crlf"/>
+                        </then>
+                    </if>
     
                     <echo>copying uber jar to OS-specific folder for the target OS: ${OSType}</echo>
                     <copy file="${basedir}/target/dataloader-${project.version}-uber.jar" 
