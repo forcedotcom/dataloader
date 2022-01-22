@@ -518,8 +518,13 @@
                     <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${project.version}"/>
                     <replace dir="${basedir}/target/${OSType}/" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
                     <chmod file="${basedir}/target/${OSType}/*" perm="755" />
-                    <fixcrlf srcdir="${basedir}/target/win/"
-                                includes="**/*.bat" eol="crlf"/>
+                    <if>
+                        <equals arg1="${OSType}" arg2="win"/>
+                        <then>
+                            <fixcrlf srcdir="${basedir}/target/win/"
+                                        includes="**/*.bat" eol="crlf"/>
+                        </then>
+                    </if>
     
                     <echo>copying uber jar to OS-specific folder for the target OS: ${OSType}</echo>
                     <copy file="${basedir}/target/dataloader-${project.version}-uber.jar" 
