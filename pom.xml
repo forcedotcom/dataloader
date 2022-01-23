@@ -113,7 +113,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>5.3.14</version>
+      <version>5.3.15</version>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.jface --> 
     <dependency>
@@ -147,7 +147,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jdbc</artifactId>
-      <version>5.3.14</version>
+      <version>5.3.15</version>
       <scope>test</scope>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
@@ -524,6 +524,14 @@
                             <fixcrlf srcdir="${basedir}/target/win/"
                                         includes="**/*.bat" eol="crlf"/>
                         </then>
+                        <else>
+                            <fixcrlf srcdir="${basedir}/target/${OSType}/"
+                                        includes="**/*.command" eol="lf" eof="remove"/>
+                            <fixcrlf srcdir="${basedir}/target/${OSType}/"
+                                        includes="**/*.sh" eol="lf" eof="remove"/>
+                            <fixcrlf srcdir="${basedir}/target/mac/dataloader.app/Contents/MacOS"
+                                        includes="**/dataloader" eol="lf" eof="remove"/>
+                        </else>
                     </if>
     
                     <echo>copying uber jar to OS-specific folder for the target OS: ${OSType}</echo>
