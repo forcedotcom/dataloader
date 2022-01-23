@@ -58,6 +58,7 @@ if [ -d "$DL_FULL_PATH" ]; then
     done
 fi
 
+# Create symlink to dataloader shell script from the root of the installation
 echo  Creating directory: $DL_FULL_PATH
 mkdir -p "$DL_FULL_PATH"
 SHELL_PATH=$(dirname "$0")
@@ -67,6 +68,8 @@ rsync -r "$SHELL_PATH"/.  "$DL_FULL_PATH" \
   --exclude="dataloader.ico" \
   --exclude="*.zip" \
   --exclude="META-INF"
+  
+ln -s ${DL_FULL_PATH}/dataloader.app/Contents/MacOS/dataloader ${DL_FULL_PATH}/dataloader_console
 
 while true
 do
