@@ -57,8 +57,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.file.Files;
@@ -379,15 +379,8 @@ public class Controller {
                     throw new ControllerInitializationException(errorMsg, e);
                 }
             } else {
-                try {
-                    // Create a blank user config
-                    logger.info(String.format("Default config does not exist in '%s' Creating empty config file in '%s'", defaultConfigFile, configPath));
-                    configFile.createNewFile();
-                } catch (IOException e) {
-                    String errorMsg = String.format("Failed to create a new config: '%s'", configPath);
-                    logger.warn(errorMsg, e);
-                    throw new ControllerInitializationException(errorMsg, e);
-                }
+                // extract from the jar
+                setDefaultUsingJarExtract("/" + CONFIG_FILE, configFile);
             }
             configFile.setWritable(true);
             configFile.setReadable(true);
@@ -455,6 +448,8 @@ public class Controller {
         String log4jConfigFileAbsolutePath =  logConfFile.getAbsolutePath();
         if (logConfFile.exists()) {
             System.setProperty(SYS_PROP_LOG_CONFIG_FILE, log4jConfigFileAbsolutePath);
+        } else { // extract log-conf.xml from the jar file
+            setDefaultUsingJarExtract("/" + LOG_CONF_DEFAULT, logConfFile);
         }
         
         // Uncomment code block to check that logger is using the config file
@@ -670,6 +665,21 @@ public class Controller {
         else if (filePath.equals(daoName))
             throw new IOException(Messages.getMessage(getClass(), "errorSameFile", daoName, filePath));
     }
+    
+    private static void setDefaultUsingJarExtract(String extractionArtifact, File extractionDestination) {
+        try {
+            InputStream link;
+            link = Controller.class.getResourceAsStream(extractionArtifact);
+            String parentDirStr = extractionDestination.getAbsoluteFile().getParent();
+            File parentDir = Paths.get(parentDirStr).toFile();
+            Files.createDirectories(parentDir.getAbsoluteFile().toPath());
+            Files.copy(link, extractionDestination.getAbsoluteFile().toPath());
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
 
     public void logout() {
         if (this.partnerClient != null) this.partnerClient.logout();
