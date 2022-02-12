@@ -507,14 +507,9 @@
                     <copy todir="${basedir}/target/${OSType}">
                       <fileset dir="${basedir}/release/${OSType}"/>
                     </copy>
-                    <copy todir="${basedir}/target/${OSType}/configs">
-                      <fileset dir="${basedir}/release/configs"/>
-                    </copy>
                     <copy todir="${basedir}/target/${OSType}/samples">
                       <fileset dir="${basedir}/release/samples"/>
                     </copy>
-                    <copy file="${basedir}/release/configs/log-conf.xml" 
-                        todir="${basedir}/target/${OSType}/samples/conf"/>
                     <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${project.version}"/>
                     <replace dir="${basedir}/target/${OSType}/" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
                     <chmod file="${basedir}/target/${OSType}/*" perm="755" />
