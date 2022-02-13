@@ -27,19 +27,7 @@ set DATALOADER_VERSION=@@FULL_VERSION@@
 set BATCH_PROCESS_BEAN_ID_OPTION=
 if not [%2]==[] set BATCH_PROCESS_BEAN_ID_OPTION=process.name=%2
 
-IF NOT "%DATALOADER_JAVA_HOME%" == "" (
-    set JAVA_HOME="%DATALOADER_JAVA_HOME%"
-)
-
-IF "%JAVA_HOME%" == "" (
-    echo To run process.bat, set the JAVA_HOME environment variable to the directory where the Java Runtime Environment ^(JRE^) is installed.
-) ELSE (
-    IF NOT EXIST "%JAVA_HOME%" (
-        echo We couldn't find the Java Runtime Environment ^(JRE^) in directory "%JAVA_HOME%". To run process.bat, set the JAVA_HOME environment variable to the directory where the JRE is installed.
-    ) ELSE (
-        "%JAVA_HOME%\bin\java" -jar "%EXE_PATH%\..\dataloader-%DATALOADER_VERSION%-uber.jar" run.mode=batch salesforce.config.dir=%1 %BATCH_PROCESS_BEAN_ID_OPTION%
-    )
-)
+CALL ..\dataloader.bat -skipbanner run.mode=batch salesforce.config.dir=%1 %BATCH_PROCESS_BEAN_ID_OPTION%
 
 :end
 exit /b %errorlevel%
