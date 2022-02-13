@@ -5,8 +5,15 @@ set DATALOADER_VERSION=@@FULL_VERSION@@
 for /f "tokens=1 delims=." %%a in ("%DATALOADER_VERSION%") do (
   set DATALOADER_SHORT_VERSION=%%a
 )
-set DATALOADER_UBER_JAR_NAME=dataloader-%DATALOADER_VERSION%-uber.jar
+set DATALOADER_UBER_JAR_NAME=%~dp0\dataloader-%DATALOADER_VERSION%-uber.jar
 set MIN_JAVA_VERSION=@@MIN_JAVA_VERSION@@
+
+IF NOT "%~1"=="" (
+    IF "%~1"=="-skipbanner" (
+        SHIFT
+        GOTO AFTER_BANNER
+    )
+)
 
 echo.
 echo *************************************************************************
@@ -25,6 +32,8 @@ echo **       https://help.salesforce.com/articleView?id=data_loader.htm    **
 echo **                                                                     **
 echo *************************************************************************
 echo.
+
+:AFTER_BANNER
  
 IF NOT "%DATALOADER_JAVA_HOME%" == "" (
     set JAVA_HOME="%DATALOADER_JAVA_HOME%"
@@ -33,7 +42,7 @@ IF NOT "%DATALOADER_JAVA_HOME%" == "" (
 :CheckMinJRE
     echo Data Loader requires Java JRE %MIN_JAVA_VERSION% or later. Checking if it is installed...
 
-    PATH=%JAVA_HOME%\bin\;%PATH%;
+    PATH="%JAVA_HOME%"\bin\;%PATH%;
 
     java -version 1>nul 2>nul || (
         goto NoJavaErrorExit
