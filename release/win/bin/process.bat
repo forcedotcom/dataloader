@@ -1,4 +1,6 @@
 @echo off
+setlocal
+
 if not [%1]==[] goto run
 echo.
 echo Usage: process ^<configuration directory^> ^[batch process bean id^]
@@ -23,11 +25,31 @@ goto end
 :run
 set EXE_PATH=%~dp0
 set DATALOADER_VERSION=@@FULL_VERSION@@
+set CONFIG_DIR_OPTION=salesforce.config.dir=%1
+set SKIP_COUNT=1
 
 set BATCH_PROCESS_BEAN_ID_OPTION=
-if not [%2]==[] set BATCH_PROCESS_BEAN_ID_OPTION=process.name=%2
+if not [%2]==[] (
+    set BATCH_PROCESS_BEAN_ID_OPTION=process.name=%2
+    set SKIP_COUNT=2
+)
 
-CALL ..\dataloader.bat -skipbanner run.mode=batch salesforce.config.dir=%1 %BATCH_PROCESS_BEAN_ID_OPTION%
+set args=
+shift
+if %SKIP_COUNT% == 2 shift
+:start
+    if [%1] == [] goto done
+    if "%args%" == "" (
+        set args=%1=%2
+    ) else (
+        set args=%args% %1=%2
+    )
+    shift
+    shift
+    goto start
+:done
+
+CALL %EXE_PATH%\..\dataloader.bat -skipbanner run.mode=batch %CONFIG_DIR_OPTION% %BATCH_PROCESS_BEAN_ID_OPTION% %args%
 
 :end
 exit /b %errorlevel%
