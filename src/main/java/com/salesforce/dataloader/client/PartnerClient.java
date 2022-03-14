@@ -46,6 +46,7 @@ import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Error;
 import com.sforce.soap.partner.Field;
+import com.sforce.soap.partner.FieldType;
 import com.sforce.soap.partner.LoginResult;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.QueryResult;
@@ -668,6 +669,8 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
         if (getDescribeGlobalResults() != null) {
             Field[] entityFields = getFieldTypes().getFields();
+            String entityName = this.config.getString(Config.ENTITY);
+
             for (Field entityField : entityFields) {
                 // upsert on references (aka foreign keys) is supported only
                 // 1. When field has relationship is set and refers to exactly one object
@@ -675,6 +678,16 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 // relationship.
                 if (entityField.isCreateable() || entityField.isUpdateable()) {
                     String relationshipName = entityField.getRelationshipName();
+                    
+                    // Skip traversing CreatedBy and LastModifiedBy relationships.
+                    // Upserts should not use these relationships.
+                    if (!entityField.isCustom()
+                        && (
+                            "CreatedBy".equalsIgnoreCase(relationshipName)
+                        || "LastModifiedBy".equalsIgnoreCase(relationshipName)
+                        )) {
+                        continue;
+                    }
                     String[] referenceTos = entityField.getReferenceTo();
                     if (referenceTos != null && referenceTos.length == 1 && referenceTos[0] != null
                             && relationshipName != null && relationshipName.length() > 0
@@ -686,9 +699,16 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                         Field[] refObjectFields = describeSObject(refEntityName).getFields();
                         Map<String, Field> refFieldInfo = new HashMap<String, Field>();
                         for (Field refField : refObjectFields) {
-                            if (refField.isExternalId() || refField.isIdLookup()) {
-                                refField.setCreateable(entityField.isCreateable());
-                                refField.setUpdateable(entityField.isUpdateable());
+                            boolean skipReference = true;
+                            if (refField.isExternalId()
+                                || ((refField.isNameField() ||  refField.getType().equals(FieldType.email)) 
+                                    && refField.isIdLookup())) {
+                                // change createable and updateable attributes of a reference field
+                                // only if it is not a self-reference.
+                                if (!entityName.equalsIgnoreCase(refEntityName)) {
+                                    refField.setCreateable(entityField.isCreateable());
+                                    refField.setUpdateable(entityField.isUpdateable());
+                                }
                                 refFieldInfo.put(refField.getName(), refField);
                             }
                         }
