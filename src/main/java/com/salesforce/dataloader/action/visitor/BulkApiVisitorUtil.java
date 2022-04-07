@@ -388,16 +388,7 @@ class BulkApiVisitorUtil {
     }
     
     int getRecordsProcessed() throws ExtractException, AsyncApiException {
-        if (!isBulkV2QueryJob()) {
-            final BatchInfo[] batchInfoArray = getBatches().getBatchInfo();
-            for (BatchInfo batchInfo : batchInfoArray) {
-                if (batchInfo.getState() == BatchStateEnum.Failed) {
-                    throw new ExtractException("Batch failed: " + batchInfo.getStateMessage());
-                }
-                this.recordsProcessed += batchInfo.getNumberRecordsProcessed();
-            }
-        }
-        return this.recordsProcessed;
+        return this.jobInfo.getNumberRecordsProcessed();
     }
     
     void getBulkV2LoadSuccessResults(String filename) throws AsyncApiException {
