@@ -64,10 +64,12 @@ public class DateOnlyCalendar extends GregorianCalendar {
         Calendar cal = Calendar.getInstance(myTimeZone);
         cal.setTimeInMillis(specifiedTimeInMilliSeconds);
 
-        // Set hour, minute, and second to 0 as it is date-only value
+        // Set hour, minute, second, and millisec to 0 (12:00AM) as it is date-only value
         cal.set(Calendar.HOUR, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(Calendar.AM_PM, Calendar.AM);
 
         TimeZone gmt = TimeZone.getTimeZone("GMT");
         if (!DataLoaderRunner.doUseGMTForDateFieldValue() && myTimeZone != null) {
