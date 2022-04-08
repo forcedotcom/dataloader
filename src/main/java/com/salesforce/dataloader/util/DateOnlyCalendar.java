@@ -64,6 +64,11 @@ public class DateOnlyCalendar extends GregorianCalendar {
         Calendar cal = Calendar.getInstance(myTimeZone);
         cal.setTimeInMillis(specifiedTimeInMilliSeconds);
 
+        // Set hour, minute, and second to 0 as it is date-only value
+        cal.set(Calendar.HOUR, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+
         TimeZone gmt = TimeZone.getTimeZone("GMT");
         if (!DataLoaderRunner.doUseGMTForDateFieldValue() && myTimeZone != null) {
             int timeZoneDifference = myTimeZone.getRawOffset() - gmt.getRawOffset() + myTimeZone.getDSTSavings() - gmt.getDSTSavings();
