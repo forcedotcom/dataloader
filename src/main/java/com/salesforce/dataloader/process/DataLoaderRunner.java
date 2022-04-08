@@ -79,8 +79,8 @@ public class DataLoaderRunner extends Thread {
     
     private static void setUseGMTForDateFieldValue() {
         if (argNameValuePair.containsKey(Config.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE)) {
-            if ("false".equalsIgnoreCase(argNameValuePair.get(Config.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE))) {
-                useGMTForDateFieldValue = false;
+            if ("true".equalsIgnoreCase(argNameValuePair.get(Config.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE))) {
+                useGMTForDateFieldValue = true;
             }
         }
     }
