@@ -64,19 +64,19 @@ public class DateOnlyCalendar extends GregorianCalendar {
         Calendar cal = Calendar.getInstance(myTimeZone);
         cal.setTimeInMillis(specifiedTimeInMilliSeconds);
 
-        // Set hour, minute, second, and millisec to 0 (12:00AM) as it is date-only value
-        cal.set(Calendar.HOUR, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        cal.set(Calendar.AM_PM, Calendar.AM);
-
-        TimeZone gmt = TimeZone.getTimeZone("GMT");
         if (!DataLoaderRunner.doUseGMTForDateFieldValue() && myTimeZone != null) {
+            // Set hour, minute, second, and millisec to 0 (12:00AM) as it is date-only value
+            cal.set(Calendar.HOUR, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            cal.set(Calendar.AM_PM, Calendar.AM);
+            
+            TimeZone gmt = TimeZone.getTimeZone("GMT");
             int timeZoneDifference = myTimeZone.getRawOffset() - gmt.getRawOffset() + myTimeZone.getDSTSavings() - gmt.getDSTSavings();
             if (timeZoneDifference > 0) {
-                // timezone is ahead of GMT, add 1 day to the specified time in milliseconds
-                cal.add(Calendar.DATE, 1);
+                // timezone is ahead of GMT, compensate for it as server-side thinks it is in GMT.
+                cal.setTimeInMillis(cal.getTimeInMillis() + timeZoneDifference);
             }
         }
         super.setTimeInMillis(cal.getTimeInMillis());
