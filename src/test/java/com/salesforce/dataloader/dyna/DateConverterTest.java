@@ -656,13 +656,49 @@ public class DateConverterTest {
         // DateConverter should always return the Calendar in GMT.
         result = (Calendar) AsianTZDateOnlyConverter.convert(null, "6/22/2012");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
-        assertEquals(23, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(22, result.get(Calendar.DAY_OF_MONTH));
 
         DataLoaderRunner.setUseGMTForDateFieldValue(true);
+        AsianTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("Asia/Tokyo"), false);
+        USTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("America/Los_Angeles"), false);
         result = (Calendar) USTZDateOnlyConverter.convert(null, "6/22/2012");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(22, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("GMT"), result.getTimeZone());
+
+        AsianTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("Asia/Tokyo"), false);
+        USTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("America/Los_Angeles"), false);
+        result = (Calendar) AsianTZDateOnlyConverter.convert(null, "6/7/2012 0:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH) + 1);
+        assertEquals(TimeZone.getTimeZone("GMT"), result.getTimeZone());
+
+        AsianTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("Asia/Tokyo"), false);
+        USTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("America/Los_Angeles"), false);
+        result = (Calendar) AsianTZDateOnlyConverter.convert(null, "6/7/2012 02:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH) + 1);
+        assertEquals(TimeZone.getTimeZone("GMT"), result.getTimeZone());
+        
+        // JST is 9 hours ahead of GMT
+        // Any time after 9am in Japan is the same day in GMT
+        AsianTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("Asia/Tokyo"), false);
+        USTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("America/Los_Angeles"), false);
+        result = (Calendar) AsianTZDateOnlyConverter.convert(null, "6/7/2012 11:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("GMT"), result.getTimeZone());
+
+        AsianTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("Asia/Tokyo"), false);
+        USTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("America/Los_Angeles"), false);
+        result = (Calendar) AsianTZDateOnlyConverter.convert(null, "6/7/2012 23:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("GMT"), result.getTimeZone());
+        
         DataLoaderRunner.setUseGMTForDateFieldValue(false);
+        AsianTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("Asia/Tokyo"), false);
+        USTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("America/Los_Angeles"), false);
 
         result = (Calendar) GMTTZDateOnlyConverter.convert(null, "6/22/2012");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
@@ -672,17 +708,52 @@ public class DateConverterTest {
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
         assertEquals(TimeZone.getTimeZone("Asia/Tokyo"), result.getTimeZone());
-
+        
+        result = (Calendar) AsianTZDateOnlyConverter.convert(null, "6/7/2012 04:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("Asia/Tokyo"), result.getTimeZone());
+        
+        result = (Calendar) AsianTZDateOnlyConverter.convert(null, "6/7/2012 11:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("Asia/Tokyo"), result.getTimeZone());
+        
+        result = (Calendar) AsianTZDateOnlyConverter.convert(null, "6/7/2012 17:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("Asia/Tokyo"), result.getTimeZone());
+        
         result = (Calendar) USTZDateConverter.convert(null, "6/7/2012 0:00");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
         assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), result.getTimeZone());
 
+        result = (Calendar) USTZDateOnlyConverter.convert(null, "6/7/2012 11:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), result.getTimeZone());
+        
+        result = (Calendar) USTZDateOnlyConverter.convert(null, "6/7/2012 23:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), result.getTimeZone());
+        
         result = (Calendar) AsianTZDateConverter.convert(null, "2012-06-07 00:00:00JST");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
         assertEquals(TimeZone.getTimeZone("Asia/Tokyo"), result.getTimeZone());
 
+        result = (Calendar) AsianTZDateOnlyConverter.convert(null, "2012-06-07 10:00:00JST");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("Asia/Tokyo"), result.getTimeZone());
+        
+        result = (Calendar) AsianTZDateOnlyConverter.convert(null, "2012-06-07 22:00:00JST");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("Asia/Tokyo"), result.getTimeZone());
+        
         result = (Calendar) USTZDateConverter.convert(null, "2012-06-07 00:00:00PST");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
