@@ -77,7 +77,7 @@ public class DatabaseTestUtil {
         put(REVENUE_COL, "decimal");
         put(LAST_UPDATED_COL, "date");
         put(ACCOUNT_NUMBER_COL, "varchar(20)");
-        put("system_modstamp", "date default sysdate not null");
+        put("system_modstamp", "date default CURRENT_TIMESTAMP not null");
     }};
 
     public static void insertOrUpdateAccountsDb(Controller theController, boolean isInsert, int numAccounts, boolean insertNulls) {
