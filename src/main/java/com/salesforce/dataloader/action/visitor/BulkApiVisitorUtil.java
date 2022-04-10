@@ -388,6 +388,15 @@ class BulkApiVisitorUtil {
     }
     
     int getRecordsProcessed() throws ExtractException, AsyncApiException {
+        if (!isBulkV2QueryJob()) { 
+            // Bulk v1 job. check if a batch failed, and if so, throw an ExtractException.
+            final BatchInfo[] batchInfoArray = getBatches().getBatchInfo();
+            for (BatchInfo batchInfo : batchInfoArray) {
+                if (batchInfo.getState() == BatchStateEnum.Failed) {
+                    throw new ExtractException("Batch failed: " + batchInfo.getStateMessage());
+                }
+            }
+        }
         return this.jobInfo.getNumberRecordsProcessed();
     }
     
