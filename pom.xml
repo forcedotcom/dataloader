@@ -13,7 +13,8 @@
   </organization>
 
   <properties>
-    <force.partner.api.version>54.0.0</force.partner.api.version>
+    <force.wsc.version>54.0.0</force.wsc.version>
+    <force.partner.api.version>${force.wsc.version}</force.partner.api.version>
     <build.year>2022</build.year>
     <java.compile.version>11</java.compile.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -49,6 +50,18 @@
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>2.9.0</version>
+    </dependency>
+<!-- https://mvnrepository.com/artifact/com.force.api/force-wsc -->
+    <dependency>
+      <groupId>com.force.api</groupId>
+      <artifactId>force-wsc</artifactId>
+      <version>${force.wsc.version}</version>
+      <exclusions>
+        <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 <!-- https://mvnrepository.com/artifact/com.force.api/force-partner-api -->
     <dependency>
