@@ -62,15 +62,15 @@ run_mvn() {
     echo "packaging dataloader_win.zip"
     mvn package -DskipTests -Duberjar.skip -Pzip,!mac_x86_64,win32_x86_64,!linux_x86_64
     cp target/win/dataloader_win.zip .
-#    echo "packaging dataloader_linux.zip"
-#    mvn package -DskipTests -Duberjar.skip -Pzip,!mac_x86_64,!win32_x86_64,linux_x86_64
-#    cp target/linux/dataloader_linux.zip .
+    echo "packaging dataloader_linux.zip"
+    mvn package -DskipTests -Duberjar.skip -Pzip,!mac_x86_64,!win32_x86_64,linux_x86_64
+    cp target/linux/dataloader_linux.zip .
   fi
 
   if [ $1 = true ]; then
     jarsigner -storepass "$3" -verbose -providerClass sun.security.pkcs11.SunPKCS11 -providerArg "$4" -keystore NONE -storetype PKCS11 -sigalg "$5" -tsa "$6" -certchain "$7" ./dataloader_mac.zip "$8"
     jarsigner -storepass "$3" -verbose -providerClass sun.security.pkcs11.SunPKCS11 -providerArg "$4" -keystore NONE -storetype PKCS11 -sigalg "$5" -tsa "$6" -certchain "$7" ./dataloader_win.zip "$8"
-#    jarsigner -storepass "$3" -verbose -providerClass sun.security.pkcs11.SunPKCS11 -providerArg "$4" -keystore NONE -storetype PKCS11 -sigalg "$5" -tsa "$6" -certchain "$7" ./dataloader_linux.zip "$8"
+    jarsigner -storepass "$3" -verbose -providerClass sun.security.pkcs11.SunPKCS11 -providerArg "$4" -keystore NONE -storetype PKCS11 -sigalg "$5" -tsa "$6" -certchain "$7" ./dataloader_linux.zip "$8"
   fi
 }
 
