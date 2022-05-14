@@ -79,6 +79,7 @@ public class OAuthTokenFlow extends OAuthFlow {
 
         @Override
         public void completed(ProgressEvent progressEvent) {
+            super.completed(progressEvent);
             try {
                 boolean handled = handleCompletedUrl(browser.getUrl(), config);
                 if (handled) {
