@@ -86,6 +86,7 @@ public class OAuthSecretFlow extends OAuthFlow {
 
         @Override
         public void completed(ProgressEvent progressEvent) {
+            super.completed(progressEvent);
             String url = browser.getUrl();
             try {
                 String code = handleInitialUrl(url);

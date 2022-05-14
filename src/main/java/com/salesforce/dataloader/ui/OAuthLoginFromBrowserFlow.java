@@ -57,10 +57,13 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
+import java.awt.Desktop;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -326,32 +329,53 @@ public class OAuthLoginFromBrowserFlow extends Dialog {
     }
     
     private void openURL(String url) {
-    	Runtime runtime = Runtime.getRuntime();
-    	String osName = System.getProperty("os.name");
-    	try {
-    		if (osName.toLowerCase().indexOf("mac") >= 0) {
-    			runtime.exec("open " + url);
-    		}
-    		else if (osName.toLowerCase().indexOf("win") >= 0) {
-    			runtime.exec("rundll32 url.dll,FileProtocolHandler " + url);
-    		} else { //assume Unix or Linux
-    			String[] browsers = {
-    					"firefox", "chrome", "opera", "konqueror", "epiphany", "mozilla", "netscape" };
-    			String browser = null;
-    			for (int count = 0; count < browsers.length && browser == null; count++)
-    				if (runtime.exec(
-    						new String[] {"which", browsers[count]}).waitFor() == 0) {
-    					browser = browsers[count];
-    				}
-    			if (browser == null) {
-    				throw new Exception("Could not find web browser");
-    			} else {
-    				runtime.exec(new String[] {browser, url});
-    			}
-    		}
-    	}
-    	catch (Exception e) {
-    		logger.error(e.getMessage());
-    	}
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+            try {
+                desktop.browse(new URI(url));
+            } catch (IOException | URISyntaxException e) {
+                logger.error(e.getMessage());
+                openURLUsingNativeCommand(url);
+            }
+        } else {
+            Runtime runtime = Runtime.getRuntime();
+            try {
+                runtime.exec("xdg-open " + url);
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+                openURLUsingNativeCommand(url);
+            }
+        }
     }
+    
+    private void openURLUsingNativeCommand(String url) {
+        Runtime runtime = Runtime.getRuntime();
+        String osName = System.getProperty("os.name");
+        try {
+            if (osName.toLowerCase().indexOf("mac") >= 0) {
+                runtime.exec("open " + url);
+            }
+            else if (osName.toLowerCase().indexOf("win") >= 0) {
+                runtime.exec("rundll32 url.dll,FileProtocolHandler " + url);
+            } else { //assume Unix or Linux
+                String[] browsers = {
+                        "firefox", "chrome", "opera", "konqueror", "epiphany", "mozilla", "netscape" };
+                String browser = null;
+                for (int count = 0; count < browsers.length && browser == null; count++)
+                    if (runtime.exec(
+                            new String[] {"which", browsers[count]}).waitFor() == 0) {
+                        browser = browsers[count];
+                    }
+                if (browser == null) {
+                    throw new Exception("Could not find web browser");
+                } else {
+                    runtime.exec(new String[] {browser, url});
+                }
+            }
+        }
+        catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+    }
+
 }
