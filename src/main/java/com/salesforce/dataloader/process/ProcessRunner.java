@@ -62,8 +62,10 @@ import com.salesforce.dataloader.config.LastRun;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
+import com.salesforce.dataloader.exception.OAuthBrowserLoginRunnerException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
+import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
 import com.sforce.soap.partner.fault.ApiFault;
 
 import org.apache.logging.log4j.Logger;
@@ -129,6 +131,9 @@ public class ProcessRunner implements InitializingBean {
         try {
             logger.info(Messages.getString("Process.initializingEngine")); //$NON-NLS-1$
             Config config = controller.getConfig();
+            if (config.getBoolean(Config.OAUTH_LOGIN_FROM_BROWSER)) {
+                doLoginFromBrowser(config);
+            }
             // Make sure that the required properties are specified.
             validateConfigProperties(config);
             if (name == null || name.isBlank()) {
@@ -332,6 +337,30 @@ public class ProcessRunner implements InitializingBean {
             if (propVal == null || propVal.isBlank()) {
                 logger.fatal(Messages.getFormattedString("Config.errorNoRequiredParameter", propName));
                 throw new ParameterLoadException(Messages.getFormattedString("Config.errorNoRequiredParameter", propName));
+            }
+        }
+    }
+    
+    private void doLoginFromBrowser(Config config) throws OAuthBrowserLoginRunnerException {
+        if (config.getString(Config.OAUTH_CLIENTID) == null || config.getString(Config.OAUTH_CLIENTID).isEmpty()) {
+            throw new OAuthBrowserLoginRunnerException("Specify Connected App Client ID");
+        }
+        final String verificationURLStr;
+        final OAuthBrowserLoginRunner loginRunner;
+        try {
+            loginRunner = new OAuthBrowserLoginRunner(config);
+            verificationURLStr = loginRunner.getVerificationURLStr();
+            logger.debug("OAuth browser login URL : " + verificationURLStr);
+        } catch (Exception ex) {
+            logger.error(ex.getMessage());
+            throw new OAuthBrowserLoginRunnerException(ex.getMessage());
+        }
+        loginRunner.openURL(verificationURLStr);
+        while (!loginRunner.isLoginProcessCompleted()) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                // fail silently
             }
         }
     }
