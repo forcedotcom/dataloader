@@ -115,7 +115,7 @@ public abstract class OAuthFlow extends Dialog {
         return params;
     }
     
-    protected static void processSuccessfulLogin(InputStream httpResponseInputStream, Config config) throws IOException {
+    public static void processSuccessfulLogin(InputStream httpResponseInputStream, Config config) throws IOException {
 
         StringBuilder builder = new StringBuilder();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpResponseInputStream, "UTF-8"));
