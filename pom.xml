@@ -14,7 +14,6 @@
 
   <properties>
     <force.wsc.version>55.1.0</force.wsc.version>
-    <salesforce.api.version>55.0</salesforce.api.version>
     <force.partner.api.version>${force.wsc.version}</force.partner.api.version>
     <build.year>2022</build.year>
     <java.compile.version>11</java.compile.version>

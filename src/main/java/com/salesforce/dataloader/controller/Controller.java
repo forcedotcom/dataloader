@@ -49,6 +49,7 @@ import com.salesforce.dataloader.mapping.Mapper;
 import com.salesforce.dataloader.mapping.SOQLMapper;
 import com.salesforce.dataloader.ui.LoaderWindow;
 import com.salesforce.dataloader.util.AppUtil;
+import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.ws.ConnectionException;
@@ -59,7 +60,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -167,14 +170,10 @@ public class Controller {
         // FIXME clean this up, make static
         // dataloader version has 3 parts, salesforce app api version should match first two parts
         APP_VERSION = versionProps.getProperty("dataloader.version");
-        String apiVersionStr = versionProps.getProperty("dataloader.apiversion");
-        if ( apiVersionStr == null || apiVersionStr.isEmpty()) {
-            apiVersionStr = APP_VERSION;
-        }
-        String[] apiVersion = apiVersionStr.split("\\.");
-        API_VERSION = apiVersion[0] + "." + apiVersion[1];
-
-
+        
+        String connectorEndpoint = Connector.END_POINT;
+        String[] apiVersion = connectorEndpoint.split("\\/");
+        API_VERSION = apiVersion[apiVersion.length-1];
         OS_TYPE = AppUtil.getOSType();
         areStaticVarsInitialized = true;
     }
