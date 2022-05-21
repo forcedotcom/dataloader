@@ -31,6 +31,7 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.sforce.ws.tools.VersionInfo;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -48,6 +49,7 @@ import org.apache.http.message.BasicNameValuePair;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 
@@ -65,11 +67,21 @@ public class DefaultSimplePost implements SimplePost {
     private InputStream input;
     private int statusCode;
     private String reasonPhrase;
+    private CloseableHttpResponse response;
 
     DefaultSimplePost(Config config, String endpoint, BasicNameValuePair... pairs) {
         this.config = config;
         this.endpoint = endpoint;
         this.pairs = pairs;
+    }
+    
+    public void addBasicNameValuePair(BasicNameValuePair pair) {
+        BasicNameValuePair[] newPairs = new BasicNameValuePair[pairs.length + 1];
+        for (int i=0; i < pairs.length; i++) {
+            newPairs[i] = pairs[i];
+        }
+        newPairs[pairs.length] = pair;
+        pairs = newPairs;
     }
 
     @Override
@@ -119,11 +131,12 @@ public class DefaultSimplePost implements SimplePost {
                 try (CloseableHttpResponse ignored = httpClient.execute(head)) {
                 }
             }
-            try (CloseableHttpResponse response = httpClient.execute(post)) {
+            try (CloseableHttpResponse postResponse = httpClient.execute(post)) {
 
-                successful = response.getStatusLine().getStatusCode() < 400;
-                statusCode = response.getStatusLine().getStatusCode();
-                reasonPhrase = response.getStatusLine().getReasonPhrase();
+                successful = postResponse.getStatusLine().getStatusCode() < 400;
+                statusCode = postResponse.getStatusLine().getStatusCode();
+                reasonPhrase = postResponse.getStatusLine().getReasonPhrase();
+                response = postResponse;
 
                 // copy input stream data into a new input stream because releasing the connection will close the input stream
                 ByteArrayOutputStream bOut = new ByteArrayOutputStream();
@@ -157,5 +170,9 @@ public class DefaultSimplePost implements SimplePost {
     @Override
     public String getReasonPhrase() {
         return reasonPhrase;
+    }
+    
+    public Header[] getResponseHeaders(String headerName) {
+        return response.getHeaders(headerName);
     }
 }

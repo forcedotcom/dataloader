@@ -30,6 +30,9 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.http.Header;
+import org.apache.http.message.BasicNameValuePair;
+
 /**
  * Created by rmazzeo on 12/9/15.
  */
@@ -43,4 +46,8 @@ public interface SimplePost {
     int getStatusCode();
 
     String getReasonPhrase();
+    
+    Header[] getResponseHeaders(String headerName);
+    
+    void addBasicNameValuePair(BasicNameValuePair pair);
 }
