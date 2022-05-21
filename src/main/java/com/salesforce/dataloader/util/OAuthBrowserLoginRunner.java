@@ -32,8 +32,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.http.Header;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,14 +57,13 @@ public class OAuthBrowserLoginRunner {
     protected static Logger logger = LogManager.getLogger(OAuthBrowserLoginRunner.class);
     private static LoginStatus loginResult = LoginStatus.WAIT;
     private String verificationURLStr = null;
-    final Map responseMap;
     final String userCodeStr;
     final String deviceCode;
     final String oAuthTokenURLStr;
     final Config config;
     final Thread checkLoginThread;
 
-    public OAuthBrowserLoginRunner(Config config) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
+    public OAuthBrowserLoginRunner(Config config, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
         setLoginStatus(LoginStatus.WAIT);
         this.config = config;
         oAuthTokenURLStr = config.getString(Config.OAUTH_SERVER) + "/services/oauth2/token";
@@ -82,21 +86,69 @@ public class OAuthBrowserLoginRunner {
         }
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-        responseMap = mapper.readValue(in, Map.class);
+        Map responseMap = mapper.readValue(in, Map.class);
         userCodeStr = (String) responseMap.get("user_code");
         deviceCode = (String)responseMap.get("device_code");
         logger.debug("User Code: " + userCodeStr);
         verificationURLStr = (String) responseMap.get("verification_uri")
                + "?user_code=" + userCodeStr;
         logger.debug("Verification URL: " + verificationURLStr);
-       
+        
+        // start checking for login
         int pollingIntervalInSec = 5;           
         try {
-            pollingIntervalInSec = ((Integer)responseMap.get("interval")).intValue();
+           pollingIntervalInSec = ((Integer)responseMap.get("interval")).intValue();
         } catch (NumberFormatException e) {
-           // fail silently
+            // fail silently
         }
-        checkLoginThread = startLoginProcess(pollingIntervalInSec, oAuthTokenURLStr, deviceCode);
+        checkLoginThread = startLoginCheck(pollingIntervalInSec);
+
+        if (!skipUserCodePage) {
+            return;
+        }
+
+        // try to skip the page with pre-filled user code.
+        client = SimplePostFactory.getInstance(config, verificationURLStr,
+                new BasicNameValuePair("", "")
+        );
+        client.post();
+        in = client.getInput();
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        for (int length; (length = in.read(buffer)) != -1; ) {
+            result.write(buffer, 0, length);
+        }
+        
+        String response = result.toString("UTF-8");
+        if (!client.isSuccessful()) {
+            // did not succeed in skipping the page with pre-filled user code, show it
+            logger.error(response);
+            openURL(verificationURLStr);
+        }
+        
+        List<BasicNameValuePair> nvPairList = parseTokenPageHTML(response);
+        
+        client = SimplePostFactory.getInstance(config, responseMap.get("verification_uri").toString(),
+                new BasicNameValuePair("save", "Connect")
+        );
+        for (BasicNameValuePair pair : nvPairList) {
+            client.addBasicNameValuePair(pair);
+        }
+        client.post();
+        in = client.getInput();
+        result = new ByteArrayOutputStream();
+        buffer = new byte[1024];
+        for (int length; (length = in.read(buffer)) != -1; ) {
+            result.write(buffer, 0, length);
+        }
+        if (client.getStatusCode() == 302) {
+            Header[] locationHeaders = client.getResponseHeaders("Location");
+            String redirectURL = locationHeaders[0].getValue();
+            openURL(redirectURL);
+        } else {
+            // did not succeed in skipping the page with pre-filled user code, show it
+            openURL(verificationURLStr);
+        }
     }
        
     public void openURL(String url) {
@@ -149,7 +201,7 @@ public class OAuthBrowserLoginRunner {
        }
    }
    
-   private Thread startLoginProcess(final int pollingIntervalInSec, final String oAuthTokenURLStr, final String deviceCode) {
+   private Thread startLoginCheck(final int pollingIntervalInSec) {
        Thread successfulLogincheckerThread = new Thread() {
            public void run() {
                // Poll for 20 minutes.
@@ -250,5 +302,39 @@ public class OAuthBrowserLoginRunner {
    
    public boolean isLoginProcessCompleted() {
        return !this.checkLoginThread.isAlive();
+   }
+   
+   private List<BasicNameValuePair> parseTokenPageHTML(String response) {
+       String id, value;
+       List<BasicNameValuePair> nvPairList = new ArrayList<BasicNameValuePair>();
+       
+       Pattern pattern = Pattern.compile("<(?!!)(?!/)\\s*([a-zA-Z0-9]+)(.*?)>");
+       Matcher matcher = pattern.matcher(response);
+       while (matcher.find()) {
+           String tagName = matcher.group(1);
+           String attributes = matcher.group(2);
+           if (!tagName.equalsIgnoreCase("input")) {
+               continue;
+           }
+           Pattern attributePattern = Pattern.compile("(\\S+)=['\"]{1}([^>]*?)['\"]{1}");
+           Matcher attributeMatcher = attributePattern.matcher(attributes);
+           id = "";
+           value = "";
+           while(attributeMatcher.find()) {
+               String attributeName = attributeMatcher.group(1);
+               String attributeValue = attributeMatcher.group(2);
+               if (attributeName.equalsIgnoreCase("id")) {
+                   id = attributeValue;
+               }
+               if (attributeName.equalsIgnoreCase("value")) {
+                   value = attributeValue;
+               }
+           }
+           if (!id.equals("")) {
+               nvPairList.add(new BasicNameValuePair(id, value));
+           }
+       }
+
+       return nvPairList;
    }
 }

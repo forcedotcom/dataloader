@@ -65,6 +65,7 @@ import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.exception.OAuthBrowserLoginRunnerException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
+import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
 import com.sforce.soap.partner.fault.ApiFault;
 
@@ -348,14 +349,15 @@ public class ProcessRunner implements InitializingBean {
         final String verificationURLStr;
         final OAuthBrowserLoginRunner loginRunner;
         try {
-            loginRunner = new OAuthBrowserLoginRunner(config);
+            loginRunner = new OAuthBrowserLoginRunner(config, true);
             verificationURLStr = loginRunner.getVerificationURLStr();
-            logger.debug("OAuth browser login URL : " + verificationURLStr);
+            System.out.println(Labels.getString("OAuthInBrowser.batchModeMessage1"));
+            System.out.println(Labels.getString("OAuthInBrowser.batchModeURL") + verificationURLStr);
+            System.out.println(Labels.getFormattedString("OAuthInBrowser.batchModeMessage2", loginRunner.getUserCode()));
         } catch (Exception ex) {
             logger.error(ex.getMessage());
             throw new OAuthBrowserLoginRunnerException(ex.getMessage());
         }
-        loginRunner.openURL(verificationURLStr);
         while (!loginRunner.isLoginProcessCompleted()) {
             try {
                 Thread.sleep(2000);

@@ -72,7 +72,7 @@ public class OAuthLoginFromBrowserFlow extends Dialog {
     	final String verificationURLStr;
     	final OAuthBrowserLoginRunner loginRunner;
     	try {
-    	    loginRunner = new OAuthBrowserLoginRunner(config);
+    	    loginRunner = new OAuthBrowserLoginRunner(config, true);
     	    verificationURLStr = loginRunner.getVerificationURLStr();
     	} catch (Exception ex) {
     	    logger.error(ex.getMessage());
@@ -87,7 +87,7 @@ public class OAuthLoginFromBrowserFlow extends Dialog {
         FontData fd = farr[0];
         fd.setStyle(SWT.BOLD);
         Font boldFont = new Font(Display.getCurrent(), fd);
-        shell.setText(Labels.getString("OAuthMFAWithUserCodeFlow.title"));
+        shell.setText(Labels.getString("OAuthInBrowser.title"));
 
         Composite container = new Composite(shell, SWT.NONE);
         GridLayout containerLayout = new GridLayout(1, false);
@@ -96,7 +96,7 @@ public class OAuthLoginFromBrowserFlow extends Dialog {
 
         Composite infoComp = new Composite(container, SWT.NONE);
         GridData data = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING | GridData.HORIZONTAL_ALIGN_CENTER);
-        data.heightHint = 100;
+        data.heightHint = 150;
         data.widthHint = 600;
         GridLayout layout = new GridLayout(2, false);
         layout.marginHeight = 0;
@@ -109,13 +109,13 @@ public class OAuthLoginFromBrowserFlow extends Dialog {
         Label label = new Label(infoComp, SWT.RIGHT);
         label.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         label.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
-        label.setText(Labels.getString("OAuthMFAWithUserCodeFlow.authStep1Title"));
+        label.setText(Labels.getString("OAuthInBrowser.authStep1Title"));
         label.setFont(boldFont);
 
         label = new Label(infoComp, SWT.WRAP);
         label.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        label.setText(Labels.getString("OAuthMFAWithUserCodeFlow.authStep1Content"));
+        label.setText(Labels.getString("OAuthInBrowser.authStep1Content"));
 
         label = new Label(infoComp, SWT.WRAP);
         label = new Label(infoComp, SWT.WRAP);
@@ -123,13 +123,13 @@ public class OAuthLoginFromBrowserFlow extends Dialog {
         label = new Label(infoComp, SWT.RIGHT);
         label.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         label.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
-        label.setText(Labels.getString("OAuthMFAWithUserCodeFlow.authStep2Title"));
+        label.setText(Labels.getString("OAuthInBrowser.authStep2Title"));
         label.setFont(boldFont);
 
         label = new Label(infoComp, SWT.WRAP);
         label.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        label.setText(Labels.getString("OAuthMFAWithUserCodeFlow.authStep2Content"));
+        label.setText(Labels.getFormattedString("OAuthInBrowser.authStep2Content", loginRunner.getUserCode()));
 
         label = new Label(infoComp, SWT.WRAP);
         label = new Label(infoComp, SWT.WRAP);
@@ -137,13 +137,13 @@ public class OAuthLoginFromBrowserFlow extends Dialog {
         label = new Label(infoComp, SWT.RIGHT);
         label.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         label.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
-        label.setText(Labels.getString("OAuthMFAWithUserCodeFlow.authStep3Title"));
+        label.setText(Labels.getString("OAuthInBrowser.authStep3Title"));
         label.setFont(boldFont);
 
         label = new Label(infoComp, SWT.WRAP);
         label.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        label.setText(Labels.getString("OAuthMFAWithUserCodeFlow.authStep3Content"));
+        label.setText(Labels.getString("OAuthInBrowser.authStep3Content"));
 
         
         Composite contentComp = new Composite(container, SWT.NONE);
@@ -155,7 +155,7 @@ public class OAuthLoginFromBrowserFlow extends Dialog {
 
         label = new Label(contentComp, SWT.RIGHT);
         label.setFont(new Font(Display.getCurrent(), fd));
-        label.setText(Labels.getString("OAuthMFAWithUserCodeFlow.verificationURL"));
+        label.setText(Labels.getString("OAuthInBrowser.verificationURL"));
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         label.setLayoutData(data);
         Link link = new Link(contentComp, SWT.END);
@@ -168,7 +168,7 @@ public class OAuthLoginFromBrowserFlow extends Dialog {
           });
         final Clipboard clipboard = new Clipboard(display);
         Button copy = new Button(contentComp, SWT.PUSH);
-        copy.setText(Labels.getString("OAuthMFAWithUserCodeFlow.copyToClipboardButton"));
+        copy.setText(Labels.getString("OAuthInBrowser.copyToClipboardButton"));
         copy.addListener(SWT.Selection, new Listener() {
           public void handleEvent(Event e) {
             String textData = verificationURLStr;
