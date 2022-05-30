@@ -48,6 +48,7 @@ public class LogoutUIAction extends Action {
     @Override
     public void run() {
         controller.logout();
+        controller.updateLoaderWindowTitle();
     }
 
 }

@@ -78,6 +78,7 @@ public class LoaderWindow extends ApplicationWindow {
 
 
     private static LoaderWindow app;
+    private Shell shell;
 
     public LoaderWindow(Controller controller) {
         super(null);
@@ -147,18 +148,28 @@ public class LoaderWindow extends ApplicationWindow {
 
         Display.getCurrent().dispose();
     }
+    
+    public void updateTitle(String suffix) {
+        if (suffix == null || suffix.isEmpty()) {
+            suffix = "";
+            this.uiActionLogout.setEnabled(false);
+        } else {
+            suffix = " - " + suffix;
+            this.uiActionLogout.setEnabled(true);
+        }
+        this.shell.setText(Labels.getString("LoaderWindow.title") + suffix);
+    }
 
     @Override
     protected void configureShell(Shell shell) {
         super.configureShell(shell);
 
+        this.shell = shell;
         // Set the title bar text
-        shell.setText(Labels.getString("LoaderWindow.title"));
+        updateTitle(null);
         shell.setSize(600, 400);
 
         shell.setImage(UIUtils.getImageRegistry().get("sfdc_icon"));
-
-
     }
 
     private OperationUIAction getOperationAction(int i) {
