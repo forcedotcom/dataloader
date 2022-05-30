@@ -45,6 +45,7 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.ui.UIUtils;
+import com.salesforce.dataloader.ui.entitySelection.EntityFilter;
 import com.sforce.soap.partner.*;
 
 /**
@@ -142,9 +143,9 @@ public class ExtractionSOQLPage extends ExtractionPage {
         comp.setLayout(gridLayout);
 
         builderComp = new Composite(comp, SWT.NONE);
-        data = new GridData(GridData.FILL_BOTH);
-        data.heightHint = 170;
-        data.widthHint = 650;
+        data = new GridData(SWT.FILL, SWT.FILL, true, true);
+        //data.heightHint = 170;
+        //data.widthHint = 650;
         builderComp.setLayoutData(data);
         gridLayout = new GridLayout(2, false);
         gridLayout.horizontalSpacing = 25;
@@ -156,17 +157,42 @@ public class ExtractionSOQLPage extends ExtractionPage {
         Label fieldWhere = new Label(builderComp, SWT.LEFT);
         fieldWhere.setText(Labels.getString("ExtractionSOQLPage.createClauses")); //$NON-NLS-1$
 
-        fieldViewer = CheckboxTableViewer.newCheckList(builderComp, SWT.BORDER);
+        Composite fieldComp = new Composite(builderComp, SWT.NONE);
+        gridLayout = new GridLayout(1, false);
+        gridLayout.horizontalSpacing = 25;
+        fieldComp.setLayout(gridLayout);
+
+        Text search = new Text(fieldComp, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        search.setLayoutData(data);
+        fieldComp.setLayoutData(data);
+
+        fieldViewer = CheckboxTableViewer.newCheckList(fieldComp, SWT.BORDER);
         fieldViewer.setLabelProvider(new ExtrFieldLabelProvider());
         fieldViewer.setContentProvider(new ExtrFieldContentProvider());
-        data = new GridData(GridData.FILL_VERTICAL);
-        data.widthHint = 135;
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        data.heightHint = 100;
         fieldViewer.getTable().setLayoutData(data);
+
+        FieldFilter filter = new FieldFilter(search);
+        fieldViewer.addFilter(filter);
         fieldViewer.addCheckStateListener(new ICheckStateListener() {
             @Override
             public void checkStateChanged(CheckStateChangedEvent event) {
                 generateFieldPart();
                 generateSOQLText();
+            }
+        });
+        
+        search.addSelectionListener(new SelectionAdapter() {
+            public void widgetDefaultSelected(SelectionEvent e) {
+                fieldViewer.refresh();
+            }
+        });
+        
+        search.addListener(SWT.KeyUp, new Listener() {
+            public void handleEvent(Event e) {
+                fieldViewer.refresh();
             }
         });
 
@@ -228,6 +254,36 @@ public class ExtractionSOQLPage extends ExtractionPage {
                         }
                     }
                 }
+            }
+        });
+        
+        fieldCombo.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                    String text = fieldCombo.getText();
+                    // updateFieldComboList(text);
+            }
+        });
+        
+        fieldCombo.addMouseListener(new MouseListener() {
+
+            @Override
+            public void mouseDoubleClick(MouseEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void mouseDown(MouseEvent arg0) {
+                String text = fieldCombo.getText();
+                updateFieldComboList(text); 
+                fieldCombo.setText(text);
+            }
+
+            @Override
+            public void mouseUp(MouseEvent arg0) {
+                // TODO Auto-generated method stub
+                
             }
         });
 
@@ -487,22 +543,30 @@ public class ExtractionSOQLPage extends ExtractionPage {
         });
 
         fieldViewer.setInput(fields);
-        fieldCombo.removeAll();
-        List<String> fieldNames = new ArrayList<String>();
-        for (int i = 0; i < fields.length; i++) {
-            // include all fields except encrypted string ones
-            if(FieldType.encryptedstring != fields[i].getType()) {
-                fieldNames.add(fields[i].getName());
-            }
-        }
-        String[] fieldNamesArray = fieldNames.toArray(new String[fieldNames.size()]);
-        Arrays.sort(fieldNamesArray);
-        fieldCombo.setItems(fieldNamesArray);
+        updateFieldComboList(null);
         builderComp.layout();
         whereComp.layout();
 
         fromPart = new StringBuffer("FROM ").append(config.getString(Config.ENTITY)).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
 
+    }
+    
+    private void updateFieldComboList(String filterStr) {
+        List<String> fieldNames = new ArrayList<String>();
+        for (int i = 0; i < fields.length; i++) {
+            // include all fields except encrypted string ones
+            String name = fields[i].getName().toLowerCase();
+            if(FieldType.encryptedstring != fields[i].getType()) {
+                if (filterStr == null 
+                        || filterStr.isEmpty() 
+                        || name.contains(filterStr)) {
+                    fieldNames.add(fields[i].getName());
+                }
+            }
+        }
+        String[] fieldNamesArray = fieldNames.toArray(new String[fieldNames.size()]);
+        Arrays.sort(fieldNamesArray);
+        fieldCombo.setItems(fieldNamesArray);
     }
 
     private void generateSOQLText() {
