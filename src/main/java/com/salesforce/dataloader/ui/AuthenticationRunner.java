@@ -125,6 +125,7 @@ public class AuthenticationRunner {
             if (controller.login() && controller.setEntityDescribes()) {
                 messenger.accept(Labels.getString("SettingsPage.loginSuccessful"));
                 controller.saveConfig();
+                controller.updateLoaderWindowTitle();
                 complete.accept(true);
             } else {
                 messenger.accept(Labels.getString("SettingsPage.invalidLogin"));

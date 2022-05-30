@@ -53,6 +53,7 @@ import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.ws.ConnectionException;
+import com.sforce.ws.ConnectorConfig;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -121,6 +122,7 @@ public class Controller {
     private BulkClient bulkClient;
     private BulkV2Client bulkV2Client;
     private PartnerClient partnerClient;
+    private LoaderWindow loaderWindow;
 
     // logger
     private static Logger logger;
@@ -279,8 +281,24 @@ public class Controller {
             throw new ControllerInitializationException(errMsg);
         }
         // start the loader UI
-        new LoaderWindow(this).run();
+        this.loaderWindow = new LoaderWindow(this);
+        this.loaderWindow.run();
         saveConfig();
+    }
+    
+    public void updateLoaderWindowTitle() {
+        if (isLoggedIn()) {
+            try {
+                ConnectorConfig sessionConfig = getPartnerClient().getClient().getConfig();
+                URL sessionURL = new URL(sessionConfig.getServiceEndpoint());
+                String sessionHost = sessionURL.getHost();
+                this.loaderWindow.updateTitle(sessionHost);
+                return;
+            } catch (MalformedURLException e) {
+                logger.error(e.getMessage());
+            }
+        }
+        this.loaderWindow.updateTitle(null);
     }
 
     public static synchronized Controller getInstance(String name, boolean isBatchMode, String[] args) throws ControllerInitializationException {
