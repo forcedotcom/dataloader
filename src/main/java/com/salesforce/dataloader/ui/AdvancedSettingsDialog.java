@@ -44,6 +44,8 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -289,7 +291,6 @@ public class AdvancedSettingsDialog extends Dialog {
 
         textBatch = new Text(restComp, SWT.BORDER);
         textBatch.setText(config.getString(Config.LOAD_BATCH_SIZE));
-        textBatch.setTextLimit(8);
         textBatch.addVerifyListener(new VerifyListener() {
             @Override
             public void verifyText(VerifyEvent event) {
@@ -297,7 +298,11 @@ public class AdvancedSettingsDialog extends Dialog {
             }
         });
         data = new GridData();
-        data.widthHint = 50;
+        GC gc = new GC(textBatch);
+        Point textSize = gc.textExtent("8");
+        gc.dispose();
+        textBatch.setTextLimit(8);
+        data.widthHint = 8 * textSize.x;
         textBatch.setLayoutData(data);
 
         //insert Nulls
@@ -315,9 +320,9 @@ public class AdvancedSettingsDialog extends Dialog {
         labelRule.setLayoutData(data);
 
         textRule = new Text(restComp, SWT.BORDER);
-        textRule.setTextLimit(18);
         data = new GridData();
-        data.widthHint = 115;
+        textRule.setTextLimit(18);
+        data.widthHint = 18 * textSize.x;
         textRule.setLayoutData(data);
         textRule.setText(config.getString(Config.ASSIGNMENT_RULE));
 
@@ -328,8 +333,8 @@ public class AdvancedSettingsDialog extends Dialog {
         labelEndpoint.setLayoutData(data);
 
         textEndpoint = new Text(restComp, SWT.BORDER);
-        data = new GridData();
-        data.widthHint = 250;
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        data.widthHint = 30 * textSize.x;
         textEndpoint.setLayoutData(data);
         String endpoint = config.getString(Config.ENDPOINT);
         if ("".equals(endpoint)) { //$NON-NLS-1$
@@ -360,7 +365,6 @@ public class AdvancedSettingsDialog extends Dialog {
         labelTimeout.setLayoutData(data);
 
         textTimeout = new Text(restComp, SWT.BORDER);
-        textTimeout.setTextLimit(4);
         textTimeout.setText(config.getString(Config.TIMEOUT_SECS));
         textTimeout.addVerifyListener(new VerifyListener() {
             @Override
@@ -369,7 +373,8 @@ public class AdvancedSettingsDialog extends Dialog {
             }
         });
         data = new GridData();
-        data.widthHint = 30;
+        textTimeout.setTextLimit(4);
+        data.widthHint = 4 * textSize.x;
         textTimeout.setLayoutData(data);
 
         //extraction batch size
@@ -380,7 +385,6 @@ public class AdvancedSettingsDialog extends Dialog {
 
         textQueryBatch = new Text(restComp, SWT.BORDER);
         textQueryBatch.setText(config.getString(Config.EXTRACT_REQUEST_SIZE));
-        textQueryBatch.setTextLimit(4);
         textQueryBatch.addVerifyListener(new VerifyListener() {
             @Override
             public void verifyText(VerifyEvent event) {
@@ -388,7 +392,8 @@ public class AdvancedSettingsDialog extends Dialog {
             }
         });
         data = new GridData();
-        data.widthHint = 30;
+        textQueryBatch.setTextLimit(4);
+        data.widthHint = 4 * textSize.x;
         textQueryBatch.setLayoutData(data);
 
         //enable/disable output of success file for extracts
@@ -464,7 +469,7 @@ public class AdvancedSettingsDialog extends Dialog {
         textSplitterValue = new Text(restComp, SWT.BORDER);
         textSplitterValue.setText(config.getString(Config.CSV_DELIMETER_OTHER_VALUE));
         data = new GridData();
-        data.widthHint = 25;
+        data.widthHint = 15 * textSize.x;
         textSplitterValue.setLayoutData(data);
         
         // Enable Bulk API Setting
@@ -525,7 +530,7 @@ public class AdvancedSettingsDialog extends Dialog {
         buttonUseBulkV2Api.setVisible(false);
 
         // timezone
-        textTimezone = createTimezoneTextInput(restComp, "AdvancedSettingsDialog.timezone", Config.TIMEZONE, TimeZone.getDefault().getID(), 200);
+        textTimezone = createTimezoneTextInput(restComp, "AdvancedSettingsDialog.timezone", Config.TIMEZONE, TimeZone.getDefault().getID(), 30 * textSize.x);
 
         // proxy Host
         Label labelProxyHost = new Label(restComp, SWT.RIGHT | SWT.WRAP);
@@ -535,8 +540,7 @@ public class AdvancedSettingsDialog extends Dialog {
 
         textProxyHost = new Text(restComp, SWT.BORDER);
         textProxyHost.setText(config.getString(Config.PROXY_HOST));
-        data = new GridData();
-        data.widthHint = 250;
+        data = new GridData(GridData.FILL_HORIZONTAL);
         textProxyHost.setLayoutData(data);
 
         //Proxy Port
@@ -547,7 +551,6 @@ public class AdvancedSettingsDialog extends Dialog {
 
         textProxyPort = new Text(restComp, SWT.BORDER);
         textProxyPort.setText(config.getString(Config.PROXY_PORT));
-        textProxyPort.setTextLimit(5);
         textProxyPort.addVerifyListener(new VerifyListener() {
             @Override
             public void verifyText(VerifyEvent event) {
@@ -555,7 +558,8 @@ public class AdvancedSettingsDialog extends Dialog {
             }
         });
         data = new GridData();
-        data.widthHint = 30;
+        textProxyPort.setTextLimit(5);
+        data.widthHint = 5 * textSize.x;
         textProxyPort.setLayoutData(data);
 
         //Proxy Username
@@ -567,7 +571,7 @@ public class AdvancedSettingsDialog extends Dialog {
         textProxyUsername = new Text(restComp, SWT.BORDER);
         textProxyUsername.setText(config.getString(Config.PROXY_USERNAME));
         data = new GridData();
-        data.widthHint = 120;
+        data.widthHint = 20 * textSize.x;
         textProxyUsername.setLayoutData(data);
 
         //Proxy Password
@@ -579,7 +583,7 @@ public class AdvancedSettingsDialog extends Dialog {
         textProxyPassword = new Text(restComp, SWT.BORDER | SWT.PASSWORD);
         textProxyPassword.setText(config.getString(Config.PROXY_PASSWORD));
         data = new GridData();
-        data.widthHint = 120;
+        data.widthHint = 20 * textSize.x;
         textProxyPassword.setLayoutData(data);
 
 
@@ -591,8 +595,7 @@ public class AdvancedSettingsDialog extends Dialog {
 
         textProxyNtlmDomain = new Text(restComp, SWT.BORDER);
         textProxyNtlmDomain.setText(config.getString(Config.PROXY_NTLM_DOMAIN));
-        data = new GridData();
-        data.widthHint = 250;
+        data = new GridData(GridData.FILL_HORIZONTAL);
         textProxyNtlmDomain.setLayoutData(data);
         
         Label empty = new Label(restComp, SWT.NONE);
@@ -611,8 +614,7 @@ public class AdvancedSettingsDialog extends Dialog {
         clientIdInProductionText.setText(Labels.getString("AdvancedSettingsDialog.clientIdInProduction"));
         clientIdInProductionText.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         this.textProductionClientID = new Text(restComp, SWT.NONE);
-        data = new GridData();
-        data.widthHint = 500;
+        data = new GridData(GridData.FILL_HORIZONTAL);
         textProductionClientID.setLayoutData(data);
     	String clientId = config.getOAuthEnvironmentString(Config.OAUTH_PROD_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_PARTNER_CLIENTID);
     	this.textProductionClientID.setText(clientId);
@@ -621,8 +623,7 @@ public class AdvancedSettingsDialog extends Dialog {
         clientIdInSandboxText.setText(Labels.getString("AdvancedSettingsDialog.clientIdInSandbox"));
         clientIdInSandboxText.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         this.textSandboxClientID = new Text(restComp, SWT.NONE);
-        data = new GridData();
-        data.widthHint = 500;
+        data = new GridData(GridData.FILL_HORIZONTAL);
         textSandboxClientID.setLayoutData(data);
     	clientId = config.getOAuthEnvironmentString(Config.OAUTH_SB_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_PARTNER_CLIENTID);
     	this.textSandboxClientID.setText(clientId);
@@ -634,29 +635,25 @@ public class AdvancedSettingsDialog extends Dialog {
         data = new GridData();
         data.horizontalSpan = 2;
         blankAgain.setLayoutData(data);
-
-        //Row to start AT
-        Label labelLastRow = new Label(restComp, SWT.NONE);
-
+        
         String lastBatch = controller.getConfig().getString(LastRun.LAST_LOAD_BATCH_ROW);
         if (lastBatch.equals("")) { //$NON-NLS-1$
             lastBatch = "0"; //$NON-NLS-1$
         }
 
-        labelLastRow.setText(Labels.getFormattedString("AdvancedSettingsDialog.lastBatch", lastBatch)); //$NON-NLS-1$
-        data = new GridData();
-        data.horizontalSpan = 2;
-        labelLastRow.setLayoutData(data);
-
         Label labelRowToStart = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelRowToStart.setText(Labels.getString("AdvancedSettingsDialog.startRow")); //$NON-NLS-1$
+        labelRowToStart.setText(Labels.getString("AdvancedSettingsDialog.startRow")
+                + "\n("
+                + Labels.getFormattedString("AdvancedSettingsDialog.lastBatch", lastBatch)
+                + ")"); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelRowToStart.setLayoutData(data);
 
         textRowToStart = new Text(restComp, SWT.BORDER);
         textRowToStart.setText(config.getString(Config.LOAD_ROW_TO_START_AT));
         data = new GridData();
-        data.widthHint = 75;
+        textRowToStart.setTextLimit(15);
+        data.widthHint = 15 * textSize.x;
         textRowToStart.setLayoutData(data);
         textRowToStart.addVerifyListener(new VerifyListener() {
             @Override
@@ -795,6 +792,7 @@ public class AdvancedSettingsDialog extends Dialog {
 
         // Set the minimum size
         sc.setMinSize(600, 1124);
+        sc.setAlwaysShowScrollBars(true);
 
         // Expand both horizontally and vertically
         sc.setExpandHorizontal(true);
