@@ -534,14 +534,15 @@ public class ExtractionSOQLPage extends ExtractionPage {
 
         DescribeSObjectResult result = controller.getFieldTypes();
         fields = result.getFields();
-        Arrays.sort(fields, new Comparator<Field>(){
-            @Override
-            public int compare(Field f1, Field f2)
-            {
-                return f1.getName().compareTo(f2.getName());
-            }
-        });
-
+        if (config.getBoolean(Config.SORT_EXTRACT_FIELDS)) {
+            Arrays.sort(fields, new Comparator<Field>(){
+                @Override
+                public int compare(Field f1, Field f2)
+                {
+                    return f1.getName().compareTo(f2.getName());
+                }
+            });
+        }
         fieldViewer.setInput(fields);
         updateFieldComboList(null);
         builderComp.layout();

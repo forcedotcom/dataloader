@@ -211,6 +211,7 @@ public class Config {
     public static final String EXTERNAL_ID_FIELD = "sfdc.externalIdField"; //$NON-NLS-1$
     public static final String EXTRACT_REQUEST_SIZE = "sfdc.extractionRequestSize"; //$NON-NLS-1$
     public static final String EXTRACT_SOQL = "sfdc.extractionSOQL"; //$NON-NLS-1$
+    public static final String SORT_EXTRACT_FIELDS = "sfdc.sortExtractionFields"; //$NON-NLS-1$
 
     //
     // process configuration (action parameters)
@@ -400,6 +401,7 @@ public class Config {
         setDefaultValue(ENABLE_LAST_RUN_OUTPUT, true);
         setDefaultValue(RESET_URL_ON_LOGIN, true);
         setDefaultValue(EXTRACT_REQUEST_SIZE, DEFAULT_EXTRACT_REQUEST_SIZE);
+        setDefaultValue(SORT_EXTRACT_FIELDS, true);
         setDefaultValue(DAO_WRITE_BATCH_SIZE, DEFAULT_DAO_WRITE_BATCH_SIZE);
         setDefaultValue(DAO_READ_BATCH_SIZE, DEFAULT_DAO_READ_BATCH_SIZE);
         setDefaultValue(TRUNCATE_FIELDS, true);
