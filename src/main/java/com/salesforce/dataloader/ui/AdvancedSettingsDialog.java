@@ -800,6 +800,21 @@ public class AdvancedSettingsDialog extends Dialog {
         // user can type input and press Enter
         // to dismiss
         shell.setDefaultButton(ok);
+        
+        empty = new Label(buttonComp, SWT.NONE);
+        data = new GridData();
+        data.horizontalSpan = 2;
+        empty.setLayoutData(data);
+
+        empty = new Label(buttonComp, SWT.NONE);
+        data = new GridData();
+        data.horizontalSpan = 2;
+        empty.setLayoutData(data);
+
+        empty = new Label(buttonComp, SWT.NONE);
+        data = new GridData();
+        data.horizontalSpan = 2;
+        empty.setLayoutData(data);
 
         // Set the child as the scrolled content of the ScrolledComposite
         sc.setContent(container);
