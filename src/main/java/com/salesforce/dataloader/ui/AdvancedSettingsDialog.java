@@ -38,6 +38,8 @@ import org.apache.logging.log4j.LogManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.VerifyEvent;
@@ -46,6 +48,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -94,6 +97,7 @@ public class AdvancedSettingsDialog extends Dialog {
     private final Logger logger = LogManager.getLogger(AdvancedSettingsDialog.class);
     private Button buttonHideWelcomeScreen;
     private Button buttonOutputExtractStatus;
+    private Button buttonSortExtractFields;
     private Button buttonReadUtf8;
     private Button buttonWriteUtf8;
     private Button buttonEuroDates;
@@ -395,6 +399,15 @@ public class AdvancedSettingsDialog extends Dialog {
         textQueryBatch.setTextLimit(4);
         data.widthHint = 4 * textSize.x;
         textQueryBatch.setLayoutData(data);
+
+        // enable/disable sort of fields to extract
+        Label labelSortExtractFields = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelSortExtractFields.setText(Labels.getString("AdvancedSettingsDialog.sortQueryFieldsInExtraction")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelSortExtractFields.setLayoutData(data);
+
+        buttonSortExtractFields = new Button(restComp, SWT.CHECK);
+        buttonSortExtractFields.setSelection(config.getBoolean(Config.SORT_EXTRACT_FIELDS));
 
         //enable/disable output of success file for extracts
         Label labelOutputExtractStatus = new Label(restComp, SWT.RIGHT | SWT.WRAP);
@@ -727,6 +740,7 @@ public class AdvancedSettingsDialog extends Dialog {
                 config.setValue(Config.NO_COMPRESSION, buttonCompression.getSelection());
                 config.setValue(Config.TRUNCATE_FIELDS, buttonTruncateFields.getSelection());
                 config.setValue(Config.TIMEOUT_SECS, textTimeout.getText());
+                config.setValue(Config.SORT_EXTRACT_FIELDS, buttonSortExtractFields.getSelection());
                 config.setValue(Config.ENABLE_EXTRACT_STATUS_OUTPUT, buttonOutputExtractStatus.getSelection());
                 config.setValue(Config.READ_UTF8, buttonReadUtf8.getSelection());
                 config.setValue(Config.WRITE_UTF8, buttonWriteUtf8.getSelection());
@@ -791,7 +805,12 @@ public class AdvancedSettingsDialog extends Dialog {
         sc.setContent(container);
 
         // Set the minimum size
-        sc.setMinSize(600, 1124);
+        sc.addControlListener(new ControlAdapter() {
+            public void controlResized(ControlEvent e) {
+              Rectangle r = sc.getClientArea();
+              sc.setMinSize(container.computeSize(r.width, SWT.DEFAULT));
+            }
+          });
         sc.setAlwaysShowScrollBars(true);
 
         // Expand both horizontally and vertically
