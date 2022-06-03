@@ -37,9 +37,12 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -76,7 +79,11 @@ public class DataSelectionPage extends LoadPage {
         this.controller = controller;
 
         // Set the description
-        setDescription(Labels.getString("DataSelectionPage.message")); //$NON-NLS-1$
+        setDescription(Labels.getString("DataSelectionPage.message")
+                + "\n\n"
+                + Labels.getString("AdvancedSettingsDialog.batchSize")
+                + " "
+                + controller.getConfig().getString(Config.LOAD_BATCH_SIZE)); //$NON-NLS-1$
 
         setPageComplete(false);
     }
@@ -93,6 +100,8 @@ public class DataSelectionPage extends LoadPage {
 
         Composite comp = new Composite(parent, SWT.NONE);
         comp.setLayout(gridLayout);
+        GridData data = new GridData(GridData.FILL_HORIZONTAL);
+        comp.setLayoutData(data);
         lv = EntitySelectionListViewerUtil.getEntitySelectionListViewer(comp);
         lv.addSelectionChangedListener(new ISelectionChangedListener() {
             @Override
@@ -124,8 +133,7 @@ public class DataSelectionPage extends LoadPage {
         //now select the csv
 
         Composite compChooser = new Composite(comp, SWT.NONE);
-        GridData data = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_END);
-        data.widthHint = 400;
+        data = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_END);
         compChooser.setLayoutData(data);
 
         csvChooser = new FileFieldEditor(
@@ -150,6 +158,14 @@ public class DataSelectionPage extends LoadPage {
                         logger.error(Labels.getString("DataSelectionPage.errorClassCast"), cle); //$NON-NLS-1$
                     }
                 }
+            }
+        });
+        
+        // Set the size
+        comp.addControlListener(new ControlAdapter() {
+            public void controlResized(ControlEvent e) {
+              Rectangle r = comp.getParent().getClientArea();
+              comp.setSize(comp.getParent().computeSize(r.width, SWT.DEFAULT));
             }
         });
 
