@@ -28,8 +28,11 @@ package com.salesforce.dataloader.ui;
 
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -72,7 +75,6 @@ public class EntitySelectionListViewerUtil {
         listViewer.setInput(null);
         data = new GridData(GridData.FILL, GridData.FILL, true, true);
         data.heightHint = 140;
-        data.widthHint = 140;
         listViewer.getControl().setLayoutData(data);
         listViewer.addFilter(filter);
         listViewer.setSorter(new EntityViewerSorter());
@@ -95,7 +97,7 @@ public class EntitySelectionListViewerUtil {
                 listViewer.refresh();
             }
         });
-
+        
         return listViewer;
     }
 }

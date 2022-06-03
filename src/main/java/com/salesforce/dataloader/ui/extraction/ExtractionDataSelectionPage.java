@@ -36,6 +36,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.*;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -77,7 +78,11 @@ public class ExtractionDataSelectionPage extends WizardPage {
         this.controller = controller;
 
         // Set the description
-        setDescription(Labels.getString("ExtractionDataSelectionPage.description")); //$NON-NLS-1$
+        setDescription(Labels.getString("ExtractionDataSelectionPage.description")
+        + "\n\n"
+        + Labels.getString("ExtractionInputDialog.querySize")
+        + " "
+        + controller.getConfig().getString(Config.EXTRACT_REQUEST_SIZE)); //$NON-NLS-1$
 
         setPageComplete(false);
     }
@@ -130,7 +135,6 @@ public class ExtractionDataSelectionPage extends WizardPage {
         fileText = new Text(compChooser, SWT.BORDER);
         fileText.setText(Labels.getString("ExtractionDataSelectionPage.defaultFileName")); //$NON-NLS-1$
         data = new GridData(GridData.FILL_HORIZONTAL);
-        data.widthHint = 350;
         fileText.setLayoutData(data);
 
         fileText.addModifyListener(new ModifyListener() {
@@ -160,6 +164,13 @@ public class ExtractionDataSelectionPage extends WizardPage {
             }
         });
 
+        // Set the size
+        comp.addControlListener(new ControlAdapter() {
+            public void controlResized(ControlEvent e) {
+              Rectangle r = comp.getParent().getClientArea();
+              comp.setSize(comp.getParent().computeSize(r.width, SWT.DEFAULT));
+            }
+        });
         setControl(comp);
     }
 
