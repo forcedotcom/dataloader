@@ -123,6 +123,7 @@ public class Controller {
     private BulkV2Client bulkV2Client;
     private PartnerClient partnerClient;
     private LoaderWindow loaderWindow;
+    private boolean lastOperationSuccessful = true;
 
     // logger
     private static Logger logger;
@@ -710,5 +711,13 @@ public class Controller {
 
     public void clearMapper() {
         this.mapper = null;
+    }
+    
+    public void setLastOperationSuccessful(boolean successful) {
+        this.lastOperationSuccessful = successful;
+    }
+    
+    public boolean isLastOperationSuccessful() {
+        return this.lastOperationSuccessful;
     }
 }

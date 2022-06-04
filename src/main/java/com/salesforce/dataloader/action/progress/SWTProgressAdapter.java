@@ -68,7 +68,7 @@ public class SWTProgressAdapter implements ILoaderProgress {
     @Override
     public void doneSuccess(String message) {
         monitor.done();
-
+        controller.setLastOperationSuccessful(true);
         dispMessage = message;
         Display.getDefault().syncExec(new Thread() {
             @Override
@@ -92,6 +92,7 @@ public class SWTProgressAdapter implements ILoaderProgress {
     @Override
     public void doneError(String message) {
         monitor.done();
+        controller.setLastOperationSuccessful(false);
         dispMessage = message;
         Display.getDefault().syncExec(new Thread() {
             @Override

@@ -148,7 +148,7 @@ public class ExtractionWizard extends BaseWizard {
             return false;
         }
 
-        return true;
+        return getController().isLastOperationSuccessful();
     }
 
     @Override
