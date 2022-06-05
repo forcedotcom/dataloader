@@ -169,8 +169,9 @@ public class ExtractionSOQLPage extends ExtractionPage {
         ColumnViewerToolTipSupport.enableFor(fieldViewer);
         fieldViewer.setLabelProvider(new ExtrFieldLabelProvider());
         fieldViewer.setContentProvider(new ExtrFieldContentProvider());
-        data = new GridData(GridData.FILL_HORIZONTAL);
-        data.heightHint = 100;
+        data = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
+        data.heightHint = 150;
+        data.widthHint = 135;
         fieldViewer.getTable().setLayoutData(data);
 
         FieldFilter filter = new FieldFilter(search);
