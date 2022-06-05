@@ -35,6 +35,7 @@ import org.apache.logging.log4j.LogManager;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -45,7 +46,6 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.ui.UIUtils;
-import com.salesforce.dataloader.ui.entitySelection.EntityFilter;
 import com.sforce.soap.partner.*;
 
 /**
@@ -68,7 +68,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
             "less than or equals", "greater than or equals" }; //$NON-NLS-1$ //$NON-NLS-2$
     private final String[] operationsDisplayMulti = { "equals", "not equals", "includes", "excludes" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     private HashMap<String, String> operationMap;
-    private Combo fieldCombo;
+    private CCombo fieldCombo;
     private Composite whereComp;
     private Composite builderComp;
     private boolean isPickListField;
@@ -144,8 +144,6 @@ public class ExtractionSOQLPage extends ExtractionPage {
 
         builderComp = new Composite(comp, SWT.NONE);
         data = new GridData(SWT.FILL, SWT.FILL, true, true);
-        //data.heightHint = 170;
-        //data.widthHint = 650;
         builderComp.setLayoutData(data);
         gridLayout = new GridLayout(2, false);
         gridLayout.horizontalSpacing = 25;
@@ -168,6 +166,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
         fieldComp.setLayoutData(data);
 
         fieldViewer = CheckboxTableViewer.newCheckList(fieldComp, SWT.BORDER);
+        ColumnViewerToolTipSupport.enableFor(fieldViewer);
         fieldViewer.setLabelProvider(new ExtrFieldLabelProvider());
         fieldViewer.setContentProvider(new ExtrFieldContentProvider());
         data = new GridData(GridData.FILL_HORIZONTAL);
@@ -211,7 +210,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
         Label valLabel = new Label(whereComp, SWT.CENTER);
         valLabel.setText(Labels.getString("ExtractionSOQLPage.value")); //$NON-NLS-1$
 
-        fieldCombo = new Combo(whereComp, SWT.DROP_DOWN);
+        fieldCombo = new CCombo(whereComp, SWT.DROP_DOWN | SWT.V_SCROLL);
         operCombo = new Combo(whereComp, SWT.DROP_DOWN);
         operCombo.setItems(operationsDisplayNormal);
         fieldCombo.addSelectionListener(new SelectionListener() {
@@ -456,8 +455,6 @@ public class ExtractionSOQLPage extends ExtractionPage {
         soqlText = new Text(comp, SWT.MULTI | SWT.WRAP | SWT.BORDER | SWT.V_SCROLL);
         data = new GridData(GridData.FILL_BOTH);
         data.heightHint = 80;
-        data.widthHint = 250;
-
         soqlText.setLayoutData(data);
 
         setControl(comp);
@@ -560,7 +557,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
             if(FieldType.encryptedstring != fields[i].getType()) {
                 if (filterStr == null 
                         || filterStr.isEmpty() 
-                        || name.contains(filterStr)) {
+                        || name.contains(filterStr.toLowerCase())) {
                     fieldNames.add(fields[i].getName());
                 }
             }

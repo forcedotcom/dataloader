@@ -72,6 +72,12 @@ public class SforceLabelProvider implements ITableLabelProvider {
             break;
         case MappingDialog.FIELD_TYPE:
             text = field.getType().toString();
+            if ("string".equalsIgnoreCase(text) || "textarea".equalsIgnoreCase(text)) {
+                text = text
+                        + "("
+                        + field.getLength()
+                        +")";
+            }
             break;
         }
         return text;

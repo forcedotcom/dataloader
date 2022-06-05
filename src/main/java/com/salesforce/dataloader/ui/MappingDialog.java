@@ -473,7 +473,7 @@ public class MappingDialog extends Dialog {
         });
 
         //  Add the third column - type
-        tc = new TableColumn(sforceTable, SWT.RIGHT);
+        tc = new TableColumn(sforceTable, SWT.LEFT);
         tc.setText(Labels.getString("MappingDialog.sforceType")); //$NON-NLS-1$
         tc.addSelectionListener(new SelectionAdapter() {
             @Override
