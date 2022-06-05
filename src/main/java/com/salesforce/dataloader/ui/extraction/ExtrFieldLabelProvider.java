@@ -26,36 +26,22 @@
 
 package com.salesforce.dataloader.ui.extraction;
 
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.swt.widgets.Control;
 
 import com.sforce.soap.partner.Field;
 
 /**
  * 
  */
-public class ExtrFieldLabelProvider implements ITableLabelProvider {
+public class ExtrFieldLabelProvider extends CellLabelProvider {
 
     public ExtrFieldLabelProvider() {
     }
 
-    @Override
-    public Image getColumnImage(Object arg0, int arg1) {
-        return null;
-    }
-
-
-    /**
-     * Gets the text for the specified column
-     * 
-     * @return String
-     */
-    @Override
-    public String getColumnText(Object arg0, int arg1) {
-        return ((Field) arg0).getName();
-    }
-
+   
     /**
      * Adds a listener
      * 
@@ -64,6 +50,7 @@ public class ExtrFieldLabelProvider implements ITableLabelProvider {
     @Override
     public void addListener(ILabelProviderListener arg0) {
         // Throw it away
+        ILabelProviderListener listener = arg0;
     }
 
     /**
@@ -92,5 +79,36 @@ public class ExtrFieldLabelProvider implements ITableLabelProvider {
     @Override
     public void removeListener(ILabelProviderListener arg0) {
         // Do nothing
+    }
+
+    @Override
+    public void update(ViewerCell cell) {
+        Field field = (Field)cell.getElement();
+        String fieldTypeStr = getFieldTypeStr(field);
+        cell.setText(field.getName() + " (" + fieldTypeStr + ")");
+        String tooltipStr = field.getInlineHelpText();
+        if (tooltipStr == null) {
+            tooltipStr = fieldTypeStr;
+        } else {
+            tooltipStr = fieldTypeStr + "\n" + tooltipStr;
+        }
+        Control control = cell.getControl();
+        control.getParent().setToolTipText(tooltipStr);
+        for (Control child : control.getParent().getChildren()) {
+            child.setToolTipText(tooltipStr);
+        }
+    }
+    
+    private String getFieldTypeStr(Field field) {
+        String fieldTypeStr = field.getType().toString();
+        if (fieldTypeStr.startsWith("_")) {
+            fieldTypeStr = fieldTypeStr.substring(1);
+        }
+        if ("string".equalsIgnoreCase(fieldTypeStr) || "textarea".equalsIgnoreCase(fieldTypeStr)) {
+            fieldTypeStr = fieldTypeStr
+                    + ", "
+                    + field.getLength();
+        }
+        return fieldTypeStr;
     }
 }

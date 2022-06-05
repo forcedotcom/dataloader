@@ -230,6 +230,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
         buttons = new HashMap<>();
         setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL | SWT.RESIZE);
         setWizard(newWizard);
+        setShellStyle(getShellStyle() | SWT.RESIZE);
         // since VAJava can't initialize an instance var with an anonymous
         // class outside a constructor we do it here:
         cancelListener = new SelectionAdapter() {
@@ -1067,6 +1068,8 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
         updateTitleBar();
         // Update the buttons
         updateButtons();
+        // update size
+        updateSize();
     }
 
     /*
