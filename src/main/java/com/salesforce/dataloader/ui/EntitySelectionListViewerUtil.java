@@ -74,7 +74,6 @@ public class EntitySelectionListViewerUtil {
         listViewer.setLabelProvider(new EntityLabelProvider());
         listViewer.setInput(null);
         data = new GridData(GridData.FILL, GridData.FILL, true, true);
-        data.heightHint = 140;
         listViewer.getControl().setLayoutData(data);
         listViewer.addFilter(filter);
         listViewer.setSorter(new EntityViewerSorter());

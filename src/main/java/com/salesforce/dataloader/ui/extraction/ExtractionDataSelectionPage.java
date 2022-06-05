@@ -164,13 +164,6 @@ public class ExtractionDataSelectionPage extends WizardPage {
             }
         });
 
-        // Set the size
-        comp.addControlListener(new ControlAdapter() {
-            public void controlResized(ControlEvent e) {
-              Rectangle r = comp.getParent().getClientArea();
-              comp.setSize(comp.getParent().computeSize(r.width, SWT.DEFAULT));
-            }
-        });
         setControl(comp);
     }
 
