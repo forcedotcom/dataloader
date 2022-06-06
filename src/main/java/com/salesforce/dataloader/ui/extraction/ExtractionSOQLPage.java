@@ -35,7 +35,6 @@ import org.apache.logging.log4j.LogManager;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -68,7 +67,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
             "less than or equals", "greater than or equals" }; //$NON-NLS-1$ //$NON-NLS-2$
     private final String[] operationsDisplayMulti = { "equals", "not equals", "includes", "excludes" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     private HashMap<String, String> operationMap;
-    private CCombo fieldCombo;
+    private Combo fieldCombo;
     private Composite whereComp;
     private Composite builderComp;
     private boolean isPickListField;
@@ -211,7 +210,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
         Label valLabel = new Label(whereComp, SWT.CENTER);
         valLabel.setText(Labels.getString("ExtractionSOQLPage.value")); //$NON-NLS-1$
 
-        fieldCombo = new CCombo(whereComp, SWT.DROP_DOWN | SWT.V_SCROLL);
+        fieldCombo = new Combo(whereComp, SWT.DROP_DOWN);
         operCombo = new Combo(whereComp, SWT.DROP_DOWN);
         operCombo.setItems(operationsDisplayNormal);
         fieldCombo.addSelectionListener(new SelectionListener() {
