@@ -38,12 +38,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.util.DAORowUtil;
+import com.sforce.soap.partner.LimitInfo;
 import com.sforce.ws.ConnectionException;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -191,10 +193,33 @@ public class DataSelectionDialog extends Dialog {
                     }
                     success = true;
                     ok.setEnabled(true);
+                    LimitInfo apiLimitInfo;
+                    String apiLimitInfoStr = "";
+                    PartnerClient partnerClient = controller.getPartnerClient();
+                    if (partnerClient != null) {
+                        apiLimitInfo = partnerClient.getAPILimitInfo();
+                        if (apiLimitInfo != null) {
+                            apiLimitInfoStr = "\n    "
+                                    + Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
+                                    + "\n    "
+                                    + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit());
+                            logger.debug(apiLimitInfoStr);
+                            // Set the description
+                       }
+                    }
+                    // Set the description
                     label.setText(Labels.getFormattedString(
-                            "DataSelectionDialog.initSuccess", String.valueOf(totalRows))); //$NON-NLS-1$
+                            "DataSelectionDialog.initSuccess", String.valueOf(totalRows))
+                            + "\n\n    "
+                            + Labels.getString("AdvancedSettingsDialog.batchSize")
+                            + " "
+                            + controller.getConfig().getString(Config.LOAD_BATCH_SIZE)
+                            + "\n    "
+                            + Labels.getString("AdvancedSettingsDialog.startRow")
+                            + " "
+                            + controller.getConfig().getString(Config.LOAD_ROW_TO_START_AT)
+                            + apiLimitInfoStr); //$NON-NLS-1$
                     label.getParent().pack();
-
                 } catch (ConnectionException ex) {
                     success = false;
                     ok.setEnabled(true);

@@ -41,6 +41,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.Labels;
@@ -101,7 +102,11 @@ public class ExtractionSOQLPage extends ExtractionPage {
         this.controller = controller;
 
         // Set the description
-        setDescription(Labels.getString("ExtractionSOQLPage.description")); //$NON-NLS-1$
+        setDescription(Labels.getString("ExtractionSOQLPage.description")
+                + "\n\n    "
+                + Labels.getString("ExtractionInputDialog.querySize")
+                + " "
+                + controller.getConfig().getString(Config.EXTRACT_REQUEST_SIZE)); //$NON-NLS-1$
         initOperMap();
 
         setPageComplete(false);
@@ -530,6 +535,23 @@ public class ExtractionSOQLPage extends ExtractionPage {
         Config config = controller.getConfig();
 
         DescribeSObjectResult result = controller.getFieldTypes();
+
+        LimitInfo apiLimitInfo;
+        String apiLimitInfoStr = "";
+        PartnerClient partnerClient = controller.getPartnerClient();
+        if (partnerClient != null) {
+            apiLimitInfo = partnerClient.getAPILimitInfo();
+            if (apiLimitInfo != null) {
+                apiLimitInfoStr = "\n    "
+                        + Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
+                        + "\n    "
+                        + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit());
+                logger.debug(apiLimitInfoStr);
+                // Set the description
+                String oldDescription = getDescription();
+                setDescription(oldDescription + apiLimitInfoStr);
+           }
+        }
         fields = result.getFields();
         if (config.getBoolean(Config.SORT_EXTRACT_FIELDS)) {
             Arrays.sort(fields, new Comparator<Field>(){

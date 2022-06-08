@@ -48,11 +48,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.action.OperationInfo;
+import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
 import com.salesforce.dataloader.ui.entitySelection.*;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
+import com.sforce.soap.partner.LimitInfo;
 
 /**
  * Describe your class here.
@@ -80,10 +82,14 @@ public class DataSelectionPage extends LoadPage {
 
         // Set the description
         setDescription(Labels.getString("DataSelectionPage.message")
-                + "\n\n"
+                + "\n\n    "
                 + Labels.getString("AdvancedSettingsDialog.batchSize")
                 + " "
-                + controller.getConfig().getString(Config.LOAD_BATCH_SIZE)); //$NON-NLS-1$
+                + controller.getConfig().getString(Config.LOAD_BATCH_SIZE)
+                + "\n    "
+                + Labels.getString("AdvancedSettingsDialog.startRow")
+                + " "
+                + controller.getConfig().getString(Config.LOAD_ROW_TO_START_AT)); //$NON-NLS-1$
 
         setPageComplete(false);
     }
@@ -168,6 +174,23 @@ public class DataSelectionPage extends LoadPage {
      * Function to dynamically set the entity list
      */
     private void setInput(Map<String, DescribeGlobalSObjectResult> entityDescribes) {
+        LimitInfo apiLimitInfo;
+        String apiLimitInfoStr = "";
+        PartnerClient partnerClient = controller.getPartnerClient();
+        if (partnerClient != null) {
+            apiLimitInfo = partnerClient.getAPILimitInfo();
+            if (apiLimitInfo != null) {
+                apiLimitInfoStr = "\n    "
+                        + Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
+                        + "\n    "
+                        + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit());
+                logger.debug(apiLimitInfoStr);
+                // Set the description
+                String oldDescription = getDescription();
+                setDescription(oldDescription + apiLimitInfoStr);
+           }
+        }
+        
         OperationInfo operation = controller.getConfig().getOperationInfo();
         Map<String, DescribeGlobalSObjectResult> inputDescribes = new HashMap<String, DescribeGlobalSObjectResult>();
 
