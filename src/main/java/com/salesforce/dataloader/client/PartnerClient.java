@@ -47,6 +47,8 @@ import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Error;
 import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.FieldType;
+import com.sforce.soap.partner.LimitInfo;
+import com.sforce.soap.partner.LimitInfoHeader_element;
 import com.sforce.soap.partner.LoginResult;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.QueryResult;
@@ -492,6 +494,16 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     public Map<String, DescribeRefObject> getReferenceDescribes() {
         return referenceDescribes;
+    }
+    
+    public LimitInfo getAPILimitInfo() {
+        LimitInfoHeader_element limitInfoElement = getClient().getLimitInfoHeader();
+        for (LimitInfo info : limitInfoElement.getLimitInfo()) {
+            if ("API REQUESTS".equalsIgnoreCase(info.getType())) {
+                return info;
+            }
+        }
+        return null;
     }
 
     boolean isSessionValid() {

@@ -30,6 +30,8 @@ import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -41,6 +43,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
@@ -51,6 +54,7 @@ import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.ui.UIUtils;
 import com.salesforce.dataloader.ui.entitySelection.*;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
+import com.sforce.soap.partner.LimitInfo;
 import com.sforce.ws.ConnectionException;
 
 /**
@@ -69,6 +73,7 @@ public class ExtractionDataSelectionPage extends WizardPage {
     private Text fileText;
     public Composite comp;
     private boolean success;
+    private final Logger logger = LogManager.getLogger(ExtractionDataSelectionPage.class);
 
     public ExtractionDataSelectionPage(Controller controller) {
         super(	Labels.getString("ExtractionDataSelectionPage.title"), 
@@ -79,7 +84,7 @@ public class ExtractionDataSelectionPage extends WizardPage {
 
         // Set the description
         setDescription(Labels.getString("ExtractionDataSelectionPage.description")
-        + "\n\n"
+        + "\n\n    "
         + Labels.getString("ExtractionInputDialog.querySize")
         + " "
         + controller.getConfig().getString(Config.EXTRACT_REQUEST_SIZE)); //$NON-NLS-1$
@@ -171,6 +176,23 @@ public class ExtractionDataSelectionPage extends WizardPage {
      * Function to dynamically set the entity list
      */
     public void setInput(Map<String, DescribeGlobalSObjectResult> entityDescribes) {
+        // update description
+        LimitInfo apiLimitInfo;
+        String apiLimitInfoStr = "";
+        PartnerClient partnerClient = controller.getPartnerClient();
+        if (partnerClient != null) {
+            apiLimitInfo = partnerClient.getAPILimitInfo();
+            if (apiLimitInfo != null) {
+                apiLimitInfoStr = "\n    "
+                        + Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
+                        + "\n    "
+                        + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit());
+                logger.debug(apiLimitInfoStr);
+                // Set the description
+                String oldDescription = getDescription();
+                setDescription(oldDescription + apiLimitInfoStr);
+           }
+        }
         Map<String, DescribeGlobalSObjectResult> inputDescribes = new HashMap<String, DescribeGlobalSObjectResult>();
 
         if (entityDescribes != null) {
@@ -184,7 +206,6 @@ public class ExtractionDataSelectionPage extends WizardPage {
         lv.setInput(inputDescribes);
         lv.refresh();
         lv.getControl().getParent().pack();
-
     }
 
     private boolean checkEntityStatus() {
