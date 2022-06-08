@@ -60,7 +60,7 @@ public class EntitySelectionListViewerUtil {
         // Add a checkbox to toggle filter
         Button filterAll = new Button(comp, SWT.CHECK);
         filterAll.setText(Labels.getString(propertiesPrefixStr + ".showAll")); //$NON-NLS-1$
-
+        filterAll.setToolTipText(Labels.getString(propertiesPrefixStr + ".showAllToolTip"));
 
         Text search = new Text(comp, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH);
         data = new GridData(GridData.FILL_HORIZONTAL);
