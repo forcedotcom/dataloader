@@ -29,6 +29,8 @@ package com.salesforce.dataloader.ui;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.model.LoginCriteria;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.widgets.*;
 
 /**
@@ -51,27 +53,62 @@ public class UsernamePasswordLoginStandardControl extends Composite {
 
         grid.createLabel(4, Labels.getString("SettingsPage.username"));
         userName = grid.createText(6, SWT.BORDER | SWT.FILL, authentication.getConfig().getString(Config.USERNAME));
+        userName.addKeyListener(new KeyListener() {
+            @Override
+            public void keyReleased(KeyEvent e){}
+            @Override
+            public void keyPressed(KeyEvent e){
+                if (e.character == '\r') {
+                    password.setFocus();
+                }
+            }
+        });
         grid.createPadding(2);
 
         grid.createLabel(4, Labels.getString("SettingsPage.password"));
         password = grid.createText(6, SWT.PASSWORD | SWT.BORDER, "");
+        password.addKeyListener(new KeyListener() {
+            @Override
+            public void keyReleased(KeyEvent e){}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (!"".equals(loginLabel.getText())) {
+                    loginLabel.setText(""); // clear the login status text
+                }
+                if (e.character == '\r') {
+                    attempt_login();
+                }
+            }
+        });
         grid.createPadding(2);
 
         grid.createLabel(4, Labels.getString("SettingsPage.instServerUrl"));
         instanceUrl = grid.createText(6, SWT.BORDER, authentication.getConfig().getString(Config.ENDPOINT));
         grid.createPadding(2);
 
-        loginLabel = grid.createLabel(8, "");
+        Label emptyLabel = grid.createLabel(8, "");
         loginButton = grid.createButton(2, SWT.PUSH | SWT.FILL | SWT.FLAT, Labels.getString("SettingsPage.login"));
         loginButton.addListener(SWT.Selection, this::loginButton_Clicked);
         grid.createPadding(2);
+        loginLabel = grid.createLabel(10, "");
     }
 
     private void loginButton_Clicked(Event event) {
+        attempt_login();
+    }
+    
+    private void attempt_login() {
         LoginCriteria criteria = new LoginCriteria(LoginCriteria.UsernamePasswordLoginStandard);
         criteria.setInstanceUrl(instanceUrl.getText());
         criteria.setUserName(userName.getText());
         criteria.setPassword(password.getText());
-        authentication.login(criteria, loginLabel::setText);
+        authentication.login(criteria, this::setLoginStatus);
+    }
+    
+    private void setLoginStatus(String statusStr) {
+        if (Labels.getString("SettingsPage.loginSuccessful").equalsIgnoreCase(statusStr)) {
+            loginButton.setEnabled(false);
+        }
+        loginLabel.setText(statusStr);
     }
 }
