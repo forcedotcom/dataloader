@@ -95,7 +95,7 @@ public class Grid12 {
     }
 
     public Label createLabel(int columns, String message) {
-        return createLabel(columns, message, SWT.RIGHT);
+        return createLabel(columns, message, SWT.RIGHT | SWT.WRAP);
     }
 
     public Label createLabel(int columns, String message, int style) {

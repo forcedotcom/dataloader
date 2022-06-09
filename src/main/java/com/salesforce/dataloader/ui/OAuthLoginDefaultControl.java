@@ -61,15 +61,23 @@ public class OAuthLoginDefaultControl extends Composite {
 
         grid.createPadding(2);
 
-        loginLabel = grid.createLabel(8, "");
+        Label emptyLabel = grid.createLabel(8, "");
         loginButton = grid.createButton(2, SWT.PUSH | SWT.FILL | SWT.FLAT, Labels.getString("SettingsPage.login"));
         loginButton.addListener(SWT.Selection, this::loginButton_Clicked);
         grid.createPadding(2);
+        
+        loginLabel = grid.createLabel(10, "");
     }
 
     protected void loginButton_Clicked(Event event) {
         LoginCriteria criteria = new LoginCriteria(LoginCriteria.OAuthLoginDefault);
         criteria.setEnvironment(environment.getText());
-        authenticator.login(criteria, loginLabel::setText);
+        authenticator.login(criteria, this::setLoginStatus);
+    }
+    private void setLoginStatus(String statusStr) {
+        if (Labels.getString("SettingsPage.loginSuccessful").equalsIgnoreCase(statusStr)) {
+            loginButton.setEnabled(false);
+        }
+        loginLabel.setText(statusStr);
     }
 }
