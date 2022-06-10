@@ -36,13 +36,13 @@ echo.
 :AFTER_BANNER
  
 IF NOT "%DATALOADER_JAVA_HOME%" == "" (
-    set JAVA_HOME="%DATALOADER_JAVA_HOME%"
+    set JAVA_HOME=%DATALOADER_JAVA_HOME%
 )
 
 :CheckMinJRE
     echo Data Loader requires Java JRE %MIN_JAVA_VERSION% or later. Checking if it is installed...
 
-    PATH="%JAVA_HOME%"\bin\;%PATH%;
+    PATH=%JAVA_HOME%\bin\;%PATH%;
 
     java -version 1>nul 2>nul || (
         goto NoJavaErrorExit
