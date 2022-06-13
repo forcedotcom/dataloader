@@ -4,3 +4,4 @@
 #Industry = Industry
 Name=Name
 NumEmp=NumberOfEmployees
+RichText=RichText__c

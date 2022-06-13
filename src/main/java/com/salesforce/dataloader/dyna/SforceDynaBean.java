@@ -78,7 +78,7 @@ public class SforceDynaBean {
         for (Field field : fields) {
             String fieldName = field.getName();
             //see which class type equals the field type
-            Class classType = getConverterClass(field);
+            Class<?> classType = getConverterClass(field);
             dynaProps.add(new DynaProperty(fieldName, classType));
 
             // if field is a reference to another object, remember the reference
@@ -276,6 +276,65 @@ public class SforceDynaBean {
         }
         return sObjects;
     }
+    
+    private static final int NONBREAKING_SPACE_ASCII_VAL = 0xA0;
+    private static Controller currentController = null;
+    private static ArrayList<String> htmlFormattedFieldList = null;
+
+    private static synchronized List<String> getHtmlFormattedFieldList(Controller controller) {
+        if (controller == currentController && htmlFormattedFieldList != null) {
+            return htmlFormattedFieldList;
+        }
+        if (controller == null) {
+            return null;
+        }
+        if (!controller.isLoggedIn()) {
+            // clear cached values if not logged in
+            controller = null;
+            return null;
+        }
+        currentController = controller;
+        htmlFormattedFieldList = new ArrayList<String>();
+        DescribeSObjectResult result = controller.getFieldTypes();
+        Field[] fields = result.getFields();
+        for (Field field : fields) {
+            if (field.getHtmlFormatted()) {
+                htmlFormattedFieldList.add(field.getName());
+            }
+        }
+        return htmlFormattedFieldList;
+    }
+    
+    private static Object getFieldValue(Controller controller, String fieldName, DynaBean dynaBean) {
+        List<String> htmlFormattedFieldList = getHtmlFormattedFieldList(controller);
+        if (htmlFormattedFieldList == null || !htmlFormattedFieldList.contains(fieldName)) {
+            return dynaBean.get(fieldName);
+        }
+        // field value is a String because it is HTML formatted.
+        return getStringFieldValue(controller, fieldName, (String)dynaBean.get(fieldName));
+
+    }
+    
+    public static String getStringFieldValue(Controller controller, String fieldName, String fieldValue) {
+        List<String> htmlFormattedFieldList = getHtmlFormattedFieldList(controller);
+        if (htmlFormattedFieldList == null || !htmlFormattedFieldList.contains(fieldName)) {
+            return fieldValue;
+        }
+        
+        // The field is a HTML Formatted text field such as RichText
+        StringBuffer htmlFormattedFieldVal = new StringBuffer("");
+        for (int i = 0, len = fieldValue.length(); i < len; i++) {
+            char c = fieldValue.charAt(i);
+            int cval = c;
+            if (controller.getConfig().getBoolean(Config.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT) 
+                && (Character.isWhitespace(c) || cval == NONBREAKING_SPACE_ASCII_VAL)) {
+                htmlFormattedFieldVal.append("&nbsp;");
+            } else {
+                htmlFormattedFieldVal.append(c);
+            }
+        }
+        return htmlFormattedFieldVal.toString();
+    }
 
     /**
      * @param entityName
@@ -286,7 +345,6 @@ public class SforceDynaBean {
      * @throws NoSuchMethodException
      * @throws ParameterLoadException
      */
-    @SuppressWarnings("unchecked")
     public static SObject getSObject(Controller controller, String entityName, DynaBean dynaBean) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, ParameterLoadException {
         SObject sObj = new SObject();
         sObj.setType(entityName);
@@ -299,7 +357,7 @@ public class SforceDynaBean {
                     SObjectReference sObjRef = (SObjectReference)value;
                     if (!sObjRef.isNull()) sObjRef.addReferenceToSObject(controller, sObj, fName);
                 } else {
-                    sObj.setField(fName, dynaBean.get(fName));
+                    sObj.setField(fName, getFieldValue(controller, fName, dynaBean));
                 }
             }
         }
