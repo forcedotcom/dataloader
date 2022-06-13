@@ -56,7 +56,6 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.DataWriter;
-import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.LoadException;
@@ -221,8 +220,6 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 if (!getController().attachmentsEnabled())
                     throw new LoadException(Messages.getMessage("FinishPage", "cannotMapBase64ForBulkApi", fieldName));
                 col = this.jobUtil.addAttachment((byte[])fieldValue);
-            } else if (fieldValue instanceof String) {
-                col = SforceDynaBean.getStringFieldValue(getController(), fieldName, (String)fieldValue);
             }
             writeColumnToCsv(out, col);
         } else {

@@ -26,12 +26,14 @@
 
 package com.salesforce.dataloader.action.visitor;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
 import org.apache.commons.beanutils.*;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
@@ -40,6 +42,8 @@ import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.mapping.LoadMapper;
 import com.sforce.async.AsyncApiException;
+import com.sforce.soap.partner.DescribeSObjectResult;
+import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 
@@ -103,14 +107,29 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         Row sforceDataRow = getMapper().mapData(row);
         try {
             convertBulkAPINulls(sforceDataRow);
-            dynaArray.add(SforceDynaBean.convertToDynaBean(dynaClass, sforceDataRow));
-        } catch (ConversionException conve) {
+            DynaBean dynaBean = SforceDynaBean.convertToDynaBean(dynaClass, sforceDataRow);
+            Map<String, String> fieldMap = BeanUtils.describe(dynaBean);
+            for (String fName : fieldMap.keySet()) {
+                if (fieldMap.get(fName) != null) {
+                    // see if any entity foreign key references are embedded here
+                    Object value = this.getFieldValue(fName, dynaBean.get(fName));
+                    dynaBean.set(fName, value);
+                }
+            }
+            dynaArray.add(dynaBean);
+        } catch (ConversionException | IllegalAccessException conve) {
             String errMsg = Messages.getMessage("Visitor", "conversionErrorMsg", conve.getMessage());
             getLogger().error(errMsg, conve);
 
             conversionFailed(row, errMsg);
             // this row cannot be added since conversion has failed
             return false;
+        } catch (InvocationTargetException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
 
         // add the data for writing to the result files
@@ -181,6 +200,56 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     @Override
     protected LoadMapper getMapper() {
         return (LoadMapper)super.getMapper();
+    }
+    
+    private static final int NONBREAKING_SPACE_ASCII_VAL = 0xA0;
+    private static Controller currentController = null;
+    private static ArrayList<String> htmlFormattedFieldList = null;
+
+    private synchronized List<String> getHtmlFormattedFieldList() {
+        if (getController() == currentController && htmlFormattedFieldList != null) {
+            return htmlFormattedFieldList;
+        }
+        if (getController() == null) {
+            return null;
+        }
+        if (!getController().isLoggedIn()) {
+            // clear cached values if not logged in
+            currentController = null;
+            return null;
+        }
+        currentController = getController();
+        htmlFormattedFieldList = new ArrayList<String>();
+        DescribeSObjectResult result = getController().getFieldTypes();
+        Field[] fields = result.getFields();
+        for (Field field : fields) {
+            if (field.getHtmlFormatted()) {
+                htmlFormattedFieldList.add(field.getName());
+            }
+        }
+        return htmlFormattedFieldList;
+    }
+    
+    public Object getFieldValue(String fieldName, Object fieldValue) {
+        List<String> htmlFormattedFieldList = getHtmlFormattedFieldList();
+        if (htmlFormattedFieldList == null || !htmlFormattedFieldList.contains(fieldName)) {
+            return fieldValue;
+        }
+        
+        // The field is a HTML Formatted text field such as RichText
+        String fvalue = (String)fieldValue;
+        StringBuffer htmlFormattedFieldVal = new StringBuffer("");
+        for (int i = 0, len = fvalue.length(); i < len; i++) {
+            char c = fvalue.charAt(i);
+            int cval = c;
+            if (getController().getConfig().getBoolean(Config.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT) 
+                && (Character.isWhitespace(c) || cval == NONBREAKING_SPACE_ASCII_VAL)) {
+                htmlFormattedFieldVal.append("&nbsp;");
+            } else {
+                htmlFormattedFieldVal.append(c);
+            }
+        }
+        return htmlFormattedFieldVal.toString();
     }
 
 }
