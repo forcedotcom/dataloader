@@ -212,6 +212,7 @@ public class Config {
     public static final String EXTRACT_REQUEST_SIZE = "sfdc.extractionRequestSize"; //$NON-NLS-1$
     public static final String EXTRACT_SOQL = "sfdc.extractionSOQL"; //$NON-NLS-1$
     public static final String SORT_EXTRACT_FIELDS = "sfdc.sortExtractionFields"; //$NON-NLS-1$
+    public static final String LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT = "sfdc.load.preserveWhitespaceInRichText";
 
     //
     // process configuration (action parameters)
@@ -448,6 +449,7 @@ public class Config {
         setDefaultValue(BUFFER_UNPROCESSED_BULK_QUERY_RESULTS, false);
         setDefaultValue(BULKV2_API_ENABLED, false);
         setDefaultValue(OAUTH_LOGIN_FROM_BROWSER, false);
+        setDefaultValue(LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
     }
 
     /**

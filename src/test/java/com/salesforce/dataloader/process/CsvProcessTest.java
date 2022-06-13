@@ -348,6 +348,69 @@ public class CsvProcessTest extends ProcessTestBase {
     }
 
     /**
+     * Verify that if not all columns are matched, that the DL operation cannot go forward.
+     *
+     * @expectedResults Assert that all the records were inserted and that the constant value was mapped as well.
+     *
+     */
+    @Test
+    public void testHtmlFormattingInInsert() throws Exception {
+        _doTestHtmlFormattingInInsert(true);
+        _doTestHtmlFormattingInInsert(false);
+    }
+    
+    private void _doTestHtmlFormattingInInsert(boolean preserveWhitespaceInRichText) throws Exception {
+        final int NONBREAKING_SPACE_ASCII_VAL = 0xA0;
+        final int numberOfRows = 4;
+
+        // insert the values
+        Map<String, String> argumentMap = getTestConfig(OperationInfo.insert,
+                getTestDataDir() + "/accountsForInsert.csv", 
+                
+                getTestDataDir() + "/nonMappedFieldsPermittedInDLTransactionMap.sdl",
+                false);
+        argumentMap.put(Config.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, 
+                        Boolean.toString(preserveWhitespaceInRichText));
+
+
+        SObject[] returnedAccounts = retrieveAccounts(runProcess(argumentMap, 
+                                        numberOfRows), "RichText__c");
+
+        //quick sanity check on the inserted record.
+        for (SObject acct : returnedAccounts) {
+            String textWithSpaceChars = (String)acct.getField("RichText__c");
+            StringBuffer buffer = new StringBuffer();
+            for (int i = 0, len = textWithSpaceChars.length(); i < len; i++) {
+                char c = textWithSpaceChars.charAt(i);
+                int cval = c;
+                if (cval == NONBREAKING_SPACE_ASCII_VAL) {
+                    buffer.append(' ');
+                } else {
+                    buffer.append(c);
+                }
+            }
+            textWithSpaceChars = buffer.toString();
+            String textWithoutLeadingSpaceChars = textWithSpaceChars.stripLeading();
+            String textWithoutTrailingSpaceChars = textWithSpaceChars.stripTrailing();
+            int numLeadingChars = textWithSpaceChars.length() - textWithoutLeadingSpaceChars.length();
+            int numTrailingChars = textWithSpaceChars.length() - textWithoutTrailingSpaceChars.length();
+            if (preserveWhitespaceInRichText) {
+                assertEquals("Incorrect value for RichText returned",
+                        4, numLeadingChars);
+                assertEquals("Incorrect value for RichText returned",
+                        2, numTrailingChars);
+            } else {
+                assertEquals("Incorrect value for RichText returned",
+                        0, numLeadingChars);
+                assertEquals("Incorrect value for RichText returned",
+                        0, numTrailingChars);
+               
+            }
+        }
+    }
+
+    
+    /**
      *
      * Verify that Date/Time with time zone, when truncated to just date, gets transferred and interpreted correctly.
      *

@@ -78,7 +78,7 @@ public class SforceDynaBean {
         for (Field field : fields) {
             String fieldName = field.getName();
             //see which class type equals the field type
-            Class classType = getConverterClass(field);
+            Class<?> classType = getConverterClass(field);
             dynaProps.add(new DynaProperty(fieldName, classType));
 
             // if field is a reference to another object, remember the reference
@@ -286,7 +286,6 @@ public class SforceDynaBean {
      * @throws NoSuchMethodException
      * @throws ParameterLoadException
      */
-    @SuppressWarnings("unchecked")
     public static SObject getSObject(Controller controller, String entityName, DynaBean dynaBean) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, ParameterLoadException {
         SObject sObj = new SObject();
         sObj.setType(entityName);
@@ -299,7 +298,7 @@ public class SforceDynaBean {
                     SObjectReference sObjRef = (SObjectReference)value;
                     if (!sObjRef.isNull()) sObjRef.addReferenceToSObject(controller, sObj, fName);
                 } else {
-                    sObj.setField(fName, dynaBean.get(fName));
+                    sObj.setField(fName, value);
                 }
             }
         }
