@@ -448,7 +448,7 @@ public class Config {
         setDefaultValue(DUPLICATE_RULE_RUN_AS_CURRENT_USER, false);
         setDefaultValue(BUFFER_UNPROCESSED_BULK_QUERY_RESULTS, false);
         setDefaultValue(BULKV2_API_ENABLED, false);
-        setDefaultValue(OAUTH_LOGIN_FROM_BROWSER, false);
+        setDefaultValue(OAUTH_LOGIN_FROM_BROWSER, true);
         setDefaultValue(LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
     }
 
