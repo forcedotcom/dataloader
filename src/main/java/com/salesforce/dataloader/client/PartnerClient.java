@@ -55,6 +55,8 @@ import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.UpsertResult;
 import com.sforce.soap.partner.fault.ApiFault;
+import com.sforce.soap.partner.fault.ExceptionCode;
+import com.sforce.soap.partner.fault.UnexpectedErrorFault;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
@@ -518,21 +520,52 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     private boolean login() throws ConnectionException, ApiFault {
         disconnect();
+        try {
+            login(apiVersionForTheSession);
+            logger.debug("able to successfully invoke server APIs of version " + apiVersionForTheSession);
+        } catch (UnexpectedErrorFault fault) {
+            if (fault.getExceptionCode() == ExceptionCode.UNSUPPORTED_API_VERSION) 
+            /*
+                && (apiVersionForTheSession.equals(getCurrentAPIVersionInWSC())
+               ) 
+            */
+            {
+                logger.error("Failed to successfully invoke server APIs of version " + apiVersionForTheSession);
+                apiVersionForTheSession = getPreviousAPIVersionInWSC();
+                login(apiVersionForTheSession);
+            } else {
+                logger.error("Failed to get user info using manually configured session id", fault);
+                throw fault;
+            }
+        }   catch (ConnectionException e) {
+            logger.error("Failed to get user info using manually configured session id", e);
+            throw e;
+        }
+        return true; // exception thrown if there is an issue with login
+    }
+    
+    private boolean login(String apiVersionStr) throws ConnectionException, ApiFault {
         // Attempt the login giving the user feedback
         logger.info(Messages.getString("Client.sforceLogin")); //$NON-NLS-1$
-        final ConnectorConfig cc = getLoginConnectorConfig();
-        final PartnerConnection conn = Connector.newConnection(cc);
+        final ConnectorConfig cc = getLoginConnectorConfig(apiVersionStr);
+        PartnerConnection conn = Connector.newConnection(cc);
         // identify the client as dataloader
         conn.setCallOptions(ClientBase.getClientName(this.config), null);
 
         String oauthAccessToken = config.getString(Config.OAUTH_ACCESSTOKEN);
         if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
-            setConfiguredSessionId(conn, oauthAccessToken);
+            conn = setConfiguredSessionId(conn, oauthAccessToken);
         } else if (config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
-            setConfiguredSessionId(conn, config.getString(Config.SFDC_INTERNAL_SESSION_ID));
+            conn = setConfiguredSessionId(conn, config.getString(Config.SFDC_INTERNAL_SESSION_ID));
         } else {
             setSessionRenewer(conn);
             loginInternal(conn);
+        }
+        synchronized (apiVersionForTheSession) {
+            if (!isValidApiVersionForTheSession) {
+                apiVersionForTheSession = apiVersionStr;
+                isValidApiVersionForTheSession = true;
+            }
         }
         return true;
 
@@ -548,16 +581,12 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         });
     }
 
-    private void setConfiguredSessionId(final PartnerConnection conn, String sessionId) throws ConnectionException {
+    private PartnerConnection setConfiguredSessionId(PartnerConnection conn, String sessionId) throws ConnectionException {
         logger.info("Using manually configured session id to bypass login");
         conn.setSessionHeader(sessionId);
-        try {
-            conn.getUserInfo(); // check to make sure we have a good connection
-        } catch (ConnectionException e) {
-            logger.error("Failed to get user info using manually configured session id", e);
-            throw e;
-        }
+        conn.getUserInfo(); // check to make sure we have a good connection
         loginSuccess(conn, getServerUrl(config.getString(Config.ENDPOINT)));
+        return conn;
     }
 
     private void loginInternal(final PartnerConnection conn) throws ConnectionException, PasswordExpiredException {
@@ -610,9 +639,14 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         try {
             PartnerConnection pc = getClient();
             if (pc != null) pc.logout();
+            
         } catch (ConnectionException e) {
             // ignore
         } finally {
+            synchronized (apiVersionForTheSession) {
+                apiVersionForTheSession = null;
+                isValidApiVersionForTheSession = false;
+            }
             disconnect();
         }
         return true;
@@ -755,17 +789,22 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     @Override
-    protected ConnectorConfig getConnectorConfig() {
-        ConnectorConfig cc = super.getConnectorConfig();
+    protected ConnectorConfig getConnectorConfig(String apiVersionStr) {
+        ConnectorConfig cc = super.getConnectorConfig(apiVersionStr);
         cc.setManualLogin(true);
         return cc;
     }
+    
+    protected static String getServicePathForAPIVersion(String apiVersionStr) {
+        // Auth endpoint is a SOAP service
+        return ClientBase.getServicePathForAPIVersion(DEFAULT_AUTH_ENDPOINT_URL.getPath(), apiVersionStr);
+    }
 
-    private synchronized ConnectorConfig getLoginConnectorConfig() {
-        this.connectorConfig = getConnectorConfig();
+    private synchronized ConnectorConfig getLoginConnectorConfig(String apiVersion) {
+        this.connectorConfig = getConnectorConfig(apiVersion);
         String serverUrl = getDefaultServer();
-        this.connectorConfig.setAuthEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());
-        this.connectorConfig.setServiceEndpoint(serverUrl + DEFAULT_AUTH_ENDPOINT_URL.getPath());
+        this.connectorConfig.setAuthEndpoint(serverUrl + getServicePathForAPIVersion(apiVersion));
+        this.connectorConfig.setServiceEndpoint(serverUrl + getServicePathForAPIVersion(apiVersion));
         return this.connectorConfig;
     }
 

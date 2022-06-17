@@ -225,7 +225,7 @@ public abstract class TestBase {
                 serverPath = new URI(Connector.END_POINT).getPath();
                 bindingConfig.setAuthEndpoint(configEndpoint + serverPath);
                 bindingConfig.setServiceEndpoint(configEndpoint + serverPath);
-                bindingConfig.setRestEndpoint(configEndpoint + ClientBase.BULKV1_ENDPOINT);
+                bindingConfig.setRestEndpoint(configEndpoint + ClientBase.BULKV1_ENDPOINT_PATH);
                 bindingConfig.setManualLogin(true);
                 // set long timeout for tests with larger data sets
                 bindingConfig.setReadTimeout(5 * 60 * 1000);

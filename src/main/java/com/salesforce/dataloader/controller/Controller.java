@@ -49,7 +49,6 @@ import com.salesforce.dataloader.mapping.Mapper;
 import com.salesforce.dataloader.mapping.SOQLMapper;
 import com.salesforce.dataloader.ui.LoaderWindow;
 import com.salesforce.dataloader.util.AppUtil;
-import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.ws.ConnectionException;
@@ -105,7 +104,7 @@ public class Controller {
 
     private static String APP_NAME; //$NON-NLS-1$
     public static String APP_VERSION; //$NON-NLS-1$
-    public static String API_VERSION;
+    public static String API_VERSION = null;
     private static String APP_VENDOR; //$NON-NLS-1$
 
     private static AppUtil.OSType OS_TYPE;
@@ -137,6 +136,7 @@ public class Controller {
             logger.error("Exception happened in initConfig:", e);
             throw e;
         }
+        HttpClientTransport.setReuseConnection(config.getBoolean(Config.REUSE_CLIENT_CONNECTION));
     }
     
     public static Map<String, String> getArgMapFromArgArray(String[] argArray){
@@ -173,16 +173,8 @@ public class Controller {
         // FIXME clean this up, make static
         // dataloader version has 3 parts, salesforce app api version should match first two parts
         APP_VERSION = versionProps.getProperty("dataloader.version");
-        
-        String connectorEndpoint = Connector.END_POINT;
-        String[] apiVersion = connectorEndpoint.split("\\/");
-        API_VERSION = apiVersion[apiVersion.length-1];
         OS_TYPE = AppUtil.getOSType();
         areStaticVarsInitialized = true;
-    }
-
-    public void setConfigDefaults() {
-        config.setDefaults();
     }
 
     public synchronized void executeAction(ILoaderProgress monitor) throws DataAccessObjectException, OperationException {
@@ -218,6 +210,14 @@ public class Controller {
     public boolean setEntityDescribes() throws ConnectionException {
         validateSession();
         return getPartnerClient().setEntityDescribes();
+    }
+    
+    public static void setAPIVersion(String apiVersionStr) {
+        API_VERSION = apiVersionStr;
+    }
+    
+    public static String getAPIVersion() {
+        return API_VERSION;
     }
 
     public Map<String, DescribeGlobalSObjectResult> getEntityDescribes() {
@@ -409,13 +409,9 @@ public class Controller {
         try {
             String lastRunFileName = name + LAST_RUN_FILE_SUFFIX;
             config = new Config(getAppPath(), configPath, lastRunFileName);
-            config.load();
-            // set default - it does not override loaded values
-            config.setDefaults();
             config.setBatchMode(isBatchMode);
-            logger.info(Messages.getMessage(getClass(), "configInit")); //$NON-NLS-1$
-            HttpClientTransport.setReuseConnection(config.getBoolean(Config.REUSE_CLIENT_CONNECTION));
             config.loadParameterOverrides(argMap);
+            logger.info(Messages.getMessage(getClass(), "configInit")); //$NON-NLS-1$
         } catch (IOException e) {
             throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorConfigLoad", configPath), e);
         } catch (ProcessInitializationException e) {

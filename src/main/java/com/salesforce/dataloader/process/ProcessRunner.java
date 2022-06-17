@@ -343,9 +343,6 @@ public class ProcessRunner implements InitializingBean {
     }
     
     private void doLoginFromBrowser(Config config) throws OAuthBrowserLoginRunnerException {
-        if (config.getString(Config.OAUTH_CLIENTID) == null || config.getString(Config.OAUTH_CLIENTID).isEmpty()) {
-            throw new OAuthBrowserLoginRunnerException("Specify Connected App Client ID");
-        }
         final String verificationURLStr;
         final OAuthBrowserLoginRunner loginRunner;
         try {

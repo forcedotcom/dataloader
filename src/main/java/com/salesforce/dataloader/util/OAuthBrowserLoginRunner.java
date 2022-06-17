@@ -66,6 +66,7 @@ public class OAuthBrowserLoginRunner {
     public OAuthBrowserLoginRunner(Config config, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
         setLoginStatus(LoginStatus.WAIT);
         this.config = config;
+        config.setOAuthEnvironment(config.getString(Config.OAUTH_ENVIRONMENT));
         oAuthTokenURLStr = config.getString(Config.OAUTH_SERVER) + "/services/oauth2/token";
         SimplePost client = SimplePostFactory.getInstance(config, oAuthTokenURLStr,
                new BasicNameValuePair("response_type", "device_code"),

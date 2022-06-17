@@ -63,17 +63,27 @@ public class BulkV2Client extends ClientBase<BulkV2Connection> {
         return true;
     }
 
-    protected synchronized ConnectorConfig getConnectorConfig() {
+    protected synchronized ConnectorConfig getConnectorConfig(String apiVersion) {
         if (this.connectorConfig == null || !this.config.getBoolean(Config.REUSE_CLIENT_CONNECTION)) {
-            this.connectorConfig = super.getConnectorConfig();
+            this.connectorConfig = super.getConnectorConfig(apiVersion);
             
             // override the restEndpoint value set in the superclass
             String server = getSession().getServer();
             if (server != null) {
-                this.connectorConfig.setRestEndpoint(server + BULKV2_ENDPOINT);
+                this.connectorConfig.setRestEndpoint(server + getServicePathForAPIVersion(apiVersion));
             }
             this.connectorConfig.setTraceMessage(config.getBoolean(Config.WIRE_OUTPUT));
         }
         return this.connectorConfig;
+    }
+    
+    protected static String getServicePathForAPIVersion(String apiVersionStr) {
+        String[] pathPartArray = BULKV2_ENDPOINT_PATH.split("\\/");
+        pathPartArray[pathPartArray.length-2] = "v" + apiVersionStr;
+        StringBuffer buf = new StringBuffer();
+        for (int i = 0; i < pathPartArray.length; i++) {
+            buf.append(pathPartArray[i] + "/");
+        }
+        return buf.toString();
     }
 }

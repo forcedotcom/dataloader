@@ -71,12 +71,16 @@ public class BulkClient extends ClientBase<BulkConnection> {
     }
 
     @Override
-    protected synchronized ConnectorConfig getConnectorConfig() {
+    protected synchronized ConnectorConfig getConnectorConfig(String apiVersion) {
         if (this.connectorConfig == null || !this.config.getBoolean(Config.REUSE_CLIENT_CONNECTION)) {
-            this.connectorConfig = super.getConnectorConfig();
+            this.connectorConfig = super.getConnectorConfig(apiVersion);
             this.connectorConfig.setTraceMessage(config.getBoolean(Config.WIRE_OUTPUT));
         }
         return this.connectorConfig;
+    }
+    
+    protected static String getServicePathForAPIVersion(String apiVersionStr) {
+        return ClientBase.getServicePathForAPIVersion(BULKV1_ENDPOINT_PATH, apiVersionStr);
     }
 
 }
