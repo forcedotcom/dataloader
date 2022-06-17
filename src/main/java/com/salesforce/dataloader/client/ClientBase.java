@@ -62,8 +62,10 @@ public abstract class ClientBase<ClientType> {
         DEFAULT_AUTH_ENDPOINT_URL = loginUrl;
     }
 
-    public static final String BULKV1_ENDPOINT = "/services/async/" + Controller.API_VERSION;
-    public static final String BULKV2_ENDPOINT = "/services/data/v" + Controller.API_VERSION + "/jobs/";
+    public static final String BULKV1_ENDPOINT_PATH = "/services/async/" + getCurrentAPIVersionInWSC();
+    public static final String BULKV2_ENDPOINT_PATH = "/services/data/v" + getCurrentAPIVersionInWSC() + "/jobs/";
+    protected static String apiVersionForTheSession = getCurrentAPIVersionInWSC();
+    protected static boolean isValidApiVersionForTheSession = false;
 
     protected final Logger logger;
     protected final Controller controller;
@@ -83,7 +85,7 @@ public abstract class ClientBase<ClientType> {
 
     public final boolean connect(SessionInfo sess) {
         setSession(sess);
-        return connectPostLogin(getConnectorConfig());
+        return connectPostLogin(getConnectorConfig(apiVersionForTheSession));
     }
 
     private static final String BASE_CLIENT_NAME = "DataLoader";
@@ -93,15 +95,18 @@ public abstract class ClientBase<ClientType> {
     private static final String UI_CLIENT_STRING = "UI";
 
     protected static String getClientName(Config cfg) {
-        final String apiType = cfg.isBulkAPIEnabled() ? BULK_API_CLIENT_TYPE : PARTNER_API_CLIENT_TYPE;
+        String apiType = cfg.isBulkAPIEnabled() ? BULK_API_CLIENT_TYPE : PARTNER_API_CLIENT_TYPE;
         final String interfaceType = cfg.isBatchMode() ? BATCH_CLIENT_STRING : UI_CLIENT_STRING;
+        if (cfg.isBulkAPIEnabled() && cfg.isBulkV2APIEnabled()) {
+            apiType = apiType + "v2";
+        }
         return new StringBuilder(32).append(BASE_CLIENT_NAME).append(apiType).append(interfaceType)
                 .append("/")
                 .append(Controller.APP_VERSION)
                 .toString(); //$NON-NLS-1$
     }
 
-    protected ConnectorConfig getConnectorConfig() {
+    protected ConnectorConfig getConnectorConfig(String apiVersionStr) {
         ConnectorConfig cc = new ConnectorConfig();
         cc.setTransport(HttpClientTransport.class);
         cc.setSessionId(getSessionId());
@@ -190,15 +195,37 @@ public abstract class ClientBase<ClientType> {
                 }
             }
         }
-
         String server = getSession().getServer();
         if (server != null) {
-            cc.setAuthEndpoint(server + DEFAULT_AUTH_ENDPOINT_URL.getPath());
-            cc.setServiceEndpoint(server + DEFAULT_AUTH_ENDPOINT_URL.getPath());
-            cc.setRestEndpoint(server + BULKV1_ENDPOINT);
+            cc.setAuthEndpoint(server + PartnerClient.getServicePathForAPIVersion(apiVersionStr));
+            cc.setServiceEndpoint(server + PartnerClient.getServicePathForAPIVersion(apiVersionStr)); // Partner SOAP service
+            cc.setRestEndpoint(server + BulkClient.getServicePathForAPIVersion(apiVersionStr));  // REST service: Bulk v1
         }
-
         return cc;
+    }
+    
+    protected static String getCurrentAPIVersionInWSC() {
+        String[] connectURLArray = Connector.END_POINT.split("\\/");
+        return connectURLArray[connectURLArray.length-1];
+    }
+    
+    protected static String getPreviousAPIVersionInWSC() {
+        String currentAPIVersion = getCurrentAPIVersionInWSC();
+        String[] versionStrArray = currentAPIVersion.split("\\.");
+        String currentMajorVerStr = versionStrArray[0];
+        int currentMajorVer = Integer.parseInt(currentMajorVerStr);
+        return Integer.toString(currentMajorVer-1) + ".0";
+    }
+    
+    // used for SOAP and Bulk v1 service endpoints but not for bulk v2 service
+    protected static String getServicePathForAPIVersion(String path, String apiVersionStr) {
+        String[] pathPartArray = path.split("\\/");
+        pathPartArray[pathPartArray.length-1] = apiVersionStr;
+        StringBuffer buf = new StringBuffer();
+        for (int i = 0; i < pathPartArray.length; i++) {
+            buf.append(pathPartArray[i] + "/");
+        }
+        return buf.toString();
     }
 
     public SessionInfo getSession() {

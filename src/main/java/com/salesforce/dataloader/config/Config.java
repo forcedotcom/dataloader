@@ -181,6 +181,7 @@ public class Config {
     public static final String BULK_API_ZIP_CONTENT = "sfdc.bulkApiZipContent";
     public static final String WIRE_OUTPUT = "sfdc.wireOutput";
     public static final String TIMEZONE = "sfdc.timezone";
+    public static final String SERVICE_API_VERSION="sfdc.apiVersion";
 
     public static final String OAUTH_PREFIX = "sfdc.oauth.";
     public static final String OAUTH_PARTIAL_BULK = "bulk";
@@ -300,7 +301,7 @@ public class Config {
     private boolean isBatchMode = false;
 
     private final String configDir;
-
+    
     /**
      * <code>dateFormatter</code> will be used for getting dates in/out of the configuration
      * file(s)
@@ -344,12 +345,14 @@ public class Config {
      * @see #load()
      * @see #save()
      */
-    public Config(String configDir, String filename, String lastRunFileName) throws ConfigInitializationException {
+    public Config(String configDir, String filename, String lastRunFileName) throws ConfigInitializationException, IOException {
         properties = new LinkedProperties();
         this.configDir = configDir;
         this.filename = filename;
         // last run gets initialized a little later since config params are needed for that
         this.lastRun = new LastRun(lastRunFileName);
+        this.load();
+        this.setDefaults();
     }
 
     /**
@@ -450,6 +453,7 @@ public class Config {
         setDefaultValue(BULKV2_API_ENABLED, false);
         setDefaultValue(OAUTH_LOGIN_FROM_BROWSER, true);
         setDefaultValue(LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
+        setOAuthEnvironment(getString(OAUTH_ENVIRONMENT));
     }
 
     /**
