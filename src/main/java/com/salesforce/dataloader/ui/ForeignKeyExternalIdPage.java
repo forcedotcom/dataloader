@@ -47,7 +47,6 @@ import com.sforce.soap.partner.Field;
  */
 public class ForeignKeyExternalIdPage extends LoadPage {
 
-    private final Controller controller;
     private final Map<String,Combo> extIdSelections = new HashMap<String,Combo>();
     private Composite containerComp;
     private ScrolledComposite scrollComp;
@@ -56,13 +55,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
     public ForeignKeyExternalIdPage(Controller controller) {
         super(Labels.getString("ForeignKeyExternalIdPage.title"), //$NON-NLS-1$
                 Labels.getString("ForeignKeyExternalIdPage.message"), //$NON-NLS-1$
-                UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$
-
-        this.controller = controller;
-
-        // Set the description
-        setDescription(Labels.getString("ForeignKeyExternalIdPage.description"));  //$NON-NLS-1$
-
+                UIUtils.getImageRegistry().getDescriptor("splashscreens"), controller); //$NON-NLS-1$
         setPageComplete(true);
     }
 
@@ -72,7 +65,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
         containerComp.setLayout(new FillLayout());
 
         setControl(containerComp);
-
+        setupPage();
         setPageComplete(true);
     }
 
@@ -188,13 +181,12 @@ public class ForeignKeyExternalIdPage extends LoadPage {
      * @see com.salesforce.dataloader.ui.LoadPage#setupPage()
      */
     @Override
-    boolean setupPage() {
+    boolean setupPagePostLogin() {
         // set the required data
         setReferenceObjects();
-
+        
         // Add the foreign key entity external id fields dropdowns
         createFkExtIdUi();
-
         return true;
     }
 

@@ -30,20 +30,15 @@ import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.*;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
@@ -52,9 +47,7 @@ import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.ui.EntitySelectionListViewerUtil;
 import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.ui.UIUtils;
-import com.salesforce.dataloader.ui.entitySelection.*;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
-import com.sforce.soap.partner.LimitInfo;
 import com.sforce.ws.ConnectionException;
 
 /**
@@ -63,32 +56,19 @@ import com.sforce.ws.ConnectionException;
  * @author Lexi Viripaeff
  * @since 6.0
  */
-public class ExtractionDataSelectionPage extends WizardPage {
-
-    private final Controller controller;
+public class ExtractionDataSelectionPage extends ExtractionPage {
 
     // These filter extensions are used to filter which files are displayed.
-    private EntityFilter filter;
     private ListViewer lv;
     private Text fileText;
     public Composite comp;
     private boolean success;
-    private final Logger logger = LogManager.getLogger(ExtractionDataSelectionPage.class);
 
     public ExtractionDataSelectionPage(Controller controller) {
         super(	Labels.getString("ExtractionDataSelectionPage.title"), 
                 Labels.getString("ExtractionDataSelectionPage.titleMsg"), 
-                UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$ //$NON-NLS-2$
-
-        this.controller = controller;
-
-        // Set the description
-        setDescription(Labels.getString("ExtractionDataSelectionPage.description")
-        + "\n\n    "
-        + Labels.getString("ExtractionInputDialog.querySize")
-        + " "
-        + controller.getConfig().getString(Config.EXTRACT_REQUEST_SIZE)); //$NON-NLS-1$
-
+                UIUtils.getImageRegistry().getDescriptor("splashscreens"),
+                controller); //$NON-NLS-1$ //$NON-NLS-2$
         setPageComplete(false);
     }
 
@@ -113,10 +93,7 @@ public class ExtractionDataSelectionPage extends WizardPage {
 
         });
 
-        //if we're logged in, set the input
-        if (controller.isLoggedIn()) {
-            setInput(controller.getEntityDescribes());
-        }
+        setupPage();
 
         Label clearLabel = new Label(comp, SWT.NONE);
         GridData data = new GridData(GridData.VERTICAL_ALIGN_END);
@@ -171,28 +148,18 @@ public class ExtractionDataSelectionPage extends WizardPage {
 
         setControl(comp);
     }
+    
+    protected boolean setupPagePostLogin() {
+        if (this.controller.isLoggedIn()) {
+            setInput(this.controller.getEntityDescribes());
+        }
+        return true;
+    }
 
     /**
      * Function to dynamically set the entity list
      */
-    public void setInput(Map<String, DescribeGlobalSObjectResult> entityDescribes) {
-        // update description
-        LimitInfo apiLimitInfo;
-        String apiLimitInfoStr = "";
-        PartnerClient partnerClient = controller.getPartnerClient();
-        if (partnerClient != null) {
-            apiLimitInfo = partnerClient.getAPILimitInfo();
-            if (apiLimitInfo != null) {
-                apiLimitInfoStr = "\n    "
-                        + Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
-                        + "\n    "
-                        + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit());
-                logger.debug(apiLimitInfoStr);
-                // Set the description
-                String oldDescription = getDescription();
-                setDescription(oldDescription + apiLimitInfoStr);
-           }
-        }
+    private void setInput(Map<String, DescribeGlobalSObjectResult> entityDescribes) {
         Map<String, DescribeGlobalSObjectResult> inputDescribes = new HashMap<String, DescribeGlobalSObjectResult>();
 
         if (entityDescribes != null) {
@@ -294,7 +261,7 @@ public class ExtractionDataSelectionPage extends WizardPage {
         if (success) {
             //set the query
             ExtractionSOQLPage soql = (ExtractionSOQLPage)getWizard().getPage("SOQL"); //$NON-NLS-1$
-            soql.initializeSOQLText();
+            soql.setupPage();
             soql.setPageComplete(true);
 
             return super.getNextPage();
@@ -304,5 +271,10 @@ public class ExtractionDataSelectionPage extends WizardPage {
             msgBox.open();
             return this;
         }
+    }
+
+    // nothing to finish before moving to the next page
+    public boolean finishPage() {
+        return true;
     }
 }

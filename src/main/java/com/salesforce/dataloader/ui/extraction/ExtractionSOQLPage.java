@@ -29,9 +29,6 @@ package com.salesforce.dataloader.ui.extraction;
 import java.util.*;
 import java.util.List;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
-
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
@@ -41,7 +38,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.Labels;
@@ -56,8 +52,6 @@ import com.sforce.soap.partner.*;
  */
 public class ExtractionSOQLPage extends ExtractionPage {
 
-    private final Controller controller;
-    private final Logger logger = LogManager.getLogger(ExtractionSOQLPage.class);
     private Text soqlText;
     private Field[] fields;
     private CheckboxTableViewer fieldViewer;
@@ -97,22 +91,15 @@ public class ExtractionSOQLPage extends ExtractionPage {
 
     public ExtractionSOQLPage(Controller controller) {
         super(
-                Labels.getString("ExtractionSOQLPage.title"), Labels.getString("ExtractionSOQLPage.titleMessage"), UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$ //$NON-NLS-2$
+                Labels.getString("ExtractionSOQLPage.title"),
+                Labels.getString("ExtractionSOQLPage.titleMessage"),
+                UIUtils.getImageRegistry().getDescriptor("splashscreens"), controller); //$NON-NLS-1$ //$NON-NLS-2$
 
-        this.controller = controller;
-
-        // Set the description
-        setDescription(Labels.getString("ExtractionSOQLPage.description")
-                + "\n\n    "
-                + Labels.getString("ExtractionInputDialog.querySize")
-                + " "
-                + controller.getConfig().getString(Config.EXTRACT_REQUEST_SIZE)); //$NON-NLS-1$
         initOperMap();
 
         setPageComplete(false);
         lastFieldType = FIELD_NORMAL;
         isPickListField = false;
-
     }
 
     private void initOperMap() {
@@ -463,6 +450,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
         soqlText.setLayoutData(data);
 
         setControl(comp);
+        setupPage();
     }
 
     private String getOperValue(String operation) {
@@ -530,28 +518,16 @@ public class ExtractionSOQLPage extends ExtractionPage {
 
     }
 
-    public void initializeSOQLText() {
+    protected boolean setupPagePostLogin() {
+        initializeSOQLText();
+        return true;
+    }
+
+    private void initializeSOQLText() {
         logger.debug(Labels.getString("ExtractionSOQLPage.initializeMsg")); //$NON-NLS-1$
         Config config = controller.getConfig();
 
         DescribeSObjectResult result = controller.getFieldTypes();
-
-        LimitInfo apiLimitInfo;
-        String apiLimitInfoStr = "";
-        PartnerClient partnerClient = controller.getPartnerClient();
-        if (partnerClient != null) {
-            apiLimitInfo = partnerClient.getAPILimitInfo();
-            if (apiLimitInfo != null) {
-                apiLimitInfoStr = "\n    "
-                        + Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
-                        + "\n    "
-                        + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit());
-                logger.debug(apiLimitInfoStr);
-                // Set the description
-                String oldDescription = getDescription();
-                setDescription(oldDescription + apiLimitInfoStr);
-           }
-        }
         fields = result.getFields();
         if (config.getBoolean(Config.SORT_EXTRACT_FIELDS)) {
             Arrays.sort(fields, new Comparator<Field>(){

@@ -25,8 +25,13 @@
  */
 package com.salesforce.dataloader.ui;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
+
+import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.controller.Controller;
 
 /**
  * This is the base class for the LoadWizard ui pages. Allows navigation to be done dynamically by forcing setupPage to
@@ -43,11 +48,36 @@ public abstract class LoadPage extends WizardPage {
      * @param titleImage
      * 
      */
-    public LoadPage(String pageName, String title, ImageDescriptor titleImage) {
-        super(pageName, title, titleImage);
-    }
+    protected final Controller controller;
+    protected final Logger logger;
 
-    abstract boolean setupPage();
+    public LoadPage(String pageName, String title, ImageDescriptor titleImage, Controller controller) {
+        super(pageName, title, titleImage);
+        this.controller = controller;
+        this.logger = LogManager.getLogger(this.getClass());
+    }
+    
+    abstract boolean setupPagePostLogin();
+
+    boolean setupPage() {
+        // Set the description
+        String description = Labels.getString(this.getClass().getSimpleName() + ".description")
+                + "\n\n    "
+                + Labels.getString("AdvancedSettingsDialog.batchSize")
+                + " "
+                + controller.getConfig().getString(Config.LOAD_BATCH_SIZE)
+                + "\n    "
+                + Labels.getString("AdvancedSettingsDialog.startRow")
+                + " "
+                + controller.getConfig().getString(Config.LOAD_ROW_TO_START_AT); //$NON-NLS-1$
+        this.setDescription(description);
+        boolean success = true;
+        if (this.controller.isLoggedIn()) {
+            success = setupPagePostLogin();
+            UIUtils.updateWizardPageDescription(this, this.controller.getPartnerClient());
+        }
+        return success;
+    }
 
     /*
      * Common code for getting the next page
@@ -55,7 +85,7 @@ public abstract class LoadPage extends WizardPage {
     @Override
     public LoadPage getNextPage() {
         LoadPage nextPage = (LoadPage)super.getNextPage();
-        if(nextPage != null && nextPage.setupPage()) {
+        if( nextPage != null && nextPage.setupPage()) {
             return nextPage;
         } else {
             return this;

@@ -81,6 +81,10 @@ public abstract class ClientBase<ClientType> {
         this.controller = controller;
         this.config = controller.getConfig();
         this.logger = logger;
+        String apiVersionStr = config.getString(Config.CLI_OPTION_API_VERSION);
+        if (apiVersionStr != null && !apiVersionStr.isEmpty()) {
+            apiVersionForTheSession = apiVersionStr;
+        }
     }
 
     public final boolean connect(SessionInfo sess) {
@@ -104,6 +108,10 @@ public abstract class ClientBase<ClientType> {
                 .append("/")
                 .append(Controller.APP_VERSION)
                 .toString(); //$NON-NLS-1$
+    }
+    
+    public String getAPIVersion() {
+        return apiVersionForTheSession;
     }
 
     protected ConnectorConfig getConnectorConfig(String apiVersionStr) {

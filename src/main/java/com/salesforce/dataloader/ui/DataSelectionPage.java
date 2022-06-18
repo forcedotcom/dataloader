@@ -29,32 +29,23 @@ package com.salesforce.dataloader.ui;
 import java.util.*;
 import java.util.Map.Entry;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
-import com.salesforce.dataloader.ui.entitySelection.*;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
-import com.sforce.soap.partner.LimitInfo;
 
 /**
  * Describe your class here.
@@ -64,33 +55,14 @@ import com.sforce.soap.partner.LimitInfo;
  */
 public class DataSelectionPage extends LoadPage {
 
-    private final Logger logger = LogManager.getLogger(DataSelectionPage.class);
-
-    private final Controller controller;
-
     // These filter extensions are used to filter which files are displayed.
     private static final String[] FILTER_EXTS = { "*.csv" }; //$NON-NLS-1$
-    private EntityFilter filter;
     private ListViewer lv;
 
     private FileFieldEditor csvChooser;
 
     public DataSelectionPage(Controller controller) {
-        super(Labels.getString("DataSelectionPage.data"), Labels.getString("DataSelectionPage.dataMsg"), UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$ //$NON-NLS-2$
-
-        this.controller = controller;
-
-        // Set the description
-        setDescription(Labels.getString("DataSelectionPage.message")
-                + "\n\n    "
-                + Labels.getString("AdvancedSettingsDialog.batchSize")
-                + " "
-                + controller.getConfig().getString(Config.LOAD_BATCH_SIZE)
-                + "\n    "
-                + Labels.getString("AdvancedSettingsDialog.startRow")
-                + " "
-                + controller.getConfig().getString(Config.LOAD_ROW_TO_START_AT)); //$NON-NLS-1$
-
+        super(Labels.getString("DataSelectionPage.data"), Labels.getString("DataSelectionPage.dataMsg"), UIUtils.getImageRegistry().getDescriptor("splashscreens"), controller); //$NON-NLS-1$ //$NON-NLS-2$
         setPageComplete(false);
     }
 
@@ -117,10 +89,7 @@ public class DataSelectionPage extends LoadPage {
 
         });
 
-        //if we're logged in, set the input
-        if (controller.isLoggedIn()) {
-            setInput(controller.getEntityDescribes());
-        }
+        setupPage();
 
         new Label(comp, SWT.NONE);
 
@@ -173,24 +142,7 @@ public class DataSelectionPage extends LoadPage {
     /**
      * Function to dynamically set the entity list
      */
-    private void setInput(Map<String, DescribeGlobalSObjectResult> entityDescribes) {
-        LimitInfo apiLimitInfo;
-        String apiLimitInfoStr = "";
-        PartnerClient partnerClient = controller.getPartnerClient();
-        if (partnerClient != null) {
-            apiLimitInfo = partnerClient.getAPILimitInfo();
-            if (apiLimitInfo != null) {
-                apiLimitInfoStr = "\n    "
-                        + Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
-                        + "\n    "
-                        + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit());
-                logger.debug(apiLimitInfoStr);
-                // Set the description
-                String oldDescription = getDescription();
-                setDescription(oldDescription + apiLimitInfoStr);
-           }
-        }
-        
+    private void setInput(Map<String, DescribeGlobalSObjectResult> entityDescribes) {        
         OperationInfo operation = controller.getConfig().getOperationInfo();
         Map<String, DescribeGlobalSObjectResult> inputDescribes = new HashMap<String, DescribeGlobalSObjectResult>();
 
@@ -271,13 +223,12 @@ public class DataSelectionPage extends LoadPage {
      * @see com.salesforce.dataloader.ui.LoadPage#setupPage()
      */
     @Override
-    boolean setupPage() {
-        Map<String, DescribeGlobalSObjectResult> describes = controller
-                .getEntityDescribes();
-        if(describes != null) {
-            setInput(describes);
-            return true;
+    boolean setupPagePostLogin() {
+        Map<String, DescribeGlobalSObjectResult> describes = controller.getEntityDescribes();
+        if(describes == null) {
+            return false;
         }
-        return false;
+        setInput(describes);
+        return true;
     }
 }

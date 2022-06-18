@@ -50,18 +50,13 @@ import com.salesforce.dataloader.ui.UIUtils;
  */
 public class ExtractionFinishPage extends ExtractionPage {
 
-    private final Controller controller;
     private DirectoryFieldEditor dirFE;
 
     public ExtractionFinishPage(Controller controller) {
-        super(Labels.getString("FinishPage.title"), Labels.getString("FinishPage.finishMsg"), UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$ //$NON-NLS-2$
-
-        this.controller = controller;
+        super(Labels.getString("FinishPage.title"), 
+                Labels.getString("FinishPage.finishMsg"), 
+                UIUtils.getImageRegistry().getDescriptor("splashscreens"), controller); //$NON-NLS-1$ //$NON-NLS-2$
         setPageComplete(false);
-
-        // Set the description
-        setDescription(Labels.getString("FinishPage.selectDir")); //$NON-NLS-1$
-
     }
 
     @Override
@@ -87,6 +82,7 @@ public class ExtractionFinishPage extends ExtractionPage {
         dirFE.setStringValue(controller.getConfig().getString(Config.OUTPUT_STATUS_DIR));
 
         setControl(comp);
+        setupPage();
     }
 
     public String getOutputDir() {
@@ -120,6 +116,10 @@ public class ExtractionFinishPage extends ExtractionPage {
             UIUtils.errorMessageBox(getShell(), e);
             return false;
         }
+        return true;
+    }
+
+    boolean setupPagePostLogin() {
         return true;
     }
 }

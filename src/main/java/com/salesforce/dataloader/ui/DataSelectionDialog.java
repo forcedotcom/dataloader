@@ -202,7 +202,9 @@ public class DataSelectionDialog extends Dialog {
                             apiLimitInfoStr = "\n    "
                                     + Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
                                     + "\n    "
-                                    + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit());
+                                    + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit()
+                                    + "\n    "
+                                    + Labels.getFormattedString("Operation.apiVersion", partnerClient.getAPIVersion()));
                             logger.debug(apiLimitInfoStr);
                             // Set the description
                        }
