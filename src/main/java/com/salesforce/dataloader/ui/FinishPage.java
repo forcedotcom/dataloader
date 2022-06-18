@@ -45,18 +45,13 @@ import com.salesforce.dataloader.mapping.LoadMapper;
  */
 public class FinishPage extends LoadPage {
 
-    private final Controller controller;
     private DirectoryFieldEditor dirFE;
 
     public FinishPage(Controller controller) {
-        super(Labels.getString("FinishPage.title"), Labels.getString("FinishPage.finishMsg"), UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$ //$NON-NLS-2$
-
-        this.controller = controller;
+        super(Labels.getString("FinishPage.title"), 
+            Labels.getString("FinishPage.finishMsg"), 
+            UIUtils.getImageRegistry().getDescriptor("splashscreens"), controller); //$NON-NLS-1$ //$NON-NLS-2$
         setPageComplete(false);
-
-        // Set the description
-        setDescription(Labels.getString("FinishPage.selectDir")); //$NON-NLS-1$
-
     }
 
     @Override
@@ -83,6 +78,7 @@ public class FinishPage extends LoadPage {
         hook_createControl(comp);
 
         setControl(comp);
+        setupPage();
     }
 
     protected void hook_createControl(Composite comp) {}
@@ -101,7 +97,7 @@ public class FinishPage extends LoadPage {
      * @see com.salesforce.dataloader.ui.LoadPage#setupPage()
      */
     @Override
-    boolean setupPage() {
+    boolean setupPagePostLogin() {
         try {
             verifySettings();
         } catch (final MappingInitializationException e) {

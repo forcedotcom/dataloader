@@ -30,8 +30,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.List;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -41,7 +39,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dyna.ObjectField;
@@ -51,7 +48,6 @@ import com.salesforce.dataloader.ui.mapping.MappingContentProvider;
 import com.salesforce.dataloader.ui.mapping.MappingLabelProvider;
 import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.FieldType;
-import com.sforce.soap.partner.LimitInfo;
 
 /**
  * Describe your class here.
@@ -61,26 +57,13 @@ import com.sforce.soap.partner.LimitInfo;
  */
 public class MappingPage extends LoadPage {
 
-    private final Controller controller;
     private TableViewer mappingTblViewer;
-    private final Logger logger = LogManager.getLogger(MappingPage.class);
     private Map<String, Field> relatedFields;
 
     public MappingPage(Controller controller) {
-        super(Labels.getString("MappingPage.title"), Labels.getString("MappingPage.titleMsg"), UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$ //$NON-NLS-2$
-
-        // Set the description
-        setDescription(Labels.getString("MappingPage.description")
-        + "\n\n    "
-        + Labels.getString("AdvancedSettingsDialog.batchSize")
-        + " "
-        + controller.getConfig().getString(Config.LOAD_BATCH_SIZE)
-        + "\n    "
-        + Labels.getString("AdvancedSettingsDialog.startRow")
-        + " "
-        + controller.getConfig().getString(Config.LOAD_ROW_TO_START_AT)); //$NON-NLS-1$
-        this.controller = controller;
-
+        super(Labels.getString("MappingPage.title"),
+                Labels.getString("MappingPage.titleMsg"), 
+                UIUtils.getImageRegistry().getDescriptor("splashscreens"), controller); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
@@ -178,6 +161,7 @@ public class MappingPage extends LoadPage {
         mappingTable.setLinesVisible(true);
 
         setControl(comp);
+        setupPage();
     }
 
     public void packMappingColumns() {
@@ -267,27 +251,11 @@ public class MappingPage extends LoadPage {
      * @see com.salesforce.dataloader.ui.LoadPage#setupPage()
      */
     @Override
-    boolean setupPage() {
+    boolean setupPagePostLogin() {
         try {
             // clear mapping file
             controller.getConfig().setValue(Config.MAPPING_FILE, "");
             controller.createMapper();
-            LimitInfo apiLimitInfo;
-            String apiLimitInfoStr = "";
-            PartnerClient partnerClient = controller.getPartnerClient();
-            if (partnerClient != null) {
-                apiLimitInfo = partnerClient.getAPILimitInfo();
-                if (apiLimitInfo != null) {
-                    apiLimitInfoStr = "\n    "
-                            + Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
-                            + "\n    "
-                            + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit());
-                    logger.debug(apiLimitInfoStr);
-                    // Set the description
-                    String oldDescription = getDescription();
-                    setDescription(oldDescription + apiLimitInfoStr);
-               }
-            }
             updateMapping();
             packMappingColumns();
             return true;

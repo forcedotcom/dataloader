@@ -48,7 +48,6 @@ import com.sforce.soap.partner.Field;
  */
 public class ExternalIdPage extends LoadPage {
 
-    private final Controller controller;
     private Composite comp;
     private Combo extIdFieldCombo;
     private Label labelExtId;
@@ -57,12 +56,7 @@ public class ExternalIdPage extends LoadPage {
     public ExternalIdPage(Controller controller) {
         super(Labels.getString("ExternalIdPage.title"), //$NON-NLS-1$
                 Labels.getString("ExternalIdPage.message"), //$NON-NLS-1$
-                UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$
-
-        this.controller = controller;
-
-        // Set the description
-        setDescription(Labels.getString("ExternalIdPage.description"));  //$NON-NLS-1$
+                UIUtils.getImageRegistry().getDescriptor("splashscreens"), controller); //$NON-NLS-1$
 
         setPageComplete(false);
     }
@@ -83,6 +77,7 @@ public class ExternalIdPage extends LoadPage {
         createExtIdFieldUi();
 
         setControl(comp);
+        setupPage();
     }
 
     private void createExtIdFieldUi() {
@@ -206,7 +201,7 @@ public class ExternalIdPage extends LoadPage {
      * @see com.salesforce.dataloader.ui.LoadPage#setupPage()
      */
     @Override
-    boolean setupPage() {
+    boolean setupPagePostLogin() {
         if (!setExtIdCombo()) {
             //if there is no external id, don't let them continue.
             MessageBox msg = new MessageBox(getShell(), SWT.ICON_ERROR | SWT.OK);
@@ -214,8 +209,7 @@ public class ExternalIdPage extends LoadPage {
             msg.setText(Labels.getString("ExternalIdPage.errorExternalIdRequiredTitle"));
             msg.open();
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
 }

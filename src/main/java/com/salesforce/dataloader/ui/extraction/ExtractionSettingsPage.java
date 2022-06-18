@@ -44,7 +44,7 @@ public class ExtractionSettingsPage extends SettingsPage {
     @Override
     protected void loadDataSelectionPage(Controller controller) {
         ExtractionDataSelectionPage selection = (ExtractionDataSelectionPage) getWizard().getPage("Data"); //$NON-NLS-1$
-        selection.setInput(controller.getEntityDescribes());
+        selection.setupPage();
         setPageComplete(true);
     }
 }

@@ -181,7 +181,6 @@ public class Config {
     public static final String BULK_API_ZIP_CONTENT = "sfdc.bulkApiZipContent";
     public static final String WIRE_OUTPUT = "sfdc.wireOutput";
     public static final String TIMEZONE = "sfdc.timezone";
-    public static final String SERVICE_API_VERSION="sfdc.apiVersion";
 
     public static final String OAUTH_PREFIX = "sfdc.oauth.";
     public static final String OAUTH_PARTIAL_BULK = "bulk";
@@ -335,6 +334,7 @@ public class Config {
     public static final String CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
     public static final String CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
     public static final String CLI_OPTION_CONFIG_DIR_PROP = "salesforce.config.dir";
+    public static final String CLI_OPTION_API_VERSION="salesforce.api.version";
     public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
 
     /**
