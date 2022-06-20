@@ -25,15 +25,10 @@
  */
 package com.salesforce.dataloader.ui.extraction;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.wizard.WizardPage;
-
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.Labels;
-import com.salesforce.dataloader.ui.UIUtils;
+import com.salesforce.dataloader.ui.OperationPage;
 
 /**
  * Class for the common code in the extraction wizard pages
@@ -41,41 +36,27 @@ import com.salesforce.dataloader.ui.UIUtils;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public abstract class ExtractionPage extends WizardPage {
+public abstract class ExtractionPage extends OperationPage {
 
-    /**
-     * @param pageName
-     * @param title
-     * @param titleImage
-     */
-    protected final Controller controller;
-    protected final Logger logger;
+    protected ExtractionPage(String name, Controller controller) {
+        super(name, controller);
 
-    protected ExtractionPage(String pageName, String title, ImageDescriptor titleImage, Controller controller) {
-        super(pageName, title, titleImage);
-        this.logger = LogManager.getLogger(this.getClass());
-        this.controller = controller;
     }
 
-    abstract boolean setupPagePostLogin();
-
-    boolean setupPage() {
-        String description = Labels.getString(this.getClass().getSimpleName() + ".description")
-                + "\n\n    "
-                + Labels.getString("ExtractionInputDialog.querySize")
-                + " "
-                + controller.getConfig().getString(Config.EXTRACT_REQUEST_SIZE);
-        this.setDescription(description);
-        boolean success = true;
-        if (this.controller.isLoggedIn()) {
-            success = setupPagePostLogin();
-            UIUtils.updateWizardPageDescription(this, this.controller.getPartnerClient());
-        }
-        return success;
+    @Override
+    protected String getConfigInfo() {
+        return getConfigInfo(controller.getConfig());
     }
-
+    
     /**
      * finishing step for this page
      */
     public abstract boolean finishPage();
+    
+    public static String getConfigInfo(Config config) {
+        return "\n\n    "
+                + Labels.getString("ExtractionInputDialog.querySize")
+                + " "
+                + config.getString(Config.EXTRACT_REQUEST_SIZE);
+    }
 }

@@ -29,7 +29,6 @@ package com.salesforce.dataloader.ui;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -41,9 +40,7 @@ import org.eclipse.swt.widgets.Event;
  * @author Lexi Viripaeff
  * @since 6.0
  */
-public class SettingsPage extends WizardPage {
-
-    private final Controller controller;
+public class SettingsPage extends OperationPage {
 
     private AuthenticationRunner authenticator;
     private OAuthLoginDefaultControl defaultControl;
@@ -51,18 +48,11 @@ public class SettingsPage extends WizardPage {
     private UsernamePasswordLoginAdvancedControl advancedControl;
     private Grid12 grid;
     private Composite control;
+    private String nextPageName = DataSelectionPage.class.getSimpleName();
 
     public SettingsPage(Controller controller) {
-        super(Labels.getString("SettingsPage.title"), Labels.getString("SettingsPage.titleMsg"), UIUtils.getImageRegistry().getDescriptor("splashscreens")); //$NON-NLS-1$ //$NON-NLS-2$
-
-        this.controller = controller;
-
-        setPageComplete(false);
-
-        // Set the description
-        setDescription(Labels.getString("SettingsPage.enterUsernamePassword")); //$NON-NLS-1$
-
-
+        super("SettingsPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
+        setPageComplete();
     }
 
     @Override
@@ -111,18 +101,19 @@ public class SettingsPage extends WizardPage {
             }
         }
     }
+    
+    public void setNextPageName(String name) {
+        this.nextPageName = name;
+    }
+    
     /**
      * Loads DataSelectionPage. To be overridden by subclasses for special behavior.
      *
      * @param controller
      */
-    protected void loadDataSelectionPage(Controller controller) {
-        DataSelectionPage selection = (DataSelectionPage)getWizard().getPage(Labels.getString("DataSelectionPage.data")); //$NON-NLS-1$
-        if(selection.setupPage()) {
-            setPageComplete(true);
-        } else {
-            setPageComplete(false);
-        }
+    private void loadDataSelectionPage(Controller controller) {
+        ((OperationPage)getWizard().getPage(this.nextPageName)).setupPage(); //$NON-NLS-1$
+        setPageComplete();
     }
 
     /**
@@ -176,5 +167,25 @@ public class SettingsPage extends WizardPage {
         grid.show(showControl);
 
         control.layout(false);
+    }
+
+    @Override
+    public boolean setupPage() {
+        return true;
+    }
+    
+    @Override
+    public void setPageComplete() {
+        setPageComplete(controller.isLoggedIn());
+    }
+
+    @Override
+    protected boolean setupPagePostLogin() {
+        return true;
+    }
+
+    @Override
+    protected String getConfigInfo() {
+        return "";
     }
 }

@@ -47,10 +47,12 @@ import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.mapping.LoadMapper;
 import com.salesforce.dataloader.mapping.Mapper;
 import com.salesforce.dataloader.mapping.SOQLMapper;
+import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.ui.LoaderWindow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
+import com.sforce.soap.partner.LimitInfo;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 
@@ -181,7 +183,24 @@ public class Controller {
         OperationInfo operation = this.config.getOperationInfo();
         IAction action = operation.instantiateAction(this, monitor);
         logger.info(Messages.getFormattedString("Controller.executeStart", operation)); //$NON-NLS-1$
+        logger.debug("API info for the operation:" + getAPIInfo());
         action.execute();
+    }
+    
+    public String getAPIInfo() {
+        if (this.partnerClient == null) {
+            return null;
+        }
+        String apiInfoStr = "\n    " + Labels.getFormattedString("Operation.apiVersion", partnerClient.getAPIVersion());
+        LimitInfo apiLimitInfo = this.partnerClient.getAPILimitInfo();
+        if (apiLimitInfo != null) {
+            apiInfoStr = "\n    "
+                    + Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
+                    + "\n    "
+                    + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit())
+                    + apiInfoStr;
+        }
+        return apiInfoStr;
     }
 
     private void validateSession() {

@@ -27,15 +27,9 @@
 package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.client.PartnerClient;
-import com.salesforce.dataloader.ui.extraction.ExtractionDataSelectionPage;
-import com.sforce.soap.partner.LimitInfo;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Combo;
@@ -50,8 +44,6 @@ import java.util.List;
 
 public class UIUtils {
     private static ImageRegistry image_registry;
-    private static Logger logger = LogManager.getLogger(UIUtils.class);
-
 
     public static boolean isValidHttpsUrl(String url) {
         try {
@@ -142,24 +134,5 @@ public class UIUtils {
             combo.setText(defaultItemText);
         }
         return itemArray;
-    }
-    
-    public static void updateWizardPageDescription(WizardPage page, PartnerClient partnerClient) {
-        if (partnerClient == null) {
-            return;
-        }
-        String currentMessage = page.getDescription();
-        LimitInfo apiLimitInfo = partnerClient.getAPILimitInfo();
-        String apiInfoStr = "\n    "
-                + Labels.getFormattedString("Operation.apiVersion", partnerClient.getAPIVersion());
-        if (apiLimitInfo != null) {
-            apiInfoStr = "\n    "
-                    + Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
-                    + "\n    "
-                    + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit())
-                    + apiInfoStr;
-        }
-        logger.debug(apiInfoStr);
-        page.setDescription(currentMessage + "\n" + apiInfoStr);
     }
 }

@@ -25,11 +25,6 @@
  */
 package com.salesforce.dataloader.ui;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.wizard.WizardPage;
-
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 
@@ -40,7 +35,7 @@ import com.salesforce.dataloader.controller.Controller;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public abstract class LoadPage extends WizardPage {
+public abstract class LoadPage extends OperationPage {
 
     /**
      * @param pageName
@@ -48,35 +43,22 @@ public abstract class LoadPage extends WizardPage {
      * @param titleImage
      * 
      */
-    protected final Controller controller;
-    protected final Logger logger;
 
-    public LoadPage(String pageName, String title, ImageDescriptor titleImage, Controller controller) {
-        super(pageName, title, titleImage);
-        this.controller = controller;
-        this.logger = LogManager.getLogger(this.getClass());
+
+    public LoadPage(String name, Controller controller) {
+        super(name, controller);
     }
     
-    abstract boolean setupPagePostLogin();
-
-    boolean setupPage() {
-        // Set the description
-        String description = Labels.getString(this.getClass().getSimpleName() + ".description")
-                + "\n\n    "
-                + Labels.getString("AdvancedSettingsDialog.batchSize")
-                + " "
-                + controller.getConfig().getString(Config.LOAD_BATCH_SIZE)
-                + "\n    "
-                + Labels.getString("AdvancedSettingsDialog.startRow")
-                + " "
-                + controller.getConfig().getString(Config.LOAD_ROW_TO_START_AT); //$NON-NLS-1$
-        this.setDescription(description);
-        boolean success = true;
-        if (this.controller.isLoggedIn()) {
-            success = setupPagePostLogin();
-            UIUtils.updateWizardPageDescription(this, this.controller.getPartnerClient());
-        }
-        return success;
+    @Override
+    protected String getConfigInfo() {
+        return "\n\n    "
+        + Labels.getString("AdvancedSettingsDialog.batchSize")
+        + " "
+        + controller.getConfig().getString(Config.LOAD_BATCH_SIZE)
+        + "\n    "
+        + Labels.getString("AdvancedSettingsDialog.startRow")
+        + " "
+        + controller.getConfig().getString(Config.LOAD_ROW_TO_START_AT); //$NON-NLS-1$
     }
 
     /*
@@ -90,13 +72,5 @@ public abstract class LoadPage extends WizardPage {
         } else {
             return this;
         }
-    }
-
-    /**
-     * Need to subclass this function to prevent the getNextPage() function being called before the button is clicked.
-     */
-    @Override
-    public boolean canFlipToNextPage() {
-        return isPageComplete();
     }
 }

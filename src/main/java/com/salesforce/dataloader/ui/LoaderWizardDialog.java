@@ -287,6 +287,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
             return;
         // set flag to indicate that we are moving back
         isMovingToPreviousPage = true;
+        ((WizardPage)currentPage).setPageComplete(false);
         // show the page
         showPage(page);
     }
@@ -729,6 +730,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
             // something must have happend getting the next page
             return;
         }
+        
         // show the next page
         showPage(page);
     }
@@ -764,9 +766,9 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      *            the key
      * @see #saveEnableStateAndSet
      */
-    private void restoreEnableState(Control w, Map h, String key) {
+    private void restoreEnableState(Control w, Map<String, Boolean> h, String key) {
         if (w != null) {
-            Boolean b = (Boolean)h.get(key);
+            Boolean b = h.get(key);
             if (b != null) w.setEnabled(b.booleanValue());
         }
     }
@@ -779,7 +781,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      *            a map containing the saved state as returned by <code>saveUIState</code>
      * @see #saveUIState
      */
-    private void restoreUIState(Map state) {
+    private void restoreUIState(Map<String, Boolean> state) {
         restoreEnableState(backButton, state, "back"); //$NON-NLS-1$
         restoreEnableState(nextButton, state, "next"); //$NON-NLS-1$
         restoreEnableState(finishButton, state, "finish"); //$NON-NLS-1$
@@ -1001,6 +1003,8 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
         IWizardPage oldPage = currentPage;
         currentPage = page;
         currentPage.setVisible(true);
+        OperationPage opPage = (OperationPage)currentPage;
+        opPage.setPageComplete();
         if (oldPage != null) oldPage.setVisible(false);
         // update the dialog controls
         update();
@@ -1079,8 +1083,8 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     public void updateButtons() {
         boolean canFlipToNextPage = false;
         boolean canFinish = wizard.canFinish();
-        if (backButton != null) backButton.setEnabled(currentPage.getPreviousPage() != null);
-        if (nextButton != null) {
+        if (backButton != null) backButton.setEnabled(currentPage != null && currentPage.getPreviousPage() != null);
+        if (nextButton != null && currentPage != null) {
             canFlipToNextPage = currentPage.canFlipToNextPage();
             nextButton.setEnabled(canFlipToNextPage);
         }
@@ -1267,5 +1271,4 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
         return button;
 
     }
-
 }

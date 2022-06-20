@@ -38,14 +38,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.util.DAORowUtil;
-import com.sforce.soap.partner.LimitInfo;
 import com.sforce.ws.ConnectionException;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -146,7 +144,7 @@ public class DataSelectionDialog extends Dialog {
                     }
                     DataReader dataReader = (DataReader)controller.getDao();
 
-                    List header = null;
+                    List<String> header = null;
                     int totalRows = 0;
                     try {
                         dataReader.checkConnection();
@@ -193,22 +191,7 @@ public class DataSelectionDialog extends Dialog {
                     }
                     success = true;
                     ok.setEnabled(true);
-                    LimitInfo apiLimitInfo;
-                    String apiLimitInfoStr = "";
-                    PartnerClient partnerClient = controller.getPartnerClient();
-                    if (partnerClient != null) {
-                        apiLimitInfo = partnerClient.getAPILimitInfo();
-                        if (apiLimitInfo != null) {
-                            apiLimitInfoStr = "\n    "
-                                    + Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
-                                    + "\n    "
-                                    + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit()
-                                    + "\n    "
-                                    + Labels.getFormattedString("Operation.apiVersion", partnerClient.getAPIVersion()));
-                            logger.debug(apiLimitInfoStr);
-                            // Set the description
-                       }
-                    }
+                    String apiInfoStr = controller.getAPIInfo();
                     // Set the description
                     label.setText(Labels.getFormattedString(
                             "DataSelectionDialog.initSuccess", String.valueOf(totalRows))
@@ -220,7 +203,7 @@ public class DataSelectionDialog extends Dialog {
                             + Labels.getString("AdvancedSettingsDialog.startRow")
                             + " "
                             + controller.getConfig().getString(Config.LOAD_ROW_TO_START_AT)
-                            + apiLimitInfoStr); //$NON-NLS-1$
+                            + apiInfoStr); //$NON-NLS-1$
                     label.getParent().pack();
                 } catch (ConnectionException ex) {
                     success = false;

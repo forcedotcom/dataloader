@@ -262,7 +262,7 @@ public class MappingDialog extends Dialog {
                 //refresh the mapping page view
                 page.updateMapping();
                 page.packMappingColumns();
-
+                page.setPageComplete();
                 shell.close();
             }
         });
@@ -402,7 +402,7 @@ public class MappingDialog extends Dialog {
 
         //Add the second column - label
         tc = new TableColumn(mappingTable, SWT.LEFT);
-        tc.setText(Labels.getString("MappingDialog.fileName")); //$NON-NLS-1$
+        tc.setText(Labels.getString("MappingDialog.sforceFieldName")); //$NON-NLS-1$
         tc.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
@@ -452,7 +452,7 @@ public class MappingDialog extends Dialog {
 
         // Add the first column - name
         TableColumn tc = new TableColumn(sforceTable, SWT.LEFT);
-        tc.setText(Labels.getString("MappingDialog.sforceName")); //$NON-NLS-1$
+        tc.setText(Labels.getString("MappingDialog.sforceFieldName")); //$NON-NLS-1$
         tc.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
@@ -463,7 +463,7 @@ public class MappingDialog extends Dialog {
 
         //Add the second column - label
         tc = new TableColumn(sforceTable, SWT.LEFT);
-        tc.setText(Labels.getString("MappingDialog.sforceLabel")); //$NON-NLS-1$
+        tc.setText(Labels.getString("MappingDialog.sforceFieldLabel")); //$NON-NLS-1$
         tc.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
@@ -474,7 +474,7 @@ public class MappingDialog extends Dialog {
 
         //  Add the third column - type
         tc = new TableColumn(sforceTable, SWT.LEFT);
-        tc.setText(Labels.getString("MappingDialog.sforceType")); //$NON-NLS-1$
+        tc.setText(Labels.getString("MappingDialog.sforceFieldType")); //$NON-NLS-1$
         tc.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {

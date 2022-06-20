@@ -40,8 +40,8 @@ import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.ui.FinishPage;
 import com.salesforce.dataloader.ui.Labels;
-import com.salesforce.dataloader.ui.UIUtils;
 import com.sforce.soap.partner.*;
 
 /**
@@ -90,14 +90,8 @@ public class ExtractionSOQLPage extends ExtractionPage {
     private Combo operCombo;
 
     public ExtractionSOQLPage(Controller controller) {
-        super(
-                Labels.getString("ExtractionSOQLPage.title"),
-                Labels.getString("ExtractionSOQLPage.titleMessage"),
-                UIUtils.getImageRegistry().getDescriptor("splashscreens"), controller); //$NON-NLS-1$ //$NON-NLS-2$
-
+        super("ExtractionSOQLPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
         initOperMap();
-
-        setPageComplete(false);
         lastFieldType = FIELD_NORMAL;
         isPickListField = false;
     }
@@ -449,6 +443,12 @@ public class ExtractionSOQLPage extends ExtractionPage {
         data.heightHint = 80;
         soqlText.setLayoutData(data);
 
+        soqlText.addModifyListener(new ModifyListener() {
+            @Override
+            public void modifyText(ModifyEvent arg0) {
+                setPageComplete();
+            }
+        });
         setControl(comp);
         setupPage();
     }
@@ -580,15 +580,16 @@ public class ExtractionSOQLPage extends ExtractionPage {
 
     @Override
     public IWizardPage getNextPage() {
-        finishPage();
-
+        String finishStepPageStr = FinishPage.class.getSimpleName(); //$NON-NLS-1$
+        ExtractionFinishPage finishStepPage = (ExtractionFinishPage)getWizard().getPage(finishStepPageStr);
+        if (!finishPage()) {
+            setPageComplete(false);
+            return null; // do not proceed to the next page if SoQL is not specified
+        }
         // get the next wizard page
-        ExtractionFinishPage finishPage = (ExtractionFinishPage)getWizard().getPage(
-                Labels.getString("FinishPage.title")); //$NON-NLS-1$
-        if (finishPage != null) {
-            getWizard().getPage(Labels.getString("FinishPage.title"));
-            finishPage.setPageComplete(true);
-            return finishPage;
+        if (finishStepPage != null) {
+            finishStepPage.setupPage();
+            return finishStepPage;
         } else {
             return super.getNextPage();
         }
@@ -600,8 +601,22 @@ public class ExtractionSOQLPage extends ExtractionPage {
      */
     @Override
     public boolean finishPage() {
-        controller.getConfig().setValue(Config.EXTRACT_SOQL, getSOQL());
+        String soqlStr = getSOQL();
+        if (soqlStr == null || soqlStr.isBlank()) {
+            return false;
+        }
+        controller.getConfig().setValue(Config.EXTRACT_SOQL, soqlStr);
         if (!controller.saveConfig()) { return false; }
         return true;
+    }
+
+    @Override
+    public void setPageComplete() {
+        String soqlStr = getSOQL();
+        if (soqlStr == null || soqlStr.isBlank()) {
+            setPageComplete(false);
+        } else {
+            setPageComplete(true);
+        }        
     }
 }

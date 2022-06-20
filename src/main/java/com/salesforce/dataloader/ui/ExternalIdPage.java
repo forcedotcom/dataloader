@@ -54,11 +54,7 @@ public class ExternalIdPage extends LoadPage {
     private Label labelExtIdInfo;
 
     public ExternalIdPage(Controller controller) {
-        super(Labels.getString("ExternalIdPage.title"), //$NON-NLS-1$
-                Labels.getString("ExternalIdPage.message"), //$NON-NLS-1$
-                UIUtils.getImageRegistry().getDescriptor("splashscreens"), controller); //$NON-NLS-1$
-
-        setPageComplete(false);
+        super("ExternalIdPage", controller); //$NON-NLS-1$
     }
 
     @Override
@@ -77,7 +73,6 @@ public class ExternalIdPage extends LoadPage {
         createExtIdFieldUi();
 
         setControl(comp);
-        setupPage();
     }
 
     private void createExtIdFieldUi() {
@@ -101,12 +96,7 @@ public class ExternalIdPage extends LoadPage {
         extIdFieldCombo.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent arg0) {
-                String fieldName = extIdFieldCombo.getText();
-                if (fieldName != null && !fieldName.equals("") ) { //$NON-NLS-1$
-                    setPageComplete(true);
-                } else {
-                    setPageComplete(false);
-                }
+                setPageComplete();
             }
             @Override
             public void widgetDefaultSelected(SelectionEvent arg0) {
@@ -145,11 +135,10 @@ public class ExternalIdPage extends LoadPage {
             extIdFieldCombo.setEnabled(false);
             extIdFieldCombo.setText(extIdNames[0]);
             labelExtIdInfo.setText(Labels.getFormattedString("ExternalIdPage.externalIdInfoNoExtId", controller.getConfig().getString(Config.ENTITY))); //$NON-NLS-1$
-            setPageComplete(true);
         } else {
             labelExtIdInfo.setText(Labels.getFormattedString("ExternalIdPage.externalIdInfoExtIdExists", controller.getConfig().getString(Config.ENTITY))); //$NON-NLS-1$
-            setPageComplete(false);
         }
+        setPageComplete();
         comp.layout();
 
         if (extIdNames.length > 0 ) {
@@ -170,15 +159,14 @@ public class ExternalIdPage extends LoadPage {
 
         // prepare next page
         LoadPage nextPage = null;
-        ForeignKeyExternalIdPage fkExtIdPage = (ForeignKeyExternalIdPage) getWizard().getPage(Labels.getString("ForeignKeyExternalIdPage.title")); //$NON-NLS-1$
+        ForeignKeyExternalIdPage fkExtIdPage = (ForeignKeyExternalIdPage) getWizard().getPage(ForeignKeyExternalIdPage.class.getSimpleName()); //$NON-NLS-1$
         if(controller.getReferenceDescribes().size() > 0) {
-            fkExtIdPage.setPageComplete(true);
             nextPage = fkExtIdPage;
         } else {
-            fkExtIdPage.setPageComplete(true);
-            nextPage = (LoadPage)getWizard().getPage(Labels.getString("MappingPage.title")); //$NON-NLS-1$
+            nextPage = (LoadPage)getWizard().getPage(MappingPage.class.getSimpleName()); //$NON-NLS-1$
         }
         nextPage.setupPage();
+        nextPage.setPageComplete();
         return nextPage;
     }
 
@@ -201,7 +189,7 @@ public class ExternalIdPage extends LoadPage {
      * @see com.salesforce.dataloader.ui.LoadPage#setupPage()
      */
     @Override
-    boolean setupPagePostLogin() {
+    public boolean setupPagePostLogin() {
         if (!setExtIdCombo()) {
             //if there is no external id, don't let them continue.
             MessageBox msg = new MessageBox(getShell(), SWT.ICON_ERROR | SWT.OK);
@@ -211,5 +199,15 @@ public class ExternalIdPage extends LoadPage {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void setPageComplete() {
+        String fieldName = extIdFieldCombo.getText();
+        if (fieldName != null && !fieldName.equals("") ) { //$NON-NLS-1$
+            setPageComplete(true);
+        } else {
+            setPageComplete(false);
+        }        
     }
 }

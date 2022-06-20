@@ -53,10 +53,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
     private Map<String, DescribeRefObject> referenceObjects;
 
     public ForeignKeyExternalIdPage(Controller controller) {
-        super(Labels.getString("ForeignKeyExternalIdPage.title"), //$NON-NLS-1$
-                Labels.getString("ForeignKeyExternalIdPage.message"), //$NON-NLS-1$
-                UIUtils.getImageRegistry().getDescriptor("splashscreens"), controller); //$NON-NLS-1$
-        setPageComplete(true);
+        super("ForeignKeyExternalIdPage", controller); //$NON-NLS-1$
     }
 
     @Override
@@ -66,7 +63,6 @@ public class ForeignKeyExternalIdPage extends LoadPage {
 
         setControl(containerComp);
         setupPage();
-        setPageComplete(true);
     }
 
     private void createFkExtIdUi() {
@@ -101,10 +97,8 @@ public class ForeignKeyExternalIdPage extends LoadPage {
             }
         }
         scrollComp.setMinSize(comp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
         containerComp.layout();
-
-        setPageComplete(true);
+        setPageComplete();
     }
 
     /**
@@ -146,7 +140,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
         // save data from this page and remember field selections for mapping
         Map<String,Field> relatedFields = saveExtIdData();
 
-        MappingPage nextPage = (MappingPage)getWizard().getPage(Labels.getString("MappingPage.title")); //$NON-NLS-1$
+        MappingPage nextPage = (MappingPage)getWizard().getPage(MappingPage.class.getSimpleName()); //$NON-NLS-1$
         nextPage.setRelatedFields(relatedFields);
         nextPage.setupPage();
         return nextPage;
@@ -181,7 +175,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
      * @see com.salesforce.dataloader.ui.LoadPage#setupPage()
      */
     @Override
-    boolean setupPagePostLogin() {
+    public boolean setupPagePostLogin() {
         // set the required data
         setReferenceObjects();
         
@@ -192,5 +186,10 @@ public class ForeignKeyExternalIdPage extends LoadPage {
 
     public void setReferenceObjects() {
         this.referenceObjects = controller.getReferenceDescribes();
+    }
+    
+    @Override
+    public void setPageComplete() {
+        setPageComplete(true);
     }
 }

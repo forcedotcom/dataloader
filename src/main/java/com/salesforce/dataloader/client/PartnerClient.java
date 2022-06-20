@@ -644,7 +644,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             // ignore
         } finally {
             synchronized (apiVersionForTheSession) {
-                apiVersionForTheSession = null;
                 isValidApiVersionForTheSession = false;
             }
             disconnect();

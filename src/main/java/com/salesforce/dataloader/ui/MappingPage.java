@@ -61,9 +61,7 @@ public class MappingPage extends LoadPage {
     private Map<String, Field> relatedFields;
 
     public MappingPage(Controller controller) {
-        super(Labels.getString("MappingPage.title"),
-                Labels.getString("MappingPage.titleMsg"), 
-                UIUtils.getImageRegistry().getDescriptor("splashscreens"), controller); //$NON-NLS-1$ //$NON-NLS-2$
+        super("MappingPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
@@ -149,7 +147,7 @@ public class MappingPage extends LoadPage {
 
         //Add the second column - label
         tc = new TableColumn(mappingTable, SWT.LEFT);
-        tc.setText(Labels.getString("MappingPage.name")); //$NON-NLS-1$
+        tc.setText(Labels.getString("MappingPage.fieldName")); //$NON-NLS-1$
 
         //update the model
         updateMapping();
@@ -251,7 +249,7 @@ public class MappingPage extends LoadPage {
      * @see com.salesforce.dataloader.ui.LoadPage#setupPage()
      */
     @Override
-    boolean setupPagePostLogin() {
+    public boolean setupPagePostLogin() {
         try {
             // clear mapping file
             controller.getConfig().setValue(Config.MAPPING_FILE, "");
@@ -264,5 +262,11 @@ public class MappingPage extends LoadPage {
             logger.error("Could not initialize mapping page", e);
             return false;
         }
+    }
+
+    @Override
+    public void setPageComplete() {
+        // no validations performed currently
+        setPageComplete(true);
     }
 }
