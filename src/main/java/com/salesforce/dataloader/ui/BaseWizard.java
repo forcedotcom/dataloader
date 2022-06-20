@@ -44,7 +44,7 @@ public abstract class BaseWizard extends Wizard {
         getConfig().setValue(Config.OPERATION, info.name());
         this.finishPage = setupPages();
         // Set the dialog window title
-        setWindowTitle(getLabel("title"));
+        setWindowTitle(getLabel("windowTitle"));
 
     }
 

@@ -39,12 +39,6 @@ public class ExtractionSettingsPage extends SettingsPage {
 
     public ExtractionSettingsPage(Controller controller) {
         super(controller);
-    }
-
-    @Override
-    protected void loadDataSelectionPage(Controller controller) {
-        ExtractionDataSelectionPage selection = (ExtractionDataSelectionPage) getWizard().getPage("Data"); //$NON-NLS-1$
-        selection.setupPage();
-        setPageComplete(true);
+        setNextPageName(ExtractionDataSelectionPage.class.getSimpleName());
     }
 }

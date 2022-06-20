@@ -27,7 +27,10 @@
 package com.salesforce.dataloader.ui;
 
 import org.eclipse.jface.preference.DirectoryFieldEditor;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -48,12 +51,13 @@ public class FinishPage extends LoadPage {
     private DirectoryFieldEditor dirFE;
 
     public FinishPage(Controller controller) {
-        super(Labels.getString("FinishPage.title"), 
-            Labels.getString("FinishPage.finishMsg"), 
-            UIUtils.getImageRegistry().getDescriptor("splashscreens"), controller); //$NON-NLS-1$ //$NON-NLS-2$
-        setPageComplete(false);
+        this("FinishPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
+    public FinishPage(String name, Controller controller) {
+        super(name, controller); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+    
     @Override
     public void createControl(Composite parent) {
         Composite comp = new Composite(parent, SWT.NONE);
@@ -68,15 +72,22 @@ public class FinishPage extends LoadPage {
         label.setText(Labels.getString("FinishPage.overwritten")); //$NON-NLS-1$
 
         Composite dirComp = new Composite(comp, SWT.NONE);
-        GridData data = new GridData();
-        data.widthHint = 400;
+        GridData data = new GridData(GridData.FILL_HORIZONTAL);
         dirComp.setLayoutData(data);
 
         dirFE = new DirectoryFieldEditor(Labels.getString("FinishPage.output"), Labels.getString("FinishPage.chooseDir"), dirComp); //$NON-NLS-1$ //$NON-NLS-2$
         dirFE.setStringValue(controller.getConfig().getString(Config.OUTPUT_STATUS_DIR));
 
-        hook_createControl(comp);
+        Text textField = dirFE.getTextControl(dirComp);
+        textField.addModifyListener(new ModifyListener() {
 
+            @Override
+            public void modifyText(ModifyEvent arg0) {
+                setPageComplete();
+            }
+            
+        });
+        hook_createControl(comp);
         setControl(comp);
         setupPage();
     }
@@ -97,7 +108,7 @@ public class FinishPage extends LoadPage {
      * @see com.salesforce.dataloader.ui.LoadPage#setupPage()
      */
     @Override
-    boolean setupPagePostLogin() {
+    protected boolean setupPagePostLogin() {
         try {
             verifySettings();
         } catch (final MappingInitializationException e) {
@@ -110,8 +121,12 @@ public class FinishPage extends LoadPage {
             });
             return false;
         }
+        setPageComplete();
+        IWizardContainer wizardContainer = this.getContainer();
+        if (wizardContainer != null) {
+            wizardContainer.updateButtons();
+        }
         if (!controller.saveConfig()) return false;
-        setPageComplete(true);
         return true;
     }
 
@@ -128,4 +143,12 @@ public class FinishPage extends LoadPage {
         return this.controller;
     }
 
+    public void setPageComplete() {
+        String outputDir = getOutputDir();
+        if (outputDir == null || outputDir.isBlank()) {
+            setPageComplete(false);
+        } else {
+            setPageComplete(true);
+        }
+    }
 }

@@ -62,8 +62,7 @@ public class DataSelectionPage extends LoadPage {
     private FileFieldEditor csvChooser;
 
     public DataSelectionPage(Controller controller) {
-        super(Labels.getString("DataSelectionPage.data"), Labels.getString("DataSelectionPage.dataMsg"), UIUtils.getImageRegistry().getDescriptor("splashscreens"), controller); //$NON-NLS-1$ //$NON-NLS-2$
-        setPageComplete(false);
+        super("DataSelectionPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
@@ -84,7 +83,7 @@ public class DataSelectionPage extends LoadPage {
         lv.addSelectionChangedListener(new ISelectionChangedListener() {
             @Override
             public void selectionChanged(SelectionChangedEvent event) {
-                checkPageComplete();
+                setPageComplete();
             }
 
         });
@@ -123,11 +122,11 @@ public class DataSelectionPage extends LoadPage {
 
                         if (!((Boolean)event.getNewValue()).booleanValue()) {
                             setErrorMessage(Labels.getString("DataSelectionPage.selectValid")); //$NON-NLS-1$
-                            checkPageComplete();
+                            setPageComplete();
 
                         } else {
                             setErrorMessage(null);
-                            checkPageComplete();
+                            setPageComplete();
                         }
                     } catch (ClassCastException cle) {
                         logger.error(Labels.getString("DataSelectionPage.errorClassCast"), cle); //$NON-NLS-1$
@@ -179,8 +178,7 @@ public class DataSelectionPage extends LoadPage {
 
     }
 
-    private void checkPageComplete() {
-
+    public void setPageComplete() {
         if (csvChooser.isValid() && checkEntityStatus()) {
             setPageComplete(true);
         } else {
@@ -223,7 +221,7 @@ public class DataSelectionPage extends LoadPage {
      * @see com.salesforce.dataloader.ui.LoadPage#setupPage()
      */
     @Override
-    boolean setupPagePostLogin() {
+    public boolean setupPagePostLogin() {
         Map<String, DescribeGlobalSObjectResult> describes = controller.getEntityDescribes();
         if(describes == null) {
             return false;

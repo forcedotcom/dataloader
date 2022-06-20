@@ -65,11 +65,7 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
     private boolean success;
 
     public ExtractionDataSelectionPage(Controller controller) {
-        super(	Labels.getString("ExtractionDataSelectionPage.title"), 
-                Labels.getString("ExtractionDataSelectionPage.titleMsg"), 
-                UIUtils.getImageRegistry().getDescriptor("splashscreens"),
-                controller); //$NON-NLS-1$ //$NON-NLS-2$
-        setPageComplete(false);
+        super("ExtractionDataSelectionPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
@@ -88,7 +84,7 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
         lv.addSelectionChangedListener(new ISelectionChangedListener() {
             @Override
             public void selectionChanged(SelectionChangedEvent event) {
-                checkPageComplete();
+                setPageComplete();
             }
 
         });
@@ -122,7 +118,7 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
         fileText.addModifyListener(new ModifyListener() {
             @Override
             public void modifyText(ModifyEvent e) {
-                checkPageComplete();
+                setPageComplete();
             }
         });
 
@@ -141,7 +137,7 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
                 if (filename != null && !"".equals(filename)) { //$NON-NLS-1$
                     //set the text, and see if the page is valid
                     fileText.setText(filename);
-                    checkPageComplete();
+                    setPageComplete();
                 }
             }
         });
@@ -183,7 +179,7 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
 
     }
 
-    private void checkPageComplete() {
+    public void setPageComplete() {
 
         if (!(fileText.getText().equals("")) && checkEntityStatus()) { //$NON-NLS-1$
             setPageComplete(true);
@@ -191,14 +187,6 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
             setPageComplete(false);
         }
 
-    }
-
-    /**
-     * Need to subclass this function to prevent the getNextPage() function being called before the button is clicked.
-     */
-    @Override
-    public boolean canFlipToNextPage() {
-        return isPageComplete();
     }
 
     /**
@@ -260,7 +248,7 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
 
         if (success) {
             //set the query
-            ExtractionSOQLPage soql = (ExtractionSOQLPage)getWizard().getPage("SOQL"); //$NON-NLS-1$
+            ExtractionSOQLPage soql = (ExtractionSOQLPage)getWizard().getPage(ExtractionSOQLPage.class.getSimpleName()); //$NON-NLS-1$
             soql.setupPage();
             soql.setPageComplete(true);
 
