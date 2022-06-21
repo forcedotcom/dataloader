@@ -30,7 +30,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.widgets.Text;
 
-import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.Field;
 
 public class FieldFilter  extends ViewerFilter {

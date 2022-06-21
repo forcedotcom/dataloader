@@ -53,7 +53,7 @@ import com.sforce.soap.partner.*;
 public class ExtractionSOQLPage extends ExtractionPage {
 
     private Text soqlText;
-    private Field[] fields;
+    private Field[] fieldsInSObject;
     private CheckboxTableViewer fieldViewer;
     private final String[] operationsDisplayNormal = { "equals", "not equals", "less than", "greater than", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
             "less than or equals", "greater than or equals" }; //$NON-NLS-1$ //$NON-NLS-2$
@@ -88,6 +88,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
     private StringBuffer fieldPart = new StringBuffer();
     private StringBuffer wherePart = new StringBuffer();
     private Combo operCombo;
+    private ArrayList<Field> selectedFieldsInFieldViewer = new ArrayList<Field>();
 
     public ExtractionSOQLPage(Controller controller) {
         super("ExtractionSOQLPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
@@ -164,6 +165,17 @@ public class ExtractionSOQLPage extends ExtractionPage {
         fieldViewer.addCheckStateListener(new ICheckStateListener() {
             @Override
             public void checkStateChanged(CheckStateChangedEvent event) {
+                Field field = (Field)event.getElement();
+                if (event.getChecked()) {
+                    selectedFieldsInFieldViewer.add(field);
+                } else {
+                    for (Field selectedField : selectedFieldsInFieldViewer) {
+                        if (selectedField.getName().equalsIgnoreCase(field.getName())) {
+                            selectedFieldsInFieldViewer.remove(field);
+                            break;
+                        }
+                    }                    
+                }
                 generateFieldPart();
                 generateSOQLText();
             }
@@ -172,12 +184,14 @@ public class ExtractionSOQLPage extends ExtractionPage {
         search.addSelectionListener(new SelectionAdapter() {
             public void widgetDefaultSelected(SelectionEvent e) {
                 fieldViewer.refresh();
+                preserveFieldViewerCheckedItems();
             }
         });
         
         search.addListener(SWT.KeyUp, new Listener() {
             public void handleEvent(Event e) {
                 fieldViewer.refresh();
+                preserveFieldViewerCheckedItems();
             }
         });
 
@@ -211,8 +225,8 @@ public class ExtractionSOQLPage extends ExtractionPage {
 
                 // get the corresponding field
                 if (name != null && name.length() > 0) {
-                    for (int i = 0; i < fields.length; i++) {
-                        Field field = fields[i];
+                    for (int i = 0; i < fieldsInSObject.length; i++) {
+                        Field field = fieldsInSObject[i];
                         if (name.equals(field.getName())) {
 
                             // picklist values
@@ -456,11 +470,20 @@ public class ExtractionSOQLPage extends ExtractionPage {
     private String getOperValue(String operation) {
         return operationMap.get(operation);
     }
+    
+    private void preserveFieldViewerCheckedItems() {
+        Field field = (Field)fieldViewer.getElementAt(0);
+        int i = 0;
+        while (field != null) {
+            fieldViewer.setChecked(field, selectedFieldsInFieldViewer.contains(field));
+            field = (Field)fieldViewer.getElementAt(++i);
+        }
+    }
 
     private boolean isSingleQuoteValue(String fieldName) {
         Field field;
-        for (int i = 0; i < fields.length; i++) {
-            field = fields[i];
+        for (int i = 0; i < fieldsInSObject.length; i++) {
+            field = fieldsInSObject[i];
             if (field.getName().equals(fieldName)) {
                 switch (field.getType()) {
                 case _boolean:
@@ -497,19 +520,28 @@ public class ExtractionSOQLPage extends ExtractionPage {
     }
 
     private void generateFieldPart() {
-        Object[] fields = fieldViewer.getCheckedElements();
-        fieldPart = new StringBuffer();
-        Field field;
-        for (int i = 0; i < fields.length; i++) {
-            field = (Field)fields[i];
-            fieldPart.append(field.getName());
-            if ((i + 1) < fields.length) {
-                fieldPart.append(", "); //$NON-NLS-1$
-
+        Field field = (Field)fieldViewer.getElementAt(0);
+        int i = 0;
+        while (field != null) {
+            if (fieldViewer.getChecked(field)) {
+                if (!selectedFieldsInFieldViewer.contains(field)) {
+                    selectedFieldsInFieldViewer.add(field);
+                }
+            } else {
+                selectedFieldsInFieldViewer.remove(field);
             }
+            field = (Field)fieldViewer.getElementAt(++i);
         }
-        fieldPart.append(" "); //$NON-NLS-1$
 
+        fieldPart = new StringBuffer();
+        for (Field selectedField : selectedFieldsInFieldViewer) {
+            fieldPart.append(selectedField.getName());
+            fieldPart.append(", "); //$NON-NLS-1$
+        }
+        if (fieldPart.length() > 0) {
+            fieldPart = new StringBuffer(fieldPart.substring(0, fieldPart.length()-2));
+            fieldPart.append(" ");
+        }
     }
 
     private boolean validateStr(String str) {
@@ -528,9 +560,9 @@ public class ExtractionSOQLPage extends ExtractionPage {
         Config config = controller.getConfig();
 
         DescribeSObjectResult result = controller.getFieldTypes();
-        fields = result.getFields();
+        fieldsInSObject = result.getFields();
         if (config.getBoolean(Config.SORT_EXTRACT_FIELDS)) {
-            Arrays.sort(fields, new Comparator<Field>(){
+            Arrays.sort(fieldsInSObject, new Comparator<Field>(){
                 @Override
                 public int compare(Field f1, Field f2)
                 {
@@ -538,7 +570,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
                 }
             });
         }
-        fieldViewer.setInput(fields);
+        fieldViewer.setInput(fieldsInSObject);
         updateFieldComboList(null);
         builderComp.layout();
         whereComp.layout();
@@ -549,14 +581,14 @@ public class ExtractionSOQLPage extends ExtractionPage {
     
     private void updateFieldComboList(String filterStr) {
         List<String> fieldNames = new ArrayList<String>();
-        for (int i = 0; i < fields.length; i++) {
+        for (int i = 0; i < fieldsInSObject.length; i++) {
             // include all fields except encrypted string ones
-            String name = fields[i].getName().toLowerCase();
-            if(FieldType.encryptedstring != fields[i].getType()) {
+            String name = fieldsInSObject[i].getName().toLowerCase();
+            if(FieldType.encryptedstring != fieldsInSObject[i].getType()) {
                 if (filterStr == null 
                         || filterStr.isEmpty() 
                         || name.contains(filterStr.toLowerCase())) {
-                    fieldNames.add(fields[i].getName());
+                    fieldNames.add(fieldsInSObject[i].getName());
                 }
             }
         }
