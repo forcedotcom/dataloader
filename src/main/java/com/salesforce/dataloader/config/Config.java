@@ -43,6 +43,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.text.DateFormat;
@@ -122,7 +123,7 @@ public class Config {
     /**
      * The mapping from preference name to preference value (represented as strings).
      */
-    private final Properties properties;
+    private Properties properties;
 
     /**
      * The default-default value for the respective types.
@@ -935,12 +936,10 @@ public class Config {
             throw new IOException(Messages.getString("Config.fileMissing")); //$NON-NLS-1$
         }
 
+        Properties inMemoryProperties = new Properties();
+        inMemoryProperties.putAll(this.properties);
         // Secure password code prevents the saving of passwords
         // no great way to do this,
-        String oldPassword = encryptProperty(PASSWORD);
-        String oldProxyPassword = encryptProperty(PROXY_PASSWORD);
-        String oauthAccessToken = getString(OAUTH_ACCESSTOKEN);
-        String oauthRefreshToken = getString(OAUTH_REFRESHTOKEN);
         putValue(PASSWORD, "");
         putValue(PROXY_PASSWORD, "");
         putValue(OAUTH_ACCESSTOKEN, "");
@@ -959,11 +958,7 @@ public class Config {
                 out.close();
             }
             // restore original property values
-            putValue(PASSWORD, oldPassword);
-            putValue(PROXY_PASSWORD, oldProxyPassword);
-            putValue(OAUTH_ACCESSTOKEN, oauthAccessToken);
-            putValue(OAUTH_REFRESHTOKEN, oauthRefreshToken);
-
+            properties = inMemoryProperties;
         }
         // save last run statistics
         lastRun.save();
@@ -983,9 +978,27 @@ public class Config {
     
     private void skipSaveOfCLIOptions() {
         Set<String> keys = this.properties.stringPropertyNames();
-        for (String key : keys) {
-            if (key.startsWith("CLI_OPTION_")) {
-                this.properties.remove(key);
+        Field[] allFields = Config.class.getDeclaredFields();
+        for (Field field : allFields) {
+            if (field.getName().startsWith("CLI_OPTION_")) {
+                String fieldVal = null;
+                try {
+                    fieldVal = (String)field.get(null);
+                } catch (IllegalArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                if (fieldVal == null) {
+                    continue;
+                }
+                for (String key : keys) {
+                    if (key.equalsIgnoreCase(fieldVal)) {
+                        this.properties.remove(key);
+                    }
+                }
             }
         }
     }
