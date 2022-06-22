@@ -365,7 +365,7 @@ public class MappingDialog extends Dialog {
             @Override
             public void keyPressed(KeyEvent event) {
                 //\u007f is delete
-                if (event.character == '\u007f') {
+                if (event.character == '\u007f' || event.character == '\b') {
                     IStructuredSelection selection = (IStructuredSelection)mappingTblViewer.getSelection();
                     for (Iterator it = selection.iterator(); it.hasNext();) {
                         @SuppressWarnings("unchecked")
