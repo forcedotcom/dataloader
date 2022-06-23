@@ -47,12 +47,7 @@ public abstract class ExtractionPage extends OperationPage {
     protected String getConfigInfo() {
         return getConfigInfo(controller.getConfig());
     }
-    
-    /**
-     * finishing step for this page
-     */
-    public abstract boolean finishPage();
-    
+        
     public static String getConfigInfo(Config config) {
         return "\n\n    "
                 + Labels.getString("ExtractionInputDialog.querySize")

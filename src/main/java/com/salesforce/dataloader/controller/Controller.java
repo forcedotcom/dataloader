@@ -541,7 +541,7 @@ public class Controller {
                 + Config.CONFIG_DIR_DEFAULT_VALUE;
     }
     
-    public static String getDirContainingClassJar(Class aClass) {
+    public static String getDirContainingClassJar(Class<?> aClass) {
         CodeSource codeSource = aClass.getProtectionDomain().getCodeSource();
     
         File jarFile = null;
@@ -570,7 +570,7 @@ public class Controller {
         return this.partnerClient;
     }
 
-    private ClientBase getClient() {
+    private ClientBase<?> getClient() {
         return this.config.useBulkAPIForCurrentOperation() ? getBulkClient() : getPartnerClient();
     }
 

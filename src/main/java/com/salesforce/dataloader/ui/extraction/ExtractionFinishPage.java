@@ -47,7 +47,8 @@ public class ExtractionFinishPage extends FinishPage {
         super("ExtractionFinishPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
-    public boolean finishPage() {
+    @Override
+    public boolean finishAllowed() {
         // validate the status output
         String outputDirName = getOutputDir();
         File statusDir = new File(outputDirName);

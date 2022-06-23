@@ -40,7 +40,6 @@ import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.ui.FinishPage;
 import com.salesforce.dataloader.ui.Labels;
 import com.sforce.soap.partner.*;
 
@@ -612,9 +611,9 @@ public class ExtractionSOQLPage extends ExtractionPage {
 
     @Override
     public IWizardPage getNextPage() {
-        String finishStepPageStr = FinishPage.class.getSimpleName(); //$NON-NLS-1$
+        String finishStepPageStr = ExtractionFinishPage.class.getSimpleName(); //$NON-NLS-1$
         ExtractionFinishPage finishStepPage = (ExtractionFinishPage)getWizard().getPage(finishStepPageStr);
-        if (!finishPage()) {
+        if (!saveSoQL()) {
             setPageComplete(false);
             return null; // do not proceed to the next page if SoQL is not specified
         }
@@ -629,10 +628,18 @@ public class ExtractionSOQLPage extends ExtractionPage {
 
     /*
      * (non-Javadoc)
-     * @see com.salesforce.dataloader.ui.extraction.ExtractionPage#finishPage()
+     * @see com.salesforce.dataloader.ui.OperationPage#finishAllowed()
      */
     @Override
-    public boolean finishPage() {
+    public boolean finishAllowed() {
+        if (this.controller.getConfig().getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT)) {
+            // this page is not the finish page if extract status output is enabled
+            return false;
+        }
+        return saveSoQL();
+    }
+    
+    private boolean saveSoQL() {
         String soqlStr = getSOQL();
         if (soqlStr == null || soqlStr.isBlank()) {
             return false;
@@ -644,11 +651,11 @@ public class ExtractionSOQLPage extends ExtractionPage {
 
     @Override
     public void setPageComplete() {
-        String soqlStr = getSOQL();
-        if (soqlStr == null || soqlStr.isBlank()) {
-            setPageComplete(false);
-        } else {
-            setPageComplete(true);
-        }        
+        setPageComplete(saveSoQL());
     }
+    
+    @Override
+    public boolean canFlipToNextPage() {
+        return (this.controller.getConfig().getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT) && isPageComplete());
+     }
 }

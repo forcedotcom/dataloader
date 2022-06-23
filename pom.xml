@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>55.0.1</version>
+  <version>55.0.2</version>
   <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -13,7 +13,7 @@
   </organization>
 
   <properties>
-    <force.wsc.version>55.1.0</force.wsc.version>
+    <force.wsc.version>55.2.0</force.wsc.version>
     <force.partner.api.version>${force.wsc.version}</force.partner.api.version>
     <build.year>2022</build.year>
     <java.compile.version>11</java.compile.version>
@@ -115,13 +115,13 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>5.3.20</version>
+      <version>5.3.21</version>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.jface --> 
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.jface</artifactId>
-      <version>3.25.0</version>
+      <version>3.26.0</version>
       <exclusions>
         <exclusion>
           <groupId>org.eclipse.platform</groupId>
@@ -135,7 +135,7 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>2.1.212</version>
+      <version>2.1.214</version>
       <scope>test</scope>
     </dependency>
 <!-- https://mvnrepository.com/artifact/junit/junit -->
@@ -149,14 +149,14 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jdbc</artifactId>
-      <version>5.3.20</version>
+      <version>5.3.21</version>
       <scope>test</scope>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>4.5.1</version>
+      <version>4.6.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -81,4 +81,9 @@ public abstract class OperationPage extends WizardPage {
    public boolean canFlipToNextPage() {
        return isPageComplete();
    }
+   
+   // concrete subclasses must override this method if they allow Finish operation
+   public boolean finishAllowed() {
+       return false;
+   }
 }

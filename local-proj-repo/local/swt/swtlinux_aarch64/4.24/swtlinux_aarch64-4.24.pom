@@ -4,6 +4,6 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>local.swt</groupId>
   <artifactId>swtlinux_aarch64</artifactId>
-  <version>4.23</version>
+  <version>4.24</version>
   <description>POM was created from install:install-file</description>
 </project>
