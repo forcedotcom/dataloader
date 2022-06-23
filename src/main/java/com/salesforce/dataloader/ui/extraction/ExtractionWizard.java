@@ -125,7 +125,7 @@ public class ExtractionWizard extends BaseWizard {
             return false;
         }
 
-        if (!((ExtractionFinishPage)getFinishPage()).finishPage()) {
+        if (!((ExtractionPage)getFinishPage()).finishPage()) {
             return false;
         }
 
