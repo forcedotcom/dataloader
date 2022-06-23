@@ -75,8 +75,8 @@ public class ExtractionWizard extends BaseWizard {
     }
 
     @Override
-    protected ExtractionFinishPage getFinishPage() {
-        return (ExtractionFinishPage)super.getFinishPage();
+    protected WizardPage getFinishPage() {
+        return (WizardPage)super.getFinishPage();
     }
 
     private boolean validateExtractionPath(String filePath) {
@@ -125,7 +125,7 @@ public class ExtractionWizard extends BaseWizard {
             return false;
         }
 
-        if (!getFinishPage().finishPage()) {
+        if (!((ExtractionFinishPage)getFinishPage()).finishPage()) {
             return false;
         }
 
