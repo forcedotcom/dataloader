@@ -74,11 +74,6 @@ public class ExtractionWizard extends BaseWizard {
         return finishPage;
     }
 
-    @Override
-    protected WizardPage getFinishPage() {
-        return (WizardPage)super.getFinishPage();
-    }
-
     private boolean validateExtractionPath(String filePath) {
         File file = new File(filePath);
 
