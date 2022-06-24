@@ -61,7 +61,7 @@ public class EncryptedDataSource extends org.apache.commons.dbcp2.BasicDataSourc
     }
 
     public synchronized void setPassword(String encodedPassword) {
-    	setPassword(decode(encodedPassword));
+    	super.setPassword(decode(encodedPassword));
     }
     
     private String decode(String password) {
