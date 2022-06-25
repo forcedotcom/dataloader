@@ -271,54 +271,26 @@ public class DataLoaderRunner extends Thread {
     }
     
     private static String getSWTDir() {
-        String parentDirPath = Controller.getDirContainingClassJar(DataLoaderRunner.class);
-        if (parentDirPath == null) {
-            parentDirPath = ".";
-        }
-
-        String SWTDirWithOSAndArchStr = buildPathStringFromOSAndArch("swt", "", false);
-        String SWTDirWildcardStr = buildPathStringFromOSAndArch("swt*", "", true);
-        
-        String SWTDirPathStr = getFilePath(parentDirPath, SWTDirWithOSAndArchStr);
-        if (SWTDirPathStr != null) {
-            logger.debug("Found SWT directory: " + SWTDirPathStr);
-            return SWTDirPathStr;
-        }
-        
-        SWTDirPathStr = getFilePath(parentDirPath, SWTDirWildcardStr);
-        if (SWTDirPathStr != null) {
-            logger.debug("Found SWT directory: " + SWTDirPathStr);
-            return SWTDirPathStr;
-        }
-        
-        // Look in the parent directory - batch mode
-        parentDirPath = "../";
-        SWTDirPathStr = getFilePath(parentDirPath, SWTDirWithOSAndArchStr);
-        if (SWTDirPathStr != null) {
-            logger.debug("Found SWT directory: " + SWTDirPathStr);
-            return SWTDirPathStr;
-        }
-        
-        SWTDirPathStr = getFilePath(parentDirPath, SWTDirWildcardStr);
-        if (SWTDirPathStr != null) {
-            logger.debug("Found SWT directory: " + SWTDirPathStr);
-            return SWTDirPathStr;
-        }
-        
-        // Look in developer's build directory
-        parentDirPath = LOCAL_SWT_DIR;
-        SWTDirPathStr = getFilePath(parentDirPath, SWTDirWithOSAndArchStr);
-        if (SWTDirPathStr != null) {
-            logger.debug("Found SWT directory: " + SWTDirPathStr);
-            return SWTDirPathStr;
-        }
-        
-        SWTDirPathStr = getFilePath(parentDirPath, SWTDirWildcardStr);
-        if (SWTDirPathStr != null) {
-            logger.debug("Found SWT directory: " + SWTDirPathStr);
-            return SWTDirPathStr;
-        }
-        
+        String[]parentDirOfSWTArray = 
+                    {Controller.getDirContainingClassJar(DataLoaderRunner.class)
+                     , "."
+                     , ".."
+                     , LOCAL_SWT_DIR
+                    };
+        Boolean[] skipOSAndArchInFileNameConstructionArray = {Boolean.FALSE, Boolean.TRUE};
+        for (String parentDirPath : parentDirOfSWTArray) {
+            if (parentDirPath == null) {
+                continue;
+            }
+            for (Boolean skipOSAndArchVal : skipOSAndArchInFileNameConstructionArray) {
+                String SWTDirStr = buildPathStringFromOSAndArch("swt*", "", skipOSAndArchVal);
+                String SWTDirPathStr = getFilePath(parentDirPath, SWTDirStr);
+                if (SWTDirPathStr != null) {
+                    logger.debug("Found SWT directory: " + SWTDirPathStr);
+                    return SWTDirPathStr;
+                }
+            }
+        }        
         return null;
     }
     
@@ -330,19 +302,14 @@ public class DataLoaderRunner extends Thread {
                     + System.getProperty("os.arch"));
             System.exit(-1);
         }
-        
-        String jarStr = buildPathStringFromOSAndArch("swt", "*.jar", false);
-        String jarPathStr = getFilePath(SWTDirStr, jarStr);
-        if (jarPathStr != null) {
-            logger.debug("Found SWT jar: " + jarPathStr);
-            return jarPathStr;
-        }
-        
-        jarStr = buildPathStringFromOSAndArch("swt", "*.jar", true);
-        jarPathStr = getFilePath(SWTDirStr, jarStr);
-        if (jarPathStr != null) {
-            logger.debug("Found SWT jar: " + jarPathStr);
-            return jarPathStr;
+        Boolean[] skipOSAndArchInFileNameConstructionArray = {Boolean.FALSE, Boolean.TRUE};
+        for (Boolean skipOSAndArchVal : skipOSAndArchInFileNameConstructionArray) {
+            String jarStr = buildPathStringFromOSAndArch("swt", "*.jar", skipOSAndArchVal);
+            String jarPathStr = getFilePath(SWTDirStr, jarStr);
+            if (jarPathStr != null) {
+                logger.debug("Found SWT jar: " + jarPathStr);
+                return jarPathStr;
+            }
         }
         // no jar file starting with swt found
         return null;
