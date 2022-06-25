@@ -26,6 +26,7 @@
 
 package com.salesforce.dataloader.EncryptionUtil;
 
+import com.salesforce.dataloader.dao.EncryptedDataSource;
 import com.salesforce.dataloader.security.EncryptionAesUtil;
 
 import org.apache.logging.log4j.Logger;
@@ -130,5 +131,18 @@ public class EncryptionUtilTest {
                 Files.move(Paths.get(filePathBak), Paths.get(filePath));
             }
         }
+    }
+    
+    @Test /* test for single line encryption */
+    public void testEncryptedDataSource() throws Exception {
+        String passwordText = "somePassword6c3708b3";
+        EncryptionAesUtil encryptionAesUtil = new EncryptionAesUtil();
+        String encryptedPassword = encryptionAesUtil.encryptMsg(passwordText);
+        EncryptedDataSource dataSource = new EncryptedDataSource();
+        dataSource.setPassword(encryptedPassword);
+        String savedPassword = dataSource.getPassword();
+        dataSource.close();
+        Assert.assertNotEquals("Encrypted password should be not be equal to original password", passwordText, encryptedPassword);                
+        Assert.assertEquals("Password recovered from EncryptedDataSource instance is as the expected: ", passwordText, savedPassword);
     }
 }
