@@ -1197,8 +1197,31 @@ public class Config {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
-    public String getCsvWriteEncoding() {
-        if (Charset.defaultCharset().equals(UTF8) || getBoolean(WRITE_UTF8)) return UTF8.name();
+    public String getCsvEncoding(boolean isWrite) {
+        // charset is for CSV read unless isWrite is set to true
+        String configProperty = READ_UTF8;
+        if (isWrite) {
+            configProperty = WRITE_UTF8;
+        }
+        if (getBoolean(configProperty)) {
+            logger.debug("Using UTF8 charset because '" 
+                    +  configProperty
+                    +"' is set to true");
+            return UTF8.name();
+        }        
+        String fileEncodingStr = System.getProperty("file.encoding");
+        if (fileEncodingStr != null && !fileEncodingStr.isBlank()) {
+            for (String charsetName : Charset.availableCharsets().keySet()) {
+                if (fileEncodingStr.equalsIgnoreCase(charsetName)) {
+                    logger.debug("Using charset specified in file.encoding system property: " + fileEncodingStr);
+                    return charsetName;
+                }
+            }
+            logger.debug("Unable to find the charset '"
+                    + fileEncodingStr
+                    + "' specified in file.encoding system property among available charsets for the Java VM." );
+        }
+        logger.debug("Using the system default charset: " + Charset.defaultCharset().name());
         return Charset.defaultCharset().name();
     }
 

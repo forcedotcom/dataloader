@@ -78,7 +78,7 @@ public class CSVFileWriter implements DataWriter {
     public CSVFileWriter(String fileName, Config config) {
         this.fileName = fileName;
         this.capitalizedHeadings = true;
-        encoding = config.getCsvWriteEncoding();
+        encoding = config.getCsvEncoding(true);
         logger.debug(this.getClass().getName(), "encoding used to write to CSV file is " + encoding);
     }
 
