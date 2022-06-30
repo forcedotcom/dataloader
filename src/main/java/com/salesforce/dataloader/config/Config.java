@@ -1202,6 +1202,9 @@ public class Config {
         String configProperty = READ_UTF8;
         if (isWrite) {
             configProperty = WRITE_UTF8;
+            logger.debug("Getting charset for writing to CSV");
+        } else {
+            logger.debug("Getting charset for reading from CSV");
         }
         if (getBoolean(configProperty)) {
             logger.debug("Using UTF8 charset because '" 
@@ -1209,11 +1212,22 @@ public class Config {
                     +"' is set to true");
             return UTF8.name();
         }        
+        String charset = getDefaultCharsetForCsvReadWrite();
+        logger.debug("Using charset " + charset);
+        return charset;
+    }
+    
+    private static String defaultCharsetForCsvReadWrite = null;
+    private synchronized static String getDefaultCharsetForCsvReadWrite() {
+        if (defaultCharsetForCsvReadWrite != null) {
+            return defaultCharsetForCsvReadWrite;
+        }
         String fileEncodingStr = System.getProperty("file.encoding");
         if (fileEncodingStr != null && !fileEncodingStr.isBlank()) {
             for (String charsetName : Charset.availableCharsets().keySet()) {
                 if (fileEncodingStr.equalsIgnoreCase(charsetName)) {
-                    logger.debug("Using charset specified in file.encoding system property: " + fileEncodingStr);
+                    logger.debug("Setting the default charset for CSV read and write to the value of file.encoding system property: " + fileEncodingStr);
+                    defaultCharsetForCsvReadWrite = charsetName; 
                     return charsetName;
                 }
             }
@@ -1221,8 +1235,9 @@ public class Config {
                     + fileEncodingStr
                     + "' specified in file.encoding system property among available charsets for the Java VM." );
         }
-        logger.debug("Using the system default charset: " + Charset.defaultCharset().name());
-        return Charset.defaultCharset().name();
+        logger.debug("Using JVM default charset as the default charset for CSV read and write : " + Charset.defaultCharset().name());
+        defaultCharsetForCsvReadWrite = Charset.defaultCharset().name();
+        return defaultCharsetForCsvReadWrite;
     }
 
     private final List<ConfigListener> listeners = new ArrayList<ConfigListener>();
