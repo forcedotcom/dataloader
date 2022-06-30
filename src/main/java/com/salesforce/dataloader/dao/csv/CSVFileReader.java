@@ -70,6 +70,7 @@ public class CSVFileReader implements DataReader {
     private List<String> headerRow;
     private boolean isOpen;
     private char[] csvDelimiters;
+    private Config config;
 
     public CSVFileReader(Config config) {
         this(new File(config.getString(Config.DAO_NAME)), config, true);
@@ -90,6 +91,7 @@ public class CSVFileReader implements DataReader {
 
     public CSVFileReader(File file, Config config, boolean custDelimiter) {
         this.file = file;
+        this.config = config;
         forceUTF8 = config.getBoolean(Config.READ_UTF8);
         StringBuilder separator = new StringBuilder();
         if (custDelimiter) {
@@ -299,8 +301,9 @@ public class CSVFileReader implements DataReader {
                 BOMInputStream bomInputStream = new BOMInputStream(input);
                 csvReader = new CSVReader(bomInputStream, "UTF-8", csvDelimiters);
             } else {
-                csvReader = new CSVReader(input, csvDelimiters);
-                LOGGER.debug(this.getClass().getName(), "encoding used to write to CSV file is " + Charset.defaultCharset().name());
+                String encoding = this.config.getCsvEncoding(false);
+                csvReader = new CSVReader(input, encoding, csvDelimiters);
+                LOGGER.debug(this.getClass().getName(), "encoding used to read from CSV file is " + encoding);
             }
             csvReader.setMaxRowsInFile(Integer.MAX_VALUE);
             csvReader.setMaxCharsInFile(Integer.MAX_VALUE);
