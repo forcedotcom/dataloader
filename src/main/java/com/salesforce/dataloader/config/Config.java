@@ -762,7 +762,7 @@ public class Config {
             throw e;
         }
         // paramter post-processing
-        postLoad(properties);
+        postLoad(properties, true);
 
         dirty = false;
     }
@@ -773,18 +773,22 @@ public class Config {
      * @param values Values to be post-processed
      */
     @SuppressWarnings("unchecked")
-    private void postLoad(Map values) throws ConfigInitializationException {
-        Map<String, String> propMap = values;
+    private void postLoad(Map<?, ?> propMap, boolean isConfigFilePropsMap) throws ConfigInitializationException {
 
         // initialize encryption
-        initEncryption(propMap);
+        initEncryption((Map<String, String>) propMap);
 
         // decrypt encrypted values
-        decryptPasswordProperty(values, PASSWORD);
-        decryptPasswordProperty(values, PROXY_PASSWORD);
-        decryptPasswordProperty(values, OAUTH_ACCESSTOKEN);
-        decryptPasswordProperty(values, OAUTH_REFRESHTOKEN);
-
+        decryptPasswordProperty(propMap, PASSWORD);
+        decryptPasswordProperty(propMap, PROXY_PASSWORD);
+        decryptPasswordProperty(propMap, OAUTH_ACCESSTOKEN);
+        decryptPasswordProperty(propMap, OAUTH_REFRESHTOKEN);
+        
+        // Do not load unsupported properties and CLI options even if they are specified in config.properties file
+        if (isConfigFilePropsMap) {
+            removeCLIOptionsFromProperties();
+            removeUnsupportedProperties();
+        }
     }
 
     private void decryptPasswordProperty(Map values, String propertyName) throws ConfigInitializationException {
@@ -821,7 +825,7 @@ public class Config {
         }
 
         // make sure to post process the args to be loaded
-        postLoad(configOverrideMap);
+        postLoad(configOverrideMap, false);
 
         // replace values in the Config
         putValue(configOverrideMap);
@@ -945,9 +949,9 @@ public class Config {
         putValue(OAUTH_ACCESSTOKEN, "");
         putValue(OAUTH_REFRESHTOKEN, "");
         
-        skipSaveOfUnsupportedProperties();
-        skipSaveOfDecryptedProperties();
-        skipSaveOfCLIOptions();
+        removeUnsupportedProperties();
+        removeDecryptedProperties();
+        removeCLIOptionsFromProperties();
 
         FileOutputStream out = null;
         try {
@@ -964,19 +968,19 @@ public class Config {
         lastRun.save();
     }
 
-    private void skipSaveOfUnsupportedProperties() {
+    private void removeUnsupportedProperties() {
         // do not save a value for enabling Bulk V2 
         this.properties.remove(BULKV2_API_ENABLED);
     }
     
-    private void skipSaveOfDecryptedProperties() {
+    private void removeDecryptedProperties() {
         this.properties.remove(PASSWORD + DECRYPTED_SUFFIX);
         this.properties.remove(PROXY_PASSWORD + DECRYPTED_SUFFIX);
         this.properties.remove(OAUTH_ACCESSTOKEN + DECRYPTED_SUFFIX);
         this.properties.remove(OAUTH_REFRESHTOKEN + DECRYPTED_SUFFIX);
     }
     
-    private void skipSaveOfCLIOptions() {
+    private void removeCLIOptionsFromProperties() {
         Set<String> keys = this.properties.stringPropertyNames();
         Field[] allFields = Config.class.getDeclaredFields();
         for (Field field : allFields) {
