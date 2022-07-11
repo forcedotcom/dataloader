@@ -100,7 +100,6 @@ public class Controller {
 
     public static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
     public static final String DEFAULT_CONFIG_FILE = "defaultConfig.properties"; //$NON-NLS-1$
-    private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
     public static final String SYS_PROP_LOG_CONFIG_FILE = "log4j2.configurationFile";
     public static final String LOG_CONF_DEFAULT = "log-conf.xml";
 
@@ -130,10 +129,10 @@ public class Controller {
     private static Logger logger;
     private String appPath;
 
-    private Controller(String name, boolean isBatchMode, Map<String, String> argMap) throws ControllerInitializationException {
+    private Controller(String lastRunFilePrefix, Map<String, String> argMap) throws ControllerInitializationException {
         // if name is passed to controller, use it to create a unique run file name
         try {
-            initConfig(name, isBatchMode, argMap);
+            initConfig(lastRunFilePrefix, argMap);
         } catch (Exception e) {
             logger.error("Exception happened in initConfig:", e);
             throw e;
@@ -321,12 +320,12 @@ public class Controller {
         this.loaderWindow.updateTitle(null);
     }
 
-    public static synchronized Controller getInstance(String name, boolean isBatchMode, String[] args) throws ControllerInitializationException {
-        return getInstance(name, isBatchMode, getArgMapFromArgArray(args));
+    public static synchronized Controller getInstance(String lastRunFilePrefix, String[] args) throws ControllerInitializationException {
+        return getInstance(lastRunFilePrefix, getArgMapFromArgArray(args));
     }
 
-    public static synchronized Controller getInstance(String name, boolean isBatchMode, Map<String, String> argMap) throws ControllerInitializationException {
-        return new Controller(name, isBatchMode, argMap);
+    public static synchronized Controller getInstance(String lastRunFilePrefix, Map<String, String> argMap) throws ControllerInitializationException {
+        return new Controller(lastRunFilePrefix, argMap);
     }
     
     public synchronized boolean saveConfig() {
@@ -368,7 +367,7 @@ public class Controller {
     /**
      * Get the current config.properties and load it into the config bean.
      */
-    protected void initConfig(String name, boolean isBatchMode, Map<String, String> argMap) throws ControllerInitializationException {
+    protected void initConfig(String lastRunFilePrefix, Map<String, String> argMap) throws ControllerInitializationException {
         initializeConfigDirAndLog(argMap);
         String configDirPath = getConfigDir();
         File configDir;
@@ -426,10 +425,7 @@ public class Controller {
         }
 
         try {
-            String lastRunFileName = name + LAST_RUN_FILE_SUFFIX;
-            config = new Config(getAppPath(), configPath, lastRunFileName);
-            config.setBatchMode(isBatchMode);
-            config.loadParameterOverrides(argMap);
+            config = new Config(getAppPath(), configPath, lastRunFilePrefix, argMap);
             logger.info(Messages.getMessage(getClass(), "configInit")); //$NON-NLS-1$
         } catch (IOException e) {
             throw new ControllerInitializationException(Messages.getMessage(getClass(), "errorConfigLoad", configPath), e);

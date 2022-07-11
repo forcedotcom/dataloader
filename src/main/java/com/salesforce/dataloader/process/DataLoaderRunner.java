@@ -113,7 +113,7 @@ public class DataLoaderRunner extends Thread {
                 } else {
                     logger.debug("org.eclipse.swt.browser.DefaultType set to " + defaultBrowser + " for UI mode on Windows");
                 }
-                Controller controller = Controller.getInstance(Config.RUN_MODE_UI_VAL, false, args);
+                Controller controller = Controller.getInstance(Config.RUN_MODE_UI_VAL, args);
                 controller.createAndShowGUI();
             } catch (ControllerInitializationException e) {
                 UIUtils.errorMessageBox(new Shell(new Display()), e);

@@ -291,14 +291,12 @@ public class Config {
     /**
      * The <code>lastRun</code> is for last run statistics file
      */
-    private final LastRun lastRun;
+    private LastRun lastRun;
     /**
      * <code>encrypter</code> is a utility used internally in the config for reading/writing
      * encrypted values. Right now, the list of encrypted values is known to this class only.
      */
     private final EncryptionAesUtil encrypter = new EncryptionAesUtil();
-
-    private boolean isBatchMode = false;
 
     private final String configDir;
     
@@ -337,6 +335,8 @@ public class Config {
     public static final String CLI_OPTION_CONFIG_DIR_PROP = "salesforce.config.dir";
     public static final String CLI_OPTION_API_VERSION="salesforce.api.version";
     public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
+    
+    private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
 
     /**
      * Creates an empty config that loads from and saves to the a file. <p> Use the methods
@@ -346,35 +346,53 @@ public class Config {
      * @see #load()
      * @see #save()
      */
-    public Config(String configDir, String filename, String lastRunFileName) throws ConfigInitializationException, IOException {
+    public Config(String configDir, String filename, String lastRunFileNamePrefix, Map<String, String> overridesMap) throws ConfigInitializationException, IOException {
         properties = new LinkedProperties();
         this.configDir = configDir;
         this.filename = filename;
-        // last run gets initialized a little later since config params are needed for that
-        this.lastRun = new LastRun(lastRunFileName);
-        this.load();
+        
+        // initialize with defaults 
+        // 
         this.setDefaults();
-    }
+        
+        // load from config.properties file
+        this.load();
+        
+        // load parameter overrides after loading from config.properties
+        // parameter overrides are from two places:
+        // 1. process-conf.properties for CLI mode
+        // 2. command line options for both CLI and UI modes
+        this.loadParameterOverrides(overridesMap);
+        
+        // last run gets initialized after loading config and overrides
+        // since config params are needed for initializing last run.
+        initializeLastRun(lastRunFileNamePrefix);
+        
+        // Properties initialization completed. Configure OAuth environment next
+        setOAuthEnvironment(getString(OAUTH_ENVIRONMENT));
 
-    /**
-     * Initialize last run directory and file. This works hand in hand with Config constructor and
-     * the load. The config needs to be loaded before this. In case of UI, config is loaded once, in
-     * case of command line, config is loaded and then overrides are loaded.
-     */
-    public void initLastRunFile() {
-        if (getBoolean(Config.ENABLE_LAST_RUN_OUTPUT)) {
-            String lastRunDir = getString(Config.LAST_RUN_OUTPUT_DIR);
-            if (lastRunDir == null || lastRunDir.length() == 0) {
-                lastRunDir = this.configDir;
-            }
-            this.lastRun.init(lastRunDir, true);
-            try {
-                this.lastRun.load();
-            } catch (IOException e) {
-                logger.warn(Messages.getFormattedString("LastRun.errorLoading", new String[]{
-                        this.lastRun.getFullPath(), e.getMessage()}), e);
-            }
+    }
+    
+    private void initializeLastRun(String lastRunFileNamePrefix) {
+        if (lastRunFileNamePrefix == null || lastRunFileNamePrefix.isBlank()) {
+            lastRunFileNamePrefix = getString(Config.CLI_OPTION_RUN_MODE);
         }
+        String lastRunFileName = lastRunFileNamePrefix + LAST_RUN_FILE_SUFFIX;
+        String lastRunDir = getString(Config.LAST_RUN_OUTPUT_DIR);
+        if (lastRunDir == null || lastRunDir.length() == 0) {
+            lastRunDir = this.configDir;
+        }
+
+        this.lastRun = new LastRun(lastRunFileName, lastRunDir, getBoolean(Config.ENABLE_LAST_RUN_OUTPUT));
+        // Need to initialize last run date if it's present neither in config or override
+        lastRun.setDefault(LastRun.LAST_RUN_DATE, getString(INITIAL_LAST_RUN_DATE));
+
+        try {
+            this.lastRun.load();
+        } catch (IOException e) {
+            logger.warn(Messages.getFormattedString("LastRun.errorLoading", new String[]{
+                    this.lastRun.getFullPath(), e.getMessage()}), e);
+        }        
     }
 
     private boolean useBulkApiByDefault() {
@@ -384,7 +402,7 @@ public class Config {
     /**
      * This sets the current defaults.
      */
-    public void setDefaults() {
+    private void setDefaults() {
         setDefaultValue(HIDE_WELCOME_SCREEN, true);
 
         setDefaultValue(CSV_DELIMETER_COMMA, true);
@@ -454,7 +472,7 @@ public class Config {
         setDefaultValue(BULKV2_API_ENABLED, false);
         setDefaultValue(OAUTH_LOGIN_FROM_BROWSER, true);
         setDefaultValue(LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
-        setOAuthEnvironment(getString(OAUTH_ENVIRONMENT));
+        setDefaultValue(Config.CLI_OPTION_RUN_MODE, Config.RUN_MODE_UI_VAL);
     }
 
     /**
@@ -684,7 +702,7 @@ public class Config {
     private String getParamValue(String name) {
         String propValue;
 
-        if (lastRun.hasParameter(name)) {
+        if (lastRun != null && lastRun.hasParameter(name)) {
             propValue = lastRun.getProperty(name);
         } else {
             propValue = properties != null ? properties.getProperty(name) : null;
@@ -819,19 +837,11 @@ public class Config {
      */
     public void loadParameterOverrides(Map<String, String> configOverrideMap) throws ParameterLoadException,
             ConfigInitializationException {
-        // Need to initialize last run date if it's present neither in config or override
-        if (configOverrideMap.containsKey(INITIAL_LAST_RUN_DATE)) {
-            lastRun.setDefault(LastRun.LAST_RUN_DATE, configOverrideMap.get(INITIAL_LAST_RUN_DATE));
-        }
-
-        // make sure to post process the args to be loaded
+        // make sure to post-process the args to be loaded
         postLoad(configOverrideMap, false);
 
         // replace values in the Config
         putValue(configOverrideMap);
-
-        // make sure that last run file gets the latest configuration
-        initLastRunFile();
     }
 
     /**
@@ -1149,7 +1159,7 @@ public class Config {
     private void doSetPropertyAndUpdateConfig(String name, String oldValue, String newValue) {
         this.dirty = true;
         configChanged(name, oldValue, newValue);
-        if (lastRun.hasParameter(name)) {
+        if (lastRun != null && lastRun.hasParameter(name)) {
             lastRun.put(name, newValue);
         } else {
             properties.put(name, newValue);
@@ -1157,11 +1167,7 @@ public class Config {
     }
 
     public boolean isBatchMode() {
-        return isBatchMode;
-    }
-
-    public void setBatchMode(boolean isBatchMode) {
-        this.isBatchMode = isBatchMode;
+        return (Config.RUN_MODE_BATCH_VAL.equalsIgnoreCase(getString(Config.CLI_OPTION_RUN_MODE)));
     }
 
     public int getLoadBatchSize() {

@@ -58,19 +58,9 @@ public class LastRun extends Properties {
     /**
      * Initialize lastRun with filename, this is needed if last run output is not enabled (yet)
      */
-    public LastRun(String filename) {
+    public LastRun(String filename, String filePath, boolean outputEnabled) {
         super(); // init properties
         this.filename = filename;
-        init(null, false);
-    }
-
-    /**
-     * Init the class, with path parameter
-     *
-     * @param filePath
-     * @param outputEnabled
-     */
-    public void init(String filePath, boolean outputEnabled) {
         this.filePath = filePath;
         this.outputEnabled = outputEnabled;
 

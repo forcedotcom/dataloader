@@ -124,7 +124,7 @@ public class ProcessRunner implements InitializingBean {
         }
 
         try {
-            controller = Controller.getInstance(name, true, getConfigOverrideMap());
+            controller = Controller.getInstance(name, getConfigOverrideMap());
         } catch (ControllerInitializationException e) {
             throw new RuntimeException(e);
         }
@@ -139,7 +139,7 @@ public class ProcessRunner implements InitializingBean {
             validateConfigProperties(config);
             if (name == null || name.isBlank()) {
                 // this can occur only if "process.name" is not specified as a  command line option
-                name = config.getString("process.operation");
+                name = config.getString(Config.OPERATION);
                 this.setName(name);
                 setThreadName(name);
             };

@@ -99,9 +99,6 @@ public class LoaderWindow extends ApplicationWindow {
 
         addMenuBar();
         addStatusLine();
-
-        // load values from last run
-        controller.getConfig().initLastRunFile();
         this.controller = controller;
 
         final ConfigListener listener = new ConfigListener() {
