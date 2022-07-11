@@ -178,7 +178,7 @@ public abstract class TestBase {
 
         if (controller == null) {
             try {
-                controller = Controller.getInstance(testName.getMethodName(), true, (String[])null);
+                controller = Controller.getInstance(testName.getMethodName(), (String[])null);
             } catch (ControllerInitializationException e) {
                 fail("While initializing controller instance", e);
             }
