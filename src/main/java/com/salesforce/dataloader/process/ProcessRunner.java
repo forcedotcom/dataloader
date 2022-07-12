@@ -66,6 +66,7 @@ import com.salesforce.dataloader.exception.OAuthBrowserLoginRunnerException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.ui.Labels;
+import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
 import com.sforce.soap.partner.fault.ApiFault;
 
@@ -303,7 +304,7 @@ public class ProcessRunner implements InitializingBean {
                         + "is specified in the command line. Loading DynaBean with id " 
                         + dynaBeanID 
                         + " from process-conf.xml located in directory "
-                        + Controller.getConfigDir());
+                        + AppUtil.getConfigurationsDir());
             runner = ProcessConfig.getProcessInstance(dynaBeanID);
         }
         runner.getConfigOverrideMap().putAll(argMap);

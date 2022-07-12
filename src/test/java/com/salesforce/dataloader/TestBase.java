@@ -58,6 +58,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -106,7 +108,7 @@ public abstract class TestBase {
         DEFAULT_ACCOUNT_EXT_ID_FIELD = getProperty("test.account.extid");
         
         String logConfFilePath = Paths.get(getTestConfDir(), Controller.LOG_CONF_DEFAULT).toString();
-        System.setProperty(Controller.SYS_PROP_LOG_CONFIG_FILE, logConfFilePath);
+        System.setProperty(Controller.SYS_PROP_LOG4J2_CONFIG_FILE, logConfFilePath);
         logger = LogManager.getLogger(TestBase.class);
     }
 
@@ -155,7 +157,7 @@ public abstract class TestBase {
         this.binding = null;
 
         setupTestName();
-        setupController();
+        setupController(new HashMap<String, String>());
     }
 
     private void setupTestName() {
@@ -171,17 +173,15 @@ public abstract class TestBase {
         Thread.currentThread().setName(testName.getMethodName());
     }
 
-    protected void setupController() {
+    protected void setupController(Map<String, String> configOverrideMap) {
         // configure the Controller to point to our testing config
         if (!System.getProperties().contains(Config.CLI_OPTION_CONFIG_DIR_PROP))
             System.setProperty(Config.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
 
-        if (controller == null) {
-            try {
-                controller = Controller.getInstance(testName.getMethodName(), (String[])null);
-            } catch (ControllerInitializationException e) {
-                fail("While initializing controller instance", e);
-            }
+        try {
+            controller = Controller.getInstance(testName.getMethodName(), configOverrideMap);
+        } catch (ControllerInitializationException e) {
+            fail("While initializing controller instance", e);
         }
     }
 
