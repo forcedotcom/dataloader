@@ -33,6 +33,7 @@ package com.salesforce.dataloader.process;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.ui.UIUtils;
+import com.salesforce.dataloader.util.AppUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -92,7 +93,7 @@ public class DataLoaderRunner extends Thread {
 
     public static void main(String[] args) {
         argNameValuePair = Controller.getArgMapFromArgArray(args);
-        Controller.initializeConfigDirAndLog(argNameValuePair);
+        Controller.initializeLog(argNameValuePair);
         Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
         logger = LogManager.getLogger(DataLoaderRunner.class);
         if (args != null) {
@@ -272,7 +273,7 @@ public class DataLoaderRunner extends Thread {
     
     private static String getSWTDir() {
         String[]parentDirOfSWTArray = 
-                    {Controller.getDirContainingClassJar(DataLoaderRunner.class)
+                    {AppUtil.getDirContainingClassJar(DataLoaderRunner.class)
                      , "."
                      , ".."
                      , LOCAL_SWT_DIR

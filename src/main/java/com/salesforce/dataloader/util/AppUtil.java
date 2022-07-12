@@ -26,6 +26,19 @@
 
 package com.salesforce.dataloader.util;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.CodeSource;
+import java.util.Map;
+
+import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.controller.Controller;
+
 /**
  * com.salesforce.dataloader.util
  *
@@ -65,4 +78,74 @@ public class AppUtil {
     }
 
     public static final String OS_NAME = "os.name";
+    
+    public static String getDirContainingClassJar(Class<?> aClass) {
+        CodeSource codeSource = aClass.getProtectionDomain().getCodeSource();
+    
+        File jarFile = null;
+    
+        if (codeSource != null && codeSource.getLocation() != null) {
+            try {
+                jarFile = new File(codeSource.getLocation().toURI());
+            } catch (URISyntaxException e) {
+                return null;
+            }
+        } else {
+          String path = aClass.getResource(aClass.getSimpleName() + ".class").getPath();
+          String jarFilePath = path.substring(path.indexOf(":") + 1, path.indexOf("!"));
+          try {
+              jarFilePath = URLDecoder.decode(jarFilePath, "UTF-8");
+          } catch (UnsupportedEncodingException e) {
+              // fail silently;
+          }
+          jarFile = new File(jarFilePath);
+        }
+        return jarFile.getParentFile().getAbsolutePath();
+    }
+    
+    public static void extractFromJar(String extractionArtifact, File extractionDestination) {
+        try {
+            InputStream link;
+            link = Controller.class.getResourceAsStream(extractionArtifact);
+            String parentDirStr = extractionDestination.getAbsoluteFile().getParent();
+            File parentDir = Paths.get(parentDirStr).toFile();
+            Files.createDirectories(parentDir.getAbsoluteFile().toPath());
+            Files.copy(link, extractionDestination.getAbsoluteFile().toPath());
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
+    
+    private static String configurationsDir = null;
+    public static synchronized String getConfigurationsDir() {
+        if (configurationsDir == null) {
+            setConfigurationsDir(null);
+        }
+        return configurationsDir;
+    }
+    
+    public static synchronized void setConfigurationsDir(Map<String, String> argsMap) {
+        if (argsMap != null && argsMap.containsKey(Config.CLI_OPTION_CONFIG_DIR_PROP)) {
+            configurationsDir = argsMap.get(Config.CLI_OPTION_CONFIG_DIR_PROP);
+        } else {
+            if (configurationsDir == null) {
+                // first time invocation and configurationsDir is not set through argsMap
+                configurationsDir = System.getProperty(Config.CLI_OPTION_CONFIG_DIR_PROP);
+            }
+            if (configurationsDir != null && !configurationsDir.isEmpty()) {
+                return;
+            }
+            // first time invocation, configurationsDir is not set through argsMap or through system property
+            configurationsDir = getDefaultConfigDir();
+        }
+        System.setProperty(Config.CLI_OPTION_CONFIG_DIR_PROP, configurationsDir);
+    }
+
+    private static String getDefaultConfigDir() {
+        return AppUtil.getDirContainingClassJar(Config.class) 
+                + "/" 
+                + Config.CONFIG_DIR_DEFAULT_VALUE;
+    }
 }

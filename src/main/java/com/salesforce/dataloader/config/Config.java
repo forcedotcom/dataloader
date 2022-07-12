@@ -29,7 +29,9 @@ package com.salesforce.dataloader.config;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.exception.ConfigInitializationException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.security.EncryptionAesUtil;
+import com.salesforce.dataloader.util.AppUtil;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -45,6 +47,8 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -320,6 +324,7 @@ public class Config {
      * communications with bulk api always use UTF8
      */
     public static final String BULK_API_ENCODING = "UTF-8";
+    public static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
     
     /*
      * command line options. Not stored in config.properties file.
@@ -346,10 +351,12 @@ public class Config {
      * @see #load()
      * @see #save()
      */
-    public Config(String configDir, String filename, String lastRunFileNamePrefix, Map<String, String> overridesMap) throws ConfigInitializationException, IOException {
+    private Config(String filename, String lastRunFileNamePrefix, Map<String, String> overridesMap) throws ConfigInitializationException, IOException {
         properties = new LinkedProperties();
-        this.configDir = configDir;
         this.filename = filename;
+        
+        File configFile = new File(this.filename);
+        this.configDir = configFile.getParentFile().getAbsolutePath();
         
         // initialize with defaults 
         // 
@@ -809,10 +816,11 @@ public class Config {
         }
     }
 
-    private void decryptPasswordProperty(Map values, String propertyName) throws ConfigInitializationException {
-        Map<String, String> propMap = values;
+    private void decryptPasswordProperty(Map<?, ?> values, String propertyName) throws ConfigInitializationException {
+        @SuppressWarnings("unchecked")
+        Map<String, String> propMap = (Map<String, String>)values;
         // initialize encryption
-        if (propMap.containsKey(propertyName)) {
+        if (propMap != null && propMap.containsKey(propertyName)) {
             if (propMap.containsKey(propertyName + DECRYPTED_SUFFIX)) {
                 String decryptedPropValue = propMap.get(propertyName + DECRYPTED_SUFFIX);
                 String propValueToBeDecrypted = propMap.get(propertyName);
@@ -835,7 +843,7 @@ public class Config {
      * Load config parameter override values. The main use case is loading of overrides from
      * external config file
      */
-    public void loadParameterOverrides(Map<String, String> configOverrideMap) throws ParameterLoadException,
+    private void loadParameterOverrides(Map<String, String> configOverrideMap) throws ParameterLoadException,
             ConfigInitializationException {
         // make sure to post-process the args to be loaded
         postLoad(configOverrideMap, false);
@@ -880,6 +888,9 @@ public class Config {
      * @throws ConfigInitializationException
      */
     private void initEncryption(Map<String, String> values) throws ConfigInitializationException {
+        if (values == null) {
+            return;
+        }
         // initialize encrypter
         String keyFile = values.get(ENCRYPTION_KEY_FILE);
         if (keyFile != null && keyFile.length() != 0) {
@@ -924,6 +935,9 @@ public class Config {
      * @param values Map of overriding values
      */
     public void putValue(Map<String, String> values) throws ParameterLoadException, ConfigInitializationException {
+        if (values == null) {
+            return;
+        }
         for (String key : values.keySet()) {
             putValue(key, values.get(key));
         }
@@ -1286,7 +1300,92 @@ public class Config {
         setValue(OAUTH_CLIENTSECRET, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTSECRET));
         setValue(OAUTH_REDIRECTURI, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_REDIRECTURI));
     }
+    
+    /**
+     * Create directory provided from the parameter
+     *
+     * @param dirPath - directory to be created
+     * @return True if directory was created successfully or directory already existed False if
+     * directory was failed to create
+     */
+    private static boolean createDir(File dirPath) {
+        boolean isSuccessful = true;
+        if (!dirPath.exists() || !dirPath.isDirectory()) {
+            isSuccessful = dirPath.mkdirs();
+            if (isSuccessful) {
+                logger.info("Created config directory: " + dirPath);
+            } else {
+                logger.info("Unable to create config directory: " + dirPath);
+            }
+        } else {
+            logger.info("Config directory already exists: " + dirPath);
+        }
+        return isSuccessful;
+    }
 
+    /**
+     * Get the current config.properties and load it into the config bean.
+     * @throws ConfigInitializationException 
+     */
+    public static synchronized Config getInstance(String lastRunFilePrefix, Map<String, String> argMap) throws ConfigInitializationException {
+        AppUtil.setConfigurationsDir(argMap);
+        String configurationsDirPath = AppUtil.getConfigurationsDir();
+        File configurationsDir;
+        final String DEFAULT_CONFIG_FILE = "defaultConfig.properties"; //$NON-NLS-1$
+
+        configurationsDir = new File(configurationsDirPath);
+ 
+        // Create dir if it doesn't exist
+        boolean isMkdirSuccessfulOrExisting = createDir(configurationsDir);
+        if (!isMkdirSuccessfulOrExisting) {
+            String errorMsg = Messages.getMessage(Config.class, "errorCreatingOutputDir", configurationsDirPath);
+            logger.error(errorMsg);
+            throw new ConfigInitializationException(errorMsg);
+        }
+
+        // check if the config file exists
+        File configFile = new File(configurationsDir.getAbsolutePath(), CONFIG_FILE);
+
+        String configFilePath = configFile.getAbsolutePath();
+        logger.info("Looking for file in config path: " + configFilePath);
+        if (!configFile.exists()) {
+
+            File defaultConfigFile = new File(configurationsDir, DEFAULT_CONFIG_FILE);
+            logger.debug("Looking for file in config file " + defaultConfigFile.getAbsolutePath());
+            // If default config exists, copy the default to user config
+            // If doesn't exist, create a blank user config
+
+            if (defaultConfigFile.exists()) {
+                try {
+                    // Copy default config to user config
+                    logger.info(String.format("User config file does not exist in '%s' Default config file is copied from '%s'",
+                            configFilePath, defaultConfigFile.getAbsolutePath()));
+                    Files.copy(defaultConfigFile.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    String errorMsg = String.format("Failed to copy '%s' to '%s'", defaultConfigFile.getAbsolutePath(), configFile);
+                    logger.warn(errorMsg, e);
+                    throw new ConfigInitializationException(errorMsg, e);
+                }
+            } else {
+                // extract from the jar
+                AppUtil.extractFromJar("/" + CONFIG_FILE, configFile);
+            }
+            configFile.setWritable(true);
+            configFile.setReadable(true);
+        } else {
+            logger.info("User config is found in " + configFile.getAbsolutePath());
+        }
+
+        Config config = null;
+        try {
+            config = new Config(configFilePath, lastRunFilePrefix, argMap);
+            logger.info(Messages.getMessage(Config.class, "configInit")); //$NON-NLS-1$
+        } catch (IOException | ProcessInitializationException e) {
+            throw new ConfigInitializationException(Messages.getMessage(Config.class, "errorConfigLoad", configFilePath), e);
+        }
+        return config;
+    }
+    
     public static interface ConfigListener {
         void configValueChanged(String key, String oldValue, String newValue);
     }
