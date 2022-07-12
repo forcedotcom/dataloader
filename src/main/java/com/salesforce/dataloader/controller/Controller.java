@@ -60,13 +60,10 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -268,6 +265,13 @@ public class Controller {
     }
 
     public void createMapper() throws MappingInitializationException {
+        if (this.dao == null) {
+            try {
+                createDao();
+            } catch (DataAccessObjectInitializationException e) {
+                throw new MappingInitializationException(e.getMessage());
+            }
+        }
         String mappingFile = config.getString(Config.MAPPING_FILE);
         this.mapper = getConfig().getOperationInfo().isExtraction() ? new SOQLMapper(getPartnerClient(),
                 dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) : new LoadMapper(getPartnerClient(), dao.getColumnNames(),
@@ -554,6 +558,10 @@ public class Controller {
     }
 
     public void clearMapper() {
+        if (this.dao != null) {
+            this.dao.close();
+            this.dao = null;
+        }
         this.mapper = null;
     }
     
