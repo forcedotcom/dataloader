@@ -250,9 +250,16 @@ public class MappingPage extends LoadPage {
      */
     @Override
     public boolean setupPagePostLogin() {
+        Config config = controller.getConfig();
+        String daoName = config.getString(Config.DAO_NAME);
+        String daoType = config.getString(Config.DAO_TYPE);
+        if (daoName == null || daoName.isBlank() || daoType == null || daoType.isBlank()) {
+            return true; // DAO is not yet initialized
+        }
+
         try {
             // clear mapping file
-            controller.getConfig().setValue(Config.MAPPING_FILE, "");
+            config.setValue(Config.MAPPING_FILE, "");
             controller.createMapper();
             updateMapping();
             packMappingColumns();
