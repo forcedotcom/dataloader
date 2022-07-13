@@ -156,19 +156,15 @@ public class OAuthBrowserLoginRunner {
        if (Desktop.isDesktopSupported()) {
            Desktop desktop = Desktop.getDesktop();
            try {
+               logger.debug("trying to use desktop.browse() method");
                desktop.browse(new URI(url));
            } catch (IOException | URISyntaxException e) {
-               logger.error(e.getMessage());
+               logger.debug(e.getMessage());
                openURLUsingNativeCommand(url);
            }
        } else {
-           Runtime runtime = Runtime.getRuntime();
-           try {
-               runtime.exec("xdg-open " + url);
-           } catch (IOException e) {
-               logger.error(e.getMessage());
-               openURLUsingNativeCommand(url);
-           }
+           logger.debug("trying to use native command");
+           openURLUsingNativeCommand(url);
        }
    }
    
@@ -177,23 +173,32 @@ public class OAuthBrowserLoginRunner {
        String osName = System.getProperty("os.name");
        try {
            if (osName.toLowerCase().indexOf("mac") >= 0) {
+               logger.debug("trying to use open command on mac");
                runtime.exec("open " + url);
            }
            else if (osName.toLowerCase().indexOf("win") >= 0) {
+               logger.debug("trying to use rundll32 command on windows");
                runtime.exec("rundll32 url.dll,FileProtocolHandler " + url);
            } else { //assume Unix or Linux
-               String[] browsers = {
-                       "firefox", "chrome", "opera", "konqueror", "epiphany", "mozilla", "netscape" };
-               String browser = null;
-               for (int count = 0; count < browsers.length && browser == null; count++)
-                   if (runtime.exec(
-                           new String[] {"which", browsers[count]}).waitFor() == 0) {
-                       browser = browsers[count];
+               try {
+                   logger.debug("trying to use xdg-open command on linux");
+                   runtime.exec("xdg-open " + url);
+               } catch (IOException e) {
+                   logger.debug(e.getMessage());
+                   logger.debug("trying to browser-specific command on linux");
+                   String[] browsers = {
+                           "firefox", "chrome", "opera", "konqueror", "epiphany", "mozilla", "netscape" };
+                   String browser = null;
+                   for (int count = 0; count < browsers.length && browser == null; count++)
+                       if (runtime.exec(
+                               new String[] {"which", browsers[count]}).waitFor() == 0) {
+                           browser = browsers[count];
+                       }
+                   if (browser == null) {
+                       throw new Exception("Could not find web browser");
+                   } else {
+                       runtime.exec(new String[] {browser, url});
                    }
-               if (browser == null) {
-                   throw new Exception("Could not find web browser");
-               } else {
-                   runtime.exec(new String[] {browser, url});
                }
            }
        }
