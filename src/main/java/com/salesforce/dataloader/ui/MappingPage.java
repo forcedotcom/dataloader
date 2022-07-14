@@ -250,25 +250,16 @@ public class MappingPage extends LoadPage {
      */
     @Override
     public boolean setupPagePostLogin() {
-        Config config = controller.getConfig();
-        String daoName = config.getString(Config.DAO_NAME);
-        String daoType = config.getString(Config.DAO_TYPE);
-        if (daoName == null || daoName.isBlank() || daoType == null || daoType.isBlank()) {
-            return true; // DAO is not yet initialized
+        if (controller.getMapper() == null) {
+            return true; // further processing is not possible
         }
 
-        try {
-            // clear mapping file
-            config.setValue(Config.MAPPING_FILE, "");
-            controller.createMapper();
-            updateMapping();
-            packMappingColumns();
-            return true;
-        } catch (MappingInitializationException e) {
-            UIUtils.errorMessageBox(getShell(), e);
-            logger.error("Could not initialize mapping page", e);
-            return false;
-        }
+        Config config = controller.getConfig();
+        // clear mapping file
+        config.setValue(Config.MAPPING_FILE, "");
+        updateMapping();
+        packMappingColumns();
+        return true;
     }
 
     @Override

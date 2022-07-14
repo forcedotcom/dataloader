@@ -42,7 +42,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
@@ -195,21 +194,12 @@ public class DataSelectionPage extends LoadPage {
 
     @Override
     public LoadPage getNextPage() {
-        //attempt to login
-        Config config = controller.getConfig();
         //get entity
         IStructuredSelection selection = (IStructuredSelection)lv.getSelection();
-        DescribeGlobalSObjectResult entity = (DescribeGlobalSObjectResult)selection.getFirstElement();
-
-        config.setValue(Config.ENTITY, entity.getName());
-        // set DAO - CSV file name
-        config.setValue(Config.DAO_NAME, csvChooser.getStringValue());
-        // set DAO type to CSV
-        config.setValue(Config.DAO_TYPE, DataAccessObjectFactory.CSV_READ_TYPE);
-        controller.saveConfig();
-
+        DescribeGlobalSObjectResult selectedEntity = (DescribeGlobalSObjectResult)selection.getFirstElement();
         DataSelectionDialog dlg = new DataSelectionDialog(getShell(), controller);
-        if (dlg.open()) {
+        if (dlg.open(DataAccessObjectFactory.CSV_READ_TYPE, 
+                csvChooser.getStringValue(), selectedEntity.getName())) {
             return super.getNextPage();
         } else {
             return this;
