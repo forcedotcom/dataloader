@@ -29,6 +29,8 @@ import com.salesforce.dataloader.client.SimplePost;
 import com.salesforce.dataloader.client.SimplePostFactory;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
+
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -115,7 +117,7 @@ public class OAuthSecretFlow extends OAuthFlow {
             );
             client.post();
             if (client.isSuccessful()) {
-            	processSuccessfulLogin(client.getInput(), config);
+                OAuthBrowserLoginRunner.processSuccessfulLogin(client.getInput(), config);
             }
             return client;
         }

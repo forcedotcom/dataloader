@@ -27,9 +27,11 @@
 package com.salesforce.dataloader.util;
 
 import java.awt.Desktop;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -45,12 +47,15 @@ import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.salesforce.dataloader.client.SimplePost;
 import com.salesforce.dataloader.client.SimplePostFactory;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.exception.OAuthBrowserLoginRunnerException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
-import com.salesforce.dataloader.ui.OAuthFlow;
+import com.salesforce.dataloader.model.OAuthToken;
 
 public class OAuthBrowserLoginRunner {
     public enum LoginStatus { WAIT, FAIL, SUCCESS };
@@ -87,7 +92,7 @@ public class OAuthBrowserLoginRunner {
         }
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-        Map responseMap = mapper.readValue(in, Map.class);
+        Map<?, ?> responseMap = mapper.readValue(in, Map.class);
         userCodeStr = (String) responseMap.get("user_code");
         deviceCode = (String)responseMap.get("device_code");
         logger.debug("User Code: " + userCodeStr);
@@ -243,7 +248,7 @@ public class OAuthBrowserLoginRunner {
                    in = client.getInput();
                    if (client.isSuccessful()) {
                        try {
-                           OAuthFlow.processSuccessfulLogin(client.getInput(), config);
+                           processSuccessfulLogin(client.getInput(), config);
                        } catch (IOException e) {
                            logger.error(e.getMessage());
                            setLoginStatus(LoginStatus.FAIL);
@@ -256,7 +261,7 @@ public class OAuthBrowserLoginRunner {
                        ObjectMapper mapper = new ObjectMapper();
                        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
                        try {
-                           Map responseMap = mapper.readValue(in, Map.class);
+                           Map<?, ?> responseMap = mapper.readValue(in, Map.class);
                            String errorStr = (String)responseMap.get("error");
                            String errorDesc = (String)responseMap.get("error_description");
                            if ("authorization_pending".equalsIgnoreCase(errorStr)) {
@@ -342,5 +347,24 @@ public class OAuthBrowserLoginRunner {
        }
 
        return nvPairList;
+   }
+   
+   
+   public static void processSuccessfulLogin(InputStream httpResponseInputStream, Config config) throws IOException {
+
+       StringBuilder builder = new StringBuilder();
+       BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpResponseInputStream, "UTF-8"));
+       for (int c = bufferedReader.read(); c != -1; c = bufferedReader.read()) {
+           builder.append((char) c);
+       }
+
+       String jsonTokenResult = builder.toString();
+       Gson gson = new GsonBuilder()
+               .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+               .create();
+       OAuthToken token = gson.fromJson(jsonTokenResult, OAuthToken.class);
+       config.setValue(Config.OAUTH_ACCESSTOKEN, token.getAccessToken());
+       config.setValue(Config.OAUTH_REFRESHTOKEN, token.getRefreshToken());
+       config.setValue(Config.ENDPOINT, token.getInstanceUrl());
    }
 }
