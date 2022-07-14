@@ -254,28 +254,41 @@ public class Controller {
         return getPartnerClient().isLoggedIn();
     }
 
-    public void createDao() throws DataAccessObjectInitializationException {
+    private void createDao(String daoTypeStr, String daoNameStr) throws DataAccessObjectInitializationException {
+        config.setValue(Config.DAO_NAME, daoNameStr);
+        config.setValue(Config.DAO_TYPE, daoTypeStr);
+        this.saveConfig();
+
         try {
             config.getStringRequired(Config.DAO_NAME); // verify required param exists: dao name
             dao = daoFactory.getDaoInstance(config.getStringRequired(Config.DAO_TYPE), config);
+            logger.info(Messages.getString("Process.checkingDao")); //$NON-NLS-1$
+            dao.checkConnection();
         } catch (Exception e) {
             logger.fatal(Messages.getString("Controller.errorDAOCreate"), e); //$NON-NLS-1$
             throw new DataAccessObjectInitializationException(Messages.getString("Controller.errorDAOCreate"), e); //$NON-NLS-1$
         }
     }
-
-    public void createMapper() throws MappingInitializationException {
-        if (this.dao == null) {
-            try {
-                createDao();
-            } catch (DataAccessObjectInitializationException e) {
-                throw new MappingInitializationException(e.getMessage());
-            }
+    
+    public void createMapper(String daoTypeStr, String daoNameStr, String sObjectName) throws MappingInitializationException {
+        try {
+            createDao(daoTypeStr, daoNameStr);
+        } catch (DataAccessObjectInitializationException e) {
+            throw new MappingInitializationException(e.getMessage());
+        }
+        config.setValue(Config.ENTITY, sObjectName);
+        this.saveConfig();
+        try {
+            this.setFieldTypes();
+            this.setReferenceDescribes();
+        } catch (Exception e) {
+            throw new MappingInitializationException(e);
         }
         String mappingFile = config.getString(Config.MAPPING_FILE);
         this.mapper = getConfig().getOperationInfo().isExtraction() ? new SOQLMapper(getPartnerClient(),
                 dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) : new LoadMapper(getPartnerClient(), dao.getColumnNames(),
                 getFieldTypes().getFields(), mappingFile);
+
     }
 
     public void createAndShowGUI() throws ControllerInitializationException {

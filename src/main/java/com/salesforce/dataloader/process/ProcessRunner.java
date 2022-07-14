@@ -152,13 +152,6 @@ public class ProcessRunner implements InitializingBean {
 
             logger.info(Messages.getFormattedString("Process.loggingIn", config.getString(Config.ENDPOINT))); //$NON-NLS-1$
             if (controller.login()) {
-                // instantiate the data access object
-                controller.createDao();
-
-                logger.info(Messages.getString("Process.checkingDao")); //$NON-NLS-1$
-                // check to see if the the data access object has any connection problems
-                controller.getDao().checkConnection();
-
                 // get the field info (using the describe call)
                 logger.info(Messages.getString("Process.settingFieldTypes")); //$NON-NLS-1$
                 controller.setFieldTypes();
@@ -169,7 +162,8 @@ public class ProcessRunner implements InitializingBean {
 
                 // instantiate the map
                 logger.info(Messages.getString("Process.creatingMap")); //$NON-NLS-1$
-                controller.createMapper();
+                controller.createMapper(config.getString(Config.DAO_TYPE), 
+                        config.getString(Config.DAO_NAME), config.getString(Config.ENTITY));
 
                 // execute the requested operation
                 controller.executeAction(monitor);

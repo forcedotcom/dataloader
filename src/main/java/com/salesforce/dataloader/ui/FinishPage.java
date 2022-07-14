@@ -39,6 +39,7 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.mapping.LoadMapper;
+import com.salesforce.dataloader.mapping.Mapper;
 
 /**
  * Describe your class here.
@@ -131,8 +132,12 @@ public class FinishPage extends LoadPage {
     }
 
     private void verifySettings() throws MappingInitializationException {
-        if (!getController().getConfig().getOperationInfo().isExtraction())
-            ((LoadMapper)getController().getMapper()).verifyMappingsAreValid();
+        if (!getController().getConfig().getOperationInfo().isExtraction()) {
+            Mapper mapper = (LoadMapper)getController().getMapper();
+            if (mapper != null) {
+                ((LoadMapper)getController().getMapper()).verifyMappingsAreValid();
+            }
+        }
     }
 
     public boolean finishAllowed() {

@@ -42,7 +42,6 @@ import org.eclipse.swt.widgets.*;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
-import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.ui.EntitySelectionListViewerUtil;
 import com.salesforce.dataloader.ui.Labels;
@@ -210,55 +209,22 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
         //get entity
         IStructuredSelection selection = (IStructuredSelection)lv.getSelection();
         DescribeGlobalSObjectResult entity = (DescribeGlobalSObjectResult)selection.getFirstElement();
-        config.setValue(Config.ENTITY, entity.getName());
-        // set DAO - CSV file name
-        config.setValue(Config.DAO_NAME, fileText.getText());
-        // set DAO type to CSV
-        config.setValue(Config.DAO_TYPE, DataAccessObjectFactory.CSV_WRITE_TYPE);
-        controller.saveConfig();
 
         try {
-            // create data access object for the extraction output
-            controller.createDao();
             // reinitialize the data mapping (UI extraction currently uses only implicit mapping)
             config.setValue(Config.MAPPING_FILE, "");
-            controller.createMapper();
-        } catch (DataAccessObjectInitializationException e) {
-            MessageBox msgBox = new MessageBox(getShell(), SWT.OK | SWT.ICON_ERROR);
-            msgBox.setMessage(Labels.getString("ExtractionDataSelectionPage.extractOutputError")); //$NON-NLS-1$
-            msgBox.open();
-            return this;
+            controller.createMapper(DataAccessObjectFactory.CSV_WRITE_TYPE, 
+                    fileText.getText(), entity.getName());
         } catch (MappingInitializationException e) {
             UIUtils.errorMessageBox(getShell(), e);
             return this;
         }
 
-        BusyIndicator.showWhile(Display.getDefault(), new Thread() {
-            @Override
-            public void run() {
-                try {
-                    controller.setFieldTypes();
-                    controller.setReferenceDescribes();
-                    success = true;
-                } catch (ConnectionException e) {
-                    success = false;
-                }
-            }
-        });
-
-        if (success) {
-            //set the query
-            ExtractionSOQLPage soql = (ExtractionSOQLPage)getWizard().getPage(ExtractionSOQLPage.class.getSimpleName()); //$NON-NLS-1$
-            soql.setupPage();
-            soql.setPageComplete(true);
-
-            return super.getNextPage();
-        } else {
-            MessageBox msgBox = new MessageBox(getShell(), SWT.OK | SWT.ICON_ERROR);
-            msgBox.setMessage(Labels.getString("ExtractionDataSelectionPage.initError")); //$NON-NLS-1$
-            msgBox.open();
-            return this;
-        }
+        //set the query
+        ExtractionSOQLPage soql = (ExtractionSOQLPage)getWizard().getPage(ExtractionSOQLPage.class.getSimpleName()); //$NON-NLS-1$
+        soql.setupPage();
+        soql.setPageComplete(true);
+        return super.getNextPage();
     }
 
     // nothing to finish before moving to the next page
