@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>55.0.2</version>
+  <version>55.0.3</version>
   <name>Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
