@@ -148,7 +148,7 @@ public class DataLoaderRunner extends Thread {
         String osName = System.getProperty("os.name").toLowerCase();
         if ((osName.contains("mac")) || (osName.startsWith("darwin"))) {
             jvmArgs.add("-XstartOnFirstThread");
-            logger.debug("added JVM arg -XstartOnFirsThread");
+            logger.debug("added JVM arg -XstartOnFirstThread");
         }
         
         // set JVM arguments
@@ -291,7 +291,27 @@ public class DataLoaderRunner extends Thread {
                     return SWTDirPathStr;
                 }
             }
-        }        
+        }
+        
+        // try to get it from the CLASSPATH
+        Map<String, String>envVars = System.getenv();
+        if (envVars.containsKey("CLASSPATH")) {
+            String classPath = envVars.get("CLASSPATH");
+            logger.debug("CLASSPATH = " + classPath);
+            if (classPath.toLowerCase().contains("swt")) {
+                String[] pathValues = classPath.split(PATH_SEPARATOR);
+                for (String pathVal : pathValues) {
+                    if (pathVal.toLowerCase().contains("swt")) {
+                        int dirMarker = pathVal.lastIndexOf(FILE_SEPARATOR);
+                        String dirStr = pathVal.substring(0, dirMarker);
+                        logger.debug("found directory " + dirStr + " containing swt jar in CLASSPATH");
+                        return dirStr;
+                    }
+                }
+            } else {
+                return null;
+            }
+        }
         return null;
     }
     
