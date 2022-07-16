@@ -36,6 +36,7 @@ import org.junit.Test;
 
 import com.salesforce.dataloader.TestProgressMontitor;
 import com.salesforce.dataloader.action.OperationInfo;
+import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
@@ -82,7 +83,7 @@ public class BulkCsvProcessTest extends ProcessTestBase {
     public void testBatchSizes() throws Exception {
         writeCsv(validRow, validRow);
         argMap.put(Config.LOAD_BATCH_SIZE, "1");
-        TestProgressMontitor monitor = runProcess(argMap, 2, 0, 0, false);
+        ILoaderProgress monitor = runProcess(argMap, 2, 0, 0, false);
         assertEquals("Inserting 2 rows with batch size of 1 should have produced 2 batches", 2, monitor.getNumberBatchesTotal());
     }
 
@@ -90,16 +91,14 @@ public class BulkCsvProcessTest extends ProcessTestBase {
     public void testBatchSizesNotAlteredByInvalidData() throws Exception {
         writeCsv(validRow, invalidRow, validRow);
         argMap.put(Config.LOAD_BATCH_SIZE, "2");
-        TestProgressMontitor monitor = runProcess(argMap, 2, 0, 1, false);
+        ILoaderProgress monitor = runProcess(argMap, 2, 0, 1, false);
         assertEquals("Even though middle row contains invalid data only 1 batch should have been created", 1, monitor.getNumberBatchesTotal());
     }
 
-    private TestProgressMontitor runProcess(Map<String, String> argMap, int numInserts, int numUpdates, int numFailures, boolean emptyId) throws Exception {
+    private ILoaderProgress runProcess(Map<String, String> argMap, int numInserts, int numUpdates, int numFailures, boolean emptyId) throws Exception {
 
-        argMap.put(ProcessRunner.PROCESS_THREAD_NAME, baseName);
-        final TestProgressMontitor monitor = new TestProgressMontitor();
-        final ProcessRunner runner = ProcessRunner.runBatchMode(argMap, monitor);
-
+        final ProcessRunner runner = this.runBatchProcess(argMap);
+        ILoaderProgress monitor = runner.getMonitor();
         Controller controller = runner.getController();
 
         assertTrue("Process failed", monitor.isSuccess());

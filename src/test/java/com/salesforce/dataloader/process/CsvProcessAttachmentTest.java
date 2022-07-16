@@ -30,6 +30,7 @@ import com.salesforce.dataloader.TestProgressMontitor;
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
+import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -144,17 +145,12 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
                                                         AttachmentTemplateListener myAttachmentTemplateListener, String... files)
             throws ProcessInitializationException, DataAccessObjectException, ConnectionException, IOException {
 
-        if (argMap == null) argMap = getTestConfig();
-        argMap.put(ProcessRunner.PROCESS_THREAD_NAME, this.baseName);
-
-        final TestProgressMontitor monitor = new TestProgressMontitor();
-        final ProcessRunner runner = ProcessRunner.runBatchMode(argMap, monitor);
-
+        final ProcessRunner runner = this.runBatchProcess(argMap);
+        ILoaderProgress monitor = runner.getMonitor();
         Controller controller = runner.getController();
 
         // verify process completed as expected
         if (expectProcessSuccess) {
-
             verifyInsertCorrectByContent(controller, createAttachmentFileMap(files), myAttachmentTemplateListener);
             // this should also still work
             assertTrue("Process failed: " + monitor.getMessage(), monitor.isSuccess());

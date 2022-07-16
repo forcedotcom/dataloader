@@ -53,13 +53,16 @@ public enum NihilistProgressAdapter implements ILoaderProgress {
 
     }
 
+    boolean success = false;
     @Override
     public void doneError(String msgs) {
+        success = false;
         logger.error(msgs);
     }
 
     @Override
     public void doneSuccess(String msg) {
+        success = true;
         logger.info(msg);
 
     }
@@ -83,9 +86,25 @@ public enum NihilistProgressAdapter implements ILoaderProgress {
         return false;
     }
 
+    private int numberBatchesTotal = 0;
     @Override
     public void setNumberBatchesTotal(int numberBatchesTotal) {
-        // nothing
+        this.numberBatchesTotal = numberBatchesTotal;
+    }
+
+    @Override
+    public boolean isSuccess() {
+        return this.success;
+    }
+
+    @Override
+    public String getMessage() {
+        return "";
+    }
+
+    @Override
+    public int getNumberBatchesTotal() {
+        return this.numberBatchesTotal;
     }
 
 }

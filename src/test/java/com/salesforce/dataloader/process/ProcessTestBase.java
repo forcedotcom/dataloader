@@ -39,6 +39,7 @@ import org.junit.Before;
 
 import com.salesforce.dataloader.*;
 import com.salesforce.dataloader.action.OperationInfo;
+import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
@@ -710,17 +711,20 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             throws ProcessInitializationException, DataAccessObjectException {
         return runProcess(args, false, failureMessage, 0, 0, 0, false);
     }
+    
+    protected ProcessRunner runBatchProcess(Map<String, String> argMap) {
+        if (argMap == null) argMap = getTestConfig();
+        argMap.put(ProcessRunner.PROCESS_THREAD_NAME, this.baseName);
+        argMap.put(Config.CLI_OPTION_READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
+        final TestProgressMontitor monitor = new TestProgressMontitor();        
+        return ProcessRunner.runBatchMode(argMap, monitor);
+    }
 
     protected Controller runProcess(Map<String, String> argMap, boolean expectProcessSuccess, String failMessage,
             int numInserts, int numUpdates, int numFailures, boolean emptyId) throws ProcessInitializationException,
             DataAccessObjectException {
-
-        if (argMap == null) argMap = getTestConfig();
-        argMap.put(ProcessRunner.PROCESS_THREAD_NAME, this.baseName);
-        
-        final TestProgressMontitor monitor = new TestProgressMontitor();
-        final ProcessRunner runner = ProcessRunner.runBatchMode(argMap, monitor);
-
+        ProcessRunner runner = runBatchProcess(argMap);
+        ILoaderProgress monitor = runner.getMonitor();
         Controller controller = runner.getController();
 
         // verify process completed as expected
