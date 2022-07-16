@@ -175,6 +175,7 @@ public abstract class TestBase {
 
     protected void setupController(Map<String, String> configOverrideMap) {
         // configure the Controller to point to our testing config
+        configOverrideMap.put(Config.CLI_OPTION_READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
         if (!System.getProperties().contains(Config.CLI_OPTION_CONFIG_DIR_PROP))
             System.setProperty(Config.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
 

@@ -97,6 +97,8 @@ public class ProcessRunner implements InitializingBean {
 
     private Controller controller;
     
+    private ILoaderProgress monitor;
+    
     private static final String PROP_NAME_ARRAY[] = {
             Config.OPERATION,
             Config.ENDPOINT,
@@ -117,6 +119,7 @@ public class ProcessRunner implements InitializingBean {
         if (monitor == null) {
             monitor = NihilistProgressAdapter.get();
         }
+        this.monitor = monitor;
         final String oldName = Thread.currentThread().getName();
         String name = getName();
 
@@ -187,6 +190,10 @@ public class ProcessRunner implements InitializingBean {
             // restore original thread name
             setThreadName(oldName);
         }
+    }
+    
+    public ILoaderProgress getMonitor() {
+        return this.monitor;
     }
 
     private void setThreadName(final String name) {

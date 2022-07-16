@@ -42,6 +42,7 @@ public class SWTProgressAdapter implements ILoaderProgress {
     private IProgressMonitor monitor = null;
     private String dispMessage;
     private final Controller controller;
+    private boolean success = false;
 
     public SWTProgressAdapter(IProgressMonitor monitor_, Controller controller) {
         monitor = monitor_;
@@ -67,6 +68,7 @@ public class SWTProgressAdapter implements ILoaderProgress {
      */
     @Override
     public void doneSuccess(String message) {
+        success = true;
         monitor.done();
         controller.setLastOperationSuccessful(true);
         dispMessage = message;
@@ -91,6 +93,7 @@ public class SWTProgressAdapter implements ILoaderProgress {
 
     @Override
     public void doneError(String message) {
+        success = false;
         monitor.done();
         controller.setLastOperationSuccessful(false);
         dispMessage = message;
@@ -101,7 +104,15 @@ public class SWTProgressAdapter implements ILoaderProgress {
             }
         });
     }
-
+    
+    public boolean isSuccess() {
+        return this.success;
+    }
+    
+    public String getMessage() {
+        return this.dispMessage;
+    }
+ 
     /*
      * (non-Javadoc)
      *
@@ -141,9 +152,15 @@ public class SWTProgressAdapter implements ILoaderProgress {
         return monitor.isCanceled();
     }
 
+    private int numberBatchesTotal = 0;
     @Override
     public void setNumberBatchesTotal(int numberBatchesTotal) {
-        // nothing
+        this.numberBatchesTotal = numberBatchesTotal;
+    }
+
+    @Override
+    public int getNumberBatchesTotal() {
+        return this.numberBatchesTotal;
     }
 
 }

@@ -128,6 +128,7 @@ public class Config {
      * The mapping from preference name to preference value (represented as strings).
      */
     private Properties properties;
+    private Properties preservedProperties;
 
     /**
      * The default-default value for the respective types.
@@ -339,6 +340,7 @@ public class Config {
     public static final String CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
     public static final String CLI_OPTION_CONFIG_DIR_PROP = "salesforce.config.dir";
     public static final String CLI_OPTION_API_VERSION="salesforce.api.version";
+    public static final String CLI_OPTION_READ_ONLY_CONFIG_PROPERTIES = "config.properties.readonly";
     public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
     
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
@@ -791,6 +793,25 @@ public class Config {
 
         dirty = false;
     }
+    
+    private void restorePreservedProperty(String propertyName) {
+        String preservedPropertyValue = (String)this.preservedProperties.get(propertyName);
+        if (preservedPropertyValue == null) {
+            return;
+        }
+        this.properties.put(propertyName, preservedPropertyValue);
+    }
+    
+    private void preserveTheProperty(Map<?, ?> propMap, String propertyName) {
+        if (this.preservedProperties == null) {
+            this.preservedProperties = new Properties();
+        }
+        String propertyValueToPreserve = (String) propMap.get(propertyName);
+        if (propertyValueToPreserve == null) {
+            return;
+        }
+        this.preservedProperties.put(propertyName, propertyValueToPreserve);
+    }
 
     /**
      * Post process parameters. Right now, only decrypts encrypted values in the map
@@ -800,6 +821,12 @@ public class Config {
     @SuppressWarnings("unchecked")
     private void postLoad(Map<?, ?> propMap, boolean isConfigFilePropsMap) throws ConfigInitializationException {
 
+        if (isConfigFilePropsMap) {
+            this.preserveTheProperty(propMap, PASSWORD);
+            this.preserveTheProperty(propMap, PROXY_PASSWORD);
+            this.preserveTheProperty(propMap, OAUTH_ACCESSTOKEN);
+            this.preserveTheProperty(propMap, OAUTH_REFRESHTOKEN);
+        }
         // initialize encryption
         initEncryption((Map<String, String>) propMap);
 
@@ -960,18 +987,21 @@ public class Config {
      * @throws java.io.IOException if there is a problem saving this store
      */
     public void save() throws IOException, GeneralSecurityException {
+        if (getBoolean(CLI_OPTION_READ_ONLY_CONFIG_PROPERTIES)) {
+            return; // do not save as it updates config.properties
+        }
         if (filename == null) {
             throw new IOException(Messages.getString("Config.fileMissing")); //$NON-NLS-1$
         }
 
         Properties inMemoryProperties = new Properties();
         inMemoryProperties.putAll(this.properties);
-        // Secure password code prevents the saving of passwords
-        // no great way to do this,
-        putValue(PASSWORD, "");
-        putValue(PROXY_PASSWORD, "");
-        putValue(OAUTH_ACCESSTOKEN, "");
-        putValue(OAUTH_REFRESHTOKEN, "");
+        // keep the property values for the following properties as retrieved from config.properties
+  
+        restorePreservedProperty(PASSWORD);
+        restorePreservedProperty(PROXY_PASSWORD);
+        restorePreservedProperty(OAUTH_ACCESSTOKEN);
+        restorePreservedProperty(OAUTH_REFRESHTOKEN);
         
         removeUnsupportedProperties();
         removeDecryptedProperties();

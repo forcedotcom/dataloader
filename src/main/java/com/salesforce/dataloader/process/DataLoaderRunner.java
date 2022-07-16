@@ -308,8 +308,6 @@ public class DataLoaderRunner extends Thread {
                         return dirStr;
                     }
                 }
-            } else {
-                return null;
             }
         }
         return null;
