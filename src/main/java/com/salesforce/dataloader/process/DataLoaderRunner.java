@@ -43,8 +43,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import org.apache.logging.log4j.Logger;
 import java.lang.management.ManagementFactory;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -58,7 +56,7 @@ import com.salesforce.dataloader.config.Config;
 
 public class DataLoaderRunner extends Thread {
 
-    private static final String LOCAL_SWT_DIR = "target/";
+    private static final String LOCAL_SWT_DIR = "./target/";
     private static final String PATH_SEPARATOR = System.getProperty("path.separator");
     private static final String FILE_SEPARATOR = System.getProperty("file.separator");
     private static boolean useGMTForDateFieldValue = false;
@@ -152,12 +150,20 @@ public class DataLoaderRunner extends Thread {
         }
         
         // set JVM arguments
-        // set library path
+        // set library path for native libs of SWT
         String librarypath = System.getProperty("java.library.path");
+        File swtJarFileHandle = getSWTJarFileHandle();
+        if (swtJarFileHandle == null) {
+            logger.error("Unable to find SWT jar for " 
+                    + System.getProperty("os.name") + " : "
+                    + System.getProperty("os.arch"));
+            System.exit(-1);
+        }
+        String swtDir = swtJarFileHandle.getParent();
         if (librarypath != null && !librarypath.isBlank()) {
-            librarypath = getSWTDir() + PATH_SEPARATOR + librarypath;
+            librarypath = swtDir + PATH_SEPARATOR + librarypath;
         } else {
-            librarypath = getSWTDir();
+            librarypath = swtDir;
         }
         jvmArgs.add("-Djava.library.path=" + librarypath);
         logger.debug("set java.library.path=" + librarypath);
@@ -167,13 +173,7 @@ public class DataLoaderRunner extends Thread {
 
         // set classpath
         String classpath = System.getProperty("java.class.path");
-        String SWTJarPath = getSWTJarPath();
-        if (SWTJarPath == null) {
-            logger.error("Unable to find SWT jar for " 
-                    + System.getProperty("os.name") + " : "
-                    + System.getProperty("os.arch"));
-            System.exit(-1);
-        }
+        String SWTJarPath = swtJarFileHandle.getAbsolutePath();
         if (classpath != null && !classpath.isBlank()) {
             classpath = SWTJarPath + PATH_SEPARATOR + classpath;
         } else {
@@ -218,9 +218,9 @@ public class DataLoaderRunner extends Thread {
     }
     
     
-    private static String buildPathStringFromOSAndArch(String pathPrefix, String suffix, boolean skipOSAndArch) {
-        pathPrefix = pathPrefix == null ? "" : pathPrefix;
-        suffix = suffix == null ? "" : suffix;
+    private static String constructSwtJarNameFromOSAndArch(boolean skipOSAndArch) {
+        String swtJarPrefix = "swt";
+        String swtJarSuffix = "*.jar";
         
         String osNameStr = getOSName();
         String archStr = System.getProperty("os.arch");
@@ -230,9 +230,9 @@ public class DataLoaderRunner extends Thread {
         }
         
         // e.g. swtwin32_x86_64*.jar or swtmac_aarch64*.jar
-        String pathStr = pathPrefix 
+        String pathStr = swtJarPrefix 
                 + (skipOSAndArch ? "" : osNameStr + "_" + archStr)
-                + suffix;
+                + swtJarSuffix;
         
         return pathStr;
     }
@@ -258,79 +258,87 @@ public class DataLoaderRunner extends Thread {
         }
     }
     
-    private static String getFilePath(String parentDirStr, String childFileStr) {
+    private static File getSWTJarFileHandleFromWildcard(String parentDirStr, String childFileStr) {
         if (parentDirStr == null || parentDirStr.isBlank() || childFileStr == null || childFileStr.isBlank()) {
             return null;
         }
+        if (parentDirStr.contains("*")) {
+            // path to the file has a wildcard. Assume that it is present only at the parent directory level
+            String[] subpaths = parentDirStr.split("\\*");
+            File grandparentDir = new File(subpaths[0]);
+            File[] possibleParentDirs = grandparentDir.listFiles();
+            for (File possibleParentDir : possibleParentDirs) {
+                if (possibleParentDir.isDirectory()) {
+                    File possibleSWTJarFile = getSWTJarFileHandleFromWildcard(
+                            possibleParentDir.getAbsolutePath(), childFileStr);
+                    if (possibleSWTJarFile != null) {
+                        return possibleSWTJarFile;
+                    }
+                }
+            }            
+        }
         File parentDir = new File(parentDirStr);
+        if (!parentDir.exists()) {
+            return null;
+        }
         FileFilter fileFilter = new WildcardFileFilter(childFileStr);
         File[] files = parentDir.listFiles(fileFilter);
         if (files != null && files.length > 0) {
-            return files[0].getPath();
+            return files[0];
         }
         return null;
     }
     
-    private static String getSWTDir() {
-        String[]parentDirOfSWTArray = 
+    private static File getSWTJarFileHandle() {
+        String[]parentDirOfSWTDirArray = 
                     {AppUtil.getDirContainingClassJar(DataLoaderRunner.class)
                      , "."
                      , ".."
                      , LOCAL_SWT_DIR
                     };
         Boolean[] skipOSAndArchInFileNameConstructionArray = {Boolean.FALSE, Boolean.TRUE};
-        for (String parentDirPath : parentDirOfSWTArray) {
-            if (parentDirPath == null) {
+        for (String parentDirOfSwtDir : parentDirOfSWTDirArray) {
+            if (parentDirOfSwtDir == null) {
                 continue;
             }
             for (Boolean skipOSAndArchVal : skipOSAndArchInFileNameConstructionArray) {
-                String SWTDirStr = buildPathStringFromOSAndArch("swt*", "", skipOSAndArchVal);
-                String SWTDirPathStr = getFilePath(parentDirPath, SWTDirStr);
-                if (SWTDirPathStr != null) {
-                    logger.debug("Found SWT directory: " + SWTDirPathStr);
-                    return SWTDirPathStr;
+                String swtDirPathStr = parentDirOfSwtDir + "/*";
+                String swtJarPathWithParentDirWildcard = constructSwtJarNameFromOSAndArch(skipOSAndArchVal);
+                File swtJarFileHandle = getSWTJarFileHandleFromWildcard(swtDirPathStr, swtJarPathWithParentDirWildcard);
+                if (swtJarFileHandle != null) {
+                    logger.debug("Found SWT jar at " + swtJarFileHandle.getAbsolutePath());
+                    return swtJarFileHandle;
                 }
             }
         }
-        
+
         // try to get it from the CLASSPATH
         Map<String, String>envVars = System.getenv();
-        if (envVars.containsKey("CLASSPATH")) {
-            String classPath = envVars.get("CLASSPATH");
-            logger.debug("CLASSPATH = " + classPath);
-            if (classPath.toLowerCase().contains("swt")) {
-                String[] pathValues = classPath.split(PATH_SEPARATOR);
-                for (String pathVal : pathValues) {
-                    if (pathVal.toLowerCase().contains("swt")) {
-                        int dirMarker = pathVal.lastIndexOf(FILE_SEPARATOR);
-                        String dirStr = pathVal.substring(0, dirMarker);
-                        logger.debug("found directory " + dirStr + " containing swt jar in CLASSPATH");
-                        return dirStr;
+        String classPathStr = envVars.get("CLASSPATH");
+        File swtJarFileHandle = getSWTJarFileFromClassPath(classPathStr);
+        if (swtJarFileHandle != null) {
+            return swtJarFileHandle;
+        }
+        classPathStr = System.getProperty("java.class.path");
+        return getSWTJarFileFromClassPath(classPathStr);
+    }
+    
+    private static File getSWTJarFileFromClassPath(String classPathStr) {
+        if (classPathStr == null) {
+            return null;
+        }
+        logger.debug("CLASSPATH = " + classPathStr);
+        if (classPathStr.toLowerCase().contains("swt")) {
+            String[] pathValues = classPathStr.split(PATH_SEPARATOR);
+            for (String pathVal : pathValues) {
+                if (pathVal.toLowerCase().contains("swt")) {
+                    File swtFile = new File(pathVal);
+                    if (swtFile.exists()) {
+                        return swtFile;
                     }
                 }
             }
         }
-        return null;
-    }
-    
-    private static String getSWTJarPath() {
-        String SWTDirStr = getSWTDir();
-        if (SWTDirStr == null || !Files.exists(Paths.get(SWTDirStr))) {
-            logger.error("Unable to find SWT directory for " 
-                    + System.getProperty("os.name") + " : "
-                    + System.getProperty("os.arch"));
-            System.exit(-1);
-        }
-        Boolean[] skipOSAndArchInFileNameConstructionArray = {Boolean.FALSE, Boolean.TRUE};
-        for (Boolean skipOSAndArchVal : skipOSAndArchInFileNameConstructionArray) {
-            String jarStr = buildPathStringFromOSAndArch("swt", "*.jar", skipOSAndArchVal);
-            String jarPathStr = getFilePath(SWTDirStr, jarStr);
-            if (jarPathStr != null) {
-                logger.debug("Found SWT jar: " + jarPathStr);
-                return jarPathStr;
-            }
-        }
-        // no jar file starting with swt found
         return null;
     }
 }
