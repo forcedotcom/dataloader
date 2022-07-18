@@ -163,7 +163,7 @@ public class OAuthBrowserLoginRunner {
            try {
                logger.debug("trying to use desktop.browse() method");
                desktop.browse(new URI(url));
-           } catch (IOException | URISyntaxException e) {
+           } catch (Exception e) {
                logger.debug(e.getMessage());
                openURLUsingNativeCommand(url);
            }
