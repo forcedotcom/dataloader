@@ -11,7 +11,7 @@ IF NOT "%DATALOADER_JAVA_HOME%" == "" (
 IF "%JAVA_HOME%" == "" (
     echo To run encrypt.bat, set the JAVA_HOME environment variable to the directory where the Java Runtime Environment ^(JRE^) is installed.
 ) ELSE (
-    PATH=%JAVA_HOME%\bin\;%PATH%;
+    set PATH=%JAVA_HOME%\bin\;%PATH%;
     java -cp "%EXE_PATH%\..\dataloader-%DATALOADER_VERSION%-uber.jar" com.salesforce.dataloader.security.EncryptionUtil %*
 )
 endlocal
