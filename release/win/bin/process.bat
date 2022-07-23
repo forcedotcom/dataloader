@@ -52,4 +52,5 @@ if %SKIP_COUNT% == 2 shift
 CALL %EXE_PATH%\..\dataloader.bat -skipbanner run.mode=batch %CONFIG_DIR_OPTION% %BATCH_PROCESS_BEAN_ID_OPTION% %args%
 
 :end
+endlocal
 exit /b %errorlevel%
