@@ -498,19 +498,14 @@ public class Controller {
                 }
             }
         }
-
-        Date currentTime = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("MMddyyhhmmssSSS"); //$NON-NLS-1$
-        String timestamp = format.format(currentTime);
-
         // if status files are not specified, generate the files automatically
         String successPath = config.getString(Config.OUTPUT_SUCCESS);
         if (generateFiles || successPath == null || successPath.length() == 0) {
-            successPath = new File(statusDir, "success" + timestamp + ".csv").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
+            successPath = new File(statusDir, "success" + getFormattedCurrentTimestamp() + ".csv").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
         }
         String errorPath = config.getString(Config.OUTPUT_ERROR);
         if (generateFiles || errorPath == null || errorPath.length() == 0) {
-            errorPath = new File(statusDir, "error" + timestamp + ".csv").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
+            errorPath = new File(statusDir, "error" + getFormattedCurrentTimestamp() + ".csv").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
         }
         /*
          * TODO: Bulk V2 has the endpoint to download unprocessed records from the submitted
@@ -536,6 +531,14 @@ public class Controller {
         config.setValue(Config.OUTPUT_ERROR, errorPath);
         // TODO for unprocessed records
         // config.setValue(Config.OUTPUT_UNPROCESSED_RECORDS, unprocessedRecordsPath);
+    }
+    
+    private final Date currentTime = new Date();
+    private final SimpleDateFormat format = new SimpleDateFormat("MMddyyhhmmssSSS"); //$NON-NLS-1$
+    private final String formattedCurrentTimestamp = format.format(currentTime);
+    
+    public String getFormattedCurrentTimestamp() {
+        return formattedCurrentTimestamp;
     }
 
     private void validateFile(String filePath) throws IOException {
