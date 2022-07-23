@@ -41,7 +41,7 @@ public abstract class AbstractVisitor implements IVisitor {
 
     private final Logger logger;
 
-    private final Controller controller;
+    protected final Controller controller;
     private final ILoaderProgress monitor;
     private final DataWriter successWriter;
     private final DataWriter errorWriter;

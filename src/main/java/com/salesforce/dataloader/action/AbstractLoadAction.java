@@ -84,7 +84,11 @@ abstract class AbstractLoadAction extends AbstractAction {
         int daoRowCount = 0;
 
         for (final Row daoRow : daoRowList) {
-            if (!DAORowUtil.isValidRow(daoRow)) return false;
+            if (!DAORowUtil.isValidRow(daoRow)) {
+                getVisitor().setRowConversionStatus(daoRowNumBase + daoRowCount++, 
+                        false);
+                return false;
+            }
             getVisitor().setRowConversionStatus(daoRowNumBase + daoRowCount++, 
                                                     getVisitor().visit(daoRow));
         }

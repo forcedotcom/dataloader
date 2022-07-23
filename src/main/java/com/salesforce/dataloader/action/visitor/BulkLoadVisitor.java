@@ -30,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
@@ -88,7 +89,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
     private final boolean isDelete;
     private static final DateFormat DATE_FMT;
-
+    private int batchCountForJob = 0;
+    
     static {
         DATE_FMT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         DATE_FMT.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -273,9 +275,65 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         addedCols.add(sfdcColumn);
     }
 
+    private void writeServerLoadBatchDataToCSV(ByteArrayOutputStream os) {
+        String filenamePrefix = "uploadedToServer";
+        String filename = generateBatchCSVFilename(filenamePrefix, batchCountForJob);
+        File uploadedToServerCSVFile = new File(filename);
+        final byte[] request = os.toByteArray();
+        try {
+            FileOutputStream outputStream = new FileOutputStream(uploadedToServerCSVFile);
+            outputStream.write(request);
+            outputStream.close();
+        } catch (Exception ex) {
+            logger.info("unable to create file " + filename);
+        }
+    }
+    
+    private void writeRawResultsToCSV(CSVReader serverResultsReader, int batchNum) {
+        String filenamePrefix = "rawResultsFromServer";
+        String filename = generateBatchCSVFilename(filenamePrefix, batchNum);
+        File rawBatchResultsCSVFile = new File(filename);
+        try {
+            FileOutputStream outputStream = new FileOutputStream(rawBatchResultsCSVFile);
+            PrintStream printOutput = new PrintStream(outputStream);
+            List<String> row = serverResultsReader.nextRecord();
+            while (row != null && !row.isEmpty()) {
+                int cellIdx = 0;
+                for (String cell : row) {
+                    if (cellIdx != 0) {
+                        printOutput.print(", ");
+                    }
+                    cellIdx++;
+                    printOutput.print(cell);
+                }
+                printOutput.println("");
+                row = serverResultsReader.nextRecord();
+            }
+            printOutput.close();
+            outputStream.close();
+        } catch (Exception ex) {
+            logger.info("unable to create file " + filename);
+        }
+    }
+    
+    private String generateBatchCSVFilename(String prefix, int batchNum) {
+        String successResultsFilename = controller.getConfig().getString(Config.OUTPUT_SUCCESS);
+        int parentDirLocation = successResultsFilename.lastIndexOf(System.getProperty("file.separator"));
+        String resultsDir = successResultsFilename.substring(0, parentDirLocation);
+        return resultsDir 
+                + System.getProperty("file.separator")
+                + prefix
+                + "_Batch" + batchNum + "_"
+                + controller.getFormattedCurrentTimestamp() + ".csv";
+    }
+
     private void createBatch(ByteArrayOutputStream os, int numRecords) throws AsyncApiException {
         if (numRecords <= 0) return;
         final byte[] request = os.toByteArray();
+        if (controller.getConfig().getBoolean(Config.SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV)) {
+            this.batchCountForJob++;
+            writeServerLoadBatchDataToCSV(os);
+        }
         os.reset();
         BatchInfo bi = this.jobUtil.createBatch(new ByteArrayInputStream(request, 0, request.length));
         this.allBatchesInOrder.add(new BatchData(bi.getId(), numRecords));
@@ -376,6 +434,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
         // go through all the batches we sent to sfdc in the same order and process the batch results for
         // each one by looking them up in batchInfoMap
+        this.batchCountForJob = 0;
         for (final BatchData clientBatchInfo : this.allBatchesInOrder) {
             processResults(dataReader, batchInfoMap.get(clientBatchInfo.batchId), clientBatchInfo);
         }
@@ -432,6 +491,10 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         // get the batch csv result stream from sfdc
         final CSVReader resultRdr = this.jobUtil.getBatchResults(batch.getId());
 
+        if (controller.getConfig().getBoolean(Config.SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV)) {
+            this.batchCountForJob++;
+            writeRawResultsToCSV(this.jobUtil.getBatchResults(batch.getId()), this.batchCountForJob);
+        }
         // read in the result csv header and note the column indices
         Map<String, Integer> hdrIndices = mapHeaderIndices(resultRdr.nextRecord());
         final int successIdx = hdrIndices.get(SUCCESS_RESULT_COL);

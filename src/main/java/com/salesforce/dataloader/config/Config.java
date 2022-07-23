@@ -343,6 +343,7 @@ public class Config {
     public static final String CLI_OPTION_READ_ONLY_CONFIG_PROPERTIES = "config.properties.readonly";
     public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
     
+    public static final String SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV = "process.bulk.saveServerLoadAndRawResultsInCSV";
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
 
     /**
@@ -482,6 +483,7 @@ public class Config {
         setDefaultValue(OAUTH_LOGIN_FROM_BROWSER, true);
         setDefaultValue(LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
         setDefaultValue(Config.CLI_OPTION_RUN_MODE, Config.RUN_MODE_UI_VAL);
+        setDefaultValue(SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV, false);
     }
 
     /**
