@@ -257,8 +257,6 @@ public class Controller {
     private void createDao(String daoTypeStr, String daoNameStr) throws DataAccessObjectInitializationException {
         config.setValue(Config.DAO_NAME, daoNameStr);
         config.setValue(Config.DAO_TYPE, daoTypeStr);
-        this.saveConfig();
-
         try {
             config.getStringRequired(Config.DAO_NAME); // verify required param exists: dao name
             dao = daoFactory.getDaoInstance(config.getStringRequired(Config.DAO_TYPE), config);
@@ -277,7 +275,6 @@ public class Controller {
             throw new MappingInitializationException(e.getMessage());
         }
         config.setValue(Config.ENTITY, sObjectName);
-        this.saveConfig();
         try {
             this.setFieldTypes();
             this.setReferenceDescribes();
