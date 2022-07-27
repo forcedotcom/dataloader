@@ -73,10 +73,10 @@ public class EncryptionUtil {
     private static void printUsage() {
         String usage = "\nUtility to encrypt a string based on a static or a provided key\n"
                         + "Options (mutually exclusive - use one at a time): \n"
-                        + "\t-e <plain text> <Path to keyfile>                Encrypt a plain text value, keyfile path\n"
-                        + "\t-d <encryptText> <Path to keyfile>               Decrypt an encrypted text back to plain text value using keyfile\n"
-                        + "\t-k [Path to Keyfile]                             Generate keyfile with optional keyfile path\n";
-
+                        + "\t-e <plain text> [keyfile]                Encrypt a plain text value using optional keyfile\n"
+                        + "\t-d <encryptText> [keyfile]               Decrypt an encrypted text back to plain text value using optional keyfile\n"
+                        + "\t-k [keyfile]                             Generate keyfile with optional path to keyfile\n"
+                        + "\n keyfile defaults to $HOME(%userprofile% on Windows)/.dataloader/dataLoader.key if not specified";
         System.out.println(usage);
     }
 
