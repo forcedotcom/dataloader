@@ -136,7 +136,8 @@ public class ProcessRunner implements InitializingBean {
         try {
             logger.info(Messages.getString("Process.initializingEngine")); //$NON-NLS-1$
             Config config = controller.getConfig();
-            if (config.getBoolean(Config.OAUTH_LOGIN_FROM_BROWSER)) {
+            if (!(config.contains(Config.USERNAME) && config.contains(Config.PASSWORD))
+                    && config.getBoolean(Config.OAUTH_LOGIN_FROM_BROWSER)) {
                 doLoginFromBrowser(config);
             }
             // Make sure that the required properties are specified.

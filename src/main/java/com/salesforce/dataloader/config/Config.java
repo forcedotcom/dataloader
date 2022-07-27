@@ -129,6 +129,7 @@ public class Config {
      */
     private Properties properties;
     private Properties preservedProperties;
+    private Map<String, String> parameterOverridesMap;
 
     /**
      * The default-default value for the respective types.
@@ -799,6 +800,7 @@ public class Config {
     private void restorePreservedProperty(String propertyName) {
         String preservedPropertyValue = (String)this.preservedProperties.get(propertyName);
         if (preservedPropertyValue == null) {
+            this.properties.remove(propertyName);
             return;
         }
         this.properties.put(propertyName, preservedPropertyValue);
@@ -874,6 +876,7 @@ public class Config {
      */
     private void loadParameterOverrides(Map<String, String> configOverrideMap) throws ParameterLoadException,
             ConfigInitializationException {
+        this.parameterOverridesMap = configOverrideMap;
         // make sure to post-process the args to be loaded
         postLoad(configOverrideMap, false);
 
@@ -989,7 +992,8 @@ public class Config {
      * @throws java.io.IOException if there is a problem saving this store
      */
     public void save() throws IOException, GeneralSecurityException {
-        if (getBoolean(CLI_OPTION_READ_ONLY_CONFIG_PROPERTIES)) {
+        if (getString(Config.CLI_OPTION_RUN_MODE).equalsIgnoreCase(Config.RUN_MODE_BATCH_VAL)
+           || getBoolean(CLI_OPTION_READ_ONLY_CONFIG_PROPERTIES)) {
             return; // do not save as it updates config.properties
         }
         if (filename == null) {
@@ -998,6 +1002,13 @@ public class Config {
 
         Properties inMemoryProperties = new Properties();
         inMemoryProperties.putAll(this.properties);
+        
+        // do not save properties set through parameter overrides
+        if (this.parameterOverridesMap != null) {
+            for (String propertyName : this.parameterOverridesMap.keySet()) {
+                this.properties.remove(propertyName);
+            }
+        }
         // keep the property values for the following properties as retrieved from config.properties
   
         restorePreservedProperty(PASSWORD);
