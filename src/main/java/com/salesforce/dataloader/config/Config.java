@@ -128,7 +128,7 @@ public class Config {
      * The mapping from preference name to preference value (represented as strings).
      */
     private Properties properties;
-    private Properties preservedProperties;
+    private Properties readOnlyProperties;
     private Map<String, String> parameterOverridesMap;
 
     /**
@@ -347,6 +347,25 @@ public class Config {
     public static final String SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV = "process.bulk.saveServerLoadAndRawResultsInCSV";
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
 
+    // Following properties are read-only, i.e. they are not overridden during save() to config.properties
+    // - These properties are not set in Advanced Settings dialog.
+    // - Make sure to list all sensitive properties such as password because these properties are not saved.
+    private static final String[] READ_ONLY_PROPERTY_NAMES = {
+            PASSWORD,
+            PROXY_PASSWORD,
+            OAUTH_ACCESSTOKEN,
+            OAUTH_REFRESHTOKEN,
+            EXTERNAL_ID_FIELD,
+            EXTRACT_SOQL,
+            OUTPUT_SUCCESS,
+            OUTPUT_ERROR,
+            DAO_NAME,
+            DAO_TYPE,
+            ENTITY,
+            OPERATION,
+            DEBUG_MESSAGES_FILE
+    };
+    
     /**
      * Creates an empty config that loads from and saves to the a file. <p> Use the methods
      * <code>load()</code> and <code>save()</code> to load and store this preference store. </p>
@@ -797,8 +816,8 @@ public class Config {
         dirty = false;
     }
     
-    private void restorePreservedProperty(String propertyName) {
-        String preservedPropertyValue = (String)this.preservedProperties.get(propertyName);
+    private void restoreReadOnlyProperty(String propertyName) {
+        String preservedPropertyValue = (String)this.readOnlyProperties.get(propertyName);
         if (preservedPropertyValue == null) {
             this.properties.remove(propertyName);
             return;
@@ -806,15 +825,15 @@ public class Config {
         this.properties.put(propertyName, preservedPropertyValue);
     }
     
-    private void preserveTheProperty(Map<?, ?> propMap, String propertyName) {
-        if (this.preservedProperties == null) {
-            this.preservedProperties = new Properties();
+    private void preserveReadOnlyProperty(Map<?, ?> propMap, String propertyName) {
+        if (this.readOnlyProperties == null) {
+            this.readOnlyProperties = new Properties();
         }
         String propertyValueToPreserve = (String) propMap.get(propertyName);
         if (propertyValueToPreserve == null) {
             return;
         }
-        this.preservedProperties.put(propertyName, propertyValueToPreserve);
+        this.readOnlyProperties.put(propertyName, propertyValueToPreserve);
     }
 
     /**
@@ -826,10 +845,9 @@ public class Config {
     private void postLoad(Map<?, ?> propMap, boolean isConfigFilePropsMap) throws ConfigInitializationException {
 
         if (isConfigFilePropsMap) {
-            this.preserveTheProperty(propMap, PASSWORD);
-            this.preserveTheProperty(propMap, PROXY_PASSWORD);
-            this.preserveTheProperty(propMap, OAUTH_ACCESSTOKEN);
-            this.preserveTheProperty(propMap, OAUTH_REFRESHTOKEN);
+            for (String propertyName : READ_ONLY_PROPERTY_NAMES) {
+                preserveReadOnlyProperty(propMap, propertyName);
+            }
         }
         // initialize encryption
         initEncryption((Map<String, String>) propMap);
@@ -1009,12 +1027,10 @@ public class Config {
                 this.properties.remove(propertyName);
             }
         }
-        // keep the property values for the following properties as retrieved from config.properties
-  
-        restorePreservedProperty(PASSWORD);
-        restorePreservedProperty(PROXY_PASSWORD);
-        restorePreservedProperty(OAUTH_ACCESSTOKEN);
-        restorePreservedProperty(OAUTH_REFRESHTOKEN);
+        // keep the property values for the read-only properties as retrieved from config.properties
+        for (String propertyName : READ_ONLY_PROPERTY_NAMES) {
+            this.restoreReadOnlyProperty(propertyName);
+        }
         
         removeUnsupportedProperties();
         removeDecryptedProperties();
