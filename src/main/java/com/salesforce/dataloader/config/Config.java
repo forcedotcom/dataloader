@@ -70,6 +70,40 @@ import java.util.TimeZone;
 /**
  * @author Lexi Viripaeff
  * @since 6.0
+ * 
+ * **** README *****
+ * Config class assimilates all properties including:
+ * - properties specified in config.properties file
+ * - properties specified in process-conf.xml file
+ * - properties specified as command line arguments
+ * - properties specified in Settings dialog - these get stored in config.properties file
+ * - properties set during operation steps (including login) and execution of an operation
+ * 
+ * Properties are set in:
+ * - config.properties file
+ *   All properties except those that are defined with the prefix "CLI_OPTION_"
+ *   can be specified in config.properties file. 
+ *   "Save" from Setup dialog saves modified properties in config.properties file.
+ *   
+ * - <process name>_lastRun.properties and ui_lastRun.properties files
+ *   Contains 2 properties: timestamp of the last run and number of records processed during
+ *   last upload (insert, upsert, update, delete, hard delete) operation if the operation
+ *   was performed using Partner API.
+ * 
+ * - process-conf.xml file
+ *   Contains properties relevant to execute an operation in the batch mode.
+ *   A property specified in process-conf.xml overrides the same property
+ *   specified in config.properties. However, it DOES NOT overwrite any property
+ *   in config.properties file.
+ *   
+ * - command line arguments
+ *   Some properties can only be specified through command line arguments. These
+ *   properties are defined with the prefix "CLI_OPTION_". A property set
+ *   in command line argument overrides the value set in other files.
+ *  
+ * - operations
+ *   Some properties are set during operations/user action such as login,
+ *   Specifying results directory for an operation, and so on.
  */
 public class Config {
     private static Logger logger = LogManager.getLogger(Config.class);
