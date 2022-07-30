@@ -72,6 +72,7 @@ import java.util.TimeZone;
  * @since 6.0
  * 
  * **** README *****
+ * 
  * Config class assimilates all properties including:
  * - properties specified in config.properties file
  * - properties specified in process-conf.xml file
@@ -79,31 +80,41 @@ import java.util.TimeZone;
  * - properties specified in Settings dialog - these get stored in config.properties file
  * - properties set during operation steps (including login) and execution of an operation
  * 
- * Properties are set in:
- * - config.properties file
+ * How properties are loaded, set in-memory, and saved to a file:
+ * - Properties loaded from and saved to config.properties file
  *   All properties except those that are defined with the prefix "CLI_OPTION_"
  *   can be specified in config.properties file. 
  *   "Save" from Setup dialog saves modified properties in config.properties file.
  *   
- * - <process name>_lastRun.properties and ui_lastRun.properties files
+ * - Properties loaded from and saved to <process name>_lastRun.properties and ui_lastRun.properties files
  *   Contains 2 properties: timestamp of the last run and number of records processed during
  *   last upload (insert, upsert, update, delete, hard delete) operation if the operation
  *   was performed using Partner API.
  * 
- * - process-conf.xml file
+ * - Properties loaded from process-conf.xml file. Properties are not saved to process-conf.xml.
  *   Contains properties relevant to execute an operation in the batch mode.
  *   A property specified in process-conf.xml overrides the same property
  *   specified in config.properties. However, it DOES NOT overwrite any property
  *   in config.properties file.
  *   
- * - command line arguments
+ * - Properties loaded from command line arguments
  *   Some properties can only be specified through command line arguments. These
  *   properties are defined with the prefix "CLI_OPTION_". A property set
  *   in command line argument overrides the value set in other files.
  *  
- * - operations
- *   Some properties are set during operations/user action such as login,
- *   Specifying results directory for an operation, and so on.
+ * - Properties set in Settings dialog and saved in config.properties file
+ * 
+ * - Properties set during actions and saved in config.properties/<operation | "ui">_lastRun.properties file.
+ *   Some properties are set during actions such as login, specifying results directory for an operation, and so on.
+ *   For example, "process.operation" property is set when user clicks on the operation button.
+ *   These properties may not get saved depending on whether they are designated as "read-only" properties.
+ *   
+ * - Certain properties are "read-only" in that their value set during the app execution
+ *   is never saved. 
+ *   For example, "sfdc.password" can be specified in config.properties, which
+ *   may be overridden by a different value when the user logs in. However, its 
+ *   value specified in config.properties is not overridden when save() method is invoked.
+ *
  */
 public class Config {
     private static Logger logger = LogManager.getLogger(Config.class);
