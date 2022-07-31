@@ -1,19 +1,19 @@
 REM call the function specified in 1st param and return the errorlevel set by the function
 REM
-call :initVars
-call :%~1
-exit /b %ERRORLEVEL%
+CALL :initVars
+CALL :%~1
+EXIT /b %ERRORLEVEL%
 
 :initVars
-    set DATALOADER_VERSION=@@FULL_VERSION@@
-    for /f "tokens=1 delims=." %%a in ("%DATALOADER_VERSION%") do (
-      set DATALOADER_SHORT_VERSION=%%a
+    SET DATALOADER_VERSION=@@FULL_VERSION@@
+    FOR /f "tokens=1 delims=." %%a IN ("%DATALOADER_VERSION%") DO (
+      SET DATALOADER_SHORT_VERSION=%%a
     )
-    set MIN_JAVA_VERSION=@@MIN_JAVA_VERSION@@
+    SET MIN_JAVA_VERSION=@@MIN_JAVA_VERSION@@
     IF NOT "%DATALOADER_JAVA_HOME%" == "" (
-        set "JAVA_HOME=%DATALOADER_JAVA_HOME%"
+        SET "JAVA_HOME=%DATALOADER_JAVA_HOME%"
     )
-    exit /b 0
+    EXIT /b 0
 
 :showBanner
     echo.
@@ -33,40 +33,40 @@ exit /b %ERRORLEVEL%
     echo **                                                                     **
     echo *************************************************************************
     echo.
-    exit /b 0
+    EXIT /b 0
 
 :checkJavaVersion
     echo Data Loader requires Java JRE %MIN_JAVA_VERSION% or later. Checking if it is installed...
 
-    set "PATH=%JAVA_HOME%\bin\;%PATH%;"
+    SET "PATH=%JAVA_HOME%\bin\;%PATH%;"
 
     java -version 1>nul 2>nul || (
-        goto NoJavaErrorExit
+        GOTO :NoJavaErrorExit
     )
 
-    for /f "tokens=3" %%a in ('java -version 2^>^&1 ^| findstr /i "version"') do (
-        set JAVA_FULL_VERSION=%%a
+    FOR /f "tokens=3" %%a IN ('java -version 2^>^&1 ^| FINDSTR /i "version"') DO (
+        SET JAVA_FULL_VERSION=%%a
     )
-    set JAVA_FULL_VERSION=%JAVA_FULL_VERSION:"=%
+    SET JAVA_FULL_VERSION=%JAVA_FULL_VERSION:"=%
 
-    for /f "tokens=1 delims=." %%m in ("%JAVA_FULL_VERSION%") do (
-        set /A JAVA_MAJOR_VERSION=%%m
+    FOR /f "tokens=1 delims=." %%m IN ("%JAVA_FULL_VERSION%") DO (
+        SET /A JAVA_MAJOR_VERSION=%%m
     )
 
-    if %JAVA_MAJOR_VERSION% LSS %MIN_JAVA_VERSION% (
-        goto JavaVersionErrorExit
+    IF %JAVA_MAJOR_VERSION% LSS %MIN_JAVA_VERSION% (
+        GOTO :JavaVersionErrorExit
     )
-    goto AfterJavaCheck
+    EXIT /b 0
 
 :NoJavaErrorExit
     echo Did not find java command.
     echo Either Java JRE %MIN_JAVA_VERSION% or later is not installed or PATH environment does not
     echo include the folder containing java executable.
-    goto CommonJavaErrorExit
+    GOTO :CommonJavaErrorExit
 
 :JavaVersionErrorExit
     echo Found Java JRE version %JAVA_FULL_VERSION% whereas Data Loader requires Java JRE %MIN_JAVA_VERSION% or later.
-    goto CommonJavaErrorExit
+    GOTO :CommonJavaErrorExit
 
 :CommonJavaErrorExit
     echo For example, download and install Zulu OpenJDK %MIN_JAVA_VERSION% or later JRE for Windows from here:
@@ -74,9 +74,5 @@ exit /b %ERRORLEVEL%
     echo After the installation, update PATH environment variable by
     echo    - removing the path to older JRE's bin folder from PATH environment variable
     echo    - adding ^<full path to the JRE base folder^>\bin to PATH environment variable
-    endlocal
     PAUSE
-    exit /b -1
-    
-:AfterJavaCheck
-    exit /b 0
+    EXIT /b -1
