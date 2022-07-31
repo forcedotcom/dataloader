@@ -1,7 +1,7 @@
 @echo off
 SETLOCAL
 
-IF NOT [%1]==[] GOTO run
+IF NOT "%1"=="" GOTO :run
 echo.
 echo Usage: process ^<configuration directory^> ^[batch process bean id^]
 echo.
@@ -19,38 +19,41 @@ echo          for example:
 echo.
 echo              process ../myconfigdir
 echo.
-
-GOTO end
+GOTO :exit
 
 :run
-SET EXE_PATH=%~dp0
 SET DATALOADER_VERSION=@@FULL_VERSION@@
-SET CONFIG_DIR_OPTION=salesforce.config.dir=%1
-SET SKIP_COUNT=1
+SET "CONFIG_DIR_OPTION=salesforce.config.dir=%1"
+SET SKIP_ARGS_COUNT=1
 
 SET BATCH_PROCESS_BEAN_ID_OPTION=
-IF NOT [%2]==[] (
+IF NOT "%2"=="" (
     set BATCH_PROCESS_BEAN_ID_OPTION=process.name=%2
-    set SKIP_COUNT=2
+    set SKIP_ARGS_COUNT=2
 )
 
-SET args=
+REM first argument is mandatory. Skip it because it is handled differently from other args.
 SHIFT
-IF %SKIP_COUNT% == 2 SHIFT
-:start
-    IF [%1] == [] GOTO done
-    IF "%args%" == "" (
-        SET args=%1=%2
+
+REM skip the second argument if provided because it is handled differently from other args.
+IF "%SKIP_ARGS_COUNT%" == "2" SHIFT
+
+REM preserve rest of the command line arguments in ARGS variable
+SET ARGS=
+:preserveNextArg
+    IF "%1" == "" GOTO :afterPreserveArgs
+    IF "%ARGS%" == "" (
+        SET ARGS=%1=%2
     ) ELSE (
-        SET args=%args% %1=%2
+        SET ARGS=%ARGS% %1=%2
     )
     SHIFT
     SHIFT
-    goto start
-:done
+    GOTO :preserveNextArg
 
-CALL %EXE_PATH%\..\dataloader.bat -skipbanner run.mode=batch %CONFIG_DIR_OPTION% %BATCH_PROCESS_BEAN_ID_OPTION% %args%
+:afterPreserveArgs
+CALL %~dp0..\dataloader.bat -skipbanner run.mode=batch %CONFIG_DIR_OPTION% %BATCH_PROCESS_BEAN_ID_OPTION% %ARGS%
 
-:end
+:exit
 ENDLOCAL
-EXIT /b %errorlevel%
+EXIT /b %ERRORLEVEL%
