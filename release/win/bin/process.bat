@@ -1,7 +1,7 @@
 @echo off
-setlocal
+SETLOCAL
 
-if not [%1]==[] goto run
+IF NOT [%1]==[] GOTO run
 echo.
 echo Usage: process ^<configuration directory^> ^[batch process bean id^]
 echo.
@@ -20,37 +20,37 @@ echo.
 echo              process ../myconfigdir
 echo.
 
-goto end
+GOTO end
 
 :run
-set EXE_PATH=%~dp0
-set DATALOADER_VERSION=@@FULL_VERSION@@
-set CONFIG_DIR_OPTION=salesforce.config.dir=%1
-set SKIP_COUNT=1
+SET EXE_PATH=%~dp0
+SET DATALOADER_VERSION=@@FULL_VERSION@@
+SET CONFIG_DIR_OPTION=salesforce.config.dir=%1
+SET SKIP_COUNT=1
 
-set BATCH_PROCESS_BEAN_ID_OPTION=
-if not [%2]==[] (
+SET BATCH_PROCESS_BEAN_ID_OPTION=
+IF NOT [%2]==[] (
     set BATCH_PROCESS_BEAN_ID_OPTION=process.name=%2
     set SKIP_COUNT=2
 )
 
-set args=
-shift
-if %SKIP_COUNT% == 2 shift
+SET args=
+SHIFT
+IF %SKIP_COUNT% == 2 SHIFT
 :start
-    if [%1] == [] goto done
-    if "%args%" == "" (
-        set args=%1=%2
-    ) else (
-        set args=%args% %1=%2
+    IF [%1] == [] GOTO done
+    IF "%args%" == "" (
+        SET args=%1=%2
+    ) ELSE (
+        SET args=%args% %1=%2
     )
-    shift
-    shift
+    SHIFT
+    SHIFT
     goto start
 :done
 
 CALL %EXE_PATH%\..\dataloader.bat -skipbanner run.mode=batch %CONFIG_DIR_OPTION% %BATCH_PROCESS_BEAN_ID_OPTION% %args%
 
 :end
-endlocal
-exit /b %errorlevel%
+ENDLOCAL
+EXIT /b %errorlevel%
