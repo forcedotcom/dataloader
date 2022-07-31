@@ -1,11 +1,14 @@
 @echo off
-setlocal
+SETLOCAL
 
-CALL %~dp0\initialize.bat %*
-set DATALOADER_UBER_JAR_NAME=%~dp0\dataloader-%DATALOADER_VERSION%-uber.jar
+IF NOT "%~1"=="-skipbanner" (
+        CALL %~dp0\util\util.bat showBanner
+    )
+)
+CALL %~dp0\util\util.bat checkJavaVersion
+IF "%ERRORLEVEL%" NEQ "0" EXIT /b %ERRORLEVEL%
 
-:Run
-    java -jar %DATALOADER_UBER_JAR_NAME% %*
+java -jar "%~dp0dataloader-%DATALOADER_VERSION%-uber.jar" %*
 
-endlocal
-exit /b %errorlevel%
+ENDLOCAL
+exit /b %ERRORLEVEL%

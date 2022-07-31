@@ -1,7 +1,8 @@
 @echo off
-setlocal
+SETLOCAL
 
-CALL %~dp0\..\initialize.bat -skipbanner
-java -cp "%~dp0\..\dataloader-%DATALOADER_VERSION%-uber.jar" com.salesforce.dataloader.security.EncryptionUtil %*
+CALL %~dp0..\util\util.bat checkJavaVersion
+IF "%ERRORLEVEL%" NEQ "0" EXIT /b %ERRORLEVEL%
+java -cp "%~dp0..\dataloader-%DATALOADER_VERSION%-uber.jar" com.salesforce.dataloader.security.EncryptionUtil %*
 
-endlocal
+ENDLOCAL
