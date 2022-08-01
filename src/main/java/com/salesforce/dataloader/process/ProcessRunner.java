@@ -251,6 +251,37 @@ public class ProcessRunner implements InitializingBean {
     
     public static void runBatchMode(String[] args) {
         Map<String,String> argMap = Controller.getArgMapFromArgArray(args);
+        if (!argMap.containsKey(Config.CLI_OPTION_CONFIG_DIR_PROP) && args.length < 2) {
+            // config directory must be specified in the first argument
+            System.err.println(
+                    "Usage: process <configuration directory> [batch process bean id]\n"
+                    + "\n"
+                    + "      configuration directory -- required -- directory that contains configuration files,\n"
+                    + "          i.e. config.properties, process-conf.xml, database-conf.xml\n"
+                    + "\n"
+                    + "      batch process bean id -- optional -- id of a batch process bean in process-conf.xml,\n"
+                    + "          for example:\n"
+                    + "\n"
+                    + "              process ../myconfigdir AccountInsert\n"
+                    + "\n"
+                    + "      If process bean id is not specified, the value of the property process.name in config.properties\n"
+                    + "      will be used to run the process instead of process-conf.xml,\n"
+                    + "          for example:\n"
+                    + "\n"
+                    + "              process ../myconfigdir");
+            System.exit(-1);
+        }
+        if (!argMap.containsKey(Config.CLI_OPTION_CONFIG_DIR_PROP)) {
+            argMap.put(Config.CLI_OPTION_CONFIG_DIR_PROP, args[0]);
+        }
+        
+        // Instantiate logger once config directory is set
+        Controller.initializeLog(argMap);
+        logger = LogManager.getLogger(ProcessRunner.class);
+        if (!argMap.containsKey(DYNABEAN_ID) && args.length > 2) {
+            // second argument must be process name
+            argMap.put(DYNABEAN_ID, args[1]);
+        }
         try {
             runBatchMode(argMap, null);
         } catch (Throwable t) {
@@ -285,7 +316,6 @@ public class ProcessRunner implements InitializingBean {
      * @throws ProcessInitializationException
      */
     private static synchronized ProcessRunner getInstance(Map<String, String> argMap) throws ProcessInitializationException {
-        logger = LogManager.getLogger(ProcessRunner.class);
         logger.info(Messages.getString("Process.initializingEngine")); //$NON-NLS-1$
         String dynaBeanID = argMap.get(DYNABEAN_ID);
         ProcessRunner runner;
