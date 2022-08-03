@@ -143,7 +143,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
 
         // specify the name of the configured process and select appropriate database access type
         if (args == null) args = getTestConfig();
-        args.put(ProcessRunner.DYNABEAN_ID, processName);
+        args.put(Config.PROCESS_NAME, processName);
         Config.DATE_FORMATTER.parse(startTime);
         args.put(LastRun.LAST_RUN_DATE, startTime);
         args.put(Config.OPERATION, OperationInfo.upsert.name());
@@ -176,7 +176,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         OperationInfo op = isInsert ? OperationInfo.insert : OperationInfo.update;
         Map<String, String> argMap = getTestConfig();
         argMap.put(Config.OPERATION, OperationInfo.extract.name());
-        argMap.put(ProcessRunner.DYNABEAN_ID, processName);
+        argMap.put(Config.PROCESS_NAME, processName);
         argMap.put(Config.DAO_NAME, op.name() + "Account");
         argMap.put(Config.OUTPUT_SUCCESS, new File(getTestStatusDir(), baseName + op.name() + "Success.csv")
         .getAbsolutePath());

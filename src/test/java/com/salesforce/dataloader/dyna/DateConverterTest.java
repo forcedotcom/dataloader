@@ -28,9 +28,8 @@ package com.salesforce.dataloader.dyna;
 import org.apache.commons.beanutils.ConversionException;
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.dao.EmptyResultDataAccessException;
 
-import com.salesforce.dataloader.process.DataLoaderRunner;
+import com.salesforce.dataloader.config.Config;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -658,7 +657,7 @@ public class DateConverterTest {
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(22, result.get(Calendar.DAY_OF_MONTH));
 
-        DataLoaderRunner.setUseGMTForDateFieldValue(true);
+        Config.setUseGMTForDateFieldValue(true);
         AsianTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("Asia/Tokyo"), false);
         USTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("America/Los_Angeles"), false);
         result = (Calendar) USTZDateOnlyConverter.convert(null, "6/22/2012");
@@ -696,7 +695,7 @@ public class DateConverterTest {
         assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
         assertEquals(TimeZone.getTimeZone("GMT"), result.getTimeZone());
         
-        DataLoaderRunner.setUseGMTForDateFieldValue(false);
+        Config.setUseGMTForDateFieldValue(false);
         AsianTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("Asia/Tokyo"), false);
         USTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("America/Los_Angeles"), false);
 

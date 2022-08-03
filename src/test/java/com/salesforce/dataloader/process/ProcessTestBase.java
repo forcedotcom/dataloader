@@ -714,10 +714,23 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     
     protected ProcessRunner runBatchProcess(Map<String, String> argMap) {
         if (argMap == null) argMap = getTestConfig();
-        argMap.put(ProcessRunner.PROCESS_THREAD_NAME, this.baseName);
+        argMap.put(Config.PROCESS_THREAD_NAME, this.baseName);
         argMap.put(Config.CLI_OPTION_READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
+
+        // emulate invocation through process.bat script
+        String[] args = new String[argMap.size()+1];
+        args[0] = getTestConfDir();
+        int i = 1;
+        if (argMap.containsKey(Config.PROCESS_NAME)) {
+            args[i++] = argMap.get(Config.PROCESS_NAME);
+            argMap.remove(Config.PROCESS_NAME);
+        }
+        for (Map.Entry<String, String> entry: argMap.entrySet())
+        {
+            args[i++] = entry.getKey() + "=" + entry.getValue();
+        }
         final TestProgressMontitor monitor = new TestProgressMontitor();        
-        return ProcessRunner.runBatchMode(argMap, monitor);
+        return ProcessRunner.runBatchMode(args, monitor);
     }
 
     protected Controller runProcess(Map<String, String> argMap, boolean expectProcessSuccess, String failMessage,
