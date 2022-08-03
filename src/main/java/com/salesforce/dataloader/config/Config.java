@@ -269,6 +269,9 @@ public class Config {
     //
     // process configuration (action parameters)
     //
+    // process.name is used to load the DynaBean from process-conf.xml file 
+    // with the same id as the value of process.name property.
+    public static final String PROCESS_NAME = "process.name";
     public static final String OPERATION = "process.operation"; //$NON-NLS-1$
     public static final String MAPPING_FILE = "process.mappingFile"; //$NON-NLS-1$
     public static final String EURO_DATES = "process.useEuropeanDates"; //$NON-NLS-1$
@@ -284,6 +287,7 @@ public class Config {
     public static final String LOAD_ROW_TO_START_AT = "process.loadRowToStartAt"; //$NON-NLS-1$
     public static final String INITIAL_LAST_RUN_DATE = "process.initialLastRunDate";
     public static final String ENCRYPTION_KEY_FILE = "process.encryptionKeyFile"; //$NON-NLS-1$
+    public static final String PROCESS_THREAD_NAME = "process.thread.name";
 
     // data access configuration (e.g., for CSV file, database, etc).
     public static final String DAO_TYPE = "dataAccess.type"; //$NON-NLS-1$
@@ -408,9 +412,30 @@ public class Config {
             DAO_TYPE,
             ENTITY,
             OPERATION,
-            DEBUG_MESSAGES_FILE
+            DEBUG_MESSAGES_FILE,
+            PROCESS_THREAD_NAME
     };
     
+    private static boolean useGMTForDateFieldValue;
+    public static boolean isUseGMTForDateFieldValue() {
+        return useGMTForDateFieldValue;
+    }
+    
+    public static void initializeStaticVariables(Map<String, String> argMap) {
+        setUseGMTForDateFieldValue(argMap);
+    }
+    
+    private static void setUseGMTForDateFieldValue(Map<String, String> argMap) {
+        if (argMap.containsKey(Config.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE)) {
+            if ("true".equalsIgnoreCase(argMap.get(Config.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE))) {
+                useGMTForDateFieldValue = true;
+            }
+        }
+    }
+    
+    public static void setUseGMTForDateFieldValue(boolean val) {
+        useGMTForDateFieldValue = val;
+    }
     /**
      * Creates an empty config that loads from and saves to the a file. <p> Use the methods
      * <code>load()</code> and <code>save()</code> to load and store this preference store. </p>

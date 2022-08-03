@@ -65,10 +65,10 @@ public abstract class ConfigTestBase extends TestBase {
         }
     }
 
-    private final Map<String, String> testConfig;
+    private final Map<String, String> baseConfig;
 
     protected Map<String, String> getTestConfig() {
-        final HashMap<String, String> configBase = new HashMap<String, String>(this.testConfig);
+        final HashMap<String, String> configBase = new HashMap<String, String>(this.baseConfig);
         configBase.put(Config.LAST_RUN_OUTPUT_DIR, getTestStatusDir());
         for (TestProperties prop : getDefaultTestPropertiesSet()) {
             prop.putConfigSetting(configBase);
@@ -91,7 +91,7 @@ public abstract class ConfigTestBase extends TestBase {
         if (testConfig == null) {
             testConfig = new HashMap<String, String>();
         }
-        this.testConfig = testConfig;
+        this.baseConfig = testConfig;
     }
 
     @Before

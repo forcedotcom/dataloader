@@ -47,7 +47,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.logging.log4j.LogManager;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -55,33 +54,16 @@ import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.config.Config;
 
 public class DataLoaderRunner extends Thread {
-
     private static final String LOCAL_SWT_DIR = "./target/";
     private static final String PATH_SEPARATOR = System.getProperty("path.separator");
     private static final String FILE_SEPARATOR = System.getProperty("file.separator");
-    private static boolean useGMTForDateFieldValue = false;
     private static Map<String, String> argNameValuePair;
     private static Logger logger;
 
-    private static boolean isBatchMode() {        
-        return argNameValuePair.containsKey(Config.CLI_OPTION_RUN_MODE) ?
-                Config.RUN_MODE_BATCH_VAL.equalsIgnoreCase(argNameValuePair.get(Config.CLI_OPTION_RUN_MODE)) : false;
-    }
-    
-    public static boolean doUseGMTForDateFieldValue() {
-        return useGMTForDateFieldValue;
-    }
-    
-    private static void setUseGMTForDateFieldValue() {
-        if (argNameValuePair.containsKey(Config.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE)) {
-            if ("true".equalsIgnoreCase(argNameValuePair.get(Config.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE))) {
-                useGMTForDateFieldValue = true;
-            }
-        }
-    }
-    
-    public static void setUseGMTForDateFieldValue(boolean doUseGMT) {
-        useGMTForDateFieldValue = doUseGMT;
+    private static boolean isBatchMode(String[] args) {   
+        Map<String, String> argMap = Controller.getArgMapFromArgArray(args);
+        return argMap.containsKey(Config.CLI_OPTION_RUN_MODE) ?
+                Config.RUN_MODE_BATCH_VAL.equalsIgnoreCase(argMap.get(Config.CLI_OPTION_RUN_MODE)) : false;
     }
 
     public void run() {
@@ -90,15 +72,17 @@ public class DataLoaderRunner extends Thread {
     }
 
     public static void main(String[] args) {
-        argNameValuePair = Controller.getArgMapFromArgArray(args);
         Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
-        setUseGMTForDateFieldValue();
-        if (isBatchMode()) {
-            ProcessRunner.runBatchMode(args);
+        if (isBatchMode(args)) {
+            try {
+                ProcessRunner.runBatchMode(args, null);
+            } catch (Throwable t) {
+                ProcessRunner.logErrorAndExitProcess("Unable to run process", t);
+            }
         } else {
             /* Run in the UI mode, get the controller instance with batchMode == false */
-            Controller.initializeLog(argNameValuePair);
-            logger = LogManager.getLogger(DataLoaderRunner.class);
+            argNameValuePair = Controller.getArgMapFromArgArray(args);
+            logger = Controller.getLogger(argNameValuePair, DataLoaderRunner.class);
             if (argNameValuePair.containsKey(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
                 && "true".equalsIgnoreCase(argNameValuePair.get(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
                 try {

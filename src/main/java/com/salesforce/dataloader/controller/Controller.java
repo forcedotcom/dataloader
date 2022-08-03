@@ -84,7 +84,7 @@ import javax.xml.parsers.FactoryConfigurationError;
  */
 public class Controller {
 
-    private static boolean isLogInitialized = false; // make sure log is initialized only once
+    private static boolean isInitialized = false; // make sure Controller is initialized only once
     private static boolean areStaticVarsInitialized = false; // make sure log is initialized only once
 
     /**
@@ -119,7 +119,7 @@ public class Controller {
 
     private Controller(String lastRunFilePrefix, Map<String, String> argMap) throws ControllerInitializationException {
         // if name is passed to controller, use it to create a unique run file name
-        initializeLog(argMap);
+        initializeStaticVariables(argMap);
         try {
             this.config = Config.getInstance(lastRunFilePrefix, argMap);
         } catch (Exception e) {
@@ -139,7 +139,7 @@ public class Controller {
             //Process name=value config setting
             Arrays.stream(argArray).forEach(arg ->
             {
-                String[] nameValuePair = arg.split("=");
+                String[] nameValuePair = arg.split("=", 2);
                 if (nameValuePair.length == 2)
                     argMap.put(nameValuePair[0], nameValuePair[1]);
             });
@@ -147,7 +147,7 @@ public class Controller {
         return argMap;
     }
 
-    private static synchronized void initStaticVariable() throws ControllerInitializationException {
+    private static synchronized void initStaticVariables() throws ControllerInitializationException {
         if (areStaticVarsInitialized) {
             return;
         }
@@ -329,7 +329,7 @@ public class Controller {
     }
 
     public static synchronized Controller getInstance(String lastRunFilePrefix, Map<String, String> argMap) throws ControllerInitializationException {
-        initializeLog(argMap);
+        initializeStaticVariables(argMap);
         return new Controller(lastRunFilePrefix, argMap);
     }
     
@@ -402,17 +402,18 @@ public class Controller {
         logger.info(Messages.getString("Controller.logInit")); //$NON-NLS-1$
     }
     
-    public synchronized static void initializeLog(Map<String, String> argMap) {
-        if (Controller.isLogInitialized) {
+    private synchronized static void initializeStaticVariables(Map<String, String> argMap) {
+        if (Controller.isInitialized) {
             return;
         }
         try {
-            initStaticVariable();
+            initStaticVariables();
         } catch (ControllerInitializationException ex) {
             System.out.println("Controller.initializeLog(): Unable to initialize Controller static vars: " + ex.getMessage());
             ex.printStackTrace();
         }
-        
+        Config.initializeStaticVariables(argMap);
+
         // Need to initialize the configurations directory before initializing logger
         // because the default log-conf.xml resides in the configuration directory.
         AppUtil.setConfigurationsDir(argMap);
@@ -423,8 +424,13 @@ public class Controller {
         } catch (FactoryConfigurationError e) {
             e.printStackTrace();
         } finally {
-            Controller.isLogInitialized = true;
+            Controller.isInitialized = true;
         }
+    }
+    
+    public static Logger getLogger(Map<String, String> argMap, Class<?> clazz) {
+        initializeStaticVariables(argMap);
+        return LogManager.getLogger(clazz);
     }
     
     public PartnerClient getPartnerClient() {

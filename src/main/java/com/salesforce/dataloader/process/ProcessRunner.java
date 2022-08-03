@@ -75,6 +75,7 @@ import org.apache.logging.log4j.LogManager;
 
 import org.springframework.beans.factory.InitializingBean;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,8 +85,6 @@ public class ProcessRunner implements InitializingBean {
     /**
      * Comment for <code>DYNABEAN_ID</code>
      */
-    public static final String DYNABEAN_ID = "process.name";
-    public static final String PROCESS_THREAD_NAME = "process.thread.name";
 
     //logger
     private static Logger logger;
@@ -115,7 +114,7 @@ public class ProcessRunner implements InitializingBean {
     protected ProcessRunner() {
     }
 
-    public synchronized void run(ILoaderProgress monitor) {
+    public synchronized void run(ILoaderProgress monitor) throws Exception {
         if (monitor == null) {
             monitor = NihilistProgressAdapter.get();
         }
@@ -182,8 +181,6 @@ public class ProcessRunner implements InitializingBean {
         } catch (ApiFault e) {
             // this is necessary, because the ConnectionException doesn't display the login fault message
             throw new RuntimeException(e.getExceptionMessage(), e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         } finally {
             // make sure all is closed and saved
             if (controller.getDao() != null) controller.getDao().close();
@@ -240,7 +237,7 @@ public class ProcessRunner implements InitializingBean {
         }
     }
 
-    private static void logErrorAndExitProcess(String message, Throwable err) {
+    public static void logErrorAndExitProcess(String message, Throwable err) {
         if (logger == null) {
             System.err.println(message);
         } else {
@@ -249,7 +246,7 @@ public class ProcessRunner implements InitializingBean {
         System.exit(-1);
     }
     
-    public static void runBatchMode(String[] args) {
+    public static ProcessRunner runBatchMode(String[] args, ILoaderProgress monitor) throws UnsupportedOperationException {
         Map<String,String> argMap = Controller.getArgMapFromArgArray(args);
         if (!argMap.containsKey(Config.CLI_OPTION_CONFIG_DIR_PROP) && args.length < 2) {
             // config directory must be specified in the first argument
@@ -274,32 +271,30 @@ public class ProcessRunner implements InitializingBean {
         if (!argMap.containsKey(Config.CLI_OPTION_CONFIG_DIR_PROP)) {
             argMap.put(Config.CLI_OPTION_CONFIG_DIR_PROP, args[0]);
         }
-        
-        // Instantiate logger once config directory is set
-        Controller.initializeLog(argMap);
-        logger = LogManager.getLogger(ProcessRunner.class);
-        if (!argMap.containsKey(DYNABEAN_ID) && args.length > 2) {
+        logger = Controller.getLogger(argMap, ProcessRunner.class);
+        if (!argMap.containsKey(Config.PROCESS_NAME) 
+                && args.length > 2
+                && !args[1].contains("=")) {
             // second argument must be process name
-            argMap.put(DYNABEAN_ID, args[1]);
+            argMap.put(Config.PROCESS_NAME, args[1]);
         }
-        try {
-            runBatchMode(argMap, null);
-        } catch (Throwable t) {
-            logErrorAndExitProcess("Unable to run process", t);
-        }
-    }
-    
-    public static ProcessRunner runBatchMode(Map<String, String> argMap, ILoaderProgress monitor) {
         ProcessRunner runner = null;
         try {
             // create the process
             runner = ProcessRunner.getInstance(argMap);
-            if (runner == null) logErrorAndExitProcess("Process runner is null", new NullPointerException());
+            if (runner == null) {
+                logErrorAndExitProcess("Process runner is null", new NullPointerException());
+            }
+            // run the process
+            runner.run(monitor);
         } catch (Throwable t) {
-            logErrorAndExitProcess("Failed to create process", t);
+            if (t.getClass().equals(UnsupportedOperationException.class)) {
+                // this is done to allow integration tests to continue
+                // after a negative test of an operation results in an exception
+                throw (UnsupportedOperationException)t;
+            }
+            logErrorAndExitProcess("Unable to run process", t);
         }
-        // run the process
-        runner.run(monitor);
         return runner;
     }
 
@@ -317,22 +312,21 @@ public class ProcessRunner implements InitializingBean {
      */
     private static synchronized ProcessRunner getInstance(Map<String, String> argMap) throws ProcessInitializationException {
         logger.info(Messages.getString("Process.initializingEngine")); //$NON-NLS-1$
-        String dynaBeanID = argMap.get(DYNABEAN_ID);
+        String dynaBeanID = argMap.get(Config.PROCESS_NAME);
         ProcessRunner runner;
         if (dynaBeanID == null || dynaBeanID.isEmpty()) {
-            // operation and other process params are specified through config.properties
-            logger.info(DYNABEAN_ID 
+            // operation and other process params are specified in config.properties
+            logger.info(Config.PROCESS_NAME 
                     + "is not specified in the command line. Loading the process properties from config.properties.");
             runner = new ProcessRunner();
             
-            if (argMap.containsKey(PROCESS_THREAD_NAME)) {
-                runner.setName(argMap.get(PROCESS_THREAD_NAME));
-                argMap.remove(PROCESS_THREAD_NAME); // avoid this option from being considered as a property
+            if (argMap.containsKey(Config.PROCESS_THREAD_NAME)) {
+                runner.setName(argMap.get(Config.PROCESS_THREAD_NAME));
             }
         } else {
             // process name specified in the command line arg. 
             // Load its DynaBean through process-conf.xml
-            logger.info(DYNABEAN_ID 
+            logger.info(Config.PROCESS_NAME 
                         + "is specified in the command line. Loading DynaBean with id " 
                         + dynaBeanID 
                         + " from process-conf.xml located in directory "

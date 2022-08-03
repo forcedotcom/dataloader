@@ -153,7 +153,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
             Assert.fail("hard delete should not succeed if bulk api is turned off");
         } catch (Exception e) {
             final String msg = e.getMessage();
-            final String expected = "java.lang.UnsupportedOperationException: Error instantiating operation hard_delete: could not instantiate class: null.";
+            final String expected = "Error instantiating operation hard_delete: could not instantiate class: null.";
             assertEquals("Wrong exception thrown when attempting to do hard delete with bulk api off : ", expected, msg);
         }
 
