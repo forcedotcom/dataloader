@@ -1,13 +1,6 @@
 @echo off
 setlocal
 
-set DATALOADER_VERSION=@@FULL_VERSION@@
-for /f "tokens=1 delims=." %%a in ("%DATALOADER_VERSION%") do (
-  set DATALOADER_SHORT_VERSION=%%a
-)
-set DATALOADER_UBER_JAR_NAME=dataloader-%DATALOADER_VERSION%-uber.jar
-set MIN_JAVA_VERSION=@@MIN_JAVA_VERSION@@
-
 CALL "%~dp0util\util.bat" showBanner
 
 echo Data Loader installation requires you to provide an installation directory to create a version-specific subdirectory for the installation artifacts.
