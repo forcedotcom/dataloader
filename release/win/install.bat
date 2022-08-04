@@ -21,30 +21,31 @@ if "%DIR_NAME:~1,1%" == ":" (
     )
 )
 
-IF EXIST %INSTALLATION_DIR% (
-    goto ExistingDir
-) ELSE (
-    goto CopyFiles
+IF EXIST "%INSTALLATION_DIR%" (
+    call :deleteExistingDir
 )
+if "%ERRORLEVEL%" == "0" (
+    call :copyFilesToInstallationDir
+)
+goto :exit
 
-:ExistingDir
+:deleteExistingDir
     echo.
     echo Do you want to overwrite previously installed versions of Data Loader v%DATALOADER_VERSION% and configurations in '%INSTALLATION_DIR%'?
     set /p DELETE_EXISTING_DIR=If not, installation will quit and you can restart installation using another directory.[Yes/No]
-    if /I "%DELETE_EXISTING_DIR%"=="Y" goto DeleteDirYes
-    if /I "%DELETE_EXISTING_DIR%"=="Yes" goto DeleteDirYes
-    if /I "%DELETE_EXISTING_DIR%"=="N" goto DeleteDirNo
-    if /I "%DELETE_EXISTING_DIR%"=="No" goto DeleteDirNo
+    if /I "%DELETE_EXISTING_DIR%"=="Y" goto :doDeleteExistingDir
+    if /I "%DELETE_EXISTING_DIR%"=="Yes" goto :doDeleteExistingDir
+    if /I "%DELETE_EXISTING_DIR%"=="N" EXIT /b 1
+    if /I "%DELETE_EXISTING_DIR%"=="No" EXIT /b 1
     echo Type Yes or No.
-    goto ExistingDir
-:DeleteDirYes
+    goto :deleteExistingDir
+    
+:doDeleteExistingDir
     echo Deleting existing Data Loader v%DATALOADER_VERSION%...
     rd /s /q "%INSTALLATION_DIR%"
-    goto CopyFiles
-:DeleteDirNo
-    goto :exit
+    EXIT /b 0
 
-:CopyFiles
+:copyFilesToInstallationDir
     echo.
     set "SRC_DIR=%~dp0"
     IF %SRC_DIR:~-1%==\ SET "SRC_DIR=%SRC_DIR:~0,-1%"
@@ -52,44 +53,50 @@ IF EXIST %INSTALLATION_DIR% (
     xcopy "%SRC_DIR%" "%INSTALLATION_DIR%" /e /i
     del "%INSTALLATION_DIR%\install.bat" /q
     echo Your Data Loader v%DATALOADER_VERSION% is created in '%INSTALLATION_DIR%'
+    CALL :promptForShortcut StartMenu
+    CALL :promptForShortcut Desktop
+    EXIT /b 0
 
-:CreateStartMenuShortCut
-    echo.
-    set /p REPLY=Would you like to create a start menu shortcut? [Yes/No]
-    if /I "%REPLY%"=="Y" goto StartMenuShortCutYes
-    if /I "%REPLY%"=="Yes" goto StartMenuShortCutYes
-    if /I "%REPLY%"=="N" goto StartMenuShortCutNo
-    if /I "%REPLY%"=="No" goto StartMenuShortCutNo
-    echo Type Yes or No.
-    goto CreateStartMenuShortCut
-:StartMenuShortCutNo
-    goto CreateDesktopShortcut
-:StartMenuShortCutYes
+REM Note for label renaming - promptForShortcut sets "yesDestination" var based on naming convention.
+:createStartMenuShortcut
     IF NOT EXIST "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Salesforce\" (
         mkdir "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Salesforce"
     )
     powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut(""""$Home\Desktop\Dataloader.lnk""""); $Shortcut.WorkingDirectory = """"$env:INSTALLATION_DIR""""; $Shortcut.TargetPath = """"$env:INSTALLATION_DIR\dataloader.bat""""; $Shortcut.IconLocation = """"$env:INSTALLATION_DIR\dataloader.ico""""; $Shortcut.WindowStyle=7; $Shortcut.Save()"
     move "%USERPROFILE%\Desktop\Dataloader.lnk" "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Salesforce\Dataloader %DATALOADER_VERSION%.lnk" >nul
+    EXIT /b 0
 
-:CreateDesktopShortcut
-    echo.
-    set /p REPLY=Would you like to create a desktop icon? [Yes/No]
-    if /I "%REPLY%"=="Y" goto DesktopShortCutYes
-    if /I "%REPLY%"=="Yes" goto DesktopShortCutYes
-    if /I "%REPLY%"=="N" goto DesktopShortCutNo
-    if /I "%REPLY%"=="No" goto DesktopShortCutNo
-    echo Type Yes or No.
-    goto CreateDesktopShortcut
-:DesktopShortCutNo
-    goto :exit
-:DesktopShortCutYes
+REM Note for label renaming - promptForShortcut sets "yesDestination" var based on naming convention.
+:createDesktopShortcut
     powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut(""""$Home\Desktop\Dataloader.lnk""""); $Shortcut.WorkingDirectory = """"$env:INSTALLATION_DIR""""; $Shortcut.TargetPath = """"$env:INSTALLATION_DIR\dataloader.bat""""; $Shortcut.IconLocation = """"$env:INSTALLATION_DIR\dataloader.ico""""; $Shortcut.WindowStyle=7; $Shortcut.Save()"
     for /f "usebackq tokens=3*" %%D IN (`reg query "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop`) do set DESKTOP_DIR=%%D
     move "%USERPROFILE%\Desktop\Dataloader.lnk" "%DESKTOP_DIR%\Dataloader %DATALOADER_VERSION%.lnk" >nul
-    goto :exit
+    EXIT /b 0
     
+:promptForShortcut
+REM Usage:
+REM CALL :promptForShortcut <desktop | startMenu>
+    set createLabel=create%~1Shortcut
+    set desktopShortcutPrompt="Would you like to create a desktop icon? [Yes/No]"
+    set startMenuShortcutPrompt="Would you like to create a start menu shortcut? [Yes/No]"
+    set prompt=%startMenuShortcutPrompt%
+    IF /I "%~1" == "desktop" (
+        set prompt=%desktopShortcutPrompt%
+    )
+    
+:startPrompt
+    echo.
+    SET /p REPLY=%prompt%
+    if /I "%REPLY%"=="Y" goto :%createLabel%
+    if /I "%REPLY%"=="Yes" goto :%createLabel%
+    if /I "%REPLY%"=="N" EXIT /b 0
+    if /I "%REPLY%"=="No" EXIT /b 0
+    echo Type Yes or No.
+    goto :startPrompt
+
 :exit
     echo.
     echo Data Loader installation is quitting.
     endlocal
     PAUSE
+    EXIT /b %ERRORLEVEL%
