@@ -8,39 +8,23 @@ for /f "tokens=1 delims=." %%a in ("%DATALOADER_VERSION%") do (
 set DATALOADER_UBER_JAR_NAME=dataloader-%DATALOADER_VERSION%-uber.jar
 set MIN_JAVA_VERSION=@@MIN_JAVA_VERSION@@
 
-echo.
-echo *************************************************************************
-echo **            ___  ____ ___ ____   _    ____ ____ ___  ____ ____       **
-echo **            ^|  \ ^|__^|  ^|  ^|__^|   ^|    ^|  ^| ^|__^| ^|  \ ^|___ ^|__/       **
-echo **            ^|__/ ^|  ^|  ^|  ^|  ^|   ^|___ ^|__^| ^|  ^| ^|__/ ^|___ ^|  \       **
-echo **                                                                     **
-echo **  Data Loader v%DATALOADER_SHORT_VERSION% is a Salesforce supported Open Source project to   **
-echo **  help you import data to and export data from your Salesforce org.  **
-echo **  It requires Java JRE %MIN_JAVA_VERSION% or later to run.                           **
-echo **                                                                     **
-echo **  Github Project Url:                                                **
-echo **       https://github.com/forcedotcom/dataloader                     **
-echo **  Salesforce Documentation:                                          **
-echo **       https://help.salesforce.com/articleView?id=data_loader.htm    **
-echo **                                                                     **
-echo *************************************************************************
-echo.
+CALL "%~dp0util\util.bat" showBanner
 
 echo Data Loader installation requires you to provide an installation directory to create a version-specific subdirectory for the installation artifacts.
 echo It uses '%USERPROFILE%\^<relative path^>' as the installation directory if you provide a relative path for the installation directory.
 echo.
-set /p DIR_NAME=Provide the installation directory [default: dataloader] : || set DIR_NAME=dataloader
+set /p "DIR_NAME=Provide the installation directory [default: dataloader]" : || set DIR_NAME=dataloader
 
 if "%DIR_NAME:~1,1%" == ":" (
     REM absolute path specified
-    set INSTALLATION_DIR=%DIR_NAME%\v%DATALOADER_VERSION%
+    set "INSTALLATION_DIR=%DIR_NAME%\v%DATALOADER_VERSION%"
 ) else (
     if "%DIR_NAME:~0,1%" == "\" (
         REM absolute path specified
-        set INSTALLATION_DIR=%DIR_NAME%\v%DATALOADER_VERSION%
+        set "INSTALLATION_DIR=%DIR_NAME%\v%DATALOADER_VERSION%"
     ) else (
         REM relative path specified
-        set INSTALLATION_DIR=%USERPROFILE%\%DIR_NAME%\v%DATALOADER_VERSION%
+        set "INSTALLATION_DIR=%USERPROFILE%\%DIR_NAME%\v%DATALOADER_VERSION%"
     )
 )
 
@@ -69,12 +53,11 @@ IF EXIST %INSTALLATION_DIR% (
 
 :CopyFiles
     echo.
-    set SRC_DIR=%~dp0
-    IF %SRC_DIR:~-1%==\ SET SRC_DIR=%SRC_DIR:~0,-1%
+    set "SRC_DIR=%~dp0"
+    IF %SRC_DIR:~-1%==\ SET "SRC_DIR=%SRC_DIR:~0,-1%"
     echo Copying files from '%SRC_DIR%' to '%INSTALLATION_DIR%'  ...
     xcopy "%SRC_DIR%" "%INSTALLATION_DIR%" /e /i
     del "%INSTALLATION_DIR%\install.bat" /q
-    rmdir "%INSTALLATION_DIR%\META-INF" /s /q
     echo Your Data Loader v%DATALOADER_VERSION% is created in '%INSTALLATION_DIR%'
 
 :CreateStartMenuShortCut
