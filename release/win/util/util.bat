@@ -60,8 +60,8 @@ EXIT /b %ERRORLEVEL%
 
 :NoJavaErrorExit
     echo Did not find java command.
-    echo Either Java JRE %MIN_JAVA_VERSION% or later is not installed or PATH environment does not
-    echo include the folder containing java executable.
+    echo Java JRE %MIN_JAVA_VERSION% or later is not installed or DATALOADER_JAVA_HOME environment variable is not set.
+    echo.
     GOTO :CommonJavaErrorExit
 
 :JavaVersionErrorExit
@@ -71,8 +71,8 @@ EXIT /b %ERRORLEVEL%
 :CommonJavaErrorExit
     echo For example, download and install Zulu OpenJDK %MIN_JAVA_VERSION% or later JRE for Windows from here:
     echo    https://www.azul.com/downloads/zulu/zulu-windows/
-    echo After the installation, update PATH environment variable by
-    echo    - removing the path to older JRE's bin folder from PATH environment variable
-    echo    - adding ^<full path to the JRE base folder^>\bin to PATH environment variable
-    PAUSE
+    echo.
+    echo After the installation, set DATALOADER_JAVA_HOME environment variable to the value
+    echo ^<full path to the JRE installation folder^>
+    echo.
     EXIT /b -1

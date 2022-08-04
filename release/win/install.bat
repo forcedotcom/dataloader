@@ -42,7 +42,7 @@ IF EXIST %INSTALLATION_DIR% (
     rd /s /q "%INSTALLATION_DIR%"
     goto CopyFiles
 :DeleteDirNo
-    goto Exit
+    goto :exit
 
 :CopyFiles
     echo.
@@ -81,13 +81,14 @@ IF EXIST %INSTALLATION_DIR% (
     echo Type Yes or No.
     goto CreateDesktopShortcut
 :DesktopShortCutNo
-    goto Exit
+    goto :exit
 :DesktopShortCutYes
     powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut(""""$Home\Desktop\Dataloader.lnk""""); $Shortcut.WorkingDirectory = """"$env:INSTALLATION_DIR""""; $Shortcut.TargetPath = """"$env:INSTALLATION_DIR\dataloader.bat""""; $Shortcut.IconLocation = """"$env:INSTALLATION_DIR\dataloader.ico""""; $Shortcut.WindowStyle=7; $Shortcut.Save()"
     for /f "usebackq tokens=3*" %%D IN (`reg query "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop`) do set DESKTOP_DIR=%%D
     move "%USERPROFILE%\Desktop\Dataloader.lnk" "%DESKTOP_DIR%\Dataloader %DATALOADER_VERSION%.lnk" >nul
-
-:Exit
+    goto :exit
+    
+:exit
     echo.
     echo Data Loader installation is quitting.
     endlocal
