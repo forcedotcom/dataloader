@@ -26,19 +26,16 @@ IF EXIST "%INSTALLATION_DIR%" (
 )
 if "%ERRORLEVEL%" == "0" (
     call :copyFilesToInstallationDir
+) ELSE (
+    echo.
+    echo Did not overwrite currently installed data loader v%DATALOADER_VERSION%. You can re-run installation using another directory.
 )
 goto :exit
 
 :deleteExistingDir
-    echo.
-    echo Do you want to overwrite previously installed versions of Data Loader v%DATALOADER_VERSION% and configurations in '%INSTALLATION_DIR%'?
-    set /p DELETE_EXISTING_DIR=If not, installation will quit and you can restart installation using another directory.[Yes/No]
-    if /I "%DELETE_EXISTING_DIR%"=="Y" goto :doDeleteExistingDir
-    if /I "%DELETE_EXISTING_DIR%"=="Yes" goto :doDeleteExistingDir
-    if /I "%DELETE_EXISTING_DIR%"=="N" EXIT /b 1
-    if /I "%DELETE_EXISTING_DIR%"=="No" EXIT /b 1
-    echo Type Yes or No.
-    goto :deleteExistingDir
+    set prompt="Do you want to overwrite currently installed Data Loader v%DATALOADER_VERSION% and its configuration in '%INSTALLATION_DIR%'?[Yes/No]"
+    CALL :promptAndExecuteOperation %prompt% doDeleteExistingDir 1
+    EXIT /b %ERRORLEVEL%
     
 :doDeleteExistingDir
     echo Deleting existing Data Loader v%DATALOADER_VERSION%...
@@ -83,16 +80,19 @@ REM CALL :promptForShortcut <desktop | startMenu>
     IF /I "%~1" == "desktop" (
         set prompt=%desktopShortcutPrompt%
     )
+    CALL :promptAndExecuteOperation %prompt% %createLabel% 0
+    EXIT /b %ERRORLEVEL%
     
-:startPrompt
+:promptAndExecuteOperation
     echo.
-    SET /p REPLY=%prompt%
-    if /I "%REPLY%"=="Y" goto :%createLabel%
-    if /I "%REPLY%"=="Yes" goto :%createLabel%
-    if /I "%REPLY%"=="N" EXIT /b 0
-    if /I "%REPLY%"=="No" EXIT /b 0
+    SET /p REPLY=%~1
+    if /I "%REPLY%"=="Y" goto :%~2
+    if /I "%REPLY%"=="Yes" goto :%~2
+    if /I "%REPLY%"=="N" EXIT /b %~3
+    if /I "%REPLY%"=="No" EXIT /b %~3
     echo Type Yes or No.
-    goto :startPrompt
+    goto :promptAndExecuteOperation
+    EXIT /b %ERRORLEVEL%
 
 :exit
     echo.
