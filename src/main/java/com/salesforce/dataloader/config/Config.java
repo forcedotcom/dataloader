@@ -394,6 +394,7 @@ public class Config {
     public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
     
     public static final String SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV = "process.bulk.saveServerLoadAndRawResultsInCSV";
+    public static final String PROCESS_BULK_CACHE_DATA_FROM_DAO = "process.bulk.cacheDataFromDao";
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
 
     // Following properties are read-only, i.e. they are not overridden during save() to config.properties
@@ -413,7 +414,9 @@ public class Config {
             ENTITY,
             OPERATION,
             DEBUG_MESSAGES_FILE,
-            PROCESS_THREAD_NAME
+            PROCESS_THREAD_NAME,
+            PROCESS_BULK_CACHE_DATA_FROM_DAO,
+            SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV
     };
     
     private static boolean useGMTForDateFieldValue;
@@ -574,6 +577,7 @@ public class Config {
         setDefaultValue(LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
         setDefaultValue(Config.CLI_OPTION_RUN_MODE, Config.RUN_MODE_UI_VAL);
         setDefaultValue(SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV, false);
+        setDefaultValue(PROCESS_BULK_CACHE_DATA_FROM_DAO, false);
     }
 
     /**

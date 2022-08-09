@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -46,7 +47,6 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dyna.DateTimeConverter;
-import com.salesforce.dataloader.dyna.DateOnlyConverter;
 import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.sobject.SObject;
 
@@ -73,8 +73,10 @@ public class CsvProcessTest extends ProcessTestBase {
         return Arrays.asList(
                 TestVariant.defaultSettings(),
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED),
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_SERIAL_MODE_ENABLED),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED));
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED)
+                );
     }
 
     /**

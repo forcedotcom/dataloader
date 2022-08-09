@@ -66,6 +66,9 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     protected final DynaProperty[] dynaProps;
 
     private final int batchSize;
+    protected List<Row> uploadedRowsFromDAO = new ArrayList<Row>();
+    protected ArrayList<Integer> uploadedRowToDAORowList = new ArrayList<Integer>();
+    private int processedDAORowCounter = 0;
 
     protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
@@ -100,9 +103,12 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     }
 
     @Override
-    public final boolean visit(Row row) throws OperationException, DataAccessObjectException,
+    public boolean visit(Row row) throws OperationException, DataAccessObjectException,
     ConnectionException {
         initLoadRateCalculator();
+        if (controller.getConfig().getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
+            this.uploadedRowsFromDAO.add(row);
+        }
         // the result are sforce fields mapped to data
         Row sforceDataRow = getMapper().mapData(row);
         try {
@@ -117,6 +123,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
                 }
             }
             dynaArray.add(dynaBean);
+            this.uploadedRowToDAORowList.add(this.processedDAORowCounter);
         } catch (ConversionException | IllegalAccessException conve) {
             String errMsg = Messages.getMessage("Visitor", "conversionErrorMsg", conve.getMessage());
             getLogger().error(errMsg, conve);
@@ -130,16 +137,22 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         } catch (NoSuchMethodException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } finally {
+            this.processedDAORowCounter++;
         }
 
         // add the data for writing to the result files
         // must do this after conversion.
         dataArray.add(row);
         // load the batch
-        if (dynaArray.size() >= this.batchSize) {
+        if (dynaArray.size() >= this.batchSize || maxBatchBytesReached(dynaArray)) {
             loadBatch();
         }
         return true;
+    }
+    
+    protected boolean maxBatchBytesReached(List<DynaBean> dynaArray) {
+        return false;
     }
 
     /**
