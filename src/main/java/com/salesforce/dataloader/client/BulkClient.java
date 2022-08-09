@@ -79,7 +79,7 @@ public class BulkClient extends ClientBase<BulkConnection> {
         return this.connectorConfig;
     }
     
-    protected static String getServicePathForAPIVersion(String apiVersionStr) {
+    public static String getServicePathForAPIVersion(String apiVersionStr) {
         return ClientBase.getServicePathForAPIVersion(BULKV1_ENDPOINT_PATH, apiVersionStr);
     }
 

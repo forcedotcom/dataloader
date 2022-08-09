@@ -794,7 +794,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         return cc;
     }
     
-    protected static String getServicePathForAPIVersion(String apiVersionStr) {
+    public static String getServicePathForAPIVersion(String apiVersionStr) {
         // Auth endpoint is a SOAP service
         return ClientBase.getServicePathForAPIVersion(DEFAULT_AUTH_ENDPOINT_URL.getPath(), apiVersionStr);
     }

@@ -212,12 +212,12 @@ public abstract class ClientBase<ClientType> {
         return cc;
     }
     
-    protected static String getCurrentAPIVersionInWSC() {
+    public static String getCurrentAPIVersionInWSC() {
         String[] connectURLArray = Connector.END_POINT.split("\\/");
         return connectURLArray[connectURLArray.length-1];
     }
     
-    protected static String getPreviousAPIVersionInWSC() {
+    public static String getPreviousAPIVersionInWSC() {
         String currentAPIVersion = getCurrentAPIVersionInWSC();
         String[] versionStrArray = currentAPIVersion.split("\\.");
         String currentMajorVerStr = versionStrArray[0];
