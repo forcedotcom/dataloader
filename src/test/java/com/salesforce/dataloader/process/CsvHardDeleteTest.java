@@ -64,6 +64,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
     public static Collection<Object[]> getTestParameters() {
         return Arrays.asList(
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED),
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED),
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_SERIAL_MODE_ENABLED));
     }

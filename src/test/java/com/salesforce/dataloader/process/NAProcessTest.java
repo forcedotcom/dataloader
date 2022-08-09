@@ -87,7 +87,8 @@ public class NAProcessTest extends ProcessTestBase {
     public static Collection<Object[]> getConfigGeneratorParams() {
         return Arrays.asList(
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED),
-                TestVariant.forSettings(TestSetting.BULK_API_DISABLED));
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED),
+               TestVariant.forSettings(TestSetting.BULK_API_DISABLED));
     }
 
     @Test

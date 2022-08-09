@@ -61,6 +61,7 @@ import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.LoadException;
 import com.salesforce.dataloader.exception.OperationException;
+import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.model.NACalendarValue;
 import com.salesforce.dataloader.model.NADateOnlyCalendarValue;
 import com.salesforce.dataloader.model.NATextValue;
@@ -90,7 +91,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private final boolean isDelete;
     private static final DateFormat DATE_FMT;
     private int batchCountForJob = 0;
-    
+
     static {
         DATE_FMT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         DATE_FMT.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -427,20 +428,29 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         	getBulkV2LoadJobResults();
         	return;
         }
-        final DataReader dataReader = resetDAO();
-
+        DataReader dataReader = null;
+        if (!controller.getConfig().getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
+            dataReader = resetDAO();
+        }
         // create a map of batch infos by batch id. Each batchinfo has the final processing state of the batch
         final Map<String, BatchInfo> batchInfoMap = createBatchInfoMap();
 
         // go through all the batches we sent to sfdc in the same order and process the batch results for
         // each one by looking them up in batchInfoMap
         this.batchCountForJob = 0;
+        int uploadedRowCount = 0;
         for (final BatchData clientBatchInfo : this.allBatchesInOrder) {
-            processResults(dataReader, batchInfoMap.get(clientBatchInfo.batchId), clientBatchInfo);
+            processResults(dataReader, 
+                    batchInfoMap.get(clientBatchInfo.batchId), clientBatchInfo, uploadedRowCount);
+            uploadedRowCount += clientBatchInfo.numRows;
         }
     }
+    
 
-    private void processResults(final DataReader dataReader, final BatchInfo batch, BatchData clientBatchInfo)
+    private int firstDataReaderRowForCurrentBatch = 0;
+
+    private void processResults(final DataReader dataReader, final BatchInfo batch, 
+            BatchData clientBatchInfo, final int firstRowInBatch)
             throws LoadException, DataAccessObjectException, AsyncApiException {
         // For Bulk API, we don't save any success or error until the end,
         // so we have to go through the original CSV from the beginning while
@@ -454,27 +464,23 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final String stateMessage = (batch.getState() == BatchStateEnum.Completed) ? null : batch.getStateMessage();
         final String errorMessage = stateMessage == null ? null : Messages.getMessage(getClass(), "batchError",
                 stateMessage);
-        
-        final int dataReaderRowNumBase = dataReader.getCurrentRowNumber();
-        int additionalRowsToReadFromDataReader = 0;
-        int rowCount = 0;
 
-        //Add rows that encountered processing error to the number of rows to be read
-        // from the DataReader
-        while (rowCount < clientBatchInfo.numRows) {
-            boolean conversionSuccessOfRow = isRowConversionSuccessful(dataReaderRowNumBase + rowCount + additionalRowsToReadFromDataReader);
-            if (conversionSuccessOfRow) {
-                rowCount++;
-            } else {
-                additionalRowsToReadFromDataReader++;
-            }
-        }
-        final int totalRowsToReadFromDataReader = clientBatchInfo.numRows + additionalRowsToReadFromDataReader;
+        int lastRowInCurrentBatch = firstRowInBatch + clientBatchInfo.numRows - 1;
+        int lastDataReaderRowForCurrentBatch = this.uploadedRowToDAORowList.get(lastRowInCurrentBatch);
         
-        final List<Row> rows = dataReader.readRowList(totalRowsToReadFromDataReader);
+        final int totalRowsInDaoInCurrentBatch = lastDataReaderRowForCurrentBatch - this.firstDataReaderRowForCurrentBatch + 1;
+        List<Row> rows;
+        if (controller.getConfig().getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
+            rows = new ArrayList<Row>();
+            for (int i=0; i<totalRowsInDaoInCurrentBatch; i++) {
+                rows.add(i, this.uploadedRowsFromDAO.get(i + this.firstDataReaderRowForCurrentBatch));
+            }
+        } else {
+            rows = dataReader.readRowList(totalRowsInDaoInCurrentBatch);
+        }
         if (batch.getState() == BatchStateEnum.Completed || batch.getNumberRecordsProcessed() > 0) {
             try {
-                processBatchResults(batch, errorMessage, batch.getState(), rows, dataReaderRowNumBase);
+                processBatchResults(batch, errorMessage, batch.getState(), rows, this.firstDataReaderRowForCurrentBatch);
             } catch (IOException e) {
                 throw new LoadException("IOException while reading batch results", e);
             }
@@ -483,10 +489,12 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 writeError(row, errorMessage);
             }
         }
+        // update to process the next batch
+        this.firstDataReaderRowForCurrentBatch = lastDataReaderRowForCurrentBatch + 1;
     }
 
-    private void processBatchResults(final BatchInfo batch, final String errorMessage, final BatchStateEnum state,
-            final List<Row> rows, final int dataReaderRowNumBase) throws DataAccessObjectException, IOException, AsyncApiException {
+    private void processBatchResults(final BatchInfo batch, final String errorMessage, 
+            final BatchStateEnum state, final List<Row> rows, final int firstDataReaderRowInBatch) throws DataAccessObjectException, IOException, AsyncApiException {
 
         // get the batch csv result stream from sfdc
         final CSVReader resultRdr = this.jobUtil.getBatchResults(batch.getId());
@@ -503,8 +511,16 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final int errIdx = hdrIndices.get(ERROR_RESULT_COL);
         hdrIndices = null;
         int dataReaderRowCount = 0;
+        int skippedRowsCount = 0;
+        try {
+            skippedRowsCount = controller.getConfig().getInt(Config.LOAD_ROW_TO_START_AT);
+        } catch (ParameterLoadException e) {
+            // @ignored
+        }
+
         for (final Row row : rows) {
-            boolean conversionSuccessOfRow = isRowConversionSuccessful(dataReaderRowNumBase + dataReaderRowCount++);
+            boolean conversionSuccessOfRow = isRowConversionSuccessful(skippedRowsCount 
+                        + this.firstDataReaderRowForCurrentBatch + dataReaderRowCount++);
             if (!conversionSuccessOfRow) {
                 continue; // this DAO row failed to convert and was not part of the batch sent to the server. Go to the next one
             }
