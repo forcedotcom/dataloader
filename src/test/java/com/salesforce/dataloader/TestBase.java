@@ -25,7 +25,9 @@
  */
 package com.salesforce.dataloader;
 
+import com.salesforce.dataloader.client.BulkClient;
 import com.salesforce.dataloader.client.ClientBase;
+import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
@@ -202,6 +204,7 @@ public abstract class TestBase {
         return controller;
     }
 
+    String apiVersionForTheSession = null;
     /**
      * @return PartnerConnection - binding to use to call the salesforce API
      */
@@ -209,24 +212,45 @@ public abstract class TestBase {
         if(binding != null) {
             return binding;
         }
-        ConnectorConfig bindingConfig = getWSCConfig();
-        logger.info("Getting binding for URL: " + bindingConfig.getAuthEndpoint());
-        binding = newConnection(bindingConfig, 0);
+        ConnectorConfig bindingConfig;
+        
+        if (this.apiVersionForTheSession == null) {
+            String apiVersionToTry = PartnerClient.getCurrentAPIVersionInWSC();
+            bindingConfig = getWSCConfig(apiVersionToTry);
+            logger.info("Getting binding for URL: " + bindingConfig.getAuthEndpoint());
+            binding = newConnection(bindingConfig, 0, 0);
+            if (binding == null) {
+                logger.error("Failed to invoke server APIs of version " + apiVersionToTry);
+                apiVersionToTry = PartnerClient.getPreviousAPIVersionInWSC();
+                bindingConfig = getWSCConfig(apiVersionToTry);
+                logger.info("Getting binding for URL: " + bindingConfig.getAuthEndpoint());
+                binding = newConnection(bindingConfig, 0, 0);
+                if (binding == null) {
+                    fail("Error logging in and getting a service binding for API version " + apiVersionToTry, new Exception());
+                }
+                this.apiVersionForTheSession = apiVersionToTry;
+            }
+        } else {
+            bindingConfig = getWSCConfig(this.apiVersionForTheSession);
+            logger.info("Getting binding for URL: " + bindingConfig.getAuthEndpoint());
+            binding = newConnection(bindingConfig, 0, 3);
+            if (binding == null) {
+                fail("Error logging in and getting a service binding for API version " + this.apiVersionForTheSession, new Exception());
+            }
+        }
         return binding;
     }
 
-    protected ConnectorConfig getWSCConfig() {
+    protected ConnectorConfig getWSCConfig(String apiVersionStr) {
         ConnectorConfig bindingConfig = new ConnectorConfig();
         bindingConfig.setUsername(getController().getConfig().getString(Config.USERNAME));
         bindingConfig.setPassword(getController().getConfig().getString(Config.PASSWORD));
         String configEndpoint = getController().getConfig().getString(Config.ENDPOINT);
         if (!configEndpoint.equals("")) { //$NON-NLS-1$
-            String serverPath;
             try {
-                serverPath = new URI(Connector.END_POINT).getPath();
-                bindingConfig.setAuthEndpoint(configEndpoint + serverPath);
-                bindingConfig.setServiceEndpoint(configEndpoint + serverPath);
-                bindingConfig.setRestEndpoint(configEndpoint + ClientBase.BULKV1_ENDPOINT_PATH);
+                bindingConfig.setAuthEndpoint(configEndpoint + PartnerClient.getServicePathForAPIVersion(apiVersionStr));
+                bindingConfig.setServiceEndpoint(configEndpoint + PartnerClient.getServicePathForAPIVersion(apiVersionStr)); // Partner SOAP service
+                bindingConfig.setRestEndpoint(configEndpoint + BulkClient.getServicePathForAPIVersion(apiVersionStr));  // REST service: Bulk v1       
                 bindingConfig.setManualLogin(true);
                 // set long timeout for tests with larger data sets
                 bindingConfig.setReadTimeout(5 * 60 * 1000);
@@ -242,7 +266,7 @@ public abstract class TestBase {
                         }
                     }
                 }
-            } catch (URISyntaxException e) {
+            } catch (Exception e) {
                 Assert.fail("Error parsing endpoint URL: " + Connector.END_POINT + ", error: " + e.getMessage());
             }
         }
@@ -254,7 +278,7 @@ public abstract class TestBase {
      * @return PartnerConnection
      * @throws com.sforce.ws.ConnectionException
      */
-    private PartnerConnection newConnection(ConnectorConfig bindingConfig, int retries) {
+    private PartnerConnection newConnection(ConnectorConfig bindingConfig, int retries, int maxRetries) {
         try {
             PartnerConnection newBinding = Connector.newConnection(bindingConfig);
 
@@ -274,11 +298,10 @@ public abstract class TestBase {
             return newBinding;
         } catch (ConnectionException e) {
             // in case of exception try to get a connection again
-            if (retries < 3) {
+            if (retries < maxRetries) {
                 retries++;
-                return newConnection(bindingConfig, retries);
+                return newConnection(bindingConfig, retries, maxRetries);
             }
-            fail("Error getting web service proxy binding", e);
         }
         // make eclipse happy
         return null;
