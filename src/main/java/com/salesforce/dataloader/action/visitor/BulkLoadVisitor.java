@@ -532,7 +532,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                         Messages.getMessage(getClass(), "logBatchInfoWithMessage", batch.getId(), state, errorMessage));
                 writeError(row, errorMessage);
             } else if (res == null || res.isEmpty()) {
-                String msg = Messages.getMessage(getClass(), "noResultForRow", batch.getId(), state);
+                String msg = Messages.getMessage(getClass(), "noResultForRow", row.toString(), batch.getId());
                 writeError(row, msg);
                 getLogger().warn(msg);
             } else {
