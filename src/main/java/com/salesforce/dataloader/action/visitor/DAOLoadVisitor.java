@@ -59,15 +59,14 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
     // this stores the dynabeans, which convert types correctly
     protected final List<DynaBean> dynaArray;
-    protected final List<Row> dataArray;
     private HashMap<Integer, Boolean> rowConversionFailureMap;
 
     protected final BasicDynaClass dynaClass;
     protected final DynaProperty[] dynaProps;
 
     private final int batchSize;
-    protected List<Row> uploadedRowsFromDAO = new ArrayList<Row>();
-    protected ArrayList<Integer> uploadedRowToDAORowList = new ArrayList<Integer>();
+    protected List<Row> daoRowList = new ArrayList<Row>();
+    protected ArrayList<Integer> batchRowToDAORowList = new ArrayList<Integer>();
     private int processedDAORowCounter = 0;
 
     protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
@@ -77,7 +76,6 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         this.columnNames = ((DataReader)controller.getDao()).getColumnNames();
 
         dynaArray = new LinkedList<DynaBean>();
-        dataArray = new LinkedList<Row>();
 
         SforceDynaBean.registerConverters(getConfig());
 
@@ -106,8 +104,10 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     public boolean visit(Row row) throws OperationException, DataAccessObjectException,
     ConnectionException {
         initLoadRateCalculator();
-        if (controller.getConfig().getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
-            this.uploadedRowsFromDAO.add(row);
+        if (controller.getConfig().getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+            || !controller.getConfig().getBoolean(Config.BULK_API_ENABLED)) {
+            // either batch mode or cache bulk data uploaded from DAO
+            this.daoRowList.add(row);
         }
         // the result are sforce fields mapped to data
         Row sforceDataRow = getMapper().mapData(row);
@@ -123,7 +123,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
                 }
             }
             dynaArray.add(dynaBean);
-            this.uploadedRowToDAORowList.add(this.processedDAORowCounter);
+            this.batchRowToDAORowList.add(this.processedDAORowCounter);
         } catch (ConversionException | IllegalAccessException conve) {
             String errMsg = Messages.getMessage("Visitor", "conversionErrorMsg", conve.getMessage());
             getLogger().error(errMsg, conve);
@@ -141,9 +141,6 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             this.processedDAORowCounter++;
         }
 
-        // add the data for writing to the result files
-        // must do this after conversion.
-        dataArray.add(row);
         // load the batch
         if (dynaArray.size() >= this.batchSize || maxBatchBytesReached(dynaArray)) {
             loadBatch();
@@ -179,7 +176,9 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
     public void clearArrays() {
         // clear the arrays
-        dataArray.clear();
+        if (!controller.getConfig().getBoolean(Config.BULK_API_ENABLED)) {
+            daoRowList.clear();
+        }
         dynaArray.clear();
     }
 
