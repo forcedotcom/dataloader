@@ -88,7 +88,7 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
             handleException(errMsg, e);
         }
 
-        writeOutputToWriter(results, dataArray);
+        writeOutputToWriter(results);
 
         // update Monitor
         getProgressMonitor().worked(results.length);
@@ -99,21 +99,26 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
 
     }
 
-    private void writeOutputToWriter(Object[] results, List<Row> dataArray)
+    private void writeOutputToWriter(Object[] results)
             throws DataAccessObjectException, LoadException {
-
-        if (results.length != dataArray.size()) {
-            getLogger().fatal(Messages.getString("Visitor.errorResultsLength")); //$NON-NLS-1$
-            throw new LoadException(Messages.getString("Visitor.errorResultsLength"));
-        }
 
         // have to do this because although saveResult and deleteResult
         // are a) not the same class yet b) not subclassed
-        for (int i = 0; i < results.length; i++) {
-            Row dataRow = dataArray.get(i);
+        int batchRowCounter = 0;
+        int startAtDAORow = 0;
+        try {
+            startAtDAORow = controller.getConfig().getInt(Config.LOAD_ROW_TO_START_AT);
+        } catch (ParameterLoadException e) {
+            // @ignored
+        }
+        for (int i = 0; i < this.daoRowList.size(); i++) {
+            Row daoRow = this.daoRowList.get(i);
+            if (!isRowConversionSuccessful(startAtDAORow + i)) {
+                continue;
+            }
             String statusMsg = null;
             if (results instanceof SaveResult[]) {
-                SaveResult saveRes = (SaveResult)results[i];
+                SaveResult saveRes = (SaveResult)results[batchRowCounter];
                 if (saveRes.getSuccess()) {
                     if (OperationInfo.insert == getConfig().getOperationInfo()) {
                         statusMsg = Messages.getString("DAOLoadVisitor.statusItemCreated");
@@ -121,24 +126,33 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
                         statusMsg = Messages.getString("DAOLoadVisitor.statusItemUpdated");
                     }
                 }
-                dataRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
-                processResult(dataRow, saveRes.getSuccess(), saveRes.getId(), saveRes.getErrors());
+                daoRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
+                processResult(daoRow, saveRes.getSuccess(), saveRes.getId(), saveRes.getErrors());
             } else if (results instanceof DeleteResult[]) {
-                DeleteResult deleteRes = (DeleteResult)results[i];
+                DeleteResult deleteRes = (DeleteResult)results[batchRowCounter];
                 if (deleteRes.getSuccess()) {
                     statusMsg = Messages.getString("DAOLoadVisitor.statusItemDeleted");
                 }
-                dataRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
-                processResult(dataRow, deleteRes.getSuccess(), deleteRes.getId(), deleteRes.getErrors());
+                daoRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
+                processResult(daoRow, deleteRes.getSuccess(), deleteRes.getId(), deleteRes.getErrors());
             } else if (results instanceof UpsertResult[]) {
-                UpsertResult upsertRes = (UpsertResult)results[i];
+                UpsertResult upsertRes = (UpsertResult)results[batchRowCounter];
                 if (upsertRes.getSuccess()) {
                     statusMsg = upsertRes.getCreated() ? Messages.getString("DAOLoadVisitor.statusItemCreated")
                             : Messages.getString("DAOLoadVisitor.statusItemUpdated");
                 }
-                dataRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
-                processResult(dataRow, upsertRes.getSuccess(), upsertRes.getId(), upsertRes.getErrors());
+                daoRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
+                processResult(daoRow, upsertRes.getSuccess(), upsertRes.getId(), upsertRes.getErrors());
             }
+            batchRowCounter++;
+            if (results.length < batchRowCounter) {
+                getLogger().fatal(Messages.getString("Visitor.errorResultsLength")); //$NON-NLS-1$
+                throw new LoadException(Messages.getString("Visitor.errorResultsLength"));
+            }
+        }
+        if (results.length > batchRowCounter) {
+            getLogger().fatal(Messages.getString("Visitor.errorResultsLength")); //$NON-NLS-1$
+            throw new LoadException(Messages.getString("Visitor.errorResultsLength"));
         }
     }
 

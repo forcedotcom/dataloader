@@ -447,7 +447,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
     
 
-    private int firstDataReaderRowForCurrentBatch = 0;
+    private int firstDAORowForCurrentBatch = 0;
 
     private void processResults(final DataReader dataReader, final BatchInfo batch, 
             BatchData clientBatchInfo, final int firstRowInBatch)
@@ -466,21 +466,21 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 stateMessage);
 
         int lastRowInCurrentBatch = firstRowInBatch + clientBatchInfo.numRows - 1;
-        int lastDataReaderRowForCurrentBatch = this.uploadedRowToDAORowList.get(lastRowInCurrentBatch);
+        int lastDAORowForCurrentBatch = this.batchRowToDAORowList.get(lastRowInCurrentBatch);
         
-        final int totalRowsInDaoInCurrentBatch = lastDataReaderRowForCurrentBatch - this.firstDataReaderRowForCurrentBatch + 1;
+        final int totalRowsInDAOInCurrentBatch = lastDAORowForCurrentBatch - this.firstDAORowForCurrentBatch + 1;
         List<Row> rows;
         if (controller.getConfig().getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
             rows = new ArrayList<Row>();
-            for (int i=0; i<totalRowsInDaoInCurrentBatch; i++) {
-                rows.add(i, this.uploadedRowsFromDAO.get(i + this.firstDataReaderRowForCurrentBatch));
+            for (int i=0; i<totalRowsInDAOInCurrentBatch; i++) {
+                rows.add(i, this.daoRowList.get(i + this.firstDAORowForCurrentBatch));
             }
         } else {
-            rows = dataReader.readRowList(totalRowsInDaoInCurrentBatch);
+            rows = dataReader.readRowList(totalRowsInDAOInCurrentBatch);
         }
         if (batch.getState() == BatchStateEnum.Completed || batch.getNumberRecordsProcessed() > 0) {
             try {
-                processBatchResults(batch, errorMessage, batch.getState(), rows, this.firstDataReaderRowForCurrentBatch);
+                processBatchResults(batch, errorMessage, batch.getState(), rows, this.firstDAORowForCurrentBatch);
             } catch (IOException e) {
                 throw new LoadException("IOException while reading batch results", e);
             }
@@ -490,7 +490,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             }
         }
         // update to process the next batch
-        this.firstDataReaderRowForCurrentBatch = lastDataReaderRowForCurrentBatch + 1;
+        this.firstDAORowForCurrentBatch = lastDAORowForCurrentBatch + 1;
     }
 
     private void processBatchResults(final BatchInfo batch, final String errorMessage, 
@@ -520,7 +520,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
         for (final Row row : rows) {
             boolean conversionSuccessOfRow = isRowConversionSuccessful(skippedRowsCount 
-                        + this.firstDataReaderRowForCurrentBatch + dataReaderRowCount++);
+                        + this.firstDAORowForCurrentBatch + dataReaderRowCount++);
             if (!conversionSuccessOfRow) {
                 continue; // this DAO row failed to convert and was not part of the batch sent to the server. Go to the next one
             }
