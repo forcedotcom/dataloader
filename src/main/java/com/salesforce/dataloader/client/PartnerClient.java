@@ -50,6 +50,8 @@ import com.sforce.soap.partner.FieldType;
 import com.sforce.soap.partner.LimitInfo;
 import com.sforce.soap.partner.LimitInfoHeader_element;
 import com.sforce.soap.partner.LoginResult;
+import com.sforce.soap.partner.OwnerChangeOption;
+import com.sforce.soap.partner.OwnerChangeOptionType;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.SaveResult;
@@ -551,6 +553,14 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         PartnerConnection conn = Connector.newConnection(cc);
         // identify the client as dataloader
         conn.setCallOptions(ClientBase.getClientName(this.config), null);
+        
+        // Support for Keeping Account keepAccountTeam during Account ownership change
+        // More details at https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_header_ownerchangeoptions.htm
+        OwnerChangeOption keepAccountTeamOption = new OwnerChangeOption();
+        keepAccountTeamOption.setExecute(this.config.getBoolean(Config.PROCESS_KEEP_ACCOUNT_TEAM));
+        keepAccountTeamOption.setType(OwnerChangeOptionType.KeepAccountTeam); // Transfer Open opportunities owned by the account's owner
+        OwnerChangeOption[] ownerChangeOptionArray = new OwnerChangeOption[] {keepAccountTeamOption};
+        conn.setOwnerChangeOptions(ownerChangeOptionArray);
 
         String oauthAccessToken = config.getString(Config.OAUTH_ACCESSTOKEN);
         if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {

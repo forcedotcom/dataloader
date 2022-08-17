@@ -288,6 +288,7 @@ public class Config {
     public static final String INITIAL_LAST_RUN_DATE = "process.initialLastRunDate";
     public static final String ENCRYPTION_KEY_FILE = "process.encryptionKeyFile"; //$NON-NLS-1$
     public static final String PROCESS_THREAD_NAME = "process.thread.name";
+    public static final String PROCESS_KEEP_ACCOUNT_TEAM = "process.keepAccountTeam";
 
     // data access configuration (e.g., for CSV file, database, etc).
     public static final String DAO_TYPE = "dataAccess.type"; //$NON-NLS-1$
@@ -303,6 +304,9 @@ public class Config {
      */
     public static final String READ_UTF8 = "dataAccess.readUTF8"; //$NON-NLS-1$
     public static final String WRITE_UTF8 = "dataAccess.writeUTF8"; //$NON-NLS-1$
+    
+    public static final String API_VERSION_PROP="salesforce.api.version";
+
     
     /**
      *  ===============  PILOT config properties ========
@@ -389,7 +393,6 @@ public class Config {
     public static final String CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
     public static final String CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
     public static final String CLI_OPTION_CONFIG_DIR_PROP = "salesforce.config.dir";
-    public static final String CLI_OPTION_API_VERSION="salesforce.api.version";
     public static final String CLI_OPTION_READ_ONLY_CONFIG_PROPERTIES = "config.properties.readonly";
     public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
     
@@ -416,7 +419,8 @@ public class Config {
             DEBUG_MESSAGES_FILE,
             PROCESS_THREAD_NAME,
             PROCESS_BULK_CACHE_DATA_FROM_DAO,
-            SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV
+            SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV,
+            API_VERSION_PROP
     };
     
     private static boolean useGMTForDateFieldValue;
@@ -578,6 +582,7 @@ public class Config {
         setDefaultValue(Config.CLI_OPTION_RUN_MODE, Config.RUN_MODE_UI_VAL);
         setDefaultValue(SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV, false);
         setDefaultValue(PROCESS_BULK_CACHE_DATA_FROM_DAO, false);
+        setDefaultValue(PROCESS_KEEP_ACCOUNT_TEAM, false);
     }
 
     /**

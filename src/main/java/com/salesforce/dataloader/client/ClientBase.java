@@ -81,7 +81,7 @@ public abstract class ClientBase<ClientType> {
         this.controller = controller;
         this.config = controller.getConfig();
         this.logger = logger;
-        String apiVersionStr = config.getString(Config.CLI_OPTION_API_VERSION);
+        String apiVersionStr = config.getString(Config.API_VERSION_PROP);
         if (apiVersionStr != null && !apiVersionStr.isEmpty()) {
             apiVersionForTheSession = apiVersionStr;
         }
