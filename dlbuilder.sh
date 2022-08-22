@@ -1,4 +1,4 @@
-#!/bin/sh -f
+#!/bin/sh 
 # script parameters
 # $1 - password for the java key store containing code-signing cert
 # $2 - PKCS11 config file (see example below)
@@ -56,15 +56,15 @@ run_mvn() {
 
   if [ $2 = true ]
   then
-    echo "packaging dataloader_mac.zip"
-    mvn package -DskipTests -Duberjar.skip -Pzip,mac_x86_64,!win32_x86_64,!linux_x86_64
-    cp target/mac/dataloader_mac.zip .
-    echo "packaging dataloader_win.zip"
+    echo "packaging dataloader_mac_<version>.zip"
+     mvn package -DskipTests -Duberjar.skip -Pzip,mac_x86_64,!win32_x86_64,!linux_x86_64
+    cp target/mac/*.zip .
+    echo "packaging dataloader_win_<version>.zip"
     mvn package -DskipTests -Duberjar.skip -Pzip,!mac_x86_64,win32_x86_64,!linux_x86_64
-    cp target/win/dataloader_win.zip .
-    echo "packaging dataloader_linux.zip"
+    cp target/win/dataloader_win_v*.zip .
+    echo "packaging dataloader_linux_<version>.zip"
     mvn package -DskipTests -Duberjar.skip -Pzip,!mac_x86_64,!win32_x86_64,linux_x86_64
-    cp target/linux/dataloader_linux.zip .
+    cp target/linux/dataloader_linux_v*.zip .
   fi
 
   if [ $1 = true ]; then

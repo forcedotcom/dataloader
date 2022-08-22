@@ -143,7 +143,10 @@ public class LoaderWindow extends ApplicationWindow {
         setBlockOnOpen(true);
         open();
 
-        Display.getCurrent().dispose();
+        Display currentDisplay = Display.getCurrent();
+        if (currentDisplay != null) {
+            currentDisplay.dispose();
+        }
     }
     
     public void updateTitle(String suffix) {

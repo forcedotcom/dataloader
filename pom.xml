@@ -544,7 +544,7 @@
                       <fileset dir="${basedir}/target/" includes="swt${OSType}*/*"/>
                     </copy> 
                     <echo>zip OS-specific folder</echo>
-                    <zip update="true" destfile="${basedir}/target/${OSType}/dataloader_${OSType}.zip" >
+                    <zip update="true" destfile="${basedir}/target/${OSType}/dataloader_${OSType}_v${version}.zip" >
                       <zipfileset dirmode="755" filemode="755" 
                         dir="${basedir}/target/${OSType}" />
                      </zip>
