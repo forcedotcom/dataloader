@@ -754,8 +754,8 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                         Field[] refObjectFields = describeSObject(refEntityName).getFields();
                         Map<String, Field> refFieldInfo = new HashMap<String, Field>();
                         for (Field refField : refObjectFields) {
-                            boolean skipReference = true;
                             if (refField.isExternalId()
+                                || "id".equalsIgnoreCase(refField.getName())
                                 || ((refField.isNameField() ||  refField.getType().equals(FieldType.email)) 
                                     && refField.isIdLookup())) {
                                 // change createable and updateable attributes of a reference field
