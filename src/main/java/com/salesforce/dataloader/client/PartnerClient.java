@@ -307,7 +307,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     /**
      * @param dynaBeans
      * @return SaveResult array
-     * @throws ConnectionException
+     * @throws ConnectionExceptio
      */
     public SaveResult[] loadInserts(List<DynaBean> dynaBeans) throws ConnectionException {
         return runSaveOperation(dynaBeans, INSERT_OPERATION, true);
@@ -553,14 +553,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         PartnerConnection conn = Connector.newConnection(cc);
         // identify the client as dataloader
         conn.setCallOptions(ClientBase.getClientName(this.config), null);
-        
-        // Support for Keeping Account keepAccountTeam during Account ownership change
-        // More details at https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_header_ownerchangeoptions.htm
-        OwnerChangeOption keepAccountTeamOption = new OwnerChangeOption();
-        keepAccountTeamOption.setExecute(this.config.getBoolean(Config.PROCESS_KEEP_ACCOUNT_TEAM));
-        keepAccountTeamOption.setType(OwnerChangeOptionType.KeepAccountTeam); // Transfer Open opportunities owned by the account's owner
-        OwnerChangeOption[] ownerChangeOptionArray = new OwnerChangeOption[] {keepAccountTeamOption};
-        conn.setOwnerChangeOptions(ownerChangeOptionArray);
 
         String oauthAccessToken = config.getString(Config.OAUTH_ACCESSTOKEN);
         if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
