@@ -62,6 +62,22 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
     @Override
     protected void loadBatch() throws DataAccessObjectException, LoadException {
         Object[] results = null;
+        Config config = this.controller.getConfig();
+        OwnerChangeOption keepAccountTeamOption = new OwnerChangeOption();
+        OwnerChangeOption[] ownerChangeOptionArray;
+        if (config.getBoolean(Config.PROCESS_KEEP_ACCOUNT_TEAM) 
+                && "Account".equalsIgnoreCase(config.getString(Config.ENTITY))) {
+            // Support for Keeping Account keepAccountTeam during Account ownership change
+            // More details at https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_header_ownerchangeoptions.htm
+            keepAccountTeamOption.setExecute(true);
+            keepAccountTeamOption.setType(OwnerChangeOptionType.KeepAccountTeam); // Transfer Open opportunities owned by the account's owner
+            ownerChangeOptionArray = new OwnerChangeOption[] {keepAccountTeamOption};
+        } else {
+            // clear ownerChangeOptions from the existing connection otherwise.
+            ownerChangeOptionArray = new OwnerChangeOption[] {};
+        }
+        this.controller.getPartnerClient().getClient().setOwnerChangeOptions(ownerChangeOptionArray);
+        
         try {
             results = executeClientAction(getController().getPartnerClient(), dynaArray);
         } catch (ApiFault e) {
