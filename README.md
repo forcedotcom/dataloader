@@ -32,11 +32,11 @@ To run the Data Loader GUI, run the command
     
 Use the command below to run the Data Loader GUI on Mac
 
-    java -XstartOnFirstThread -jar target/dataloader-x.y.z-uber.jar
+    java -jar target/dataloader-x.y.z-uber.jar
 
 To run data loader for debug on macOS
 
-    java -XstartOnFirstThread -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005  target/dataloader-x.y.z-uber.jar
+    java -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005  target/dataloader-x.y.z-uber.jar
 
 To run Data Loader in Batch mode on Windows, see [Batch mode for Windows platform](https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_batchmode_intro.htm]). Batch mode is supported only on Windows platform.
 
