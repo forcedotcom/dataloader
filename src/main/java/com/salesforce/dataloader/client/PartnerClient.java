@@ -725,16 +725,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 // relationship.
                 if (entityField.isCreateable() || entityField.isUpdateable()) {
                     String relationshipName = entityField.getRelationshipName();
-                    
-                    // Skip traversing CreatedBy and LastModifiedBy relationships.
-                    // Upserts should not use these relationships.
-                    if (!entityField.isCustom()
-                        && (
-                            "CreatedBy".equalsIgnoreCase(relationshipName)
-                        || "LastModifiedBy".equalsIgnoreCase(relationshipName)
-                        )) {
-                        continue;
-                    }
                     String[] referenceTos = entityField.getReferenceTo();
                     if (referenceTos != null && referenceTos.length == 1 && referenceTos[0] != null
                             && relationshipName != null && relationshipName.length() > 0
