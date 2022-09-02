@@ -238,15 +238,16 @@ public class ProcessRunner implements InitializingBean {
     }
 
     public static void logErrorAndExitProcess(String message, Throwable err) {
-        if (logger == null) {
+        if (logger == null || err == null) {
             System.err.println(message);
+            throw new RuntimeException(message);
         } else {
             logger.fatal(message, err);
+            throw new RuntimeException(err.getMessage());
         }
-        System.exit(-1);
     }
     
-    public static ProcessRunner runBatchMode(String[] args, ILoaderProgress monitor) throws UnsupportedOperationException {
+    public static ProcessRunner runBatchMode(String[] args, ILoaderProgress progressMonitor) throws UnsupportedOperationException {
         Map<String,String> argMap = Controller.getArgMapFromArgArray(args);
         if (!argMap.containsKey(Config.CLI_OPTION_CONFIG_DIR_PROP) && args.length < 2) {
             // config directory must be specified in the first argument
@@ -286,7 +287,11 @@ public class ProcessRunner implements InitializingBean {
                 logErrorAndExitProcess("Process runner is null", new NullPointerException());
             }
             // run the process
-            runner.run(monitor);
+            runner.run(progressMonitor);
+            progressMonitor = runner.getMonitor();
+            if (progressMonitor != null && (progressMonitor.isCanceled() || !progressMonitor.isSuccess())) {
+                logErrorAndExitProcess(progressMonitor.getMessage(), null);
+            }
         } catch (Throwable t) {
             if (t.getClass().equals(UnsupportedOperationException.class)) {
                 // this is done to allow integration tests to continue

@@ -709,7 +709,13 @@ public abstract class ProcessTestBase extends ConfigTestBase {
 
     protected Controller runProcessNegative(Map<String, String> args, String failureMessage)
             throws ProcessInitializationException, DataAccessObjectException {
-        return runProcess(args, false, failureMessage, 0, 0, 0, false);
+        Controller controller = null;
+        try {
+            controller = runProcess(args, false, failureMessage, 0, 0, 0, false);
+        } catch (RuntimeException ex) {
+            // ignore
+        }
+        return controller;
     }
     
     protected ProcessRunner runBatchProcess(Map<String, String> argMap) {
