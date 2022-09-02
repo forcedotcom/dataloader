@@ -47,6 +47,7 @@ public enum NihilistProgressAdapter implements ILoaderProgress {
 
     //logger
     private final Logger logger = LogManager.getLogger(getClass());
+    private String message = "";
 
     @Override
     public void beginTask(String name, int totalWork) {
@@ -55,14 +56,16 @@ public enum NihilistProgressAdapter implements ILoaderProgress {
 
     boolean success = false;
     @Override
-    public void doneError(String msgs) {
+    public void doneError(String msg) {
         success = false;
-        logger.error(msgs);
+        message = msg;
+        logger.error(msg);
     }
 
     @Override
     public void doneSuccess(String msg) {
         success = true;
+        message = msg;
         logger.info(msg);
 
     }
@@ -99,7 +102,7 @@ public enum NihilistProgressAdapter implements ILoaderProgress {
 
     @Override
     public String getMessage() {
-        return "";
+        return this.message;
     }
 
     @Override

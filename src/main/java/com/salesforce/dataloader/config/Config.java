@@ -117,7 +117,7 @@ import java.util.TimeZone;
  *
  */
 public class Config {
-    private static Logger logger = LogManager.getLogger(Config.class);
+    private static Logger logger;
     private static final String DECRYPTED_SUFFIX = ".decrypted";
 
     /**
@@ -430,6 +430,7 @@ public class Config {
     
     public static void initializeStaticVariables(Map<String, String> argMap) {
         setUseGMTForDateFieldValue(argMap);
+        logger = LogManager.getLogger(Config.class);
     }
     
     private static void setUseGMTForDateFieldValue(Map<String, String> argMap) {
