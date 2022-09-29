@@ -1,6 +1,7 @@
 @echo off
 setlocal
 
+SET ERRORLEVEL=0
 CALL "%~dp0util\util.bat" showBanner
 
 echo Data Loader installation requires you to provide an installation directory to create a version-specific subdirectory for the installation artifacts.
