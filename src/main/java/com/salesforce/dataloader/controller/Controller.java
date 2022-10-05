@@ -406,25 +406,22 @@ public class Controller {
         if (Controller.isInitialized) {
             return;
         }
+        
         try {
-            initStaticVariables();
-        } catch (ControllerInitializationException ex) {
-            System.out.println("Controller.initializeLog(): Unable to initialize Controller static vars: " + ex.getMessage());
-            ex.printStackTrace();
-        }
-        Config.initializeStaticVariables(argMap);
-
-        // Need to initialize the configurations directory before initializing logger
-        // because the default log-conf.xml resides in the configuration directory.
-        AppUtil.setConfigurationsDir(argMap);
-
-        // initialize logger
-        try {
+            // Need to initialize the configurations directory before initializing logger
+            // because the default log-conf.xml resides in the configuration directory.
+            AppUtil.setConfigurationsDir(argMap);
+            
+            // initialize logger
             _doInitializeLog();
-        } catch (FactoryConfigurationError e) {
-            e.printStackTrace();
-        } finally {
+            
+            // initialze Controller and Config static vars
+            initStaticVariables();
+            Config.initializeStaticVariables(argMap);
             Controller.isInitialized = true;
+        } catch (Exception ex) {
+            System.out.println("Controller.initializeStaticVariables(): Unable to initialize Controller static vars: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
     
