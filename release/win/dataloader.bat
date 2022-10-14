@@ -7,7 +7,7 @@ IF "%ERRORLEVEL%" NEQ "0" (
     PAUSE
     GOTO :exit
 )
-java -jar "%~dp0dataloader-%DATALOADER_VERSION%-uber.jar" %*
+java -cp "%~dp0*" com.salesforce.dataloader.process.DataLoaderRunner %*
 
 :exit
 ENDLOCAL

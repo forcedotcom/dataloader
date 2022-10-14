@@ -6,7 +6,7 @@ IF "%ERRORLEVEL%" NEQ "0" (
     PAUSE
     GOTO :exit
 )
-java -cp "%~dp0..\dataloader-%DATALOADER_VERSION%-uber.jar" com.salesforce.dataloader.security.EncryptionUtil %*
+java -cp "%~dp0..\*" com.salesforce.dataloader.security.EncryptionUtil %*
 
 :exit
 ENDLOCAL
