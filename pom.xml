@@ -19,7 +19,7 @@
     <java.compile.version>11</java.compile.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <config.additional.properties></config.additional.properties>
-    <swt.version>4.24</swt.version>
+    <swt.version>4.25</swt.version>
 
     <!-- test properties -->
     <test.endpoint>http://testendpoint</test.endpoint>
@@ -91,13 +91,13 @@
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
-      <version>2.18.0</version>
+      <version>2.19.0</version>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
-      <version>2.18.0</version>
+      <version>2.19.0</version>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
     <dependency>
@@ -115,13 +115,13 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>5.3.22</version>
+      <version>5.3.23</version>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.jface --> 
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.jface</artifactId>
-      <version>3.26.0</version>
+      <version>3.27.0</version>
       <exclusions>
         <exclusion>
           <groupId>org.eclipse.platform</groupId>
@@ -149,14 +149,14 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jdbc</artifactId>
-      <version>5.3.22</version>
+      <version>5.3.23</version>
       <scope>test</scope>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>4.7.0</version>
+      <version>4.8.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
