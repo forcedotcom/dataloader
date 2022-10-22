@@ -13,19 +13,19 @@
   </organization>
 
   <properties>
-    <force.wsc.version>56.0.0</force.wsc.version>
+    <force.wsc.version>56.1.0</force.wsc.version>
     <force.partner.api.version>${force.wsc.version}</force.partner.api.version>
     <build.year>2022</build.year>
     <java.compile.version>11</java.compile.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <config.additional.properties></config.additional.properties>
+    <config.additional.properties/>
     <swt.version>4.25</swt.version>
 
     <!-- test properties -->
     <test.endpoint>http://testendpoint</test.endpoint>
     <test.user.default>admin@org.com</test.user.default>
     <test.user.restricted>standard@org.com</test.user.restricted>
-    <test.password></test.password><!-- use the encrypted password -->
+    <test.password/><!-- use the encrypted password -->
     <test.redirect>false</test.redirect>
     <test.testfiles.directory>${project.build.testOutputDirectory}/testfiles</test.testfiles.directory>
   </properties>
@@ -455,7 +455,7 @@
                 <phase>compile</phase>
                 <configuration>
                   <target>
-                    <ant antfile="${basedir}/extractSWTJar.xml" inheritAll="true" />
+                    <ant antfile="${basedir}/extractSWTJar.xml" inheritAll="true"/>
                     <delete includeEmptyDirs="true">
                       <dirset dir="${basedir}/target/">
                         <patternset>
@@ -514,39 +514,33 @@
                     </copy>
                     <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${project.version}"/>
                     <replace dir="${basedir}/target/${OSType}/" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
-                    <chmod file="${basedir}/target/${OSType}/*" perm="755" />
+                    <chmod file="${basedir}/target/${OSType}/*" perm="755"/>
                     <if>
                         <equals arg1="${OSType}" arg2="win"/>
                         <then>
-                            <fixcrlf srcdir="${basedir}/target/win/"
-                                        includes="**/*.bat" eol="crlf"/>
+                            <fixcrlf srcdir="${basedir}/target/win/" includes="**/*.bat" eol="crlf"/>
                         </then>
                         <else>
-                            <fixcrlf srcdir="${basedir}/target/${OSType}/"
-                                        includes="**/*.command" eol="lf" eof="remove"/>
-                            <fixcrlf srcdir="${basedir}/target/${OSType}/"
-                                        includes="**/*.sh" eol="lf" eof="remove"/>
+                            <fixcrlf srcdir="${basedir}/target/${OSType}/" includes="**/*.command" eol="lf" eof="remove"/>
+                            <fixcrlf srcdir="${basedir}/target/${OSType}/" includes="**/*.sh" eol="lf" eof="remove"/>
                             <if>>
                                 <equals arg1="${OSType}" arg2="mac"/>
                                 <then>
-                                    <fixcrlf srcdir="${basedir}/target/mac/dataloader.app/Contents/MacOS"
-                                        includes="**/dataloader" eol="lf" eof="remove"/>
+                                    <fixcrlf srcdir="${basedir}/target/mac/dataloader.app/Contents/MacOS" includes="**/dataloader" eol="lf" eof="remove"/>
                                 </then>
                             </if>
                         </else>
                     </if>
     
                     <echo>copying uber jar to OS-specific folder for the target OS: ${OSType}</echo>
-                    <copy file="${basedir}/target/dataloader-${project.version}-uber.jar" 
-                       todir="${basedir}/target/${OSType}"/>
+                    <copy file="${basedir}/target/dataloader-${project.version}-uber.jar" todir="${basedir}/target/${OSType}"/>
                        
-                    <copy todir="${basedir}/target/${OSType}" >
+                    <copy todir="${basedir}/target/${OSType}">
                       <fileset dir="${basedir}/target/" includes="swt${OSType}*/*"/>
                     </copy> 
                     <echo>zip OS-specific folder</echo>
-                    <zip update="true" destfile="${basedir}/target/${OSType}/dataloader_${OSType}_v${version}.zip" >
-                      <zipfileset dirmode="755" filemode="755" 
-                        dir="${basedir}/target/${OSType}" />
+                    <zip update="true" destfile="${basedir}/target/${OSType}/dataloader_${OSType}_v${version}.zip">
+                      <zipfileset dirmode="755" filemode="755" dir="${basedir}/target/${OSType}"/>
                      </zip>
                    </target>
                 </configuration>
