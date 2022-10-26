@@ -532,13 +532,11 @@ public class Controller {
         // TODO for unprocessed records
         // config.setValue(Config.OUTPUT_UNPROCESSED_RECORDS, unprocessedRecordsPath);
     }
-    
-    private final Date currentTime = new Date();
-    private final SimpleDateFormat format = new SimpleDateFormat("MMddyyhhmmssSSS"); //$NON-NLS-1$
-    private final String formattedCurrentTimestamp = format.format(currentTime);
-    
+        
     public String getFormattedCurrentTimestamp() {
-        return formattedCurrentTimestamp;
+        Date currentTime = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("MMddyyhhmmssSSS"); //$NON-NLS-1$
+        return format.format(currentTime);
     }
 
     private void validateFile(String filePath) throws IOException {
