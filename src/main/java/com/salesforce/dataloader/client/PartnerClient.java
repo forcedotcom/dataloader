@@ -550,18 +550,26 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         // Attempt the login giving the user feedback
         logger.info(Messages.getString("Client.sforceLogin")); //$NON-NLS-1$
         final ConnectorConfig cc = getLoginConnectorConfig(apiVersionStr);
+        boolean savedIsTraceMessage = cc.isTraceMessage();
+        cc.setTraceMessage(false);
         PartnerConnection conn = Connector.newConnection(cc);
         // identify the client as dataloader
         conn.setCallOptions(ClientBase.getClientName(this.config), null);
 
         String oauthAccessToken = config.getString(Config.OAUTH_ACCESSTOKEN);
-        if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
-            conn = setConfiguredSessionId(conn, oauthAccessToken);
-        } else if (config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
-            conn = setConfiguredSessionId(conn, config.getString(Config.SFDC_INTERNAL_SESSION_ID));
-        } else {
-            setSessionRenewer(conn);
-            loginInternal(conn);
+        try {
+            if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
+                conn = setConfiguredSessionId(conn, oauthAccessToken);
+            } else if (config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
+                conn = setConfiguredSessionId(conn, config.getString(Config.SFDC_INTERNAL_SESSION_ID));
+            } else {
+                setSessionRenewer(conn);
+                loginInternal(conn);
+            }
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            cc.setTraceMessage(savedIsTraceMessage);
         }
         synchronized (apiVersionForTheSession) {
             if (!isValidApiVersionForTheSession) {
