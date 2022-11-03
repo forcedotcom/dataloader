@@ -416,7 +416,9 @@ public class Config {
             DAO_TYPE,
             ENTITY,
             OPERATION,
+            DEBUG_MESSAGES,
             DEBUG_MESSAGES_FILE,
+            WIRE_OUTPUT,
             PROCESS_THREAD_NAME,
             PROCESS_BULK_CACHE_DATA_FROM_DAO,
             SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV,
@@ -542,6 +544,7 @@ public class Config {
         setDefaultValue(BULK_API_ZIP_CONTENT, false);
         setDefaultValue(BULK_API_CHECK_STATUS_INTERVAL, DEFAULT_BULK_API_CHECK_STATUS_INTERVAL);
         setDefaultValue(WIRE_OUTPUT, false);
+        setDefaultValue(DEBUG_MESSAGES, false);
         setDefaultValue(TIMEZONE, TimeZone.getDefault().getID());
         //sfdcInternal settings
         setDefaultValue(SFDC_INTERNAL, false);
