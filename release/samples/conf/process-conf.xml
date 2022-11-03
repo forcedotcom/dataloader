@@ -7,7 +7,7 @@
         <property name="name" value="accountMasterProcess"/>
         <property name="configOverrideMap">
             <map>
-                <entry key="sfdc.debugMessages" value="true"/>
+                <entry key="sfdc.debugMessages" value="false"/>
                 <entry key="sfdc.debugMessagesFile" value="c:\dataloader\samples\status\accountMasterSoapTrace.log"/>
                 <entry key="sfdc.endpoint" value="https://login.salesforce.com"/>
                 <entry key="sfdc.username" value="user@mycompany.com"/>
