@@ -3,10 +3,10 @@
   <groupId>local.swt</groupId>
   <artifactId>swtlinux_x86_64</artifactId>
   <versioning>
-    <release>4.25</release>
+    <release>4.26</release>
     <versions>
-      <version>4.25</version>
+      <version>4.26</version>
     </versions>
-    <lastUpdated>20221015155355</lastUpdated>
+    <lastUpdated>20221210201054</lastUpdated>
   </versioning>
 </metadata>
