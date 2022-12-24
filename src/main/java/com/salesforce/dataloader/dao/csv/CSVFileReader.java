@@ -155,7 +155,7 @@ public class CSVFileReader implements DataReader {
 
         FileInputStream stream = null;
 
-        // UTF-8 BOM is 0xEE 0xBB OxBf
+        // UTF-8 BOM is 0xEF 0xBB OxBF. Source: https://learn.microsoft.com/en-us/globalization/encoding/byte-order-mark
         // or 239 187 191
 
         try {
