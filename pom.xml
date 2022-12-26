@@ -276,6 +276,7 @@
               <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
               <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
               <nonFilteredFileExtension>png</nonFilteredFileExtension>
+              <nonFilteredFileExtension>csv</nonFilteredFileExtension>
             </nonFilteredFileExtensions>
         </configuration>
       </plugin>
