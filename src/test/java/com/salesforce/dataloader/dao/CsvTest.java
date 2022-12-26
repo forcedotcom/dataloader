@@ -26,6 +26,7 @@
 package com.salesforce.dataloader.dao;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,10 +67,18 @@ public class CsvTest extends TestBase {
         row2.put("COL2", "row2col2");
         row2.put("COL3", "row2col3");
     }
-
     @Test
     public void testCSVReadBasic() throws Exception {
-        File f = new File(getTestDataDir(), "csvtext.csv");
+        testCSVReadBasic("csvtext.csv");
+    }
+    
+    @Test
+    public void testCSVReadUTF8BOMBasic() throws Exception{
+        testCSVReadBasic("csvtext_BOM_UTF8.csv");
+    }
+    
+    private void testCSVReadBasic(String csvFile) throws Exception {
+        File f = new File(getTestDataDir(), csvFile);
         assertTrue(f.exists());
         assertTrue(f.canRead());
 

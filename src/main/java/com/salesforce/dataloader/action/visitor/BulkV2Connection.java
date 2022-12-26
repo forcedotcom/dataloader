@@ -144,6 +144,7 @@ import java.io.Serializable;
 import java.io.FileOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -196,7 +197,7 @@ public class BulkV2Connection  {
     public static final String ZIP_XML_CONTENT_TYPE = "zip/xml";
     public static final String ZIP_CSV_CONTENT_TYPE = "zip/csv";
     public static final String ZIP_JSON_CONTENT_TYPE = "zip/json";
-    public static final String UTF_8 = "UTF-8";
+    public static final String UTF_8 = StandardCharsets.UTF_8.name();
     public static final String INGEST_RESULTS_SUCCESSFUL = "successfulResults";
     public static final String INGEST_RESULTS_UNSUCCESSFUL = "failedResults";
     public static final String INGEST_RECORDS_UNPROCESSED = "unprocessedrecords";

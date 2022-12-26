@@ -30,12 +30,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.logging.log4j.Logger;
@@ -66,7 +66,6 @@ public class CSVFileReader implements DataReader {
     private int totalRows;
     private CSVReader csvReader;
     private int currentRowNumber;
-    private boolean forceUTF8;
     private List<String> headerRow;
     private boolean isOpen;
     private char[] csvDelimiters;
@@ -92,7 +91,6 @@ public class CSVFileReader implements DataReader {
     public CSVFileReader(File file, Config config, boolean custDelimiter) {
         this.file = file;
         this.config = config;
-        forceUTF8 = config.getBoolean(Config.READ_UTF8);
         StringBuilder separator = new StringBuilder();
         if (custDelimiter) {
             if (config.getBoolean(Config.CSV_DELIMETER_COMMA)) {
@@ -147,38 +145,7 @@ public class CSVFileReader implements DataReader {
             isOpen = false;
         }
     }
-
-    /**
-     * Checks the Bytes for the UTF-8 BOM if found, returns true, else false
-     */
-    private boolean isUTF8FileWithBOM(File file) {
-
-        FileInputStream stream = null;
-
-        // UTF-8 BOM is 0xEF 0xBB OxBF. Source: https://learn.microsoft.com/en-us/globalization/encoding/byte-order-mark
-        // or 239 187 191
-
-        try {
-            stream = new FileInputStream(file);
-
-            if (stream.read() == 239) {
-                if (stream.read() == 187) {
-                    if (stream.read() == 191) {
-                        return true;
-                    }
-                }
-            }
-        } catch (FileNotFoundException e) {
-            LOGGER.error("Error in file when testing CSV");
-        } catch (IOException io) {
-            LOGGER.error("IO error when testing file");
-        } finally {
-            IOUtils.closeQuietly(stream);
-        }
-        return false;
-    }
     
-
     @Override
     public List<Row> readRowList(int maxRows) throws DataAccessObjectException {
         List<Row> outputRows = new ArrayList<Row>();
@@ -297,11 +264,20 @@ public class CSVFileReader implements DataReader {
 
         try {
             input = new FileInputStream(file);
-            if (forceUTF8 || isUTF8FileWithBOM(file)) {
-                BOMInputStream bomInputStream = new BOMInputStream(input);
-                csvReader = new CSVReader(bomInputStream, "UTF-8", csvDelimiters);
+            String encoding = this.config.getCsvEncoding(false);
+            if (StandardCharsets.UTF_8.name().equals(encoding)
+                || StandardCharsets.UTF_16BE.name().equals(encoding)
+                || StandardCharsets.UTF_16LE.name().equals(encoding)
+                || "UTF-32LE".equals(encoding)
+                || "UTF-32BE".equals(encoding)) {
+                BOMInputStream bomInputStream = new BOMInputStream(input,
+                        ByteOrderMark.UTF_8,
+                        ByteOrderMark.UTF_16LE,
+                        ByteOrderMark.UTF_16BE,
+                        ByteOrderMark.UTF_32LE,
+                        ByteOrderMark.UTF_32BE);
+                csvReader = new CSVReader(bomInputStream, encoding, csvDelimiters);
             } else {
-                String encoding = this.config.getCsvEncoding(false);
                 csvReader = new CSVReader(input, encoding, csvDelimiters);
                 LOGGER.debug(this.getClass().getName(), "encoding used to read from CSV file is " + encoding);
             }
