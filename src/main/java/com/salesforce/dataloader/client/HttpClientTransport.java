@@ -104,7 +104,7 @@ public class HttpClientTransport implements HttpTransportInterface {
         HashMap<String, String> header = new HashMap<String, String>();
 
         header.put("SOAPAction", "\"" + soapAction + "\"");
-        header.put("Content-Type", "text/xml; charset=" + StandardCharsets.UTF_8);
+        header.put("Content-Type", "text/xml; charset=" + StandardCharsets.UTF_8.name());
         header.put("Accept", "text/xml");
 
         return connect(url, header);
