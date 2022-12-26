@@ -305,6 +305,7 @@ public class Config {
      */
     public static final String READ_UTF8 = "dataAccess.readUTF8"; //$NON-NLS-1$
     public static final String WRITE_UTF8 = "dataAccess.writeUTF8"; //$NON-NLS-1$
+    public static final String READ_CHARSET = "dataAccess.readCharset";
     
     public static final String API_VERSION_PROP="salesforce.api.version";
 
@@ -423,7 +424,8 @@ public class Config {
             PROCESS_THREAD_NAME,
             PROCESS_BULK_CACHE_DATA_FROM_DAO,
             SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV,
-            API_VERSION_PROP
+            API_VERSION_PROP,
+            READ_CHARSET
     };
     
     private static boolean useGMTForDateFieldValue;
@@ -1376,7 +1378,13 @@ public class Config {
                     +  configProperty
                     +"' is set to true");
             return StandardCharsets.UTF_8.name();
-        }        
+        }
+        if (!isWrite) {
+            String charset = getString(READ_CHARSET);
+            if (charset != null && !charset.isEmpty()) {
+                return charset;
+            }
+        }
         String charset = getDefaultCharsetForCsvReadWrite();
         logger.debug("Using charset " + charset);
         return charset;

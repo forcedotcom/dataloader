@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.salesforce.dataloader.TestBase;
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.model.Row;
@@ -77,6 +78,20 @@ public class CsvTest extends TestBase {
         testCSVReadBasic("csvtext_BOM_UTF8.csv");
     }
     
+    @Test
+    public void testCSVReadUTF16BEBOMBasic() throws Exception{
+        getController().getConfig().setValue(Config.READ_CHARSET, "UTF-16BE");
+        testCSVReadBasic("csvtext_BOM_UTF16BE.csv");
+        getController().getConfig().setValue(Config.READ_CHARSET, "");
+    }
+    
+    @Test
+    public void testCSVReadUTF16LEBOMBasic() throws Exception{
+        getController().getConfig().setValue(Config.READ_CHARSET, "UTF-16LE");
+        testCSVReadBasic("csvtext_BOM_UTF16LE.csv");
+        getController().getConfig().setValue(Config.READ_CHARSET, "");
+    }
+
     private void testCSVReadBasic(String csvFile) throws Exception {
         File f = new File(getTestDataDir(), csvFile);
         assertTrue(f.exists());
