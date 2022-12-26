@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,7 @@ public class OAuthBrowserLoginRunner {
             for (int length; (length = in.read(buffer)) != -1; ) {
                 result.write(buffer, 0, length);
             }
-            String response = result.toString("UTF-8");
+            String response = result.toString(StandardCharsets.UTF_8.name());
             logger.error(response);
             throw new OAuthBrowserLoginRunnerException(response);
         }
@@ -125,7 +126,7 @@ public class OAuthBrowserLoginRunner {
             result.write(buffer, 0, length);
         }
         
-        String response = result.toString("UTF-8");
+        String response = result.toString(StandardCharsets.UTF_8.name());
         if (!client.isSuccessful()) {
             // did not succeed in skipping the page with pre-filled user code, show it
             logger.error(response);
@@ -353,7 +354,7 @@ public class OAuthBrowserLoginRunner {
    public static void processSuccessfulLogin(InputStream httpResponseInputStream, Config config) throws IOException {
 
        StringBuilder builder = new StringBuilder();
-       BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpResponseInputStream, "UTF-8"));
+       BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpResponseInputStream, StandardCharsets.UTF_8.name()));
        for (int c = bufferedReader.read(); c != -1; c = bufferedReader.read()) {
            builder.append((char) c);
        }

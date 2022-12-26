@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.CodeSource;
@@ -94,7 +95,7 @@ public class AppUtil {
           String path = aClass.getResource(aClass.getSimpleName() + ".class").getPath();
           String jarFilePath = path.substring(path.indexOf(":") + 1, path.indexOf("!"));
           try {
-              jarFilePath = URLDecoder.decode(jarFilePath, "UTF-8");
+              jarFilePath = URLDecoder.decode(jarFilePath, StandardCharsets.UTF_8.name());
           } catch (UnsupportedEncodingException e) {
               // fail silently;
           }

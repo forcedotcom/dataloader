@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -72,7 +73,7 @@ public class OAuthSecretFlow extends OAuthFlow {
         return config.getString(Config.OAUTH_SERVER) +
                 "/services/oauth2/authorize?response_type=code&display=popup&client_id=" +
                 config.getString(Config.OAUTH_CLIENTID) + "&redirect_uri=" +
-                URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), "UTF-8");
+                URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
     }
 
     public static class OAuthSecretBrowserListener extends OAuthBrowserListener {

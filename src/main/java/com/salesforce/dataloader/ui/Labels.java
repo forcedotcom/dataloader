@@ -26,6 +26,7 @@
 package com.salesforce.dataloader.ui;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -46,7 +47,7 @@ public class Labels {
     public static String getString(String key) {
         try {
             //Hmm.. need to test other languages on this at some point
-            return new String(RESOURCE_BUNDLE.getString(key).getBytes("ISO-8859-1"), "UTF-8");//$NON-NLS-2$ //$NON-NLS-1$
+            return new String(RESOURCE_BUNDLE.getString(key).getBytes("ISO-8859-1"), StandardCharsets.UTF_8.name());//$NON-NLS-2$ //$NON-NLS-1$
         } catch (MissingResourceException e) {
             return '!' + key + '!';
         } catch (UnsupportedEncodingException e) {

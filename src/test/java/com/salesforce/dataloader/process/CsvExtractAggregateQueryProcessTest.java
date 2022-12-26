@@ -28,6 +28,7 @@ package com.salesforce.dataloader.process;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
@@ -79,7 +80,7 @@ public class CsvExtractAggregateQueryProcessTest extends ProcessTestBase {
     private void validateAccountNameInOutputFile(final String accountName) throws IOException {
         FileInputStream fis = new FileInputStream(new File(testConfig.get(Config.DAO_NAME)));
         try {
-            CSVReader rdr = new CSVReader(fis, "UTF-8");
+            CSVReader rdr = new CSVReader(fis, StandardCharsets.UTF_8.name());
             int acctNameIndex = rdr.nextRecord().indexOf("ACCOUNT.NAME");
             assertEquals(accountName, rdr.nextRecord().get(acctNameIndex));
         } finally {

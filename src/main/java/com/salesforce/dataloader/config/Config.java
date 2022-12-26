@@ -47,6 +47,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
@@ -378,7 +379,7 @@ public class Config {
     /**
      * communications with bulk api always use UTF8
      */
-    public static final String BULK_API_ENCODING = "UTF-8";
+    public static final String BULK_API_ENCODING = StandardCharsets.UTF_8.name();
     public static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
     
     /*
@@ -1361,8 +1362,6 @@ public class Config {
         return getEnum(OperationInfo.class, OPERATION);
     }
 
-    private static final Charset UTF8 = Charset.forName("UTF-8");
-
     public String getCsvEncoding(boolean isWrite) {
         // charset is for CSV read unless isWrite is set to true
         String configProperty = READ_UTF8;
@@ -1376,7 +1375,7 @@ public class Config {
             logger.debug("Using UTF8 charset because '" 
                     +  configProperty
                     +"' is set to true");
-            return UTF8.name();
+            return StandardCharsets.UTF_8.name();
         }        
         String charset = getDefaultCharsetForCsvReadWrite();
         logger.debug("Using charset " + charset);
