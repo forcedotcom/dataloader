@@ -65,11 +65,12 @@ public class LoadMapper extends Mapper {
     }
 
     public Map<String, String> getMappingWithUnmappedColumns(boolean includeUnmapped) {
-        final Map<String, String> result = new HashMap<String, String>(getMap());
-        if (includeUnmapped) {
-            for (String daoColumn : getDaoColumns()) {
-                if (getMapping(daoColumn, true) == null) result.put(daoColumn, null);
-            }
+        final Map<String, String> result = new HashMap<String, String>();
+        for (String daoColumn : getDaoColumns()) {
+            String mapping = getMapping(daoColumn);
+            if (includeUnmapped || mapping != null) {
+                result.put(daoColumn, mapping);
+            }            
         }
         return result;
     }

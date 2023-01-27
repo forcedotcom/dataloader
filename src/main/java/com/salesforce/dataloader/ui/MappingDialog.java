@@ -344,7 +344,6 @@ public class MappingDialog extends Dialog {
         mappingTblViewer = new TableViewer(shell, SWT.FULL_SELECTION);
         mappingTblViewer.setContentProvider(new MappingContentProvider());
         mappingTblViewer.setLabelProvider(new MappingLabelProvider());
-        mappingTblViewer.setSorter(new MappingViewerSorter());
 
         //add drop support
         int ops = DND.DROP_MOVE;
