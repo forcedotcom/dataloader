@@ -50,15 +50,8 @@ public class SforceDropAdapter extends ViewerDropAdapter {
 
     @Override
     public boolean performDrop(Object arg0) {
-
-        TableViewer viewer = (TableViewer)getViewer();
-
-        dlg.replenishField((String) arg0);
-
-
-        viewer.refresh();
+        dlg.replenishSforceField((String) arg0);
         dlg.packMappingColumns();
-
         return true;
     }
 

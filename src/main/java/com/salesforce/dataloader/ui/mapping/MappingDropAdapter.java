@@ -53,25 +53,18 @@ public class MappingDropAdapter extends ViewerDropAdapter {
 
     @Override
     public boolean performDrop(Object arg0) {
-
-        TableViewer viewer = (TableViewer)getViewer();
-
         @SuppressWarnings("unchecked")
         Map.Entry<String, String> entry = (Entry<String, String>)getCurrentTarget();
 
         //replenish the old
         String oldSforce = entry.getValue();
         if (oldSforce != null && oldSforce.length() > 0) {
-            dlg.replenishField(oldSforce);
+            dlg.replenishSforceField(oldSforce);
         }
 
         entry.setValue((String)arg0);
         dlg.getMapper().putMapping(entry.getKey(), entry.getValue());
-
-        viewer.refresh();
         dlg.packMappingColumns();
-
-
         return true;
     }
 

@@ -69,7 +69,7 @@ public class MappingDragListener extends DragSourceAdapter {
                 }
 
                 Field[] newFields = fieldList.toArray(new Field[fieldList.size()]);
-                dlg.setFields(newFields);
+                dlg.setSforceFields(newFields);
 
                 viewer.setInput(newFields);
                 viewer.refresh();

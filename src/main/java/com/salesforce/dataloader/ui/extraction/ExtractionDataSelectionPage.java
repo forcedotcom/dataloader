@@ -33,7 +33,6 @@ import java.util.Map.Entry;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -47,7 +46,6 @@ import com.salesforce.dataloader.ui.EntitySelectionListViewerUtil;
 import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.ui.UIUtils;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
-import com.sforce.ws.ConnectionException;
 
 /**
  * Describe your class here.
@@ -61,7 +59,6 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
     private ListViewer lv;
     private Text fileText;
     public Composite comp;
-    private boolean success;
 
     public ExtractionDataSelectionPage(Controller controller) {
         super("ExtractionDataSelectionPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
@@ -166,8 +163,8 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
             }
         }
         lv.setInput(inputDescribes);
-        lv.refresh();
         lv.getControl().getParent().pack();
+        lv.refresh();
     }
 
     private boolean checkEntityStatus() {

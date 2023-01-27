@@ -162,9 +162,8 @@ public class DataSelectionPage extends LoadPage {
             }
         }
         lv.setInput(inputDescribes);
-        lv.refresh();
         lv.getControl().getParent().pack();
-
+        lv.refresh();
     }
 
     private boolean checkEntityStatus() {

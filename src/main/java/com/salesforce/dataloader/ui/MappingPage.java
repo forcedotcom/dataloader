@@ -170,6 +170,7 @@ public class MappingPage extends LoadPage {
                 mappingTable.getColumn(i).pack();
             }
         }
+        refreshMapping();
     }
 
     /**
@@ -191,6 +192,7 @@ public class MappingPage extends LoadPage {
     public void refreshMapping() {
         if (mappingTblViewer != null) {
             mappingTblViewer.refresh();
+            this.getShell().redraw();
         }
     }
 
