@@ -68,8 +68,8 @@ public class SforceDragListener extends DragSourceAdapter {
                     dlg.getMapper().removeMapping(eventElem.getKey());
                 }
 
-                viewer.refresh();
                 dlg.packMappingColumns();
+                viewer.refresh();
             }
         } catch (Exception e) {
             e.printStackTrace();

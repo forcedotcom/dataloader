@@ -182,15 +182,15 @@ public class ExtractionSOQLPage extends ExtractionPage {
         
         search.addSelectionListener(new SelectionAdapter() {
             public void widgetDefaultSelected(SelectionEvent e) {
-                fieldViewer.refresh();
                 preserveFieldViewerCheckedItems();
+                fieldViewer.refresh();
             }
         });
         
         search.addListener(SWT.KeyUp, new Listener() {
             public void handleEvent(Event e) {
-                fieldViewer.refresh();
                 preserveFieldViewerCheckedItems();
+                fieldViewer.refresh();
             }
         });
 
