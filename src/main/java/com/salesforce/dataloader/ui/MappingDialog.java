@@ -37,6 +37,8 @@ import org.apache.logging.log4j.LogManager;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.*;
 import org.eclipse.swt.events.*;
@@ -218,11 +220,19 @@ public class MappingDialog extends Dialog {
                 autoMatchFields();
             }
         });
+        
+        Text sforceFieldsSearch = new Text(shell, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH);
+        sforceFieldsSearch.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        sforceFieldsSearch.addListener(SWT.KeyUp, new Listener() {
+            public void handleEvent(Event e) {
+                sforceTblViewer.refresh();
+            }
+        });
 
         ///////////////////////////////////////////////
         //InitializeSforceViewer
         ///////////////////////////////////////////////
-        initializeSforceViewer(shell);
+        initializeSforceViewer(shell, sforceFieldsSearch);
 
         Label sep1 = new Label(shell, SWT.HORIZONTAL | SWT.SEPARATOR);
         sep1.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -423,7 +433,7 @@ public class MappingDialog extends Dialog {
 
     }
 
-    private void initializeSforceViewer(Shell shell) {
+    private void initializeSforceViewer(Shell shell, Text sforceFieldsSearch) {
         GridData data;
 
         //sforce field table viewer
@@ -431,6 +441,7 @@ public class MappingDialog extends Dialog {
         sforceTblViewer.setContentProvider(new SforceContentProvider());
         sforceTblViewer.setLabelProvider(new SforceLabelProvider());
         sforceTblViewer.setSorter(new SforceViewerSorter());
+        sforceTblViewer.addFilter(new SforceFieldsFilter(sforceFieldsSearch));
 
         //add drag support
         int ops = DND.DROP_MOVE;
@@ -671,4 +682,45 @@ public class MappingDialog extends Dialog {
         return this.mapper;
     }
 
+}
+
+/**
+* This class filters the Saleforce fields list
+*/
+
+class SforceFieldsFilter extends ViewerFilter {
+   private Text searchText;
+   public SforceFieldsFilter(Text search) {
+       super();
+       this.searchText = search;
+   }
+   /**
+    * Returns whether the specified element passes this filter
+    *
+    * @param arg0
+    *            the viewer
+    * @param arg1
+    *            the parent element
+    * @param arg2
+    *            the element
+    * @return boolean
+    */
+   @Override
+   public boolean select(Viewer arg0, Object arg1, Object arg2) {
+
+       Field selectedField = (Field)arg2;
+       String fieldName = selectedField.getName();
+       String fieldLabel = selectedField.getLabel();
+       String searchText = this.searchText.getText();
+       if (searchText != null && !searchText.isBlank()) {
+           searchText = searchText.toLowerCase();
+           if ((fieldName != null && fieldName.toLowerCase().contains(searchText)) 
+              || (fieldLabel != null && fieldLabel.toLowerCase().contains(searchText))) {
+               return true;
+           } else {
+               return false;
+           }
+       }
+       return true;
+   }
 }
