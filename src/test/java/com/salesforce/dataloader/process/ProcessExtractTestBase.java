@@ -132,8 +132,11 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
     }
 
     // Utility functions
-
     protected void verifyIdsInCSV(Controller control, String[] ids) throws DataAccessObjectException {
+        verifyIdsInCSV(control, ids, false);
+    }
+
+    protected void verifyIdsInCSV(Controller control, String[] ids, boolean checkPhoneFormat) throws DataAccessObjectException {
 
         // assert that it's a CSV...if not fail
         final Set<String> unexpectedIds = new HashSet<String>();
@@ -145,9 +148,33 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
 
             // go through item by item and assert that it's there
             Row row;
+            int currentRow = 0;
             while ((row = resultReader.readRow()) != null) {
                 final String resultId = (String)row.get(Config.ID_COLUMN_NAME);
                 assertValidId(resultId);
+                String resultPhone = (String)row.get("Phone");
+                if (checkPhoneFormat && resultPhone != null) {
+                    resultPhone = resultPhone.substring(0, 8);
+                    int remainder = currentRow++ % 4;
+                    switch (remainder) {
+                        case 0 :
+                            assertEquals("Incorrect phone number conversion", resultPhone, "+1415555");
+                            break;
+                        case 1 :
+                            assertEquals("Incorrect phone number conversion", resultPhone, "(415) 55");
+                            break;
+                        case 2 :
+                            assertEquals("Incorrect phone number conversion", resultPhone, "(415) 55");
+                            break;
+                        case 3 :
+                            resultPhone = resultPhone.substring(0,5);
+                            assertEquals("Incorrect phone number conversion", resultPhone, "14155");
+                            break;
+                        default :
+                            assertEquals("Incorrect phone number conversion", resultPhone, "1415555");
+                            break;
+                    }
+                }
                 if (!expectedIds.remove(resultId)) {
                     unexpectedIds.add(resultId);
                 }
@@ -299,7 +326,8 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         final String soql = accountGen
                 .getSOQL("ID, NAME, TYPE, PHONE, ACCOUNTNUMBER__C, WEBSITE, ANNUALREVENUE, LASTMODIFIEDDATE, ORACLE_ID__C");
         Controller control = runProcess(getTestConfig(soql, "Account", true), numRecords);
-        verifyIdsInCSV(control, accountIds);
+        // verify IDs and phone format 
+        verifyIdsInCSV(control, accountIds, true);
     }
 
     public void testPolymorphicRelationshipExtract() throws Exception {
