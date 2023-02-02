@@ -31,6 +31,8 @@ import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
 import org.apache.commons.beanutils.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
@@ -41,9 +43,12 @@ import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.mapping.LoadMapper;
+import com.salesforce.dataloader.mapping.Mapper;
 import com.sforce.async.AsyncApiException;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Field;
+import com.sforce.soap.partner.FieldType;
+import com.sforce.soap.partner.GetUserInfoResult;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 
@@ -68,6 +73,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     protected List<Row> daoRowList = new ArrayList<Row>();
     protected ArrayList<Integer> batchRowToDAORowList = new ArrayList<Integer>();
     private int processedDAORowCounter = 0;
+    private static final Logger logger = LogManager.getLogger(DAOLoadVisitor.class);
 
     protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
@@ -216,35 +222,48 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     
     private static final int NONBREAKING_SPACE_ASCII_VAL = 0xA0;
     private static Controller currentController = null;
-    private static ArrayList<String> htmlFormattedFieldList = null;
+    private ArrayList<String> htmlFormattedSforceFieldList = null;
+    private ArrayList<String> phoneSforceFieldList = null;
 
-    private synchronized List<String> getHtmlFormattedFieldList() {
-        if (getController() == currentController && htmlFormattedFieldList != null) {
-            return htmlFormattedFieldList;
+    private synchronized void getHtmlFormattedAndPhoneSforceFieldList() {
+        if (htmlFormattedSforceFieldList != null && phoneSforceFieldList != null) {
+            return; // already created
+        }
+        if (getController() == currentController && htmlFormattedSforceFieldList != null) {
+            return;
         }
         if (getController() == null) {
-            return null;
+            return;
         }
         if (!getController().isLoggedIn()) {
             // clear cached values if not logged in
             currentController = null;
-            return null;
+            return;
         }
         currentController = getController();
-        htmlFormattedFieldList = new ArrayList<String>();
+        htmlFormattedSforceFieldList = new ArrayList<String>();
+        phoneSforceFieldList = new ArrayList<String>();
         DescribeSObjectResult result = getController().getFieldTypes();
         Field[] fields = result.getFields();
         for (Field field : fields) {
             if (field.getHtmlFormatted()) {
-                htmlFormattedFieldList.add(field.getName());
+                htmlFormattedSforceFieldList.add(field.getName());
+            }
+            if (field.getType() == FieldType.phone) {
+                phoneSforceFieldList.add(field.getName());
             }
         }
-        return htmlFormattedFieldList;
     }
     
     public Object getFieldValue(String fieldName, Object fieldValue) {
-        List<String> htmlFormattedFieldList = getHtmlFormattedFieldList();
-        if (htmlFormattedFieldList == null || !htmlFormattedFieldList.contains(fieldName)) {
+        fieldValue = getHtmlFormattedFieldValue(fieldName, fieldValue);
+        fieldValue = getPhoneFieldValue(fieldName, fieldValue);
+        return fieldValue;
+    }
+    
+    private Object getHtmlFormattedFieldValue(String fieldName, Object fieldValue) {
+        getHtmlFormattedAndPhoneSforceFieldList();
+        if (htmlFormattedSforceFieldList == null || !htmlFormattedSforceFieldList.contains(fieldName)) {
             return fieldValue;
         }
         
@@ -264,4 +283,52 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         return htmlFormattedFieldVal.toString();
     }
 
+    private Object getPhoneFieldValue(String fieldName, Object fieldValue) {
+        getHtmlFormattedAndPhoneSforceFieldList();
+        if (phoneSforceFieldList == null || !phoneSforceFieldList.contains(fieldName)) {
+            return fieldValue;
+        }
+        
+        // The field is a phone field.
+        // Per documentation at https://help.salesforce.com/s/articleView?id=000385963&type=1
+        // if Locale is set to English (United States) or English (Canada), 
+        // 10-digit phone numbers and 11-digit numbers that start with “1” are 
+        // formatted as (800) 555-1212.
+        //
+        // Locale codes "en_US" and "en_CA" obtained from 
+        // https://docs.oracle.com/cd/E23824_01/html/E26033/glset.html 
+        
+        String localeStr = Locale.getDefault().toString(); 
+        try {
+            GetUserInfoResult userInfo = this.controller.getPartnerClient().getClient().getUserInfo();
+            localeStr = userInfo.getUserLocale();
+        } catch (ConnectionException e) {
+            logger.debug("Unable to access user locale from server");
+        }
+
+        String phoneValue = (String)fieldValue;
+        if (phoneValue == null 
+                || !("en_US".equalsIgnoreCase(localeStr) && "en_CA".equalsIgnoreCase(localeStr))
+                || phoneValue.length() < 10
+                || phoneValue.length() > 11
+        ) {
+            return phoneValue;
+        }
+        
+        try {
+            Long.parseUnsignedLong(phoneValue);
+        } catch (Exception ex) {
+            // phone number contains non-numeric characters
+            return phoneValue;
+        }
+        if (phoneValue.startsWith("+") || phoneValue.startsWith("-")) {
+            return phoneValue;
+        }
+        if (phoneValue.length() == 10) { // use the format (xxx) xxx-xxxx
+            phoneValue = phoneValue.replaceFirst("(\\d{3})(\\d{3})(\\d+)", "($1) $2-$3");
+        } else if (phoneValue.length() == 11 && phoneValue.startsWith("1")) { // length 11 and starts with 1
+            phoneValue = phoneValue.replaceFirst("(\\d{1})(\\d{3})(\\d{3})(\\d+)", "($2) $3-$4");
+        }
+        return phoneValue;
+    }
 }

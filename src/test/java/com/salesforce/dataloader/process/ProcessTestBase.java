@@ -423,7 +423,24 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             }
             account.setField("AccountNumber__c", accountNumberValue);
             account.setField("AnnualRevenue", (double) 1000 * i);
-            account.setField("Phone", "415-555-" + seqStr);
+            int remainder = i % 5;
+            switch (remainder) {
+                case 0:
+                    account.setField("Phone", "+1415555" + seqStr);
+                    break;
+                case 1:
+                    account.setField("Phone", "415555" + seqStr);
+                    break;
+                case 2:
+                    account.setField("Phone", "1415555" + seqStr);
+                    break;
+                case 3:  // length less than 10
+                    account.setField("Phone", "14155" + seqStr);
+                    break;
+                default:
+                    account.setField("Phone", "141555567" + seqStr);
+                    break;
+            }
             account.setField("WebSite", "http://www.accountInsert" + seqStr
                     + ".com");
             account.setField(DEFAULT_ACCOUNT_EXT_ID_FIELD, "1-" + seqStr);
