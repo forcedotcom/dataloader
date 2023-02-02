@@ -40,7 +40,7 @@ public class LoadRateCalculator {
 
     // TODO: we can probably move all references to this code into a base ProgressMonitor class
     private Date startTime = null;
-    private int totalRecords;
+    private long totalRecordsInJob = 0;
 
     public LoadRateCalculator() {}
 
@@ -49,35 +49,52 @@ public class LoadRateCalculator {
     }
 
     public void setNumRecords(int numRecords) {
-        this.totalRecords = numRecords;
+        this.totalRecordsInJob = numRecords;
     }
 
-    public String calculateSubTask(long l, long m) {
+    public String calculateSubTask(long processedRecordsInJob, long numErrorsInJob) {
 
         final Date currentLoadTime = new Date();
-        final long numSuccess = l - m;
-        final long currentPerMin = numSuccess * 60 * 60;
-        long rate;
+        final long numSuccessInJob = processedRecordsInJob - numErrorsInJob;
+        //final long currentPerMin = numSuccess * 60 * 60;
+        long hourlyProcessingRate;
 
-        final long totalElapsed = currentLoadTime.getTime() - this.startTime.getTime();
-        if (totalElapsed == 0) {
-            rate = 0;
+        final long totalElapsedTimeInSec = (currentLoadTime.getTime() - this.startTime.getTime())/1000;
+        if (totalElapsedTimeInSec == 0) {
+            hourlyProcessingRate = 0;
         } else {
-            rate = currentPerMin / totalElapsed * 1000;
+            hourlyProcessingRate = (processedRecordsInJob * 60 * 60) / totalElapsedTimeInSec;
         }
 
-        long remainingSeconds = 0;
-        if (this.totalRecords > 0) {
-            // time_remaining = time_elapsed / percent_complete - time_elapsed
-            remainingSeconds = (long)(((double)this.totalRecords / numSuccess - 1.0) * totalElapsed) / 1000;
+        long remainingTimeInSec = 0;
+        if (this.totalRecordsInJob > 0 && processedRecordsInJob > 0) {
+            // can estimate remaining time only if a few records are processed already.
+            long estimatedTotalTimeInSec = (long) (totalElapsedTimeInSec * this.totalRecordsInJob / processedRecordsInJob);
+            remainingTimeInSec = estimatedTotalTimeInSec - totalElapsedTimeInSec;
         }
 
-        final long mins = remainingSeconds / 60;
+        final long remainingTimeInMinutes = remainingTimeInSec / 60;
+        final long remainingSeconds = remainingTimeInSec - remainingTimeInMinutes * 60;
 
-        final long seconds = remainingSeconds - mins * 60;
-
-        return Messages.getMessage(getClass(), "processed", l, this.totalRecords, rate, mins, seconds,
-                numSuccess,
-                m);
+        if (hourlyProcessingRate <= 0 || (remainingTimeInMinutes > 7 * 24 * 60)) { // processing time not calculated or imprecise
+            // LoadRateCalculator.processedTimeUnknown=Processed {0} of {1} total records. 
+            // There are {2} successes and {3} errors.
+            return Messages.getMessage(getClass(), "processedTimeUnknown", 
+                    processedRecordsInJob, // {0}
+                    this.totalRecordsInJob,  // {1}
+                    numSuccessInJob,       // {2}
+                    numErrorsInJob);       // {3}
+        }
+        // LoadRateCalculator.processed=Processed {0} of {1} total records. 
+        // There are {5} successes and {6} errors. \nRate: {2} records per hour. 
+        // Estimated time to complete: {3} minutes and {4} seconds. 
+        return Messages.getMessage(getClass(), "processed", 
+                processedRecordsInJob, // {0}
+                this.totalRecordsInJob,  // {1}
+                hourlyProcessingRate,    // {2}
+                remainingTimeInMinutes,  // {3}
+                remainingSeconds,        // {4}
+                numSuccessInJob,       // {5}
+                numErrorsInJob);       // {6}
     }
 }
