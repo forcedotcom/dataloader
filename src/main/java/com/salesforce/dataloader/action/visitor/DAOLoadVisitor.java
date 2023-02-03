@@ -30,6 +30,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.util.DAORowUtil;
+
 import org.apache.commons.beanutils.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -285,19 +287,9 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
     private Object getPhoneFieldValue(String fieldName, Object fieldValue) {
         getHtmlFormattedAndPhoneSforceFieldList();
-        if (phoneSforceFieldList == null || !phoneSforceFieldList.contains(fieldName)) {
+        if (this.phoneSforceFieldList == null || !this.phoneSforceFieldList.contains(fieldName)) {
             return fieldValue;
         }
-        
-        // The field is a phone field.
-        // Per documentation at https://help.salesforce.com/s/articleView?id=000385963&type=1
-        // if Locale is set to English (United States) or English (Canada), 
-        // 10-digit phone numbers and 11-digit numbers that start with “1” are 
-        // formatted as (800) 555-1212.
-        //
-        // Locale codes "en_US" and "en_CA" obtained from 
-        // https://docs.oracle.com/cd/E23824_01/html/E26033/glset.html 
-        
         String localeStr = Locale.getDefault().toString(); 
         try {
             GetUserInfoResult userInfo = this.controller.getPartnerClient().getClient().getUserInfo();
@@ -305,30 +297,6 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         } catch (ConnectionException e) {
             logger.debug("Unable to access user locale from server");
         }
-
-        String phoneValue = (String)fieldValue;
-        if (phoneValue == null 
-                || !("en_US".equalsIgnoreCase(localeStr) && "en_CA".equalsIgnoreCase(localeStr))
-                || phoneValue.length() < 10
-                || phoneValue.length() > 11
-        ) {
-            return phoneValue;
-        }
-        
-        try {
-            Long.parseUnsignedLong(phoneValue);
-        } catch (Exception ex) {
-            // phone number contains non-numeric characters
-            return phoneValue;
-        }
-        if (phoneValue.startsWith("+") || phoneValue.startsWith("-")) {
-            return phoneValue;
-        }
-        if (phoneValue.length() == 10) { // use the format (xxx) xxx-xxxx
-            phoneValue = phoneValue.replaceFirst("(\\d{3})(\\d{3})(\\d+)", "($1) $2-$3");
-        } else if (phoneValue.length() == 11 && phoneValue.startsWith("1")) { // length 11 and starts with 1
-            phoneValue = phoneValue.replaceFirst("(\\d{1})(\\d{3})(\\d{3})(\\d+)", "($2) $3-$4");
-        }
-        return phoneValue;
+        return DAORowUtil.getPhoneFieldValue((String)fieldValue, localeStr);
     }
 }
