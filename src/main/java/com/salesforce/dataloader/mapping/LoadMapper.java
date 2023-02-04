@@ -89,9 +89,12 @@ public class LoadMapper extends Mapper {
     public Row mapData(Row localRow) {
         Row mappedData = new Row();
         for (Map.Entry<String, Object> entry : localRow.entrySet()) {
-            String sfdcName = getMapping(entry.getKey(), true);
-            if (StringUtils.hasText(sfdcName)) {
-                mappedData.put(sfdcName, entry.getValue());
+            String sfdcNameList = getMapping(entry.getKey(), true);
+            if (StringUtils.hasText(sfdcNameList)) {
+                String sfdcNameArray[] = sfdcNameList.split(",");
+                for (String sfdcName : sfdcNameArray) {
+                    mappedData.put(sfdcName.trim(), entry.getValue());
+                }
             } else {
                 logger.info("Mapping for field " + entry.getKey() + " will be ignored since destination column is empty");
             }
@@ -102,11 +105,14 @@ public class LoadMapper extends Mapper {
 
     public void verifyMappingsAreValid() throws MappingInitializationException {
         for (Map.Entry<String, String> entry : getMappingWithUnmappedColumns(false).entrySet()) {
-            String sfdcName = entry.getValue();
-            if(StringUtils.hasText(sfdcName)) {
-                final Field f = getClient().getField(sfdcName);
-                if (f == null)
-                    throw new MappingInitializationException("Field mapping is invalid: " + entry.getKey() + " => " + sfdcName);
+            String sfdcNameList = entry.getValue();
+            if(StringUtils.hasText(sfdcNameList)) {
+                String sfdcNameArray[] = sfdcNameList.split(",");
+                for (String sfdcName : sfdcNameArray) {
+                    final Field f = getClient().getField(sfdcName.trim());
+                    if (f == null)
+                        throw new MappingInitializationException("Field mapping is invalid: " + entry.getKey() + " => " + sfdcName);
+                }
             }
         }
     }

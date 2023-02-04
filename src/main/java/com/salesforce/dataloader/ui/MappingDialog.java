@@ -87,6 +87,7 @@ public class MappingDialog extends Dialog {
     private Field[] sforceFieldInfo;
     private MappingPage page;
     private HashSet<String> mappedFields;
+    private Shell parent;
 
     public void setSforceFieldInfo(Field[] sforceFieldInfo) {
         this.sforceFieldInfo = sforceFieldInfo;
@@ -135,8 +136,13 @@ public class MappingDialog extends Dialog {
     public MappingDialog(Shell parent, int style) {
         // Let users override the default styles
         super(parent, style);
+        this.parent = parent;
 
         setText(Labels.getString("MappingDialog.title")); //$NON-NLS-1$
+    }
+    
+    public Shell getParent() {
+        return this.parent;
     }
 
     /**
