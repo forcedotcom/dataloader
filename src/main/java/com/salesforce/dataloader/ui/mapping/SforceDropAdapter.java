@@ -50,7 +50,7 @@ public class SforceDropAdapter extends ViewerDropAdapter {
 
     @Override
     public boolean performDrop(Object arg0) {
-        dlg.replenishSforceField((String) arg0);
+        dlg.replenishMappedSforceFields((String) arg0);
         dlg.packMappingColumns();
         return true;
     }

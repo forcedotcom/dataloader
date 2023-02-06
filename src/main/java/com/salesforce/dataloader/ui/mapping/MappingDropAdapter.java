@@ -89,10 +89,7 @@ public class MappingDropAdapter extends ViewerDropAdapter {
                 newSforceMappings = this.currentSforceMappings + MAPPING_DELIMITER + this.sforceFieldToAddOrReplace;
             } else { // choice == MAPPING_CHOICE.REPLACE
                 //add replaced Salesforce fields in sforceFieldsViewer so that they are available for mapping to other fields
-                String[] currentlyMappedFields = this.currentSforceMappings.split(MAPPING_DELIMITER);
-                for (String currentlyMappedField : currentlyMappedFields) {
-                    mappingDialog.replenishSforceField(currentlyMappedField);
-                }
+                mappingDialog.replenishMappedSforceFields(this.currentSforceMappings);
             }
         }
         this.dropEntry.setValue(newSforceMappings);
