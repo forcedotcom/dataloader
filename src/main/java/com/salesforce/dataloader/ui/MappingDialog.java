@@ -587,8 +587,6 @@ public class MappingDialog extends Dialog {
             for (int i = 0; i < allFields.length; i++) {
                 field = allFields[i];
                 if (field.getName().equals(fieldNameToReplenish)) {
-    
-                    //else add the field
                     fieldList.add(field);
                 }
             }
