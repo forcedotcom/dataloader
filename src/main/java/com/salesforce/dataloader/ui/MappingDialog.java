@@ -87,6 +87,7 @@ public class MappingDialog extends Dialog {
     private Field[] sforceFieldInfo;
     private MappingPage page;
     private HashSet<String> mappedFields;
+    private Shell parent;
 
     public void setSforceFieldInfo(Field[] sforceFieldInfo) {
         this.sforceFieldInfo = sforceFieldInfo;
@@ -135,8 +136,13 @@ public class MappingDialog extends Dialog {
     public MappingDialog(Shell parent, int style) {
         // Let users override the default styles
         super(parent, style);
+        this.parent = parent;
 
         setText(Labels.getString("MappingDialog.title")); //$NON-NLS-1$
+    }
+    
+    public Shell getParent() {
+        return this.parent;
     }
 
     /**
@@ -382,7 +388,7 @@ public class MappingDialog extends Dialog {
                         String oldSforce = elem.getValue();
                         if (oldSforce != null && oldSforce.length() > 0) {
                             //clear the sforce
-                            replenishSforceField(oldSforce);
+                            replenishMappedSforceFields(oldSforce);
                             elem.setValue("");
                             mapper.removeMapping(elem.getKey());
                             packMappingColumns();
@@ -571,23 +577,26 @@ public class MappingDialog extends Dialog {
         sforceTable.redraw();
     }
 
-    public void replenishSforceField(String fieldName) {
-        //find the Field object to add to the current list.
-        Field field;
-        for (int i = 0; i < allFields.length; i++) {
-            field = allFields[i];
-            if (field.getName().equals(fieldName)) {
-                ArrayList<Field> fieldArray = new ArrayList<Field>(Arrays.asList(this.sforceFields));
-
-                //else add the field
-                fieldArray.add(field);
-                this.sforceFields = fieldArray.toArray(new Field[fieldArray.size()]);
-
-                sforceTblViewer.setInput(this.sforceFields);
-                packSforceColumns();
-                return;
+    public void replenishMappedSforceFields(String fieldNameList) {
+        String[] fieldNameListArray = fieldNameList.split(",");
+        ArrayList<Field> fieldList = new ArrayList<Field>(Arrays.asList(this.sforceFields));
+        for (String fieldNameToReplenish : fieldNameListArray) {
+            fieldNameToReplenish = fieldNameToReplenish.strip();
+            //find the Field object to add to the current list.
+            Field field;
+            for (int i = 0; i < allFields.length; i++) {
+                field = allFields[i];
+                if (field.getName().equals(fieldNameToReplenish)) {
+    
+                    //else add the field
+                    fieldList.add(field);
+                }
             }
         }
+        this.sforceFields = fieldList.toArray(new Field[fieldList.size()]);
+        sforceTblViewer.setInput(this.sforceFields);
+        packSforceColumns();
+        return;
     }
 
     /**
@@ -663,7 +672,7 @@ public class MappingDialog extends Dialog {
         mapper.clearMap();
         // restore the fields in sforceTblViewer that were mapped before
         for(String fieldName : mappedFields) {
-            replenishSforceField(fieldName);
+            replenishMappedSforceFields(fieldName);
         }
         mappedFields.clear();
         packMappingColumns();

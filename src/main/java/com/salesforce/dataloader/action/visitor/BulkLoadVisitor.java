@@ -42,9 +42,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
-import java.util.TreeSet;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
@@ -91,6 +89,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private final boolean isDelete;
     private static final DateFormat DATE_FMT;
     private int batchCountForJob = 0;
+    private List<String> batchHeaderColumns = null;
 
     static {
         DATE_FMT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -176,38 +175,49 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
     private void doOneBatch(PrintStream out, ByteArrayOutputStream os, List<DynaBean> rows) throws OperationException,
             AsyncApiException {
-        int recordsInBatch = 0;
-        final List<String> userColumns = getController().getDao().getColumnNames();
-        List<String> headerColumns = null;
+        int processedRecordsCount = 0;
         for (int i = 0; i < rows.size(); i++) {
             final DynaBean row = rows.get(i);
 
-            if (recordsInBatch == 0) {
-                headerColumns = addHeader(out, row, userColumns);
+            if (processedRecordsCount == 0) {
+                addHeader(out, row);
             }
-            writeRow(row, out, recordsInBatch, headerColumns);
-            recordsInBatch++;
+            writeRow(row, out, processedRecordsCount);
+            processedRecordsCount++;
 
             if (os.size() > Config.MAX_BULK_API_BATCH_BYTES) {
-            	createBatch(os, recordsInBatch); // resets outputstream
+            	createBatch(os, processedRecordsCount); // resets outputstream
                 // reset for the next batch
-                recordsInBatch = 0;
+            	processedRecordsCount = 0;
             }
         }
-        if (recordsInBatch > 0) createBatch(os, recordsInBatch);
+        if (processedRecordsCount > 0) createBatch(os, processedRecordsCount);
         this.jobUtil.periodicCheckStatus();
     }
+    
+    private List<String> getBatchHeaderColumns(DynaBean row) {
+        if (this.batchHeaderColumns != null) {
+            return this.batchHeaderColumns;
+        }
+        this.batchHeaderColumns = new ArrayList<String>();
+        for (DynaProperty dynaProperty : row.getDynaClass().getDynaProperties()) {
+            final String sfdcColumn = dynaProperty.getName();
+            if (row.get(sfdcColumn) != null) {
+                this.batchHeaderColumns.add(sfdcColumn);
+            }
+        }
+        return this.batchHeaderColumns;
+    }
 
-    private void writeRow(DynaBean row, PrintStream out, int recordsInBatch,
-            List<String> header) throws LoadException {
+    private void writeRow(DynaBean row, PrintStream out, int recordsInBatch) throws LoadException {
         boolean notFirst = false;
-        for (final String column : header) {
+        for (String sforceField : getBatchHeaderColumns(row)) {
             if (notFirst) {
                 out.print(',');
             } else {
                 notFirst = true;
             }
-            writeSingleColumn(out, column, row.get(column));
+            writeSingleColumn(out, sforceField.strip(), row.get(sforceField));
         }
         out.println();
     }
@@ -237,43 +247,18 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         out.print('"');
     }
 
-    private List<String> addHeader(PrintStream out, DynaBean row, List<String> columns)
+    private void addHeader(PrintStream out, DynaBean row)
             throws LoadException {
         boolean first = true;
-        final List<String> cols = new ArrayList<String>();
-        final Set<String> addedCols = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        for (final String userColumn : columns) {
-            final String sfdcColumn = getMapper().getMapping(userColumn);
-            // if the column is not mapped, don't send it
-            if (sfdcColumn == null || sfdcColumn.length() == 0) {
-                // TODO: we should make it more obvious to users when we omit a column
-                getLogger().warn("Cannot find mapping for column: " + userColumn + ".  Omitting column");
-                continue;
+        for (String sfdcColumn : getBatchHeaderColumns(row)) {
+            if (first) {
+                first = false;
+            } else {
+                out.print(',');
             }
-            // TODO we don't really need to be this strict about a delete CSV file.. as long as the IDS are there
-            if (this.isDelete && (!first || !"id".equalsIgnoreCase(sfdcColumn)))
-                throw new LoadException(Messages.getMessage(getClass(), "deleteCsvError"));
-            addFieldToHeader(out, sfdcColumn, cols, addedCols, first);
-            if (first) first = false;
-        }
-        for (DynaProperty dynaProperty : row.getDynaClass().getDynaProperties()) {
-            final String name = dynaProperty.getName();
-            if (row.get(name) != null && !addedCols.contains(name)) {
-                addFieldToHeader(out, name, cols, addedCols, first);
-            }
+            out.print(sfdcColumn.replace(':', '.'));
         }
         out.println();
-        return Collections.unmodifiableList(cols);
-    }
-
-    private static void addFieldToHeader(PrintStream out, String sfdcColumn, List<String> cols, Set<String> addedCols,
-            boolean first) {
-        if (!first) {
-            out.print(',');
-        }
-        out.print(sfdcColumn.replace(':', '.'));
-        cols.add(sfdcColumn);
-        addedCols.add(sfdcColumn);
     }
 
     private void writeServerLoadBatchDataToCSV(ByteArrayOutputStream os) {
@@ -597,8 +582,6 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         assert (batchId != null && batchId.equals(batch.getId()));
         assert (jobUtil.getJobId().equals(batch.getJobId()));
         assert clientBatchInfo.numRows > 0;
-
-        final int recordsProcessed = batch.getNumberRecordsProcessed();
         final BatchStateEnum state = batch.getState();
 
         if (state != BatchStateEnum.Completed && state != BatchStateEnum.Failed)

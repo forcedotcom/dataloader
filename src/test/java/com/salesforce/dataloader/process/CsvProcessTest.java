@@ -470,6 +470,32 @@ public class CsvProcessTest extends ProcessTestBase {
     public void testErrorsGeneratedOnInvalidDateMatchingWithOffset() throws Exception {
     	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(2, 2, 2);
     }
+    
+    @Test
+    public void testOneToManySforceFieldsMappingInCsv() throws Exception {
+        // The use case is as follows:
+        // This company in this scenario only does business in the state of CA, therefore billing and shipping
+        // addresses are hard coded to that.
+        // Also, all of its descriptions are constant.
+
+        // insert the values
+        Map<String, String> argumentMap = getTestConfig(OperationInfo.insert, getTestDataDir()
+                + "/oneToManySforceFieldsMappingInCsv.csv", false);
+        Controller controller = runProcess(argumentMap, 2);
+        for (SObject acct : retrieveAccounts(controller, "Name", "Description", "BillingState", "ShippingState")) {
+            if ("ABC Corp".equals(acct.getField("Name"))) {
+                final String stateValue = "California";
+                assertEquals("Incorrect value for billing state returned", stateValue, acct.getField("BillingState"));
+                assertEquals("Incorrect value for shipping state returned", stateValue, acct.getField("ShippingState"));
+                assertEquals("Incorrect value for description returned", stateValue, acct.getField("Description"));
+            } else if ("XYZ Corp".equals(acct.getField("Name"))) {
+                final String stateValue = "New York";
+                assertEquals("Incorrect value for billing state returned", stateValue, acct.getField("BillingState"));
+                assertEquals("Incorrect value for shipping state returned", stateValue, acct.getField("ShippingState"));
+                assertEquals("Incorrect value for description returned", stateValue, acct.getField("Description"));
+            }
+        }
+    }
 
     private void runTestErrorsGeneratedOnInvalidDateMatchWithOffset(Integer rowOffset, final int numSuccesses, final int numFailures) throws Exception {
 
