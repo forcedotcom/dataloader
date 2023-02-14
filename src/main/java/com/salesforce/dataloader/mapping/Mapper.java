@@ -96,7 +96,20 @@ public abstract class Mapper {
     }
 
     public final void putMapping(String src, String dest) {
-        this.map.put(daoColumns.getOriginal(src), fields.getOriginal(dest));
+        // destination can be multiple field names for upload operations
+        StringTokenizer st = new StringTokenizer(dest, ",");
+        String originalDestList = null;
+        while(st.hasMoreElements()) {
+            String v = st.nextToken();
+            v = v.trim();
+            String originalVal = fields.getOriginal(v);
+            if (originalDestList == null) {
+                originalDestList = originalVal;
+            } else {
+                originalDestList = originalDestList + ", " + originalVal;
+            }
+        }
+        this.map.put(daoColumns.getOriginal(src), originalDestList);
     }
 
     protected void putConstant(String name, String value) {
