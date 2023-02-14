@@ -87,12 +87,12 @@ public abstract class Mapper {
         Set<String> daoColumns = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         if (columnNames != null) daoColumns.addAll(columnNames);
         this.daoColumns = new CaseInsensitiveSet(Collections.unmodifiableSet(daoColumns));
-        putPropertyFileMappings(mappingFileName);
         if (fields != null) {
             for (Field field : fields) {
                 this.fields.add(field.getName());
             }
         }
+        putPropertyFileMappings(mappingFileName);
     }
 
     public final void putMapping(String src, String dest) {
