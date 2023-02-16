@@ -114,6 +114,12 @@ public class SettingsPage extends OperationPage {
     private void loadDataSelectionPage(Controller controller) {
         ((OperationPage)getWizard().getPage(this.nextPageName)).setupPage(); //$NON-NLS-1$
         setPageComplete();
+        if (canFlipToNextPage()) {
+            IWizardPage page = getNextPage();
+            if (page != null) {
+                getContainer().showPage(page);
+            }
+        }
     }
 
     /**
