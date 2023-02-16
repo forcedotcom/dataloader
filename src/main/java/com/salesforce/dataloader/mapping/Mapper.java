@@ -85,6 +85,15 @@ public abstract class Mapper {
         this.client = client;
         this.fields = new CaseInsensitiveSet();
         Set<String> daoColumns = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+        int i = 0;
+        for (String colName : columnNames) {
+            i++;
+            if (colName == null) {
+                String errorMsg = "Missing column name in the CSV file at column " + i;
+                logger.error(errorMsg);
+                throw new MappingInitializationException(errorMsg);
+            }
+        }
         if (columnNames != null) daoColumns.addAll(columnNames);
         this.daoColumns = new CaseInsensitiveSet(Collections.unmodifiableSet(daoColumns));
         if (fields != null) {
