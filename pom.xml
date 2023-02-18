@@ -229,7 +229,7 @@
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-jar-plugin</artifactId>
-   <version>3.2.2</version>
+      <version>3.2.2</version>
 	</plugin>
 <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-site-plugin -->
 	<plugin>
@@ -430,6 +430,9 @@
                 <manifest>
                   <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
                 </manifest>
+                <manifestEntries>
+                    <Multi-Release>true</Multi-Release>
+                </manifestEntries>
               </archive>
               <descriptors>
                 <descriptor>src/main/assembly/uber.xml</descriptor>
