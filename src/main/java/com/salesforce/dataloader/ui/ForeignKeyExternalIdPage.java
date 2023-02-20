@@ -54,6 +54,8 @@ public class ForeignKeyExternalIdPage extends LoadPage {
 
     public ForeignKeyExternalIdPage(Controller controller) {
         super("ForeignKeyExternalIdPage", controller); //$NON-NLS-1$
+        // Mark this page as completed as the selected sObject may not have any foreign key
+        setPageComplete();
     }
 
     @Override
@@ -98,7 +100,6 @@ public class ForeignKeyExternalIdPage extends LoadPage {
         }
         scrollComp.setMinSize(comp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
         containerComp.layout();
-        setPageComplete();
     }
 
     /**
