@@ -150,7 +150,7 @@ public class FinishPage extends LoadPage {
 
     public void setPageComplete() {
         String outputDir = getOutputDir();
-        if (outputDir == null || outputDir.isBlank()) {
+        if (outputDir == null || outputDir.isBlank() || !this.isCurrentPage()) {
             setPageComplete(false);
         } else {
             setPageComplete(true);
