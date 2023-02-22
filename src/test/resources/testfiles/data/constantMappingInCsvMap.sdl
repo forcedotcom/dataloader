@@ -3,4 +3,4 @@
 Name=Name
 NumEmployees = NumberOfEmployees
 "Aerospace"=Industry
-state=BillingState, ShippingState
+"California"=BillingState, ShippingState
