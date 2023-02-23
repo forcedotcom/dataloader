@@ -91,13 +91,13 @@
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
-      <version>2.19.0</version>
+      <version>2.20.0</version>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
-      <version>2.19.0</version>
+      <version>2.20.0</version>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
     <dependency>
@@ -156,7 +156,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.0.0</version>
+      <version>5.1.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -299,13 +299,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M6</version>
+        <version>3.0.0-M9</version>
           <dependencies>
 <!-- https://mvnrepository.com/artifact/org.apache.maven.surefire/surefire-junit4 -->
               <dependency>
                   <groupId>org.apache.maven.surefire</groupId>
                   <artifactId>surefire-junit4</artifactId>
-                  <version>3.0.0-M8</version>
+                  <version>3.0.0-M9</version>
               </dependency>
           </dependencies>
         <configuration>
@@ -593,13 +593,13 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>3.0.0-M6</version>
+            <version>3.0.0-M9</version>
             <dependencies>
 <!-- https://mvnrepository.com/artifact/org.apache.maven.surefire/surefire-junit4 -->
               <dependency>
                 <groupId>org.apache.maven.surefire</groupId>
                 <artifactId>surefire-junit4</artifactId>
-                <version>3.0.0-M7</version>
+                <version>3.0.0-M9</version>
               </dependency>
             </dependencies>
             <configuration>
