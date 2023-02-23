@@ -27,7 +27,6 @@ package com.salesforce.dataloader.action.visitor;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -232,7 +231,6 @@ class BulkApiVisitorUtil {
         	processBulkV2LoadBatch(batchContent);
         	batch = new BatchInfo();
         	batch.setId("BULKV2_LOAD_BATCH_" + this.bulkV2LoadBatchCount++);
-        	return batch;
         } else { // Bulk v1 job
 	        BulkConnection connectionClient = this.controller.getBulkClient().getClient();
 	        if (this.jobInfo.getContentType() == ContentType.ZIP_CSV) {
@@ -241,8 +239,12 @@ class BulkApiVisitorUtil {
 	            batch = connectionClient.createBatchFromStream(this.jobInfo, batchContent);
 	        }
 	        logger.info(Messages.getMessage(getClass(), "logBatchLoaded", batch.getId()));
-	        return batch;
         }
+        
+        // Done creating a batch. Clear attachments map in preparation for the next batch
+        this.attachments.clear();
+        this.attachmentNum = 0;
+        return batch;
     }
     
     void processBulkV2LoadBatch(InputStream batchContent) throws AsyncApiException {
