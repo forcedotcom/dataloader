@@ -26,6 +26,7 @@
 
 package com.salesforce.dataloader.action;
 
+import com.salesforce.dataloader.action.visitor.IVisitor;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.OperationException;
 
@@ -41,4 +42,5 @@ public interface IAction {
      * @throws DataAccessObjectException
      */
     public void execute() throws DataAccessObjectException, OperationException;
+    public IVisitor getVisitor();
 }

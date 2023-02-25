@@ -45,7 +45,6 @@ import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.mapping.LoadMapper;
-import com.salesforce.dataloader.mapping.Mapper;
 import com.sforce.async.AsyncApiException;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Field;

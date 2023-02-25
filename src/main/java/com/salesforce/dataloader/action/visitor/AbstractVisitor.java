@@ -35,6 +35,10 @@ import com.salesforce.dataloader.mapping.Mapper;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.LoadRateCalculator;
 import org.apache.logging.log4j.Logger;
+
+import java.io.InputStream;
+import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 
 public abstract class AbstractVisitor implements IVisitor {
@@ -144,4 +148,11 @@ public abstract class AbstractVisitor implements IVisitor {
     protected LoadRateCalculator getRateCalculator() {
         return this.rateCalculator;
     }
+    
+    // Subclasses that support attachments (e.g. BulkLoadVisitor) need to override the method
+    @Override
+    public Map<String, InputStream> getAttachments() {
+        return null;
+    }
+
 }

@@ -26,7 +26,6 @@
 
 package com.salesforce.dataloader.process;
 
-import com.salesforce.dataloader.TestProgressMontitor;
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
@@ -47,6 +46,7 @@ import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -114,6 +114,8 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
 
         final Map<String, String> argMap = getTestConfig(OperationInfo.insert, fileName, false);
         argMap.put(Config.ENTITY, "Attachment");
+        // force multiple batches
+        argMap.put(Config.LOAD_BATCH_SIZE, "1");
 
         // this feature does not work when bulk api is enabled but the zip content type is not
         final boolean bulkApi = isBulkAPIEnabled(argMap);
@@ -155,6 +157,12 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
             verifyInsertCorrectByContent(controller, createAttachmentFileMap(files), myAttachmentTemplateListener);
             // this should also still work
             assertTrue("Process failed: " + monitor.getMessage(), monitor.isSuccess());
+            Map<String, InputStream> attachments = controller.getLastExecutedAction().getVisitor().getAttachments();
+            if ( attachments!= null) {
+                // attachments map must be cleared when a batch is uploaded
+                assertTrue("Incorrect number of attachments in the batch: expected 0, actual " + attachments.keySet().size(),
+                        attachments.keySet().size() == 0);
+            }
             verifyFailureFile(controller, numFailures); // A.S.: To be removed and replaced
             verifySuccessFile(controller, numInserts, numUpdates, false);
 
