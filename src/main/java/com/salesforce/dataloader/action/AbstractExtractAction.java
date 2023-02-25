@@ -80,7 +80,7 @@ abstract class AbstractExtractAction extends AbstractAction {
     }
 
     @Override
-    protected IQueryVisitor getVisitor() {
+    public IQueryVisitor getVisitor() {
         return (IQueryVisitor)super.getVisitor();
     }
 

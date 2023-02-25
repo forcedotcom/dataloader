@@ -209,7 +209,7 @@ abstract class AbstractAction implements IAction {
         return this.successWriter;
     }
 
-    protected IVisitor getVisitor() {
+    public IVisitor getVisitor() {
         return this.visitor;
     }
 

@@ -32,13 +32,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -620,5 +620,10 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             OperationException {
         super.conversionFailed(row, errMsg);
         getLogger().warn("Skipping results for row " + row + " which failed before upload to Saleforce.com");
+    }
+
+    @Override
+    public Map<String, InputStream> getAttachments() {
+        return this.jobUtil.getAttachments();
     }
 }

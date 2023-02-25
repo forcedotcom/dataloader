@@ -121,7 +121,7 @@ abstract class AbstractLoadAction extends AbstractAction {
     }
 
     @Override
-    protected DAOLoadVisitor getVisitor() {
+    public DAOLoadVisitor getVisitor() {
         return (DAOLoadVisitor)super.getVisitor();
     }
 

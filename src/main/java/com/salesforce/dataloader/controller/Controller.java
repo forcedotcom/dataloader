@@ -60,6 +60,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -116,6 +117,8 @@ public class Controller {
 
     // logger
     private static Logger logger;
+    
+    private IAction lastExecutedAction = null;
 
     private Controller(String lastRunFilePrefix, Map<String, String> argMap) throws ControllerInitializationException {
         // if name is passed to controller, use it to create a unique run file name
@@ -171,6 +174,11 @@ public class Controller {
         logger.info(Messages.getFormattedString("Controller.executeStart", operation)); //$NON-NLS-1$
         logger.debug("API info for the operation:" + getAPIInfo());
         action.execute();
+        this.lastExecutedAction = action;
+    }
+    
+    public IAction getLastExecutedAction() {
+        return this.lastExecutedAction;
     }
     
     public String getAPIInfo() {

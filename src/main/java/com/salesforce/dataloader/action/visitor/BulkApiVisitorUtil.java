@@ -222,6 +222,10 @@ class BulkApiVisitorUtil {
         this.attachments.put(name, new ByteArrayInputStream(fileContents));
         return "#" + name;
     }
+    
+    public Map<String, InputStream> getAttachments() {
+        return this.attachments;
+    }
 
     BatchInfo createBatch(InputStream batchContent) throws AsyncApiException {
         BatchInfo batch = null;
