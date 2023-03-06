@@ -5,10 +5,10 @@
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
   <version>57.0.2</version>
-  <name>Data Loader</name>
+  <name>Salesforce Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
-    <name>salesforce.com</name>
+    <name>Salesforce, Inc.</name>
     <url>http://salesforce.com</url>
   </organization>
 
@@ -432,6 +432,8 @@
                 </manifest>
                 <manifestEntries>
                     <Multi-Release>true</Multi-Release>
+                    <Permissions>all-permissions</Permissions>
+                    <Application-Name>${project.name}</Application-Name>
                 </manifestEntries>
               </archive>
               <descriptors>
