@@ -131,8 +131,8 @@ public class DataLoaderRunner extends Thread {
         }
         
         // set JVM arguments
-        // set library path for native libs of SWT
-        String librarypath = System.getProperty("java.library.path");
+        // add JVM arguments specified in the command line
+        jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
         File swtJarFileHandle = getSWTJarFileHandle();
         if (swtJarFileHandle == null) {
             logger.error("Unable to find SWT jar for " 
@@ -140,18 +140,7 @@ public class DataLoaderRunner extends Thread {
                     + System.getProperty("os.arch"));
             System.exit(-1);
         }
-        String swtDir = swtJarFileHandle.getParent();
-        if (librarypath != null && !librarypath.isBlank()) {
-            librarypath = swtDir + PATH_SEPARATOR + librarypath;
-        } else {
-            librarypath = swtDir;
-        }
-        jvmArgs.add("-Djava.library.path=" + librarypath);
-        logger.debug("set java.library.path=" + librarypath);
         
-        // add JVM arguments specified in the command line
-        jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
-
         // set classpath
         String classpath = System.getProperty("java.class.path");
         String SWTJarPath = swtJarFileHandle.getAbsolutePath();
