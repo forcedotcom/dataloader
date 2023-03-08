@@ -19,15 +19,5 @@
 		  <include name="**/*.jar"/>
 		</fileset>
 	  </move>
-	  <unzip dest="${fileName}">
-		<patternset>
-		  <include name="**/*.jnilib"/>
-		  <include name="**/*.dll"/>
-		  <include name="**/*.so"/>
-		</patternset>
-		<fileset dir="${fileName}">
-		  <include name="**/*.jar"/>
-		</fileset>
-	  </unzip>
 	</target>
 </project>
