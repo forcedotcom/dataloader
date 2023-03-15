@@ -98,3 +98,8 @@ REM Note for label renaming - promptForShortcut sets "yesDestination" var based 
     for /f "usebackq tokens=3*" %%D IN (`reg query "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop`) do set DESKTOP_DIR=%%D
     move "%USERPROFILE%\Desktop\Dataloader.lnk" "%DESKTOP_DIR%\Dataloader %DATALOADER_VERSION%.lnk" >nul
     EXIT /b 0
+    
+:doDeleteExistingDir
+    echo Deleting existing Data Loader v%DATALOADER_VERSION%...
+    rd /s /q "%~1"
+    EXIT /b 0

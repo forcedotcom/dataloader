@@ -2,7 +2,6 @@
 setlocal
 
 SET ERRORLEVEL=0
-CALL "%~dp0util\util.bat" :checkJavaVersion
 CALL "%~dp0util\util.bat" :showBanner
 
 echo Data Loader installation requires you to provide an installation directory to create a version-specific subdirectory for the installation artifacts.
@@ -38,11 +37,6 @@ goto :exit
     set prompt="Do you want to overwrite currently installed Data Loader v%DATALOADER_VERSION% and its configuration in '%INSTALLATION_DIR%'?[Yes/No]"
     CALL :promptAndExecuteOperation %prompt% doDeleteExistingDir 1
     EXIT /b %ERRORLEVEL%
-    
-:doDeleteExistingDir
-    echo Deleting existing Data Loader v%DATALOADER_VERSION%...
-    rd /s /q "%INSTALLATION_DIR%"
-    EXIT /b 0
 
 :copyFilesToInstallationDir
     echo.
@@ -70,12 +64,21 @@ REM CALL :promptForShortcut <desktop | startMenu>
     EXIT /b %ERRORLEVEL%
     
 :promptAndExecuteOperation
+    SET executeOperation=""
     echo.
     SET /p REPLY=%~1
-    if /I "%REPLY%"=="Y" CALL :%~2 "%INSTALLATION_DIR%"
-    if /I "%REPLY%"=="Yes" CALL :%~2 "%INSTALLATION_DIR%"
-    if /I "%REPLY%"=="N" EXIT /b %~3
-    if /I "%REPLY%"=="No" EXIT /b %~3
+    if /I "%REPLY%"=="Y" SET executeOperation="true"
+    if /I "%REPLY%"=="Yes" SET executeOperation="true"
+    if /I "%REPLY%"=="N" SET executeOperation="false"
+    if /I "%REPLY%"=="No" SET executeOperation="false"
+    if %executeOperation%=="true" (
+      CALL "%~dp0util\util.bat" :%~2 "%INSTALLATION_DIR%"
+      EXIT /b %ERRORLEVEL%
+    )
+    if %executeOperation%=="false" (
+      SET ERRORLEVEL=%~3
+      EXIT /b %ERRORLEVEL%
+    )
     echo Type Yes or No.
     goto :promptAndExecuteOperation
     EXIT /b %ERRORLEVEL%
@@ -85,4 +88,4 @@ REM CALL :promptForShortcut <desktop | startMenu>
     echo Data Loader installation is quitting.
     endlocal
     PAUSE
-    EXIT /b %ERRORLEVEL%
+    EXIT %ERRORLEVEL%
