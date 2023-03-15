@@ -27,17 +27,28 @@
 package com.salesforce.dataloader.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+
+import javax.xml.parsers.FactoryConfigurationError;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 
 /**
@@ -54,6 +65,30 @@ public class AppUtil {
         LINUX,
         MACOSX,
         UNKNOWN
+    }
+    
+    public static final String DATALOADER_VERSION;
+    public static final String DATALOADER_SHORT_VERSION;
+    public static final String MIN_JAVA_VERSION;
+    
+    public static final String SYS_PROP_LOG4J2_CONFIG_FILE = "log4j2.configurationFile";
+    public static final String LOG_CONF_DEFAULT = "log-conf.xml";
+    private static Logger logger;
+    
+    static {
+        Properties versionProps = new Properties();
+        try {
+            versionProps.load(Controller.class.getClassLoader().getResourceAsStream("com/salesforce/dataloader/version.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+        DATALOADER_VERSION=versionProps.getProperty("dataloader.version");
+        String[] versionParts = DATALOADER_VERSION.split("\\.");
+        DATALOADER_SHORT_VERSION=versionParts[0];
+        MIN_JAVA_VERSION=versionProps.getProperty("java.min.version");
+
     }
 
     public static OSType getOSType() throws SecurityException {
@@ -127,7 +162,7 @@ public class AppUtil {
         return configurationsDir;
     }
     
-    public static synchronized void setConfigurationsDir(Map<String, String> argsMap) {
+    private static synchronized void setConfigurationsDir(Map<String, String> argsMap) {
         if (argsMap != null && argsMap.containsKey(Config.CLI_OPTION_CONFIG_DIR_PROP)) {
             configurationsDir = argsMap.get(Config.CLI_OPTION_CONFIG_DIR_PROP);
         } else {
@@ -144,9 +179,90 @@ public class AppUtil {
         System.setProperty(Config.CLI_OPTION_CONFIG_DIR_PROP, configurationsDir);
     }
 
+    public static void showBanner() {
+        System.out.println("");
+        System.out.println("*************************************************************************");
+        System.out.println("**                                                                     **");
+        System.out.println("**              Salesforce Data Loader                                 **");
+        System.out.println("**              ======================                                 **");
+        System.out.println("**                                                                     **");
+        System.out.println("**  Data Loader v" + DATALOADER_SHORT_VERSION + " is a Salesforce supported Open Source project to   **");
+        System.out.println("**  help you import data to and export data from your Salesforce org.  **");
+        System.out.println("**  It requires Java JRE " + MIN_JAVA_VERSION + " or later to run.                           **");
+        System.out.println("**                                                                     **");
+        System.out.println("**  Github Project Url:                                                **");
+        System.out.println("**       https://github.com/forcedotcom/dataloader                     **");
+        System.out.println("**  Salesforce Documentation:                                          **");
+        System.out.println("**       https://help.salesforce.com/articleView?id=data_loader.htm    **");
+        System.out.println("**                                                                     **");
+        System.out.println("*************************************************************************");
+        System.out.println("");
+    }
+    
+    public static synchronized void initializeLog(Map<String, String> argsMap) throws FactoryConfigurationError {
+        setConfigurationsDir(argsMap);
+        // check the environment variable for log4j
+        String log4jConfigFilePath = System.getenv("LOG4J_CONFIGURATION_FILE");
+        if (log4jConfigFilePath == null || log4jConfigFilePath.isEmpty()) {
+            // check the system property for log4j2
+            log4jConfigFilePath = System.getProperty(SYS_PROP_LOG4J2_CONFIG_FILE);
+        }
+        
+        if (log4jConfigFilePath == null || log4jConfigFilePath.isEmpty()) { // use the default
+            log4jConfigFilePath = Paths.get(AppUtil.getConfigurationsDir(), LOG_CONF_DEFAULT).toString();
+        }
+       
+        Path p = Paths.get(log4jConfigFilePath);
+        File logConfFile;
+        if (p.isAbsolute()) {
+            logConfFile = Paths.get(log4jConfigFilePath).toFile();
+        } else {
+            logConfFile = Paths.get(System.getProperty("user.dir"), log4jConfigFilePath).toFile();
+        }
+
+        String log4jConfigFileAbsolutePath = logConfFile.getAbsolutePath();
+        if (!logConfFile.exists()) {
+            AppUtil.extractFromJar("/" + LOG_CONF_DEFAULT, logConfFile);
+        }
+        System.setProperty(SYS_PROP_LOG4J2_CONFIG_FILE, log4jConfigFileAbsolutePath);
+
+        // Uncomment code block to check that logger is using the config file
+        /*
+         * 
+
+        logger = LogManager.getLogger(AppUtil.class);
+
+        LoggerContext loggerContext = (LoggerContext) LogManager.getContext();
+        String logConfigLocation = loggerContext.getConfiguration().getConfigurationSource().getLocation();
+        if (logConfigLocation == null) {
+            logger.error("Unable to initialize logging using log4j2 config file at "
+                    + log4jConfigFileAbsolutePath
+                    + ". All error messages will be logged on STDOUT.");
+        } else {
+            logger.info("Using log4j2 configuration file at location: " + logConfigLocation);
+        }
+        */
+        logger = LogManager.getLogger(AppUtil.class);
+        logger.info(Messages.getString("AppUtil.logInit")); //$NON-NLS-1$
+    }
+    
     private static String getDefaultConfigDir() {
         return AppUtil.getDirContainingClassJar(Config.class) 
-                + "/" 
+                + "/"
                 + Config.CONFIG_DIR_DEFAULT_VALUE;
+    }
+
+    public static Map<String, String> getArgMapFromArgArray(String[] argArray){
+        Map<String, String> argMap = new HashMap<>();
+        if (argArray != null) {
+            //Process name=value config setting
+            Arrays.stream(argArray).forEach(arg ->
+            {
+                String[] nameValuePair = arg.split("=", 2);
+                if (nameValuePair.length == 2)
+                    argMap.put(nameValuePair[0], nameValuePair[1]);
+            });
+        }
+        return argMap;
     }
 }

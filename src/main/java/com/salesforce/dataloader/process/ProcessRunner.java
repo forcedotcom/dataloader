@@ -71,11 +71,9 @@ import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
 import com.sforce.soap.partner.fault.ApiFault;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import org.springframework.beans.factory.InitializingBean;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -248,7 +246,7 @@ public class ProcessRunner implements InitializingBean {
     }
     
     public static ProcessRunner runBatchMode(String[] args, ILoaderProgress progressMonitor) throws UnsupportedOperationException {
-        Map<String,String> argMap = Controller.getArgMapFromArgArray(args);
+        Map<String,String> argMap = AppUtil.getArgMapFromArgArray(args);
         if (!argMap.containsKey(Config.CLI_OPTION_CONFIG_DIR_PROP) && args.length < 2) {
             // config directory must be specified in the first argument
             System.err.println(

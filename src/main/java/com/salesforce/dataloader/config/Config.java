@@ -1477,7 +1477,6 @@ public class Config {
      * @throws ConfigInitializationException 
      */
     public static synchronized Config getInstance(String lastRunFilePrefix, Map<String, String> argMap) throws ConfigInitializationException {
-        AppUtil.setConfigurationsDir(argMap);
         String configurationsDirPath = AppUtil.getConfigurationsDir();
         File configurationsDir;
         final String DEFAULT_CONFIG_FILE = "defaultConfig.properties"; //$NON-NLS-1$

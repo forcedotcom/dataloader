@@ -60,11 +60,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -72,8 +69,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import javax.xml.parsers.FactoryConfigurationError;
 
 /**
  * The class that controls dataloader engine (config, salesforce communication, mapping, dao). For
@@ -86,19 +81,13 @@ import javax.xml.parsers.FactoryConfigurationError;
 public class Controller {
 
     private static boolean isInitialized = false; // make sure Controller is initialized only once
-    private static boolean areStaticVarsInitialized = false; // make sure log is initialized only once
 
     /**
      * the system property name used to determine the config directory
      */
 
-    public static final String SYS_PROP_LOG4J2_CONFIG_FILE = "log4j2.configurationFile";
-    public static final String LOG_CONF_DEFAULT = "log-conf.xml";
-
-    private static String APP_NAME; //$NON-NLS-1$
-    public static String APP_VERSION; //$NON-NLS-1$
-    public static String API_VERSION = null;
-    private static String APP_VENDOR; //$NON-NLS-1$
+    public static String APP_VERSION = ""; //$NON-NLS-1$
+    public static String API_VERSION = "";
     
     /**
      * <code>config</code> is an instance of configuration that's tied to this instance of
@@ -119,10 +108,21 @@ public class Controller {
     private static Logger logger;
     
     private IAction lastExecutedAction = null;
+    
+    static {
+        Properties versionProps = new Properties();
+        try {
+            versionProps.load(Controller.class.getClassLoader().getResourceAsStream("com/salesforce/dataloader/version.properties"));
+            APP_VERSION = versionProps.getProperty("dataloader.version");
+        } catch (IOException e) {
+            System.err.println("Unable to read version.properties file from uber jar");
+        }
+    }
 
     private Controller(String lastRunFilePrefix, Map<String, String> argMap) throws ControllerInitializationException {
         // if name is passed to controller, use it to create a unique run file name
-        initializeStaticVariables(argMap);
+        initializeWithArgs(argMap);
+        logger = LogManager.getLogger(Controller.class);
         try {
             this.config = Config.getInstance(lastRunFilePrefix, argMap);
         } catch (Exception e) {
@@ -134,38 +134,6 @@ public class Controller {
             daoFactory = new DataAccessObjectFactory();
         }
         HttpClientTransport.setReuseConnection(config.getBoolean(Config.REUSE_CLIENT_CONNECTION));
-    }
-    
-    public static Map<String, String> getArgMapFromArgArray(String[] argArray){
-        Map<String, String> argMap = new HashMap<>();
-        if (argArray != null) {
-            //Process name=value config setting
-            Arrays.stream(argArray).forEach(arg ->
-            {
-                String[] nameValuePair = arg.split("=", 2);
-                if (nameValuePair.length == 2)
-                    argMap.put(nameValuePair[0], nameValuePair[1]);
-            });
-        }
-        return argMap;
-    }
-
-    private static synchronized void initStaticVariables() throws ControllerInitializationException {
-        if (areStaticVarsInitialized) {
-            return;
-        }
-        Properties versionProps = new Properties();
-        try {
-            versionProps.load(Controller.class.getClassLoader().getResourceAsStream("com/salesforce/dataloader/version.properties"));
-        } catch (IOException e) {
-            throw new ControllerInitializationException(e);
-        }
-        APP_NAME = versionProps.getProperty("dataloader.name");
-        APP_VENDOR = versionProps.getProperty("dataloader.vendor");
-        // FIXME clean this up, make static
-        // dataloader version has 3 parts, salesforce app api version should match first two parts
-        APP_VERSION = versionProps.getProperty("dataloader.version");
-        areStaticVarsInitialized = true;
     }
 
     public synchronized void executeAction(ILoaderProgress monitor) throws DataAccessObjectException, OperationException {
@@ -333,11 +301,10 @@ public class Controller {
     }
 
     public static synchronized Controller getInstance(String lastRunFilePrefix, String[] args) throws ControllerInitializationException {
-        return getInstance(lastRunFilePrefix, getArgMapFromArgArray(args));
+        return getInstance(lastRunFilePrefix, AppUtil.getArgMapFromArgArray(args));
     }
 
     public static synchronized Controller getInstance(String lastRunFilePrefix, Map<String, String> argMap) throws ControllerInitializationException {
-        initializeStaticVariables(argMap);
         return new Controller(lastRunFilePrefix, argMap);
     }
     
@@ -355,76 +322,14 @@ public class Controller {
 
     }
 
-    /**
-     * @return product name
-     */
-    private static String getProductName() {
-        return APP_NAME + " " + APP_VERSION;
-    }
-
-    private static synchronized void _doInitializeLog() throws FactoryConfigurationError {
-        // check the environment variable for log4j
-        String log4jConfigFilePath = System.getenv("LOG4J_CONFIGURATION_FILE");
-        if (log4jConfigFilePath == null || log4jConfigFilePath.isEmpty()) {
-            // check the system property for log4j2
-            log4jConfigFilePath = System.getProperty(SYS_PROP_LOG4J2_CONFIG_FILE);
-        }
-        
-        if (log4jConfigFilePath == null || log4jConfigFilePath.isEmpty()) { // use the default
-            log4jConfigFilePath = Paths.get(AppUtil.getConfigurationsDir(), LOG_CONF_DEFAULT).toString();
-        }
-       
-        Path p = Paths.get(log4jConfigFilePath);
-        File logConfFile;
-        if (p.isAbsolute()) {
-            logConfFile = Paths.get(log4jConfigFilePath).toFile();
-        } else {
-            logConfFile = Paths.get(System.getProperty("user.dir"), log4jConfigFilePath).toFile();
-        }
-
-        String log4jConfigFileAbsolutePath =  logConfFile.getAbsolutePath();
-        if (logConfFile.exists()) {
-            System.setProperty(SYS_PROP_LOG4J2_CONFIG_FILE, log4jConfigFileAbsolutePath);
-        } else { // extract log-conf.xml from the jar file
-            AppUtil.extractFromJar("/" + LOG_CONF_DEFAULT, logConfFile);
-        }
-        
-        // Uncomment code block to check that logger is using the config file
-        /*
-         * 
-
-        logger = LogManager.getLogger(Controller.class);
-
-        LoggerContext loggerContext = (LoggerContext) LogManager.getContext();
-        String logConfigLocation = loggerContext.getConfiguration().getConfigurationSource().getLocation();
-        if (logConfigLocation == null) {
-            logger.error("Unable to initialize logging using log4j2 config file at "
-                    + log4jConfigFileAbsolutePath
-                    + ". All error messages will be logged on STDOUT.");
-        } else {
-            logger.info("Using log4j2 configuration file at location: " + logConfigLocation);
-        }
-        */
-        logger = LogManager.getLogger(Controller.class);
-
-        logger.info(Messages.getString("Controller.logInit")); //$NON-NLS-1$
-    }
-    
-    private synchronized static void initializeStaticVariables(Map<String, String> argMap) {
+    private synchronized static void initializeWithArgs(Map<String, String> argMap) {
         if (Controller.isInitialized) {
             return;
         }
         
         try {
-            // Need to initialize the configurations directory before initializing logger
-            // because the default log-conf.xml resides in the configuration directory.
-            AppUtil.setConfigurationsDir(argMap);
-            
-            // initialize logger
-            _doInitializeLog();
-            
+            AppUtil.initializeLog(argMap);
             // initialze Controller and Config static vars
-            initStaticVariables();
             Config.initializeStaticVariables(argMap);
             Controller.isInitialized = true;
         } catch (Exception ex) {
@@ -434,7 +339,7 @@ public class Controller {
     }
     
     public static Logger getLogger(Map<String, String> argMap, Class<?> clazz) {
-        initializeStaticVariables(argMap);
+        initializeWithArgs(argMap);
         return LogManager.getLogger(clazz);
     }
     
