@@ -532,7 +532,7 @@
                                         includes="**/*.command" eol="lf" eof="remove"/>
                             <fixcrlf srcdir="${basedir}/target/${OSType}/"
                                         includes="**/*.sh" eol="lf" eof="remove"/>
-                            <if>>
+                            <if>
                                 <equals arg1="${OSType}" arg2="mac"/>
                                 <then>
                                     <fixcrlf srcdir="${basedir}/target/mac/dataloader.app/Contents/MacOS"

@@ -61,7 +61,7 @@ public class DataLoaderRunner extends Thread {
     private static Logger logger;
 
     private static boolean isBatchMode(String[] args) {   
-        Map<String, String> argMap = Controller.getArgMapFromArgArray(args);
+        Map<String, String> argMap = AppUtil.getArgMapFromArgArray(args);
         return argMap.containsKey(Config.CLI_OPTION_RUN_MODE) ?
                 Config.RUN_MODE_BATCH_VAL.equalsIgnoreCase(argMap.get(Config.CLI_OPTION_RUN_MODE)) : false;
     }
@@ -81,7 +81,7 @@ public class DataLoaderRunner extends Thread {
             }
         } else {
             /* Run in the UI mode, get the controller instance with batchMode == false */
-            argNameValuePair = Controller.getArgMapFromArgArray(args);
+            argNameValuePair = AppUtil.getArgMapFromArgArray(args);
             logger = Controller.getLogger(argNameValuePair, DataLoaderRunner.class);
             if (argNameValuePair.containsKey(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
                 && "true".equalsIgnoreCase(argNameValuePair.get(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
@@ -98,6 +98,7 @@ public class DataLoaderRunner extends Thread {
                     UIUtils.errorMessageBox(new Shell(new Display()), e);
                 }
             } else { // SWT_NATIVE_LIB_IN_JAVA_LIB_PATH not set
+                AppUtil.showBanner();
                 rerunWithSWTNativeLib(args);
             }
         }

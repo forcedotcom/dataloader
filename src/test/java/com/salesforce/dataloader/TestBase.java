@@ -26,13 +26,13 @@
 package com.salesforce.dataloader;
 
 import com.salesforce.dataloader.client.BulkClient;
-import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
+import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.LoginResult;
 import com.sforce.soap.partner.PartnerConnection;
@@ -56,8 +56,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -109,8 +107,8 @@ public abstract class TestBase {
         TEST_STATUS_DIR = TEST_FILES_DIR + File.separator + "status";
         DEFAULT_ACCOUNT_EXT_ID_FIELD = getProperty("test.account.extid");
         
-        String logConfFilePath = Paths.get(getTestConfDir(), Controller.LOG_CONF_DEFAULT).toString();
-        System.setProperty(Controller.SYS_PROP_LOG4J2_CONFIG_FILE, logConfFilePath);
+        String logConfFilePath = Paths.get(getTestConfDir(), AppUtil.LOG_CONF_DEFAULT).toString();
+        System.setProperty(AppUtil.SYS_PROP_LOG4J2_CONFIG_FILE, logConfFilePath);
         logger = LogManager.getLogger(TestBase.class);
     }
 
