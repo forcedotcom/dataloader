@@ -1,13 +1,11 @@
 @echo off
 SETLOCAL
 
-CALL "%~dp0..\util\util.bat" checkJavaVersion
+CALL "%~dp0..\util\util.bat" :checkJavaVersion
 IF "%ERRORLEVEL%" NEQ "0" (
     PAUSE
     GOTO :exit
 )
-
-
 java -cp "%~dp0../*;%~dp0*" com.salesforce.dataloader.process.DataLoaderRunner %* run.mode=batch
 
 :exit
