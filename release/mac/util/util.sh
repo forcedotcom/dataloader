@@ -11,9 +11,9 @@ showBanner() {
     initVars
     echo ""
     echo "*************************************************************************"
-    echo "**            ___  ____ ___ ____   _    ____ ____ ___  ____ ____       **"
-    echo "**            |  \ |__|  |  |__|   |    |  | |__| |  \ |___ |__/       **"
-    echo "**            |__/ |  |  |  |  |   |___ |__| |  | |__/ |___ |  \       **"
+    echo "**                                                                     **"
+    echo "**                     Salesforce Data Loader                          **"
+    echo "**                     ======================                          **"
     echo "**                                                                     **"
     echo "**  Data Loader v${DATALOADER_SHORT_VERSION} is a Salesforce supported Open Source project to   **"
     echo "**  help you import data to and export data from your Salesforce org.  **"
