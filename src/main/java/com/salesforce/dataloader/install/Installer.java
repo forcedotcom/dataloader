@@ -243,10 +243,10 @@ public class Installer {
         for (;;) {
             System.out.println("");
             String input = promptAndGetUserInput(prompt);
-            if (input.toLowerCase().equals("yes") || input.toLowerCase().equals("y")) {
+            if ("yes".toLowerCase().equals(input) || "y".toLowerCase().equals(input)) {
                 shortcutCreator.create();
                 break;
-            } else if (input.toLowerCase().equals("no") || input.toLowerCase().equals("n")) {
+            } else if ("no".toLowerCase().equals(input) || "n".toLowerCase().equals(input)) {
                 return;                  
             } else {
                 System.out.println("Type Yes or No.");
@@ -308,6 +308,13 @@ public class Installer {
                     new ShortcutCreatorInterface() {
                         public void create() {
                             try {
+                                String APPDATA = System.getenv("APPDATA");
+                                String SALESFORCE_START_MENU_DIR = APPDATA + "\\Microsoft\\Windows\\Start Menu\\Programs\\Salesforce\\" ;
+
+                                File directory = new File(SALESFORCE_START_MENU_DIR);
+                                if (!directory.exists()) {
+                                        directory.mkdir();
+                                }
                                 createShortcutOnWindows(CREATE_START_MENU_SHORTCUT_ON_WINDOWS);
                             } catch (Exception ex) {
                                 System.err.println(ex.getMessage());
