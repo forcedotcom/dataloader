@@ -139,20 +139,17 @@ public class AppUtil {
         return jarFile.getParentFile().getAbsolutePath();
     }
     
-    public static void extractFromJar(String extractionArtifact, File extractionDestination) {
-        try {
-            InputStream link;
-            link = Controller.class.getResourceAsStream(extractionArtifact);
-            String parentDirStr = extractionDestination.getAbsoluteFile().getParent();
-            File parentDir = Paths.get(parentDirStr).toFile();
-            Files.createDirectories(parentDir.getAbsoluteFile().toPath());
-            Files.copy(link, extractionDestination.getAbsoluteFile().toPath());
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+    public static void extractFromJar(String extractionArtifact, File extractionDestination) throws IOException {
+        InputStream link;
+        link = Controller.class.getResourceAsStream(extractionArtifact);
+        String parentDirStr = extractionDestination.getAbsoluteFile().getParent();
+        File parentDir = Paths.get(parentDirStr).toFile();
+        Files.createDirectories(parentDir.getAbsoluteFile().toPath());
+        if (extractionDestination.exists()) {
+            extractionDestination.delete();
         }
-    }
-    
+        Files.copy(link, extractionDestination.getAbsoluteFile().toPath());
+    }    
     
     private static String configurationsDir = null;
     public static synchronized String getConfigurationsDir() {
@@ -199,7 +196,7 @@ public class AppUtil {
         System.out.println("");
     }
     
-    public static synchronized void initializeLog(Map<String, String> argsMap) throws FactoryConfigurationError {
+    public static synchronized void initializeLog(Map<String, String> argsMap) throws FactoryConfigurationError, IOException {
         setConfigurationsDir(argsMap);
         // check the environment variable for log4j
         String log4jConfigFilePath = System.getenv("LOG4J_CONFIGURATION_FILE");
@@ -264,5 +261,17 @@ public class AppUtil {
             });
         }
         return argMap;
+    }
+    
+    public static boolean isRunningOnMacOS() {
+        return getOSType() == OSType.MACOSX;
+    }
+    
+    public static boolean isRunningOnWindows() {
+        return getOSType() == OSType.WINDOWS;
+    }
+    
+    public static boolean isRunningOnLinux() {
+        return getOSType() == OSType.LINUX;
     }
 }
