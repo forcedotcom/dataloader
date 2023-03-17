@@ -512,11 +512,19 @@
                     <echo>creating version-specific files for the target OS: ${OSType}</echo>
 					<delete dir="${basedir}/target/${OSType}"/>
                     <mkdir dir="${basedir}/target/${OSType}"/>
-                    <copy todir="${basedir}/target/${OSType}">
-                      <fileset dir="${basedir}/release/${OSType}"/>
-                    </copy>
+                    <if>
+                        <available file="${basedir}/release/${OSType}" type="dir" />
+                    <then>
+                        <copy todir="${basedir}/target/${OSType}">
+                          <fileset dir="${basedir}/release/${OSType}"/>
+                        </copy>
+                    </then>
+                    </if>
                     <copy todir="${basedir}/target/${OSType}/samples">
                       <fileset dir="${basedir}/release/samples"/>
+                    </copy>
+                    <copy todir="${basedir}/target/${OSType}/util">
+                      <fileset dir="${basedir}/release/util"/>
                     </copy>
                     <replace dir="${basedir}/target/${OSType}/" token="@@FULL_VERSION@@" value="${project.version}"/>
                     <replace dir="${basedir}/target/${OSType}/" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
@@ -524,21 +532,27 @@
                     <if>
                         <equals arg1="${OSType}" arg2="win"/>
                         <then>
+                             <echo>copying install.bat to OS-specific folder for the target OS: ${OSType}</echo>
+                           <copy file="${basedir}/release/install/install.bat"
+                                 todir="${basedir}/target/${OSType}/" />
                             <fixcrlf srcdir="${basedir}/target/win/"
                                         includes="**/*.bat" eol="crlf"/>
                         </then>
                         <else>
+                            <echo>copying install.command to OS-specific folder for the target OS: ${OSType}</echo>
+                            <copy file="${basedir}/release/install/install.command"
+                                  todir="${basedir}/target/${OSType}/" />
+                            <echo>copying dataloader_console to OS-specific folder for the target OS: ${OSType}</echo>
+<!--
+                            <copy file="${basedir}/release/mac/dataloader_console"
+                                  todir="${basedir}/target/${OSType}/" />
+-->
                             <fixcrlf srcdir="${basedir}/target/${OSType}/"
                                         includes="**/*.command" eol="lf" eof="remove"/>
                             <fixcrlf srcdir="${basedir}/target/${OSType}/"
                                         includes="**/*.sh" eol="lf" eof="remove"/>
-                            <if>
-                                <equals arg1="${OSType}" arg2="mac"/>
-                                <then>
-                                    <fixcrlf srcdir="${basedir}/target/mac/dataloader.app/Contents/MacOS"
-                                        includes="**/dataloader" eol="lf" eof="remove"/>
-                                </then>
-                            </if>
+                             <fixcrlf srcdir="${basedir}/target/${OSType}/"
+                                        includes="**/dataloader_console" eol="lf" eof="remove"/>
                         </else>
                     </if>
     

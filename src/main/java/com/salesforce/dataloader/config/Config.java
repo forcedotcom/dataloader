@@ -1516,7 +1516,12 @@ public class Config {
                 }
             } else {
                 // extract from the jar
-                AppUtil.extractFromJar("/" + CONFIG_FILE, configFile);
+                try {
+                    AppUtil.extractFromJar("/" + CONFIG_FILE, configFile);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    logger.error("Unable to extract " + CONFIG_FILE + " from jar " + e.getMessage());
+                }
             }
             configFile.setWritable(true);
             configFile.setReadable(true);
