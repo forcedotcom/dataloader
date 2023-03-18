@@ -56,12 +56,9 @@ run_mvn() {
 
   if [ $2 = true ]
   then
-    echo "packaging dataloader_mac_<version>.zip"
-     mvn package -DskipTests -Duberjar.skip -Pzip,mac_x86_64,!win32_x86_64,!linux_x86_64
-    cp target/mac/*.zip .
-    echo "packaging dataloader_win_<version>.zip"
-    mvn package -DskipTests -Duberjar.skip -Pzip,!mac_x86_64,win32_x86_64,!linux_x86_64
-    cp target/win/dataloader_win_v*.zip .
+    echo "packaging dataloader_<version>.zip"
+    rm -f dataloader_v*zip
+    mvn package -DskipTests -Dshadedjar.skip -Pzip
   fi
 
   if [ $1 = true ]; then
