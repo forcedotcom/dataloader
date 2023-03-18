@@ -39,3 +39,4 @@ local-proj-repo/junit/
 local-proj-repo/org/
 pom.xml.save
 pom.xml.versionsBackup
+dependency-reduced-pom.xml
