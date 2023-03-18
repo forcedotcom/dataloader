@@ -194,7 +194,7 @@ public class Installer {
             logger.debug("going to delete \\.* files from " + INSTALLATION_ABSOLUTE_PATH);
             deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "\\.*");
             logger.debug("going to delete install.* files from " + INSTALLATION_ABSOLUTE_PATH);
-            deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "install.*");
+            deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "install.(.*)");
             logger.debug("going to delete META-INF from " + INSTALLATION_ABSOLUTE_PATH);
             deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "META-INF");
             logger.debug("going to delete zip files from " + INSTALLATION_ABSOLUTE_PATH);
@@ -226,17 +226,20 @@ public class Installer {
 
     }
     
-    private static void deleteFilesFromDir(String directoryName, String filePattern) {
+    private static void deleteFilesFromDir(String directoryName, String filePattern) throws IOException {
         File directory = new File(directoryName);
         final File[] files = directory.listFiles( new FilenameFilter() {
             @Override
             public boolean accept( final File dir,
                                    final String name ) {
-                return name.matches(filePattern);
+                boolean match = name.matches(filePattern);
+                return match;
             }
         } );
         for ( final File file : files ) {
-            if ( !file.delete() ) {
+            if (file.isDirectory()) {
+                FileUtils.deleteDirectory(file);
+            } else if ( !file.delete() ) {
                 logger.error("Can't remove " + file.getAbsolutePath());
             }
         }
@@ -380,7 +383,10 @@ public class Installer {
         // delete unnecessary artifacts
         logger.debug("going to delete dataloader.ico from " + INSTALLATION_ABSOLUTE_PATH);
         deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "dataloader.ico");
-        
+        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "swtlinux(.*)");
+        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "swtwin(.*)");
+        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH + "/util", "(.*).bat");
+
         // create a soft link from <INSTALLATION_ABSOLUTE_PATH>/dataloader.app/Contents/MacOS/dataloader to 
         // <INSTALLATION_ABSOLUTE_PATH>/dataloader_console
         logger.debug("going to create symlink from " 
@@ -393,12 +399,17 @@ public class Installer {
     }
     
     private static void configureWindowsArtifactsPostCopy() throws IOException {
-        // Nothing to do
+        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "swtmac(.*)");
+        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "swtlinux(.*)");
+        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH + "/util", "(.*).sh");
     }
     
     private static void configureLinuxArtifactsPostCopy() throws IOException {
+        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "swtmac(.*)");
+        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "swtwin(.*)");
         Files.move(Paths.get(INSTALLATION_ABSOLUTE_PATH + "/dataloader_console"),
                 Paths.get(INSTALLATION_ABSOLUTE_PATH + "/dataloader.sh"));
+        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH + "/util", "(.*).bat");
     }
 
     private static void createDir(String dirPath) throws IOException {
