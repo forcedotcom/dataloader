@@ -39,6 +39,8 @@ checkJavaVersion() {
     JAVA_VERSION=$(java -version 2>&1 | grep -i version | cut -d'"' -f 2 | cut -d'.' -f 1)
     if [ -z "${JAVA_VERSION}" ]
     then
+        echo "Did not find java command."
+        echo ""
         exitWithJavaDownloadMessage
     fi
     if [ ${JAVA_VERSION} \< ${MIN_JAVA_VERSION} ]
@@ -49,6 +51,8 @@ checkJavaVersion() {
 }
 
 exitWithJavaDownloadMessage() {
-        echo "Java JRE ${MIN_JAVA_VERSION} or later is not installed. For example, download and install Zulu OpenJDK ${MIN_JAVA_VERSION} or later JRE for macOS from https://www.azul.com/downloads/zulu/zulu-mac/"
+        echo "Java JRE ${MIN_JAVA_VERSION} or later is not installed or DATALOADER_JAVA_HOME environment variable is not set."
+        echo "For example, download and install Zulu JRE ${MIN_JAVA_VERSION} or later from here:"
+        echo "    https://www.azul.com/downloads/"
         exit -1
 }

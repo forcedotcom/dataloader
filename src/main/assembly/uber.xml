@@ -16,9 +16,4 @@
       </excludes>
     </dependencySet>
   </dependencySets>
-  <fileSets>
-    <fileSet>
-      <directory>${project.build.outputDirectory}</directory>
-    </fileSet>
-  </fileSets>
 </assembly>
