@@ -61,17 +61,17 @@ EXIT /b %ERRORLEVEL%
 
 :NoJavaErrorExit
     echo Did not find java command.
-    echo Java JRE %MIN_JAVA_VERSION% or later is not installed or DATALOADER_JAVA_HOME environment variable is not set.
     echo.
-    GOTO :CommonJavaErrorExit
+    GOTO :exitWithJavaDownloadMessage
 
 :JavaVersionErrorExit
     echo Found Java JRE version %JAVA_FULL_VERSION% whereas Data Loader requires Java JRE %MIN_JAVA_VERSION% or later.
-    GOTO :CommonJavaErrorExit
+    GOTO :exitWithJavaDownloadMessage
 
-:CommonJavaErrorExit
-    echo For example, download and install Zulu OpenJDK %MIN_JAVA_VERSION% or later JRE for Windows from here:
-    echo    https://www.azul.com/downloads/zulu/zulu-windows/
+:exitWithJavaDownloadMessage
+    echo Java JRE %MIN_JAVA_VERSION% or later is not installed or DATALOADER_JAVA_HOME environment variable is not set.
+    echo For example, download and install Zulu JRE %MIN_JAVA_VERSION% or later from here:
+    echo     https://www.azul.com/downloads/
     echo.
     echo After the installation, set DATALOADER_JAVA_HOME environment variable to the value
     echo ^<full path to the JRE installation folder^>

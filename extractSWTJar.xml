@@ -5,7 +5,7 @@
 		<fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swt*/*/*.jar"/>
 	  </copy>
 	  <taskdef resource="net/sf/antcontrib/antcontrib.properties" />
-	  <foreach param="fileName" target="unzip">
+	  <foreach param="fileName" target="flatten">
 	    <path>
 	    <dirset dir="${basedir}/target/">
 	      <include name="swt*" />
@@ -13,7 +13,7 @@
 	    </path>
 	  </foreach>
 	</target>
-	<target name="unzip">
+	<target name="flatten">
 	  <move todir="${fileName}" flatten="true">
 		<fileset dir="${fileName}/">
 		  <include name="**/*.jar"/>
