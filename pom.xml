@@ -430,9 +430,9 @@
               </artifactSet>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
+                  <mainClass>com.salesforce.dataloader.install.Installer</mainClass>
                   <manifestEntries>
-                    <Main-Class>com.salesforce.dataloader.process.DataLoaderRunner</Main-Class>
+                    <Main-Class>com.salesforce.dataloader.install.Installer</Main-Class>
                     <Multi-Release>true</Multi-Release>
                     <Permissions>all-permissions</Permissions>
                     <Application-Name>${project.name}</Application-Name>
@@ -495,6 +495,9 @@
                          </patternset>
                       </dirset>
                     </delete>
+
+                    <replace dir="${basedir}/target/classes/" token="@@FULL_VERSION@@" value="${project.version}"/>
+                    <replace dir="${basedir}/target/classes/" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
                   </target>
                 </configuration>
                 <goals>
@@ -542,20 +545,12 @@
                     <copy todir="${basedir}/target/zipartifacts/samples">
                       <fileset dir="${basedir}/release/samples"/>
                     </copy>
-                    <copy todir="${basedir}/target/zipartifacts/util">
-                      <fileset dir="${basedir}/release/util"/>
-                    </copy>
-                    <copy todir="${basedir}/target/zipartifacts">
-                      <fileset dir="${basedir}/release/install"/>
-                    </copy>
                     <copy todir="${basedir}/target/zipartifacts" >
                       <fileset dir="${basedir}/target/" includes="swt*/*"/>
                     </copy>
 
-                    <replace dir="${basedir}/target/zipartifacts" token="@@FULL_VERSION@@" value="${project.version}"/>
-                    <replace dir="${basedir}/target/zipartifacts" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
-                    <chmod file="${basedir}/target/zipartifacts/*.command" perm="755" />
-                    <chmod file="${basedir}/target/zipartifacts/*.bat" perm="755" />
+                    <replace dir="${basedir}/target/classes/*" token="@@FULL_VERSION@@" value="${project.version}"/>
+                    <replace dir="${basedir}/target/classes/*" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
 
                     <fixcrlf srcdir="${basedir}/target/zipartifacts/"
                                 includes="**/*.bat" eol="crlf"/>

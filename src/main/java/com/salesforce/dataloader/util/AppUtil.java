@@ -115,14 +115,12 @@ public class AppUtil {
 
     public static final String OS_NAME = "os.name";
     
-    public static String getDirContainingClassJar(Class<?> aClass) {
+    public static String getFullPathOfJar(Class<?> aClass) {
         CodeSource codeSource = aClass.getProtectionDomain().getCodeSource();
-    
-        File jarFile = null;
-    
         if (codeSource != null && codeSource.getLocation() != null) {
             try {
-                jarFile = new File(codeSource.getLocation().toURI());
+                String jarFilePath = codeSource.getLocation().toURI().toString();
+                return jarFilePath.substring(jarFilePath.indexOf('/'));
             } catch (URISyntaxException e) {
                 return null;
             }
@@ -134,8 +132,12 @@ public class AppUtil {
           } catch (UnsupportedEncodingException e) {
               // fail silently;
           }
-          jarFile = new File(jarFilePath);
+          return jarFilePath;
         }
+    }
+    
+    public static String getDirContainingClassJar(Class<?> aClass) {
+        File jarFile = new File(getFullPathOfJar(aClass));
         return jarFile.getParentFile().getAbsolutePath();
     }
     
@@ -149,7 +151,47 @@ public class AppUtil {
             extractionDestination.delete();
         }
         Files.copy(link, extractionDestination.getAbsoluteFile().toPath());
-    }    
+    }
+    
+    public static void extractDirFromJar(String extractionDir, String destDirName, boolean flatten) throws IOException, URISyntaxException {
+        String jarPath = getFullPathOfJar(AppUtil.class);
+        java.util.jar.JarFile jarfile = new java.util.jar.JarFile(new java.io.File(jarPath)); //jar file path(here sqljdbc4.jar)
+        java.util.Enumeration<java.util.jar.JarEntry> enu= jarfile.entries();
+        while(enu.hasMoreElements())
+        {
+            java.util.jar.JarEntry je = enu.nextElement();
+
+            if (!je.toString().startsWith(extractionDir)) {
+                continue;
+            }
+            logger.debug(je.getName());
+            
+            String childArtifactName = je.getName();
+            if (flatten) {
+                childArtifactName = childArtifactName.substring(extractionDir.length());
+            }
+            File extractionDestination = new File(destDirName, childArtifactName);
+            if(!extractionDestination.exists())
+            {
+                extractionDestination.getParentFile().mkdirs();
+                extractionDestination = new java.io.File(destDirName, childArtifactName);
+            }
+            if(je.isDirectory())
+            {
+                continue;
+            }
+            extractionDestination.setExecutable(true);
+            java.io.InputStream is = jarfile.getInputStream(je);
+            java.io.FileOutputStream fo = new java.io.FileOutputStream(extractionDestination);
+            while(is.available() > 0)
+            {
+                fo.write(is.read());
+            }
+            fo.close();
+            is.close();
+        }
+    }
+    
     
     private static String configurationsDir = null;
     public static synchronized String getConfigurationsDir() {
