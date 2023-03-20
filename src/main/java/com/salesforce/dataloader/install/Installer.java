@@ -189,6 +189,7 @@ public class Installer {
             logger.debug("going to create " + INSTALLATION_ABSOLUTE_PATH);
             createDir(INSTALLATION_ABSOLUTE_PATH);
             logger.debug("going to copy contents of " + installationSourceDir + " to " + INSTALLATION_ABSOLUTE_PATH);
+            
             FileUtils.copyDirectory(new File(installationSourceDir), new File(INSTALLATION_ABSOLUTE_PATH));
             
             logger.debug("going to delete \\.* files from " + INSTALLATION_ABSOLUTE_PATH);
@@ -228,6 +229,9 @@ public class Installer {
     
     private static void deleteFilesFromDir(String directoryName, String filePattern) throws IOException {
         File directory = new File(directoryName);
+        if (!directory.exists()) {
+            return;
+        }
         final File[] files = directory.listFiles( new FilenameFilter() {
             @Override
             public boolean accept( final File dir,
@@ -372,14 +376,7 @@ public class Installer {
     private static void configureMacOSArtifactsPostCopy() throws IOException {
         final String MACOS_PACKAGE_BASE = INSTALLATION_ABSOLUTE_PATH + "/dataloader.app/Contents";
         final String PATH_TO_DL_EXECUTABLE_ON_MAC = MACOS_PACKAGE_BASE + "/MacOS/dataloader";
-        // create <installation root>/dataloader.app/Contents
-        logger.debug("going to create dataloader.app directory");
-        createDir(MACOS_PACKAGE_BASE);
-
-        // create Contents, MacOS, and Resources directories in dataloader.app
-        logger.debug("going to create " + MACOS_PACKAGE_BASE + "/MacOS");
-        createDir(MACOS_PACKAGE_BASE + "/MacOS");
-
+ 
         // delete unnecessary artifacts
         logger.debug("going to delete dataloader.ico from " + INSTALLATION_ABSOLUTE_PATH);
         deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "dataloader.ico");
@@ -394,6 +391,8 @@ public class Installer {
                     PATH_TO_DL_EXECUTABLE_ON_MAC
                     + " to "
                     + INSTALLATION_ABSOLUTE_PATH + "/dataloader_console");
+        logger.debug("going to create " + MACOS_PACKAGE_BASE + "/MacOS");
+        createDir(MACOS_PACKAGE_BASE + "/MacOS");
         createSymLink(PATH_TO_DL_EXECUTABLE_ON_MAC,
                         INSTALLATION_ABSOLUTE_PATH + "/dataloader_console");
     }
@@ -418,66 +417,10 @@ public class Installer {
 
     private static void extractOSSpecificArtifactsFromJar() throws URISyntaxException, IOException {
         if (AppUtil.isRunningOnWindows()) {
-            extractWindowsArtifactsFromJar();
-        } else {
-            // mac artifact work for both linux and mac
-            extractMacOSArtifactsFromJar();
-        }
-    }
-    
-    private static void extractWindowsArtifactsFromJar() throws IOException {
-        final String BASEDIR = "/win";
-        // dataloader.bat
-        File script = extractArtifactFromJar(BASEDIR, "dataloader.bat");
-        script.setExecutable(true);
-        
-        // dataloader.ico
-        extractArtifactFromJar(BASEDIR, "dataloader.ico");
-        
-        // bin/process.bat
-        script = extractArtifactFromJar(BASEDIR, "bin/process.bat");
-        script.setExecutable(true);
-        
-        // bin/encrypt.bat
-        script = extractArtifactFromJar(BASEDIR, "bin/encrypt.bat");
-        script.setExecutable(true);        
-    }
-
-    private static void extractMacOSArtifactsFromJar() throws URISyntaxException, IOException {
-        final String BASEDIR = "/mac";
-        // dataloader_console
-        File script = extractArtifactFromJar(BASEDIR, "dataloader_console");
-        script.setExecutable(true);
-        
-        // dataloader.app/Contents/PkgInfo
-        extractArtifactFromJar(BASEDIR, "dataloader.app/Contents/PkgInfo");
-
-        // dataloader.app/Contents/Info.plist
-        extractArtifactFromJar(BASEDIR, "dataloader.app/Contents/Info.plist");
-        
-        // dataloader.app/Contents/Resources/dataloader.icns
-        extractArtifactFromJar(BASEDIR, "dataloader.app/Contents/Resources/dataloader.icns");
-    }
-    
-    private static File extractArtifactFromJar(String baseDir, String fileToExtract) throws IOException {
-        if (!fileToExtract.startsWith("/")) {
-            fileToExtract = "/" + fileToExtract;
-        }
-        File extractionFile = new File(TOBE_INSTALLED_ABSOLUTE_PATH + fileToExtract);
-        AppUtil.extractFromJar(baseDir + fileToExtract, extractionFile);
-        return extractionFile;
-    }
-
-    private static void extractDirFromJar(File rootDir) throws URISyntaxException, IOException {
-        for (File nextFile : rootDir.listFiles()) {
-            if (nextFile.isDirectory()) {
-                extractDirFromJar(nextFile);
-            } else {
-                // extract the file
-                logger.debug("going to extract " + nextFile.getPath() + " from jar");
-                AppUtil.extractFromJar(nextFile.getPath(),
-                        new File(Installer.class.getProtectionDomain().getCodeSource().getLocation().toURI()));
-            }
-        }
+            AppUtil.extractDirFromJar("win", TOBE_INSTALLED_ABSOLUTE_PATH, true);
+       } else {
+            AppUtil.extractDirFromJar("mac", TOBE_INSTALLED_ABSOLUTE_PATH, true);
+       }
+        AppUtil.extractDirFromJar("samples", TOBE_INSTALLED_ABSOLUTE_PATH, false);
     }
 }
