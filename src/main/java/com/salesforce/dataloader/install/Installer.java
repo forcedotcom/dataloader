@@ -44,7 +44,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.util.AppUtil;
 
-public class Installer {
+public class Installer extends Thread {
     private static final String USERHOME=System.getProperty("user.home");
     private static final String PATH_SEPARATOR = System.getProperty("file.separator");
     private static final String CREATE_DEKSTOP_SHORTCUT_ON_WINDOWS = ":createDesktopShortcut";
@@ -57,9 +57,14 @@ public class Installer {
     static {
         TOBE_INSTALLED_ABSOLUTE_PATH = AppUtil.getDirContainingClassJar(Installer.class);
     }
+    
+    public void run() {
+        System.out.println("Data Loader installation is quitting.");
+    }
 
     public static void main(String[] args) {
         try {
+            Runtime.getRuntime().addShutdownHook(new Installer());
             try {
                 AppUtil.initializeLog(AppUtil.getArgMapFromArgArray(args));
             } catch (FactoryConfigurationError | IOException e1) {
@@ -121,8 +126,6 @@ public class Installer {
         } catch (Exception ex) {
             handleException(ex, Level.FATAL);
             System.exit(-1);            
-        } finally {
-            System.out.println("Data Loader installation is quitting.");
         }
     }
         
