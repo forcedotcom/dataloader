@@ -60,76 +60,73 @@ public class Installer {
 
     public static void main(String[] args) {
         try {
-            AppUtil.initializeLog(AppUtil.getArgMapFromArgArray(args));
-        } catch (FactoryConfigurationError | IOException e1) {
-            System.err.println("Unable to initialize log: " + e1.getMessage());
-        }
-        logger = LogManager.getLogger(Installer.class);
-        boolean hideBanner = false;
-        boolean skipCopyArtifacts = false;
-        boolean skipCreateDesktopShortcut = false;
-        boolean skipCreateStartMenuShortcut = false;
-        boolean skipCreateAppsDirShortcut = false;
-        
-        for (int i = 0; i < args.length; i++) {
-            switch (args[i]) {
-                case "-b":
-                    hideBanner = true;
-                    continue;
-                case "-c":
-                    skipCopyArtifacts = true;
-                    continue;
-                case "-d":
-                    skipCreateDesktopShortcut = true;
-                    continue;
-                case "-s":
-                    skipCreateStartMenuShortcut = true;
-                    continue;
-                case "-a":
-                    skipCreateAppsDirShortcut = true;
-                    continue;
-                default:
-                    continue;
-            }
-        }
-        if (!hideBanner) {
-            logger.debug("going to show banner");
-            AppUtil.showBanner();
-        }
-        if (!skipCopyArtifacts) {
             try {
+                AppUtil.initializeLog(AppUtil.getArgMapFromArgArray(args));
+            } catch (FactoryConfigurationError | IOException e1) {
+                System.err.println("Unable to initialize log: " + e1.getMessage());
+            }
+            logger = LogManager.getLogger(Installer.class);
+            boolean hideBanner = false;
+            boolean skipCopyArtifacts = false;
+            boolean skipCreateDesktopShortcut = false;
+            boolean skipCreateStartMenuShortcut = false;
+            boolean skipCreateAppsDirShortcut = false;
+            
+            for (int i = 0; i < args.length; i++) {
+                switch (args[i]) {
+                    case "-b":
+                        hideBanner = true;
+                        continue;
+                    case "-c":
+                        skipCopyArtifacts = true;
+                        continue;
+                    case "-d":
+                        skipCreateDesktopShortcut = true;
+                        continue;
+                    case "-s":
+                        skipCreateStartMenuShortcut = true;
+                        continue;
+                    case "-a":
+                        skipCreateAppsDirShortcut = true;
+                        continue;
+                    default:
+                        continue;
+                }
+            }
+            if (!hideBanner) {
+                logger.debug("going to show banner");
+                AppUtil.showBanner();
+            }
+            if (!skipCopyArtifacts) {
+                logger.debug("going to extract artifacts from jar");
                 extractOSSpecificArtifactsFromJar();
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                logger.fatal("Unable to extract OS-specific files from uber jar");
-                System.exit(-1);
-            }
-            logger.debug("going to select installation directory");
-            selectInstallationDir();
-            logger.debug("going to copy artifacts");
-            copyArtifacts();
-            try {
+                logger.debug("going to select installation directory");
+                selectInstallationDir();
+                logger.debug("going to copy artifacts");
+                copyArtifacts();
                 configureOSSpecificArtifactsPostCopy();
-            } catch (Exception ex) {
-                logger.fatal(ex.getMessage());
-                System.exit(-1);
             }
-        }
-        if (!skipCreateDesktopShortcut) {
-            logger.debug("going to create desktop shortcut");
-            createDesktopShortcut();
-        }
-        if (!skipCreateStartMenuShortcut && AppUtil.isRunningOnWindows()) {
-            logger.debug("going to create start menu shortcut");
-            createStartMenuShortcut();
-        }
-        if (!skipCreateAppsDirShortcut && AppUtil.isRunningOnMacOS()) {
-            logger.debug("going to create Applications directory shortcut");
-            createAppsDirShortcut();
+            if (!skipCreateDesktopShortcut) {
+                logger.debug("going to create desktop shortcut");
+                createDesktopShortcut();
+            }
+            if (!skipCreateStartMenuShortcut && AppUtil.isRunningOnWindows()) {
+                logger.debug("going to create start menu shortcut");
+                createStartMenuShortcut();
+            }
+            if (!skipCreateAppsDirShortcut && AppUtil.isRunningOnMacOS()) {
+                logger.debug("going to create Applications directory shortcut");
+                createAppsDirShortcut();
+            }
+        } catch (Exception ex) {
+            handleException(ex, Level.FATAL);
+            System.exit(-1);            
+        } finally {
+            System.out.println("Data Loader installation is quitting.");
         }
     }
         
-    private static void selectInstallationDir() {
+    private static void selectInstallationDir() throws IOException {
         
         System.out.println("Data Loader installation requires you to provide an installation directory to create a version-specific subdirectory for the installation artifacts.");
         System.out.println("It uses '" + USERHOME + PATH_SEPARATOR + "<relative path>' as the installation directory if you provide a relative path for the installation directory.");
@@ -154,7 +151,7 @@ public class Installer {
         System.out.println("Data Loader v" + AppUtil.DATALOADER_VERSION + " will be installed in: " + INSTALLATION_ABSOLUTE_PATH);
     }
     
-    private static void copyArtifacts() {
+    private static void copyArtifacts() throws Exception {
         Path installationDirPath = Paths.get(INSTALLATION_ABSOLUTE_PATH);
         if (Files.exists(installationDirPath)) {
             for (;;) {
@@ -165,17 +162,10 @@ public class Installer {
                 String input = promptAndGetUserInput("another directory.[Yes/No] ");
                 if (input.toLowerCase().equals("yes") || input.toLowerCase().equals("y")) {
                     System.out.println("Deleting existing Data Loader v" + AppUtil.DATALOADER_VERSION + "... ");
-                    try {
-                        logger.debug("going to delete " + INSTALLATION_ABSOLUTE_PATH);
-                        FileUtils.deleteDirectory(new File(INSTALLATION_ABSOLUTE_PATH));
-                    } catch (IOException e) {
-                        logger.fatal("Unable to delete existing Data Loader installation at " + INSTALLATION_ABSOLUTE_PATH);
-                        logger.fatal(e.getMessage());
-                        System.exit(-1);
-                    }
+                    logger.debug("going to delete " + INSTALLATION_ABSOLUTE_PATH);
+                    FileUtils.deleteDirectory(new File(INSTALLATION_ABSOLUTE_PATH));
                     break;
                 } else if (input.toLowerCase().equals("no") || input.toLowerCase().equals("n")) {
-                    System.out.println("Data Loader installation is quitting.");
                     System.exit(0);                  
                 } else {
                     System.out.println("Type Yes or No.");
@@ -183,33 +173,25 @@ public class Installer {
             }
         }
         String installationSourceDir = ".";
-        try {
-            installationSourceDir = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation()
-                    .toURI()).getParent();
-            logger.debug("going to create " + INSTALLATION_ABSOLUTE_PATH);
-            createDir(INSTALLATION_ABSOLUTE_PATH);
-            logger.debug("going to copy contents of " + installationSourceDir + " to " + INSTALLATION_ABSOLUTE_PATH);
-            
-            FileUtils.copyDirectory(new File(installationSourceDir), new File(INSTALLATION_ABSOLUTE_PATH));
-            
-            logger.debug("going to delete \\.* files from " + INSTALLATION_ABSOLUTE_PATH);
-            deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "\\.*");
-            logger.debug("going to delete install.* files from " + INSTALLATION_ABSOLUTE_PATH);
-            deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "install.(.*)");
-            logger.debug("going to delete META-INF from " + INSTALLATION_ABSOLUTE_PATH);
-            deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "META-INF");
-            logger.debug("going to delete zip files from " + INSTALLATION_ABSOLUTE_PATH);
-            deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, ".*.zip");
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            logger.fatal("Unable to copy installation artifacts from " 
-                + installationSourceDir + " to " +  INSTALLATION_ABSOLUTE_PATH);
-            System.exit(-1);
-        }
+        installationSourceDir = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation()
+                .toURI()).getParent();
+        logger.debug("going to create " + INSTALLATION_ABSOLUTE_PATH);
+        createDir(INSTALLATION_ABSOLUTE_PATH);
+        logger.debug("going to copy contents of " + installationSourceDir + " to " + INSTALLATION_ABSOLUTE_PATH);
+        
+        FileUtils.copyDirectory(new File(installationSourceDir), new File(INSTALLATION_ABSOLUTE_PATH));
+        
+        logger.debug("going to delete \\.* files from " + INSTALLATION_ABSOLUTE_PATH);
+        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "\\.*");
+        logger.debug("going to delete install.* files from " + INSTALLATION_ABSOLUTE_PATH);
+        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "install.(.*)");
+        logger.debug("going to delete META-INF from " + INSTALLATION_ABSOLUTE_PATH);
+        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "META-INF");
+        logger.debug("going to delete zip files from " + INSTALLATION_ABSOLUTE_PATH);
+        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, ".*.zip");
     }
     
-    private static String promptAndGetUserInput(String prompt) {
+    private static String promptAndGetUserInput(String prompt) throws IOException {
         if (prompt == null || prompt.isBlank()) {
             prompt = "Provide input: ";
         }
@@ -217,14 +199,8 @@ public class Installer {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String input = "";
         // Reading data using readLine
-        try {
-            input = reader.readLine();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        input = reader.readLine();
         return input;
-
     }
     
     private static void deleteFilesFromDir(String directoryName, String filePattern) throws IOException {
@@ -250,15 +226,26 @@ public class Installer {
     }
     
     interface ShortcutCreatorInterface {
-        public void create();
+        public void create() throws Exception;
     }
     
     private static void createShortcut(String prompt, ShortcutCreatorInterface shortcutCreator) {
         for (;;) {
             System.out.println("");
-            String input = promptAndGetUserInput(prompt);
+            String input = "";
+            try {
+                input = promptAndGetUserInput(prompt);
+            } catch (IOException e) {
+                System.err.println("Can't read your response. Try again.");
+                handleException(e, Level.ERROR);
+            }
             if ("yes".toLowerCase().equals(input) || "y".toLowerCase().equals(input)) {
-                shortcutCreator.create();
+                try {
+                    shortcutCreator.create();
+                } catch (Exception ex) {
+                    System.err.println("Unable to create shortcut");
+                    handleException(ex, Level.ERROR);
+                }
                 break;
             } else if ("no".toLowerCase().equals(input) || "n".toLowerCase().equals(input)) {
                 return;                  
@@ -273,24 +260,16 @@ public class Installer {
         if (AppUtil.isRunningOnWindows()) {
             createShortcut(PROMPT,
                     new ShortcutCreatorInterface() {
-                        public void create() {
-                            try {
-                                createShortcutOnWindows(CREATE_DEKSTOP_SHORTCUT_ON_WINDOWS);
-                            } catch (Exception ex) {
-                                System.err.println(ex.getMessage());
-                            }
+                        public void create() throws Exception {
+                            createShortcutOnWindows(CREATE_DEKSTOP_SHORTCUT_ON_WINDOWS);
                         }
             });
         } else if (AppUtil.isRunningOnMacOS()) {
             createShortcut(PROMPT,
                     new ShortcutCreatorInterface() {
-                        public void create() {
-                            try {
+                        public void create()  throws Exception {
                                 createSymLink(USERHOME + "/Desktop/DataLoader " + AppUtil.DATALOADER_VERSION,
                                         INSTALLATION_ABSOLUTE_PATH + "/dataloader.app");
-                            } catch (Exception ex) {
-                                System.err.println(ex.getMessage());
-                            }
                         }
             });
         }
@@ -302,13 +281,9 @@ public class Installer {
         if (AppUtil.isRunningOnMacOS()) {
             createShortcut(PROMPT,
                     new ShortcutCreatorInterface() {
-                        public void create() {
-                            try {
-                                createSymLink("/Applications/DataLoader " + AppUtil.DATALOADER_VERSION,
+                        public void create() throws Exception {
+                            createSymLink("/Applications/DataLoader " + AppUtil.DATALOADER_VERSION,
                                         INSTALLATION_ABSOLUTE_PATH + "/dataloader.app");
-                            } catch (Exception ex) {
-                                System.err.println(ex.getMessage());
-                            }
                         }
             });
         }
@@ -320,15 +295,11 @@ public class Installer {
         if (AppUtil.isRunningOnWindows()) {
             createShortcut(PROMPT,
                     new ShortcutCreatorInterface() {
-                        public void create() {
-                            try {
-                                String APPDATA = System.getenv("APPDATA");
-                                String SALESFORCE_START_MENU_DIR = APPDATA + "\\Microsoft\\Windows\\Start Menu\\Programs\\Salesforce\\" ;
-                                createDir(SALESFORCE_START_MENU_DIR);
-                                createShortcutOnWindows(CREATE_START_MENU_SHORTCUT_ON_WINDOWS);
-                            } catch (Exception ex) {
-                                System.err.println(ex.getMessage());
-                            }
+                        public void create() throws Exception {
+                            String APPDATA = System.getenv("APPDATA");
+                            String SALESFORCE_START_MENU_DIR = APPDATA + "\\Microsoft\\Windows\\Start Menu\\Programs\\Salesforce\\" ;
+                            createDir(SALESFORCE_START_MENU_DIR);
+                            createShortcutOnWindows(CREATE_START_MENU_SHORTCUT_ON_WINDOWS);
                         }
             });
         }
@@ -344,7 +315,7 @@ public class Installer {
         Files.createSymbolicLink(symlinkPath, Paths.get(target));
     }
     
-    private static void createShortcutOnWindows(final String shortcutCommand) throws IOException {
+    private static void createShortcutOnWindows(final String shortcutCommand) throws IOException, InterruptedException {
         String redirectWinCmdOutputStr = "";
         if (logger.getLevel() == Level.DEBUG) {
             redirectWinCmdOutputStr = " > debug.txt 2>&1";
@@ -354,13 +325,8 @@ public class Installer {
         logger.debug("going to execute windows command: ");
         logger.debug(command);
         Process p = Runtime.getRuntime().exec(command);
-        try {
-            int exitVal = p.waitFor();
-            logger.debug("windows command exited with exit code: " + exitVal);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            logger.error(e.getMessage());
-        }
+        int exitVal = p.waitFor();
+        logger.debug("windows command exited with exit code: " + exitVal);
     }
     
     private static void configureOSSpecificArtifactsPostCopy() throws IOException {
@@ -422,5 +388,16 @@ public class Installer {
             AppUtil.extractDirFromJar("mac", TOBE_INSTALLED_ABSOLUTE_PATH, true);
        }
         AppUtil.extractDirFromJar("samples", TOBE_INSTALLED_ABSOLUTE_PATH, false);
+    }
+    
+    private static void handleException(Exception ex, Level level) {
+        if (logger != null) {
+            logger.log(level, ex.getMessage());
+            if (logger.getLevel() == Level.DEBUG) {
+                ex.printStackTrace();
+            }
+        } else {
+            ex.printStackTrace();
+        }
     }
 }
