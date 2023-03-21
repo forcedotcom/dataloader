@@ -219,23 +219,7 @@ public class AppUtil {
     }
 
     public static void showBanner() {
-        System.out.println("");
-        System.out.println("*************************************************************************");
-        System.out.println("**                                                                     **");
-        System.out.println("**              Salesforce Data Loader                                 **");
-        System.out.println("**              ======================                                 **");
-        System.out.println("**                                                                     **");
-        System.out.println("**  Data Loader v" + DATALOADER_SHORT_VERSION + " is a Salesforce supported Open Source project to   **");
-        System.out.println("**  help you import data to and export data from your Salesforce org.  **");
-        System.out.println("**  It requires Java JRE " + MIN_JAVA_VERSION + " or later to run.                           **");
-        System.out.println("**                                                                     **");
-        System.out.println("**  Github Project Url:                                                **");
-        System.out.println("**       https://github.com/forcedotcom/dataloader                     **");
-        System.out.println("**  Salesforce Documentation:                                          **");
-        System.out.println("**       https://help.salesforce.com/articleView?id=data_loader.htm    **");
-        System.out.println("**                                                                     **");
-        System.out.println("*************************************************************************");
-        System.out.println("");
+        System.out.println(Messages.getMessage(AppUtil.class, "banner", DATALOADER_SHORT_VERSION, MIN_JAVA_VERSION));
     }
     
     public static synchronized void initializeLog(Map<String, String> argsMap) throws FactoryConfigurationError, IOException {

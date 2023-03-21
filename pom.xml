@@ -542,23 +542,31 @@
                     <mkdir dir="${basedir}/target/zipartifacts"/>
                     <copy file="${basedir}/target/dataloader-${project.version}.jar" 
                        todir="${basedir}/target/zipartifacts"/>
-                    <copy todir="${basedir}/target/zipartifacts/samples">
-                      <fileset dir="${basedir}/release/samples"/>
-                    </copy>
+                    <copy file="${basedir}/release/install/install.command" 
+                       todir="${basedir}/target/zipartifacts"/>
+                    <copy file="${basedir}/release/install/install.command" 
+                       tofile="${basedir}/target/zipartifacts/install.bat"/>
+                    <replace dir="${basedir}/target/zipartifacts/" token="@@FULL_VERSION@@" value="${project.version}"/>
+<!--
+                    <copy file="${basedir}/target/dataloader-${project.version}.jar" 
+                       tofile="${basedir}/target/zipartifacts/dataloader.jar"/>
+
+                    <concat destfile="${basedir}/target/zipartifacts/dataloader-${project.version}.jar" binary="yes">
+                      <filelist dir="${basedir}/release/install" files="install.command"/>
+                      <filelist dir="${basedir}/target/zipartifacts" files="dataloader.jar"/>
+                    </concat>
+-->
+                    <delete file="${basedir}/target/zipartifacts/dataloader.jar"/>
                     <copy todir="${basedir}/target/zipartifacts" >
                       <fileset dir="${basedir}/target/" includes="swt*/*"/>
                     </copy>
-
-                    <replace dir="${basedir}/target/classes/*" token="@@FULL_VERSION@@" value="${project.version}"/>
-                    <replace dir="${basedir}/target/classes/*" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
-
                     <fixcrlf srcdir="${basedir}/target/zipartifacts/"
                                 includes="**/*.bat" eol="crlf"/>
                     <fixcrlf srcdir="${basedir}/target/zipartifacts/"
                                 includes="**/*.bat.old" eol="crlf"/>
 
                     <fixcrlf srcdir="${basedir}/target/zipartifacts/"
-                                includes="**/*.command" eol="lf" eof="remove"/>
+                                includes="**/*.command" eol="crlf" eof="remove"/>
                     <fixcrlf srcdir="${basedir}/target/zipartifacts/"
                                 includes="**/*.command.old" eol="lf" eof="remove"/>
                     <fixcrlf srcdir="${basedir}/target/zipartifacts/"
@@ -567,8 +575,8 @@
                     <zip update="true" destfile="${basedir}/dataloader_v${project.version}.zip">
                       <zipfileset dirmode="755" filemode="755" 
                         dir="${basedir}/target/zipartifacts" />
-                     </zip>
-                   </target>
+                      </zip>
+                    </target>
                 </configuration>
                 <id>package</id>
                 <phase>package</phase>

@@ -42,6 +42,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.util.AppUtil;
 
 public class Installer extends Thread {
@@ -59,7 +60,7 @@ public class Installer extends Thread {
     }
     
     public void run() {
-        System.out.println("Data Loader installation is quitting.");
+        System.out.println(Messages.getMessage(Installer.class, "exitMessage"));
     }
 
     public static void main(String[] args) {
@@ -67,8 +68,8 @@ public class Installer extends Thread {
             Runtime.getRuntime().addShutdownHook(new Installer());
             try {
                 AppUtil.initializeLog(AppUtil.getArgMapFromArgArray(args));
-            } catch (FactoryConfigurationError | IOException e1) {
-                System.err.println("Unable to initialize log: " + e1.getMessage());
+            } catch (FactoryConfigurationError | IOException ex) {
+                handleException(ex, Level.ERROR);
             }
             logger = LogManager.getLogger(Installer.class);
             boolean hideBanner = false;
@@ -130,11 +131,7 @@ public class Installer extends Thread {
     }
         
     private static void selectInstallationDir() throws IOException {
-        
-        System.out.println("Data Loader installation requires you to provide an installation directory to create a version-specific subdirectory for the installation artifacts.");
-        System.out.println("It uses '" + USERHOME + PATH_SEPARATOR + "<relative path>' as the installation directory if you provide a relative path for the installation directory.");
-        System.out.println("");
-        
+        System.out.println(Messages.getMessage(Installer.class, "initialMessage", USERHOME + PATH_SEPARATOR));
         String installationDir = promptAndGetUserInput("Provide the installation directory [default: dataloader] : ");
         if (installationDir.isBlank()) {
             installationDir = "dataloader";
@@ -151,7 +148,7 @@ public class Installer extends Thread {
             INSTALLATION_ABSOLUTE_PATH = USERHOME + PATH_SEPARATOR + installationPathSuffix;
         }
         logger.debug("installation directory absolute path: " + INSTALLATION_ABSOLUTE_PATH);
-        System.out.println("Data Loader v" + AppUtil.DATALOADER_VERSION + " will be installed in: " + INSTALLATION_ABSOLUTE_PATH);
+        System.out.println(Messages.getMessage(Installer.class, "installationDirConfirmation", AppUtil.DATALOADER_VERSION, INSTALLATION_ABSOLUTE_PATH));
     }
     
     private static void copyArtifacts() throws Exception {
@@ -159,19 +156,18 @@ public class Installer extends Thread {
         if (Files.exists(installationDirPath)) {
             for (;;) {
                 System.out.println("");
-                System.out.println("Do you want to overwrite previously installed versions of Data Loader");
-                System.out.println("v" + AppUtil.DATALOADER_VERSION + " and configurations in '" + INSTALLATION_ABSOLUTE_PATH + "'?");
-                System.out.println("If not, installation will quit and you can restart installation using");
-                String input = promptAndGetUserInput("another directory.[Yes/No] ");
-                if (input.toLowerCase().equals("yes") || input.toLowerCase().equals("y")) {
-                    System.out.println("Deleting existing Data Loader v" + AppUtil.DATALOADER_VERSION + "... ");
+                final String prompt = Messages.getMessage(Installer.class, "overwriteInstallationDirPrompt", AppUtil.DATALOADER_VERSION, INSTALLATION_ABSOLUTE_PATH);
+                String input = promptAndGetUserInput(prompt);
+                if (Messages.getMessage(Installer.class, "promptAnswerYes").toLowerCase().startsWith(input.toLowerCase())) {
+                    System.out.println(Messages.getMessage(Installer.class, "deletionInProgressMessage", AppUtil.DATALOADER_VERSION));
+                    Messages.getMessage(Installer.class, "initialMessage");
                     logger.debug("going to delete " + INSTALLATION_ABSOLUTE_PATH);
                     FileUtils.deleteDirectory(new File(INSTALLATION_ABSOLUTE_PATH));
                     break;
-                } else if (input.toLowerCase().equals("no") || input.toLowerCase().equals("n")) {
-                    System.exit(0);                  
+                } else if (Messages.getMessage(Installer.class, "promptAnswerNo").toLowerCase().startsWith(input.toLowerCase())) {
+                    System.exit(0);
                 } else {
-                    System.out.println("Type Yes or No.");
+                    System.out.println(Messages.getMessage(Installer.class, "reprompt"));
                 }
             }
         }
@@ -239,27 +235,27 @@ public class Installer extends Thread {
             try {
                 input = promptAndGetUserInput(prompt);
             } catch (IOException e) {
-                System.err.println("Can't read your response. Try again.");
+                System.err.println(Messages.getMessage(Installer.class, "responseReadError"));
                 handleException(e, Level.ERROR);
             }
-            if ("yes".toLowerCase().equals(input) || "y".toLowerCase().equals(input)) {
+            if (Messages.getMessage(Installer.class, "promptAnswerYes").toLowerCase().startsWith(input.toLowerCase())) {
                 try {
                     shortcutCreator.create();
                 } catch (Exception ex) {
-                    System.err.println("Unable to create shortcut");
+                    System.err.println(Messages.getMessage(Installer.class, "shortcutCreateError"));
                     handleException(ex, Level.ERROR);
                 }
                 break;
-            } else if ("no".toLowerCase().equals(input) || "n".toLowerCase().equals(input)) {
+            } else if (Messages.getMessage(Installer.class, "promptAnswerNo").toLowerCase().startsWith(input.toLowerCase())) {
                 return;                  
             } else {
-                System.out.println("Type Yes or No.");
+                System.out.println(Messages.getMessage(Installer.class, "reprompt"));
             }
         }
     }
     
     private static void createDesktopShortcut() {
-        final String PROMPT = "Do you want to create a Desktop shortcut? [Yes/No] ";
+        final String PROMPT = Messages.getMessage(Installer.class, "createDesktopShortcutPrompt");
         if (AppUtil.isRunningOnWindows()) {
             createShortcut(PROMPT,
                     new ShortcutCreatorInterface() {
@@ -279,7 +275,7 @@ public class Installer extends Thread {
     }
     
     private static void createAppsDirShortcut() {
-        final String PROMPT = "Do you want to create a shortcut in Applications directory? [Yes/No] ";
+        final String PROMPT =  Messages.getMessage(Installer.class, "createApplicationsDirShortcutPrompt");
 
         if (AppUtil.isRunningOnMacOS()) {
             createShortcut(PROMPT,
@@ -293,7 +289,7 @@ public class Installer extends Thread {
     }
     
     private static void createStartMenuShortcut() {
-        final String PROMPT = "Do you want to create a Start menu shortcut? [Yes/No] ";
+        final String PROMPT = Messages.getMessage(Installer.class, "createStartMenuShortcutPrompt");
 
         if (AppUtil.isRunningOnWindows()) {
             createShortcut(PROMPT,
@@ -393,12 +389,9 @@ public class Installer extends Thread {
         AppUtil.extractDirFromJar("samples", TOBE_INSTALLED_ABSOLUTE_PATH, false);
     }
     
-    private static void handleException(Exception ex, Level level) {
+    private static void handleException(Throwable ex, Level level) {
         if (logger != null) {
-            logger.log(level, ex.getMessage());
-            if (logger.getLevel() == Level.DEBUG) {
-                ex.printStackTrace();
-            }
+            logger.log(level, "Installer :", ex);
         } else {
             ex.printStackTrace();
         }
