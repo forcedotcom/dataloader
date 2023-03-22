@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="maven-antrun-" default="main"  >
 	<target name="main">
-	  <copy todir="${basedir}/target/" >
-		<fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swt*/*/*.jar"/>
+	  <copy todir="${basedir}/target/classes/mac" >
+		<fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtmac*/*/*.jar"/>
 	  </copy>
+      <copy todir="${basedir}/target/classes/win" >
+        <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtwin*/*/*.jar"/>
+      </copy>
+      <copy todir="${basedir}/target/classes/linux" >
+        <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtlinux*/*/*.jar"/>
+      </copy>
 	  <taskdef resource="net/sf/antcontrib/antcontrib.properties" />
 	  <foreach param="fileName" target="flatten">
 	    <path>
-	    <dirset dir="${basedir}/target/">
-	      <include name="swt*" />
-	    </dirset>
-	    </path>
+    	    <dirset dir="${basedir}/target/classes/mac">
+    	      <include name="swt*" />
+    	    </dirset>
+            <dirset dir="${basedir}/target/classes/win">
+              <include name="swt*" />
+            </dirset>
+	        <dirset dir="${basedir}/target/classes/linux">
+	           <include name="swt*" />
+	        </dirset>
+        </path>
 	  </foreach>
 	</target>
 	<target name="flatten">

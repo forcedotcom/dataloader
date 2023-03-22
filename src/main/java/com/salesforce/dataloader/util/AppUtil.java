@@ -180,7 +180,6 @@ public class AppUtil {
             {
                 continue;
             }
-            extractionDestination.setExecutable(true);
             java.io.InputStream is = jarfile.getInputStream(je);
             java.io.FileOutputStream fo = new java.io.FileOutputStream(extractionDestination);
             while(is.available() > 0)
@@ -189,6 +188,12 @@ public class AppUtil {
             }
             fo.close();
             is.close();
+            if (extractionDestination.getName().endsWith(".bat")
+                || extractionDestination.getName().endsWith(".sh")
+                || extractionDestination.getName().endsWith(".command")
+                || !extractionDestination.getName().contains("\\.")) {
+                extractionDestination.setExecutable(true);
+            }
         }
     }
     
