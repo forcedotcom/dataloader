@@ -263,7 +263,7 @@ public class Installer extends Thread {
                     new ShortcutCreatorInterface() {
                         public void create()  throws Exception {
                                 createSymLink(USERHOME + "/Desktop/DataLoader " + AppUtil.DATALOADER_VERSION,
-                                        installationDir + "/dataloader.app");
+                                        installationDir + "/dataloader.app", true);
                         }
             });
         }
@@ -277,7 +277,7 @@ public class Installer extends Thread {
                     new ShortcutCreatorInterface() {
                         public void create() throws Exception {
                             createSymLink("/Applications/DataLoader " + AppUtil.DATALOADER_VERSION,
-                                    installationDir + "/dataloader.app");
+                                    installationDir + "/dataloader.app", true);
                         }
             });
         }
@@ -299,11 +299,16 @@ public class Installer extends Thread {
         }
     }
     
-    private static void createSymLink(String symlink, String target) throws IOException {
+    private static void createSymLink(String symlink, String target, boolean deleteExisting) throws IOException {
         Path symlinkPath = Paths.get(symlink);
         if (Files.exists(symlinkPath)) {
-            logger.debug("Symlink " + symlink + " exists. Skipping linking it to " + target);
-            return;
+            if (deleteExisting) {
+                logger.debug("Deleting existing symlink " + symlink);
+                Files.delete(symlinkPath);
+            } else {
+                logger.debug("Symlink " + symlink + " exists. Skipping linking it to " + target);
+                return;
+            }
         }
         logger.debug("going to create symlink: " + symlink + " pointing to " + target);
         Files.createSymbolicLink(symlinkPath, Paths.get(target));
@@ -351,7 +356,7 @@ public class Installer extends Thread {
         logger.debug("going to create " + MACOS_PACKAGE_BASE + "/MacOS");
         createDir(MACOS_PACKAGE_BASE + "/MacOS");
         createSymLink(PATH_TO_DL_EXECUTABLE_ON_MAC,
-                installationDir + "/dataloader_console");
+                installationDir + "/dataloader_console", false);
     }
     
     private static void configureWindowsArtifactsPostCopy(String installationDir) throws IOException {
