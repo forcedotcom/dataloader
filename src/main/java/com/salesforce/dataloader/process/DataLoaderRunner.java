@@ -91,7 +91,6 @@ public class DataLoaderRunner extends Thread {
         } catch (FactoryConfigurationError | IOException ex) {
             ex.printStackTrace();
         }
-        extractInstallationArtifacts();
         if (isBatchMode(args)) {
             try {
                 ProcessRunner.runBatchMode(args, null);
@@ -102,6 +101,7 @@ public class DataLoaderRunner extends Thread {
             /* Run in the UI mode, get the controller instance with batchMode == false */
             argNameValuePair = AppUtil.getArgMapFromArgArray(args);
             logger = Controller.getLogger(argNameValuePair, DataLoaderRunner.class);
+            extractInstallationArtifacts();
             if (argNameValuePair.containsKey(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
                 && "true".equalsIgnoreCase(argNameValuePair.get(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
                 try {

@@ -66,7 +66,7 @@ public class Installer extends Thread {
             } catch (FactoryConfigurationError | IOException ex) {
                 handleException(ex, Level.ERROR);
             }
-            logger = LogManager.getLogger(Installer.class);
+            setLogger();
             boolean hideBanner = false;
             boolean skipCopyArtifacts = false;
             boolean skipCreateDesktopShortcut = false;
@@ -369,6 +369,7 @@ public class Installer extends Thread {
     }
 
     public static void extractInstallationArtifactsFromJar(String installationDir) throws URISyntaxException, IOException {
+        setLogger();
         AppUtil.extractDirFromJar("samples", installationDir, false);
         AppUtil.extractDirFromJar("configs", installationDir, false);
         String osSpecificExtractionPrefix = "mac/";
@@ -384,6 +385,12 @@ public class Installer extends Thread {
             logger.log(level, "Installer :", ex);
         } else {
             ex.printStackTrace();
+        }
+    }
+
+    private static void setLogger() {
+        if (logger == null) {
+            logger = LogManager.getLogger(Installer.class);
         }
     }
 }
