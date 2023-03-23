@@ -51,19 +51,14 @@ public class Installer extends Thread {
     private static final String CREATE_DEKSTOP_SHORTCUT_ON_WINDOWS = ":createDesktopShortcut";
     private static final String CREATE_START_MENU_SHORTCUT_ON_WINDOWS = ":createStartMenuShortcut";
 
-    private static String INSTALLATION_ABSOLUTE_PATH;
     private static Logger logger;
-    private final static String TOBE_INSTALLED_ABSOLUTE_PATH;
-    
-    static {
-        TOBE_INSTALLED_ABSOLUTE_PATH = AppUtil.getDirContainingClassJar(Installer.class);
-    }
     
     public void run() {
         System.out.println(Messages.getMessage(Installer.class, "exitMessage"));
     }
 
     public static void main(String[] args) {
+        String installationDir = ".";
         try {
             Runtime.getRuntime().addShutdownHook(new Installer());
             try {
@@ -71,7 +66,7 @@ public class Installer extends Thread {
             } catch (FactoryConfigurationError | IOException ex) {
                 handleException(ex, Level.ERROR);
             }
-            logger = LogManager.getLogger(Installer.class);
+            setLogger();
             boolean hideBanner = false;
             boolean skipCopyArtifacts = false;
             boolean skipCreateDesktopShortcut = false;
@@ -104,25 +99,23 @@ public class Installer extends Thread {
                 AppUtil.showBanner();
             }
             if (!skipCopyArtifacts) {
-                logger.debug("going to extract artifacts from jar");
-                extractOSSpecificArtifactsFromJar();
                 logger.debug("going to select installation directory");
-                selectInstallationDir();
+                installationDir = selectInstallationDir();
                 logger.debug("going to copy artifacts");
-                copyArtifacts();
-                configureOSSpecificArtifactsPostCopy();
+                copyArtifacts(installationDir);
+                extractInstallationArtifactsFromJar(installationDir);
             }
             if (!skipCreateDesktopShortcut) {
                 logger.debug("going to create desktop shortcut");
-                createDesktopShortcut();
+                createDesktopShortcut(installationDir);
             }
             if (!skipCreateStartMenuShortcut && AppUtil.isRunningOnWindows()) {
                 logger.debug("going to create start menu shortcut");
-                createStartMenuShortcut();
+                createStartMenuShortcut(installationDir);
             }
             if (!skipCreateAppsDirShortcut && AppUtil.isRunningOnMacOS()) {
                 logger.debug("going to create Applications directory shortcut");
-                createAppsDirShortcut();
+                createAppsDirShortcut(installationDir);
             }
         } catch (Exception ex) {
             handleException(ex, Level.FATAL);
@@ -130,39 +123,41 @@ public class Installer extends Thread {
         }
     }
         
-    private static void selectInstallationDir() throws IOException {
+    private static String selectInstallationDir() throws IOException {
+        String installationDir = "";
         System.out.println(Messages.getMessage(Installer.class, "initialMessage", USERHOME + PATH_SEPARATOR));
-        String installationDir = promptAndGetUserInput("Provide the installation directory [default: dataloader] : ");
-        if (installationDir.isBlank()) {
-            installationDir = "dataloader";
+        String installationDirRoot = promptAndGetUserInput("Provide the installation directory [default: dataloader] : ");
+        if (installationDirRoot.isBlank()) {
+            installationDirRoot = "dataloader";
         }
-        logger.debug("installation directory: " + installationDir);
-        String installationPathSuffix = installationDir + PATH_SEPARATOR + "v" + AppUtil.DATALOADER_VERSION;
-        if (installationDir.startsWith(PATH_SEPARATOR) 
-             || (AppUtil.isRunningOnWindows() && installationDir.indexOf(':') == 1 && installationDir.indexOf(PATH_SEPARATOR) == 2)) {
+        logger.debug("installation directory: " + installationDirRoot);
+        String installationPathSuffix = installationDirRoot + PATH_SEPARATOR + "v" + AppUtil.DATALOADER_VERSION;
+        if (installationDirRoot.startsWith(PATH_SEPARATOR) 
+             || (AppUtil.isRunningOnWindows() && installationDirRoot.indexOf(':') == 1 && installationDirRoot.indexOf(PATH_SEPARATOR) == 2)) {
             // Absolute path specified. 
             // Absolute path on Mac and Linux start with PATH_SEPARATOR
             // Absolute path on Windows starts with <Single character drive letter>:\. For example, "C:\"
-            INSTALLATION_ABSOLUTE_PATH = installationPathSuffix;
+            installationDir = installationPathSuffix;
         } else {
-            INSTALLATION_ABSOLUTE_PATH = USERHOME + PATH_SEPARATOR + installationPathSuffix;
+            installationDir = USERHOME + PATH_SEPARATOR + installationPathSuffix;
         }
-        logger.debug("installation directory absolute path: " + INSTALLATION_ABSOLUTE_PATH);
-        System.out.println(Messages.getMessage(Installer.class, "installationDirConfirmation", AppUtil.DATALOADER_VERSION, INSTALLATION_ABSOLUTE_PATH));
+        logger.debug("installation directory absolute path: " + installationDir);
+        System.out.println(Messages.getMessage(Installer.class, "installationDirConfirmation", AppUtil.DATALOADER_VERSION, installationDir));
+        return installationDir;
     }
     
-    private static void copyArtifacts() throws Exception {
-        Path installationDirPath = Paths.get(INSTALLATION_ABSOLUTE_PATH);
+    private static void copyArtifacts(String installationDir) throws Exception {
+        Path installationDirPath = Paths.get(installationDir);
         if (Files.exists(installationDirPath)) {
             for (;;) {
                 System.out.println("");
-                final String prompt = Messages.getMessage(Installer.class, "overwriteInstallationDirPrompt", AppUtil.DATALOADER_VERSION, INSTALLATION_ABSOLUTE_PATH);
+                final String prompt = Messages.getMessage(Installer.class, "overwriteInstallationDirPrompt", AppUtil.DATALOADER_VERSION, installationDir);
                 String input = promptAndGetUserInput(prompt);
                 if (Messages.getMessage(Installer.class, "promptAnswerYes").toLowerCase().startsWith(input.toLowerCase())) {
                     System.out.println(Messages.getMessage(Installer.class, "deletionInProgressMessage", AppUtil.DATALOADER_VERSION));
                     Messages.getMessage(Installer.class, "initialMessage");
-                    logger.debug("going to delete " + INSTALLATION_ABSOLUTE_PATH);
-                    FileUtils.deleteDirectory(new File(INSTALLATION_ABSOLUTE_PATH));
+                    logger.debug("going to delete " + installationDir);
+                    FileUtils.deleteDirectory(new File(installationDir));
                     break;
                 } else if (Messages.getMessage(Installer.class, "promptAnswerNo").toLowerCase().startsWith(input.toLowerCase())) {
                     System.exit(0);
@@ -174,20 +169,20 @@ public class Installer extends Thread {
         String installationSourceDir = ".";
         installationSourceDir = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation()
                 .toURI()).getParent();
-        logger.debug("going to create " + INSTALLATION_ABSOLUTE_PATH);
-        createDir(INSTALLATION_ABSOLUTE_PATH);
-        logger.debug("going to copy contents of " + installationSourceDir + " to " + INSTALLATION_ABSOLUTE_PATH);
+        logger.debug("going to create " + installationDir);
+        createDir(installationDir);
+        logger.debug("going to copy contents of " + installationSourceDir + " to " + installationDir);
         
-        FileUtils.copyDirectory(new File(installationSourceDir), new File(INSTALLATION_ABSOLUTE_PATH));
+        FileUtils.copyDirectory(new File(installationSourceDir), new File(installationDir));
         
-        logger.debug("going to delete \\.* files from " + INSTALLATION_ABSOLUTE_PATH);
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "\\.*");
-        logger.debug("going to delete install.* files from " + INSTALLATION_ABSOLUTE_PATH);
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "install.(.*)");
-        logger.debug("going to delete META-INF from " + INSTALLATION_ABSOLUTE_PATH);
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "META-INF");
-        logger.debug("going to delete zip files from " + INSTALLATION_ABSOLUTE_PATH);
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, ".*.zip");
+        logger.debug("going to delete \\.* files from " + installationDir);
+        deleteFilesFromDir(installationDir, "\\.*");
+        logger.debug("going to delete install.* files from " + installationDir);
+        deleteFilesFromDir(installationDir, "install.(.*)");
+        logger.debug("going to delete META-INF from " + installationDir);
+        deleteFilesFromDir(installationDir, "META-INF");
+        logger.debug("going to delete zip files from " + installationDir);
+        deleteFilesFromDir(installationDir, ".*.zip");
     }
     
     private static String promptAndGetUserInput(String prompt) throws IOException {
@@ -254,13 +249,13 @@ public class Installer extends Thread {
         }
     }
     
-    private static void createDesktopShortcut() {
+    private static void createDesktopShortcut(String installationDir) {
         final String PROMPT = Messages.getMessage(Installer.class, "createDesktopShortcutPrompt");
         if (AppUtil.isRunningOnWindows()) {
             createShortcut(PROMPT,
                     new ShortcutCreatorInterface() {
                         public void create() throws Exception {
-                            createShortcutOnWindows(CREATE_DEKSTOP_SHORTCUT_ON_WINDOWS);
+                            createShortcutOnWindows(CREATE_DEKSTOP_SHORTCUT_ON_WINDOWS, installationDir);
                         }
             });
         } else if (AppUtil.isRunningOnMacOS()) {
@@ -268,13 +263,13 @@ public class Installer extends Thread {
                     new ShortcutCreatorInterface() {
                         public void create()  throws Exception {
                                 createSymLink(USERHOME + "/Desktop/DataLoader " + AppUtil.DATALOADER_VERSION,
-                                        INSTALLATION_ABSOLUTE_PATH + "/dataloader.app");
+                                        installationDir + "/dataloader.app");
                         }
             });
         }
     }
     
-    private static void createAppsDirShortcut() {
+    private static void createAppsDirShortcut(String installationDir) {
         final String PROMPT =  Messages.getMessage(Installer.class, "createApplicationsDirShortcutPrompt");
 
         if (AppUtil.isRunningOnMacOS()) {
@@ -282,13 +277,13 @@ public class Installer extends Thread {
                     new ShortcutCreatorInterface() {
                         public void create() throws Exception {
                             createSymLink("/Applications/DataLoader " + AppUtil.DATALOADER_VERSION,
-                                        INSTALLATION_ABSOLUTE_PATH + "/dataloader.app");
+                                    installationDir + "/dataloader.app");
                         }
             });
         }
     }
     
-    private static void createStartMenuShortcut() {
+    private static void createStartMenuShortcut(String installationDir) {
         final String PROMPT = Messages.getMessage(Installer.class, "createStartMenuShortcutPrompt");
 
         if (AppUtil.isRunningOnWindows()) {
@@ -298,7 +293,7 @@ public class Installer extends Thread {
                             String APPDATA = System.getenv("APPDATA");
                             String SALESFORCE_START_MENU_DIR = APPDATA + "\\Microsoft\\Windows\\Start Menu\\Programs\\Salesforce\\" ;
                             createDir(SALESFORCE_START_MENU_DIR);
-                            createShortcutOnWindows(CREATE_START_MENU_SHORTCUT_ON_WINDOWS);
+                            createShortcutOnWindows(CREATE_START_MENU_SHORTCUT_ON_WINDOWS, installationDir);
                         }
             });
         }
@@ -307,20 +302,20 @@ public class Installer extends Thread {
     private static void createSymLink(String symlink, String target) throws IOException {
         Path symlinkPath = Paths.get(symlink);
         if (Files.exists(symlinkPath)) {
-            logger.debug("going to delete existing symlink: " + symlink);
-            Files.delete(symlinkPath);
+            logger.debug("Symlink " + symlink + " exists. Skipping linking it to " + target);
+            return;
         }
         logger.debug("going to create symlink: " + symlink + " pointing to " + target);
         Files.createSymbolicLink(symlinkPath, Paths.get(target));
     }
     
-    private static void createShortcutOnWindows(final String shortcutCommand) throws IOException, InterruptedException {
+    private static void createShortcutOnWindows(final String shortcutCommand, String installationDir) throws IOException, InterruptedException {
         String redirectWinCmdOutputStr = "";
         if (logger.getLevel() == Level.DEBUG) {
             redirectWinCmdOutputStr = " > debug.txt 2>&1";
         }
-        String command = "cmd /c call \"" + INSTALLATION_ABSOLUTE_PATH + "\\util\\util.bat\"" 
-                + " " + shortcutCommand + " \"" + INSTALLATION_ABSOLUTE_PATH + "\"" + redirectWinCmdOutputStr;
+        String command = "cmd /c call \"" + installationDir + "\\util\\util.bat\"" 
+                + " " + shortcutCommand + " \"" + installationDir + "\"" + redirectWinCmdOutputStr;
         logger.debug("going to execute windows command: ");
         logger.debug(command);
         Process p = Runtime.getRuntime().exec(command);
@@ -328,26 +323,23 @@ public class Installer extends Thread {
         logger.debug("windows command exited with exit code: " + exitVal);
     }
     
-    private static void configureOSSpecificArtifactsPostCopy() throws IOException {
+    private static void configureOSSpecificInstallationArtifactsPostCopy(String installationDir) throws IOException {
         if (AppUtil.isRunningOnWindows()) {
-            configureWindowsArtifactsPostCopy();
+            configureWindowsArtifactsPostCopy(installationDir);
         } else if (AppUtil.isRunningOnMacOS()) {
-            configureMacOSArtifactsPostCopy();
+            configureMacOSArtifactsPostCopy(installationDir);
         } else if (AppUtil.isRunningOnLinux()) {
-            configureLinuxArtifactsPostCopy();
+            configureLinuxArtifactsPostCopy(installationDir);
         }
     }
     
-    private static void configureMacOSArtifactsPostCopy() throws IOException {
-        final String MACOS_PACKAGE_BASE = INSTALLATION_ABSOLUTE_PATH + "/dataloader.app/Contents";
+    private static void configureMacOSArtifactsPostCopy(String installationDir) throws IOException {
+        final String MACOS_PACKAGE_BASE = installationDir + "/dataloader.app/Contents";
         final String PATH_TO_DL_EXECUTABLE_ON_MAC = MACOS_PACKAGE_BASE + "/MacOS/dataloader";
  
         // delete unnecessary artifacts
-        logger.debug("going to delete dataloader.ico from " + INSTALLATION_ABSOLUTE_PATH);
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "dataloader.ico");
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "swtlinux(.*)");
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "swtwin(.*)");
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH + "/util", "(.*).bat");
+        logger.debug("going to delete dataloader.ico from " + installationDir);
+        deleteFilesFromDir(installationDir + "/util", "(.*).bat");
 
         // create a soft link from <INSTALLATION_ABSOLUTE_PATH>/dataloader.app/Contents/MacOS/dataloader to 
         // <INSTALLATION_ABSOLUTE_PATH>/dataloader_console
@@ -355,38 +347,37 @@ public class Installer extends Thread {
                     + 
                     PATH_TO_DL_EXECUTABLE_ON_MAC
                     + " to "
-                    + INSTALLATION_ABSOLUTE_PATH + "/dataloader_console");
+                    + installationDir + "/dataloader_console");
         logger.debug("going to create " + MACOS_PACKAGE_BASE + "/MacOS");
         createDir(MACOS_PACKAGE_BASE + "/MacOS");
         createSymLink(PATH_TO_DL_EXECUTABLE_ON_MAC,
-                        INSTALLATION_ABSOLUTE_PATH + "/dataloader_console");
+                installationDir + "/dataloader_console");
     }
     
-    private static void configureWindowsArtifactsPostCopy() throws IOException {
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "swtmac(.*)");
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "swtlinux(.*)");
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH + "/util", "(.*).sh");
+    private static void configureWindowsArtifactsPostCopy(String installationDir) throws IOException {
+        deleteFilesFromDir(installationDir + "/util", "(.*).sh");
     }
     
-    private static void configureLinuxArtifactsPostCopy() throws IOException {
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "swtmac(.*)");
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH, "swtwin(.*)");
-        Files.move(Paths.get(INSTALLATION_ABSOLUTE_PATH + "/dataloader_console"),
-                Paths.get(INSTALLATION_ABSOLUTE_PATH + "/dataloader.sh"));
-        deleteFilesFromDir(INSTALLATION_ABSOLUTE_PATH + "/util", "(.*).bat");
+    private static void configureLinuxArtifactsPostCopy(String installationDir) throws IOException {
+        Files.move(Paths.get(installationDir + "/dataloader_console"),
+                Paths.get(installationDir + "/dataloader.sh"));
+        deleteFilesFromDir(installationDir + "/util", "(.*).bat");
     }
 
     private static void createDir(String dirPath) throws IOException {
         Files.createDirectories(Paths.get(dirPath));
     }
 
-    private static void extractOSSpecificArtifactsFromJar() throws URISyntaxException, IOException {
+    public static void extractInstallationArtifactsFromJar(String installationDir) throws URISyntaxException, IOException {
+        setLogger();
+        AppUtil.extractDirFromJar("samples", installationDir, false);
+        AppUtil.extractDirFromJar("configs", installationDir, false);
+        String osSpecificExtractionPrefix = "mac/";
         if (AppUtil.isRunningOnWindows()) {
-            AppUtil.extractDirFromJar("win", TOBE_INSTALLED_ABSOLUTE_PATH, true);
-       } else {
-            AppUtil.extractDirFromJar("mac", TOBE_INSTALLED_ABSOLUTE_PATH, true);
-       }
-        AppUtil.extractDirFromJar("samples", TOBE_INSTALLED_ABSOLUTE_PATH, false);
+            osSpecificExtractionPrefix = "win/";
+        }
+        AppUtil.extractDirFromJar(osSpecificExtractionPrefix, installationDir, true);
+        configureOSSpecificInstallationArtifactsPostCopy(installationDir);
     }
     
     private static void handleException(Throwable ex, Level level) {
@@ -394,6 +385,12 @@ public class Installer extends Thread {
             logger.log(level, "Installer :", ex);
         } else {
             ex.printStackTrace();
+        }
+    }
+
+    private static void setLogger() {
+        if (logger == null) {
+            logger = LogManager.getLogger(Installer.class);
         }
     }
 }

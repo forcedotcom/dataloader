@@ -32,6 +32,7 @@ package com.salesforce.dataloader.process;
 
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
+import com.salesforce.dataloader.install.Installer;
 import com.salesforce.dataloader.ui.UIUtils;
 import com.salesforce.dataloader.util.AppUtil;
 
@@ -41,10 +42,14 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
 import org.apache.logging.log4j.Logger;
 import java.lang.management.ManagementFactory;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Map;
+
+import javax.xml.parsers.FactoryConfigurationError;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.eclipse.swt.widgets.Display;
@@ -70,9 +75,22 @@ public class DataLoaderRunner extends Thread {
         // called just before the program closes
         HttpClientTransport.closeConnections();
     }
+    
+    private static void extractInstallationArtifacts() {
+        try {
+            Installer.extractInstallationArtifactsFromJar(AppUtil.getDirContainingClassJar(DataLoaderRunner.class));
+        } catch (URISyntaxException | IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
+        try {
+            AppUtil.initializeLog(AppUtil.getArgMapFromArgArray(args));
+        } catch (FactoryConfigurationError | IOException ex) {
+            ex.printStackTrace();
+        }
         if (isBatchMode(args)) {
             try {
                 ProcessRunner.runBatchMode(args, null);
@@ -83,6 +101,7 @@ public class DataLoaderRunner extends Thread {
             /* Run in the UI mode, get the controller instance with batchMode == false */
             argNameValuePair = AppUtil.getArgMapFromArgArray(args);
             logger = Controller.getLogger(argNameValuePair, DataLoaderRunner.class);
+            extractInstallationArtifacts();
             if (argNameValuePair.containsKey(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
                 && "true".equalsIgnoreCase(argNameValuePair.get(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
                 try {
@@ -246,7 +265,7 @@ public class DataLoaderRunner extends Thread {
                         return possibleSWTJarFile;
                     }
                 }
-            }            
+            }
         }
         File parentDir = new File(parentDirStr);
         if (!parentDir.exists()) {

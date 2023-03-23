@@ -153,34 +153,36 @@ public class AppUtil {
         Files.copy(link, extractionDestination.getAbsoluteFile().toPath());
     }
     
-    public static void extractDirFromJar(String extractionDir, String destDirName, boolean flatten) throws IOException, URISyntaxException {
+    public static void extractDirFromJar(String extractionPrefix, String destDirName, boolean flatten) throws IOException, URISyntaxException {
         String jarPath = getFullPathOfJar(AppUtil.class);
         java.util.jar.JarFile jarfile = new java.util.jar.JarFile(new java.io.File(jarPath)); //jar file path(here sqljdbc4.jar)
         java.util.Enumeration<java.util.jar.JarEntry> enu= jarfile.entries();
         while(enu.hasMoreElements())
         {
-            java.util.jar.JarEntry je = enu.nextElement();
+            java.util.jar.JarEntry jarEntry = enu.nextElement();
 
-            if (!je.toString().startsWith(extractionDir)) {
+            if (!jarEntry.toString().startsWith(extractionPrefix)) {
                 continue;
             }
-            logger.debug(je.getName());
+            logger.debug(jarEntry.getName());
             
-            String childArtifactName = je.getName();
+            String childArtifactName = jarEntry.getName();
             if (flatten) {
-                childArtifactName = childArtifactName.substring(extractionDir.length());
+                childArtifactName = childArtifactName.substring(extractionPrefix.length());
             }
             File extractionDestination = new File(destDirName, childArtifactName);
-            if(!extractionDestination.exists())
-            {
+            if (extractionDestination.isFile() && extractionDestination.exists()) {
+                // Do not overwrite existing artifacts
+                continue;
+            } else {
                 extractionDestination.getParentFile().mkdirs();
                 extractionDestination = new java.io.File(destDirName, childArtifactName);
             }
-            if(je.isDirectory())
+            if (jarEntry.isDirectory())
             {
                 continue;
             }
-            java.io.InputStream is = jarfile.getInputStream(je);
+            java.io.InputStream is = jarfile.getInputStream(jarEntry);
             java.io.FileOutputStream fo = new java.io.FileOutputStream(extractionDestination);
             while(is.available() > 0)
             {
