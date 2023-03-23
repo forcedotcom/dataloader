@@ -547,22 +547,22 @@
                     <delete dir="${basedir}/target/zipartifacts"/>
                     <mkdir dir="${basedir}/target/zipartifacts"/>
                     <copy file="${basedir}/target/dataloader-${project.version}.jar" 
-                       todir="${basedir}/target/zipartifacts"/>
+                        todir="${basedir}/target/zipartifacts"/>
                     <copy file="${basedir}/release/install/install.command" 
-                       todir="${basedir}/target/zipartifacts"/>
+                        todir="${basedir}/target/zipartifacts"/>
                     <copy file="${basedir}/release/install/install.command" 
-                       tofile="${basedir}/target/zipartifacts/install.bat"/>
+                        tofile="${basedir}/target/zipartifacts/install.bat"/>
+                    <copy file="${basedir}/target/classes/mac/util/util.sh" 
+                        todir="${basedir}/target/zipartifacts/util"/>
+                    <copy file="${basedir}/target/classes/win/util/util.bat" 
+                        todir="${basedir}/target/zipartifacts/util"/>
                     <replace dir="${basedir}/target/zipartifacts/" token="@@FULL_VERSION@@" value="${project.version}"/>
 <!--
-                    <copy file="${basedir}/target/dataloader-${project.version}.jar" 
-                       tofile="${basedir}/target/zipartifacts/dataloader.jar"/>
-
                     <concat destfile="${basedir}/target/zipartifacts/dataloader-${project.version}.jar" binary="yes">
                       <filelist dir="${basedir}/release/install" files="install.command"/>
-                      <filelist dir="${basedir}/target/zipartifacts" files="dataloader.jar"/>
+                      <filelist dir="${basedir}/target" files="dataloader-${project.version}.jar"/>
                     </concat>
 -->
-                    <delete file="${basedir}/target/zipartifacts/dataloader.jar"/>
                     <copy todir="${basedir}/target/zipartifacts" >
                       <fileset dir="${basedir}/target/" includes="swt*/*"/>
                     </copy>
