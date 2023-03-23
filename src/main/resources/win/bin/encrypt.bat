@@ -1,7 +1,7 @@
 @echo off
 SETLOCAL
 
-CALL "%~dp0..\util\util.bat" checkJavaVersion
+CALL "%~dp0..\util\util.bat" :checkJavaVersion
 IF "%ERRORLEVEL%" NEQ "0" (
     PAUSE
     GOTO :exit

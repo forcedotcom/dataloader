@@ -453,7 +453,13 @@
                        <include>**</include>
                    </includes>
                 </filter>
-               <filter>
+                <filter>
+                   <artifact>org.springframework:spring-beans</artifact>
+                   <includes>
+                       <include>**</include>
+                   </includes>
+                </filter>
+                <filter>
                     <artifact>*:*</artifact>
                     <excludes>
                         <exclude>**/Log4j2Plugins.dat</exclude>
