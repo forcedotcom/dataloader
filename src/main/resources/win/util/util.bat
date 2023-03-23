@@ -10,9 +10,6 @@ EXIT /b %ERRORLEVEL%
       SET DATALOADER_SHORT_VERSION=%%a
     )
     SET MIN_JAVA_VERSION=@@MIN_JAVA_VERSION@@
-    IF NOT "%DATALOADER_JAVA_HOME%" == "" (
-        SET "JAVA_HOME=%DATALOADER_JAVA_HOME%"
-    )
     EXIT /b 0
 
 :showBanner
@@ -37,12 +34,17 @@ EXIT /b %ERRORLEVEL%
 
 :checkJavaVersion
     CALL :initVars
-    echo Data Loader requires Java JRE %MIN_JAVA_VERSION% or later. Checking if it is installed...
 
+    echo Data Loader requires Java JRE %MIN_JAVA_VERSION% or later. Checking if it is installed...
+    IF NOT "%DATALOADER_JAVA_HOME%" == "" (
+        SET "JAVA_HOME=%DATALOADER_JAVA_HOME%"
+    )
     SET "PATH=%JAVA_HOME%\bin\;%PATH%;"
 
     java -version 1>nul 2>nul || (
-        GOTO :NoJavaErrorExit
+        echo Did not find java command.
+        echo.
+        GOTO :exitWithJavaDownloadMessage
     )
 
     FOR /f "tokens=3" %%a IN ('java -version 2^>^&1 ^| FINDSTR /i "version"') DO (
@@ -55,18 +57,10 @@ EXIT /b %ERRORLEVEL%
     )
 
     IF %JAVA_MAJOR_VERSION% LSS %MIN_JAVA_VERSION% (
-        GOTO :JavaVersionErrorExit
+        echo Found Java JRE version %JAVA_FULL_VERSION% whereas Data Loader requires Java JRE %MIN_JAVA_VERSION% or later.
+        GOTO :exitWithJavaDownloadMessage
     )
     EXIT /b 0
-
-:NoJavaErrorExit
-    echo Did not find java command.
-    echo.
-    GOTO :exitWithJavaDownloadMessage
-
-:JavaVersionErrorExit
-    echo Found Java JRE version %JAVA_FULL_VERSION% whereas Data Loader requires Java JRE %MIN_JAVA_VERSION% or later.
-    GOTO :exitWithJavaDownloadMessage
 
 :exitWithJavaDownloadMessage
     echo Java JRE %MIN_JAVA_VERSION% or later is not installed or DATALOADER_JAVA_HOME environment variable is not set.

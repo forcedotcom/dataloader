@@ -30,6 +30,8 @@ showBanner() {
 
 checkJavaVersion() {
     initVars
+    
+    echo "Data Loader requires Java JRE ${MIN_JAVA_VERSION} or later. Checking if it is installed..."
     if [ ! -z "${DATALOADER_JAVA_HOME}" ]
     then
         JAVA_HOME=${DATALOADER_JAVA_HOME}
