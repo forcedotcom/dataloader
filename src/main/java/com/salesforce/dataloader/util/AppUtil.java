@@ -161,7 +161,9 @@ public class AppUtil {
         {
             java.util.jar.JarEntry jarEntry = enu.nextElement();
 
-            if (!jarEntry.toString().startsWith(extractionPrefix)) {
+            if (!jarEntry.toString().startsWith(extractionPrefix)
+                || jarEntry.isDirectory() 
+                || jarEntry.getName().startsWith("\\.")) {
                 continue;
             }
             logger.debug(jarEntry.getName());
@@ -177,10 +179,6 @@ public class AppUtil {
             } else {
                 extractionDestination.getParentFile().mkdirs();
                 extractionDestination = new java.io.File(destDirName, childArtifactName);
-            }
-            if (jarEntry.isDirectory())
-            {
-                continue;
             }
             java.io.InputStream is = jarfile.getInputStream(jarEntry);
             java.io.FileOutputStream fo = new java.io.FileOutputStream(extractionDestination);
