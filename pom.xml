@@ -18,14 +18,14 @@
     <build.year>2022</build.year>
     <java.compile.version>11</java.compile.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <config.additional.properties></config.additional.properties>
+    <config.additional.properties/>
     <swt.version>4.27</swt.version>
 
     <!-- test properties -->
     <test.endpoint>http://testendpoint</test.endpoint>
     <test.user.default>admin@org.com</test.user.default>
     <test.user.restricted>standard@org.com</test.user.restricted>
-    <test.password></test.password><!-- use the encrypted password -->
+    <test.password/><!-- use the encrypted password -->
     <test.redirect>false</test.redirect>
     <test.testfiles.directory>${project.build.testOutputDirectory}/testfiles</test.testfiles.directory>
   </properties>
@@ -115,7 +115,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>5.3.23</version>
+      <version>5.3.26</version>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.jface --> 
     <dependency>
@@ -493,7 +493,7 @@
                 <phase>compile</phase>
                 <configuration>
                   <target>
-                    <ant antfile="${basedir}/extractSWTJar.xml" inheritAll="true" />
+                    <ant antfile="${basedir}/extractSWTJar.xml" inheritAll="true"/>
                     <delete includeEmptyDirs="true">
                       <dirset dir="${basedir}/target/">
                         <patternset>
@@ -546,16 +546,11 @@
                     <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath"/>
                     <delete dir="${basedir}/target/zipartifacts"/>
                     <mkdir dir="${basedir}/target/zipartifacts"/>
-                    <copy file="${basedir}/target/dataloader-${project.version}.jar" 
-                        todir="${basedir}/target/zipartifacts"/>
-                    <copy file="${basedir}/release/install/install.command" 
-                        todir="${basedir}/target/zipartifacts"/>
-                    <copy file="${basedir}/release/install/install.command" 
-                        tofile="${basedir}/target/zipartifacts/install.bat"/>
-                    <copy file="${basedir}/target/classes/mac/util/util.sh" 
-                        todir="${basedir}/target/zipartifacts/util"/>
-                    <copy file="${basedir}/target/classes/win/util/util.bat" 
-                        todir="${basedir}/target/zipartifacts/util"/>
+                    <copy file="${basedir}/target/dataloader-${project.version}.jar" todir="${basedir}/target/zipartifacts"/>
+                    <copy file="${basedir}/release/install/install.command" todir="${basedir}/target/zipartifacts"/>
+                    <copy file="${basedir}/release/install/install.command" tofile="${basedir}/target/zipartifacts/install.bat"/>
+                    <copy file="${basedir}/target/classes/mac/util/util.sh" todir="${basedir}/target/zipartifacts/util"/>
+                    <copy file="${basedir}/target/classes/win/util/util.bat" todir="${basedir}/target/zipartifacts/util"/>
                     <replace dir="${basedir}/target/zipartifacts/" token="@@FULL_VERSION@@" value="${project.version}"/>
 <!--
                     <concat destfile="${basedir}/target/zipartifacts/dataloader-${project.version}.jar" binary="yes">
@@ -563,24 +558,18 @@
                       <filelist dir="${basedir}/target" files="dataloader-${project.version}.jar"/>
                     </concat>
 -->
-                    <copy todir="${basedir}/target/zipartifacts" >
+                    <copy todir="${basedir}/target/zipartifacts">
                       <fileset dir="${basedir}/target/" includes="swt*/*"/>
                     </copy>
-                    <fixcrlf srcdir="${basedir}/target/zipartifacts/"
-                                includes="**/*.bat" eol="crlf"/>
-                    <fixcrlf srcdir="${basedir}/target/zipartifacts/"
-                                includes="**/*.bat.old" eol="crlf"/>
+                    <fixcrlf srcdir="${basedir}/target/zipartifacts/" includes="**/*.bat" eol="crlf"/>
+                    <fixcrlf srcdir="${basedir}/target/zipartifacts/" includes="**/*.bat.old" eol="crlf"/>
 
-                    <fixcrlf srcdir="${basedir}/target/zipartifacts/"
-                                includes="**/*.command" eol="crlf" eof="remove"/>
-                    <fixcrlf srcdir="${basedir}/target/zipartifacts/"
-                                includes="**/*.command.old" eol="lf" eof="remove"/>
-                    <fixcrlf srcdir="${basedir}/target/zipartifacts/"
-                                        includes="**/*.sh" eol="lf" eof="remove"/>
+                    <fixcrlf srcdir="${basedir}/target/zipartifacts/" includes="**/*.command" eol="crlf" eof="remove"/>
+                    <fixcrlf srcdir="${basedir}/target/zipartifacts/" includes="**/*.command.old" eol="lf" eof="remove"/>
+                    <fixcrlf srcdir="${basedir}/target/zipartifacts/" includes="**/*.sh" eol="lf" eof="remove"/>
 
                     <zip update="true" destfile="${basedir}/dataloader_v${project.version}.zip">
-                      <zipfileset dirmode="755" filemode="755" 
-                        dir="${basedir}/target/zipartifacts" />
+                      <zipfileset dirmode="755" filemode="755" dir="${basedir}/target/zipartifacts"/>
                       </zip>
                     </target>
                 </configuration>
