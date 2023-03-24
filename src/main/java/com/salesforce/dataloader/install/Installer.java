@@ -57,12 +57,12 @@ public class Installer extends Thread {
         System.out.println(Messages.getMessage(Installer.class, "exitMessage"));
     }
 
-    public static void main(String[] args) {
+    public static void install(String[] args) {
         String installationDir = ".";
         try {
             Runtime.getRuntime().addShutdownHook(new Installer());
             try {
-                AppUtil.initializeLog(AppUtil.getArgMapFromArgArray(args));
+                AppUtil.initializeLog(AppUtil.convertCommandArgsArrayToArgMap(args));
             } catch (FactoryConfigurationError | IOException ex) {
                 handleException(ex, Level.ERROR);
             }
@@ -356,7 +356,7 @@ public class Installer extends Thread {
         logger.debug("going to create " + MACOS_PACKAGE_BASE + "/MacOS");
         createDir(MACOS_PACKAGE_BASE + "/MacOS");
         createSymLink(PATH_TO_DL_EXECUTABLE_ON_MAC,
-                installationDir + "/dataloader_console", false);
+                installationDir + "/dataloader_console", true);
     }
     
     private static void configureWindowsArtifactsPostCopy(String installationDir) throws IOException {

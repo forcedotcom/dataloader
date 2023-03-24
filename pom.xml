@@ -16,9 +16,8 @@
     <force.wsc.version>57.0.0</force.wsc.version>
     <force.partner.api.version>${force.wsc.version}</force.partner.api.version>
     <build.year>2022</build.year>
-    <java.compile.version>11</java.compile.version>
+    <maven.compiler.release>11</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <config.additional.properties></config.additional.properties>
     <swt.version>4.27</swt.version>
 
     <!-- test properties -->
@@ -115,7 +114,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>5.3.23</version>
+      <version>5.3.26</version>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.jface --> 
     <dependency>
@@ -149,7 +148,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jdbc</artifactId>
-      <version>5.3.23</version>
+      <version>5.3.26</version>
       <scope>test</scope>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
@@ -286,8 +285,6 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.10.1</version>
         <configuration>
-          <source>${java.compile.version}</source>
-          <target>${java.compile.version}</target>
           <forceJavacCompilerUse>true</forceJavacCompilerUse>
           <compilerArgs>
             <!-- <arg>-verbose</arg> -->
@@ -299,13 +296,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M9</version>
+        <version>3.0.0</version>
           <dependencies>
 <!-- https://mvnrepository.com/artifact/org.apache.maven.surefire/surefire-junit4 -->
               <dependency>
                   <groupId>org.apache.maven.surefire</groupId>
                   <artifactId>surefire-junit4</artifactId>
-                  <version>3.0.0-M9</version>
+                  <version>3.0.0</version>
               </dependency>
           </dependencies>
         <configuration>
@@ -430,9 +427,9 @@
               </artifactSet>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.salesforce.dataloader.install.Installer</mainClass>
+                  <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
                   <manifestEntries>
-                    <Main-Class>com.salesforce.dataloader.install.Installer</Main-Class>
+                    <Main-Class>com.salesforce.dataloader.process.DataLoaderRunner</Main-Class>
                     <Multi-Release>true</Multi-Release>
                     <Permissions>all-permissions</Permissions>
                     <Application-Name>${project.name}</Application-Name>
@@ -493,7 +490,7 @@
                 <phase>compile</phase>
                 <configuration>
                   <target>
-                    <ant antfile="${basedir}/extractSWTJar.xml" inheritAll="true" />
+                    <ant antfile="${basedir}/extractSWTJar.xml" inheritAll="true"/>
                     <delete includeEmptyDirs="true">
                       <dirset dir="${basedir}/target/">
                         <patternset>
@@ -503,7 +500,7 @@
                     </delete>
 
                     <replace dir="${basedir}/target/classes/" token="@@FULL_VERSION@@" value="${project.version}"/>
-                    <replace dir="${basedir}/target/classes/" token="@@MIN_JAVA_VERSION@@" value="${java.compile.version}"/>
+                    <replace dir="${basedir}/target/classes/" token="@@MIN_JAVA_VERSION@@" value="${maven.compiler.release}"/>
                   </target>
                 </configuration>
                 <goals>
@@ -623,13 +620,13 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>3.0.0-M9</version>
+            <version>3.0.0</version>
             <dependencies>
 <!-- https://mvnrepository.com/artifact/org.apache.maven.surefire/surefire-junit4 -->
               <dependency>
                 <groupId>org.apache.maven.surefire</groupId>
                 <artifactId>surefire-junit4</artifactId>
-                <version>3.0.0-M9</version>
+                <version>3.0.0</version>
               </dependency>
             </dependencies>
             <configuration>

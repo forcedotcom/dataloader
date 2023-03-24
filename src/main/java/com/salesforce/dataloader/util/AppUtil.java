@@ -37,10 +37,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
@@ -280,18 +284,46 @@ public class AppUtil {
                 + Config.CONFIG_DIR_DEFAULT_VALUE;
     }
 
-    public static Map<String, String> getArgMapFromArgArray(String[] argArray){
-        Map<String, String> argMap = new HashMap<>();
+    private static final String OTHER_ARGS_KEY = "__OTHER_ARGS__";
+    private static int otherArgsCount = 0;
+    public synchronized static Map<String, String> convertCommandArgsArrayToArgMap(String[] argArray){
+        Map<String, String> commandArgsMap = new HashMap<String, String>();
+        if (argArray == null) {
+            return commandArgsMap;
+        }
+
         if (argArray != null) {
             //Process name=value config setting
+            otherArgsCount = 0;
             Arrays.stream(argArray).forEach(arg ->
             {
                 String[] nameValuePair = arg.split("=", 2);
-                if (nameValuePair.length == 2)
-                    argMap.put(nameValuePair[0], nameValuePair[1]);
+                if (nameValuePair.length == 2) {
+                    commandArgsMap.put(nameValuePair[0], nameValuePair[1]);
+                } else {
+                    commandArgsMap.put(OTHER_ARGS_KEY + otherArgsCount++, arg);
+                }
             });
         }
-        return argMap;
+        return commandArgsMap;
+    }
+    
+    public static String[] convertCommandArgsMapToArgsArray(Map<String, String> argsMap) {
+        if (argsMap == null) {
+            return null;
+        }
+        ArrayList<String> argsList = new ArrayList<String>();
+        ArrayList<String> argKeysList = new ArrayList<String>(argsMap.keySet());
+        Collections.sort(argKeysList);
+        for (String argKey : argKeysList) {
+            if (argKey.startsWith(OTHER_ARGS_KEY)) {
+                argsList.add(argsMap.get(argKey));
+            } else {
+                String argVal = argsMap.get(argKey);
+                argsList.add(argKey + "=" + argVal);
+            }
+        }
+        return argsList.toArray(new String[0]);
     }
     
     public static boolean isRunningOnMacOS() {

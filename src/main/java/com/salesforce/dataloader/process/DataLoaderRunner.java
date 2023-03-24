@@ -33,6 +33,7 @@ package com.salesforce.dataloader.process;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.install.Installer;
+import com.salesforce.dataloader.security.EncryptionUtil;
 import com.salesforce.dataloader.ui.UIUtils;
 import com.salesforce.dataloader.util.AppUtil;
 
@@ -62,15 +63,13 @@ public class DataLoaderRunner extends Thread {
     private static final String LOCAL_SWT_DIR = "./target/";
     private static final String PATH_SEPARATOR = System.getProperty("path.separator");
     private static final String FILE_SEPARATOR = System.getProperty("file.separator");
-    private static Map<String, String> argNameValuePair;
+    private static Map<String, String> argsMap;
     private static Logger logger;
 
-    private static boolean isBatchMode(String[] args) {   
-        Map<String, String> argMap = AppUtil.getArgMapFromArgArray(args);
-        return argMap.containsKey(Config.CLI_OPTION_RUN_MODE) ?
-                Config.RUN_MODE_BATCH_VAL.equalsIgnoreCase(argMap.get(Config.CLI_OPTION_RUN_MODE)) : false;
+    private static boolean isModeSpecifiedInArgs(final String mode) {
+        return argsMap.containsKey(Config.CLI_OPTION_RUN_MODE) ?
+                mode.equalsIgnoreCase(argsMap.get(Config.CLI_OPTION_RUN_MODE)) : false;
     }
-
     public void run() {
         // called just before the program closes
         HttpClientTransport.closeConnections();
@@ -86,24 +85,30 @@ public class DataLoaderRunner extends Thread {
 
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
+        argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
         try {
-            AppUtil.initializeLog(AppUtil.getArgMapFromArgArray(args));
+            AppUtil.initializeLog(argsMap);
         } catch (FactoryConfigurationError | IOException ex) {
             ex.printStackTrace();
         }
-        if (isBatchMode(args)) {
+        if (isModeSpecifiedInArgs(Config.RUN_MODE_BATCH_VAL)) {
             try {
                 ProcessRunner.runBatchMode(args, null);
             } catch (Throwable t) {
                 ProcessRunner.logErrorAndExitProcess("Unable to run process", t);
             }
+        } else if (isModeSpecifiedInArgs(Config.RUN_MODE_INSTALL_VAL)) {
+            Installer.install(args);
+        } else if (isModeSpecifiedInArgs(Config.RUN_MODE_ENCRYPT_VAL)) {
+            argsMap.remove(Config.CLI_OPTION_RUN_MODE);
+            String[] argsForEncrypt = AppUtil.convertCommandArgsMapToArgsArray(argsMap);
+            EncryptionUtil.main(argsForEncrypt);
         } else {
             /* Run in the UI mode, get the controller instance with batchMode == false */
-            argNameValuePair = AppUtil.getArgMapFromArgArray(args);
-            logger = Controller.getLogger(argNameValuePair, DataLoaderRunner.class);
+            logger = Controller.getLogger(argsMap, DataLoaderRunner.class);
             extractInstallationArtifacts();
-            if (argNameValuePair.containsKey(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
-                && "true".equalsIgnoreCase(argNameValuePair.get(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
+            if (argsMap.containsKey(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
+                && "true".equalsIgnoreCase(argsMap.get(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
                 try {
                     String defaultBrowser = System.getProperty("org.eclipse.swt.browser.DefaultType");
                     if (defaultBrowser == null) {
@@ -111,7 +116,7 @@ public class DataLoaderRunner extends Thread {
                     } else {
                         logger.debug("org.eclipse.swt.browser.DefaultType set to " + defaultBrowser + " for UI mode on Windows");
                     }
-                    Controller controller = Controller.getInstance(Config.RUN_MODE_UI_VAL, args);
+                    Controller controller = Controller.getInstance(Config.RUN_MODE_UI_VAL, argsMap);
                     controller.createAndShowGUI();
                 } catch (ControllerInitializationException e) {
                     UIUtils.errorMessageBox(new Shell(new Display()), e);
