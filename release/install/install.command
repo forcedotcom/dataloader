@@ -2,7 +2,7 @@
 :; #
 :; source "`dirname $0`/util/util.sh" #
 :; checkJavaVersion #
-:; java -cp "`dirname $0`/*" com.salesforce.dataloader.process.DataLoaderRunner %* run.mode=install #
+:; java -cp "`dirname $0`/*" com.salesforce.dataloader.process.DataLoaderRunner $@ run.mode=install #
 :; exit 0 #
 
 @echo off
