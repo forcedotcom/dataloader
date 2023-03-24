@@ -300,10 +300,6 @@ public class Controller {
         this.loaderWindow.updateTitle(null);
     }
 
-    public static synchronized Controller getInstance(String lastRunFilePrefix, String[] args) throws ControllerInitializationException {
-        return getInstance(lastRunFilePrefix, AppUtil.getArgMapFromArgArray(args));
-    }
-
     public static synchronized Controller getInstance(String lastRunFilePrefix, Map<String, String> argMap) throws ControllerInitializationException {
         return new Controller(lastRunFilePrefix, argMap);
     }

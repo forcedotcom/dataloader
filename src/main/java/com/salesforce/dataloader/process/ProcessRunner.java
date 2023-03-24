@@ -246,7 +246,7 @@ public class ProcessRunner implements InitializingBean {
     }
     
     public static ProcessRunner runBatchMode(String[] args, ILoaderProgress progressMonitor) throws UnsupportedOperationException {
-        Map<String,String> argMap = AppUtil.getArgMapFromArgArray(args);
+        Map<String,String> argMap = AppUtil.convertCommandArgsArrayToArgMap(args);
         if (!argMap.containsKey(Config.CLI_OPTION_CONFIG_DIR_PROP) && args.length < 2) {
             // config directory must be specified in the first argument
             System.err.println(

@@ -392,6 +392,8 @@ public class Config {
     public static final String CLI_OPTION_RUN_MODE = "run.mode";
     public static final String RUN_MODE_UI_VAL = "ui";
     public static final String RUN_MODE_BATCH_VAL = "batch";
+    public static final String RUN_MODE_INSTALL_VAL = "install";
+    public static final String RUN_MODE_ENCRYPT_VAL = "encrypt";
     public static final String CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
     public static final String CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
     public static final String CLI_OPTION_CONFIG_DIR_PROP = "salesforce.config.dir";
