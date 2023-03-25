@@ -66,10 +66,6 @@ public class DataLoaderRunner extends Thread {
     private static Map<String, String> argsMap;
     private static Logger logger;
 
-    private static boolean isModeSpecifiedInArgs(final String mode) {
-        return argsMap.containsKey(Config.CLI_OPTION_RUN_MODE) ?
-                mode.equalsIgnoreCase(argsMap.get(Config.CLI_OPTION_RUN_MODE)) : false;
-    }
     public void run() {
         // called just before the program closes
         HttpClientTransport.closeConnections();
@@ -86,23 +82,22 @@ public class DataLoaderRunner extends Thread {
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
         argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
+        args = AppUtil.convertCommandArgsMapToArgsArray(argsMap); //remove run.mode from args
         try {
             AppUtil.initializeLog(argsMap);
         } catch (FactoryConfigurationError | IOException ex) {
             ex.printStackTrace();
         }
-        if (isModeSpecifiedInArgs(Config.RUN_MODE_BATCH_VAL)) {
+        if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH) {
             try {
                 ProcessRunner.runBatchMode(args, null);
             } catch (Throwable t) {
                 ProcessRunner.logErrorAndExitProcess("Unable to run process", t);
             }
-        } else if (isModeSpecifiedInArgs(Config.RUN_MODE_INSTALL_VAL)) {
+        } else if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.INSTALL) {
             Installer.install(args);
-        } else if (isModeSpecifiedInArgs(Config.RUN_MODE_ENCRYPT_VAL)) {
-            argsMap.remove(Config.CLI_OPTION_RUN_MODE);
-            String[] argsForEncrypt = AppUtil.convertCommandArgsMapToArgsArray(argsMap);
-            EncryptionUtil.main(argsForEncrypt);
+        } else if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.ENCRYPT) {
+            EncryptionUtil.main(args);
         } else {
             /* Run in the UI mode, get the controller instance with batchMode == false */
             logger = Controller.getLogger(argsMap, DataLoaderRunner.class);

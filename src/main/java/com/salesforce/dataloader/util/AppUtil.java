@@ -41,10 +41,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
@@ -53,7 +51,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
-import com.salesforce.dataloader.controller.Controller;
 
 /**
  * com.salesforce.dataloader.util
@@ -71,6 +68,13 @@ public class AppUtil {
         UNKNOWN
     }
     
+    public enum APP_RUN_MODE {
+        BATCH,
+        UI,
+        INSTALL,
+        ENCRYPT
+    }
+    
     public static final String DATALOADER_VERSION;
     public static final String DATALOADER_SHORT_VERSION;
     public static final String MIN_JAVA_VERSION;
@@ -78,11 +82,12 @@ public class AppUtil {
     public static final String SYS_PROP_LOG4J2_CONFIG_FILE = "log4j2.configurationFile";
     public static final String LOG_CONF_DEFAULT = "log-conf.xml";
     private static Logger logger;
+    private static APP_RUN_MODE appRunMode = APP_RUN_MODE.UI;
     
     static {
         Properties versionProps = new Properties();
         try {
-            versionProps.load(Controller.class.getClassLoader().getResourceAsStream("com/salesforce/dataloader/version.properties"));
+            versionProps.load(AppUtil.class.getClassLoader().getResourceAsStream("com/salesforce/dataloader/version.properties"));
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);
@@ -147,7 +152,7 @@ public class AppUtil {
     
     public static void extractFromJar(String extractionArtifact, File extractionDestination) throws IOException {
         InputStream link;
-        link = Controller.class.getResourceAsStream(extractionArtifact);
+        link = AppUtil.class.getResourceAsStream(extractionArtifact);
         String parentDirStr = extractionDestination.getAbsoluteFile().getParent();
         File parentDir = Paths.get(parentDirStr).toFile();
         Files.createDirectories(parentDir.getAbsoluteFile().toPath());
@@ -200,7 +205,10 @@ public class AppUtil {
             }
         }
     }
-    
+
+    public static APP_RUN_MODE getAppRunMode() {
+        return appRunMode;
+    }
     
     private static String configurationsDir = null;
     public static synchronized String getConfigurationsDir() {
@@ -299,13 +307,34 @@ public class AppUtil {
             {
                 String[] nameValuePair = arg.split("=", 2);
                 if (nameValuePair.length == 2) {
-                    commandArgsMap.put(nameValuePair[0], nameValuePair[1]);
+                    if (nameValuePair[0].equalsIgnoreCase(Config.CLI_OPTION_RUN_MODE)) {
+                        setAppRunMode(nameValuePair[1]);
+                    } else {
+                        commandArgsMap.put(nameValuePair[0], nameValuePair[1]);
+                    }
                 } else {
                     commandArgsMap.put(OTHER_ARGS_KEY + otherArgsCount++, arg);
                 }
             });
         }
         return commandArgsMap;
+    }
+    
+    private static void setAppRunMode(String modeStr) {
+        if (modeStr == null) return;
+        switch (modeStr) {
+            case "batch":
+                appRunMode = APP_RUN_MODE.BATCH;
+                break;
+            case "install":
+                appRunMode = APP_RUN_MODE.INSTALL;
+                break;
+            case "encrypt":
+                appRunMode = APP_RUN_MODE.ENCRYPT;
+                break;
+            default:
+                appRunMode = APP_RUN_MODE.UI;
+        }
     }
     
     public static String[] convertCommandArgsMapToArgsArray(Map<String, String> argsMap) {
