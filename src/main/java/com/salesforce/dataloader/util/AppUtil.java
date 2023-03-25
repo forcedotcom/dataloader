@@ -182,13 +182,14 @@ public class AppUtil {
                 childArtifactName = childArtifactName.substring(extractionPrefix.length());
             }
             File extractionDestination = new File(destDirName, childArtifactName);
-            if (extractionDestination.isFile() && extractionDestination.exists()) {
-                // Do not overwrite existing artifacts
+            if (extractionDestination.exists()) {
+                logger.debug("File " + extractionDestination + " won't be extracted from jar as it already exists");
                 continue;
             } else {
                 extractionDestination.getParentFile().mkdirs();
                 extractionDestination = new java.io.File(destDirName, childArtifactName);
             }
+            extractionDestination.delete(); // just in case it is a dangling symlink
             java.io.InputStream is = jarfile.getInputStream(jarEntry);
             java.io.FileOutputStream fo = new java.io.FileOutputStream(extractionDestination);
             while(is.available() > 0)
