@@ -1,13 +1,2 @@
 @echo off
-SETLOCAL
-
-CALL "%~dp0..\util\util.bat" :checkJavaVersion
-IF "%ERRORLEVEL%" NEQ "0" (
-    PAUSE
-    GOTO :exit
-)
-java -cp "%~dp0../*" com.salesforce.dataloader.process.DataLoaderRunner %* run.mode=encrypt
-
-:exit
-ENDLOCAL
-EXIT /b %ERRORLEVEL%
+CALL "%~dp0..\util\util.bat" :runDataLoader %* run.mode=encrypt
