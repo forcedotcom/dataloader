@@ -12,29 +12,7 @@ EXIT /b %ERRORLEVEL%
     SET MIN_JAVA_VERSION=@@MIN_JAVA_VERSION@@
     EXIT /b 0
 
-:showBanner
-    echo.
-    echo *************************************************************************
-    echo **                                                                     **
-    echo **                     Salesforce Data Loader                          **
-    echo **                     ======================                          **
-    echo **                                                                     **
-    echo **  Data Loader v%DATALOADER_SHORT_VERSION% is a Salesforce supported Open Source project to   **
-    echo **  help you import data to and export data from your Salesforce org.  **
-    echo **  It requires Java JRE %MIN_JAVA_VERSION% or later to run.                           **
-    echo **                                                                     **
-    echo **  Github Project Url:                                                **
-    echo **       https://github.com/forcedotcom/dataloader                     **
-    echo **  Salesforce Documentation:                                          **
-    echo **       https://help.salesforce.com/articleView?id=data_loader.htm    **
-    echo **                                                                     **
-    echo *************************************************************************
-    echo.
-    EXIT /b 0
-
 :checkJavaVersion
-    CALL :initVars
-
     echo Data Loader requires Java JRE %MIN_JAVA_VERSION% or later. Checking if it is installed...
     IF NOT "%DATALOADER_JAVA_HOME%" == "" (
         SET "JAVA_HOME=%DATALOADER_JAVA_HOME%"
@@ -70,9 +48,14 @@ EXIT /b %ERRORLEVEL%
     echo After the installation, set DATALOADER_JAVA_HOME environment variable to the value
     echo ^<full path to the JRE installation folder^>
     echo.
-    EXIT /b -1
+    EXIT -1
+    
+:runDataLoader
+    CALL :checkJavaVersion
+    java -cp "%~dp0..\*" com.salesforce.dataloader.process.DataLoaderRunner %*
+    EXIT /b %ERRORLEVEL%
 
-# Shortcut files have .lnk extension
+REM Shortcut files have .lnk extension
 :CreateShortcut
     powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut(""""%~1""""); $Shortcut.WorkingDirectory = """"%~2""""; $Shortcut.TargetPath = """"%~2\dataloader.bat""""; $Shortcut.IconLocation = """"%~2\dataloader.ico""""; $Shortcut.WindowStyle=7; $Shortcut.Save()"
     EXIT /b 0
@@ -91,9 +74,4 @@ REM Note for label renaming - promptForShortcut sets "yesDestination" var based 
     CALL :CreateShortcut "$Home\Desktop\Dataloader.lnk" "%~1"
     for /f "usebackq tokens=3*" %%D IN (`reg query "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop`) do set DESKTOP_DIR=%%D
     move "%USERPROFILE%\Desktop\Dataloader.lnk" "%DESKTOP_DIR%\Dataloader %DATALOADER_VERSION%.lnk" >nul
-    EXIT /b 0
-    
-:doDeleteExistingDir
-    echo Deleting existing Data Loader v%DATALOADER_VERSION%...
-    rd /s /q "%~1"
     EXIT /b 0

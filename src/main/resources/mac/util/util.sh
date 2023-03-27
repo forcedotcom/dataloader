@@ -7,27 +7,6 @@ initVars() {
     MIN_JAVA_VERSION=@@MIN_JAVA_VERSION@@
 }
 
-showBanner() {
-    initVars
-    echo ""
-    echo "*************************************************************************"
-    echo "**                                                                     **"
-    echo "**                     Salesforce Data Loader                          **"
-    echo "**                     ======================                          **"
-    echo "**                                                                     **"
-    echo "**  Data Loader v${DATALOADER_SHORT_VERSION} is a Salesforce supported Open Source project to   **"
-    echo "**  help you import data to and export data from your Salesforce org.  **"
-    echo "**  It requires Java JRE ${MIN_JAVA_VERSION} or later to run.                           **"
-    echo "**                                                                     **"
-    echo "**  Github Project Url:                                                **"
-    echo "**       https://github.com/forcedotcom/dataloader                     **"
-    echo "**  Salesforce Documentation:                                          **"
-    echo "**       https://help.salesforce.com/articleView?id=data_loader.htm    **"
-    echo "**                                                                     **"
-    echo "*************************************************************************"
-    echo ""
-}
-
 checkJavaVersion() {
     initVars
     
@@ -53,8 +32,14 @@ checkJavaVersion() {
 }
 
 exitWithJavaDownloadMessage() {
-        echo "Java JRE ${MIN_JAVA_VERSION} or later is not installed or DATALOADER_JAVA_HOME environment variable is not set."
-        echo "For example, download and install Zulu JRE ${MIN_JAVA_VERSION} or later from here:"
-        echo "    https://www.azul.com/downloads/"
-        exit -1
+    echo "Java JRE ${MIN_JAVA_VERSION} or later is not installed or DATALOADER_JAVA_HOME environment variable is not set."
+    echo "For example, download and install Zulu JRE ${MIN_JAVA_VERSION} or later from here:"
+    echo "    https://www.azul.com/downloads/"
+    exit -1
+}
+
+runDataLoader() {
+    checkJavaVersion
+    SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+    java -cp "${SCRIPT_DIR}/../*" com.salesforce.dataloader.process.DataLoaderRunner $@
 }
