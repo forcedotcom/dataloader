@@ -30,6 +30,7 @@ import java.io.*;
 
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.Converter;
+import org.apache.logging.log4j.Logger;
 
 import com.sforce.ws.util.FileUtil;
 
@@ -90,6 +91,10 @@ public final class FileByteArrayConverter implements Converter {
             final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
             // just in case the file is not found we want to display the absolute file name to the user
             final String absolutePath = new File(String.valueOf(value.toString())).getAbsolutePath();
+            File file = new File(absolutePath);
+            if (!file.canRead()) {
+                file.setReadable(true);
+            }
             FileUtil.copy(new FileInputStream(absolutePath), byteStream);
             return byteStream.toByteArray();
         } catch (Exception e) {

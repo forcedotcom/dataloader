@@ -132,6 +132,9 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             dynaArray.add(dynaBean);
             this.batchRowToDAORowList.add(this.processedDAORowCounter);
         } catch (ConversionException | IllegalAccessException conve) {
+            if (conve.getMessage().contains("(Operation not permitted)")) {
+                getLogger().error("Visitor", "insufficientAccessToContentMsg");
+            }
             String errMsg = Messages.getMessage("Visitor", "conversionErrorMsg", conve.getMessage());
             getLogger().error(errMsg, conve);
 
