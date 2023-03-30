@@ -49,7 +49,6 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -217,17 +216,25 @@ public class AdvancedSettingsDialog extends Dialog {
     private void createContents(final Shell shell) {
 
         final Config config = controller.getConfig();
+        GridData data;
+        
+        GridLayout layout = new GridLayout(1, false);
+        layout.verticalSpacing = 10;
+        shell.setLayout(layout);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        shell.setLayoutData(data);
 
         // Create the ScrolledComposite to scroll horizontally and vertically
         ScrolledComposite sc = new ScrolledComposite(shell, SWT.H_SCROLL | SWT.V_SCROLL);
-
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        data.heightHint = 600;
+        sc.setLayoutData(data);
+        
         // Create the parent Composite container for the three child containers
         Composite container = new Composite(sc, SWT.NONE);
         GridLayout containerLayout = new GridLayout(1, false);
         container.setLayout(containerLayout);
-        shell.setLayout(new FillLayout());
 
-        GridData data;
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.heightHint = 50;
         data.widthHint = 400;
@@ -235,7 +242,7 @@ public class AdvancedSettingsDialog extends Dialog {
         // START TOP COMPONENT
 
         Composite topComp = new Composite(container, SWT.NONE);
-        GridLayout layout = new GridLayout(1, false);
+        layout = new GridLayout(1, false);
         layout.marginHeight = 0;
         layout.marginWidth = 0;
         layout.verticalSpacing = 0;
@@ -680,19 +687,19 @@ public class AdvancedSettingsDialog extends Dialog {
         initBulkApiSetting(useBulkAPI);
 
         //the bottow separator
-        Label labelSeparatorBottom = new Label(restComp, SWT.SEPARATOR | SWT.HORIZONTAL);
+        Label labelSeparatorBottom = new Label(sc, SWT.SEPARATOR | SWT.HORIZONTAL);
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.horizontalSpan = 2;
         labelSeparatorBottom.setLayoutData(data);
 
         //ok cancel buttons
-        new Label(restComp, SWT.NONE);
+        new Label(sc, SWT.NONE);
 
         // END MIDDLE COMPONENT
 
         // START BOTTOM COMPONENT
 
-        Composite buttonComp = new Composite(restComp, SWT.NONE);
+        Composite buttonComp = new Composite(shell, SWT.NONE);
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         buttonComp.setLayoutData(data);
         buttonComp.setLayout(new GridLayout(2, false));
@@ -801,16 +808,6 @@ public class AdvancedSettingsDialog extends Dialog {
         // to dismiss
         shell.setDefaultButton(ok);
         
-        empty = new Label(buttonComp, SWT.NONE);
-        data = new GridData();
-        data.horizontalSpan = 2;
-        empty.setLayoutData(data);
-
-        empty = new Label(buttonComp, SWT.NONE);
-        data = new GridData();
-        data.horizontalSpan = 2;
-        empty.setLayoutData(data);
-
         empty = new Label(buttonComp, SWT.NONE);
         data = new GridData();
         data.horizontalSpan = 2;
