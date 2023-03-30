@@ -403,6 +403,8 @@ public class Config {
     public static final String SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV = "process.bulk.saveServerLoadAndRawResultsInCSV";
     public static final String PROCESS_BULK_CACHE_DATA_FROM_DAO = "process.bulk.cacheDataFromDao";
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
+    public static final String LOGGING_LEVEL = "logging.level"; // valid values are as specified by org.apache.logging.lo4j.Level class
+                                                                // viz. ALL, DEBUG, ERROR, FATAL, INFO, OFF, TRACE, WARN
 
     // Following properties are read-only, i.e. they are not overridden during save() to config.properties
     // - These properties are not set in Advanced Settings dialog.
@@ -427,7 +429,8 @@ public class Config {
             PROCESS_BULK_CACHE_DATA_FROM_DAO,
             SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV,
             API_VERSION_PROP,
-            READ_CHARSET
+            READ_CHARSET,
+            LOGGING_LEVEL
     };
     
     private static boolean useGMTForDateFieldValue;

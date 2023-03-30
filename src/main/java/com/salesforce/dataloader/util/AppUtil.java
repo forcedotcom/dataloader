@@ -46,8 +46,12 @@ import java.util.Properties;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -283,8 +287,23 @@ public class AppUtil {
             logger.info("Using log4j2 configuration file at location: " + logConfigLocation);
         }
         */
+        if (argsMap.containsKey(Config.LOGGING_LEVEL)) {
+            setLoggingLevel(argsMap.get(Config.LOGGING_LEVEL));
+        }
         logger = LogManager.getLogger(AppUtil.class);
         logger.info(Messages.getString("AppUtil.logInit")); //$NON-NLS-1$
+    }
+    
+    public static void setLoggingLevel(String newLevelStr) {
+        if (newLevelStr == null) {
+            return;
+        }
+        Level newLevel = Level.toLevel(newLevelStr);
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        Configuration config = ctx.getConfiguration();
+        LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME); 
+        loggerConfig.setLevel(newLevel);
+        ctx.updateLoggers();  // This causes all Loggers to refetch information from their LoggerConfig.
     }
     
     private static String getDefaultConfigDir() {
