@@ -238,19 +238,14 @@ public class AppUtil {
         System.setProperty(Config.CLI_OPTION_CONFIG_DIR_PROP, configurationsDir);
     }
     
-    public static String getConfigsDir() {
-        return configurationsDir;
+    private static String getDefaultConfigDir() {
+        return AppUtil.getDirContainingClassJar(Config.class) 
+                + System.getProperty("file.separator")
+                + Config.CONFIG_DIR_DEFAULT_VALUE;
     }
 
     public static void showBanner() {
         System.out.println(Messages.getMessage(AppUtil.class, "banner", DATALOADER_SHORT_VERSION, MIN_JAVA_VERSION));
-    }
-    
-    
-    private static String getDefaultConfigDir() {
-        return AppUtil.getDirContainingClassJar(Config.class) 
-                + "/"
-                + Config.CONFIG_DIR_DEFAULT_VALUE;
     }
 
     private static final String OTHER_ARGS_KEY = "__OTHER_ARGS__";

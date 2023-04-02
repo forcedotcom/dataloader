@@ -172,7 +172,7 @@ public class LoggingUtil {
         LoggerConfig rootConfig = map.get("");
         Collection<Appender> appenders = rootConfig.getAppenders().values();
         for (Appender appender : appenders) {
-            if (appender.getClass().isInstance(appenderClass)) {
+            if (appender.getClass().getCanonicalName().equals(appenderClass.getCanonicalName())) {
                 return appender;
             }
         }
