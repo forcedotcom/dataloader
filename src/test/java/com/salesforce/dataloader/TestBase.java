@@ -57,11 +57,12 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
+
+import javax.xml.parsers.FactoryConfigurationError;
 
 /**
  * This class represents the base class for all data loader JUnit tests. TODO: ProcessScheduler test? TODO: Encryption
@@ -71,7 +72,7 @@ import java.util.regex.Pattern;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public abstract class TestBase {
+abstract class TestBase {
 
     private static final Pattern INSIDE_BRACKETS_TEST_PARAMETERS = Pattern.compile("\\[.+\\]");
     @Rule
@@ -107,8 +108,17 @@ public abstract class TestBase {
         TEST_STATUS_DIR = TEST_FILES_DIR + File.separator + "status";
         DEFAULT_ACCOUNT_EXT_ID_FIELD = getProperty("test.account.extid");
         
-        String logConfFilePath = Paths.get(getTestConfDir(), AppUtil.LOG_CONF_DEFAULT).toString();
-        System.setProperty(AppUtil.SYS_PROP_LOG4J2_CONFIG_FILE, logConfFilePath);
+        Map<String, String> argsMap = new HashMap<String, String>();
+        argsMap.put(Config.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
+        try {
+            AppUtil.initializeAppConfig(argsMap);
+        } catch (FactoryConfigurationError e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         logger = LogManager.getLogger(TestBase.class);
     }
 
@@ -155,9 +165,7 @@ public abstract class TestBase {
 
         // reset binding
         this.binding = null;
-
         setupTestName();
-        setupController(new HashMap<String, String>());
     }
 
     private void setupTestName() {

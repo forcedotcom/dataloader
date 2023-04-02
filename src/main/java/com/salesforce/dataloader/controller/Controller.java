@@ -64,9 +64,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -324,7 +322,7 @@ public class Controller {
         }
         
         try {
-            AppUtil.initializeLog(argMap);
+            AppUtil.initializeAppConfig(argMap);
             // initialze Controller and Config static vars
             Config.initializeStaticVariables(argMap);
             Controller.isInitialized = true;

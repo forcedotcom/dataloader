@@ -95,12 +95,7 @@ public abstract class ConfigTestBase extends TestBase {
     }
 
     @Before
-    public void loadParameterOverrides() throws Exception {
+    public void setupController() throws Exception {
         super.setupController(getTestConfig());
     }
-
-    protected void setupController() {
-        super.setupController(getTestConfig());
-    }
-
 }

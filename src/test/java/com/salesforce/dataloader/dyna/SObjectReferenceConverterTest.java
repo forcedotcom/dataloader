@@ -26,7 +26,6 @@
 package com.salesforce.dataloader.dyna;
 
 import com.salesforce.dataloader.ConfigTestBase;
-import com.salesforce.dataloader.TestBase;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 import org.junit.Assert;
@@ -78,11 +77,11 @@ public class SObjectReferenceConverterTest extends ConfigTestBase {
     private void testValidSObjectReference(String refValue, String relationshipName, boolean expectSuccess) {
         SObjectReference ref = new SObjectReference(refValue);
         SObject sObj = new SObject();
-        String fkFieldName = TestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD;
+        String fkFieldName = ConfigTestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD;
 
         try {
             ref.addReferenceToSObject(getController(), sObj, ObjectField.formatAsString("Parent",
-                    TestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD));
+                    ConfigTestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD));
 
             SObject child = (SObject)sObj.getChild(relationshipName);
             boolean succeeded = child != null && child.getField(fkFieldName) != null && child.getField(fkFieldName)
