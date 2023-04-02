@@ -736,7 +736,7 @@ public class AdvancedSettingsDialog extends Dialog {
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelConfigDir.setLayoutData(data);
         Text textConfigDirLocation = new Text(restComp, SWT.LEFT);
-        textConfigDirLocation.setText(AppUtil.getConfigsDir()); //$NON-NLS-1$
+        textConfigDirLocation.setText(AppUtil.getConfigurationsDir()); //$NON-NLS-1$
         textConfigDirLocation.setEditable(false);
 
         Label labelLoggingFile = new Label(restComp, SWT.RIGHT | SWT.WRAP);
