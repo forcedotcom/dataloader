@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader.util;
 
-import com.salesforce.dataloader.TestBase;
+import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.process.ProcessTestBase;
 
 import java.util.Arrays;
@@ -69,7 +69,7 @@ public class TestRecordsUtil extends ProcessTestBase {
         int numRecords = argMap.containsKey("-n") ? Integer.parseInt(argMap.get("-n")) : 100;
         String whereClause = argMap.get("-q");
         if(whereClause == null) {
-            whereClause = TestBase.ACCOUNT_WHERE_CLAUSE;
+            whereClause = ConfigTestBase.ACCOUNT_WHERE_CLAUSE;
         }
 
         setupController();

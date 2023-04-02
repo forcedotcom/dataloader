@@ -34,7 +34,6 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.util.ArrayList;
@@ -46,12 +45,8 @@ import java.util.Properties;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -82,11 +77,8 @@ public class AppUtil {
     public static final String DATALOADER_VERSION;
     public static final String DATALOADER_SHORT_VERSION;
     public static final String MIN_JAVA_VERSION;
-    
-    public static final String SYS_PROP_LOG4J2_CONFIG_FILE = "log4j2.configurationFile";
-    public static final String LOG_CONF_DEFAULT = "log-conf.xml";
-    private static Logger logger;
     private static APP_RUN_MODE appRunMode = APP_RUN_MODE.UI;
+    private static Logger logger;
     
     static {
         Properties versionProps = new Properties();
@@ -102,6 +94,12 @@ public class AppUtil {
         DATALOADER_SHORT_VERSION=versionParts[0];
         MIN_JAVA_VERSION=versionProps.getProperty("java.min.version");
 
+    }
+    
+    public static void initializeAppConfig(Map<String, String> argsMap) throws FactoryConfigurationError, IOException {
+        setConfigurationsDir(argsMap);
+        LoggingUtil.initializeLog(argsMap);
+        logger = LogManager.getLogger(AppUtil.class);
     }
 
     public static OSType getOSType() throws SecurityException {
@@ -239,72 +237,15 @@ public class AppUtil {
         }
         System.setProperty(Config.CLI_OPTION_CONFIG_DIR_PROP, configurationsDir);
     }
+    
+    public static String getConfigsDir() {
+        return configurationsDir;
+    }
 
     public static void showBanner() {
         System.out.println(Messages.getMessage(AppUtil.class, "banner", DATALOADER_SHORT_VERSION, MIN_JAVA_VERSION));
     }
     
-    public static synchronized void initializeLog(Map<String, String> argsMap) throws FactoryConfigurationError, IOException {
-        setConfigurationsDir(argsMap);
-        // check the environment variable for log4j
-        String log4jConfigFilePath = System.getenv("LOG4J_CONFIGURATION_FILE");
-        if (log4jConfigFilePath == null || log4jConfigFilePath.isEmpty()) {
-            // check the system property for log4j2
-            log4jConfigFilePath = System.getProperty(SYS_PROP_LOG4J2_CONFIG_FILE);
-        }
-        
-        if (log4jConfigFilePath == null || log4jConfigFilePath.isEmpty()) { // use the default
-            log4jConfigFilePath = Paths.get(AppUtil.getConfigurationsDir(), LOG_CONF_DEFAULT).toString();
-        }
-       
-        Path p = Paths.get(log4jConfigFilePath);
-        File logConfFile;
-        if (p.isAbsolute()) {
-            logConfFile = Paths.get(log4jConfigFilePath).toFile();
-        } else {
-            logConfFile = Paths.get(System.getProperty("user.dir"), log4jConfigFilePath).toFile();
-        }
-
-        String log4jConfigFileAbsolutePath = logConfFile.getAbsolutePath();
-        if (!logConfFile.exists()) {
-            AppUtil.extractFromJar("/" + LOG_CONF_DEFAULT, logConfFile);
-        }
-        System.setProperty(SYS_PROP_LOG4J2_CONFIG_FILE, log4jConfigFileAbsolutePath);
-
-        // Uncomment code block to check that logger is using the config file
-        /*
-         * 
-
-        logger = LogManager.getLogger(AppUtil.class);
-
-        LoggerContext loggerContext = (LoggerContext) LogManager.getContext();
-        String logConfigLocation = loggerContext.getConfiguration().getConfigurationSource().getLocation();
-        if (logConfigLocation == null) {
-            logger.error("Unable to initialize logging using log4j2 config file at "
-                    + log4jConfigFileAbsolutePath
-                    + ". All error messages will be logged on STDOUT.");
-        } else {
-            logger.info("Using log4j2 configuration file at location: " + logConfigLocation);
-        }
-        */
-        if (argsMap.containsKey(Config.LOGGING_LEVEL)) {
-            setLoggingLevel(argsMap.get(Config.LOGGING_LEVEL));
-        }
-        logger = LogManager.getLogger(AppUtil.class);
-        logger.info(Messages.getString("AppUtil.logInit")); //$NON-NLS-1$
-    }
-    
-    public static void setLoggingLevel(String newLevelStr) {
-        if (newLevelStr == null) {
-            return;
-        }
-        Level newLevel = Level.toLevel(newLevelStr);
-        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-        Configuration config = ctx.getConfiguration();
-        LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME); 
-        loggerConfig.setLevel(newLevel);
-        ctx.updateLoggers();  // This causes all Loggers to refetch information from their LoggerConfig.
-    }
     
     private static String getDefaultConfigDir() {
         return AppUtil.getDirContainingClassJar(Config.class) 

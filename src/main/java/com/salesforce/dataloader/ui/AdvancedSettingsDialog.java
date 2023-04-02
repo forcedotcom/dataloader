@@ -30,11 +30,12 @@ package com.salesforce.dataloader.ui;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.LastRun;
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.util.AppUtil;
+import com.salesforce.dataloader.util.LoggingUtil;
 import com.sforce.soap.partner.Connector;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -52,6 +53,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
@@ -109,7 +111,9 @@ public class AdvancedSettingsDialog extends Dialog {
     private Button buttonCsvTab;
     private Button buttonCsvOther;
     private Button buttonLoginFromBrowser;
-
+    private static final String[] LOGGING_LEVEL = { "ALL", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
+    private Combo comboLoggingLevelDropdown;
+    
     /**
      * InputDialog constructor
      *
@@ -127,7 +131,7 @@ public class AdvancedSettingsDialog extends Dialog {
             uri = new URI(Connector.END_POINT);
             server = uri.getScheme() + "://" + uri.getHost(); //$NON-NLS-1$
         } catch (URISyntaxException e) {
-            logger.error(e);
+            logger.error("", e);
         }
         defaultServer = server;
     }
@@ -685,6 +689,63 @@ public class AdvancedSettingsDialog extends Dialog {
         // now that we've created all the buttons, make sure that buttons dependent on the bulk api
         // setting are enabled or disabled appropriately
         initBulkApiSetting(useBulkAPI);
+        
+        blankAgain = new Label(restComp, SWT.NONE);
+        data = new GridData();
+        data.horizontalSpan = 2;
+        blankAgain.setLayoutData(data);
+        
+        Label labelLoggingConfigFile = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelLoggingConfigFile.setText(Labels.getString("AdvancedSettingsDialog.loggingConfigFile")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelLoggingConfigFile.setLayoutData(data);
+        
+        String log4j2ConfFile = LoggingUtil.getLoggingConfigFile();
+        Text textLoggingFileName = new Text(restComp, SWT.LEFT);
+        textLoggingFileName.setText(log4j2ConfFile); //$NON-NLS-1$
+        textLoggingFileName.setEditable(false);
+        
+        Label labelLoggingLevel = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelLoggingLevel.setText(Labels.getString("AdvancedSettingsDialog.loggingLevel")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelLoggingLevel.setLayoutData(data);
+
+        comboLoggingLevelDropdown = new Combo(restComp, SWT.DROP_DOWN);
+        comboLoggingLevelDropdown.setItems(LOGGING_LEVEL);
+        String currentLoggingLevel = LoggingUtil.getLoggingLevel().toUpperCase();
+        if (currentLoggingLevel == null || currentLoggingLevel.isBlank()) {
+            currentLoggingLevel= LoggingUtil.getLoggingLevel();
+        }
+        int currentLoggingLevelIndex = 0;
+        for (String level : LOGGING_LEVEL) {
+            if (currentLoggingLevel.equals(level)) {
+                break;
+            }
+            currentLoggingLevelIndex++;
+        }
+        if (currentLoggingLevelIndex == LOGGING_LEVEL.length) {
+            currentLoggingLevelIndex = 1;
+        }
+        comboLoggingLevelDropdown.select(currentLoggingLevelIndex);
+        if (log4j2ConfFile == null || !log4j2ConfFile.endsWith(".properties")) {
+            comboLoggingLevelDropdown.setEnabled(false); // Can't modify current setting
+        }
+
+        Label labelConfigDir = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelConfigDir.setText(Labels.getString("AdvancedSettingsDialog.configDir")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelConfigDir.setLayoutData(data);
+        Text textConfigDirLocation = new Text(restComp, SWT.LEFT);
+        textConfigDirLocation.setText(AppUtil.getConfigsDir()); //$NON-NLS-1$
+        textConfigDirLocation.setEditable(false);
+
+        Label labelLoggingFile = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelLoggingFile.setText(Labels.getString("AdvancedSettingsDialog.latestLoggingFile")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelLoggingFile.setLayoutData(data);
+        Text textLoggingFileLocation = new Text(restComp, SWT.LEFT);
+        textLoggingFileLocation.setText(LoggingUtil.getLatestLoggingFile()); //$NON-NLS-1$
+        textLoggingFileLocation.setEditable(false);
 
         //the bottow separator
         Label labelSeparatorBottom = new Label(sc, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -763,6 +824,7 @@ public class AdvancedSettingsDialog extends Dialog {
                 config.setValue(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
                 config.setValue(Config.BULKV2_API_ENABLED, buttonUseBulkV2Api.getSelection());
                 config.setValue(Config.OAUTH_LOGIN_FROM_BROWSER, buttonLoginFromBrowser.getSelection());
+                LoggingUtil.setLoggingLevel(LOGGING_LEVEL[comboLoggingLevelDropdown.getSelectionIndex()]);
                 String clientIdVal = textProductionClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
                 	config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID, clientIdVal);

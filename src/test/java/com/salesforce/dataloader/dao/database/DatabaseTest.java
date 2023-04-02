@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader.dao.database;
 
-import com.salesforce.dataloader.TestBase;
+import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.database.DatabaseTestUtil.DateType;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -38,7 +38,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,7 +54,7 @@ import static org.junit.Assert.assertTrue;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class DatabaseTest extends TestBase {
+public class DatabaseTest extends ConfigTestBase {
 
     private static final Logger logger = LogManager.getLogger(DatabaseReader.class);
     

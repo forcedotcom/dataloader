@@ -84,7 +84,7 @@ public class DataLoaderRunner extends Thread {
         argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
         args = AppUtil.convertCommandArgsMapToArgsArray(argsMap); //remove run.mode from args
         try {
-            AppUtil.initializeLog(argsMap);
+            AppUtil.initializeAppConfig(argsMap);
         } catch (FactoryConfigurationError | IOException ex) {
             ex.printStackTrace();
         }

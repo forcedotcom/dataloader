@@ -26,14 +26,13 @@
 package com.salesforce.dataloader.dao;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.salesforce.dataloader.TestBase;
+import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
@@ -42,7 +41,7 @@ import com.salesforce.dataloader.model.Row;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class CsvTest extends TestBase {
+public class CsvTest extends ConfigTestBase {
 
     private static final String COLUMN_1_NAME = "column1";
     private static final String COLUMN_2_NAME = "column2";

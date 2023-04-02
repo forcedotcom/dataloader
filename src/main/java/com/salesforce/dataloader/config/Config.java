@@ -33,9 +33,6 @@ import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.security.EncryptionAesUtil;
 import com.salesforce.dataloader.util.AppUtil;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -67,6 +64,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TimeZone;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Lexi Viripaeff
@@ -403,9 +403,6 @@ public class Config {
     public static final String SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV = "process.bulk.saveServerLoadAndRawResultsInCSV";
     public static final String PROCESS_BULK_CACHE_DATA_FROM_DAO = "process.bulk.cacheDataFromDao";
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
-    public static final String LOGGING_LEVEL = "logging.level"; // valid values are as specified by org.apache.logging.lo4j.Level class
-                                                                // viz. ALL, DEBUG, ERROR, FATAL, INFO, OFF, TRACE, WARN
-
     // Following properties are read-only, i.e. they are not overridden during save() to config.properties
     // - These properties are not set in Advanced Settings dialog.
     // - Make sure to list all sensitive properties such as password because these properties are not saved.
@@ -429,8 +426,7 @@ public class Config {
             PROCESS_BULK_CACHE_DATA_FROM_DAO,
             SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV,
             API_VERSION_PROP,
-            READ_CHARSET,
-            LOGGING_LEVEL
+            READ_CHARSET
     };
     
     private static boolean useGMTForDateFieldValue;
@@ -488,7 +484,6 @@ public class Config {
         
         // Properties initialization completed. Configure OAuth environment next
         setOAuthEnvironment(getString(OAUTH_ENVIRONMENT));
-
     }
     
     private void initializeLastRun(String lastRunFileNamePrefix) {
@@ -1481,7 +1476,7 @@ public class Config {
      * Get the current config.properties and load it into the config bean.
      * @throws ConfigInitializationException 
      */
-    public static synchronized Config getInstance(String lastRunFilePrefix, Map<String, String> argMap) throws ConfigInitializationException {
+    public static synchronized Config getInstance(String lastRunFilePrefix, Map<String, String> argMap) throws ConfigInitializationException { 
         String configurationsDirPath = AppUtil.getConfigurationsDir();
         File configurationsDir;
         final String DEFAULT_CONFIG_FILE = "defaultConfig.properties"; //$NON-NLS-1$

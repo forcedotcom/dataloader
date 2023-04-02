@@ -35,8 +35,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.xml.parsers.FactoryConfigurationError;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -61,11 +59,6 @@ public class Installer extends Thread {
         String installationDir = ".";
         try {
             Runtime.getRuntime().addShutdownHook(new Installer());
-            try {
-                AppUtil.initializeLog(AppUtil.convertCommandArgsArrayToArgMap(args));
-            } catch (FactoryConfigurationError | IOException ex) {
-                handleException(ex, Level.ERROR);
-            }
             setLogger();
             boolean hideBanner = false;
             boolean skipCopyArtifacts = false;

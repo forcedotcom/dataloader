@@ -63,7 +63,7 @@ import com.sforce.ws.util.FileUtil;
  */
 public abstract class ProcessTestBase extends ConfigTestBase {
 
-    private static Logger logger = LogManager.getLogger(TestBase.class);
+    private static Logger logger = LogManager.getLogger(ProcessTestBase.class);
 
     protected ProcessTestBase() {
         super(Collections.<String, String>emptyMap());
