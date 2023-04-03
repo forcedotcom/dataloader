@@ -107,7 +107,7 @@ public class LoggingUtil {
         }
         */
         logger = LogManager.getLogger(AppUtil.class);
-        logger.info(Messages.getString("AppUtil.logInit")); //$NON-NLS-1$
+        logger.debug(Messages.getMessage(AppUtil.class, "logInit")); //$NON-NLS-1$
     }
     
     public static void setLoggingLevel(String newLevelStr) {
