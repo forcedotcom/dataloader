@@ -65,6 +65,8 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TimeZone;
 
+import javax.xml.parsers.FactoryConfigurationError;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -394,14 +396,11 @@ public class Config {
     public static final String RUN_MODE_BATCH_VAL = "batch";
     public static final String RUN_MODE_INSTALL_VAL = "install";
     public static final String RUN_MODE_ENCRYPT_VAL = "encrypt";
-    public static final String CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
-    public static final String CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
-    public static final String CLI_OPTION_CONFIG_DIR_PROP = "salesforce.config.dir";
-    public static final String CLI_OPTION_READ_ONLY_CONFIG_PROPERTIES = "config.properties.readonly";
-    public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
     
     public static final String SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV = "process.bulk.saveServerLoadAndRawResultsInCSV";
     public static final String PROCESS_BULK_CACHE_DATA_FROM_DAO = "process.bulk.cacheDataFromDao";
+    public static final String READ_ONLY_CONFIG_PROPERTIES = "config.properties.readonly";
+    
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
     // Following properties are read-only, i.e. they are not overridden during save() to config.properties
     // - These properties are not set in Advanced Settings dialog.
@@ -426,30 +425,10 @@ public class Config {
             PROCESS_BULK_CACHE_DATA_FROM_DAO,
             SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV,
             API_VERSION_PROP,
-            READ_CHARSET
+            READ_CHARSET,
+            READ_ONLY_CONFIG_PROPERTIES
     };
     
-    private static boolean useGMTForDateFieldValue;
-    public static boolean isUseGMTForDateFieldValue() {
-        return useGMTForDateFieldValue;
-    }
-    
-    public static void initializeStaticVariables(Map<String, String> argMap) {
-        setUseGMTForDateFieldValue(argMap);
-        logger = LogManager.getLogger(Config.class);
-    }
-    
-    private static void setUseGMTForDateFieldValue(Map<String, String> argMap) {
-        if (argMap.containsKey(Config.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE)) {
-            if ("true".equalsIgnoreCase(argMap.get(Config.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE))) {
-                useGMTForDateFieldValue = true;
-            }
-        }
-    }
-    
-    public static void setUseGMTForDateFieldValue(boolean val) {
-        useGMTForDateFieldValue = val;
-    }
     /**
      * Creates an empty config that loads from and saves to the a file. <p> Use the methods
      * <code>load()</code> and <code>save()</code> to load and store this preference store. </p>
@@ -458,7 +437,7 @@ public class Config {
      * @see #load()
      * @see #save()
      */
-    private Config(String filename, String lastRunFileNamePrefix, Map<String, String> overridesMap) throws ConfigInitializationException, IOException {
+    private Config(String filename, Map<String, String> overridesMap) throws ConfigInitializationException, IOException {
         properties = new LinkedProperties();
         this.filename = filename;
         
@@ -480,10 +459,18 @@ public class Config {
         
         // last run gets initialized after loading config and overrides
         // since config params are needed for initializing last run.
-        initializeLastRun(lastRunFileNamePrefix);
+        initializeLastRun(getLastRunPrefix());
         
         // Properties initialization completed. Configure OAuth environment next
         setOAuthEnvironment(getString(OAUTH_ENVIRONMENT));
+    }
+    
+    private String getLastRunPrefix() {
+        String lastRunFilePrefix = getString(Config.OPERATION);
+        if (lastRunFilePrefix == null || lastRunFilePrefix.isBlank()) {
+            lastRunFilePrefix = RUN_MODE_UI_VAL;
+        }
+        return lastRunFilePrefix;
     }
     
     private void initializeLastRun(String lastRunFileNamePrefix) {
@@ -978,7 +965,7 @@ public class Config {
      * Load config parameter override values. The main use case is loading of overrides from
      * external config file
      */
-    private void loadParameterOverrides(Map<String, String> configOverrideMap) throws ParameterLoadException,
+    public void loadParameterOverrides(Map<String, String> configOverrideMap) throws ParameterLoadException,
             ConfigInitializationException {
         this.parameterOverridesMap = configOverrideMap;
         // make sure to post-process the args to be loaded
@@ -1097,8 +1084,8 @@ public class Config {
      */
     public void save() throws IOException, GeneralSecurityException {
         if (getString(Config.CLI_OPTION_RUN_MODE).equalsIgnoreCase(Config.RUN_MODE_BATCH_VAL)
-           || getBoolean(CLI_OPTION_READ_ONLY_CONFIG_PROPERTIES)) {
-            return; // do not save as it updates config.properties
+           || getBoolean(READ_ONLY_CONFIG_PROPERTIES)) {
+            return; // do not save any updates to config.properties file
         }
         if (filename == null) {
             throw new IOException(Messages.getString("Config.fileMissing")); //$NON-NLS-1$
@@ -1475,8 +1462,13 @@ public class Config {
     /**
      * Get the current config.properties and load it into the config bean.
      * @throws ConfigInitializationException 
+     * @throws IOException 
+     * @throws FactoryConfigurationError 
      */
-    public static synchronized Config getInstance(String lastRunFilePrefix, Map<String, String> argMap) throws ConfigInitializationException { 
+    public static synchronized Config getInstance(Map<String, String> argMap) throws ConfigInitializationException, FactoryConfigurationError, IOException { 
+        AppUtil.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argMap));
+        logger = LogManager.getLogger(Config.class);
+
         String configurationsDirPath = AppUtil.getConfigurationsDir();
         File configurationsDir;
         final String DEFAULT_CONFIG_FILE = "defaultConfig.properties"; //$NON-NLS-1$
@@ -1531,7 +1523,7 @@ public class Config {
 
         Config config = null;
         try {
-            config = new Config(configFilePath, lastRunFilePrefix, argMap);
+            config = new Config(configFilePath, argMap);
             logger.info(Messages.getMessage(Config.class, "configInit")); //$NON-NLS-1$
         } catch (IOException | ProcessInitializationException e) {
             throw new ConfigInitializationException(Messages.getMessage(Config.class, "errorConfigLoad", configFilePath), e);

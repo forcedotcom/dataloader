@@ -106,6 +106,13 @@ public class LoggingUtil {
             logger.info("Using log4j2 configuration file at location: " + logConfigLocation);
         }
         */
+        
+        // From https://people.apache.org/~rgoers/log4j2/faq.html#reconfig_from_code
+        LoggerContext context = (LoggerContext) LogManager.getContext(false);
+        File file = new File(log4jConfigFileAbsolutePath);
+         
+        // this will force a reconfiguration
+        context.setConfigLocation(file.toURI());
         logger = LogManager.getLogger(AppUtil.class);
         logger.debug(Messages.getMessage(AppUtil.class, "logInit")); //$NON-NLS-1$
     }

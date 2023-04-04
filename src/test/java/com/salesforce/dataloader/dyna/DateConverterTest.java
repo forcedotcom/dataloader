@@ -30,6 +30,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.util.AppUtil;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -657,7 +658,7 @@ public class DateConverterTest {
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(22, result.get(Calendar.DAY_OF_MONTH));
 
-        Config.setUseGMTForDateFieldValue(true);
+        AppUtil.setUseGMTForDateFieldValue(true);
         AsianTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("Asia/Tokyo"), false);
         USTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("America/Los_Angeles"), false);
         result = (Calendar) USTZDateOnlyConverter.convert(null, "6/22/2012");
@@ -695,7 +696,7 @@ public class DateConverterTest {
         assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
         assertEquals(TimeZone.getTimeZone("GMT"), result.getTimeZone());
         
-        Config.setUseGMTForDateFieldValue(false);
+        AppUtil.setUseGMTForDateFieldValue(false);
         AsianTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("Asia/Tokyo"), false);
         USTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("America/Los_Angeles"), false);
 

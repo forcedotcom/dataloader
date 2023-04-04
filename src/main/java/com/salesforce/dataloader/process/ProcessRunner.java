@@ -70,6 +70,7 @@ import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
 import com.sforce.soap.partner.fault.ApiFault;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -78,7 +79,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ProcessRunner implements InitializingBean {
+public class ProcessRunner implements InitializingBean, IProcess {
 
     /**
      * Comment for <code>DYNABEAN_ID</code>
@@ -125,7 +126,7 @@ public class ProcessRunner implements InitializingBean {
         }
 
         try {
-            controller = Controller.getInstance(name, getConfigOverrideMap());
+            controller = Controller.getInstance(getConfigOverrideMap());
         } catch (ControllerInitializationException e) {
             throw new RuntimeException(e);
         }
@@ -245,38 +246,8 @@ public class ProcessRunner implements InitializingBean {
         }
     }
     
-    public static ProcessRunner runBatchMode(String[] args, ILoaderProgress progressMonitor) throws UnsupportedOperationException {
-        Map<String,String> argMap = AppUtil.convertCommandArgsArrayToArgMap(args);
-        if (!argMap.containsKey(Config.CLI_OPTION_CONFIG_DIR_PROP) && args.length < 2) {
-            // config directory must be specified in the first argument
-            System.err.println(
-                    "Usage: process <configuration directory> [batch process bean id]\n"
-                    + "\n"
-                    + "      configuration directory -- required -- directory that contains configuration files,\n"
-                    + "          i.e. config.properties, process-conf.xml, database-conf.xml\n"
-                    + "\n"
-                    + "      batch process bean id -- optional -- id of a batch process bean in process-conf.xml,\n"
-                    + "          for example:\n"
-                    + "\n"
-                    + "              process ../myconfigdir AccountInsert\n"
-                    + "\n"
-                    + "      If process bean id is not specified, the value of the property process.name in config.properties\n"
-                    + "      will be used to run the process instead of process-conf.xml,\n"
-                    + "          for example:\n"
-                    + "\n"
-                    + "              process ../myconfigdir");
-            System.exit(-1);
-        }
-        if (!argMap.containsKey(Config.CLI_OPTION_CONFIG_DIR_PROP)) {
-            argMap.put(Config.CLI_OPTION_CONFIG_DIR_PROP, args[0]);
-        }
-        logger = Controller.getLogger(argMap, ProcessRunner.class);
-        if (!argMap.containsKey(Config.PROCESS_NAME) 
-                && args.length > 2
-                && !args[1].contains("=")) {
-            // second argument must be process name
-            argMap.put(Config.PROCESS_NAME, args[1]);
-        }
+    public static ProcessRunner runBatchMode(Map<String, String>argMap, ILoaderProgress progressMonitor) throws UnsupportedOperationException {
+        logger = LogManager.getLogger(ProcessRunner.class);
         ProcessRunner runner = null;
         try {
             // create the process

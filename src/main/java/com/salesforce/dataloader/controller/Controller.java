@@ -38,11 +38,13 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dao.DataAccessObject;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
+import com.salesforce.dataloader.exception.ConfigInitializationException;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.exception.OperationException;
+import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.mapping.LoadMapper;
 import com.salesforce.dataloader.mapping.Mapper;
@@ -77,8 +79,6 @@ import java.util.Properties;
  * @since 6.0
  */
 public class Controller {
-
-    private static boolean isInitialized = false; // make sure Controller is initialized only once
 
     /**
      * the system property name used to determine the config directory
@@ -117,12 +117,10 @@ public class Controller {
         }
     }
 
-    private Controller(String lastRunFilePrefix, Map<String, String> argMap) throws ControllerInitializationException {
+    private Controller(Map<String, String> argsMap) throws ControllerInitializationException {
         // if name is passed to controller, use it to create a unique run file name
-        initializeWithArgs(argMap);
-        logger = LogManager.getLogger(Controller.class);
         try {
-            this.config = Config.getInstance(lastRunFilePrefix, argMap);
+            this.config = Config.getInstance(argsMap);
         } catch (Exception e) {
             logger.error("Exception happened in initConfig:", e);
             throw new ControllerInitializationException(e.getMessage());
@@ -298,8 +296,9 @@ public class Controller {
         this.loaderWindow.updateTitle(null);
     }
 
-    public static synchronized Controller getInstance(String lastRunFilePrefix, Map<String, String> argMap) throws ControllerInitializationException {
-        return new Controller(lastRunFilePrefix, argMap);
+    public static synchronized Controller getInstance(Map<String, String> argsMap) throws ControllerInitializationException, ParameterLoadException, ConfigInitializationException {
+        logger = LogManager.getLogger(Controller.class);
+        return new Controller(argsMap);
     }
     
     public synchronized boolean saveConfig() {
@@ -314,27 +313,6 @@ public class Controller {
         }
         return true;
 
-    }
-
-    private synchronized static void initializeWithArgs(Map<String, String> argMap) {
-        if (Controller.isInitialized) {
-            return;
-        }
-        
-        try {
-            AppUtil.initializeAppConfig(argMap);
-            // initialze Controller and Config static vars
-            Config.initializeStaticVariables(argMap);
-            Controller.isInitialized = true;
-        } catch (Exception ex) {
-            System.out.println("Controller.initializeStaticVariables(): Unable to initialize Controller static vars: " + ex.getMessage());
-            ex.printStackTrace();
-        }
-    }
-    
-    public static Logger getLogger(Map<String, String> argMap, Class<?> clazz) {
-        initializeWithArgs(argMap);
-        return LogManager.getLogger(clazz);
     }
     
     public PartnerClient getPartnerClient() {

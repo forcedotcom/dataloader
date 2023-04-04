@@ -28,6 +28,8 @@ package com.salesforce.dataloader;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.exception.ConfigInitializationException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.util.AppUtil;
+
 import org.junit.Before;
 
 import java.util.Collections;
@@ -73,6 +75,7 @@ public abstract class ConfigTestBase extends TestBase {
         for (TestProperties prop : getDefaultTestPropertiesSet()) {
             prop.putConfigSetting(configBase);
         }
+        configBase.put(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, TEST_CONF_DIR);
         return configBase;
     }
 

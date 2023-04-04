@@ -148,7 +148,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
                                                         AttachmentTemplateListener myAttachmentTemplateListener, String... files)
             throws ProcessInitializationException, DataAccessObjectException, ConnectionException, IOException {
 
-        final ProcessRunner runner = this.runBatchProcess(argMap);
+        final IProcess runner = this.runBatchProcess(argMap);
         ILoaderProgress monitor = runner.getMonitor();
         Controller controller = runner.getController();
 
