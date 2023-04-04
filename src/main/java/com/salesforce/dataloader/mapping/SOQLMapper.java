@@ -210,6 +210,9 @@ public class SOQLMapper extends Mapper {
     }
 
     private String evalSfdcField(DescribeSObjectResult describeResult, String fieldExpr) {
+        if (describeResult == null) {
+            throw new InvalidMappingException("Failed to get entity fields from server");
+        }
         final int splitIdx = fieldExpr.indexOf('.');
         if (splitIdx >= 0) {
           final   Field field = getReferenceField(describeResult, fieldExpr.substring(0, splitIdx));
