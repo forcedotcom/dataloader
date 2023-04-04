@@ -97,7 +97,7 @@ public class BulkCsvProcessTest extends ProcessTestBase {
 
     private ILoaderProgress runProcess(Map<String, String> argMap, int numInserts, int numUpdates, int numFailures, boolean emptyId) throws Exception {
 
-        final ProcessRunner runner = this.runBatchProcess(argMap);
+        final IProcess runner = this.runBatchProcess(argMap);
         ILoaderProgress monitor = runner.getMonitor();
         Controller controller = runner.getController();
 

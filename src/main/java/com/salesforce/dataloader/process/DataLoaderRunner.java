@@ -30,7 +30,6 @@ package com.salesforce.dataloader.process;
  * @input DataLoaderRunner -------------- @ * ----------------
  */
 
-import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.install.Installer;
 import com.salesforce.dataloader.security.EncryptionUtil;
@@ -44,6 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.lang.management.ManagementFactory;
 import java.net.URISyntaxException;
@@ -56,14 +56,15 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.controller.Controller;
 
 public class DataLoaderRunner extends Thread {
     private static final String LOCAL_SWT_DIR = "./target/";
     private static final String PATH_SEPARATOR = System.getProperty("path.separator");
     private static final String FILE_SEPARATOR = System.getProperty("file.separator");
-    private static Map<String, String> argsMap;
     private static Logger logger;
 
     public void run() {
@@ -80,17 +81,20 @@ public class DataLoaderRunner extends Thread {
     }
 
     public static void main(String[] args) {
+        runApp(args, null);
+    }
+    
+    public static IProcess runApp(String[] args, ILoaderProgress monitor) {
         Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
-        argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
-        args = AppUtil.convertCommandArgsMapToArgsArray(argsMap); //remove run.mode from args
         try {
-            AppUtil.initializeAppConfig(argsMap);
-        } catch (FactoryConfigurationError | IOException ex) {
+            args = AppUtil.initializeAppConfig(args);
+        } catch (FactoryConfigurationError | Exception ex) {
             ex.printStackTrace();
+            System.exit(-1);
         }
         if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH) {
             try {
-                ProcessRunner.runBatchMode(args, null);
+                return ProcessRunner.runBatchMode(AppUtil.convertCommandArgsArrayToArgMap(args), monitor);
             } catch (Throwable t) {
                 ProcessRunner.logErrorAndExitProcess("Unable to run process", t);
             }
@@ -99,11 +103,12 @@ public class DataLoaderRunner extends Thread {
         } else if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.ENCRYPT) {
             EncryptionUtil.main(args);
         } else {
+            Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
             /* Run in the UI mode, get the controller instance with batchMode == false */
-            logger = Controller.getLogger(argsMap, DataLoaderRunner.class);
+            logger = LogManager.getLogger(DataLoaderRunner.class);
             extractInstallationArtifacts();
-            if (argsMap.containsKey(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
-                && "true".equalsIgnoreCase(argsMap.get(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
+            if (argsMap.containsKey(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
+                && "true".equalsIgnoreCase(argsMap.get(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
                 try {
                     String defaultBrowser = System.getProperty("org.eclipse.swt.browser.DefaultType");
                     if (defaultBrowser == null) {
@@ -111,9 +116,9 @@ public class DataLoaderRunner extends Thread {
                     } else {
                         logger.debug("org.eclipse.swt.browser.DefaultType set to " + defaultBrowser + " for UI mode on Windows");
                     }
-                    Controller controller = Controller.getInstance(Config.RUN_MODE_UI_VAL, argsMap);
+                    Controller controller = Controller.getInstance(argsMap);
                     controller.createAndShowGUI();
-                } catch (ControllerInitializationException e) {
+                } catch (Exception e) {
                     UIUtils.errorMessageBox(new Shell(new Display()), e);
                 }
             } else { // SWT_NATIVE_LIB_IN_JAVA_LIB_PATH not set
@@ -121,6 +126,7 @@ public class DataLoaderRunner extends Thread {
                 rerunWithSWTNativeLib(args);
             }
         }
+        return null;
     }
     
     private static void rerunWithSWTNativeLib(String[] args) {
@@ -185,8 +191,8 @@ public class DataLoaderRunner extends Thread {
         }
         
         // add the argument to indicate that JAVA_LIB_PATH has the directory containing SWT native libraries
-        jvmArgs.add(Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
-        logger.debug("    " + Config.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
+        jvmArgs.add(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
+        logger.debug("    " + AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
         ProcessBuilder processBuilder = new ProcessBuilder(jvmArgs);
         processBuilder.redirectErrorStream(true);
         try {
@@ -206,7 +212,6 @@ public class DataLoaderRunner extends Thread {
             e.printStackTrace();
         }
     }
-    
     
     private static String constructSwtJarNameFromOSAndArch(boolean skipOSAndArch) {
         String swtJarPrefix = "swt";

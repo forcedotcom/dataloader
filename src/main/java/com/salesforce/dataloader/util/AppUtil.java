@@ -50,6 +50,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
+import com.salesforce.dataloader.exception.ConfigInitializationException;
 
 /**
  * com.salesforce.dataloader.util
@@ -77,8 +78,13 @@ public class AppUtil {
     public static final String DATALOADER_VERSION;
     public static final String DATALOADER_SHORT_VERSION;
     public static final String MIN_JAVA_VERSION;
+    public static final String CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
+    public static final String CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
+    public static final String CLI_OPTION_CONFIG_DIR_PROP = "salesforce.config.dir";
+    public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
+    
     private static APP_RUN_MODE appRunMode = APP_RUN_MODE.UI;
-    private static Logger logger;
+    private static Logger logger = null;
     
     static {
         Properties versionProps = new Properties();
@@ -96,10 +102,13 @@ public class AppUtil {
 
     }
     
-    public static void initializeAppConfig(Map<String, String> argsMap) throws FactoryConfigurationError, IOException {
+    public static String[] initializeAppConfig(String[] args) throws FactoryConfigurationError, IOException, ConfigInitializationException {
+        Map<String, String> argsMap = convertCommandArgsArrayToArgMap(args);
         setConfigurationsDir(argsMap);
         LoggingUtil.initializeLog(argsMap);
         logger = LogManager.getLogger(AppUtil.class);
+        setUseGMTForDateFieldValue(argsMap);
+        return convertCommandArgsMapToArgsArray(argsMap);
     }
 
     public static OSType getOSType() throws SecurityException {
@@ -212,7 +221,23 @@ public class AppUtil {
     public static APP_RUN_MODE getAppRunMode() {
         return appRunMode;
     }
+
+    private static void setUseGMTForDateFieldValue(Map<String, String> argMap) {
+        if (argMap.containsKey(AppUtil.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE)) {
+            if ("true".equalsIgnoreCase(argMap.get(AppUtil.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE))) {
+                useGMTForDateFieldValue = true;
+            }
+        }
+    }
     
+    public static void setUseGMTForDateFieldValue(boolean val) {
+        useGMTForDateFieldValue = val;
+    }
+    
+    private static boolean useGMTForDateFieldValue;
+    public static boolean isUseGMTForDateFieldValue() {
+        return useGMTForDateFieldValue;
+    }
     private static String configurationsDir = null;
     public static synchronized String getConfigurationsDir() {
         if (configurationsDir == null) {
@@ -222,12 +247,12 @@ public class AppUtil {
     }
     
     private static synchronized void setConfigurationsDir(Map<String, String> argsMap) {
-        if (argsMap != null && argsMap.containsKey(Config.CLI_OPTION_CONFIG_DIR_PROP)) {
-            configurationsDir = argsMap.get(Config.CLI_OPTION_CONFIG_DIR_PROP);
+        if (argsMap != null && argsMap.containsKey(CLI_OPTION_CONFIG_DIR_PROP)) {
+            configurationsDir = argsMap.get(CLI_OPTION_CONFIG_DIR_PROP);
         } else {
             if (configurationsDir == null) {
                 // first time invocation and configurationsDir is not set through argsMap
-                configurationsDir = System.getProperty(Config.CLI_OPTION_CONFIG_DIR_PROP);
+                configurationsDir = System.getProperty(CLI_OPTION_CONFIG_DIR_PROP);
             }
             if (configurationsDir != null && !configurationsDir.isEmpty()) {
                 return;
@@ -235,13 +260,13 @@ public class AppUtil {
             // first time invocation, configurationsDir is not set through argsMap or through system property
             configurationsDir = getDefaultConfigDir();
         }
-        System.setProperty(Config.CLI_OPTION_CONFIG_DIR_PROP, configurationsDir);
+        System.setProperty(CLI_OPTION_CONFIG_DIR_PROP, configurationsDir);
     }
     
     private static String getDefaultConfigDir() {
         return AppUtil.getDirContainingClassJar(Config.class) 
                 + System.getProperty("file.separator")
-                + Config.CONFIG_DIR_DEFAULT_VALUE;
+                + CONFIG_DIR_DEFAULT_VALUE;
     }
 
     public static void showBanner() {
@@ -273,7 +298,43 @@ public class AppUtil {
                 }
             });
         }
+        if (getAppRunMode() == APP_RUN_MODE.BATCH) {
+            processArgsForBatchMode(argArray, commandArgsMap);
+        }
         return commandArgsMap;
+    }
+    
+    
+    private static void processArgsForBatchMode(String[] args, Map<String,String> argsMap) {
+        if (!argsMap.containsKey(AppUtil.CLI_OPTION_CONFIG_DIR_PROP) && args.length < 2) {
+            // config directory must be specified in the first argument
+            System.err.println(
+                    "Usage: process <configuration directory> [batch process bean id]\n"
+                    + "\n"
+                    + "      configuration directory -- required -- directory that contains configuration files,\n"
+                    + "          i.e. config.properties, process-conf.xml, database-conf.xml\n"
+                    + "\n"
+                    + "      batch process bean id -- optional -- id of a batch process bean in process-conf.xml,\n"
+                    + "          for example:\n"
+                    + "\n"
+                    + "              process ../myconfigdir AccountInsert\n"
+                    + "\n"
+                    + "      If process bean id is not specified, the value of the property process.name in config.properties\n"
+                    + "      will be used to run the process instead of process-conf.xml,\n"
+                    + "          for example:\n"
+                    + "\n"
+                    + "              process ../myconfigdir");
+            System.exit(-1);
+        }
+        if (!argsMap.containsKey(AppUtil.CLI_OPTION_CONFIG_DIR_PROP)) {
+            argsMap.put(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, args[0]);
+        }
+        if (!argsMap.containsKey(Config.PROCESS_NAME) 
+                && args.length > 2
+                && !args[1].contains("=")) {
+            // second argument must be process name
+            argsMap.put(Config.PROCESS_NAME, args[1]);
+        }
     }
     
     private static void setAppRunMode(String modeStr) {

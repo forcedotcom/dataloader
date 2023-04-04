@@ -48,6 +48,7 @@ import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.Base64;
 import com.sforce.soap.partner.*;
 import com.sforce.soap.partner.fault.ApiFault;
@@ -735,10 +736,10 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         return controller;
     }
     
-    protected ProcessRunner runBatchProcess(Map<String, String> argMap) {
+    protected IProcess runBatchProcess(Map<String, String> argMap) {
         if (argMap == null) argMap = getTestConfig();
         argMap.put(Config.PROCESS_THREAD_NAME, this.baseName);
-        argMap.put(Config.CLI_OPTION_READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
+        argMap.put(Config.READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
 
         // emulate invocation through process.bat script
         String[] args = new String[argMap.size()+1];
@@ -753,13 +754,13 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             args[i++] = entry.getKey() + "=" + entry.getValue();
         }
         final TestProgressMontitor monitor = new TestProgressMontitor();        
-        return ProcessRunner.runBatchMode(args, monitor);
+        return DataLoaderRunner.runApp(args, monitor);
     }
 
     protected Controller runProcess(Map<String, String> argMap, boolean expectProcessSuccess, String failMessage,
             int numInserts, int numUpdates, int numFailures, boolean emptyId) throws ProcessInitializationException,
             DataAccessObjectException {
-        ProcessRunner runner = runBatchProcess(argMap);
+        IProcess runner = runBatchProcess(argMap);
         ILoaderProgress monitor = runner.getMonitor();
         Controller controller = runner.getController();
 
@@ -963,4 +964,10 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         return argMap;
     }
 
+    protected Map<String, String> getTestConfig() {
+        Map<String, String> configArgsMap = super.getTestConfig();
+        // run process tests in batch mode
+        configArgsMap.put(Config.CLI_OPTION_RUN_MODE, Config.RUN_MODE_BATCH_VAL);
+        return configArgsMap;
+    }
 }

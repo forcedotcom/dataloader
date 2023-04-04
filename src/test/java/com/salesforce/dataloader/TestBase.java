@@ -30,7 +30,6 @@ import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Connector;
@@ -85,7 +84,7 @@ abstract class TestBase {
      */
     private static final Properties TEST_PROPS;
     private static final String TEST_FILES_DIR;
-    private static final String TEST_CONF_DIR;
+    protected static final String TEST_CONF_DIR;
     private static final String TEST_DATA_DIR;
     private static final String TEST_STATUS_DIR;
 
@@ -104,18 +103,19 @@ abstract class TestBase {
         TEST_PROPS = loadTestProperties();
         TEST_FILES_DIR = getProperty("testfiles.dir");
         TEST_CONF_DIR = TEST_FILES_DIR + File.separator + "conf";
+        TEST_PROPS.put(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, TEST_CONF_DIR);
         TEST_DATA_DIR = TEST_FILES_DIR + File.separator + "data";
         TEST_STATUS_DIR = TEST_FILES_DIR + File.separator + "status";
         DEFAULT_ACCOUNT_EXT_ID_FIELD = getProperty("test.account.extid");
         
         Map<String, String> argsMap = new HashMap<String, String>();
-        argsMap.put(Config.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
+        argsMap.put(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
         try {
-            AppUtil.initializeAppConfig(argsMap);
+            AppUtil.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argsMap));
         } catch (FactoryConfigurationError e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -183,13 +183,13 @@ abstract class TestBase {
 
     protected void setupController(Map<String, String> configOverrideMap) {
         // configure the Controller to point to our testing config
-        configOverrideMap.put(Config.CLI_OPTION_READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
-        if (!System.getProperties().contains(Config.CLI_OPTION_CONFIG_DIR_PROP))
-            System.setProperty(Config.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
+        configOverrideMap.put(Config.READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
+        if (!System.getProperties().contains(AppUtil.CLI_OPTION_CONFIG_DIR_PROP))
+            System.setProperty(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
 
         try {
-            controller = Controller.getInstance(testName.getMethodName(), configOverrideMap);
-        } catch (ControllerInitializationException e) {
+            controller = Controller.getInstance(configOverrideMap);
+        } catch (Exception e) {
             fail("While initializing controller instance", e);
         }
     }

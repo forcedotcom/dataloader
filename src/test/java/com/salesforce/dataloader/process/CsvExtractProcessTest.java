@@ -169,7 +169,7 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
         String lastRunFilePath = config.getLastRunFilename();
         File lastRunFile = new File(lastRunFilePath);
         try {
-            String defaultFileName = baseProcessName + "_lastRun.properties";
+            String defaultFileName = argMap.get(Config.OPERATION) + "_lastRun.properties";
             File expectedFile = useDefault ? new File(config.constructConfigFilePath(defaultFileName)) : new File(
                     outputDir, defaultFileName);
             if (enableOutput) {

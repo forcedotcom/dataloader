@@ -33,10 +33,6 @@ import java.util.TimeZone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.salesforce.dataloader.config.Config;
-
-
-
 public class DateOnlyCalendar extends GregorianCalendar {
     /**
      * 
@@ -69,7 +65,7 @@ public class DateOnlyCalendar extends GregorianCalendar {
         Calendar cal = Calendar.getInstance(myTimeZone);
         cal.setTimeInMillis(specifiedTimeInMilliSeconds);
 
-        if (!Config.isUseGMTForDateFieldValue() && myTimeZone != null) {
+        if (!AppUtil.isUseGMTForDateFieldValue() && myTimeZone != null) {
             // Set hour, minute, second, and millisec to 0 (12:00AM) as it is date-only value
             cal.set(Calendar.HOUR, 0);
             cal.set(Calendar.MINUTE, 0);
@@ -88,7 +84,7 @@ public class DateOnlyCalendar extends GregorianCalendar {
     }
 
     public static DateOnlyCalendar getInstance(TimeZone timeZone) {
-        if (Config.isUseGMTForDateFieldValue()) {
+        if (AppUtil.isUseGMTForDateFieldValue()) {
             timeZone = GMT_TZ;
         } 
         return new DateOnlyCalendar(timeZone);
