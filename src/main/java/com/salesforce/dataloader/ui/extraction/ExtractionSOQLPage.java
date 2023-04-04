@@ -557,7 +557,11 @@ public class ExtractionSOQLPage extends ExtractionPage {
     private void initializeSOQLText() {
         logger.debug(Labels.getString("ExtractionSOQLPage.initializeMsg")); //$NON-NLS-1$
         Config config = controller.getConfig();
+        String entityStr = config.getString(Config.ENTITY);
 
+        if (entityStr == null || entityStr.isBlank()) {
+            return;
+        }
         DescribeSObjectResult result = controller.getFieldTypes();
         fieldsInSObject = result.getFields();
         if (config.getBoolean(Config.SORT_EXTRACT_FIELDS)) {
