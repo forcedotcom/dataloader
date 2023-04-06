@@ -155,9 +155,10 @@ public class ExtractionSOQLPage extends ExtractionPage {
         fieldViewer.setLabelProvider(new ExtrFieldLabelProvider());
         fieldViewer.setContentProvider(new ExtrFieldContentProvider());
         data = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
-        data.heightHint = 150;
-        data.widthHint = 135;
+        data.widthHint = 50;
+        data.heightHint = 120;
         fieldViewer.getTable().setLayoutData(data);
+        fieldViewer.getTable().getHorizontalBar().setVisible(true);
 
         FieldFilter filter = new FieldFilter(search);
         fieldViewer.addFilter(filter);
@@ -197,21 +198,19 @@ public class ExtractionSOQLPage extends ExtractionPage {
         whereComp = new Composite(builderComp, SWT.NONE);
         data = new GridData(GridData.FILL_BOTH);
         whereComp.setLayoutData(data);
-        gridLayout = new GridLayout(3, false);
+        gridLayout = new GridLayout(2, false);
         whereComp.setLayout(gridLayout);
 
-        Label fLabel = new Label(whereComp, SWT.LEFT);
+        data = new GridData();
+        Label fLabel = new Label(whereComp, SWT.RIGHT);
         fLabel.setText(Labels.getString("ExtractionSOQLPage.fields")); //$NON-NLS-1$
-
-        Label opLabel = new Label(whereComp, SWT.CENTER);
-        opLabel.setText(Labels.getString("ExtractionSOQLPage.operation")); //$NON-NLS-1$
-
-        Label valLabel = new Label(whereComp, SWT.CENTER);
-        valLabel.setText(Labels.getString("ExtractionSOQLPage.value")); //$NON-NLS-1$
-
         fieldCombo = new Combo(whereComp, SWT.DROP_DOWN);
         operCombo = new Combo(whereComp, SWT.DROP_DOWN);
         operCombo.setItems(operationsDisplayNormal);
+        fieldCombo = new Combo(whereComp, SWT.DROP_DOWN | SWT.LEFT);
+        data = new GridData();
+        data.widthHint = 200;
+        fieldCombo.setLayoutData(data);
         fieldCombo.addSelectionListener(new SelectionListener() {
 
             @Override
@@ -285,9 +284,16 @@ public class ExtractionSOQLPage extends ExtractionPage {
             }
         });
 
+        Label opLabel = new Label(whereComp, SWT.RIGHT);
+        opLabel.setText(Labels.getString("ExtractionSOQLPage.operation")); //$NON-NLS-1$
+        operCombo = new Combo(whereComp, SWT.DROP_DOWN | SWT.LEFT);
+        operCombo.setItems(operationsDisplayNormal);
+
+        Label valLabel = new Label(whereComp, SWT.RIGHT);
+        valLabel.setText(Labels.getString("ExtractionSOQLPage.value")); //$NON-NLS-1$
         valueText = new Text(whereComp, SWT.BORDER);
         data = new GridData();
-        data.widthHint = 85;
+        data.widthHint = 200;
         valueText.setLayoutData(data);
         valueText.addFocusListener(new FocusListener() {
             @Override
@@ -334,7 +340,13 @@ public class ExtractionSOQLPage extends ExtractionPage {
             public void focusLost(FocusEvent e) {}
         });
 
-        Button addWhere = new Button(whereComp, SWT.PUSH | SWT.FLAT);
+        Composite whereButtonsComp = new Composite(whereComp, SWT.NONE);
+        data = new GridData(GridData.FILL_BOTH);
+        data.horizontalSpan = 2;
+        whereButtonsComp.setLayoutData(data);
+        gridLayout = new GridLayout(3, false);
+        whereButtonsComp.setLayout(gridLayout);
+        Button addWhere = new Button(whereButtonsComp, SWT.PUSH | SWT.FLAT);
         addWhere.setText(Labels.getString("ExtractionSOQLPage.addCondition")); //$NON-NLS-1$
         addWhere.addSelectionListener(new SelectionListener() {
             @Override
@@ -392,7 +404,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
 
-        Button clearWhere = new Button(whereComp, SWT.PUSH | SWT.FLAT);
+        Button clearWhere = new Button(whereButtonsComp, SWT.PUSH | SWT.FLAT);
         clearWhere.setText(Labels.getString("ExtractionSOQLPage.clearAllConditions")); //$NON-NLS-1$
         data = new GridData();
         data.horizontalSpan = 2;
@@ -598,6 +610,12 @@ public class ExtractionSOQLPage extends ExtractionPage {
         String[] fieldNamesArray = fieldNames.toArray(new String[fieldNames.size()]);
         Arrays.sort(fieldNamesArray);
         fieldCombo.setItems(fieldNamesArray);
+        if (fieldCombo.getVerticalBar() != null) {
+            fieldCombo.getVerticalBar().setVisible(true);
+        }
+        if (fieldCombo.getHorizontalBar() != null) {
+            fieldCombo.getHorizontalBar().setVisible(true);
+        }
     }
 
     private void generateSOQLText() {

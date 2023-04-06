@@ -27,15 +27,12 @@
 package com.salesforce.dataloader.ui;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Grid12 simplifies the creation of grid based layout
@@ -147,9 +144,8 @@ public class Grid12 {
         return button;
     }
 
-    public CCombo createCombo(int columns, int style, ArrayList<String> labels) {
-        CCombo combo = new CCombo(composite, style);
-        combo.setEditable(false);
+    public Combo createCombo(int columns, int style, ArrayList<String> labels) {
+        Combo combo = new Combo(composite, style);
         combo.setLayoutData(createCell(columns));
         for (String label: labels) {
             combo.add(label);
