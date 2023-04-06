@@ -28,8 +28,8 @@ package com.salesforce.dataloader.ui;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.model.LoginCriteria;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -41,7 +41,7 @@ import java.util.ArrayList;
  */
 public class OAuthLoginDefaultControl extends Composite {
     private final Button loginButton;
-    protected final CCombo environment;
+    protected final Combo environment;
     protected final AuthenticationRunner authenticator;
     protected final Label loginLabel;
 
