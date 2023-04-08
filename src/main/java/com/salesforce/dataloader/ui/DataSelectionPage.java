@@ -78,7 +78,7 @@ public class DataSelectionPage extends LoadPage {
         comp.setLayout(gridLayout);
         GridData data = new GridData(GridData.FILL_HORIZONTAL);
         comp.setLayoutData(data);
-        lv = EntitySelectionListViewerUtil.getEntitySelectionListViewer(comp);
+        lv = EntitySelectionListViewerUtil.getEntitySelectionListViewer(comp, this.controller.getConfig());
         lv.addSelectionChangedListener(new ISelectionChangedListener() {
             @Override
             public void selectionChanged(SelectionChangedEvent event) {

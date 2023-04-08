@@ -28,6 +28,11 @@ package com.salesforce.dataloader.ui;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 
 import com.salesforce.dataloader.controller.Controller;
 
@@ -50,23 +55,57 @@ public abstract class OperationPage extends WizardPage {
    public OperationPage(String name, Controller controller) {
        super(name);
        this.setTitle(Labels.getString(getClass().getSimpleName() + ".title"));
-       this.setImageDescriptor(UIUtils.getImageRegistry().getDescriptor("splashscreens"));
+       this.setImageDescriptor(UIUtils.getImageRegistry().getDescriptor("logo"));
        this.controller = controller;
        this.logger = LogManager.getLogger(this.getClass());
        this.setPageComplete(false);
    }
-   
+
    public boolean setupPage() {
        // Set the description
-       String description = Labels.getString(this.getClass().getSimpleName() + ".description")
-                                           + getConfigInfo();
+       String description = Labels.getString(this.getClass().getSimpleName() + ".description");
        this.setDescription(description);
        boolean success = true;
        if (this.controller.isLoggedIn()) {
-           success = setupPagePostLogin();            
-           this.setDescription(this.getDescription() 
-                   + "\n" + this.controller.getAPIInfo());
+           success = setupPagePostLogin();
+           if (success) {
+               String message = this.getConfigInfo() + "\n" + this.controller.getAPIInfo();
+               this.setMessage(message);
+               Control[] controls = this.getShell().getChildren();
+               for (Control control : controls) {
+                   if (control instanceof Composite) {
+                       controls = ((Composite)control).getChildren();
+                       // get the first Composite among children
+                       break;
+                   }
+               }
+
+               for (Control ctl : controls) {
+                   // Tracer to see if extra vertical gap is removed
+                   // ctl.setBackground(new Color(200, 0, 0));
+                   if (ctl instanceof Composite) {
+                       Composite comp = (Composite)ctl;
+                       GridData data = (GridData)comp.getLayoutData();
+
+                       Control[] children = comp.getChildren();
+                       for (Control child : children) {
+                           data = (GridData) child.getLayoutData();
+                           if (data == null) {
+                               data = new GridData();
+                           }
+                           data.verticalSpan = GridData.FILL_VERTICAL;
+                           data.grabExcessVerticalSpace = true;
+                           child.setLayoutData(data);
+                       }
+                       break;
+                   }
+               }
+               Point currentShellSize = this.getShell().getSize();
+               // Point shellSize = this.getShell().computeSize(currentShellSize.x , currentShellSize.y);
+               this.getShell().setSize(currentShellSize.x + 1, currentShellSize.y + 1);
+           }
        }
+
        return success;
    }
    

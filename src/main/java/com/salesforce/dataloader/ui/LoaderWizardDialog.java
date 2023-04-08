@@ -43,6 +43,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.exception.ParameterLoadException;
+
 /**
  * A dialog to show a wizard to the end user.
  * <p>
@@ -98,6 +101,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     private static final String FOCUS_CONTROL = "focusControl"; //$NON-NLS-1$
     private boolean lockedUI = false;
     private HashMap<Integer, Button> buttons;
+    private Config config;
 
     /**
      * A layout for a container which includes several pages, like a notebook, wizard, or preference dialog. The size
@@ -225,8 +229,9 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      * @param newWizard
      *            the wizard this dialog is working on
      */
-    public LoaderWizardDialog(Shell parentShell, IWizard newWizard) {
+    public LoaderWizardDialog(Shell parentShell, IWizard newWizard, Config config) {
         super(parentShell);
+        this.config = config;
         buttons = new HashMap<>();
         setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL | SWT.RESIZE);
         setWizard(newWizard);
@@ -1184,6 +1189,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      */
     private void updateSizeForPage(IWizardPage page) {
         // ensure the page container is large enough
+        /*
         Point delta = calculatePageSizeDelta(page);
         if (delta.x > 0 || delta.y > 0) {
             // increase the size of the shell
@@ -1192,6 +1198,21 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
             setShellSize(shellSize.x + delta.x, shellSize.y + delta.y);
             constrainShellSize();
         }
+        */
+        int shellWidth = Config.DEFAULT_WIZARD_WIDTH;
+        try {
+            shellWidth = config.getInt(Config.WIZARD_WIDTH) - 20;
+        } catch (ParameterLoadException e1) {
+            // ignore
+        }
+        int shellHeight = Config.DEFAULT_WIZARD_HEIGHT;
+        try {
+            shellHeight = config.getInt(Config.WIZARD_HEIGHT) - 20;
+        } catch (ParameterLoadException e1) {
+            // ignore
+        }
+        setShellSize(shellWidth, shellHeight);
+        constrainShellSize();
     }
 
     /**
@@ -1201,6 +1222,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      *            the wizard
      */
     private void updateSizeForWizard(IWizard sizingWizard) {
+        /*
         Point delta = new Point(0, 0);
         IWizardPage[] pages = sizingWizard.getPages();
         for (int i = 0; i < pages.length; i++) {
@@ -1215,6 +1237,21 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
             Point shellSize = shell.getSize();
             setShellSize(shellSize.x + delta.x, shellSize.y + delta.y);
         }
+        */
+        int shellWidth = Config.DEFAULT_WIZARD_WIDTH;
+        try {
+            shellWidth = config.getInt(Config.WIZARD_WIDTH) - 20;
+        } catch (ParameterLoadException e1) {
+            // ignore
+        }
+        int shellHeight = Config.DEFAULT_WIZARD_HEIGHT;
+        try {
+            shellHeight = config.getInt(Config.WIZARD_HEIGHT) - 20;
+        } catch (ParameterLoadException e1) {
+            // ignore
+        }
+        setShellSize(shellWidth, shellHeight);
+        constrainShellSize();
     }
 
     /*
