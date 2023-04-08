@@ -51,11 +51,10 @@ public abstract class LoadPage extends OperationPage {
     
     @Override
     protected String getConfigInfo() {
-        return "\n\n    "
-        + Labels.getString("AdvancedSettingsDialog.batchSize")
+        return Labels.getString("AdvancedSettingsDialog.batchSize")
         + " "
         + controller.getConfig().getString(Config.LOAD_BATCH_SIZE)
-        + "\n    "
+        + "    "
         + Labels.getString("AdvancedSettingsDialog.startRow")
         + " "
         + controller.getConfig().getString(Config.LOAD_ROW_TO_START_AT); //$NON-NLS-1$

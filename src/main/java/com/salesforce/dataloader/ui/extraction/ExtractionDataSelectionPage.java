@@ -76,7 +76,7 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
 
         comp = new Composite(parent, SWT.NONE);
         comp.setLayout(gridLayout);
-        lv = EntitySelectionListViewerUtil.getEntitySelectionListViewer(comp);
+        lv = EntitySelectionListViewerUtil.getEntitySelectionListViewer(comp, this.controller.getConfig());
         lv.addSelectionChangedListener(new ISelectionChangedListener() {
             @Override
             public void selectionChanged(SelectionChangedEvent event) {

@@ -42,6 +42,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
+import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.ui.entitySelection.EntityContentProvider;
 import com.salesforce.dataloader.ui.entitySelection.EntityFilter;
 import com.salesforce.dataloader.ui.entitySelection.EntityLabelProvider;
@@ -50,7 +52,7 @@ import com.salesforce.dataloader.ui.entitySelection.EntityViewerSorter;
 public class EntitySelectionListViewerUtil {
     private static final String PROPERTIES_PREFIX_STR = "DataSelectionPage";
     
-    public static ListViewer getEntitySelectionListViewer(Composite comp) {
+    public static ListViewer getEntitySelectionListViewer(Composite comp, Config config) {
         String propertiesPrefixStr = PROPERTIES_PREFIX_STR;
         Label label = new Label(comp, SWT.RIGHT);
         label.setText(Labels.getString(propertiesPrefixStr + ".selectObject")); //$NON-NLS-1$
@@ -71,7 +73,15 @@ public class EntitySelectionListViewerUtil {
         listViewer.setContentProvider(new EntityContentProvider());
         listViewer.setLabelProvider(new EntityLabelProvider());
         listViewer.setInput(null);
-        data = new GridData(GridData.FILL, GridData.FILL, true, true);
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING, GridData.FILL, false, true);
+        try {
+            data.widthHint = config.getInt(Config.WIZARD_WIDTH) - 60;
+        } catch (ParameterLoadException e1) {
+            data.widthHint = Config.DEFAULT_WIZARD_WIDTH;
+        }
+        if (data.widthHint <= 0) {
+            data.widthHint = Config.DEFAULT_WIZARD_WIDTH;
+        }
         listViewer.getControl().setLayoutData(data);
         listViewer.addFilter(filter);
         listViewer.setSorter(new EntityViewerSorter());

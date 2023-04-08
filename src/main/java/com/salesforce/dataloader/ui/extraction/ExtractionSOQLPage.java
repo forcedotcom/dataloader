@@ -32,6 +32,7 @@ import java.util.List;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -61,7 +62,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
             "less than or equals", "greater than or equals" }; //$NON-NLS-1$ //$NON-NLS-2$
     private final String[] operationsDisplayMulti = { "equals", "not equals", "includes", "excludes" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     private HashMap<String, String> operationMap;
-    private Combo fieldCombo;
+    private CCombo whereFieldCombo;
     private Composite whereComp;
     private Composite builderComp;
     private boolean isPickListField;
@@ -82,12 +83,14 @@ public class ExtractionSOQLPage extends ExtractionPage {
     private static final int FIELD_NORMAL = 2;
 
     // SOQL building variables
-    private StringBuffer fromPart;
-    private final String SELECT = "Select "; //$NON-NLS-1$
-    private StringBuffer fieldPart = new StringBuffer();
+    private StringBuffer fromEntityPart;
+    private final String SELECT = "SELECT "; //$NON-NLS-1$
+    private StringBuffer selectFieldsClausePart = new StringBuffer();
     private StringBuffer wherePart = new StringBuffer();
-    private Combo operCombo;
+    private CCombo operCombo;
     private ArrayList<Field> selectedFieldsInFieldViewer = new ArrayList<Field>();
+    private Button addWhereClause;
+    private Button clearAllWhereClauses;
 
     public ExtractionSOQLPage(Controller controller) {
         super("ExtractionSOQLPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
@@ -176,8 +179,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
                         }
                     }                    
                 }
-                generateFieldPart();
-                generateSOQLText();
+                updateSoQLTextAndButtons();
             }
         });
         
@@ -201,17 +203,15 @@ public class ExtractionSOQLPage extends ExtractionPage {
         gridLayout = new GridLayout(2, false);
         whereComp.setLayout(gridLayout);
 
-        data = new GridData();
         Label fLabel = new Label(whereComp, SWT.RIGHT);
         fLabel.setText(Labels.getString("ExtractionSOQLPage.fields")); //$NON-NLS-1$
-        fieldCombo = new Combo(whereComp, SWT.DROP_DOWN);
-        operCombo = new Combo(whereComp, SWT.DROP_DOWN);
-        operCombo.setItems(operationsDisplayNormal);
-        fieldCombo = new Combo(whereComp, SWT.DROP_DOWN | SWT.LEFT);
-        data = new GridData();
+        fLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+
+        whereFieldCombo = new CCombo(whereComp, SWT.DROP_DOWN | SWT.LEFT);
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         data.widthHint = 200;
-        fieldCombo.setLayoutData(data);
-        fieldCombo.addSelectionListener(new SelectionListener() {
+        whereFieldCombo.setLayoutData(data);
+        whereFieldCombo.addSelectionListener(new SelectionListener() {
 
             @Override
             public void widgetDefaultSelected(SelectionEvent event) {}
@@ -219,7 +219,8 @@ public class ExtractionSOQLPage extends ExtractionPage {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 // get the selected string
-                String name = fieldCombo.getText();
+                String name = whereFieldCombo.getText();
+                setAddWhereButtonState();
 
                 // get the corresponding field
                 if (name != null && name.length() > 0) {
@@ -238,13 +239,16 @@ public class ExtractionSOQLPage extends ExtractionPage {
                             // operations values
                             if (field.getType() == FieldType.string && lastFieldType != FIELD_STRING) {
                                 operCombo.setItems(operationsDisplayString);
+                                operCombo.setText(operationsDisplayString[0]);
                                 setLastFieldType(FIELD_STRING);
                             } else if (field.getType() == FieldType.multipicklist && lastFieldType != FIELD_MULTI) {
                                 operCombo.setItems(operationsDisplayMulti);
+                                operCombo.setText(operationsDisplayMulti[0]);
                                 setLastFieldType(FIELD_MULTI);
                             } else if (lastFieldType != FIELD_NORMAL && field.getType() != FieldType.multipicklist
                                     && !field.getType().toString().equals("string")) {
                                 operCombo.setItems(operationsDisplayNormal);
+                                operCombo.setText(operationsDisplayNormal[0]);
                                 setLastFieldType(FIELD_NORMAL);
                             }
                             break;
@@ -254,47 +258,69 @@ public class ExtractionSOQLPage extends ExtractionPage {
             }
         });
         
-        fieldCombo.addKeyListener(new KeyAdapter() {
+        whereFieldCombo.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                    String text = fieldCombo.getText();
-                    // updateFieldComboList(text);
+                // Do nothing
             }
         });
-        
-        fieldCombo.addMouseListener(new MouseListener() {
+                
+        whereFieldCombo.addMouseListener(new MouseListener() {
 
             @Override
             public void mouseDoubleClick(MouseEvent arg0) {
-                // TODO Auto-generated method stub
+                // Do nothing
                 
             }
 
             @Override
             public void mouseDown(MouseEvent arg0) {
-                String text = fieldCombo.getText();
-                updateFieldComboList(text); 
-                fieldCombo.setText(text);
+                String text = whereFieldCombo.getText();
+                updateWhereFieldComboList(text);
             }
 
             @Override
             public void mouseUp(MouseEvent arg0) {
-                // TODO Auto-generated method stub
-                
+                // setAddWhereButtonState();
             }
         });
 
         Label opLabel = new Label(whereComp, SWT.RIGHT);
         opLabel.setText(Labels.getString("ExtractionSOQLPage.operation")); //$NON-NLS-1$
-        operCombo = new Combo(whereComp, SWT.DROP_DOWN | SWT.LEFT);
+        opLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+        operCombo = new CCombo(whereComp, SWT.DROP_DOWN | SWT.LEFT | SWT.READ_ONLY);
+        operCombo.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
         operCombo.setItems(operationsDisplayNormal);
+        operCombo.setText(operationsDisplayNormal[0]);
+        operCombo.addSelectionListener(new SelectionListener() {
+
+            @Override
+            public void widgetDefaultSelected(SelectionEvent event) {}
+
+            @Override
+            public void widgetSelected(SelectionEvent event) {
+                setAddWhereButtonState();
+            }
+        });
 
         Label valLabel = new Label(whereComp, SWT.RIGHT);
         valLabel.setText(Labels.getString("ExtractionSOQLPage.value")); //$NON-NLS-1$
+        valLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         valueText = new Text(whereComp, SWT.BORDER);
-        data = new GridData();
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         data.widthHint = 200;
         valueText.setLayoutData(data);
+        valueText.addKeyListener(new KeyListener() {
+            public void keyReleased(KeyEvent key) {
+                setAddWhereButtonState();
+            }
+
+            @Override
+            public void keyPressed(KeyEvent arg0) {
+                // DO NOTHING
+                
+            }
+        });
         valueText.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -333,11 +359,12 @@ public class ExtractionSOQLPage extends ExtractionPage {
                 } else {
                     isFocusDialogWanted = true;
                 }
-
             }
 
             @Override
-            public void focusLost(FocusEvent e) {}
+            public void focusLost(FocusEvent e) {
+                // Do Nothing
+            }
         });
 
         Composite whereButtonsComp = new Composite(whereComp, SWT.NONE);
@@ -346,24 +373,23 @@ public class ExtractionSOQLPage extends ExtractionPage {
         whereButtonsComp.setLayoutData(data);
         gridLayout = new GridLayout(3, false);
         whereButtonsComp.setLayout(gridLayout);
-        Button addWhere = new Button(whereButtonsComp, SWT.PUSH | SWT.FLAT);
-        addWhere.setText(Labels.getString("ExtractionSOQLPage.addCondition")); //$NON-NLS-1$
-        addWhere.addSelectionListener(new SelectionListener() {
+        addWhereClause = new Button(whereButtonsComp, SWT.PUSH | SWT.FLAT);
+        addWhereClause.setText(Labels.getString("ExtractionSOQLPage.addCondition")); //$NON-NLS-1$
+        addWhereClause.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                String whereField = fieldCombo.getText();
+                String whereField = whereFieldCombo.getText();
                 String whereOper = operCombo.getText();
                 String whereValue = valueText.getText();
 
                 if (validateStr(whereField) && validateStr(whereOper)) {
                     if (wherePart.length() == 0) {
-                        wherePart.append("WHERE "); //$NON-NLS-1$
+                        wherePart.append("WHERE \n    "); //$NON-NLS-1$
                     } else {
-                        wherePart.append("AND "); //$NON-NLS-1$
+                        wherePart.append("\n    AND "); //$NON-NLS-1$
                     }
 
                     boolean isSingleQuoteValue = isSingleQuoteValue(whereField);
-
                     wherePart.append(whereField);
                     wherePart.append(SPACE);
                     wherePart.append(getOperValue(whereOper));
@@ -395,25 +421,26 @@ public class ExtractionSOQLPage extends ExtractionPage {
                     if (isMultiPickList) {
                         wherePart.append(CLOSE_BRACKET);
                     }
-
                 }
-                generateSOQLText();
+                updateSoQLTextAndButtons();
             }
 
             @Override
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
+        setAddWhereButtonState();
 
-        Button clearWhere = new Button(whereButtonsComp, SWT.PUSH | SWT.FLAT);
-        clearWhere.setText(Labels.getString("ExtractionSOQLPage.clearAllConditions")); //$NON-NLS-1$
+        clearAllWhereClauses = new Button(whereButtonsComp, SWT.PUSH | SWT.FLAT);
+        clearAllWhereClauses.setText(Labels.getString("ExtractionSOQLPage.clearAllConditions")); //$NON-NLS-1$
         data = new GridData();
         data.horizontalSpan = 2;
-        clearWhere.setLayoutData(data);
-        clearWhere.addSelectionListener(new SelectionListener() {
+        clearAllWhereClauses.setLayoutData(data);
+        setClearWhereButtonState();
+        clearAllWhereClauses.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 wherePart = new StringBuffer();
-                generateSOQLText();
+                updateSoQLTextAndButtons();
             }
 
             @Override
@@ -431,8 +458,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 fieldViewer.setAllChecked(true);
-                generateFieldPart();
-                generateSOQLText();
+                updateSoQLTextAndButtons();
             }
 
             @Override
@@ -445,25 +471,25 @@ public class ExtractionSOQLPage extends ExtractionPage {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 fieldViewer.setAllChecked(false);
-                generateFieldPart();
-                generateSOQLText();
+                updateSoQLTextAndButtons();
             }
 
             @Override
             public void widgetDefaultSelected(SelectionEvent e) {}
         });
+        setClearWhereButtonState();
 
         new Label(builderComp, SWT.NONE);
 
-        // the bottow separator
-        Label labelSeparatorBottom = new Label(comp, SWT.SEPARATOR | SWT.HORIZONTAL);
+        // the bottom separator
+        Label labelSeparator = new Label(comp, SWT.SEPARATOR | SWT.HORIZONTAL);
         data = new GridData(GridData.FILL_HORIZONTAL);
-        labelSeparatorBottom.setLayoutData(data);
+        labelSeparator.setLayoutData(data);
 
         Label messageLabel = new Label(comp, SWT.NONE);
         messageLabel.setText(Labels.getString("ExtractionSOQLPage.queryBelowMsg")); //$NON-NLS-1$
 
-        soqlText = new Text(comp, SWT.MULTI | SWT.WRAP | SWT.BORDER | SWT.V_SCROLL);
+        soqlText = new Text(comp, SWT.MULTI | SWT.WRAP | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
         data = new GridData(GridData.FILL_BOTH);
         data.heightHint = 80;
         soqlText.setLayoutData(data);
@@ -474,8 +500,34 @@ public class ExtractionSOQLPage extends ExtractionPage {
                 setPageComplete();
             }
         });
+        labelSeparator = new Label(comp, SWT.SEPARATOR | SWT.HORIZONTAL);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        labelSeparator.setLayoutData(data);
         setControl(comp);
         setupPage();
+    }
+    
+    private void setAddWhereButtonState() {
+        if (this.whereFieldCombo.getText() != null
+                && !this.whereFieldCombo.getText().isBlank()
+                && this.operCombo.getText() != null
+                && !this.operCombo.getText().isBlank()
+                && this.valueText.getText() != null
+                && !this.valueText.getText().isBlank()
+                && this.soqlText.getText() != null
+                && !this.soqlText.getText().isBlank()) {
+            this.addWhereClause.setEnabled(true);
+        } else {
+            this.addWhereClause.setEnabled(false);
+        }
+    }
+    
+    private void setClearWhereButtonState() {
+        if (this.wherePart.length() == 0 || this.wherePart.toString().isBlank()) {
+            this.clearAllWhereClauses.setEnabled(false);
+        } else {
+            this.clearAllWhereClauses.setEnabled(true);
+        }
     }
 
     private String getOperValue(String operation) {
@@ -530,7 +582,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
         return (value.equals("includes") || value.equals("excludes"));
     }
 
-    private void generateFieldPart() {
+    private void generateSelectFromPart() {
         Field field = (Field)fieldViewer.getElementAt(0);
         int i = 0;
         while (field != null) {
@@ -544,21 +596,20 @@ public class ExtractionSOQLPage extends ExtractionPage {
             field = (Field)fieldViewer.getElementAt(++i);
         }
 
-        fieldPart = new StringBuffer();
+        selectFieldsClausePart = new StringBuffer();
         for (Field selectedField : selectedFieldsInFieldViewer) {
-            fieldPart.append(selectedField.getName());
-            fieldPart.append(", "); //$NON-NLS-1$
+            selectFieldsClausePart.append(selectedField.getName());
+            selectFieldsClausePart.append(", "); //$NON-NLS-1$
         }
-        if (fieldPart.length() > 0) {
-            fieldPart = new StringBuffer(fieldPart.substring(0, fieldPart.length()-2));
-            fieldPart.append(" ");
+        if (selectFieldsClausePart.length() > 0) {
+            selectFieldsClausePart = new StringBuffer(selectFieldsClausePart.substring(0, selectFieldsClausePart.length()-2));
+            selectFieldsClausePart.append(" ");
         }
     }
 
     private boolean validateStr(String str) {
         if (str != null && str.length() > 0) { return true; }
         return false;
-
     }
 
     protected boolean setupPagePostLogin() {
@@ -586,15 +637,13 @@ public class ExtractionSOQLPage extends ExtractionPage {
             });
         }
         fieldViewer.setInput(fieldsInSObject);
-        updateFieldComboList(null);
+        updateWhereFieldComboList(null);
         builderComp.layout();
         whereComp.layout();
-
-        fromPart = new StringBuffer("FROM ").append(config.getString(Config.ENTITY)).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
-
+        fromEntityPart = new StringBuffer("\nFROM ").append(config.getString(Config.ENTITY)).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
     }
     
-    private void updateFieldComboList(String filterStr) {
+    private void updateWhereFieldComboList(String filterStr) {
         List<String> fieldNames = new ArrayList<String>();
         for (int i = 0; i < fieldsInSObject.length; i++) {
             // include all fields except encrypted string ones
@@ -609,22 +658,27 @@ public class ExtractionSOQLPage extends ExtractionPage {
         }
         String[] fieldNamesArray = fieldNames.toArray(new String[fieldNames.size()]);
         Arrays.sort(fieldNamesArray);
-        fieldCombo.setItems(fieldNamesArray);
-        if (fieldCombo.getVerticalBar() != null) {
-            fieldCombo.getVerticalBar().setVisible(true);
-        }
-        if (fieldCombo.getHorizontalBar() != null) {
-            fieldCombo.getHorizontalBar().setVisible(true);
-        }
+        whereFieldCombo.setItems(fieldNamesArray);
     }
 
-    private void generateSOQLText() {
-        StringBuffer soql = new StringBuffer(SELECT);
-        soql.append(fieldPart);
-        soql.append(fromPart);
-        soql.append(wherePart);
-        soqlText.setText(soql.toString());
-
+    private void updateSoQLTextAndButtons() {
+        generateSelectFromPart();
+        if (selectFieldsClausePart == null || selectFieldsClausePart.toString().isBlank()) {
+            // clear the SoQL text and where clause
+            wherePart = new StringBuffer("");
+            soqlText.setText("");
+        } else {
+            StringBuffer soql = new StringBuffer(SELECT);
+            soql.append(selectFieldsClausePart);
+            soql.append(fromEntityPart);
+            if (wherePart != null && !wherePart.toString().isBlank()) {
+                soql.append("\n");
+                soql.append(wherePart);
+            }
+            soqlText.setText(soql.toString());
+        }
+        setAddWhereButtonState();
+        setClearWhereButtonState();
     }
 
     public String getSOQL() {

@@ -50,7 +50,7 @@ public class OperationUIAction extends Action {
     public void run() {
         this.controller.clearMapper();
         LoaderWizardDialog dlg = new LoaderWizardDialog(LoaderWindow.getApp().getShell(), 
-                this.opInfo.getUIHelper().instantiateWizard(this.controller));
+                this.opInfo.getUIHelper().instantiateWizard(this.controller), this.controller.getConfig());
         dlg.open();
     }
 

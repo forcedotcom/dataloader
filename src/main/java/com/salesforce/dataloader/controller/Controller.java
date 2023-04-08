@@ -149,13 +149,13 @@ public class Controller {
         if (this.partnerClient == null) {
             return null;
         }
-        String apiInfoStr = "\n    " + Labels.getFormattedString("Operation.apiVersion", partnerClient.getAPIVersion());
+        String apiInfoStr = Labels.getFormattedString("Operation.apiVersion", partnerClient.getAPIVersion());
         LimitInfo apiLimitInfo = this.partnerClient.getAPILimitInfo();
         if (apiLimitInfo != null) {
-            apiInfoStr = "\n    "
-                    + Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
-                    + "\n    "
+            apiInfoStr = Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
+                    + "\n"
                     + Labels.getFormattedString("Operation.apiLimit", apiLimitInfo.getLimit())
+                    + "\n"
                     + apiInfoStr;
         }
         return apiInfoStr;

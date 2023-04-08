@@ -400,6 +400,10 @@ public class Config {
     public static final String SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV = "process.bulk.saveServerLoadAndRawResultsInCSV";
     public static final String PROCESS_BULK_CACHE_DATA_FROM_DAO = "process.bulk.cacheDataFromDao";
     public static final String READ_ONLY_CONFIG_PROPERTIES = "config.properties.readonly";
+    public static final String WIZARD_WIDTH = "sfdc.ui.wizard.width";
+    public static final String WIZARD_HEIGHT = "sfdc.ui.wizard.height";
+    public static final int DEFAULT_WIZARD_WIDTH = 600;
+    public static final int DEFAULT_WIZARD_HEIGHT = 700;
     
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
     // Following properties are read-only, i.e. they are not overridden during save() to config.properties
@@ -577,6 +581,8 @@ public class Config {
         setDefaultValue(SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV, false);
         setDefaultValue(PROCESS_BULK_CACHE_DATA_FROM_DAO, false);
         setDefaultValue(PROCESS_KEEP_ACCOUNT_TEAM, false);
+        setDefaultValue(WIZARD_WIDTH, DEFAULT_WIZARD_WIDTH);
+        setDefaultValue(WIZARD_HEIGHT, DEFAULT_WIZARD_HEIGHT);
     }
 
     /**
