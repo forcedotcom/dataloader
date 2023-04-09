@@ -208,8 +208,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
         fLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 
         whereFieldCombo = new CCombo(whereComp, SWT.DROP_DOWN | SWT.LEFT);
-        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-        data.widthHint = 200;
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
         whereFieldCombo.setLayoutData(data);
         whereFieldCombo.addSelectionListener(new SelectionListener() {
 
@@ -289,7 +288,8 @@ public class ExtractionSOQLPage extends ExtractionPage {
         opLabel.setText(Labels.getString("ExtractionSOQLPage.operation")); //$NON-NLS-1$
         opLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         operCombo = new CCombo(whereComp, SWT.DROP_DOWN | SWT.LEFT | SWT.READ_ONLY);
-        operCombo.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
+        operCombo.setLayoutData(data);
         operCombo.setItems(operationsDisplayNormal);
         operCombo.setText(operationsDisplayNormal[0]);
         operCombo.addSelectionListener(new SelectionListener() {
@@ -307,8 +307,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
         valLabel.setText(Labels.getString("ExtractionSOQLPage.value")); //$NON-NLS-1$
         valLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         valueText = new Text(whereComp, SWT.BORDER);
-        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-        data.widthHint = 200;
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
         valueText.setLayoutData(data);
         valueText.addKeyListener(new KeyListener() {
             public void keyReleased(KeyEvent key) {
