@@ -6,5 +6,5 @@
 :; exit 0 #
 
 @echo off
-CALL "%~dp0util\util.bat" :runDataLoader run.mode=install
+CALL "%~dp0util\util.bat" :runDataLoader %* run.mode=install
 PAUSE
