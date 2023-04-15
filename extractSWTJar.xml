@@ -1,29 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="maven-antrun-" default="main"  >
 	<target name="main">
-	  <copy todir="${basedir}/target/classes/mac/" >
+	  <copy todir="${basedir}/target/classes/mac/" flatten="true">
 		<fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtmac*/*/*.jar"/>
 	  </copy>
-      <copy todir="${basedir}/target/classes/win/" >
+      <copy todir="${basedir}/target/classes/win/"  flatten="true">
         <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtwin*/*/*.jar"/>
       </copy>
-      <copy todir="${basedir}/target/classes/linux/" >
+      <copy todir="${basedir}/target/classes/linux/"  flatten="true">
         <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtlinux*/*/*.jar"/>
       </copy>
-	  <taskdef resource="net/sf/antcontrib/antcontrib.properties" />
-	  <foreach param="fileName" target="flatten">
-	    <path>
-    	    <dirset dir="${basedir}/target/classes/">
-    	      <include name="**/swt*" />
-    	    </dirset>
-        </path>
-	  </foreach>
-	</target>
-	<target name="flatten">
-	  <move todir="${fileName}" flatten="true">
-		<fileset dir="${fileName}/">
-		  <include name="**/*.jar"/>
-		</fileset>
-	  </move>
 	</target>
 </project>
