@@ -489,7 +489,15 @@
                 <phase>compile</phase>
                 <configuration>
                   <target>
-                    <ant antfile="${basedir}/extractSWTJar.xml" inheritAll="true"/>
+                    <copy todir="${basedir}/target/classes/mac/" flatten="true">
+                      <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtmac*/*/*.jar"/>
+                    </copy>
+                    <copy todir="${basedir}/target/classes/win/"  flatten="true">
+                      <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtwin*/*/*.jar"/>
+                    </copy>
+                    <copy todir="${basedir}/target/classes/linux/"  flatten="true">
+                      <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtlinux*/*/*.jar"/>
+                    </copy>
                     <delete includeEmptyDirs="true">
                       <dirset dir="${basedir}/target/">
                         <patternset>
@@ -534,11 +542,10 @@
                         todir="${basedir}/target/zipartifacts"/>
                     <copy file="${basedir}/release/install/install.command" 
                         tofile="${basedir}/target/zipartifacts/install.bat"/>
-                    <copy file="${basedir}/target/classes/mac/util/util.sh" 
+                    <copy file="${basedir}/target/classes/mac/util/util.sh"
                         todir="${basedir}/target/zipartifacts/util"/>
                     <copy file="${basedir}/target/classes/win/util/util.bat" 
                         todir="${basedir}/target/zipartifacts/util"/>
-                    <replace dir="${basedir}/target/zipartifacts/" token="@@FULL_VERSION@@" value="${project.version}"/>
 <!--
                     <concat destfile="${basedir}/target/zipartifacts/dataloader-${project.version}.jar" binary="yes">
                       <filelist dir="${basedir}/release/install" files="install.command"/>
@@ -573,20 +580,6 @@
                 </goals>
              </execution>
             </executions>
-            <dependencies>
-<!-- https://mvnrepository.com/artifact/ant-contrib/ant-contrib -->
-              <dependency>
-              <groupId>ant-contrib</groupId>
-              <artifactId>ant-contrib</artifactId>
-              <version>1.0b3</version>
-              <exclusions>
-                <exclusion>
-                  <groupId>ant</groupId>
-                  <artifactId>ant</artifactId>
-                </exclusion>
-              </exclusions>
-            </dependency>
-          </dependencies>
           </plugin>
         </plugins>
       </build>
