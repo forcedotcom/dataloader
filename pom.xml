@@ -17,7 +17,6 @@
     <force.partner.api.version>${force.wsc.version}</force.partner.api.version>
     <maven.compiler.release>11</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <swt.version>4.27</swt.version>
 
     <!-- test properties -->
     <test.endpoint>http://testendpoint</test.endpoint>
@@ -43,6 +42,15 @@
 
   <dependencies>
 <!-- Runtime dependencies -->
+<!-- 
+     SWT - OS and processor architecture are not important at compile time, using mac for OS 
+     and ARM for processor architecture for compile-time dependency
+ -->
+    <dependency>
+      <groupId>local.swt</groupId>
+      <artifactId>swtmac_aarch64</artifactId>
+      <version>4.27</version>
+    </dependency>
 <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -347,64 +355,7 @@
     </plugins>
   </build>
 
-  <profiles>
-    <profile>
-      <id>mac</id>
-      <activation>
-        <os>
-          <family>mac</family>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>local.swt</groupId>
-          <artifactId>swtmac_x86_64</artifactId>
-          <version>${swt.version}</version>
-        </dependency>
-      </dependencies>
-      <properties>
-          <OSType>mac</OSType>
-      </properties>
-    </profile>
-
-    <profile>
-      <id>win</id>
-      <activation>
-        <os>
-          <family>Windows</family>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>local.swt</groupId>
-          <artifactId>swtwin32_x86_64</artifactId>
-          <version>${swt.version}</version>
-        </dependency>
-      </dependencies>
-      <properties>
-          <OSType>win</OSType>
-      </properties>
-    </profile>
-    
-    <profile>
-      <id>linux</id>
-      <activation>
-        <os>
-          <family>linux</family>
-        </os>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>local.swt</groupId>
-          <artifactId>swtlinux_x86_64</artifactId>
-          <version>${swt.version}</version>
-        </dependency>
-      </dependencies>
-      <properties>
-          <OSType>linux</OSType>
-      </properties>
-    </profile>
-    
+  <profiles>    
     <profile>
       <id>make-shaded-jar</id>
       <activation>
@@ -498,46 +449,8 @@
                     <copy todir="${basedir}/target/classes/linux/"  flatten="true">
                       <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtlinux*/*/*.jar"/>
                     </copy>
-                    <delete includeEmptyDirs="true">
-                      <dirset dir="${basedir}/target/">
-                        <patternset>
-                          <include name="**/${swt.version}"/>
-                         </patternset>
-                      </dirset>
-                    </delete>
 
-                    <replace dir="${basedir}/target/classes/" token="@@FULL_VERSION@@" value="${project.version}"/>
-                    <replace dir="${basedir}/target/classes/" token="@@MIN_JAVA_VERSION@@" value="${maven.compiler.release}"/>
-                  </target>
-                </configuration>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-              </execution>
-            </executions>
-	      </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
-      <id>zip</id>
-      <build>
-        <plugins>
-<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-antrun-plugin -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <version>3.0.0</version>
-            <executions>
-              <execution>
-                <configuration>
-                  <target>
-                    <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath"/>
-                    <delete dir="${basedir}/target/zipartifacts"/>
                     <mkdir dir="${basedir}/target/zipartifacts"/>
-                    <copy file="${basedir}/target/dataloader-${project.version}.jar" 
-                        todir="${basedir}/target/zipartifacts"/>
                     <copy file="${basedir}/release/install/install.command" 
                         todir="${basedir}/target/zipartifacts"/>
                     <copy file="${basedir}/release/install/install.command" 
@@ -546,44 +459,45 @@
                         todir="${basedir}/target/zipartifacts/util"/>
                     <copy file="${basedir}/target/classes/win/util/util.bat" 
                         todir="${basedir}/target/zipartifacts/util"/>
-<!--
-                    <concat destfile="${basedir}/target/zipartifacts/dataloader-${project.version}.jar" binary="yes">
-                      <filelist dir="${basedir}/release/install" files="install.command"/>
-                      <filelist dir="${basedir}/target" files="dataloader-${project.version}.jar"/>
-                    </concat>
--->
-                    <copy todir="${basedir}/target/zipartifacts" >
-                      <fileset dir="${basedir}/target/" includes="swt*/*"/>
-                    </copy>
-                    <fixcrlf srcdir="${basedir}/target/zipartifacts/"
+
+                    <replace dir="${basedir}/target/" token="@@FULL_VERSION@@" value="${project.version}"/>
+                    <replace dir="${basedir}/target/" token="@@MIN_JAVA_VERSION@@" value="${maven.compiler.release}"/>
+
+                    <fixcrlf srcdir="${basedir}/target/"
                                 includes="**/*.bat" eol="crlf"/>
-                    <fixcrlf srcdir="${basedir}/target/zipartifacts/"
-                                includes="**/*.bat.old" eol="crlf"/>
-
-                    <fixcrlf srcdir="${basedir}/target/zipartifacts/"
+                    <fixcrlf srcdir="${basedir}/target/"
                                 includes="**/*.command" eol="crlf" eof="remove"/>
-                    <fixcrlf srcdir="${basedir}/target/zipartifacts/"
-                                includes="**/*.command.old" eol="lf" eof="remove"/>
-                    <fixcrlf srcdir="${basedir}/target/zipartifacts/"
+                    <fixcrlf srcdir="${basedir}/target/"
                                         includes="**/*.sh" eol="lf" eof="remove"/>
-
-                    <zip update="true" destfile="${basedir}/dataloader_v${project.version}.zip">
-                      <zipfileset dirmode="755" filemode="755" 
-                        dir="${basedir}/target/zipartifacts" />
-                      </zip>
-                    </target>
+                  </target>
                 </configuration>
-                <id>package</id>
-                <phase>package</phase>
                 <goals>
                   <goal>run</goal>
                 </goals>
-             </execution>
+              </execution>
+              <execution>
+                <id>zip</id>
+                <phase>package</phase>
+                 <configuration>
+                  <target>
+                    <copy file="${basedir}/target/dataloader-${project.version}.jar" 
+                        todir="${basedir}/target/zipartifacts"/>
+                    <zip update="true" destfile="${basedir}/dataloader_v${project.version}.zip">
+                      <zipfileset dirmode="755" filemode="755" 
+                        dir="${basedir}/target/zipartifacts" />
+                    </zip>
+                  </target>
+                 </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+               </execution>
             </executions>
-          </plugin>
+	      </plugin>
         </plugins>
       </build>
     </profile>
+
     
 <!-- "integration-test" profile declares surefire-plugin again with fewer exclusions
       than surefire-plugin declaration run during test phase, thereby ensuring that
