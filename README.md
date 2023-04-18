@@ -13,7 +13,7 @@ NOTE: Salesforce officially supports Data Loader for Windows and macOS. Any othe
 # Install Data Loader on Linux
 Salesforce officially supports Data Loader for Windows and macOS. The details of supported OS versions and CPU architecture are provided in the Release Notes.
 
-Extract contents of Data Loader zip file, rename `install.command` as `install.sh`, and run the following command (v48 and later):
+Extract contents of Data Loader zip file, rename `install.command` as `install.sh`, and run the following command:
 
     ./install.sh
 
