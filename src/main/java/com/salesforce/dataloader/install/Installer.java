@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -357,8 +358,14 @@ public class Installer extends Thread {
     }
     
     private static void configureLinuxArtifactsPostCopy(String installationDir) throws IOException {
-        Files.move(Paths.get(installationDir + "/dataloader_console"),
-                Paths.get(installationDir + "/dataloader.sh"));
+        try {
+            if (Files.exists(Paths.get(installationDir + "/dataloader_console"))) {
+                Files.move(Paths.get(installationDir + "/dataloader_console"),
+                    Paths.get(installationDir + "/dataloader.sh"));
+            }
+        } catch (InvalidPathException ex) {
+            // do nothing - dataloader_console not found in the path
+        }
         deleteFilesFromDir(installationDir + "/util", "(.*).bat");
     }
 
@@ -373,6 +380,8 @@ public class Installer extends Thread {
         String osSpecificExtractionPrefix = "mac/";
         if (AppUtil.isRunningOnWindows()) {
             osSpecificExtractionPrefix = "win/";
+        } else if (AppUtil.isRunningOnLinux()) {
+            osSpecificExtractionPrefix = "linux/";
         }
         AppUtil.extractDirFromJar(osSpecificExtractionPrefix, installationDir, true);
         configureOSSpecificInstallationArtifactsPostCopy(installationDir);
