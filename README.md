@@ -1,12 +1,9 @@
-# Notes for Data Loader v45.0.0 and later
+# Prerequisites
 
-Data Loader v45 and later is built with JDK 11 and requires a 64-bit operating system. Install JRE 11 or later before installing Data Loader. See instructions further down to install via scripts. Users can download v44 or later from [Releases](https://github.com/forcedotcom/dataloader/releases) tab.
-
-
-Data Loader v44 is the last version built with Oracle Java 8. Developers can check out code from the branch “DataloaderV44Release”. 
+Data Loader v45 and later are built with JDK 11 and requires JRE 11 or later to install and run.
 
 # Installing Data Loader
-Salesforce officially supports Data Loader for Windows and macOS. Any other operating systems that Data Loader can be run on or compiled for are unsupported. The list of supported macOS and Windows versions and CPU architecture are provided in the [Release Notes](https://github.com/forcedotcom/dataloader/releases) for each released version of Data Loader.
+Salesforce officially supports Data Loader for Windows and macOS. All other operating systems are unsupported. The list of supported macOS and Windows versions and CPU architecture for a released version of Data Loader is provided in the [Release Notes](https://github.com/forcedotcom/dataloader/releases) for that release.
 
 Follow the installation instructions for [macOS](https://help.salesforce.com/articleView?id=sf.loader_install_mac.htm) and [Windows](https://help.​salesforce.com/articleView?id=​loader_install_windows.htm).
 
