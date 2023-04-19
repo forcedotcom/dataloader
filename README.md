@@ -1,6 +1,6 @@
 # Prerequisites
 
-Data Loader v45 and later are built with JDK 11 and requires JRE 11 or later to install and run.
+Data Loader v45 and later are built with JDK 11 and require JRE 11 or later to install and run.
 
 # Installing Data Loader
 Salesforce officially supports Data Loader for Windows and macOS. All other operating systems are unsupported. The list of supported macOS and Windows versions and CPU architecture for a released version of Data Loader is provided in the [Release Notes](https://github.com/forcedotcom/dataloader/releases) for that release.
@@ -28,17 +28,11 @@ Consult the [documentation](https://developer.salesforce.com/docs/atlas.en-us.da
 # Running Data Loader in Batch mode
 Batch mode is officially supported only on Windows. To run Data Loader in Batch mode on Windows, see [Batch mode for Windows](https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_batchmode_intro.htm). 
 
-To run Data Loader in Batch mode on Mac or Linux, execute one of the following commands from Data Loader installation directory:
-
-Mac
+Execute the following command on Mac (Replace `dataloader_console` with `dataloader.sh` on Linux):
 
     ./dataloader_console <config dir containing process-conf.xml and config.properties files> <process name> run.mode=batch
     
-Linux
-
-    ./dataloader.sh <config dir containing process-conf.xml and config.properties files> <process name> run.mode=batch
-    
-Alternately execute one of the following commands on Mac or Linux:
+Alternately execute one of the following commands:
     
     java -jar dataloader-x.y.z.jar <config dir containing process-conf.xml and config.properties files> <process name> run.mode=batch
     
@@ -52,7 +46,7 @@ See [Batch mode for Windows](https://developer.salesforce.com/docs/atlas.en-us.d
 
 Batch mode requires specifying an encrypted password in process-conf.xml, config.properties, or as a command line argument. The first step in encrypting a password is to create an encryption key file on Mac or Linux.
 
-Following command generates an encryption key file on Mac and Linux (Replace `dataloader_console` with `dataloader.sh` on Linux):
+Execute the following command to generate an encryption key file on Mac (Replace `dataloader_console` with `dataloader.sh` on Linux):
     
     ./dataloader_console -k [<encryption key file>]  run.mode=encrypt 
     
@@ -60,7 +54,7 @@ Following command generates an encryption key file on Mac and Linux (Replace `da
     
     java -jar dataloader-x.y.z.jar -k [<encryption key file>]  run.mode=encrypt 
  
- Type the following command to encrypt a password (Replace `dataloader_console` with `dataloader.sh` on Linux):
+ Execute the following command to encrypt a password on Mac (Replace `dataloader_console` with `dataloader.sh` on Linux):
     
     ./dataloader_console -e <password in plain text> [<encryption key file>] run.mode=encrypt 
     
@@ -68,7 +62,7 @@ Following command generates an encryption key file on Mac and Linux (Replace `da
     
     java -jar dataloader-x.y.z.jar -e <password in plain text> [<encryption key file>] run.mode=encrypt
 
-Type the following command to decrypt a password (Replace `dataloader_console` with `dataloader.sh` on Linux):
+Execute the following command to decrypt a password on Mac (Replace `dataloader_console` with `dataloader.sh` on Linux):
     
     ./dataloader_console -d <encrypted password> [<encryption key file>] run.mode=encrypt 
     
