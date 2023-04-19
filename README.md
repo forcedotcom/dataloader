@@ -1,24 +1,24 @@
 # Notes for Data Loader v45.0.0 and later
- 
-Data Loader v45 and later is built with JDK 11 and requires a 64-bit operating system. Install JRE 11 or later before installing Data Loader. See instructions further down to install via scripts.
 
-Data Loader v44 is the last version built with Oracle Java 8. Developers can check out code from the branch “DataloaderV44Release”. End users can download v44 or older from this project’s “releases” tab.
+Data Loader v45 and later is built with JDK 11 and requires a 64-bit operating system. Install JRE 11 or later before installing Data Loader. See instructions further down to install via scripts. Users can download v44 or later from [Releases](https://github.com/forcedotcom/dataloader/releases) tab.
 
-# Install Data Loader on Mac or Windows
- 
+
+Data Loader v44 is the last version built with Oracle Java 8. Developers can check out code from the branch “DataloaderV44Release”. 
+
+# Installing Data Loader
+Salesforce officially supports Data Loader for Windows and macOS. Any other operating systems that Data Loader can be run on or compiled for are unsupported. The list of supported macOS and Windows versions and CPU architecture are provided in the [Release Notes](https://github.com/forcedotcom/dataloader/releases) for each released version of Data Loader.
+
 Follow the installation instructions for [macOS](https://help.salesforce.com/articleView?id=sf.loader_install_mac.htm) and [Windows](https://help.​salesforce.com/articleView?id=​loader_install_windows.htm).
 
-NOTE: Salesforce officially supports Data Loader for Windows and macOS. Any other operating systems that Data Loader jar file can be run or compiled for are unofficial.
-
-# Install Data Loader on Linux
-Salesforce officially supports Data Loader for Windows and macOS. The details of supported OS versions and CPU architecture are provided in the Release Notes.
-
-Extract contents of Data Loader zip file, rename `install.command` as `install.sh`, and run the following command:
+Installing on Linux: Extract contents of Data Loader zip file, rename `install.command` as `install.sh`, and run the following command:
 
     ./install.sh
 
-# Execute Data Loader in GUI mode on Linux
-Use the command below to run the Data Loader GUI on Linux.
+# Running Data Loader in GUI mode
+
+For running Data Loader on macOS or Windows, follow the [instructions](https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/configuring_the_data_loader.htm).
+
+For running Data Loader on Linux, type the following command in a command shell:
 
     ./dataloader.sh
     
@@ -26,26 +26,28 @@ Use the command below to run the Data Loader GUI on Linux.
     
     java -jar dataloader-x.y.z.jar
 
-# Execute Data Loader in Batch mode on Mac or Linux
-NOTE: Batch mode is officially supported only on Windows. To run Data Loader in Batch mode on Windows, see [Batch mode for Windows](https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_batchmode_intro.htm). 
+Consult the [documentation](https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/configuring_the_data_loader.htm) for the details of how to configure and use Data Loader.
 
-To execute Data Loader in Batch mode on Mac or Linux, run one of the following commands from Data Loader installation directory:
+# Running Data Loader in Batch mode
+Batch mode is officially supported only on Windows. To run Data Loader in Batch mode on Windows, see [Batch mode for Windows](https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_batchmode_intro.htm). 
+
+To run Data Loader in Batch mode on Mac or Linux, execute one of the following commands from Data Loader installation directory:
 
 Mac
 
-    ./dataloader_console <path to config dir containing process-conf.xml and config.properties files> <process name> run.mode=batch
+    ./dataloader_console <config dir containing process-conf.xml and config.properties files> <process name> run.mode=batch
     
 Linux
 
-    ./dataloader.sh <path to config dir containing process-conf.xml and config.properties files> <process name> run.mode=batch
+    ./dataloader.sh <config dir containing process-conf.xml and config.properties files> <process name> run.mode=batch
     
-Alternately,
+Alternately execute one of the following commands on Mac or Linux:
     
-    java -jar dataloader-x.y.z.jar <path to config dir containing process-conf.xml and config.properties files> <process name> run.mode=batch
+    java -jar dataloader-x.y.z.jar <config dir containing process-conf.xml and config.properties files> <process name> run.mode=batch
     
-OR
+    OR
     
-    java -jar dataloader-x.y.z.jar salesforce.config.dir=<path to config dir containing process-conf.xml and config.properties files> process.name=<process name> run.mode=batch 
+    java -jar dataloader-x.y.z.jar salesforce.config.dir=<config dir containing process-conf.xml and config.properties files> process.name=<process name> run.mode=batch 
     
 
 ## Commands to create an encryption key file, encrypt a password, or decrypt a password
@@ -53,31 +55,33 @@ See [Batch mode for Windows](https://developer.salesforce.com/docs/atlas.en-us.d
 
 Batch mode requires specifying an encrypted password in process-conf.xml, config.properties, or as a command line argument. The first step in encrypting a password is to create an encryption key file on Mac or Linux (Replace `dataloader_console` with `dataloader.sh` on Linux).
 
-Following command generates an encryption key file on Mac and Linux. It uses the default encryption key file `${HOME}/.dataloader/dataloader.key` if an encryption key file is not specified.
+Following command generates an encryption key file on Mac and Linux. 
     
-    ./dataloader_console -k [<name of an encryption key file>]  run.mode=encrypt 
+    ./dataloader_console -k [<encryption key file>]  run.mode=encrypt 
     
     OR
     
-    java -jar dataloader-x.y.z.jar -k [<name of an encryption key file>]  run.mode=encrypt 
+    java -jar dataloader-x.y.z.jar -k [<encryption key file>]  run.mode=encrypt 
  
  Encrypt a password.
     
-    ./dataloader_console -e <password in plain text> [<name of an encryption key file>] run.mode=encrypt 
+    ./dataloader_console -e <password in plain text> [<encryption key file>] run.mode=encrypt 
     
     OR
     
-    java -jar dataloader-x.y.z.jar -e <password in plain text> [<name of an encryption key file>] run.mode=encrypt
+    java -jar dataloader-x.y.z.jar -e <password in plain text> [<encryption key file>] run.mode=encrypt
 
 Decrypt a password.
     
-    ./dataloader_console -d <encrypted password> [<path to keyfile>] run.mode=encrypt 
+    ./dataloader_console -d <encrypted password> [<encryption key file>] run.mode=encrypt 
     
     OR
     
-    java -jar dataloader-x.y.z.jar -d <encrypted password> [<path to keyfile if it is other than the default path>] run.mode=encrypt
-    
-# Build Data Loader
+    java -jar dataloader-x.y.z.jar -d <encrypted password> [<encryption key file>] run.mode=encrypt
+
+NOTE: these commands use the default encryption key file `${HOME}/.dataloader/dataloader.key` if an encryption key file is not specified.
+
+# Building Data Loader
 Developers need to use JDK 11 or later to build Data Loader. For example, developers can use [Zulu OpenJDK](https://www.azul.com/downloads/zulu) to build Data Loader.
 
     git clone git@github.com:forcedotcom/dataloader.git
@@ -90,12 +94,12 @@ Developers need to use JDK 11 or later to build Data Loader. For example, develo
 
 `dataloader_v<x.y.z>.zip` will be created in the root directory of the local git clone.
 
-# Debug Data Loader
+# Debugging Data Loader
 To run data loader for debugging with an IDE
 
     java -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005  dataloader-x.y.z.jar
 
-# Test Data Loader
+# Testing Data Loader
 
 See the [testing wiki](https://github.com/forcedotcom/dataloader/wiki/Testing-Dataloader)
 
