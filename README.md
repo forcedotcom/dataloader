@@ -50,9 +50,9 @@ Alternately execute one of the following commands on Mac or Linux:
 ## Commands to create an encryption key file, encrypt a password, or decrypt a password
 See [Batch mode for Windows](https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_batchmode_intro.htm) for the detailed steps to create an encryption key file, encrypt a password, or decrypt a password on Windows.
 
-Batch mode requires specifying an encrypted password in process-conf.xml, config.properties, or as a command line argument. The first step in encrypting a password is to create an encryption key file on Mac or Linux (Replace `dataloader_console` with `dataloader.sh` on Linux).
+Batch mode requires specifying an encrypted password in process-conf.xml, config.properties, or as a command line argument. The first step in encrypting a password is to create an encryption key file on Mac or Linux.
 
-Following command generates an encryption key file on Mac and Linux. 
+Following command generates an encryption key file on Mac and Linux (Replace `dataloader_console` with `dataloader.sh` on Linux):
     
     ./dataloader_console -k [<encryption key file>]  run.mode=encrypt 
     
@@ -60,7 +60,7 @@ Following command generates an encryption key file on Mac and Linux.
     
     java -jar dataloader-x.y.z.jar -k [<encryption key file>]  run.mode=encrypt 
  
- Encrypt a password.
+ Type the following command to encrypt a password (Replace `dataloader_console` with `dataloader.sh` on Linux):
     
     ./dataloader_console -e <password in plain text> [<encryption key file>] run.mode=encrypt 
     
@@ -68,7 +68,7 @@ Following command generates an encryption key file on Mac and Linux.
     
     java -jar dataloader-x.y.z.jar -e <password in plain text> [<encryption key file>] run.mode=encrypt
 
-Decrypt a password.
+Type the following command to decrypt a password (Replace `dataloader_console` with `dataloader.sh` on Linux):
     
     ./dataloader_console -d <encrypted password> [<encryption key file>] run.mode=encrypt 
     
