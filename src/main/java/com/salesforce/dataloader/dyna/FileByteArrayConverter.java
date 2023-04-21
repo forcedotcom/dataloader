@@ -30,8 +30,11 @@ import java.io.*;
 
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.Converter;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.salesforce.dataloader.config.Messages;
+import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.ws.util.FileUtil;
 
 /**
@@ -41,6 +44,7 @@ import com.sforce.ws.util.FileUtil;
  */
 
 public final class FileByteArrayConverter implements Converter {
+    private static Logger logger;
 
     // ----------------------------------------------------------- Constructors
 
@@ -48,7 +52,7 @@ public final class FileByteArrayConverter implements Converter {
 
         this.defaultValue = null;
         this.useDefault = false;
-
+        logger = LogManager.getLogger(this.getClass().getName());
     }
 
     public FileByteArrayConverter(Object defaultValue) {
@@ -86,18 +90,27 @@ public final class FileByteArrayConverter implements Converter {
     public Object convert(Class type, Object value) {
 
         if (value == null || String.valueOf(value).length() == 0) { return null; }
-
+        final String absolutePath = new File(String.valueOf(value.toString())).getAbsolutePath();
         try {
             final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
             // just in case the file is not found we want to display the absolute file name to the user
-            final String absolutePath = new File(String.valueOf(value.toString())).getAbsolutePath();
             File file = new File(absolutePath);
             if (!file.canRead()) {
+                logger.debug("Attempting to enable readable flag on file " + absolutePath);
                 file.setReadable(true);
             }
             FileUtil.copy(new FileInputStream(absolutePath), byteStream);
             return byteStream.toByteArray();
         } catch (Exception e) {
+            if (e instanceof java.io.FileNotFoundException) {
+                if (AppUtil.getOSType() == AppUtil.OSType.MACOSX 
+                        && (absolutePath.contains("/Desktop/") || absolutePath.contains("/Downloads/"))) {
+                    logger.error(Messages.getMessage(this.getClass(), "insufficientAccessToContentOnMacMsg1", absolutePath));
+                    logger.error(Messages.getMessage(this.getClass(), "insufficientAccessToContentOnMacMsg2"));
+                } else {
+                    logger.error(Messages.getMessage(this.getClass(), "insufficientAccessToContentGenericMsg", absolutePath));
+                }
+            }
             if (useDefault) {
                 return (defaultValue);
             } else {
