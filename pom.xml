@@ -440,6 +440,12 @@
                     <copy file="${basedir}/target/classes/win/util/util.bat" 
                         todir="${basedir}/target/zipartifacts/util"/>
 
+                    <mkdir dir="${basedir}/target/classes/linux"/>
+                    <copy file="${basedir}/target/classes/mac/dataloader_console"
+                        tofile="${basedir}/target/classes/linux/dataloader.sh"/>
+                    <copy file="${basedir}/target/classes/mac/util/util.sh"
+                        todir="${basedir}/target/classes/linux/util"/>
+
                     <replace dir="${basedir}/target/" token="@@FULL_VERSION@@" value="${project.version}"/>
                     <replace dir="${basedir}/target/" token="@@MIN_JAVA_VERSION@@" value="${maven.compiler.release}"/>
 
