@@ -207,6 +207,8 @@ public class BulkV2Connection  {
     private String queryLocator = "";
     private int numberOfRecordsInQueryResult = 0;
     private ConnectorConfig config;
+    private HashMap<String, String> headers = new HashMap<String, String>();
+
     public static final TypeMapper typeMapper = new TypeMapper(null, null, false);
 
     /**********************************
@@ -361,6 +363,10 @@ public class BulkV2Connection  {
     	return doGetIngestResultsStream(jobId, INGEST_RECORDS_UNPROCESSED);
     }
     
+    public void addHeader(String headerName, String headerValue) {
+        headers.put(headerName, headerValue);
+    }
+    
     /**********************************
      * 
      * private, common methods 
@@ -504,6 +510,9 @@ public class BulkV2Connection  {
 	    newMap.put("Content-Type", requestContentType);
 	    newMap.put("ACCEPT", acceptContentType);
 	    newMap.put(AUTH_HEADER, this.authHeaderValue);
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            newMap.put(entry.getKey(), entry.getValue());
+        }
 	    return newMap;
 	}
 	

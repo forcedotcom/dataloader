@@ -94,7 +94,7 @@ class BulkApiVisitorUtil {
         this.config = ctl.getConfig();
         this.controller = ctl;
         if (isBulkV2QueryJob() || isBulkV2LoadJob()) {
-            this.client = new BulkClientConnection(ctl.getBulkV2Client().getClient());
+            this.client = new BulkClientConnection(ctl.getBulkV2Client().getClient(), this.config);
         	try {
 				bulkV2LoadUploadFile = new File(getStagingFileInOutputStatusDir("bulkV2LoadUpload_", ".csv"));
 				bulkV2LoadUploadWriter = new FileOutputStream(this.bulkV2LoadUploadFile);
@@ -103,7 +103,7 @@ class BulkApiVisitorUtil {
 				this.config.setValue(Config.BULKV2_API_ENABLED, false);
 			}
         } else {
-            this.client = new BulkClientConnection(ctl.getBulkClient().getClient());
+            this.client = new BulkClientConnection(ctl.getBulkClient().getClient(), this.config);
         }
 
         try {
