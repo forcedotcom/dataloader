@@ -25,6 +25,8 @@
  */
 package com.salesforce.dataloader.action.visitor;
 
+import com.salesforce.dataloader.client.ClientBase;
+import com.salesforce.dataloader.config.Config;
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.BulkConnection;
 import com.sforce.async.JobInfo;
@@ -32,14 +34,19 @@ import com.sforce.async.JobInfo;
 public class BulkClientConnection {
     private BulkV2Connection bulkV2Connection = null;
     private BulkConnection bulkV1Connection = null;
+    private Config config = null;
 
-    public BulkClientConnection(BulkConnection conn) {
+    public BulkClientConnection(BulkConnection conn, Config config) {
         this.bulkV1Connection = conn;
+        this.config = config;
+        addClientNameHeader();
     }
 
-    public BulkClientConnection(BulkV2Connection conn) {
+    public BulkClientConnection(BulkV2Connection conn, Config config) {
         this.bulkV2Connection = conn;
+        addClientNameHeader();
     }
+    
     public JobInfo createJob(JobInfo job) throws AsyncApiException {
         if (this.bulkV1Connection != null) {
             return this.bulkV1Connection.createJob(job);
@@ -53,10 +60,13 @@ public class BulkClientConnection {
         if (this.bulkV1Connection != null) {
             this.bulkV1Connection.addHeader(headerName, headerValue);
         }
-        // not available for bulkv2
+        if (this.bulkV2Connection != null) {
+            this.bulkV2Connection.addHeader(headerName, headerValue);
+        }
     }
 
     public JobInfo getJobStatus(String jobId, boolean isQuery) throws AsyncApiException {
+        addClientNameHeader();
         if (this.bulkV1Connection != null) {
             return this.bulkV1Connection.getJobStatus(jobId);
         } else if (this.bulkV2Connection != null) {
@@ -72,5 +82,10 @@ public class BulkClientConnection {
             return this.bulkV2Connection.getJobStatus(jobId, isQuery);
         }
         return null;
+    }
+
+    private void addClientNameHeader() {
+       this.addHeader("Sforce-Call-Options",
+                "client=" + ClientBase.getClientName(this.config));
     }
 }

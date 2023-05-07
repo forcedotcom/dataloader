@@ -31,15 +31,23 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.model.LoginCriteria;
 import com.salesforce.dataloader.util.ExceptionUtil;
+import com.sforce.soap.partner.PartnerConnection;
+import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.fault.LoginFault;
 import com.sforce.soap.partner.fault.UnexpectedErrorFault;
+import com.sforce.soap.partner.sobject.SObject;
+import com.sforce.ws.ConnectionException;
+import com.sforce.ws.bind.XmlObject;
+
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import java.util.Iterator;
 import java.util.function.Consumer;
 
 /**
@@ -126,6 +134,20 @@ public class AuthenticationRunner {
                 messenger.accept(Labels.getString("SettingsPage.loginSuccessful"));
                 controller.saveConfig();
                 controller.updateLoaderWindowTitle();
+                PartnerConnection conn = controller.getPartnerClient().getClient();
+                logger.debug("org_id = " + conn.getUserInfo().getOrganizationId());
+                logger.debug("user_id = " + conn.getUserInfo().getUserId());
+                if (logger.getLevel() == Level.DEBUG) { 
+                    // avoid making a remote API call to the server unless log level is DEBUG
+                    logger.debug(getSoqlResultsAsString(
+                            "\nConnected App Information: ",
+                            "SELECT Name, id FROM ConnectedApplication WHERE name like 'Dataloader%'"
+                                    , conn));
+                    logger.debug(getSoqlResultsAsString(
+                            "\nOrg Instance Information:",
+                            "SELECT InstanceName FROM Organization"
+                                    , conn));
+                    }
                 complete.accept(true);
             } else {
                 messenger.accept(Labels.getString("SettingsPage.invalidLogin"));
@@ -139,6 +161,38 @@ public class AuthenticationRunner {
         } catch (Throwable e) {
             handleError(e, e.getMessage());
         }
+    }
+        
+    private String getSoqlResultsAsString(String prefix, String soql, PartnerConnection conn) throws ConnectionException {
+        QueryResult result = conn.query(soql);
+        final SObject[] sfdcResults = result.getRecords();
+        String debugInfo = prefix;
+        if (sfdcResults != null) {
+            for (SObject sobj : sfdcResults) {
+                Iterator<XmlObject> fields = sobj.getChildren();
+                if (fields == null) continue;
+                String fieldsStr = "    ";
+                boolean isIdInFields = false;
+                while (fields.hasNext()) {
+                    XmlObject field = fields.next();
+                    if ("type".equalsIgnoreCase(field.getName().getLocalPart())) {
+                        continue;
+                    }
+                    if (field.getValue() == null || field.getValue().toString().isBlank()) {
+                        continue;
+                    }
+                    if ("id".equalsIgnoreCase(field.getName().getLocalPart())) {
+                        if (isIdInFields) {
+                            continue;
+                        }
+                        isIdInFields = true;
+                    }
+                    fieldsStr += field.getName().getLocalPart() + " = " + field.getValue() + "  ";
+                }
+                debugInfo += "\n" + fieldsStr;
+            }
+        }
+        return debugInfo;
     }
 
     private void handleError(Throwable e, String message) {

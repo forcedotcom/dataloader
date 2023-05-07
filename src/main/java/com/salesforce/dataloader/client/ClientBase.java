@@ -98,7 +98,7 @@ public abstract class ClientBase<ClientType> {
     private static final String BATCH_CLIENT_STRING = "Batch";
     private static final String UI_CLIENT_STRING = "UI";
 
-    protected static String getClientName(Config cfg) {
+    public static String getClientName(Config cfg) {
         String apiType = cfg.isBulkAPIEnabled() ? BULK_API_CLIENT_TYPE : PARTNER_API_CLIENT_TYPE;
         final String interfaceType = cfg.isBatchMode() ? BATCH_CLIENT_STRING : UI_CLIENT_STRING;
         if (cfg.isBulkAPIEnabled() && cfg.isBulkV2APIEnabled()) {
@@ -118,7 +118,8 @@ public abstract class ClientBase<ClientType> {
         ConnectorConfig cc = new ConnectorConfig();
         cc.setTransport(HttpClientTransport.class);
         cc.setSessionId(getSessionId());
-        
+        cc.setRequestHeader("Sforce-Call-Options",
+                "client=" + ClientBase.getClientName(this.config));      
         // set authentication credentials
         // blank username is not acceptible
         String username = config.getString(Config.USERNAME);
