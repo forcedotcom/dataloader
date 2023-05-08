@@ -84,10 +84,10 @@ Collect the following information before reaching out to Salesforce Support or r
   - The default tempdir is `%USER%\AppData\Local\Temp` on Windows
   - The default tempdir is `${TMPDIR}` on macOS
 - Provide a sample csv file containing as few as possible columns and rows to reproduce the issue.
-- Provide the following information about your org (it is available in the log file if data loader version > 58.0.0, the log level is set to debug and the user logs in):
-  - Org id: Settings >> Company Profile >> Company Information >> value of Salesforce organization id field
-  - instance : Settings >> Company Profile >> Company Information >> value of Instance field
-  - User id: follow the instructions in this article or this article.
+- Provide the following information about your org (it is available in the log file if data loader version > 58.0.0, the log level is set to debug, and the user logs in):
+  - `Org id`: Setup >> Company Information >> value of Salesforce organization id field
+  - `instance`: Setup >> Company Information >> value of Instance field
+  - `User id`: follow the instructions in [this article](https://help.salesforce.com/s/articleView?id=000381643&language=en_US&type=1).
 
 NOTE:
 Remove all personal, business-specific, an any other sensitive information before reporting an issue on a public forum such as github. Sensitive information may be in any files you may upload including config files, data files such as csv files, log files, screenshots, console logs, and more.
