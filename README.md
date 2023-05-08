@@ -72,6 +72,26 @@ Execute the following command to decrypt a password on Mac (Replace `dataloader_
 
 NOTE: these commands use the default encryption key file `${HOME}/.dataloader/dataloader.key` if an encryption key file is not specified.
 
+# Reporting an issue
+Collect the following information before reaching out to Salesforce Support or reporting an issue on github:
+- Data Loader version, operation being performed, and screenshots of the issue.
+- Config files: `config.properties`, `log4j2.properties` or `log-conf.xml`, `process-conf.xml`.
+- log file:
+  - Set the root log level to “debug” in Advanced Config dialog (v58 and later) or in `log-conf.xml`.
+  - Rerun data loader to reproduce the issue.
+  - Send the log output located in the file shown by “Logging output file” info in the Advanced Settings dialog of their data loader. Logging output file info is shown in the Advanced Settings dialog as of v58.
+  - If you are using v58 or earlier, the default location of the debug log is `<tempdir>/sdl.log`
+  - The default tempdir is `%USER%\AppData\Local\Temp` on Windows
+  - The default tempdir is `${TMPDIR}` on macOS
+- Provide a sample csv file containing as few as possible columns and rows to reproduce the issue.
+- Provide the following information about your org (it is available in the log file if data loader version > 58.0.0, the log level is set to debug and the user logs in):
+  - Org id: Settings >> Company Profile >> Company Information >> value of Salesforce organization id field
+  - instance : Settings >> Company Profile >> Company Information >> value of Instance field
+  - User id: follow the instructions in this article or this article.
+
+NOTE:
+Remove all personal, business-specific, an any other sensitive information before reporting an issue on a public forum such as github. Sensitive information may be in any files you may upload including config files, data files such as csv files, log files, screenshots, console logs, and more.
+
 # Building Data Loader
 Developers need to use JDK 11 or later to build Data Loader. For example, developers can use [Zulu OpenJDK](https://www.azul.com/downloads/zulu) to build Data Loader.
 
