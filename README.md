@@ -77,7 +77,7 @@ Collect the following information before reaching out to Salesforce Support or r
 - Data Loader version, operation being performed, and screenshots of the issue.
 - Config files: `config.properties`, `log4j2.properties` or `log-conf.xml`, `process-conf.xml`.
 - log file:
-  - Set the root log level to “debug” in Advanced Config dialog (v58 and later) or in `log-conf.xml`.
+  - Set the log level to “debug” in Advanced Config dialog (v58 and later). If the log level is not visible in Advanced Settings dialog (v57 or earlier) or if the log level is not changeable in Advanced Settings dialog, set "root" log level to "debug" in `log-conf.xml`.
   - Rerun data loader to reproduce the issue.
   - Send the log output located in the file shown by “Logging output file” info in the Advanced Settings dialog of their data loader. Logging output file info is shown in the Advanced Settings dialog as of v58.
   - If you are using v58 or earlier, the default location of the debug log is `<tempdir>/sdl.log`
