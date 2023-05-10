@@ -11,7 +11,7 @@ usage() {
 # build jar with the following command:
 # mvn clean package -DskipTests
 # run the following command to get encrypted password for the test admin account:
-#java -cp target/dataloader-*-uber.jar com.salesforce.dataloader.security.EncryptionUtil -e <password>
+#java -cp target/dataloader-*.jar com.salesforce.dataloader.security.EncryptionUtil -e <password>
 
 test=""
 debug=""
