@@ -240,7 +240,7 @@ public class Controller {
         }
     }
     
-    public void createMapper(String daoTypeStr, String daoNameStr, String sObjectName) throws MappingInitializationException {
+    public void initializeOperation(String daoTypeStr, String daoNameStr, String sObjectName) throws MappingInitializationException {
         try {
             createDao(daoTypeStr, daoNameStr);
         } catch (DataAccessObjectInitializationException e) {
@@ -253,11 +253,18 @@ public class Controller {
         } catch (Exception e) {
             throw new MappingInitializationException(e);
         }
+        // Initialize with empty mapping 
+        this.mapper = getConfig().getOperationInfo().isExtraction() ? 
+                new SOQLMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), "") 
+              : new LoadMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), "");
+    }
+
+    public void createMapper(String daoTypeStr, String daoNameStr, String sObjectName) throws MappingInitializationException {
+        initializeOperation(daoTypeStr, daoNameStr, sObjectName);
         String mappingFile = config.getString(Config.MAPPING_FILE);
         this.mapper = getConfig().getOperationInfo().isExtraction() ? new SOQLMapper(getPartnerClient(),
                 dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) : new LoadMapper(getPartnerClient(), dao.getColumnNames(),
                 getFieldTypes().getFields(), mappingFile);
-
     }
 
     public void createAndShowGUI() throws ControllerInitializationException {

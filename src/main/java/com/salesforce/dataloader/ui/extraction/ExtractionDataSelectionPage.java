@@ -202,15 +202,13 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
             }
         }
 
-        Config config = controller.getConfig();
         //get entity
         IStructuredSelection selection = (IStructuredSelection)lv.getSelection();
         DescribeGlobalSObjectResult entity = (DescribeGlobalSObjectResult)selection.getFirstElement();
 
         try {
             // reinitialize the data mapping (UI extraction currently uses only implicit mapping)
-            config.setValue(Config.MAPPING_FILE, "");
-            controller.createMapper(DataAccessObjectFactory.CSV_WRITE_TYPE, 
+            controller.initializeOperation(DataAccessObjectFactory.CSV_WRITE_TYPE, 
                     fileText.getText(), entity.getName());
         } catch (MappingInitializationException e) {
             UIUtils.errorMessageBox(getShell(), e);
