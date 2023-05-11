@@ -74,7 +74,7 @@ NOTE: these commands use the default encryption key file `${HOME}/.dataloader/da
 
 # Reporting an issue
 Collect the following information before reaching out to Salesforce Support or reporting an issue on github:
-- Data Loader version, operation being performed, and screenshots of the issue.
+- Data Loader version, desktop operating system type and version, operation being performed, and screenshots of the issue.
 - Config files: `config.properties`, `log4j2.properties` or `log-conf.xml`, `process-conf.xml`.
 - log file:
   - Set the log level to “debug” in Advanced Config dialog (v58 and later). If the log level is not visible in Advanced Settings dialog (v57 or earlier) or if the log level is not changeable in Advanced Settings dialog, set "root" log level to "debug" in `log-conf.xml`.
@@ -90,7 +90,7 @@ Collect the following information before reaching out to Salesforce Support or r
   - `User id`: follow the instructions in [this article](https://help.salesforce.com/s/articleView?id=000381643&language=en_US&type=1).
 
 NOTE:
-Remove all personal, business-specific, an any other sensitive information before reporting an issue on a public forum such as github. Sensitive information may be in any files you may upload including config files, data files such as csv files, log files, screenshots, console logs, and more.
+Remove all personal, business-specific, and all other sensitive information from the files you share (e.g. config files, log files, screenshots, csv files, and others) before reporting an issue, especially on a public forum such as github.
 
 # Building Data Loader
 Developers need to use JDK 11 or later to build Data Loader. For example, developers can use [Zulu OpenJDK](https://www.azul.com/downloads/zulu) to build Data Loader.
