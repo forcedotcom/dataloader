@@ -120,7 +120,7 @@ public class DataSelectionDialog extends Dialog {
             @Override
             public void run() {
                 try {
-                    controller.createMapper(daoTypeStr, daoNameStr, sObjectName);
+                    controller.initializeOperation(daoTypeStr, daoNameStr, sObjectName);
                 } catch (MappingInitializationException e) {
                     success = false;
                     ok.setEnabled(true);

@@ -422,6 +422,7 @@ public class Config {
             DAO_TYPE,
             ENTITY,
             OPERATION,
+            MAPPING_FILE,
             DEBUG_MESSAGES,
             DEBUG_MESSAGES_FILE,
             WIRE_OUTPUT,
