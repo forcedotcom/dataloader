@@ -198,14 +198,15 @@ public class DataSelectionDialog extends Dialog {
                 // Set the description
                 label.setText(Labels.getFormattedString(
                         "DataSelectionDialog.initSuccess", String.valueOf(totalRows))
-                        + "\n\n    "
+                        + "\n\n"
                         + Labels.getString("AdvancedSettingsDialog.batchSize")
                         + " "
                         + controller.getConfig().getString(Config.LOAD_BATCH_SIZE)
-                        + "\n    "
+                        + "\n"
                         + Labels.getString("AdvancedSettingsDialog.startRow")
                         + " "
                         + controller.getConfig().getString(Config.LOAD_ROW_TO_START_AT)
+                        + "\n"
                         + apiInfoStr); //$NON-NLS-1$
                 label.getParent().pack();
             }
