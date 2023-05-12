@@ -128,6 +128,12 @@ public class DataSelectionDialog extends Dialog {
                     shell.setText(Labels.getString("DataSelectionDialog.titleError"));
                     return;
                 }
+                try {
+                    controller.createMapperPostInitialize();
+                } catch (MappingInitializationException e) {
+                    // skip mapping
+                    controller.getConfig().setValue(Config.MAPPING_FILE, "");
+                }
 
                 String daoPath = controller.getConfig().getString(Config.DAO_NAME);
                 File file = new File(daoPath);

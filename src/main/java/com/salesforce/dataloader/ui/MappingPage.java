@@ -256,9 +256,6 @@ public class MappingPage extends LoadPage {
             return true; // further processing is not possible
         }
 
-        Config config = controller.getConfig();
-        // clear mapping file
-        config.setValue(Config.MAPPING_FILE, "");
         updateMapping();
         packMappingColumns();
         return true;

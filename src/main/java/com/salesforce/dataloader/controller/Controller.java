@@ -64,6 +64,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -258,13 +260,21 @@ public class Controller {
                 new SOQLMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), "") 
               : new LoadMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), "");
     }
-
-    public void createMapper(String daoTypeStr, String daoNameStr, String sObjectName) throws MappingInitializationException {
-        initializeOperation(daoTypeStr, daoNameStr, sObjectName);
+    
+    public void createMapperPostInitialize() throws MappingInitializationException {
         String mappingFile = config.getString(Config.MAPPING_FILE);
+        if (mappingFile != null 
+                && !mappingFile.isBlank() && !Files.exists(Path.of(mappingFile))) {
+            throw new MappingInitializationException("Mapping file " + mappingFile + " does not exist");
+        }
         this.mapper = getConfig().getOperationInfo().isExtraction() ? new SOQLMapper(getPartnerClient(),
                 dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) : new LoadMapper(getPartnerClient(), dao.getColumnNames(),
                 getFieldTypes().getFields(), mappingFile);
+    }
+
+    public void initializeOperationAndCreateMapper(String daoTypeStr, String daoNameStr, String sObjectName) throws MappingInitializationException {
+        initializeOperation(daoTypeStr, daoNameStr, sObjectName);
+        createMapperPostInitialize();
     }
 
     public void createAndShowGUI() throws ControllerInitializationException {
