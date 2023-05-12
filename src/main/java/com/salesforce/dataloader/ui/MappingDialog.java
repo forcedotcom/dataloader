@@ -275,6 +275,8 @@ public class MappingDialog extends Dialog {
         ok.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
+                // user is auto-mapping fields, not using a mapping file
+                controller.getConfig().setValue(Config.MAPPING_FILE, "");
                 //refresh the mapping page view
                 page.updateMapping();
                 page.packMappingColumns();

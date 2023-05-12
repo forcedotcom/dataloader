@@ -59,6 +59,8 @@ public class MappingPage extends LoadPage {
 
     private TableViewer mappingTblViewer;
     private Map<String, Field> relatedFields;
+    private Label mappingLabel;
+    private Label mappingFileLabel;
 
     public MappingPage(Controller controller) {
         super("MappingPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
@@ -81,7 +83,7 @@ public class MappingPage extends LoadPage {
             public void widgetSelected(SelectionEvent event) {
                 FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
                 String filename = dlg.open();
-                if (filename != null && !"".equals(filename)) { //$NON-NLS-1$
+                if (filename != null && !filename.isBlank()) { //$NON-NLS-1$
                     Config config = controller.getConfig();
                     config.setValue(Config.MAPPING_FILE, filename);
                     LoadMapper mapper = (LoadMapper)controller.getMapper();
@@ -122,11 +124,15 @@ public class MappingPage extends LoadPage {
         data.horizontalSpan = 2;
         sep3.setLayoutData(data);
 
-        Label mappingLabel = new Label(comp, SWT.NONE);
-        mappingLabel.setText(Labels.getString("MappingPage.currentBelow")); //$NON-NLS-1$
+        mappingFileLabel = new Label(comp, SWT.NONE);
         data = new GridData();
         data.horizontalSpan = 2;
-        data.heightHint = 20;
+        mappingFileLabel.setLayoutData(data);
+        
+        mappingLabel = new Label(comp, SWT.NONE);
+        updateMappingLabel();
+        data = new GridData();
+        data.horizontalSpan = 2;
         mappingLabel.setLayoutData(data);
 
         //  mapping field table viewer
@@ -177,6 +183,7 @@ public class MappingPage extends LoadPage {
      * Responsible for updating the mapping model
      */
     public void updateMapping() {
+        updateMappingLabel();
         // Set the table viewer's input
         if (mappingTblViewer != null) {
             mappingTblViewer.setInput(controller.getMapper());
@@ -265,5 +272,18 @@ public class MappingPage extends LoadPage {
     public void setPageComplete() {
         // no validations performed currently
         setPageComplete(true);
+    }
+    
+    private void updateMappingLabel() {
+        String mappingFile = controller.getConfig().getString(Config.MAPPING_FILE);
+        if (mappingFile == null) {
+            mappingFile = "";
+        }
+        mappingFileLabel.setText(Labels.getFormattedString(
+                    this.getClass().getSimpleName() + ".currentMappingFile",
+                    mappingFile));
+        mappingLabel.setText(
+                Labels.getString(this.getClass().getSimpleName() + ".currentMapping")); //$NON-NLS-1$
+
     }
 }
