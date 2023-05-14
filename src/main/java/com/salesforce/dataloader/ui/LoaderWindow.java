@@ -168,6 +168,11 @@ public class LoaderWindow extends ApplicationWindow {
         // Set the title bar text
         updateTitle(null);
         shell.setSize(600, 400);
+        Point shellLocation = shell.getLocation();
+        if (shellLocation.x < 50) {
+            shellLocation.x = 50;
+            shell.setLocation(shellLocation);
+        }
 
         shell.setImage(UIUtils.getImageRegistry().get("sfdc_icon"));
     }
