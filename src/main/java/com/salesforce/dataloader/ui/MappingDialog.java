@@ -323,11 +323,14 @@ public class MappingDialog extends Dialog {
                     } catch (IOException e1) {
                         logger.error(Labels.getString("MappingDialog.errorSave"), e1); //$NON-NLS-1$
                     }
+                    
                 }
 
                 //refresh the mapping page view
                 page.updateMapping();
                 page.packMappingColumns();
+                page.setPageComplete();
+                shell.close();
             }
         });
 

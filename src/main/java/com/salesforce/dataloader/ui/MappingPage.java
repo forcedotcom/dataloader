@@ -60,7 +60,6 @@ public class MappingPage extends LoadPage {
     private TableViewer mappingTblViewer;
     private Map<String, Field> relatedFields;
     private Label mappingLabel;
-    private Label mappingFileLabel;
 
     public MappingPage(Controller controller) {
         super("MappingPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
@@ -124,16 +123,11 @@ public class MappingPage extends LoadPage {
         data.horizontalSpan = 2;
         sep3.setLayoutData(data);
 
-        mappingFileLabel = new Label(comp, SWT.NONE);
-        data = new GridData();
-        data.horizontalSpan = 2;
-        mappingFileLabel.setLayoutData(data);
-        
         mappingLabel = new Label(comp, SWT.NONE);
-        updateMappingLabel();
-        data = new GridData();
+        data = new GridData(GridData.FILL_HORIZONTAL);
         data.horizontalSpan = 2;
         mappingLabel.setLayoutData(data);
+        updateMappingLabel();
 
         //  mapping field table viewer
         mappingTblViewer = new TableViewer(comp, SWT.FULL_SELECTION);
@@ -279,11 +273,13 @@ public class MappingPage extends LoadPage {
         if (mappingFile == null) {
             mappingFile = "";
         }
-        mappingFileLabel.setText(Labels.getFormattedString(
-                    this.getClass().getSimpleName() + ".currentMappingFile",
-                    mappingFile));
-        mappingLabel.setText(
-                Labels.getString(this.getClass().getSimpleName() + ".currentMapping")); //$NON-NLS-1$
-
+        String label = "";
+        if (mappingFile.isBlank()) {
+            label = Labels.getString(this.getClass().getSimpleName() + ".currentMapping");
+        } else {
+            label = Labels.getFormattedString(this.getClass().getSimpleName() + ".currentMappingFromFile", mappingFile);
+        }
+        mappingLabel.setText(label); //$NON-NLS-1$
+        mappingLabel.redraw();
     }
 }
