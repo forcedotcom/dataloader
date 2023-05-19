@@ -44,6 +44,7 @@ public class BulkClientConnection {
 
     public BulkClientConnection(BulkV2Connection conn, Config config) {
         this.bulkV2Connection = conn;
+        this.config = config;
         addClientNameHeader();
     }
     
