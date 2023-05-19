@@ -73,8 +73,7 @@ public class DateOnlyCalendar extends GregorianCalendar {
             cal.set(Calendar.MILLISECOND, 0);
             cal.set(Calendar.AM_PM, Calendar.AM);
             
-            TimeZone gmt = TimeZone.getTimeZone("GMT");
-            int timeZoneDifference = myTimeZone.getRawOffset() - gmt.getRawOffset() + myTimeZone.getDSTSavings() - gmt.getDSTSavings();
+            int timeZoneDifference = myTimeZone.getOffset(cal.getTimeInMillis());
             if (timeZoneDifference > 0) {
                 // timezone is ahead of GMT, compensate for it as server-side thinks it is in GMT.
                 cal.setTimeInMillis(cal.getTimeInMillis() + timeZoneDifference);
