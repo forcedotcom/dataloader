@@ -321,6 +321,143 @@
               </execution>
           </executions>
       </plugin>
+      <plugin>
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.4.1</version>
+        <configuration>
+          <createDependencyReducedPom>false</createDependencyReducedPom>
+          <artifactSet>
+            <excludes>
+                <exclude>local.swt:swt*:</exclude>
+           </excludes>
+          </artifactSet>
+          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+              <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
+              <manifestEntries>
+                <Main-Class>com.salesforce.dataloader.process.DataLoaderRunner</Main-Class>
+                <Multi-Release>true</Multi-Release>
+                <Permissions>all-permissions</Permissions>
+                <Application-Name>${project.name}</Application-Name>
+              </manifestEntries>
+            </transformer>
+          </transformers>
+          <minimizeJar>true</minimizeJar>
+          <filters>
+            <filter>
+               <artifact>org.apache.logging.log4j:log4j-core</artifact>
+               <includes>
+                   <include>**</include>
+               </includes>
+            </filter>
+             <filter>
+               <artifact>org.apache.logging.log4j:log4j-api</artifact>
+               <includes>
+                   <include>**</include>
+               </includes>
+            </filter>
+            <filter>
+               <artifact>org.springframework:spring-beans</artifact>
+               <includes>
+                   <include>**</include>
+               </includes>
+            </filter>
+            <filter>
+                <artifact>*:*</artifact>
+                <excludes>
+                    <exclude>**/Log4j2Plugins.dat</exclude>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+               </excludes>
+            </filter>
+          </filters>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-shaded-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-antrun-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <phase>compile</phase>
+            <configuration>
+              <target>
+                <copy todir="${basedir}/target/classes/mac/" flatten="true">
+                  <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtmac*/*/*.jar"/>
+                </copy>
+                <copy todir="${basedir}/target/classes/win/"  flatten="true">
+                  <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtwin*/*/*.jar"/>
+                </copy>
+                <copy todir="${basedir}/target/classes/linux/"  flatten="true">
+                  <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtlinux*/*/*.jar"/>
+                </copy>
+
+                <mkdir dir="${basedir}/target/zipartifacts"/>
+                <copy file="${basedir}/release/install/install.command" 
+                    todir="${basedir}/target/zipartifacts"/>
+                <copy file="${basedir}/release/install/install.command" 
+                    tofile="${basedir}/target/zipartifacts/install.bat"/>
+                <copy file="${basedir}/target/classes/mac/util/util.sh"
+                    todir="${basedir}/target/zipartifacts/util"/>
+                <copy file="${basedir}/target/classes/win/util/util.bat" 
+                    todir="${basedir}/target/zipartifacts/util"/>
+
+                <mkdir dir="${basedir}/target/classes/linux"/>
+                <copy file="${basedir}/target/classes/mac/dataloader_console"
+                    tofile="${basedir}/target/classes/linux/dataloader.sh"/>
+                <copy file="${basedir}/target/classes/mac/util/util.sh"
+                    todir="${basedir}/target/classes/linux/util"/>
+
+                <replace dir="${basedir}/target/" token="@@FULL_VERSION@@" value="${project.version}"/>
+                <replace dir="${basedir}/target/" token="@@MIN_JAVA_VERSION@@" value="${maven.compiler.release}"/>
+
+                <fixcrlf srcdir="${basedir}/target/"
+                            includes="**/*.bat" eol="crlf"/>
+                <fixcrlf srcdir="${basedir}/target/"
+                            includes="**/*.command" eol="crlf" eof="remove"/>
+                <fixcrlf srcdir="${basedir}/target/"
+                                    includes="**/*.sh" eol="lf" eof="remove"/>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>zip</id>
+            <phase>package</phase>
+             <configuration>
+              <target>
+                <copy file="${basedir}/target/dataloader-${project.version}.jar" 
+                    todir="${basedir}/target/zipartifacts"/>
+                <zip update="true" destfile="${basedir}/dataloader_v${project.version}.zip">
+                  <zipfileset dirmode="755" filemode="755" 
+                    dir="${basedir}/target/zipartifacts" />
+                </zip>
+              </target>
+             </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+           </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -334,151 +471,5 @@
         </exclude.integration.tests>
       </properties>
     </profile>
-
-    <profile>
-      <id>make-shaded-jar</id>
-      <build>
-        <plugins>
-          <plugin>
-<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin -->
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-shade-plugin</artifactId>
-            <version>3.4.1</version>
-            <configuration>
-              <createDependencyReducedPom>false</createDependencyReducedPom>
-              <artifactSet>
-                <excludes>
-                    <exclude>local.swt:swt*:</exclude>
-               </excludes>
-              </artifactSet>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.salesforce.dataloader.process.DataLoaderRunner</mainClass>
-                  <manifestEntries>
-                    <Main-Class>com.salesforce.dataloader.process.DataLoaderRunner</Main-Class>
-                    <Multi-Release>true</Multi-Release>
-                    <Permissions>all-permissions</Permissions>
-                    <Application-Name>${project.name}</Application-Name>
-                  </manifestEntries>
-                </transformer>
-              </transformers>
-              <minimizeJar>true</minimizeJar>
-              <filters>
-                <filter>
-                   <artifact>org.apache.logging.log4j:log4j-core</artifact>
-                   <includes>
-                       <include>**</include>
-                   </includes>
-                </filter>
-                 <filter>
-                   <artifact>org.apache.logging.log4j:log4j-api</artifact>
-                   <includes>
-                       <include>**</include>
-                   </includes>
-                </filter>
-                <filter>
-                   <artifact>org.springframework:spring-beans</artifact>
-                   <includes>
-                       <include>**</include>
-                   </includes>
-                </filter>
-                <filter>
-                    <artifact>*:*</artifact>
-                    <excludes>
-                        <exclude>**/Log4j2Plugins.dat</exclude>
-                        <exclude>META-INF/*.SF</exclude>
-                        <exclude>META-INF/*.DSA</exclude>
-                        <exclude>META-INF/*.RSA</exclude>
-                   </excludes>
-                </filter>
-              </filters>
-            </configuration>
-            <executions>
-              <execution>
-                <id>make-shaded-jar</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>shade</goal>
-                </goals>
-                <configuration>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-
-<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-antrun-plugin -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <version>3.0.0</version>
-            <executions>
-              <execution>
-                <phase>compile</phase>
-                <configuration>
-                  <target>
-                    <copy todir="${basedir}/target/classes/mac/" flatten="true">
-                      <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtmac*/*/*.jar"/>
-                    </copy>
-                    <copy todir="${basedir}/target/classes/win/"  flatten="true">
-                      <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtwin*/*/*.jar"/>
-                    </copy>
-                    <copy todir="${basedir}/target/classes/linux/"  flatten="true">
-                      <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtlinux*/*/*.jar"/>
-                    </copy>
-
-                    <mkdir dir="${basedir}/target/zipartifacts"/>
-                    <copy file="${basedir}/release/install/install.command" 
-                        todir="${basedir}/target/zipartifacts"/>
-                    <copy file="${basedir}/release/install/install.command" 
-                        tofile="${basedir}/target/zipartifacts/install.bat"/>
-                    <copy file="${basedir}/target/classes/mac/util/util.sh"
-                        todir="${basedir}/target/zipartifacts/util"/>
-                    <copy file="${basedir}/target/classes/win/util/util.bat" 
-                        todir="${basedir}/target/zipartifacts/util"/>
-
-                    <mkdir dir="${basedir}/target/classes/linux"/>
-                    <copy file="${basedir}/target/classes/mac/dataloader_console"
-                        tofile="${basedir}/target/classes/linux/dataloader.sh"/>
-                    <copy file="${basedir}/target/classes/mac/util/util.sh"
-                        todir="${basedir}/target/classes/linux/util"/>
-
-                    <replace dir="${basedir}/target/" token="@@FULL_VERSION@@" value="${project.version}"/>
-                    <replace dir="${basedir}/target/" token="@@MIN_JAVA_VERSION@@" value="${maven.compiler.release}"/>
-
-                    <fixcrlf srcdir="${basedir}/target/"
-                                includes="**/*.bat" eol="crlf"/>
-                    <fixcrlf srcdir="${basedir}/target/"
-                                includes="**/*.command" eol="crlf" eof="remove"/>
-                    <fixcrlf srcdir="${basedir}/target/"
-                                        includes="**/*.sh" eol="lf" eof="remove"/>
-                  </target>
-                </configuration>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>zip</id>
-                <phase>package</phase>
-                 <configuration>
-                  <target>
-                    <copy file="${basedir}/target/dataloader-${project.version}.jar" 
-                        todir="${basedir}/target/zipartifacts"/>
-                    <zip update="true" destfile="${basedir}/dataloader_v${project.version}.zip">
-                      <zipfileset dirmode="755" filemode="755" 
-                        dir="${basedir}/target/zipartifacts" />
-                    </zip>
-                  </target>
-                 </configuration>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-               </execution>
-            </executions>
-	      </plugin>
-        </plugins>
-      </build>
-    </profile>
   </profiles>
-
 </project>
