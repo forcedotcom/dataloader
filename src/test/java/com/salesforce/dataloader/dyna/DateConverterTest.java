@@ -767,16 +767,13 @@ public class DateConverterTest {
 
         // Make sure the date is not changed in Japan DST
         result = (Calendar) AsianTZDateOnlyConverter.convert(null, "1948-05-01"); // JST(UTC+9)
-        long resultTime = result.getTimeInMillis();
-        Date utcDate = new Date(resultTime - TimeZone.getTimeZone("Asia/Tokyo").getOffset(resultTime));
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        assertEquals("1948-05-01", formatter.format(utcDate));
+        assertEquals(5, result.get(Calendar.MONTH) + 1);
+        assertEquals(1, result.get(Calendar.DAY_OF_MONTH));
 
         result = (Calendar) AsianTZDateOnlyConverter.convert(null, "1948-05-02"); // DST(UTC+10)
-        resultTime = result.getTimeInMillis();
-        utcDate = new Date(resultTime - TimeZone.getTimeZone("Asia/Tokyo").getOffset(resultTime));
-        assertEquals("1948-05-02", formatter.format(utcDate));
-    }
+        assertEquals(5, result.get(Calendar.MONTH) + 1);
+        assertEquals(2, result.get(Calendar.DAY_OF_MONTH));
+     }
 
     private void assertValidDate(String msg, String strDate, Calendar expCalDate, boolean useEuropean) {
 
