@@ -337,9 +337,6 @@
 
     <profile>
       <id>make-shaded-jar</id>
-      <activation>
-        <property><name>!shadedjar.skip</name></property>
-      </activation>
       <build>
         <plugins>
           <plugin>
