@@ -36,7 +36,7 @@ import com.sforce.async.AsyncApiException;
 import com.sforce.ws.ConnectorConfig;
 
 public class BulkV2Client extends ClientBase<BulkV2Connection> {
-    private static Logger LOG = LogManager.getLogger(BulkClient.class);
+    private static Logger LOG = LogManager.getLogger(BulkV2Client.class);
     private BulkV2Connection client;
     private ConnectorConfig connectorConfig = null;
 

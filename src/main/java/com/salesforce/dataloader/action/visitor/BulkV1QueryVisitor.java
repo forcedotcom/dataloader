@@ -50,11 +50,11 @@ import com.sforce.async.QueryResultList;
  * @author Colin Jarvis
  * @since 21.0
  */
-public class BulkQueryVisitor extends AbstractBulkQueryVisitor {
+public class BulkV1QueryVisitor extends AbstractBulkQueryVisitor {
 
     private BatchInfo[] batches;
 
-    public BulkQueryVisitor(Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
+    public BulkV1QueryVisitor(Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {
         super(controller, monitor, queryWriter, successWriter, errorWriter);
     }
@@ -85,13 +85,13 @@ public class BulkQueryVisitor extends AbstractBulkQueryVisitor {
     private void writeExtractionForBatch(BatchInfo batch) throws AsyncApiException, ExtractException, DataAccessObjectException {
         if (batch.getState() == BatchStateEnum.Failed)
             throw new ExtractException("Batch failed: " + batch.getStateMessage());
-        final QueryResultList results = getController().getBulkClient().getClient()
+        final QueryResultList results = getController().getBulkV1Client().getClient()
                 .getQueryResultList(batch.getJobId(), batch.getId());
 
         for (final String resultId : results.getResult()) {
             if (getProgressMonitor().isCanceled()) return;
             try {
-                final InputStream serverResultStream = getController().getBulkClient().getClient()
+                final InputStream serverResultStream = getController().getBulkV1Client().getClient()
                         .getQueryResultStream(batch.getJobId(), batch.getId(), resultId);
                 writeExtractionForServerStream(serverResultStream);
             }  catch (final IOException e) {

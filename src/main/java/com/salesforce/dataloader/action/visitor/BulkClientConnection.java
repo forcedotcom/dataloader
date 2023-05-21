@@ -25,27 +25,20 @@
  */
 package com.salesforce.dataloader.action.visitor;
 
-import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.config.Config;
 import com.sforce.async.AsyncApiException;
-import com.sforce.async.BulkConnection;
 import com.sforce.async.JobInfo;
 
 public class BulkClientConnection {
     private BulkV2Connection bulkV2Connection = null;
-    private BulkConnection bulkV1Connection = null;
-    private Config config = null;
+    private BulkV1Connection bulkV1Connection = null;
 
-    public BulkClientConnection(BulkConnection conn, Config config) {
+    public BulkClientConnection(BulkV1Connection conn, Config config) {
         this.bulkV1Connection = conn;
-        this.config = config;
-        addClientNameHeader();
     }
 
     public BulkClientConnection(BulkV2Connection conn, Config config) {
         this.bulkV2Connection = conn;
-        this.config = config;
-        addClientNameHeader();
     }
     
     public JobInfo createJob(JobInfo job) throws AsyncApiException {
@@ -67,7 +60,6 @@ public class BulkClientConnection {
     }
 
     public JobInfo getJobStatus(String jobId, boolean isQuery) throws AsyncApiException {
-        addClientNameHeader();
         if (this.bulkV1Connection != null) {
             return this.bulkV1Connection.getJobStatus(jobId);
         } else if (this.bulkV2Connection != null) {
@@ -80,13 +72,8 @@ public class BulkClientConnection {
         if (this.bulkV1Connection != null) {
             return this.bulkV1Connection.closeJob(jobId);
         } else if (this.bulkV2Connection != null) {
-            return this.bulkV2Connection.getJobStatus(jobId, isQuery);
+            return this.getJobStatus(jobId, isQuery);
         }
         return null;
-    }
-
-    private void addClientNameHeader() {
-       this.addHeader("Sforce-Call-Options",
-                "client=" + ClientBase.getClientName(this.config));
     }
 }
