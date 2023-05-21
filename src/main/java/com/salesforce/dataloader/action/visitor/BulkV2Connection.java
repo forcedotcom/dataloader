@@ -157,6 +157,9 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.xml.namespace.QName;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -188,6 +191,9 @@ public class BulkV2Connection  {
     private static final String URI_STEM_QUERY = "query/";
     private static final String URI_STEM_INGEST = "ingest/";
     private static final String AUTH_HEADER = "Authorization";
+    private static final String REQUEST_CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String ACCEPT_CONTENT_TYPES_HEADER = "ACCEPT";
+    private static final String SFORCE_CALL_OPTIONS_HEADER = "Sforce-Call-Options";
     private static final String AUTH_HEADER_VALUE_PREFIX = "Bearer ";
     public static final String NAMESPACE = "http://www.force.com/2009/06/asyncapi/dataload";
     public static final String SESSION_ID = "X-SFDC-Session";
@@ -208,6 +214,7 @@ public class BulkV2Connection  {
     private int numberOfRecordsInQueryResult = 0;
     private ConnectorConfig config;
     private HashMap<String, String> headers = new HashMap<String, String>();
+    private static Logger logger = LogManager.getLogger(BulkV2Connection.class);
 
     public static final TypeMapper typeMapper = new TypeMapper(null, null, false);
 
@@ -507,10 +514,12 @@ public class BulkV2Connection  {
 	
 	private HashMap<String, String> getHeaders(String requestContentType, String acceptContentType) {
 	    HashMap<String, String> newMap = new HashMap<String, String>();
-	    newMap.put("Content-Type", requestContentType);
-	    newMap.put("ACCEPT", acceptContentType);
+	    newMap.put(REQUEST_CONTENT_TYPE_HEADER, requestContentType);
+	    newMap.put(ACCEPT_CONTENT_TYPES_HEADER, acceptContentType);
 	    newMap.put(AUTH_HEADER, this.authHeaderValue);
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
+	    newMap.put(SFORCE_CALL_OPTIONS_HEADER, this.config.getRequestHeader("Sforce-Call-Options"));
+	    logger.debug("Sforce-Call-Options : " + this.config.getRequestHeader("Sforce-Call-Options"));
+	    for (Map.Entry<String, String> entry : headers.entrySet()) {
             newMap.put(entry.getKey(), entry.getValue());
         }
 	    return newMap;

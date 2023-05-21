@@ -28,11 +28,12 @@ package com.salesforce.dataloader.client;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+
+import com.salesforce.dataloader.action.visitor.BulkV1Connection;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.sforce.async.AsyncApiException;
-import com.sforce.async.BulkConnection;
 import com.sforce.ws.ConnectorConfig;
 
 /**
@@ -41,17 +42,17 @@ import com.sforce.ws.ConnectorConfig;
  * @author Colin Jarvis
  * @since 17.0
  */
-public class BulkClient extends ClientBase<BulkConnection> {
-    private static Logger LOG = LogManager.getLogger(BulkClient.class);
-    private BulkConnection client;
+public class BulkV1Client extends ClientBase<BulkV1Connection> {
+    private static Logger LOG = LogManager.getLogger(BulkV1Client.class);
+    private BulkV1Connection client;
     private ConnectorConfig connectorConfig = null;
 
-    public BulkClient(Controller controller) {
+    public BulkV1Client(Controller controller) {
         super(controller, LOG);
     }
 
     @Override
-    public BulkConnection getClient() {
+    public BulkV1Connection getClient() {
         return client;
     }
 
@@ -59,8 +60,7 @@ public class BulkClient extends ClientBase<BulkConnection> {
     protected boolean connectPostLogin(ConnectorConfig cc) {
         try {
             // Set up a connection object with the given config
-            this.client = new BulkConnection(cc);
-
+            this.client = new BulkV1Connection(cc);
         } catch (AsyncApiException e) {
             logger.error(Messages.getMessage(getClass(), "loginError", cc.getAuthEndpoint(), e.getExceptionMessage()),
                     e);

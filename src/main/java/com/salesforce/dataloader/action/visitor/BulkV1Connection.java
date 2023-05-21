@@ -23,35 +23,30 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package com.salesforce.dataloader.action.visitor;
 
-package com.salesforce.dataloader.action;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.action.visitor.BulkV1QueryVisitor;
-import com.salesforce.dataloader.action.visitor.BulkV2QueryVisitor;
-import com.salesforce.dataloader.action.visitor.IVisitor;
-import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.sforce.async.AsyncApiException;
+import com.sforce.async.BulkConnection;
+import com.sforce.ws.ConnectorConfig;
 
-/**
- * Bulk api extract action.
- * 
- * @author Colin Jarvis
- * @since 21.0
- */
-class BulkExtractAction extends AbstractExtractAction {
+public class BulkV1Connection extends BulkConnection {
+    private static final String SFORCE_CALL_OPTIONS_HEADER = "Sforce-Call-Options";
+    private static Logger logger = LogManager.getLogger(BulkV1Connection.class);
 
-    public BulkExtractAction(Controller controller, ILoaderProgress monitor)
-            throws DataAccessObjectInitializationException {
-        super(controller, monitor);
+    public BulkV1Connection(ConnectorConfig config) throws AsyncApiException {
+        super(config);
+        
+        // This is needed to set the correct client name in Bulk V1 calls
+        addHeader(SFORCE_CALL_OPTIONS_HEADER, config.getRequestHeader("Sforce-Call-Options"));
     }
-
-    @Override
-    protected IVisitor createVisitor() {
-    	if (getController().getConfig().isBulkV2APIEnabled() ) {
-    		return new BulkV2QueryVisitor(getController(), getMonitor(), getDao(), getSuccessWriter(), getErrorWriter());
-    	}
-        return new BulkV1QueryVisitor(getController(), getMonitor(), getDao(), getSuccessWriter(), getErrorWriter());
+    
+    public void addHeader(String headerName, String headerValue) {
+        super.addHeader(headerName, headerValue);
+        if ("Sforce-Call-Options".equalsIgnoreCase(headerName)) {
+            logger.debug("Sforce-Call-Options : " + headerValue);
+        }
     }
-
 }

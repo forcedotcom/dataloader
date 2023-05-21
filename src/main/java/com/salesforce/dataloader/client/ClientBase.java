@@ -208,7 +208,7 @@ public abstract class ClientBase<ClientType> {
         if (server != null) {
             cc.setAuthEndpoint(server + PartnerClient.getServicePathForAPIVersion(apiVersionStr));
             cc.setServiceEndpoint(server + PartnerClient.getServicePathForAPIVersion(apiVersionStr)); // Partner SOAP service
-            cc.setRestEndpoint(server + BulkClient.getServicePathForAPIVersion(apiVersionStr));  // REST service: Bulk v1
+            cc.setRestEndpoint(server + BulkV1Client.getServicePathForAPIVersion(apiVersionStr));  // REST service: Bulk v1
         }
         return cc;
     }

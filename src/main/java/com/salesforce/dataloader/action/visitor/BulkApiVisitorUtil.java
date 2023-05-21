@@ -103,7 +103,7 @@ class BulkApiVisitorUtil {
 				this.config.setValue(Config.BULKV2_API_ENABLED, false);
 			}
         } else {
-            this.client = new BulkClientConnection(ctl.getBulkClient().getClient(), this.config);
+            this.client = new BulkClientConnection(ctl.getBulkV1Client().getClient(), this.config);
         }
 
         try {
@@ -236,7 +236,7 @@ class BulkApiVisitorUtil {
         	batch = new BatchInfo();
         	batch.setId("BULKV2_LOAD_BATCH_" + this.bulkV2LoadBatchCount++);
         } else { // Bulk v1 job
-	        BulkConnection connectionClient = this.controller.getBulkClient().getClient();
+	        BulkConnection connectionClient = this.controller.getBulkV1Client().getClient();
 	        if (this.jobInfo.getContentType() == ContentType.ZIP_CSV) {
 	            batch = connectionClient.createBatchWithInputStreamAttachments(this.jobInfo, batchContent, this.attachments);
 	        } else {
@@ -384,12 +384,12 @@ class BulkApiVisitorUtil {
     }
 
     BatchInfoList getBatches() throws AsyncApiException {
-        BulkConnection connectionClient = this.controller.getBulkClient().getClient();
+        BulkConnection connectionClient = this.controller.getBulkV1Client().getClient();
         return connectionClient.getBatchInfoList(getJobId());
     }
 
     CSVReader getBatchResults(String batchId) throws AsyncApiException {
-        BulkConnection connectionClient = this.controller.getBulkClient().getClient();
+        BulkConnection connectionClient = this.controller.getBulkV1Client().getClient();
         return new CSVReader(connectionClient.getBatchResultStream(getJobId(), batchId));
     }
     

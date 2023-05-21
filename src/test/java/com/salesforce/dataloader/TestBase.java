@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader;
 
-import com.salesforce.dataloader.client.BulkClient;
+import com.salesforce.dataloader.client.BulkV1Client;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -256,7 +256,7 @@ abstract class TestBase {
             try {
                 bindingConfig.setAuthEndpoint(configEndpoint + PartnerClient.getServicePathForAPIVersion(apiVersionStr));
                 bindingConfig.setServiceEndpoint(configEndpoint + PartnerClient.getServicePathForAPIVersion(apiVersionStr)); // Partner SOAP service
-                bindingConfig.setRestEndpoint(configEndpoint + BulkClient.getServicePathForAPIVersion(apiVersionStr));  // REST service: Bulk v1       
+                bindingConfig.setRestEndpoint(configEndpoint + BulkV1Client.getServicePathForAPIVersion(apiVersionStr));  // REST service: Bulk v1       
                 bindingConfig.setManualLogin(true);
                 // set long timeout for tests with larger data sets
                 bindingConfig.setReadTimeout(5 * 60 * 1000);

@@ -28,7 +28,7 @@ package com.salesforce.dataloader.controller;
 import com.salesforce.dataloader.action.IAction;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.client.BulkClient;
+import com.salesforce.dataloader.client.BulkV1Client;
 import com.salesforce.dataloader.client.BulkV2Client;
 import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.client.DescribeRefObject;
@@ -98,7 +98,7 @@ public class Controller {
 
     private DataAccessObjectFactory daoFactory;
     private DataAccessObject dao;
-    private BulkClient bulkClient;
+    private BulkV1Client bulkV1Client;
     private BulkV2Client bulkV2Client;
     private PartnerClient partnerClient;
     private LoaderWindow loaderWindow;
@@ -338,15 +338,15 @@ public class Controller {
     }
 
     private ClientBase<?> getClient() {
-        return this.config.useBulkAPIForCurrentOperation() ? getBulkClient() : getPartnerClient();
+        return this.config.useBulkAPIForCurrentOperation() ? getBulkV1Client() : getPartnerClient();
     }
 
-    public BulkClient getBulkClient() {
-        if (this.bulkClient == null) {
-            this.bulkClient = new BulkClient(this);
-            loginIfSessionExists(this.bulkClient);
+    public BulkV1Client getBulkV1Client() {
+        if (this.bulkV1Client == null) {
+            this.bulkV1Client = new BulkV1Client(this);
+            loginIfSessionExists(this.bulkV1Client);
         }
-        return this.bulkClient;
+        return this.bulkV1Client;
     }
     
     public BulkV2Client getBulkV2Client() {
@@ -465,7 +465,7 @@ public class Controller {
 
     public void logout() {
         if (this.partnerClient != null) this.partnerClient.logout();
-        this.bulkClient = null;
+        this.bulkV1Client = null;
         this.partnerClient = null;
     }
 
