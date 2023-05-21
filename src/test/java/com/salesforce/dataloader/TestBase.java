@@ -143,7 +143,7 @@ abstract class TestBase {
         return TEST_PROPS.getProperty(testProperty);
     }
 
-    private static final String API_CLIENT_NAME = "DataLoaderBatch/" + Controller.APP_VERSION;
+    private static final String API_CLIENT_NAME = "DataLoaderTestBatch/" + Controller.APP_VERSION;
 
     protected static final String DEFAULT_CONTACT_EXT_ID_FIELD = "NumberId__c";
 
