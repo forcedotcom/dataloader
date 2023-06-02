@@ -323,8 +323,16 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         final ExtractAccountGenerator accountGen = new ExtractAccountGenerator();
         final int numRecords = 100;
         final String[] accountIds = insertExtractTestRecords(numRecords, accountGen);
-        final String soql = accountGen
-                .getSOQL("ID, NAME, TYPE, PHONE, ACCOUNTNUMBER__C, WEBSITE, ANNUALREVENUE, LASTMODIFIEDDATE, ORACLE_ID__C");
+        
+        final String soql;
+        if (isBulkAPIEnabled(this.getTestConfig())) {
+            soql= accountGen
+                    .getSOQL("ID, NAME, TYPE, PHONE, ACCOUNTNUMBER__C, WEBSITE, ANNUALREVENUE, LASTMODIFIEDDATE, ORACLE_ID__C");
+        } else {
+            soql= accountGen
+                    .getSOQL("ID, BILLINGADDRESS, NAME, TYPE, PHONE, ACCOUNTNUMBER__C, WEBSITE, ANNUALREVENUE, LASTMODIFIEDDATE, ORACLE_ID__C");
+            
+        }
         Controller control = runProcess(getTestConfig(soql, "Account", true), numRecords);
         // verify IDs and phone format 
         verifyIdsInCSV(control, accountIds, true);
