@@ -23,9 +23,6 @@
     <test.password></test.password><!-- use the encrypted password -->
     <test.redirect>false</test.redirect>
     <test.testfiles.directory>${project.build.testOutputDirectory}/testfiles</test.testfiles.directory>
-    <exclude.integration.tests>
-      **/client/**, **/dyna/SObjectReferenceConverterTest.*, **/integration/**, **/mapping/LoadMapperTest.*, **/mapping/SOQLMapperTest.*, **/process/**
-    </exclude.integration.tests>
   </properties>
 
   <repositories>
@@ -471,23 +468,39 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.1.0</version>
         <configuration>
-          <excludes>
-            <exclude>${exclude.integration.tests}</exclude>
-          </excludes>
           <!-- skip unit and integration tests during maven's test phase -->
           <skipTests>true</skipTests>
+          <additionalClasspathElements>
+            <additionalClasspathElement>${basedir}/target/dataloader-${project.version}.jar</additionalClasspathElement>
+          </additionalClasspathElements>
         </configuration>
         <executions>
           <!-- To run unit tests: mvn clean package -->
           <!-- To run integration tests: mvn clean package -Pintegration-test to run integration tests -->
           <execution>
-            <id>integration-test</id>
+            <id>unit-tests</id>
             <phase>package</phase>
             <configuration>
               <skipTests>false</skipTests>
-              <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/target/dataloader-${project.version}.jar</additionalClasspathElement>
-              </additionalClasspathElements>
+              <excludes>
+                <!-- skip integration tests -->
+                <exclude>**/client/**, **/dyna/SObjectReferenceConverterTest.*, **/integration/**, **/mapping/LoadMapperTest.*, **/mapping/SOQLMapperTest.*, **/process/** </exclude>
+              </excludes>
+            </configuration>
+            <goals>
+              <goal>test</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>integration-tests</id>
+            <phase>verify</phase>
+            <configuration>
+              <skipTests>false</skipTests>
+              <excludes>
+                <exclude>
+                  <!-- Specify the list of integration tests to exclude -->
+                </exclude>
+              </excludes>
             </configuration>
             <goals>
               <goal>test</goal>
@@ -497,16 +510,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-<!-- "mvn test" runs unit tests whereas "mvn test -Pintegration-test" runs all tests. -->
-    <profile>
-      <id>integration-test</id>
-      <properties>
-        <exclude.integration.tests>
-            <!-- Specify the list of integration tests to exclude -->
-        </exclude.integration.tests>
-      </properties>
-    </profile>
-  </profiles>
 </project>
