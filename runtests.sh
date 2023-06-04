@@ -52,5 +52,5 @@ sed -i '' "s/admin@org.com/${2}/g" pomtest.xml
 sed -i '' "s/standard@org.com/${3}/g" pomtest.xml
 sed -i '' "s/<test\.password>/<test\.password>${4}/g" pomtest.xml
 
-mvn -f pomtest.xml clean package -Pintegration-test ${debug} ${test}
+mvn -f pomtest.xml clean verify ${debug} ${test}
 rm pomtest.xml
