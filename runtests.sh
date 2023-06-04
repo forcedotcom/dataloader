@@ -37,20 +37,9 @@ shift $((OPTIND -1))
 # $3 test regular user username
 # $4 test admin and regular user encoded password
 
-echo "num arguments = $#"
-
 if [ "$#" -lt 4 ]; then
   usage
 fi 
 
 echo $@
-
-cp pom.xml pomtest.xml
-
-sed -i '' "s/http:\/\/testendpoint/${1}/g" pomtest.xml
-sed -i '' "s/admin@org.com/${2}/g" pomtest.xml
-sed -i '' "s/standard@org.com/${3}/g" pomtest.xml
-sed -i '' "s/<test\.password>/<test\.password>${4}/g" pomtest.xml
-
-mvn -f pomtest.xml clean verify ${debug} ${test}
-rm pomtest.xml
+mvn -Dtest.endpoint=${1} -Dtest.user.default=${2} -Dtest.user.restricted=${3} -Dtest.password=${4} clean verify ${debug} ${test}
