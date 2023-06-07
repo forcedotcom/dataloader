@@ -82,7 +82,7 @@ public class CsvProcessTest extends ProcessTestBase {
     /**
      * Tests the insert operation on Account - Positive test.
      */
-    @Ignore
+    @Test
     public void testInsertAccountCsv() throws Exception {
         runProcess(getTestConfig(OperationInfo.insert, false), 100);
     }
@@ -90,7 +90,7 @@ public class CsvProcessTest extends ProcessTestBase {
     /**
      * Tests update operation with input coming from a CSV file. Relies on the id's in the CSV on being in the database
      */
-    @Ignore
+    @Test
     public void testUpdateAccountCsv() throws Exception {
         runProcess(getUpdateTestConfig(false, null, 100), 100);
     }
@@ -98,7 +98,7 @@ public class CsvProcessTest extends ProcessTestBase {
     /**
      * Upsert the records from CSV file
      */
-    @Ignore
+    @Test
     public void testUpsertAccountCsv() throws Exception {
         // manually inserts 50 accounts, then upserts 100 accounts (50 inserts and 50 updates)
         runUpsertProcess(getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 50), 50, 50);
@@ -115,7 +115,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *                  when queried.
      * @throws Exception
      */
-    @Ignore
+    @Test
     public void testConstantMappingInCsv() throws Exception {
 
         // The use case is as follows:
@@ -147,7 +147,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @throws Exception
      */
-    @Ignore
+    @Test
     public void testDescriptionAsConstantMappingInCsv() throws Exception {
         // The use case is as follows:
         // This company in this scenario only does business in the state of CA, therefore billing and shipping
@@ -174,7 +174,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @expectedResults Assert that the values retrieved for that field match those in the CSV file
      */
-    @Ignore
+    @Test
     public void testFieldAndConstantFieldClash()  throws Exception {
 
         // The use case is as follows:
@@ -204,7 +204,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @expectedResults Assert that the values retrieved for that field match those in the CSV file
      */
-    @Ignore
+    @Test
     public void testNullConstantAssignment()  throws Exception {
 
         /* Field assignments in .sdl are as follows:
@@ -267,7 +267,7 @@ public class CsvProcessTest extends ProcessTestBase {
     /**
      * Tests Upsert on foreign key for the records based on the CSV file
      */
-    @Ignore
+    @Test
     public void testUpsertFkAccountCsv() throws Exception {
         // manually inserts 100 accounts, then upserts specifying account parent for 50 accounts
         runUpsertProcess(getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 100), 0, 50);
@@ -276,7 +276,7 @@ public class CsvProcessTest extends ProcessTestBase {
     /**
      * Tests that Deleting the records based on a CSV file works
      */
-    @Ignore
+    @Test
     public void testDeleteAccountCsv() throws Exception {
         AccountIdTemplateListener listener = new AccountIdTemplateListener(100);
         String deleteFileName = convertTemplateToInput(baseName + "Template.csv", baseName + ".csv", listener);
@@ -300,7 +300,7 @@ public class CsvProcessTest extends ProcessTestBase {
         }
     }
 
-    @Ignore
+    @Test
     public void testCreateAttachment() throws Exception {
         // convert the template using the parent account id
         final String fileName = convertTemplateToInput(this.baseName + "Template.csv", this.baseName + ".csv",
@@ -326,7 +326,7 @@ public class CsvProcessTest extends ProcessTestBase {
      * @expectedResults Assert that all the records were inserted and that the constant value was mapped as well.
      *
      */
-    @Ignore
+    @Test
     public void testNonMappedFieldsPermittedInDLTransaction() throws Exception {
 
         final int numberOfRows = 4;
@@ -432,7 +432,7 @@ public class CsvProcessTest extends ProcessTestBase {
      * @expectedResults Assert that the dates in Salesforce match up.
      *
      */
-    @Ignore
+    @Test
     public void testTimezoneNotTruncated() throws Exception {
 
         final int numberOfRows = 12;
@@ -466,7 +466,7 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @throws Exception
      */
-    @Ignore
+    @Test
     public void testErrorsGeneratedOnInvalidDateMatching() throws Exception {
 
     	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(0, 3,3);
@@ -479,12 +479,12 @@ public class CsvProcessTest extends ProcessTestBase {
      *
      * @throws Exception
      */
-    @Ignore
+    @Test
     public void testErrorsGeneratedOnInvalidDateMatchingWithOffset() throws Exception {
     	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(2, 2, 2);
     }
     
-    @Ignore
+    @Test
     public void testOneToManySforceFieldsMappingInCsv() throws Exception {
         // The use case is as follows:
         // This company in this scenario only does business in the state of CA, therefore billing and shipping
