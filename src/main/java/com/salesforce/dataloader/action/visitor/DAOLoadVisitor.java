@@ -28,8 +28,6 @@ package com.salesforce.dataloader.action.visitor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.DAORowUtil;
@@ -77,9 +75,6 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     protected ArrayList<Integer> batchRowToDAORowList = new ArrayList<Integer>();
     private int processedDAORowCounter = 0;
     private static final Logger logger = LogManager.getLogger(DAOLoadVisitor.class);
-    private static final String HTML_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
-    private Pattern pattern = Pattern.compile(HTML_PATTERN);
-
 
     protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
@@ -271,16 +266,28 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         getHtmlFormattedAndPhoneSforceFieldList();
         if (htmlFormattedSforceFieldList == null 
             || !htmlFormattedSforceFieldList.contains(fieldName)
-            || !getController().getConfig().getBoolean(Config.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT)
-            || hasHTMLTags((String)fieldValue)) {
+            || !getController().getConfig().getBoolean(Config.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT)) {
             return fieldValue;
         }
 
         String fvalue = (String)fieldValue;
         StringBuffer htmlFormattedFieldVal = new StringBuffer("");
+        boolean isInsideHTMLTag = false;
         for (int i = 0, len = fvalue.length(); i < len; i++) {
             char c = fvalue.charAt(i);
             int cval = c;
+            if (cval == '<') {
+                isInsideHTMLTag = true;
+                htmlFormattedFieldVal.append(c);
+                continue;
+            }
+            if (isInsideHTMLTag) {
+                if (cval == '>') {
+                    isInsideHTMLTag = false;
+                }
+                htmlFormattedFieldVal.append(c);
+                continue; // do not process whitespace characters within HTML tag
+            }
             if (Character.isWhitespace(c) || cval == NONBREAKING_SPACE_ASCII_VAL) {
                 htmlFormattedFieldVal.append("&nbsp;");
             } else {
@@ -288,11 +295,6 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             }
         }
         return htmlFormattedFieldVal.toString();
-    }
-
-    private boolean hasHTMLTags(String text){
-        Matcher matcher = pattern.matcher(text);
-        return matcher.find();
     }
     
     private Object getPhoneFieldValue(String fieldName, Object fieldValue) {
