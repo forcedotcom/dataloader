@@ -404,6 +404,19 @@ public class CsvProcessTest extends ProcessTestBase {
                     assertEquals("spaces not preserved for company " + companyName, true, isSpaceChar);
                 }
                 continue;
+            } else if (companyName.equalsIgnoreCase("Company C")) {
+                int idx = textWithSpaceChars.indexOf('<');
+                if (idx == -1) {
+                    idx = textWithSpaceChars.indexOf("&lt;");
+                }
+                if (idx != -1) {
+                    idx += 4;
+                    if (textWithSpaceChars.charAt(idx+1) != ' '
+                        || textWithSpaceChars.charAt(idx+2) != ' '
+                        || textWithSpaceChars.charAt(idx+1) != ' ') {
+                        assertEquals("spaces after < character not preserved for company " + companyName, true, false);
+                    }
+                }
             }
             String textWithoutLeadingSpaceChars = textWithSpaceChars.stripLeading();
             String textWithoutTrailingSpaceChars = textWithSpaceChars.stripTrailing();

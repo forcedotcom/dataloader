@@ -33,8 +33,12 @@ import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.DAORowUtil;
 
 import org.apache.commons.beanutils.*;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
@@ -75,6 +79,8 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     protected ArrayList<Integer> batchRowToDAORowList = new ArrayList<Integer>();
     private int processedDAORowCounter = 0;
     private static final Logger logger = LogManager.getLogger(DAOLoadVisitor.class);
+    private static final String HTML_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
+    private static final Pattern pattern = Pattern.compile(HTML_PATTERN);
 
     protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
@@ -269,34 +275,51 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             || !getController().getConfig().getBoolean(Config.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT)) {
             return fieldValue;
         }
+        return convertToHTMLFormatting((String)fieldValue);
+    }
 
-        String fvalue = (String)fieldValue;
-        StringBuffer htmlFormattedFieldVal = new StringBuffer("");
-        boolean isInsideHTMLTag = false;
-        for (int i = 0, len = fvalue.length(); i < len; i++) {
-            char c = fvalue.charAt(i);
-            int cval = c;
-            if (cval == '<') {
-                isInsideHTMLTag = true;
-                htmlFormattedFieldVal.append(c);
-                continue;
-            }
-            if (isInsideHTMLTag) {
-                if (cval == '>') {
-                    isInsideHTMLTag = false;
-                }
-                htmlFormattedFieldVal.append(c);
-                continue; // do not process whitespace characters within HTML tag
-            }
-            if (Character.isWhitespace(c) || cval == NONBREAKING_SPACE_ASCII_VAL) {
-                htmlFormattedFieldVal.append("&nbsp;");
-            } else {
-                htmlFormattedFieldVal.append(c);
-            }
+    public static String convertToHTMLFormatting(String fvalue) {
+        String[] outsideHTMLTags = fvalue.split(HTML_PATTERN);
+        if (outsideHTMLTags.length == 0) {
+            return escapeHTMLChars(fvalue);
         }
-        return htmlFormattedFieldVal.toString();
+        Matcher matcher = pattern.matcher(fvalue);
+        String htmlEscapedValue = "";
+        int idx = 0;
+        while (matcher.find()) {
+            if (idx >= outsideHTMLTags.length) {
+                htmlEscapedValue += matcher.group();
+            } else {
+                htmlEscapedValue += escapeHTMLChars(outsideHTMLTags[idx]) + matcher.group();
+            }
+            idx++;
+        }
+        if (outsideHTMLTags.length > idx) {
+            htmlEscapedValue += escapeHTMLChars(outsideHTMLTags[idx]);
+        }
+        return htmlEscapedValue;
     }
     
+    private static String escapeHTMLChars(String input) {
+        if (input == null) {
+            return null;
+        }
+        input = StringEscapeUtils.escapeHtml4(input);
+        
+        // space characters need further handling
+        StringBuffer htmlFormattedStr = new StringBuffer("");
+        for (int i = 0, len = input.length(); i < len; i++) {
+            char c = input.charAt(i);
+            int cval = c;
+            if (Character.isWhitespace(c) || cval == NONBREAKING_SPACE_ASCII_VAL) {
+                htmlFormattedStr.append("&nbsp;");
+            } else {
+                htmlFormattedStr.append(c);
+            }
+        }
+        return htmlFormattedStr.toString();
+    }
+
     private Object getPhoneFieldValue(String fieldName, Object fieldValue) {
         getHtmlFormattedAndPhoneSforceFieldList();
         if (this.phoneSforceFieldList == null || !this.phoneSforceFieldList.contains(fieldName)) {
