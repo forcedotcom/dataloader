@@ -1,5 +1,5 @@
 "Name","NumEmp","Industry","RichText"
 "Company A","25","Heavy Industry","    4 <span style="" font-size: 172px;"">leading spaces and</span> 2 trailing <h1>spaces</h1>  "
 "Company B","36","Mining","<p>    4 leading spaces and 2 trailing spaces  </p>"
-"Company C","47","Aerospace","    4 leading spaces and 2 trailing spaces  "
+"Company C","47","Aerospace","    4 leading spaces and 2 trailing spaces with 3 spaces after <   char  "
 "Company D","58","Fiber Optics","    4 leading spaces and 2 trailing spaces  "

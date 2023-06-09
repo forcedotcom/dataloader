@@ -115,6 +115,12 @@
         </exclusion>
       </exclusions>
     </dependency>
+<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-text</artifactId>
+        <version>1.10.0</version>
+    </dependency>
 
 <!-- Testing dependencies -->
 <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
