@@ -104,8 +104,8 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
                 + "<ol>"
                 +   "<li><strike>line 1</strike>"
                 +       "<ol>"
-                +           "<li><strike>line 1a</strike></li>"
-                +           "<li><strike>line 1b</strike></li>"
+                +           "<li><strike>line 1a    </strike>    </li>"
+                +           "<li><strike>line 1b<</strike>></li>"
                 +       "</ol>"
                 +   "</li>"
                 +   "<li>"
@@ -116,6 +116,20 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
         String origText = tag + "    a  </p>";
         String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
         assertEquals("Incorrect conversion of " + origText, "<", convertedText.substring(0, 1));
+        String[] parts = convertedText.split("1a");
+        assertEquals("Incorrect encoding of whitespace characters in string" + origText, 2, parts.length);
+        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
+                4, getSpaceChars(parts[1].substring(0,25)));
+        
+        parts = convertedText.split("1b");
+        assertEquals("Incorrect encoding of whitespace characters in string" + origText, 2, parts.length);
+        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
+                "&lt;", parts[1].substring(0,4));
+        
+        parts = parts[1].split("</li>");
+        parts = parts[0].split("</strike>");
+        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
+                "&gt;", parts[1].substring(0,4));
     }
 
     private static final String HTML_WHITESPACE_ENCODING = "&nbsp;";
