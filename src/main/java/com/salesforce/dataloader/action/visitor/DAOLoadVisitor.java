@@ -79,9 +79,12 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     protected ArrayList<Integer> batchRowToDAORowList = new ArrayList<Integer>();
     private int processedDAORowCounter = 0;
     private static final Logger logger = LogManager.getLogger(DAOLoadVisitor.class);
-    private static final String HTML_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
-    private static final Pattern pattern = Pattern.compile(HTML_PATTERN);
-
+    // following regex pattern is based on info from:
+    // - https://www.regular-expressions.info/lookaround.html
+    // - https://www.geeksforgeeks.org/how-to-validate-html-tag-using-regular-expression/#
+    public static final String DEFAULT_RICHTEXT_REGEX = "<(?=[a-zA-Z/])(\"[^\"]*\"|'[^']*'|[^'\">])*>";
+    private String richTextRegex = DEFAULT_RICHTEXT_REGEX;
+    
     protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
@@ -97,6 +100,10 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
         this.batchSize = getConfig().getLoadBatchSize();
         rowConversionFailureMap = new HashMap<Integer, Boolean>();
+        String newRichTextRegex = getConfig().getString(Config.RICH_TEXT_FIELD_REGEX);
+        if (newRichTextRegex != null && !newRichTextRegex.isBlank()) {
+            this.richTextRegex = newRichTextRegex;
+        }
     }
     
     public void setRowConversionStatus(int dataSourceRow, boolean conversionSuccess) {
@@ -275,15 +282,16 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             || !getController().getConfig().getBoolean(Config.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT)) {
             return fieldValue;
         }
-        return convertToHTMLFormatting((String)fieldValue);
+        return convertToHTMLFormatting((String)fieldValue, this.richTextRegex);
     }
 
-    public static String convertToHTMLFormatting(String fvalue) {
-        String[] outsideHTMLTags = fvalue.split(HTML_PATTERN);
+    public static String convertToHTMLFormatting(String fvalue, String regex) {
+        String[] outsideHTMLTags = fvalue.split(regex);
         if (outsideHTMLTags.length == 0) {
             return escapeHTMLChars(fvalue);
         }
-        Matcher matcher = pattern.matcher(fvalue);
+        Pattern htmlTagInRichTextPattern = Pattern.compile(regex);
+        Matcher matcher = htmlTagInRichTextPattern.matcher(fvalue);
         String htmlEscapedValue = "";
         int idx = 0;
         while (matcher.find()) {

@@ -257,6 +257,7 @@ public class Config {
     public static final String OAUTH_REDIRECTURI = OAUTH_PREFIX + OAUTH_PARTIAL_REDIRECTURI;
     public static final String OAUTH_LOGIN_FROM_BROWSER = OAUTH_PREFIX + "loginfrombrowser";
     public static final String REUSE_CLIENT_CONNECTION = "sfdc.reuseClientConnection";
+    public static final String RICH_TEXT_FIELD_REGEX = "sfdx.richtext.regex";
     
     // salesforce operation parameters
     public static final String INSERT_NULLS = "sfdc.insertNulls"; //$NON-NLS-1$
@@ -430,7 +431,8 @@ public class Config {
             SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV,
             API_VERSION_PROP,
             READ_CHARSET,
-            READ_ONLY_CONFIG_PROPERTIES
+            READ_ONLY_CONFIG_PROPERTIES,
+            RICH_TEXT_FIELD_REGEX
     };
     
     /**
