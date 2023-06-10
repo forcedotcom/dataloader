@@ -23,7 +23,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader.mapping;
+package com.salesforce.dataloader.dao;
 
 import static org.junit.Assert.assertEquals;
 
@@ -35,7 +35,7 @@ import org.junit.Test;
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 
-public class RichTextHTMLEncoding extends ConfigTestBase {
+public class RichTextHTMLEncodingTest extends ConfigTestBase {
     String regex = DAOLoadVisitor.DEFAULT_RICHTEXT_REGEX;
 
     @Test
