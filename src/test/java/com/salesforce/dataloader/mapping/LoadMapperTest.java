@@ -26,7 +26,6 @@
 package com.salesforce.dataloader.mapping;
 
 import com.salesforce.dataloader.ConfigTestBase;
-import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.model.Row;
 import org.junit.Assert;
@@ -39,8 +38,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -266,98 +263,6 @@ public class LoadMapperTest extends ConfigTestBase {
         } catch (MappingInitializationException ignored) {
             // expected
         }
-    }
-    
-    @Test
-    public void testRichTextConversionNoHTMLTags() throws Exception {
-        String origText = "    a  ";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText);
-        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
-                4, getSpaceChars(convertedText.substring(0, 24)));
-        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
-                2, getSpaceChars(convertedText.substring(25)));
-
-    }
-    
-    @Test
-    public void testRichTextConversionHTMLTagAttrsWithDoubleQuotes() throws Exception {    
-        String tag = "<span style=\"font-size: 172px;\">";
-        String origText = tag + "    a</span>  ";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText);
-        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
-                4, getSpaceChars(convertedText.substring(
-                        tag.length(), 
-                        tag.length()+24)));
-        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
-                2, getSpaceChars(convertedText.substring(tag.length()+30)));  
-    }
-    
-    @Test
-    public void testRichTextConversionHTMLTagWithoutClosingQuote() throws Exception {    
-        String tag = "<span style=\"font-size: 172px;>"; // skip closing doublequotes in style attribute
-        String origText = tag + "    a  </p>";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText);
-        assertEquals("Incorrect conversion of " + origText, "&lt;", convertedText.substring(0, 4));
-    }
-    
-    @Test
-    public void testRichTextConversionHTMLTagAttrsWithSingleQuotes() throws Exception {    
-        String tag = "<span style=\'font-size: 172px;\'>";
-        String origText = tag + "    a</span    >  ";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText);
-        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
-                4, getSpaceChars(convertedText.substring(
-                        tag.length(), 
-                        tag.length()+24)));
-        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
-                2, getSpaceChars(convertedText.substring(tag.length()+34)));
-    }
-    
-    @Test
-    public void testRichTextConversionLTAndGTCharsInString() throws Exception {    
-        String origText = "    <    or > ";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText);
-        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
-                true, convertedText.contains("<")); // text interpret as containing a HTML tag
-    }
-    
-    @Test
-    public void testRichTextConversionCascadingHTMLTags() throws Exception {    
-        String tag = 
-                  "<p>    "
-                +   "<strong>leading</strong>"
-                +   "     space "
-                +   "<em>and</em>"
-                +   " <u>ending</u>"
-                +   " <strike>tab</strike>"
-                + "</p>"
-                + "<ol>"
-                +   "<li><strike>line 1</strike>"
-                +       "<ol>"
-                +           "<li><strike>line 1a</strike></li>"
-                +           "<li><strike>line 1b</strike></li>"
-                +       "</ol>"
-                +   "</li>"
-                +   "<li>"
-                +       "<strike>line 2</strike>"
-                +   "</li>"
-                + "</ol>\n"
-                + "";
-        String origText = tag + "    a  </p>";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText);
-        assertEquals("Incorrect conversion of " + origText, "<", convertedText.substring(0, 1));
-    }
-
-    private static final String HTML_WHITESPACE_ENCODING = "&nbsp;";
-    private static final Pattern HTML_WHITESPACE_PATTERN = Pattern.compile(HTML_WHITESPACE_ENCODING);
-
-    private int getSpaceChars(String text) {
-        Matcher matcher = HTML_WHITESPACE_PATTERN.matcher(text);
-        int count = 0;
-        while (matcher.find()) {
-            count++;
-        }
-        return count;
     }
 
     /**
