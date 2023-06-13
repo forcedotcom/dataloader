@@ -89,6 +89,27 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
         String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
                 true, convertedText.contains("&lt;")); // text interpret as containing a HTML tag
+
+        origText = "    <div ";
+        convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
+                true, convertedText.contains("&lt;")); // text interpret as containing a HTML tag
+
+        origText = "    <div/> ";
+        convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
+                true, convertedText.contains("<")); // text interpret as containing a HTML tag
+ 
+        origText = "    </div> ";
+        convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
+                true, convertedText.contains("<")); // text interpret as containing a HTML tag
+        
+        origText = "    < /div> ";
+        convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        assertEquals("Incorrect encoding of whitespace characters in string" + origText,
+                true, convertedText.contains("&lt;")); // text interpret as containing a HTML tag
+
     }
     
     @Test
@@ -109,7 +130,7 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
                 +       "</ol>"
                 +   "</li>"
                 +   "<li>"
-                +       "<strike>line 2</strike>"
+                +       "<strike>line 2 </strike>"
                 +   "</li>"
                 + "</ol>\n"
                 + "";
@@ -121,6 +142,7 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
                 4, getSpaceChars(parts[1].substring(0,25)));
         
+        // verify that the first < char and the 2nd > char in the line "line 1b" are HTML encoded
         parts = convertedText.split("1b");
         assertEquals("Incorrect encoding of whitespace characters in string" + origText, 2, parts.length);
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
@@ -130,6 +152,8 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
         parts = parts[0].split("</strike>");
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
                 "&gt;", parts[1].substring(0,4));
+        
+        // verify that the < char an
     }
 
     private static final String HTML_WHITESPACE_ENCODING = "&nbsp;";
