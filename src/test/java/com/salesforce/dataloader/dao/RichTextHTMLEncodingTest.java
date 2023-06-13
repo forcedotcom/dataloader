@@ -152,8 +152,6 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
         parts = parts[0].split("</strike>");
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
                 "&gt;", parts[1].substring(0,4));
-        
-        // verify that the < char an
     }
 
     private static final String HTML_WHITESPACE_ENCODING = "&nbsp;";
