@@ -46,12 +46,9 @@ import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Error;
 import com.sforce.soap.partner.Field;
-import com.sforce.soap.partner.FieldType;
 import com.sforce.soap.partner.LimitInfo;
 import com.sforce.soap.partner.LimitInfoHeader_element;
 import com.sforce.soap.partner.LoginResult;
-import com.sforce.soap.partner.OwnerChangeOption;
-import com.sforce.soap.partner.OwnerChangeOptionType;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.SaveResult;
@@ -747,11 +744,16 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                         for (Field refField : refObjectFields) {
                             if (refField.isExternalId()
                                 || "id".equalsIgnoreCase(refField.getName())
-                                || ((refField.isNameField() ||  refField.getType().equals(FieldType.email)) 
-                                    && refField.isIdLookup())) {
-                                // change createable and updateable attributes of a reference field
-                                // only if it is not a self-reference.
+                                || refField.isIdLookup()) {
                                 if (!entityName.equalsIgnoreCase(refEntityName)) {
+                                    // Change createable and updateable attributes of a reference field
+                                    // only if it is not a self-reference.
+                                    // 
+                                    // The conditional check is to address the issue [W-10811419]:
+                                    // Name (Auto-Number - a read-only field) field shows up in mapping dialog
+                                    // when parent entity is the same as child entity (self-ref) because
+                                    // the field's "isUpdateable" attribute may get changed from "false"
+                                    // to "true" in the following code.
                                     refField.setCreateable(entityField.isCreateable());
                                     refField.setUpdateable(entityField.isUpdateable());
                                 }
