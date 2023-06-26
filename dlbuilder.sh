@@ -16,7 +16,7 @@ run_mvn() {
   zip -q -d ${HOME}/.m2/repository/org/apache/logging/log4j/log4j-core/${log4j_version_num}/log4j-core-${log4j_version_num}.jar org/apache/logging/log4j/core/appender/db/jdbc/JdbcAppender.class
 
   # build uber jar
-  mvn clean package -DskipTests 
+  mvn clean package
 }
 
 #################
