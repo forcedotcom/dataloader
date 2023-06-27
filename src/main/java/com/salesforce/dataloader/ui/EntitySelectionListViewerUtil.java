@@ -30,8 +30,10 @@ import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -73,16 +75,24 @@ public class EntitySelectionListViewerUtil {
         listViewer.setContentProvider(new EntityContentProvider());
         listViewer.setLabelProvider(new EntityLabelProvider());
         listViewer.setInput(null);
-        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING, GridData.FILL, false, true);
-        try {
-            data.widthHint = config.getInt(Config.WIZARD_WIDTH) - 60;
-        } catch (ParameterLoadException e1) {
-            data.widthHint = Config.DEFAULT_WIZARD_WIDTH;
-        }
-        if (data.widthHint <= 0) {
-            data.widthHint = Config.DEFAULT_WIZARD_WIDTH;
-        }
+        data = new GridData(GridData.FILL_HORIZONTAL, GridData.VERTICAL_ALIGN_BEGINNING, true, true);
         listViewer.getControl().setLayoutData(data);
+        comp.addControlListener(new ControlListener() {
+
+            @Override
+            public void controlMoved(ControlEvent arg0) {
+                // do nothing
+            }
+
+            @Override
+            public void controlResized(ControlEvent arg0) {
+                GridData gdata = new GridData(GridData.FILL_HORIZONTAL, GridData.VERTICAL_ALIGN_BEGINNING, true, true);
+                Point containerSize = comp.getSize();
+                gdata.widthHint = containerSize.x - 30;
+                listViewer.getControl().setLayoutData(gdata);
+            }
+            
+        });
         listViewer.addFilter(filter);
         listViewer.setSorter(new EntityViewerSorter());
         
