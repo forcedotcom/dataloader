@@ -224,7 +224,7 @@ public class CSVFileReader implements DataReader {
     public int getTotalRows() throws DataAccessObjectException {
         if (totalRows == 0) {
             if (!isOpen) {
-                throw new IllegalStateException("File is not open");
+                open();
             }
             totalRows = DAORowUtil.calculateTotalRows(this);
         }

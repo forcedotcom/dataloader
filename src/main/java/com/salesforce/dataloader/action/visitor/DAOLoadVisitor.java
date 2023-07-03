@@ -104,6 +104,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         if (newRichTextRegex != null && !newRichTextRegex.isBlank()) {
             this.richTextRegex = newRichTextRegex;
         }
+        this.initLoadRateCalculator();
     }
     
     public void setRowConversionStatus(int dataSourceRow, boolean conversionSuccess) {
@@ -223,8 +224,14 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         return true;
     }
 
-    public void initLoadRateCalculator() throws DataAccessObjectException {
-        getRateCalculator().start(((DataReader)getController().getDao()).getTotalRows());
+    private void initLoadRateCalculator() {
+        try {
+            DataReader dao = (DataReader)getController().getDao();
+            getRateCalculator().start(dao.getTotalRows());
+        } catch (Exception e) {
+            logger.error("Unable to get total rows to upload from CSV or database");
+            getRateCalculator().start(0);
+        }
     }
 
     @Override
