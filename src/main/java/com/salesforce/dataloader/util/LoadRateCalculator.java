@@ -41,15 +41,18 @@ public class LoadRateCalculator {
     // TODO: we can probably move all references to this code into a base ProgressMonitor class
     private Date startTime = null;
     private long totalRecordsInJob = 0;
+    private boolean started = false;
 
-    public LoadRateCalculator() {}
-
-    public void start() {
-        this.startTime = new Date();
+    public LoadRateCalculator() {
+        // do nothing
     }
 
-    public void setNumRecords(int numRecords) {
-        this.totalRecordsInJob = numRecords;
+    public synchronized void start(int numRecords) {
+        if (!started) {
+            started = true;
+            this.startTime = new Date();
+            this.totalRecordsInJob = numRecords;
+        }
     }
 
     public String calculateSubTask(long processedRecordsInJob, long numErrorsInJob) {
@@ -67,9 +70,10 @@ public class LoadRateCalculator {
         }
 
         long remainingTimeInSec = 0;
+        long estimatedTotalTimeInSec = 0;
         if (this.totalRecordsInJob > 0 && processedRecordsInJob > 0) {
             // can estimate remaining time only if a few records are processed already.
-            long estimatedTotalTimeInSec = (long) (totalElapsedTimeInSec * this.totalRecordsInJob / processedRecordsInJob);
+            estimatedTotalTimeInSec = (long) (totalElapsedTimeInSec * this.totalRecordsInJob / processedRecordsInJob);
             remainingTimeInSec = estimatedTotalTimeInSec - totalElapsedTimeInSec;
         }
 
@@ -85,7 +89,7 @@ public class LoadRateCalculator {
                     numSuccessInJob,       // {2}
                     numErrorsInJob);       // {3}
         }
-        // LoadRateCalculator.processed=Processed {0} of {1} total records. 
+        // LoadRateCalculator.processed=Processed {0} of {1} total records in {7} seconds. 
         // There are {5} successes and {6} errors. \nRate: {2} records per hour. 
         // Estimated time to complete: {3} minutes and {4} seconds. 
         return Messages.getMessage(getClass(), "processed", 
@@ -95,6 +99,8 @@ public class LoadRateCalculator {
                 remainingTimeInMinutes,  // {3}
                 remainingSeconds,        // {4}
                 numSuccessInJob,       // {5}
-                numErrorsInJob);       // {6}
+                numErrorsInJob,       // {6}
+                totalElapsedTimeInSec // {7}
+            );
     }
 }

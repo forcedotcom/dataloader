@@ -178,8 +178,7 @@ abstract class AbstractQueryVisitor extends AbstractVisitor implements IQueryVis
     }
 
     protected void startWriteExtraction(int size) {
-        getRateCalculator().start();
-        getRateCalculator().setNumRecords(size);
+        getRateCalculator().start(size);
         // start the Progress Monitor
         getProgressMonitor().beginTask(Messages.getMessage(getClass(), "extracting"), size); //$NON-NLS-1$
     }
