@@ -30,6 +30,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DAORowUtil;
 
 import org.apache.commons.beanutils.*;
@@ -317,17 +318,31 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         if (input == null) {
             return null;
         }
-        input = StringEscapeUtils.escapeHtml4(input);
-        
-        // space characters need further handling
         StringBuffer htmlFormattedStr = new StringBuffer("");
         for (int i = 0, len = input.length(); i < len; i++) {
             char c = input.charAt(i);
             int cval = c;
-            if (Character.isWhitespace(c) || cval == NONBREAKING_SPACE_ASCII_VAL) {
-                htmlFormattedStr.append("&nbsp;");
+            char nextChar = 0;
+            if (i+1 < input.length()) {
+                nextChar = input.charAt(i+1);
+            }
+            char prevChar = 0;
+            if (i > 0) {
+                prevChar = input.charAt(i-1);
+            }
+
+            boolean isCharWhitespace = Character.isWhitespace(c) || cval == NONBREAKING_SPACE_ASCII_VAL;
+            boolean isNextCharWhitespace = Character.isWhitespace(nextChar) || nextChar == NONBREAKING_SPACE_ASCII_VAL;
+            boolean isPrevCharWhitespace = Character.isWhitespace(prevChar) || prevChar == NONBREAKING_SPACE_ASCII_VAL;
+            //only occurrences of multiple w
+            if (isCharWhitespace) {
+                if (isNextCharWhitespace || isPrevCharWhitespace) {
+                    htmlFormattedStr.append("&nbsp;");
+                } else {
+                    htmlFormattedStr.append(c);
+                }
             } else {
-                htmlFormattedStr.append(c);
+                htmlFormattedStr.append(StringEscapeUtils.escapeHtml4(Character.toString(c)));
             }
         }
         return htmlFormattedStr.toString();
