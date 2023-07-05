@@ -324,7 +324,23 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         for (int i = 0, len = input.length(); i < len; i++) {
             char c = input.charAt(i);
             int cval = c;
-            if (Character.isWhitespace(c) || cval == NONBREAKING_SPACE_ASCII_VAL) {
+
+            char nextChar = 0;
+            if(i+1 < input.length()){
+                nextChar = input.charAt(i+1);
+            }
+            char prevChar = 0;
+            if(i>0){
+                prevChar = input.charAt(i-1);
+            }
+
+            boolean isCharWhitespace = Character.isWhitespace(c) || cval == NONBREAKING_SPACE_ASCII_VAL;
+            //If last char, also evaluates to as whitespace
+            boolean isNextCharWhitespace = nextChar == 0 || Character.isWhitespace(nextChar) || nextChar == NONBREAKING_SPACE_ASCII_VAL;
+            //If first char, also evaluates to as whitespace
+            boolean isPrevCharWhitespace = prevChar == 0 || Character.isWhitespace(prevChar) || prevChar == NONBREAKING_SPACE_ASCII_VAL;
+            //only occurrences of multiple w
+            if (isCharWhitespace && (isNextCharWhitespace || isPrevCharWhitespace)){
                 htmlFormattedStr.append("&nbsp;");
             } else {
                 htmlFormattedStr.append(c);
