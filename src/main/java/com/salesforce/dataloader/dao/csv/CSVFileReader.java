@@ -95,12 +95,15 @@ public class CSVFileReader implements DataReader {
         if (custDelimiter) {
             if (config.getBoolean(Config.CSV_DELIMETER_COMMA)) {
                 separator.append(",");
+                LOGGER.debug("comma is a CSV delimiter character");
             }
             if (config.getBoolean(Config.CSV_DELIMETER_TAB)) {
                 separator.append("\t");
+                LOGGER.debug("tab is a CSV delimiter character");
             }
             if (config.getBoolean(Config.CSV_DELIMETER_OTHER)) {
                 separator.append(config.getString(Config.CSV_DELIMETER_OTHER_VALUE));
+                LOGGER.debug("CSV delimiter character: \"" + config.getString(Config.CSV_DELIMETER_OTHER_VALUE) + "\"");
             }
         } else {
             separator.append(",");
@@ -189,11 +192,16 @@ public class CSVFileReader implements DataReader {
             String errMsg = Messages.getFormattedString("CSVFileDAO.errorRowTooLarge", new String[]{
                     String.valueOf(currentRowNumber), String.valueOf(record.size()), String.valueOf(headerRow.size())});
             throw new DataAccessRowException(errMsg);
-        }
-        if (record.size() < headerRow.size()) {
+        } else if (record.size() < headerRow.size()) {
             String errMsg = Messages.getFormattedString("CSVFileDAO.errorRowTooSmall", new String[]{
                     String.valueOf(currentRowNumber), String.valueOf(record.size()), String.valueOf(headerRow.size())});
             throw new DataAccessRowException(errMsg);
+        } else {
+            LOGGER.debug(Messages.getFormattedString("CSVFileDAO.debugMessageRowSize", 
+                    new String[] {
+                            String.valueOf(currentRowNumber), String.valueOf(record.size())
+                            }
+            ));
         }
 
         Row row = new Row(record.size());
@@ -248,6 +256,10 @@ public class CSVFileReader implements DataReader {
                 LOGGER.error(Messages.getString("CSVFileDAO.errorHeaderRow"));
                 throw new DataAccessObjectInitializationException(Messages.getString("CSVFileDAO.errorHeaderRow"));
             }
+            LOGGER.debug(Messages.getFormattedString(
+                    "CSVFileDAO.debugMessageHeaderRowSize", headerRow.size()));
+
+            LOGGER.info("Columns in CSV header = " + headerRow.size());
         } catch (IOException e) {
             String errMsg = Messages.getString("CSVFileDAO.errorHeaderRow");
             LOGGER.error(errMsg, e);
@@ -270,12 +282,16 @@ public class CSVFileReader implements DataReader {
                 || StandardCharsets.UTF_16LE.name().equals(encoding)
                 || "UTF-32LE".equals(encoding)
                 || "UTF-32BE".equals(encoding)) {
-                BOMInputStream bomInputStream = new BOMInputStream(input,
-                        ByteOrderMark.UTF_8,
-                        ByteOrderMark.UTF_16LE,
-                        ByteOrderMark.UTF_16BE,
-                        ByteOrderMark.UTF_32LE,
-                        ByteOrderMark.UTF_32BE);
+                BOMInputStream bomInputStream = 
+                        BOMInputStream.builder()
+                                        .setFile(file)
+                                        .setByteOrderMarks(ByteOrderMark.UTF_8,
+                                                            ByteOrderMark.UTF_16LE,
+                                                            ByteOrderMark.UTF_16BE,
+                                                            ByteOrderMark.UTF_32LE,
+                                                            ByteOrderMark.UTF_32BE)
+                                        .setInclude(false)
+                                        .get();
                 csvReader = new CSVReader(bomInputStream, encoding, csvDelimiters);
             } else {
                 csvReader = new CSVReader(input, encoding, csvDelimiters);
@@ -291,6 +307,8 @@ public class CSVFileReader implements DataReader {
             String errMsg = Messages.getString("CSVFileDAO.errorUnsupportedEncoding");
             LOGGER.error(errMsg, e);
             throw new DataAccessObjectInitializationException(errMsg, e);
+        } catch (IOException e) {
+            throw new DataAccessObjectInitializationException(e);
         } finally {
             if (csvReader == null) {
                 IOUtils.closeQuietly(input);
