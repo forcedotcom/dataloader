@@ -95,18 +95,19 @@ public class CSVFileReader implements DataReader {
         if (custDelimiter) {
             if (config.getBoolean(Config.CSV_DELIMETER_COMMA)) {
                 separator.append(",");
-                LOGGER.debug("comma is a CSV delimiter character");
+                LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageCommaSeparator"));
             }
             if (config.getBoolean(Config.CSV_DELIMETER_TAB)) {
                 separator.append("\t");
-                LOGGER.debug("tab is a CSV delimiter character");
+                LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageTabSeparator"));
             }
             if (config.getBoolean(Config.CSV_DELIMETER_OTHER)) {
                 separator.append(config.getString(Config.CSV_DELIMETER_OTHER_VALUE));
-                LOGGER.debug("CSV delimiter character: \"" + config.getString(Config.CSV_DELIMETER_OTHER_VALUE) + "\"");
+                LOGGER.debug(Messages.getFormattedString("CSVFileDAO.debugMessageSeparatorChar", separator));
             }
         } else {
             separator.append(",");
+            LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageCommaSeparator"));
         }
         csvDelimiters = separator.toString().toCharArray();
 
