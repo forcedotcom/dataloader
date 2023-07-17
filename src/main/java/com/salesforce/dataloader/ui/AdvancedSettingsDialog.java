@@ -837,7 +837,7 @@ public class AdvancedSettingsDialog extends Dialog {
                 }
                 controller.saveConfig();
                 controller.logout();
-                controller.updateLoaderWindowTitle();
+                controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession();
 
                 input = Labels.getString("UI.ok"); //$NON-NLS-1$
                 shell.close();

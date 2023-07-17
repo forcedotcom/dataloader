@@ -30,7 +30,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
-import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DAORowUtil;
 
 import org.apache.commons.beanutils.*;
@@ -54,7 +53,6 @@ import com.sforce.async.AsyncApiException;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.FieldType;
-import com.sforce.soap.partner.GetUserInfoResult;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 
@@ -354,11 +352,8 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             return fieldValue;
         }
         String localeStr = Locale.getDefault().toString(); 
-        try {
-            GetUserInfoResult userInfo = this.controller.getPartnerClient().getClient().getUserInfo();
-            localeStr = userInfo.getUserLocale();
-        } catch (ConnectionException e) {
-            logger.debug("Unable to access user locale from server");
+        if (this.controller.getCachedUserInfoForTheSession() != null) {
+            localeStr = this.controller.getCachedUserInfoForTheSession().getUserLocale();
         }
         return DAORowUtil.getPhoneFieldValue((String)fieldValue, localeStr);
     }
