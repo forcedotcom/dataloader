@@ -40,6 +40,7 @@ import org.junit.Before;
 import com.salesforce.dataloader.*;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
+import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
@@ -48,7 +49,6 @@ import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
 import com.salesforce.dataloader.model.Row;
-import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.Base64;
 import com.sforce.soap.partner.*;
 import com.sforce.soap.partner.fault.ApiFault;
@@ -68,10 +68,12 @@ public abstract class ProcessTestBase extends ConfigTestBase {
 
     protected ProcessTestBase() {
         super(Collections.<String, String>emptyMap());
+        HttpClientTransport.resetServerInvocationCount();
     }
 
     protected ProcessTestBase(Map<String, String> config) {
         super(config);
+        HttpClientTransport.resetServerInvocationCount();
     }
 
     @Before
@@ -771,7 +773,8 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             assertTrue("Process failed: " + actualMessage, monitor.isSuccess());
             verifyFailureFile(controller, numFailures);        //A.S.: To be removed and replaced
             verifySuccessFile(controller, numInserts, numUpdates, emptyId);
-
+            long serverAPIInvocations = HttpClientTransport.getServerInvocationCount();
+            assertTrue("Number of server invocations (" + serverAPIInvocations + ") have exceeded the threshold of 50", serverAPIInvocations <= 50);
         } else {
             assertFalse("Expected process to fail but got success: " + actualMessage, monitor.isSuccess());
         }
