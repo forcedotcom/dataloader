@@ -74,6 +74,7 @@ public class HttpClientTransport implements HttpTransportInterface {
     private ByteArrayOutputStream entityByteOut;
     private static CloseableHttpClient currentHttpClient = null;
     private static boolean reuseConnection = true;
+    private static long serverInvocationCount = 0;
 
     public HttpClientTransport() {
     }
@@ -199,6 +200,7 @@ public class HttpClientTransport implements HttpTransportInterface {
     
     @Override
     public synchronized InputStream getContent() throws IOException {
+        serverInvocationCount++;
         initializeHttpClient();
     	if (this.httpMethod.getEntity() == null) {
 	        byte[] entityBytes = entityByteOut.toByteArray();
@@ -272,6 +274,14 @@ public class HttpClientTransport implements HttpTransportInterface {
 		doConnect(endpoint, httpHeaders, enableCompression, httpMethod, contentInputStream, contentEncoding);
 	}
 
+	public static long getServerInvocationCount() {
+	    return serverInvocationCount;
+	}
+	
+	public static void resetServerInvocationCount() {
+	    serverInvocationCount = 0;
+	}
+	
     private OutputStream doConnect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression, SupportedHttpMethodType httpMethodType, InputStream requestInputStream, String contentTypeStr) throws IOException {
     	switch (httpMethodType) {
     		case PATCH :
