@@ -70,7 +70,6 @@ public class DataLoaderRunner extends Thread {
     public void run() {
         // called just before the program closes
         HttpClientTransport.closeConnections();
-        logger.debug("Number of server API invocations = " + HttpClientTransport.getServerInvocationCount());
     }
     
     private static void extractInstallationArtifacts() {
@@ -82,7 +81,11 @@ public class DataLoaderRunner extends Thread {
     }
 
     public static void main(String[] args) {
-        runApp(args, null);
+        try {
+            runApp(args, null);
+        } finally {
+            logger.debug("Number of server API invocations = " + HttpClientTransport.getServerInvocationCount());
+        }
     }
     
     public static IProcess runApp(String[] args, ILoaderProgress monitor) {
