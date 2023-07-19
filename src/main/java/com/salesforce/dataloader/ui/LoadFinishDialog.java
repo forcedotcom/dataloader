@@ -193,10 +193,9 @@ public class LoadFinishDialog extends Dialog {
     }
 
     private void openViewer(String filename) {
-        CSVViewerDialog dlg = new CSVViewerDialog(getParent(), controller);
+        CSVViewerDialog dlg = new CSVViewerDialog(getParent(), controller, false, false);
         dlg.setNumberOfRows(200000);
         dlg.setFileName(filename);
-        dlg.setUseCustomSplitter(false);
         try {
             dlg.open();
         } catch (DataAccessObjectInitializationException e) {

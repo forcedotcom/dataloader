@@ -221,7 +221,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
 
     private CSVFileReader openConfiguredPath(Config cfg, String configSetting)
             throws DataAccessObjectInitializationException {
-        final CSVFileReader rdr = new CSVFileReader(new File(cfg.getString(configSetting)), cfg);
+        final CSVFileReader rdr = new CSVFileReader(new File(cfg.getString(configSetting)), cfg, false, false);
         rdr.open();
         return rdr;
     }

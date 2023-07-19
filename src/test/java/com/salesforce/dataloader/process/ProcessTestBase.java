@@ -643,7 +643,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
                 idx++;
             }
             final String inputPath = new File(getTestDataDir(), inputFileName).getAbsolutePath();
-            final CSVFileWriter inputWriter = new CSVFileWriter(inputPath, getController().getConfig());
+            final CSVFileWriter inputWriter = new CSVFileWriter(inputPath, getController().getConfig(), ",");
             try {
                 inputWriter.open();
                 inputWriter.setColumnNames(templateReader.getColumnNames());

@@ -74,12 +74,19 @@ public class CSVFileWriter implements DataWriter {
      * If <code>capitalizedHeadings</code> is true, output header row in caps
      */
     private final boolean capitalizedHeadings;
+    private final char columnDelimiter;
+        
+    public CSVFileWriter(String fileName, Config config, String columnDelimiterStr) {
 
-    public CSVFileWriter(String fileName, Config config) {
         this.fileName = fileName;
         this.capitalizedHeadings = true;
         encoding = config.getCsvEncoding(true);
         logger.debug(this.getClass().getName(), "encoding used to write to CSV file is " + encoding);
+        
+        if (columnDelimiterStr.length() == 0) {
+            columnDelimiterStr = ",";
+        }
+        this.columnDelimiter = columnDelimiterStr.charAt(0);
     }
 
     /**
@@ -137,7 +144,7 @@ public class CSVFileWriter implements DataWriter {
     }
 
     private void writeHeaderRow() throws DataAccessObjectInitializationException {
-        CSVColumnVisitor visitor = new CSVColumnVisitor(fileOut, false);
+        CSVColumnVisitor visitor = new CSVColumnVisitor(fileOut, false, this.columnDelimiter);
         try {
             visitHeaderColumns(this.columnNames, visitor);
             fileOut.newLine();
@@ -155,7 +162,7 @@ public class CSVFileWriter implements DataWriter {
      */
     @Override
     public boolean writeRow(Row row) throws DataAccessObjectException {
-        CSVColumnVisitor visitor = new CSVColumnVisitor(fileOut, false);
+        CSVColumnVisitor visitor = new CSVColumnVisitor(fileOut, false, this.columnDelimiter);
         try {
             visitColumns(columnNames, row, visitor);
             fileOut.newLine();
