@@ -210,7 +210,7 @@ public class NAProcessTest extends ProcessTestBase {
     }
 
     private String getCsvFieldValue(String csvFile, String fieldName) throws Exception {
-        CSVFileReader reader = new CSVFileReader(csvFile, getController(), false);
+        CSVFileReader reader = new CSVFileReader(csvFile, getController());
         reader.open();
         assertEquals(1, reader.getTotalRows());
         String fieldValue = (String)reader.readRow().get(fieldName);
@@ -256,7 +256,7 @@ public class NAProcessTest extends ProcessTestBase {
 
         CSVFileWriter writer = null;
         try {
-            writer = new CSVFileWriter(CSV_FILE_PATH, getController().getConfig());
+            writer = new CSVFileWriter(CSV_FILE_PATH, getController().getConfig(), ",");
             writer.open();
             writer.setColumnNames(new ArrayList<String>(row.keySet()));
             writer.writeRow(row);

@@ -206,8 +206,7 @@ public class ExtractionFinishDialog extends Dialog {
     }
 
     private void openViewer(String filename) {
-        CSVViewerDialog dlg = new CSVViewerDialog(getParent(), controller);
-        dlg.setUseCustomSplitter(false);
+        CSVViewerDialog dlg = new CSVViewerDialog(getParent(), controller, false, true);
         dlg.setNumberOfRows(200000);
         dlg.setFileName(filename);
         try {

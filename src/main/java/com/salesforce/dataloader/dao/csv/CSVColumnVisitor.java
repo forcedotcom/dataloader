@@ -48,13 +48,15 @@ public class CSVColumnVisitor {
     private static final char EQUAL = '=';
 
     private Writer writer;
+    private char columnDelimiter = COMMA;
 
     //logger
     private static Logger logger = LogManager.getLogger(CSVColumnVisitor.class);
 
-    public CSVColumnVisitor(Writer writer, boolean escapeFormulaValue) {
+    public CSVColumnVisitor(Writer writer, boolean escapeFormulaValue, char columnDelimiter) {
         this.writer = writer;
         this.escapeFormulaValue = escapeFormulaValue;
+        this.columnDelimiter = columnDelimiter;
     }
 
     public void newRow() {
@@ -68,7 +70,7 @@ public class CSVColumnVisitor {
         }
         try {
             if (!first)
-                writer.write(COMMA);
+                writer.write(this.columnDelimiter);
             else
                 first = false;
 

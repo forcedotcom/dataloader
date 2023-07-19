@@ -121,7 +121,7 @@ public class BulkCsvProcessTest extends ProcessTestBase {
 
         CSVFileWriter writer = null;
         try {
-            writer = new CSVFileWriter(CSV_FILE_PATH, getController().getConfig());
+            writer = new CSVFileWriter(CSV_FILE_PATH, getController().getConfig(), ",");
             writer.open();
             writer.setColumnNames(new ArrayList<String>(rows[0].keySet()));
             writer.writeRowList(Arrays.asList(rows));

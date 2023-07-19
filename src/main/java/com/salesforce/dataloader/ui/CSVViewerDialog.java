@@ -26,6 +26,7 @@
 
 package com.salesforce.dataloader.ui;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -69,17 +70,13 @@ public class CSVViewerDialog extends Dialog {
 
     private Logger logger = LogManager.getLogger(CSVViewerDialog.class);
     private String filename;
-    private boolean useCustomSplitter = false;
+    private final boolean ignoreDelimiterConfig;
+    private final boolean isQueryOperationResult;
     private int numberOfRows;
 
     //the two tableViewers
     private TableViewer csvTblViewer;
     private final Controller controller;
-
-    public void setUseCustomSplitter(boolean useCustomSplitter)
-    {
-        this.useCustomSplitter = useCustomSplitter;
-    }
 
     public void setFileName(String filename) {
         this.filename = filename;
@@ -91,23 +88,16 @@ public class CSVViewerDialog extends Dialog {
 
     /**
      * @param parent
-     */
-    public CSVViewerDialog(Shell parent, Controller controller) {
-        // Pass the default styles here
-        this(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.MAX | SWT.MIN, controller);
-    }
-
-    /**
-     * @param parent
      *            the parent
      * @param style
      *            the style
      */
-    public CSVViewerDialog(Shell parent, int style, Controller controller) {
-        // Let users override the default styles
-        super(parent, style);
+    public CSVViewerDialog(Shell parent, Controller controller, boolean ignoreDelimiterConfig, boolean isQueryOperationResult) {
+        super(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.MAX | SWT.MIN);
         setText(Labels.getString("CSVViewer.title")); //$NON-NLS-1$
         this.controller = controller;
+        this.ignoreDelimiterConfig = ignoreDelimiterConfig;
+        this.isQueryOperationResult = isQueryOperationResult;
     }
 
     /**
@@ -250,9 +240,10 @@ public class CSVViewerDialog extends Dialog {
 
     private void initializeCSVViewer(Shell shell) throws DataAccessObjectInitializationException {
         GridData data;
-
-        CSVFileReader csvReader = new CSVFileReader(filename, controller, useCustomSplitter);
-
+        
+        // use delimiter settings for load operations by specifying 'false' for isQueryOperationResult param
+        CSVFileReader csvReader = new CSVFileReader(new File(filename),
+                                        controller.getConfig(), ignoreDelimiterConfig, isQueryOperationResult);
         try {
             csvReader.open();
 

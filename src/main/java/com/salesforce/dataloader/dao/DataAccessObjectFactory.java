@@ -52,9 +52,9 @@ public class DataAccessObjectFactory {
         logger.info(Messages.getFormattedString("DataAccessObjectFactory.creatingDao", new String[] {config.getString(Config.DAO_NAME), daoType}));
 
         if (CSV_READ_TYPE.equalsIgnoreCase(daoType)) {
-            dao = new CSVFileReader(config);
+            dao = new CSVFileReader(config, false);
         } else if (CSV_WRITE_TYPE.equalsIgnoreCase(daoType)) {
-            dao = new CSVFileWriter(config.getString(Config.DAO_NAME), config);
+            dao = new CSVFileWriter(config.getString(Config.DAO_NAME), config, config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS));
         } else if (DATABASE_READ_TYPE.equalsIgnoreCase(daoType)) {
             dao = new DatabaseReader(config);
         } else if (DATABASE_WRITE_TYPE.equalsIgnoreCase(daoType)) {

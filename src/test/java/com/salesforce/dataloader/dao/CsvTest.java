@@ -96,7 +96,7 @@ public class CsvTest extends ConfigTestBase {
         assertTrue(f.exists());
         assertTrue(f.canRead());
 
-        CSVFileReader csv = new CSVFileReader(f, getController().getConfig());
+        CSVFileReader csv = new CSVFileReader(f, getController().getConfig(), false, false);
         csv.open();
 
         List<String> headerRow = csv.getColumnNames();
@@ -119,9 +119,23 @@ public class CsvTest extends ConfigTestBase {
 
     @Test
     public void testCSVWriteBasic() throws Exception {
+        doTestCSVWriteBasic(",");
+    }
+    
+    @Test
+    public void testCSVWriteBasicWithDashDelimiter() throws Exception {
+        doTestCSVWriteBasic("-");
+    }
+    
+    @Test
+    public void testCSVWriteBasicWithColonDelimiter() throws Exception {
+        doTestCSVWriteBasic(":");
+    }
+    
+    private void doTestCSVWriteBasic(String delimiter) throws Exception {
         File f = new File(getTestDataDir(), "csvtestTemp.csv");
         String path = f.getAbsolutePath();
-        CSVFileWriter writer = new CSVFileWriter(path, getController().getConfig());
+        CSVFileWriter writer = new CSVFileWriter(path, getController().getConfig(), delimiter);
         List<Row> rowList = new ArrayList<Row>();
 
         rowList.add(row1);
@@ -133,11 +147,11 @@ public class CsvTest extends ConfigTestBase {
         writer.writeRowList(rowList);
         writer.close();
 
-        compareWriterFile(path);
+        compareWriterFile(path, delimiter);
 
         f.delete();
     }
-
+    
     @Test
     public void testReadingSeparatedValues () throws Exception {
         File f = new File(getTestDataDir(), "csvSeparator.csv");
@@ -146,7 +160,7 @@ public class CsvTest extends ConfigTestBase {
         getController().getConfig().setValue("loader.csvOther", true);
         getController().getConfig().setValue("loader.csvOtherValue", "!");
 
-        CSVFileReader csv = new CSVFileReader(f, getController().getConfig());
+        CSVFileReader csv = new CSVFileReader(f, getController().getConfig(), false, false);
         csv.open();
         Row firstRow = csv.readRow();
         assertEquals("somev1", firstRow.get("some"));
@@ -156,7 +170,7 @@ public class CsvTest extends ConfigTestBase {
         csv.close();
 
         getController().getConfig().setValue("loader.csvOther", false);
-        csv = new CSVFileReader(f, getController().getConfig());
+        csv = new CSVFileReader(f, getController().getConfig(), false, false);
         csv.open();
         firstRow = csv.readRow();
         assertEquals("col12!somev1", firstRow.get("column2!some"));
@@ -170,7 +184,7 @@ public class CsvTest extends ConfigTestBase {
         assertTrue(f.exists());
         assertTrue(f.canRead());
 
-        CSVFileReader csv = new CSVFileReader(f, getController().getConfig());
+        CSVFileReader csv = new CSVFileReader(f, getController().getConfig(), false, false);
         csv.open();
 
         Row firstRow = csv.readRow();
@@ -184,7 +198,7 @@ public class CsvTest extends ConfigTestBase {
 
     @Test
     public void testCsvWithManyRowsCanBeParsed() throws Exception {
-        CSVFileReader csvFileReader = new CSVFileReader(new File(getTestDataDir(), "20kRows.csv"), getController().getConfig());
+        CSVFileReader csvFileReader = new CSVFileReader(new File(getTestDataDir(), "20kRows.csv"), getController().getConfig(), false, false);
         csvFileReader.open();
         assertEquals(20000, csvFileReader.getTotalRows());
         int count = 0;
@@ -198,8 +212,11 @@ public class CsvTest extends ConfigTestBase {
      * @param filePath
      */
 
-    private void compareWriterFile(String filePath) throws Exception {
-        CSVFileReader csv = new CSVFileReader(filePath, getController());
+    private void compareWriterFile(String filePath, String delimiterStr) throws Exception {
+        Config config = getController().getConfig();
+        String storedQueryResultsDelimiter = config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS);
+        config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
+        CSVFileReader csv = new CSVFileReader(new File(filePath), config, false, true);
         csv.open();
 
         //check that the header is the same as what we wanted to write
@@ -220,5 +237,6 @@ public class CsvTest extends ConfigTestBase {
             assertEquals(row2.get(headerColumn), secondRow.get(headerColumn));
         }
         csv.close();
+        config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, storedQueryResultsDelimiter);
     }
 }

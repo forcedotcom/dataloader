@@ -239,9 +239,8 @@ public class CSVChooserDialog extends Dialog {
                 FileDialog dlg = new FileDialog(shell, SWT.OPEN);
                 String fn = dlg.open();
                 if (fn != null) {
-                    openViewer(fn, true);
+                    openViewer(fn, false, false);
                 }
-
             }
         });
 
@@ -257,7 +256,7 @@ public class CSVChooserDialog extends Dialog {
             public void widgetSelected(SelectionEvent event) {
                 String successFilePath = controller.getConfig().getString(Config.OUTPUT_SUCCESS);
                 if(StringUtils.hasText(successFilePath)) {
-                    openViewer(successFilePath, false);
+                    openViewer(successFilePath, true, false);
                 } else {
                     UIUtils.infoMessageBox(shell, Messages.getString("CSVChooser.noSucessOrErrorFile"));
                 }
@@ -276,7 +275,7 @@ public class CSVChooserDialog extends Dialog {
             public void widgetSelected(SelectionEvent event) {
                 String errorFilePath = controller.getConfig().getString(Config.OUTPUT_ERROR);
                 if(StringUtils.hasText(errorFilePath)) {
-                    openViewer(errorFilePath, false);
+                    openViewer(errorFilePath, true, false);
                 } else {
                     UIUtils.infoMessageBox(shell, Messages.getString("CSVChooser.noSucessOrErrorFile"));
                 }
@@ -321,11 +320,11 @@ public class CSVChooserDialog extends Dialog {
         shell.setDefaultButton(ok);
     }
 
-    private void openViewer(String filename, boolean useCustomSplitter) {
-        CSVViewerDialog dlg = new CSVViewerDialog(getParent(), controller);
+    private void openViewer(String filename, boolean ignoreDelimiterConfig, boolean isQueryOperationResult) {
+        // 
+        CSVViewerDialog dlg = new CSVViewerDialog(getParent(), controller, ignoreDelimiterConfig, isQueryOperationResult);
         dlg.setNumberOfRows(Integer.parseInt(textRows.getText()));
         dlg.setFileName(filename);
-        dlg.setUseCustomSplitter(useCustomSplitter);
         try {
             dlg.open();
         } catch (DataAccessObjectInitializationException e) {

@@ -71,43 +71,47 @@ public class CSVFileReader implements DataReader {
     private char[] csvDelimiters;
     private Config config;
 
-    public CSVFileReader(Config config) {
-        this(new File(config.getString(Config.DAO_NAME)), config, true);
+    public CSVFileReader(Config config, boolean isQueryOperationResult) {
+        this(new File(config.getString(Config.DAO_NAME)), config, false, isQueryOperationResult);
     }
 
+    // used only in tests
     public CSVFileReader(String filePath, Controller controller) {
-        this(new File(filePath), controller.getConfig(), false);
+        // Assume comma char as the delimiter => set 3rd param to true.
+        // Assume load operation by setting 4th param to false.
+        // 4th param setting is ignored if 3rd param is set to true. 
+        this(new File(filePath), controller.getConfig(), true, false);  
     }
 
-    public CSVFileReader(String filePath, Controller controller, boolean custDelimiter) {
-        this(new File(filePath), controller.getConfig(), custDelimiter);
-    }
-
-    // Used only by the test
-    public CSVFileReader(File file, Config config) {
-        this(file, config, true);
-    }
-
-    public CSVFileReader(File file, Config config, boolean custDelimiter) {
+    // Handles 3 types of CSV files:
+    // 1. CSV files provided by the user for upload operations: ignoreDelimiterConfig = false, isQueryOperationResult = false
+    // 2. CSV files that are results of query operations: ignoreDelimiterConfig = false, isQueryOperationResult = true
+    // 3. CSV files that capture successes/failures when performing an upload operation: ignoreDelimiterConfig = true, isQueryOperationResult = <value ignored>
+    //    isQueryOperationsResult value is ignored if ignoreDelimiterConfig is 'true'. 
+    public CSVFileReader(File file, Config config, boolean ignoreDelimiterConfig, boolean isQueryOperationResult) {
         this.file = file;
         this.config = config;
         StringBuilder separator = new StringBuilder();
-        if (custDelimiter) {
-            if (config.getBoolean(Config.CSV_DELIMETER_COMMA)) {
-                separator.append(",");
-                LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageCommaSeparator"));
-            }
-            if (config.getBoolean(Config.CSV_DELIMETER_TAB)) {
-                separator.append("\t");
-                LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageTabSeparator"));
-            }
-            if (config.getBoolean(Config.CSV_DELIMETER_OTHER)) {
-                separator.append(config.getString(Config.CSV_DELIMETER_OTHER_VALUE));
-                LOGGER.debug(Messages.getFormattedString("CSVFileDAO.debugMessageSeparatorChar", separator));
-            }
-        } else {
+        if (ignoreDelimiterConfig) {
             separator.append(",");
-            LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageCommaSeparator"));
+            LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageCommaSeparator"));            
+        } else {
+            if (isQueryOperationResult) {
+                separator.append(config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS));
+            } else { // reading CSV for a load operation
+                if (config.getBoolean(Config.CSV_DELIMETER_COMMA)) {
+                    separator.append(",");
+                    LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageCommaSeparator"));
+                }
+                if (config.getBoolean(Config.CSV_DELIMETER_TAB)) {
+                    separator.append("\t");
+                    LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageTabSeparator"));
+                }
+                if (config.getBoolean(Config.CSV_DELIMETER_OTHER)) {
+                    separator.append(config.getString(Config.CSV_DELIMETER_OTHER_VALUE));
+                    LOGGER.debug(Messages.getFormattedString("CSVFileDAO.debugMessageSeparatorChar", separator));
+                }
+            }
         }
         csvDelimiters = separator.toString().toCharArray();
 

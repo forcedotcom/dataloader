@@ -204,6 +204,7 @@ public class Config {
     public static final String CSV_DELIMETER_TAB = "loader.csvTab";
     public static final String CSV_DELIMETER_OTHER = "loader.csvOther";
     public static final String CSV_DELIMETER_OTHER_VALUE = "loader.csvOtherValue";
+    public static final String CSV_DELIMITER_FOR_QUERY_RESULTS = "loader.query.delimiter";
     public static final String BUFFER_UNPROCESSED_BULK_QUERY_RESULTS = "loader.bufferUnprocessedBulkQueryResults";
 
     //Special Internal Configs
@@ -515,6 +516,7 @@ public class Config {
         setDefaultValue(CSV_DELIMETER_TAB, true);
         setDefaultValue(CSV_DELIMETER_OTHER, false);
         setDefaultValue(CSV_DELIMETER_OTHER_VALUE, "-");
+        setDefaultValue(CSV_DELIMITER_FOR_QUERY_RESULTS, ",");
 
         setDefaultValue(ENDPOINT, DEFAULT_ENDPOINT_URL);
         setDefaultValue(LOAD_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
