@@ -134,6 +134,11 @@ public class CsvTest extends ConfigTestBase {
         doTestCSVWriteBasic(":");
     }
     
+    @Test
+    public void testCSVWriteBasicWithTabDelimiter() throws Exception {
+        doTestCSVWriteBasic("   ");
+    }
+    
     private void doTestCSVWriteBasic(String delimiter) throws Exception {
         File f = new File(getTestDataDir(), "csvtestTemp.csv");
         String path = f.getAbsolutePath();
@@ -149,9 +154,10 @@ public class CsvTest extends ConfigTestBase {
         writer.writeRowList(rowList);
         writer.close();
 
-        compareWriterFile(path, delimiter, false, false);
-        compareWriterFile(path, delimiter, false, true);
-        compareWriterFile(path, delimiter, true, true);
+        compareWriterFile(path, delimiter, false, false); // 3rd param false and 4th param false => CSV for a upload
+        compareWriterFile(path, delimiter, false, true);  // 3rd param false and 4th param true => query result CSV
+        compareWriterFile(path, delimiter, true, true);   // 3rd param is set to true => upload result CSV
+        compareWriterFile(path, delimiter, true, false);  // 3rd param is set to true => upload result CSV
         f.delete();
     }
     
@@ -218,16 +224,29 @@ public class CsvTest extends ConfigTestBase {
     private void compareWriterFile(String filePath, String delimiterStr, boolean ignoreDelimiterConfig, boolean isQueryResultsCSV) throws Exception {
         Config config = getController().getConfig();
         String storedDelimiter;
+        boolean storedCsvDelimiterComma = false, storedCsvDelimiterTab = false, storedCsvDelimiterOther = false;
         if (isQueryResultsCSV) {
             storedDelimiter = config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS);
             config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
         } else {
             storedDelimiter = config.getString(Config.CSV_DELIMETER_OTHER_VALUE);
-            config.setValue(Config.CSV_DELIMETER_OTHER_VALUE, delimiterStr);
+            storedCsvDelimiterComma = config.getBoolean(Config.CSV_DELIMETER_COMMA);
+            storedCsvDelimiterTab = config.getBoolean(Config.CSV_DELIMETER_TAB);
+            storedCsvDelimiterOther = config.getBoolean(Config.CSV_DELIMETER_OTHER);
             config.setValue(Config.CSV_DELIMETER_COMMA, false);
             config.setValue(Config.CSV_DELIMETER_TAB, false);
-            config.setValue(Config.CSV_DELIMETER_OTHER, true);
-       }
+            config.setValue(Config.CSV_DELIMETER_OTHER, false);
+            config.setValue(Config.CSV_DELIMETER_OTHER_VALUE, delimiterStr);
+            if (",".equals(delimiterStr)) {
+                config.setValue(Config.CSV_DELIMETER_COMMA, true);
+            } else if ("    ".equals(delimiterStr)) {
+                config.setValue(Config.CSV_DELIMETER_TAB, true);
+            } else {
+                config.setValue(Config.CSV_DELIMETER_OTHER, true);
+                storedDelimiter = config.getString(Config.CSV_DELIMETER_OTHER_VALUE);
+                config.setValue(Config.CSV_DELIMETER_OTHER_VALUE, delimiterStr);
+            }
+        }
         config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
         CSVFileReader csv = new CSVFileReader(new File(filePath), config, ignoreDelimiterConfig, isQueryResultsCSV);
         try {
@@ -259,6 +278,9 @@ public class CsvTest extends ConfigTestBase {
             config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, storedDelimiter);
         } else {
             config.setValue(Config.CSV_DELIMETER_OTHER_VALUE, storedDelimiter);
+            config.setValue(Config.CSV_DELIMETER_COMMA, storedCsvDelimiterComma);
+            config.setValue(Config.CSV_DELIMETER_TAB, storedCsvDelimiterTab);
+            config.setValue(Config.CSV_DELIMETER_OTHER, storedCsvDelimiterOther);
         }
     }
 }
