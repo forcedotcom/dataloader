@@ -38,6 +38,8 @@ import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.model.Row;
 
+import org.junit.Assert;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -147,8 +149,9 @@ public class CsvTest extends ConfigTestBase {
         writer.writeRowList(rowList);
         writer.close();
 
-        compareWriterFile(path, delimiter);
-
+        compareWriterFile(path, delimiter, false, false);
+        compareWriterFile(path, delimiter, false, true);
+        compareWriterFile(path, delimiter, true, true);
         f.delete();
     }
     
@@ -212,13 +215,28 @@ public class CsvTest extends ConfigTestBase {
      * @param filePath
      */
 
-    private void compareWriterFile(String filePath, String delimiterStr) throws Exception {
+    private void compareWriterFile(String filePath, String delimiterStr, boolean ignoreDelimiterConfig, boolean isQueryResultsCSV) throws Exception {
         Config config = getController().getConfig();
-        String storedQueryResultsDelimiter = config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS);
+        String storedDelimiter;
+        if (isQueryResultsCSV) {
+            storedDelimiter = config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS);
+            config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
+        } else {
+            storedDelimiter = config.getString(Config.CSV_DELIMETER_OTHER_VALUE);
+            config.setValue(Config.CSV_DELIMETER_OTHER_VALUE, delimiterStr);
+            config.setValue(Config.CSV_DELIMETER_COMMA, false);
+            config.setValue(Config.CSV_DELIMETER_TAB, false);
+            config.setValue(Config.CSV_DELIMETER_OTHER, true);
+       }
         config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
-        CSVFileReader csv = new CSVFileReader(new File(filePath), config, false, true);
-        csv.open();
-
+        CSVFileReader csv = new CSVFileReader(new File(filePath), config, ignoreDelimiterConfig, isQueryResultsCSV);
+        try {
+            csv.open();
+        } catch (Exception e) {
+            assertTrue("Exception reading header row: " + e.getMessage(), ignoreDelimiterConfig && !delimiterStr.equals(","));
+            csv.close();
+            return;
+        }
         //check that the header is the same as what we wanted to write
         List<String> headerRow = csv.getColumnNames();
         for (int i = 0; i < writeHeader.size(); i++) {
@@ -228,15 +246,19 @@ public class CsvTest extends ConfigTestBase {
         //check that row 1 is valid
         Row firstRow = csv.readRow();
         for (String headerColumn : writeHeader) {
-            assertEquals(row1.get(headerColumn), firstRow.get(headerColumn));
+                assertEquals(row1.get(headerColumn), firstRow.get(headerColumn));
         }
 
         //check that row 2 is valid
         Row secondRow = csv.readRow();
         for (String headerColumn : writeHeader) {
-            assertEquals(row2.get(headerColumn), secondRow.get(headerColumn));
+                assertEquals(row2.get(headerColumn), secondRow.get(headerColumn));
         }
         csv.close();
-        config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, storedQueryResultsDelimiter);
+        if (isQueryResultsCSV) {
+            config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, storedDelimiter);
+        } else {
+            config.setValue(Config.CSV_DELIMETER_OTHER_VALUE, storedDelimiter);
+        }
     }
 }
