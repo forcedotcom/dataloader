@@ -75,8 +75,8 @@ public class AdvancedSettingsDialog extends Dialog {
     private Controller controller;
     private Text textBatch;
     private Text textQueryBatch;
-    private Text textSplitterValue;
-    private Text queryResultsDelimiterValue;
+    private Text textUploadCSVDelimiterValue;
+    private Text textQueryResultsDelimiterValue;
     private Button buttonNulls;
     private Text textRule;
     private Text textEndpoint;
@@ -491,22 +491,22 @@ public class AdvancedSettingsDialog extends Dialog {
         labelOtherDelimiterValue.setText(Labels.getString("AdvancedSettingsDialog.csvOtherDelimiterValue"));
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelOtherDelimiterValue.setLayoutData(data);
-        textSplitterValue = new Text(restComp, SWT.BORDER);
-        textSplitterValue.setText(config.getString(Config.CSV_DELIMITER_OTHER_VALUE));
+        textUploadCSVDelimiterValue = new Text(restComp, SWT.BORDER);
+        textUploadCSVDelimiterValue.setText(config.getString(Config.CSV_DELIMITER_OTHER_VALUE));
         data = new GridData();
         data.widthHint = 15 * textSize.x;
-        textSplitterValue.setLayoutData(data);
+        textUploadCSVDelimiterValue.setLayoutData(data);
 
         Label labelQueryResultsDelimiter = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelQueryResultsDelimiter.setText(Labels.getString("AdvancedSettingsDialog.queryResultsDelimiterValue"));
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelQueryResultsDelimiter.setLayoutData(data);
-        queryResultsDelimiterValue = new Text(restComp, SWT.BORDER);
-        queryResultsDelimiterValue.setText(config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS));
-        queryResultsDelimiterValue.setTextLimit(1);
+        textQueryResultsDelimiterValue = new Text(restComp, SWT.BORDER);
+        textQueryResultsDelimiterValue.setText(config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS));
+        textQueryResultsDelimiterValue.setTextLimit(1);
         data = new GridData();
         data.widthHint = 5 * textSize.x;
-        queryResultsDelimiterValue.setLayoutData(data);
+        textQueryResultsDelimiterValue.setLayoutData(data);
         
         // Enable Bulk API Setting
         Label labelUseBulkApi = new Label(restComp, SWT.RIGHT | SWT.WRAP);
@@ -803,12 +803,12 @@ public class AdvancedSettingsDialog extends Dialog {
                 if (!buttonCsvComma.getSelection()
                         && !buttonCsvTab.getSelection()
                         && (!buttonCsvOther.getSelection()
-                        || textSplitterValue.getText() == null
-                        || textSplitterValue.getText().length() == 0)) {
+                        || textUploadCSVDelimiterValue.getText() == null
+                        || textUploadCSVDelimiterValue.getText().length() == 0)) {
                     return;
                 }
-                config.setValue(Config.CSV_DELIMITER_OTHER_VALUE, textSplitterValue.getText());
-                String queryResultsDelimiterStr = queryResultsDelimiterValue.getText();
+                config.setValue(Config.CSV_DELIMITER_OTHER_VALUE, textUploadCSVDelimiterValue.getText());
+                String queryResultsDelimiterStr = textQueryResultsDelimiterValue.getText();
                 if (queryResultsDelimiterStr.length() == 0) {
                     queryResultsDelimiterStr = AppUtil.COMMA; // set to default
                 }
