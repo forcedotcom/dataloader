@@ -43,6 +43,7 @@ import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.util.AppUtil;
 
 /**
  * Writes csv files.
@@ -84,7 +85,7 @@ public class CSVFileWriter implements DataWriter {
         logger.debug(this.getClass().getName(), "encoding used to write to CSV file is " + encoding);
         
         if (columnDelimiterStr.length() == 0) {
-            columnDelimiterStr = ",";
+            columnDelimiterStr = AppUtil.COMMA;
         }
         this.columnDelimiter = columnDelimiterStr.charAt(0);
     }

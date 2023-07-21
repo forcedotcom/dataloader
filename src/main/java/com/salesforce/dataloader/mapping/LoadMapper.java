@@ -29,6 +29,7 @@ package com.salesforce.dataloader.mapping;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Field;
 
 import org.apache.logging.log4j.Logger;
@@ -91,7 +92,7 @@ public class LoadMapper extends Mapper {
         for (Map.Entry<String, Object> entry : localRow.entrySet()) {
             String sfdcNameList = getMapping(entry.getKey(), true);
             if (StringUtils.hasText(sfdcNameList)) {
-                String sfdcNameArray[] = sfdcNameList.split(",");
+                String sfdcNameArray[] = sfdcNameList.split(AppUtil.COMMA);
                 for (String sfdcName : sfdcNameArray) {
                     mappedData.put(sfdcName.trim(), entry.getValue());
                 }
@@ -107,7 +108,7 @@ public class LoadMapper extends Mapper {
         for (Map.Entry<String, String> entry : getMappingWithUnmappedColumns(false).entrySet()) {
             String sfdcNameList = entry.getValue();
             if(StringUtils.hasText(sfdcNameList)) {
-                String sfdcNameArray[] = sfdcNameList.split(",");
+                String sfdcNameArray[] = sfdcNameList.split(AppUtil.COMMA);
                 for (String sfdcName : sfdcNameArray) {
                     final Field f = getClient().getField(sfdcName.trim());
                     if (f == null)

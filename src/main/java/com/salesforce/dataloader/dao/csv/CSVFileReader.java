@@ -49,6 +49,7 @@ import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.DataAccessRowException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DAORowUtil;
 import com.sforce.async.CSVReader;
 
@@ -93,22 +94,22 @@ public class CSVFileReader implements DataReader {
         this.config = config;
         StringBuilder separator = new StringBuilder();
         if (ignoreDelimiterConfig) {
-            separator.append(",");
+            separator.append(AppUtil.COMMA);
             LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageCommaSeparator"));            
         } else {
             if (isQueryOperationResult) {
                 separator.append(config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS));
             } else { // reading CSV for a load operation
-                if (config.getBoolean(Config.CSV_DELIMETER_COMMA)) {
-                    separator.append(",");
+                if (config.getBoolean(Config.CSV_DELIMITER_COMMA)) {
+                    separator.append(AppUtil.COMMA);
                     LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageCommaSeparator"));
                 }
-                if (config.getBoolean(Config.CSV_DELIMETER_TAB)) {
-                    separator.append("\t");
+                if (config.getBoolean(Config.CSV_DELIMITER_TAB)) {
+                    separator.append(AppUtil.TAB);
                     LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageTabSeparator"));
                 }
-                if (config.getBoolean(Config.CSV_DELIMETER_OTHER)) {
-                    separator.append(config.getString(Config.CSV_DELIMETER_OTHER_VALUE));
+                if (config.getBoolean(Config.CSV_DELIMITER_OTHER)) {
+                    separator.append(config.getString(Config.CSV_DELIMITER_OTHER_VALUE));
                     LOGGER.debug(Messages.getFormattedString("CSVFileDAO.debugMessageSeparatorChar", separator));
                 }
             }

@@ -74,7 +74,8 @@ public class AppUtil {
         INSTALL,
         ENCRYPT
     }
-    
+    public static final String COMMA = ",";
+    public static final String TAB = "\t";
     public static final String DATALOADER_VERSION;
     public static final String DATALOADER_SHORT_VERSION;
     public static final String MIN_JAVA_VERSION;

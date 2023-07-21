@@ -47,6 +47,7 @@ import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.model.NATextValue;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
@@ -256,7 +257,7 @@ public class NAProcessTest extends ProcessTestBase {
 
         CSVFileWriter writer = null;
         try {
-            writer = new CSVFileWriter(CSV_FILE_PATH, getController().getConfig(), ",");
+            writer = new CSVFileWriter(CSV_FILE_PATH, getController().getConfig(), AppUtil.COMMA);
             writer.open();
             writer.setColumnNames(new ArrayList<String>(row.keySet()));
             writer.writeRow(row);

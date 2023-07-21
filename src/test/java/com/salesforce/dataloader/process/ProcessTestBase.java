@@ -49,6 +49,7 @@ import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.Base64;
 import com.sforce.soap.partner.*;
 import com.sforce.soap.partner.fault.ApiFault;
@@ -643,7 +644,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
                 idx++;
             }
             final String inputPath = new File(getTestDataDir(), inputFileName).getAbsolutePath();
-            final CSVFileWriter inputWriter = new CSVFileWriter(inputPath, getController().getConfig(), ",");
+            final CSVFileWriter inputWriter = new CSVFileWriter(inputPath, getController().getConfig(), AppUtil.COMMA);
             try {
                 inputWriter.open();
                 inputWriter.setColumnNames(templateReader.getColumnNames());

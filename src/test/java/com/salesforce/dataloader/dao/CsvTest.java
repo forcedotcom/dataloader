@@ -37,6 +37,7 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.util.AppUtil;
 
 import org.junit.Assert;
 
@@ -121,7 +122,7 @@ public class CsvTest extends ConfigTestBase {
 
     @Test
     public void testCSVWriteBasic() throws Exception {
-        doTestCSVWriteBasic(",");
+        doTestCSVWriteBasic(AppUtil.COMMA);
     }
     
     @Test
@@ -136,7 +137,7 @@ public class CsvTest extends ConfigTestBase {
     
     @Test
     public void testCSVWriteBasicWithTabDelimiter() throws Exception {
-        doTestCSVWriteBasic("   ");
+        doTestCSVWriteBasic(AppUtil.TAB);
     }
     
     private void doTestCSVWriteBasic(String delimiter) throws Exception {
@@ -229,22 +230,22 @@ public class CsvTest extends ConfigTestBase {
             storedDelimiter = config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS);
             config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
         } else {
-            storedDelimiter = config.getString(Config.CSV_DELIMETER_OTHER_VALUE);
-            storedCsvDelimiterComma = config.getBoolean(Config.CSV_DELIMETER_COMMA);
-            storedCsvDelimiterTab = config.getBoolean(Config.CSV_DELIMETER_TAB);
-            storedCsvDelimiterOther = config.getBoolean(Config.CSV_DELIMETER_OTHER);
-            config.setValue(Config.CSV_DELIMETER_COMMA, false);
-            config.setValue(Config.CSV_DELIMETER_TAB, false);
-            config.setValue(Config.CSV_DELIMETER_OTHER, false);
-            config.setValue(Config.CSV_DELIMETER_OTHER_VALUE, delimiterStr);
-            if (",".equals(delimiterStr)) {
-                config.setValue(Config.CSV_DELIMETER_COMMA, true);
+            storedDelimiter = config.getString(Config.CSV_DELIMITER_OTHER_VALUE);
+            storedCsvDelimiterComma = config.getBoolean(Config.CSV_DELIMITER_COMMA);
+            storedCsvDelimiterTab = config.getBoolean(Config.CSV_DELIMITER_TAB);
+            storedCsvDelimiterOther = config.getBoolean(Config.CSV_DELIMITER_OTHER);
+            config.setValue(Config.CSV_DELIMITER_COMMA, false);
+            config.setValue(Config.CSV_DELIMITER_TAB, false);
+            config.setValue(Config.CSV_DELIMITER_OTHER, false);
+            config.setValue(Config.CSV_DELIMITER_OTHER_VALUE, delimiterStr);
+            if (AppUtil.COMMA.equals(delimiterStr)) {
+                config.setValue(Config.CSV_DELIMITER_COMMA, true);
             } else if ("    ".equals(delimiterStr)) {
-                config.setValue(Config.CSV_DELIMETER_TAB, true);
+                config.setValue(Config.CSV_DELIMITER_TAB, true);
             } else {
-                config.setValue(Config.CSV_DELIMETER_OTHER, true);
-                storedDelimiter = config.getString(Config.CSV_DELIMETER_OTHER_VALUE);
-                config.setValue(Config.CSV_DELIMETER_OTHER_VALUE, delimiterStr);
+                config.setValue(Config.CSV_DELIMITER_OTHER, true);
+                storedDelimiter = config.getString(Config.CSV_DELIMITER_OTHER_VALUE);
+                config.setValue(Config.CSV_DELIMITER_OTHER_VALUE, delimiterStr);
             }
         }
         config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
@@ -252,7 +253,7 @@ public class CsvTest extends ConfigTestBase {
         try {
             csv.open();
         } catch (Exception e) {
-            assertTrue("Exception reading header row: " + e.getMessage(), ignoreDelimiterConfig && !delimiterStr.equals(","));
+            assertTrue("Exception reading header row: " + e.getMessage(), ignoreDelimiterConfig && !delimiterStr.equals(AppUtil.COMMA));
             csv.close();
             return;
         }
@@ -277,10 +278,10 @@ public class CsvTest extends ConfigTestBase {
         if (isQueryResultsCSV) {
             config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, storedDelimiter);
         } else {
-            config.setValue(Config.CSV_DELIMETER_OTHER_VALUE, storedDelimiter);
-            config.setValue(Config.CSV_DELIMETER_COMMA, storedCsvDelimiterComma);
-            config.setValue(Config.CSV_DELIMETER_TAB, storedCsvDelimiterTab);
-            config.setValue(Config.CSV_DELIMETER_OTHER, storedCsvDelimiterOther);
+            config.setValue(Config.CSV_DELIMITER_OTHER_VALUE, storedDelimiter);
+            config.setValue(Config.CSV_DELIMITER_COMMA, storedCsvDelimiterComma);
+            config.setValue(Config.CSV_DELIMITER_TAB, storedCsvDelimiterTab);
+            config.setValue(Config.CSV_DELIMITER_OTHER, storedCsvDelimiterOther);
         }
     }
 }
