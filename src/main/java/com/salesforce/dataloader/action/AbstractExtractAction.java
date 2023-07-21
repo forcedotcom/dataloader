@@ -38,6 +38,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.*;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.mapping.SOQLMapper;
+import com.salesforce.dataloader.util.AppUtil;
 
 /**
  * Parent class for all extract dataloader actions.
@@ -99,7 +100,7 @@ abstract class AbstractExtractAction extends AbstractAction {
         }
 
         // normalize the SOQL string and find the field list
-        final String trimmedSoql = soql.trim().replaceAll("[\\s]*,[\\s]*", ",");
+        final String trimmedSoql = soql.trim().replaceAll("[\\s]*,[\\s]*", AppUtil.COMMA);
         final String upperSOQL = trimmedSoql.toUpperCase();
         final int selectPos = upperSOQL.indexOf("SELECT ");
         if (selectPos == -1) {
@@ -112,7 +113,7 @@ abstract class AbstractExtractAction extends AbstractAction {
 
         try {
             final String fieldString = trimmedSoql.substring(fieldListStart, fieldListEnd).trim();
-            final String[] fields = fieldString.split(","); //$NON-NLS-1$
+            final String[] fields = fieldString.split(AppUtil.COMMA); //$NON-NLS-1$
             return new ArrayList<String>(Arrays.asList(fields));
         } catch (final Exception e) {
             String errMsg;

@@ -29,6 +29,8 @@ package com.salesforce.dataloader.mapping;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.salesforce.dataloader.util.AppUtil;
+
 /**
  * Class to parse information used by DataLoader from a soql expression
  * 
@@ -135,7 +137,7 @@ class SOQLInfo {
 
         String rawFields = soql.substring(SELECT_KEYWORD.length(), fromIdx).trim();
         AtomicInteger aggIdx = new AtomicInteger();
-        for (String fieldString : rawFields.split(",")) {
+        for (String fieldString : rawFields.split(AppUtil.COMMA)) {
             SOQLFieldInfo soqlFieldInfo = new SOQLFieldInfo(fieldString, aggIdx);
             this.selectedFields.add(soqlFieldInfo);
         }

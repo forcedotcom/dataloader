@@ -471,28 +471,28 @@ public class AdvancedSettingsDialog extends Dialog {
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelCsvCommand.setLayoutData(data);
         buttonCsvComma = new Button(restComp, SWT.CHECK);
-        buttonCsvComma.setSelection(config.getBoolean(Config.CSV_DELIMETER_COMMA));
+        buttonCsvComma.setSelection(config.getBoolean(Config.CSV_DELIMITER_COMMA));
 
         Label labelTabCommand = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelTabCommand.setText(Labels.getString("AdvancedSettingsDialog.useTabAsCsvDelimiter"));
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelTabCommand.setLayoutData(data);
         buttonCsvTab = new Button(restComp, SWT.CHECK);
-        buttonCsvTab.setSelection(config.getBoolean(Config.CSV_DELIMETER_TAB));
+        buttonCsvTab.setSelection(config.getBoolean(Config.CSV_DELIMITER_TAB));
 
         Label labelOtherCommand = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelOtherCommand.setText(Labels.getString("AdvancedSettingsDialog.useOtherAsCsvDelimiter"));
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelOtherCommand.setLayoutData(data);
         buttonCsvOther = new Button(restComp, SWT.CHECK);
-        buttonCsvOther.setSelection(config.getBoolean(Config.CSV_DELIMETER_OTHER));
+        buttonCsvOther.setSelection(config.getBoolean(Config.CSV_DELIMITER_OTHER));
 
         Label labelOtherDelimiterValue = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelOtherDelimiterValue.setText(Labels.getString("AdvancedSettingsDialog.csvOtherDelimiterValue"));
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelOtherDelimiterValue.setLayoutData(data);
         textSplitterValue = new Text(restComp, SWT.BORDER);
-        textSplitterValue.setText(config.getString(Config.CSV_DELIMETER_OTHER_VALUE));
+        textSplitterValue.setText(config.getString(Config.CSV_DELIMITER_OTHER_VALUE));
         data = new GridData();
         data.widthHint = 15 * textSize.x;
         textSplitterValue.setLayoutData(data);
@@ -807,15 +807,15 @@ public class AdvancedSettingsDialog extends Dialog {
                         || textSplitterValue.getText().length() == 0)) {
                     return;
                 }
-                config.setValue(Config.CSV_DELIMETER_OTHER_VALUE, textSplitterValue.getText());
+                config.setValue(Config.CSV_DELIMITER_OTHER_VALUE, textSplitterValue.getText());
                 String queryResultsDelimiterStr = queryResultsDelimiterValue.getText();
                 if (queryResultsDelimiterStr.length() == 0) {
-                    queryResultsDelimiterStr = ","; // set to default
+                    queryResultsDelimiterStr = AppUtil.COMMA; // set to default
                 }
                 config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, queryResultsDelimiterStr);
-                config.setValue(Config.CSV_DELIMETER_COMMA, buttonCsvComma.getSelection());
-                config.setValue(Config.CSV_DELIMETER_TAB, buttonCsvTab.getSelection());
-                config.setValue(Config.CSV_DELIMETER_OTHER, buttonCsvOther.getSelection());
+                config.setValue(Config.CSV_DELIMITER_COMMA, buttonCsvComma.getSelection());
+                config.setValue(Config.CSV_DELIMITER_TAB, buttonCsvTab.getSelection());
+                config.setValue(Config.CSV_DELIMITER_OTHER, buttonCsvOther.getSelection());
 
                 config.setValue(Config.EXTRACT_REQUEST_SIZE, textQueryBatch.getText());
                 config.setValue(Config.ENDPOINT, currentTextEndpoint);

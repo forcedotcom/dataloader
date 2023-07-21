@@ -47,6 +47,7 @@ import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.util.AppUtil;
 
 /**
  * Base class for field name mappers. Used by data loader operations to map between local field names and sfdc field
@@ -108,7 +109,7 @@ public abstract class Mapper {
 
     public final void putMapping(String src, String dest) {
         // destination can be multiple field names for upload operations
-        StringTokenizer st = new StringTokenizer(dest, ",");
+        StringTokenizer st = new StringTokenizer(dest, AppUtil.COMMA);
         String originalDestList = null;
         while(st.hasMoreElements()) {
             String v = st.nextToken();
@@ -128,7 +129,7 @@ public abstract class Mapper {
     }
 
     private void handleMultipleValuesFromConstant(String name, String value) {
-        StringTokenizer st = new StringTokenizer(name, ",");
+        StringTokenizer st = new StringTokenizer(name, AppUtil.COMMA);
         while(st.hasMoreElements()) {
             String v = st.nextToken();
             v = v.trim();

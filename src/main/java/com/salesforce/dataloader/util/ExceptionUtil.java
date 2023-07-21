@@ -36,7 +36,7 @@ public class ExceptionUtil {
         StringBuilder stackTrace = new StringBuilder();
         if (e.getStackTrace() != null) {
             for (StackTraceElement elem : e.getStackTrace()) {
-                stackTrace.append("\t" + elem.toString() + "\n");
+                stackTrace.append(AppUtil.TAB + elem.toString() + "\n");
             }
         }
         return stackTrace.toString();

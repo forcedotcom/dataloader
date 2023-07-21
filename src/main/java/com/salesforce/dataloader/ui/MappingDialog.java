@@ -51,6 +51,7 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.mapping.LoadMapper;
 import com.salesforce.dataloader.ui.mapping.*;
+import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Field;
 
 /**
@@ -583,7 +584,7 @@ public class MappingDialog extends Dialog {
     }
 
     public void replenishMappedSforceFields(String fieldNameList) {
-        String[] fieldNameListArray = fieldNameList.split(",");
+        String[] fieldNameListArray = fieldNameList.split(AppUtil.COMMA);
         ArrayList<Field> fieldList = new ArrayList<Field>(Arrays.asList(this.sforceFields));
         for (String fieldNameToReplenish : fieldNameListArray) {
             fieldNameToReplenish = fieldNameToReplenish.strip();

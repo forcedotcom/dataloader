@@ -48,6 +48,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dyna.DateTimeConverter;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.sobject.SObject;
 
 import static org.junit.Assert.assertEquals;
@@ -256,7 +257,7 @@ public class CsvProcessTest extends ProcessTestBase {
         // query them and verify that they have the values
         StringBuilder fields = new StringBuilder("id");
         for(String field : accountFieldsToReturn) {
-            fields.append(",").append(field);
+            fields.append(AppUtil.COMMA).append(field);
         }
 
         SObject[] sobjects = getBinding().retrieve(fields.toString(), "Account", ids.toArray(new String[ids.size()]));

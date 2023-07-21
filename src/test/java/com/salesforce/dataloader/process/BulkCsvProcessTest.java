@@ -41,6 +41,7 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.util.AppUtil;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -121,7 +122,7 @@ public class BulkCsvProcessTest extends ProcessTestBase {
 
         CSVFileWriter writer = null;
         try {
-            writer = new CSVFileWriter(CSV_FILE_PATH, getController().getConfig(), ",");
+            writer = new CSVFileWriter(CSV_FILE_PATH, getController().getConfig(), AppUtil.COMMA);
             writer.open();
             writer.setColumnNames(new ArrayList<String>(rows[0].keySet()));
             writer.writeRowList(Arrays.asList(rows));

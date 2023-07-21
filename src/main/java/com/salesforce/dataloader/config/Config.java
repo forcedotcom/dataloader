@@ -200,10 +200,10 @@ public class Config {
     public static final String HIDE_WELCOME_SCREEN = "loader.hideWelcome";
 
     // Delimiter settings
-    public static final String CSV_DELIMETER_COMMA = "loader.csvComma";
-    public static final String CSV_DELIMETER_TAB = "loader.csvTab";
-    public static final String CSV_DELIMETER_OTHER = "loader.csvOther";
-    public static final String CSV_DELIMETER_OTHER_VALUE = "loader.csvOtherValue";
+    public static final String CSV_DELIMITER_COMMA = "loader.csvComma";
+    public static final String CSV_DELIMITER_TAB = "loader.csvTab";
+    public static final String CSV_DELIMITER_OTHER = "loader.csvOther";
+    public static final String CSV_DELIMITER_OTHER_VALUE = "loader.csvOtherValue";
     public static final String CSV_DELIMITER_FOR_QUERY_RESULTS = "loader.query.delimiter";
     public static final String BUFFER_UNPROCESSED_BULK_QUERY_RESULTS = "loader.bufferUnprocessedBulkQueryResults";
 
@@ -512,11 +512,11 @@ public class Config {
     private void setDefaults() {
         setDefaultValue(HIDE_WELCOME_SCREEN, true);
 
-        setDefaultValue(CSV_DELIMETER_COMMA, true);
-        setDefaultValue(CSV_DELIMETER_TAB, true);
-        setDefaultValue(CSV_DELIMETER_OTHER, false);
-        setDefaultValue(CSV_DELIMETER_OTHER_VALUE, "-");
-        setDefaultValue(CSV_DELIMITER_FOR_QUERY_RESULTS, ",");
+        setDefaultValue(CSV_DELIMITER_COMMA, true);
+        setDefaultValue(CSV_DELIMITER_TAB, true);
+        setDefaultValue(CSV_DELIMITER_OTHER, false);
+        setDefaultValue(CSV_DELIMITER_OTHER_VALUE, "-");
+        setDefaultValue(CSV_DELIMITER_FOR_QUERY_RESULTS, AppUtil.COMMA);
 
         setDefaultValue(ENDPOINT, DEFAULT_ENDPOINT_URL);
         setDefaultValue(LOAD_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
@@ -553,7 +553,7 @@ public class Config {
         setDefaultValue(OAUTH_SERVER, DEFAULT_ENDPOINT_URL);
         setDefaultValue(OAUTH_REDIRECTURI, DEFAULT_ENDPOINT_URL);
         setDefaultValue(OAUTH_ENVIRONMENT, OAUTH_PROD_ENVIRONMENT_VAL);
-        setDefaultValue(OAUTH_ENVIRONMENTS, OAUTH_PROD_ENVIRONMENT_VAL + "," + OAUTH_SB_ENVIRONMENT_VAL);
+        setDefaultValue(OAUTH_ENVIRONMENTS, OAUTH_PROD_ENVIRONMENT_VAL + AppUtil.COMMA + OAUTH_SB_ENVIRONMENT_VAL);
 
         /* sfdc.oauth.<env>.<bulk | partner>.clientid = DataLoaderBulkUI | DataLoaderPartnerUI */
         setDefaultValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
@@ -722,7 +722,7 @@ public class Config {
         String values = getString(name);
         ArrayList<String> list = new ArrayList<>();
         if (values != null && !values.trim().isEmpty()) {
-            Collections.addAll(list, values.trim().split(","));
+            Collections.addAll(list, values.trim().split(AppUtil.COMMA));
         }
         return list;
     }
@@ -795,7 +795,7 @@ public class Config {
         String value = getParamValue(name);
         if (value == null || value.length() == 0) return MAP_STRING_DEFAULT;
         Map<String, String> mval = new HashMap<String, String>();
-        String[] pairs = value.split(",");
+        String[] pairs = value.split(AppUtil.COMMA);
         for (String pair : pairs) {
             String[] nameValue = pair.split("=");
             if (nameValue.length != 2) {
@@ -1211,7 +1211,7 @@ public class Config {
         for (String key : valueMap.keySet()) {
             // add comma for subsequent entries
             if (sb.length() != 0) {
-                sb.append(",");
+                sb.append(AppUtil.COMMA);
             }
             sb.append(key + "=" + valueMap.get(key));
         }
@@ -1264,7 +1264,7 @@ public class Config {
     
     private void setValue(String name,  boolean skipIfAlreadySet, String... values) {
         if (values != null && values.length > 1) {
-            StringJoiner joiner = new StringJoiner(",");
+            StringJoiner joiner = new StringJoiner(AppUtil.COMMA);
             for (String value : values) {
                 joiner.add(value);
             }
