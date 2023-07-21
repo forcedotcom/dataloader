@@ -251,7 +251,7 @@ public class DateConverterTest {
      * @expectedResults Assert that the calendar and the string will evaluate to the same instant.
      */
     @Test
-    public void testNotInDelimeterPattern() {
+    public void testNotInDelimiterPattern() {
 
         // use this as the expected calendar instance
         Calendar expCalDate = Calendar.getInstance(TZ);
@@ -517,7 +517,7 @@ public class DateConverterTest {
      *
      */
     @Test
-    public void testSlashAndNoTDelimeterFormat() {
+    public void testSlashAndNoTDelimiterFormat() {
 
         Calendar expCalDate = Calendar.getInstance(TZ);
 
@@ -543,7 +543,7 @@ public class DateConverterTest {
      *
      */
     @Test
-    public void testSlashWithTimeZoneDelimeterFormat() {
+    public void testSlashWithTimeZoneDelimiterFormat() {
 
         TimeZone wst = TimeZone.getTimeZone("Australia/Perth");
         Calendar calDateWST = Calendar.getInstance(wst);
@@ -551,16 +551,16 @@ public class DateConverterTest {
         calDateWST.clear();
         calDateWST.set(2009, 7 - 1, 16, 12, 14, 45);
 
-        for (String delimeter : new String[] { " ", "T" }) {
+        for (String delimiter : new String[] { " ", "T" }) {
 
             //vanilla cases that don't cross into different days
-            assertValidDate("07/16/2009" + delimeter + "12:14:45+0800", calDateWST,    false);
-            assertValidDate("07/16/2009" + delimeter + "02:14:45-0200", calDateWST, false); // offset case
-            assertValidDate("07/16/2009" + delimeter + "16:14:45+1200", calDateWST, false); // offset case
+            assertValidDate("07/16/2009" + delimiter + "12:14:45+0800", calDateWST,    false);
+            assertValidDate("07/16/2009" + delimiter + "02:14:45-0200", calDateWST, false); // offset case
+            assertValidDate("07/16/2009" + delimiter + "16:14:45+1200", calDateWST, false); // offset case
 
             //cross-day cases
-            assertValidDate("07/16/2009" + delimeter + "03:14:45-0100", calDateWST,    false);
-            assertValidDate("07/16/2009" + delimeter + "12:14:45+0800", calDateWST, false); // offset case
+            assertValidDate("07/16/2009" + delimiter + "03:14:45-0100", calDateWST,    false);
+            assertValidDate("07/16/2009" + delimiter + "12:14:45+0800", calDateWST, false); // offset case
         }
     }
 
@@ -573,7 +573,7 @@ public class DateConverterTest {
      *
      */
     @Test
-    public void testSlashWithTimeZoneDelimeterFormatEuropeanFormat() {
+    public void testSlashWithTimeZoneDelimiterFormatEuropeanFormat() {
 
         TimeZone wst = TimeZone.getTimeZone("Australia/Perth");
         Calendar calDateWST = Calendar.getInstance(wst);
@@ -581,16 +581,16 @@ public class DateConverterTest {
         calDateWST.clear();
         calDateWST.set(2009, 7 - 1, 16, 12, 14, 45);
 
-        for (String delimeter : new String[] { " ", "T" }) {
+        for (String delimiter : new String[] { " ", "T" }) {
 
             //vanilla cases that don't cross into different days
-            assertValidDate("16/07/2009" + delimeter + "12:14:45+0800", calDateWST,    true);
-            assertValidDate("16/07/2009" + delimeter + "02:14:45-0200", calDateWST, true); // offset case
-            assertValidDate("16/07/2009" + delimeter + "16:14:45+1200", calDateWST, true); // offset case
+            assertValidDate("16/07/2009" + delimiter + "12:14:45+0800", calDateWST,    true);
+            assertValidDate("16/07/2009" + delimiter + "02:14:45-0200", calDateWST, true); // offset case
+            assertValidDate("16/07/2009" + delimiter + "16:14:45+1200", calDateWST, true); // offset case
 
             //cross-day cases
-            assertValidDate("16/07/2009" + delimeter + "03:14:45-0100", calDateWST,    true);
-            assertValidDate("16/07/2009" + delimeter + "12:14:45+0800", calDateWST, true); // offset case
+            assertValidDate("16/07/2009" + delimiter + "03:14:45-0100", calDateWST,    true);
+            assertValidDate("16/07/2009" + delimiter + "12:14:45+0800", calDateWST, true); // offset case
         }
     }
 
