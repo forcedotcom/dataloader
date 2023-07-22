@@ -30,7 +30,6 @@ package com.salesforce.dataloader.process;
  * @input DataLoaderRunner -------------- @ * ----------------
  */
 
-import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.install.Installer;
 import com.salesforce.dataloader.security.EncryptionUtil;
 import com.salesforce.dataloader.ui.UIUtils;
@@ -58,7 +57,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.client.HttpClientTransport;
-import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 
 public class DataLoaderRunner extends Thread {
@@ -84,7 +82,9 @@ public class DataLoaderRunner extends Thread {
         try {
             runApp(args, null);
         } finally {
-            logger.debug("Number of server API invocations = " + HttpClientTransport.getServerInvocationCount());
+            if (logger != null) {
+                logger.debug("Number of server API invocations = " + HttpClientTransport.getServerInvocationCount());
+            }
         }
     }
     
@@ -280,7 +280,7 @@ public class DataLoaderRunner extends Thread {
         if (!parentDir.exists()) {
             return null;
         }
-        FileFilter fileFilter = new WildcardFileFilter(childFileStr);
+        FileFilter fileFilter = WildcardFileFilter.builder().setWildcards(childFileStr).get();
         File[] files = parentDir.listFiles(fileFilter);
         if (files != null && files.length > 0) {
             return files[0];
