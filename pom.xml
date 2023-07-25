@@ -222,6 +222,11 @@
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-jar-plugin</artifactId>
       <version>3.2.2</version>
+      <configuration>
+          <excludes>
+            <exclude>contrib/**</exclude>
+          </excludes>
+      </configuration>
 	</plugin>
 <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-site-plugin -->
 	<plugin>
@@ -441,6 +446,7 @@
             <phase>package</phase>
              <configuration>
               <target>
+                <delete file="${basedir}/dataloader_v${project.version}.zip"/>
                 <copy file="${basedir}/target/dataloader-${project.version}.jar" 
                     todir="${basedir}/target/zipartifacts"/>
                 <zip update="true" destfile="${basedir}/dataloader_v${project.version}.zip">
