@@ -114,21 +114,21 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
     }
 
     /**
-     * Test output of last run files. 1. Output is enabled, directory is not set (use default) 2. Output is enabled,
-     * directory is set 3. Output is disabled
+     * Test output of last run files. 1. Output is enabled, folder is not set (use default) 2. Output is enabled,
+     * folder is set 3. Output is disabled
      * 
      * @hierarchy API.dataloader Csv Process Tests
      * @userstory Commenting existing data loader tests and uploading into QA force
      */
     @Test
     public void testLastRunOutput() throws Exception {
-        // 1. Output is enabled (use default), directory is not set (use
+        // 1. Output is enabled (use default), folder is not set (use
         // default)
         String baseName = this.baseName;
         upsertSfdcAccounts(1);
         testLastRunOutput(true, baseName + "_default", true, null);
 
-        // 2. Output is enabled, directory is set
+        // 2. Output is enabled, folder is set
         testLastRunOutput(false, baseName + "_dirSet", true, System.getProperty("java.io.tmpdir"));
 
         // 3. Output is disabled

@@ -84,7 +84,7 @@ import java.util.Properties;
 public class Controller {
 
     /**
-     * the system property name used to determine the config directory
+     * the system property name used to determine the config folder
      */
 
     public static String APP_VERSION = ""; //$NON-NLS-1$
@@ -393,13 +393,13 @@ public class Controller {
     public void setStatusFiles(String statusDirName, boolean createDir, boolean generateFiles)
             throws ProcessInitializationException {
         File statusDir = new File(statusDirName);
-        // if status directory unspecified, create one based on config path
+        // if status folder unspecified, create one based on config path
         if (statusDirName == null || statusDirName.length() == 0) {
             statusDir = new File(new File(AppUtil.getConfigurationsDir()), "../status");
             statusDirName = statusDir.getAbsolutePath();
         }
-        // it's an error if directory files exists but not a directory
-        // or if directory doesn't exist and cannot be created (determined by caller)
+        // it's an error if folder files exists but not a folder
+        // or if folder doesn't exist and cannot be created (determined by caller)
         if (statusDir.exists() && !statusDir.isDirectory()) {
             throw new ProcessInitializationException(Messages.getFormattedString("Controller.invalidOutputDir",
                     statusDirName));

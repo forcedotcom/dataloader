@@ -35,7 +35,7 @@ import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.ui.UIUtils;
 
 /**
- * Last page of extraction wizard which lets the user select directory for status files (currently, only error status is
+ * Last page of extraction wizard which lets the user select folder for status files (currently, only error status is
  * generated in case of extract)
  * 
  * @author Alex Warshavsky
@@ -53,7 +53,7 @@ public class ExtractionFinishPage extends FinishPage {
         String outputDirName = getOutputDir();
         File statusDir = new File(outputDirName);
         if (!statusDir.exists() || !statusDir.isDirectory()) {
-            UIUtils.errorMessageBox(getShell(), Labels.getString("LoadWizard.errorValidDirectory")); //$NON-NLS-1$
+            UIUtils.errorMessageBox(getShell(), Labels.getString("LoadWizard.errorValidFolder")); //$NON-NLS-1$
             return false;
         }
         // set the files for status output

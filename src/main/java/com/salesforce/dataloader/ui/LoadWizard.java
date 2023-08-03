@@ -75,7 +75,7 @@ public abstract class LoadWizard extends BaseWizard {
         String outputDirName = getFinishPage().getOutputDir();
         File statusDir = new File(outputDirName);
         if (!statusDir.exists() || !statusDir.isDirectory()) {
-            UIUtils.errorMessageBox(getShell(), Labels.getString("LoadWizard.errorValidDirectory")); //$NON-NLS-1$
+            UIUtils.errorMessageBox(getShell(), Labels.getString("LoadWizard.errorValidFolder")); //$NON-NLS-1$
             return false;
         }
         // set the files for status output
