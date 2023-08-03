@@ -167,8 +167,20 @@ public class Installer extends Thread {
         createDir(installationDir);
         logger.debug("going to copy contents of " + installationSourceDir + " to " + installationDir);
         
-        FileUtils.copyDirectory(new File(installationSourceDir), new File(installationDir));
-        
+        String classpath = System.getProperty("java.class.path");
+        String[] jars = classpath.split(System.getProperty("path.separator"));
+        String dataloaderJar = null;
+        for (String jar : jars) {
+            if (jar.contains("dataloader")) {
+                dataloaderJar = jar;
+                break;
+            }
+        }
+        if (dataloaderJar == null) {
+            logger.fatal("Did not find Data Loader jar in the installation artifacts. Unable to install Data Loader");
+            System.exit(-1);
+        }
+        FileUtils.copyFileToDirectory(new File(dataloaderJar), new File(installationDir));
         logger.debug("going to delete \\.* files from " + installationDir);
         deleteFilesFromDir(installationDir, "\\.*");
         logger.debug("going to delete install.* files from " + installationDir);
