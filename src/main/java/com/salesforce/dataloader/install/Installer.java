@@ -93,7 +93,7 @@ public class Installer extends Thread {
                 AppUtil.showBanner();
             }
             if (!skipCopyArtifacts) {
-                logger.debug("going to select installation directory");
+                logger.debug("going to select installation folder");
                 installationDir = selectInstallationDir();
                 logger.debug("going to copy artifacts");
                 copyArtifacts(installationDir);
@@ -108,7 +108,7 @@ public class Installer extends Thread {
                 createStartMenuShortcut(installationDir);
             }
             if (!skipCreateAppsDirShortcut && AppUtil.isRunningOnMacOS()) {
-                logger.debug("going to create Applications directory shortcut");
+                logger.debug("going to create Applications folder shortcut");
                 createAppsDirShortcut(installationDir);
             }
         } catch (Exception ex) {
@@ -120,11 +120,11 @@ public class Installer extends Thread {
     private static String selectInstallationDir() throws IOException {
         String installationDir = "";
         System.out.println(Messages.getMessage(Installer.class, "initialMessage", USERHOME + PATH_SEPARATOR));
-        String installationDirRoot = promptAndGetUserInput("Provide the installation directory [default: dataloader] : ");
+        String installationDirRoot = promptAndGetUserInput("Provide the installation folder [default: dataloader] : ");
         if (installationDirRoot.isBlank()) {
             installationDirRoot = "dataloader";
         }
-        logger.debug("installation directory: " + installationDirRoot);
+        logger.debug("installation folder: " + installationDirRoot);
         String installationPathSuffix = installationDirRoot + PATH_SEPARATOR + "v" + AppUtil.DATALOADER_VERSION;
         if (installationDirRoot.startsWith(PATH_SEPARATOR) 
              || (AppUtil.isRunningOnWindows() && installationDirRoot.indexOf(':') == 1 && installationDirRoot.indexOf(PATH_SEPARATOR) == 2)) {
@@ -135,7 +135,7 @@ public class Installer extends Thread {
         } else {
             installationDir = USERHOME + PATH_SEPARATOR + installationPathSuffix;
         }
-        logger.debug("installation directory absolute path: " + installationDir);
+        logger.debug("installation folder absolute path: " + installationDir);
         System.out.println(Messages.getMessage(Installer.class, "installationDirConfirmation", AppUtil.DATALOADER_VERSION, installationDir));
         return installationDir;
     }
@@ -147,7 +147,9 @@ public class Installer extends Thread {
                 System.out.println("");
                 final String prompt = Messages.getMessage(Installer.class, "overwriteInstallationDirPrompt", AppUtil.DATALOADER_VERSION, installationDir);
                 String input = promptAndGetUserInput(prompt);
-                if (Messages.getMessage(Installer.class, "promptAnswerYes").toLowerCase().startsWith(input.toLowerCase())) {
+                if (input == null || input.isBlank()) {
+                    System.out.println(Messages.getMessage(Installer.class, "reprompt"));
+                } else if (Messages.getMessage(Installer.class, "promptAnswerYes").toLowerCase().startsWith(input.toLowerCase())) {
                     System.out.println(Messages.getMessage(Installer.class, "deletionInProgressMessage", AppUtil.DATALOADER_VERSION));
                     Messages.getMessage(Installer.class, "initialMessage");
                     logger.debug("going to delete " + installationDir);
@@ -203,12 +205,12 @@ public class Installer extends Thread {
         return input;
     }
     
-    private static void deleteFilesFromDir(String directoryName, String filePattern) throws IOException {
-        File directory = new File(directoryName);
-        if (!directory.exists()) {
+    private static void deleteFilesFromDir(String folderName, String filePattern) throws IOException {
+        File folder = new File(folderName);
+        if (!folder.exists()) {
             return;
         }
-        final File[] files = directory.listFiles( new FilenameFilter() {
+        final File[] files = folder.listFiles( new FilenameFilter() {
             @Override
             public boolean accept( final File dir,
                                    final String name ) {
@@ -229,7 +231,7 @@ public class Installer extends Thread {
         public void create() throws Exception;
     }
     
-    private static void createShortcut(String prompt, ShortcutCreatorInterface shortcutCreator) {
+    private static void createShortcut(String prompt, ShortcutCreatorInterface shortcutCreator, String success) {
         for (;;) {
             System.out.println("");
             String input = "";
@@ -239,9 +241,14 @@ public class Installer extends Thread {
                 System.err.println(Messages.getMessage(Installer.class, "responseReadError"));
                 handleException(e, Level.ERROR);
             }
-            if (Messages.getMessage(Installer.class, "promptAnswerYes").toLowerCase().startsWith(input.toLowerCase())) {
+            if (input == null || input.isBlank()) {
+                System.out.println(Messages.getMessage(Installer.class, "reprompt"));
+            } else if (Messages.getMessage(Installer.class, "promptAnswerYes").toLowerCase().startsWith(input.toLowerCase())) {
                 try {
                     shortcutCreator.create();
+                    if (success != null && !success.isBlank()) {
+                        System.out.println(success);
+                    }
                 } catch (Exception ex) {
                     System.err.println(Messages.getMessage(Installer.class, "shortcutCreateError"));
                     handleException(ex, Level.ERROR);
@@ -257,13 +264,14 @@ public class Installer extends Thread {
     
     private static void createDesktopShortcut(String installationDir) {
         final String PROMPT = Messages.getMessage(Installer.class, "createDesktopShortcutPrompt");
+        final String SUCCESS = Messages.getMessage(Installer.class, "successCreateDesktopShortcut");
         if (AppUtil.isRunningOnWindows()) {
             createShortcut(PROMPT,
                     new ShortcutCreatorInterface() {
                         public void create() throws Exception {
                             createShortcutOnWindows(CREATE_DEKSTOP_SHORTCUT_ON_WINDOWS, installationDir);
                         }
-            });
+            }, SUCCESS);
         } else if (AppUtil.isRunningOnMacOS()) {
             createShortcut(PROMPT,
                     new ShortcutCreatorInterface() {
@@ -271,12 +279,13 @@ public class Installer extends Thread {
                                 createSymLink(USERHOME + "/Desktop/DataLoader " + AppUtil.DATALOADER_VERSION,
                                         installationDir + "/dataloader.app", true);
                         }
-            });
+            }, SUCCESS);
         }
     }
     
     private static void createAppsDirShortcut(String installationDir) {
         final String PROMPT =  Messages.getMessage(Installer.class, "createApplicationsDirShortcutPrompt");
+        final String SUCCESS =  Messages.getMessage(Installer.class, "successCreateApplicationsDirShortcut");
 
         if (AppUtil.isRunningOnMacOS()) {
             createShortcut(PROMPT,
@@ -285,12 +294,13 @@ public class Installer extends Thread {
                             createSymLink("/Applications/DataLoader " + AppUtil.DATALOADER_VERSION,
                                     installationDir + "/dataloader.app", true);
                         }
-            });
+            }, SUCCESS);
         }
     }
     
     private static void createStartMenuShortcut(String installationDir) {
         final String PROMPT = Messages.getMessage(Installer.class, "createStartMenuShortcutPrompt");
+        final String SUCCESS = Messages.getMessage(Installer.class, "successCreateStartMenuShortcut");
 
         if (AppUtil.isRunningOnWindows()) {
             createShortcut(PROMPT,
@@ -301,7 +311,7 @@ public class Installer extends Thread {
                             createDir(SALESFORCE_START_MENU_DIR);
                             createShortcutOnWindows(CREATE_START_MENU_SHORTCUT_ON_WINDOWS, installationDir);
                         }
-            });
+            }, SUCCESS);
         }
     }
     

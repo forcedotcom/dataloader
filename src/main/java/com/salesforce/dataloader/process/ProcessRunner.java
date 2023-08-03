@@ -303,7 +303,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
             logger.info(Config.PROCESS_NAME 
                         + "is specified in the command line. Loading DynaBean with id " 
                         + dynaBeanID 
-                        + " from process-conf.xml located in directory "
+                        + " from process-conf.xml located in folder "
                         + AppUtil.getConfigurationsDir());
             runner = ProcessConfig.getProcessInstance(dynaBeanID);
         }

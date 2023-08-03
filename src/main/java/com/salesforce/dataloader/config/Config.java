@@ -108,7 +108,7 @@ import org.apache.logging.log4j.Logger;
  * - Properties set in Settings dialog and saved in config.properties file
  * 
  * - Properties set during actions and saved in config.properties/<operation | "ui">_lastRun.properties file.
- *   Some properties are set during actions such as login, specifying results directory for an operation, and so on.
+ *   Some properties are set during actions such as login, specifying results folder for an operation, and so on.
  *   For example, "process.operation" property is set when user clicks on the operation button.
  *   These properties may not get saved depending on whether they are designated as "read-only" properties.
  *   
@@ -743,7 +743,7 @@ public class Config {
      *
      * @param configFileProperty property containing a config filename
      * @return Config filename path based on config property value. Config file is assumed to reside
-     * in the global config directory
+     * in the global config folder
      */
     public String getConfigFilename(String configFileProperty) {
         String value = getParamValue(configFileProperty);
@@ -757,10 +757,10 @@ public class Config {
 
 
     /**
-     * Constructs config file path based on the configuration directory and the passed in config
+     * Constructs config file path based on the configuration folder and the passed in config
      * filename
      *
-     * @param configFilename Config filename that resides in the config directory
+     * @param configFilename Config filename that resides in the config folder
      * @return Full path to the config file
      */
     public String constructConfigFilePath(String configFilename) {
@@ -1448,23 +1448,23 @@ public class Config {
     }
     
     /**
-     * Create directory provided from the parameter
+     * Create folder provided from the parameter
      *
-     * @param dirPath - directory to be created
-     * @return True if directory was created successfully or directory already existed False if
-     * directory was failed to create
+     * @param dirPath - folder to be created
+     * @return True if folder was created successfully or folder already existed False if
+     * folder was failed to create
      */
     private static boolean createDir(File dirPath) {
         boolean isSuccessful = true;
         if (!dirPath.exists() || !dirPath.isDirectory()) {
             isSuccessful = dirPath.mkdirs();
             if (isSuccessful) {
-                logger.info("Created config directory: " + dirPath);
+                logger.info("Created config folder: " + dirPath);
             } else {
-                logger.info("Unable to create config directory: " + dirPath);
+                logger.info("Unable to create config folder: " + dirPath);
             }
         } else {
-            logger.info("Config directory already exists: " + dirPath);
+            logger.info("Config folder already exists: " + dirPath);
         }
         return isSuccessful;
     }

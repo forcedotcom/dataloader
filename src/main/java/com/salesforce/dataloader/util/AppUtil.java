@@ -308,11 +308,11 @@ public class AppUtil {
     
     private static void processArgsForBatchMode(String[] args, Map<String,String> argsMap) {
         if (!argsMap.containsKey(AppUtil.CLI_OPTION_CONFIG_DIR_PROP) && args.length < 2) {
-            // config directory must be specified in the first argument
+            // config folder must be specified in the first argument
             System.err.println(
-                    "Usage: process <configuration directory> [batch process bean id]\n"
+                    "Usage: process <configuration folder> [batch process bean id]\n"
                     + "\n"
-                    + "      configuration directory -- required -- directory that contains configuration files,\n"
+                    + "      configuration folder -- required -- folder that contains configuration files,\n"
                     + "          i.e. config.properties, process-conf.xml, database-conf.xml\n"
                     + "\n"
                     + "      batch process bean id -- optional -- id of a batch process bean in process-conf.xml,\n"

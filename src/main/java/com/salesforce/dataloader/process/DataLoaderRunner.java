@@ -194,7 +194,7 @@ public class DataLoaderRunner extends Thread {
           logger.debug("    " + args[i]);
         }
         
-        // add the argument to indicate that JAVA_LIB_PATH has the directory containing SWT native libraries
+        // add the argument to indicate that JAVA_LIB_PATH has the folder containing SWT native libraries
         jvmArgs.add(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
         logger.debug("    " + AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
         ProcessBuilder processBuilder = new ProcessBuilder(jvmArgs);
@@ -262,7 +262,7 @@ public class DataLoaderRunner extends Thread {
             return null;
         }
         if (parentDirStr.contains("*")) {
-            // path to the file has a wildcard. Assume that it is present only at the parent directory level
+            // path to the file has a wildcard. Assume that it is present only at the parent folder level
             String[] subpaths = parentDirStr.split("\\*");
             File grandparentDir = new File(subpaths[0]);
             File[] possibleParentDirs = grandparentDir.listFiles();

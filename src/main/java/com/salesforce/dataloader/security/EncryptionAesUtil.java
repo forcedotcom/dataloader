@@ -137,7 +137,7 @@ public class EncryptionAesUtil {
 
         } else {
             LOGGER.error(customDir + " was not created");
-            throw new RuntimeException("Cannot create directory:" + path);
+            throw new RuntimeException("Cannot create folder:" + path);
         }
         return Paths.get(path, DEFAULT_KEYFILE_NAME).toString();
     }
