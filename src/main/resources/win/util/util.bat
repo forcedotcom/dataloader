@@ -60,7 +60,6 @@ REM Shortcut files have .lnk extension
     powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut(""""%~1""""); $Shortcut.WorkingDirectory = """"%~2""""; $Shortcut.TargetPath = """"%~2\dataloader.bat""""; $Shortcut.IconLocation = """"%~2\dataloader.ico""""; $Shortcut.WindowStyle=7; $Shortcut.Save()"
     EXIT /b 0
 
-REM Note for label renaming - promptForShortcut sets "yesDestination" var based on naming convention.
 :createStartMenuShortcut
     IF NOT EXIST "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Salesforce\" (
         mkdir "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Salesforce"
@@ -69,7 +68,6 @@ REM Note for label renaming - promptForShortcut sets "yesDestination" var based 
     move "%USERPROFILE%\Desktop\Dataloader.lnk" "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Salesforce\Dataloader %DATALOADER_VERSION%.lnk" >nul
     EXIT /b 0
 
-REM Note for label renaming - promptForShortcut sets "yesDestination" var based on naming convention.
 :createDesktopShortcut
     CALL :CreateShortcut "$Home\Desktop\Dataloader.lnk" "%~1"
     for /f "usebackq tokens=3*" %%D IN (`reg query "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop`) do set DESKTOP_DIR=%%D
