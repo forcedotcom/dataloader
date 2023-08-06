@@ -39,10 +39,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.TreeSet;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
@@ -89,7 +92,6 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private final boolean isDelete;
     private static final DateFormat DATE_FMT;
     private int batchCountForJob = 0;
-    private List<String> batchHeaderColumns = null;
 
     static {
         DATE_FMT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -176,13 +178,15 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private void doOneBatch(PrintStream out, ByteArrayOutputStream os, List<DynaBean> rows) throws OperationException,
             AsyncApiException {
         int processedRecordsCount = 0;
+        final List<String> userColumns = getController().getDao().getColumnNames();
+        List<String> headerColumns = null;
         for (int i = 0; i < rows.size(); i++) {
             final DynaBean row = rows.get(i);
 
             if (processedRecordsCount == 0) {
-                addHeader(out, row);
+                headerColumns = addBatchRequestHeader(out, row, userColumns);
             }
-            writeRow(row, out, processedRecordsCount);
+            writeRow(row, out, processedRecordsCount, headerColumns);
             processedRecordsCount++;
 
             if (os.size() > Config.MAX_BULK_API_BATCH_BYTES) {
@@ -194,30 +198,17 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         if (processedRecordsCount > 0) createBatch(os, processedRecordsCount);
         this.jobUtil.periodicCheckStatus();
     }
-    
-    private List<String> getBatchHeaderColumns(DynaBean row) {
-        if (this.batchHeaderColumns != null) {
-            return this.batchHeaderColumns;
-        }
-        this.batchHeaderColumns = new ArrayList<String>();
-        for (DynaProperty dynaProperty : row.getDynaClass().getDynaProperties()) {
-            final String sfdcColumn = dynaProperty.getName();
-            if (row.get(sfdcColumn) != null) {
-                this.batchHeaderColumns.add(sfdcColumn);
-            }
-        }
-        return this.batchHeaderColumns;
-    }
 
-    private void writeRow(DynaBean row, PrintStream out, int recordsInBatch) throws LoadException {
+    private void writeRow(DynaBean row, PrintStream out, int recordsInBatch,
+            List<String> header) throws LoadException {
         boolean notFirst = false;
-        for (String sforceField : getBatchHeaderColumns(row)) {
+        for (final String sfdcColumn : header) {
             if (notFirst) {
                 out.print(',');
             } else {
                 notFirst = true;
             }
-            writeSingleColumn(out, sforceField.strip(), row.get(sforceField));
+            writeSingleColumn(out, sfdcColumn, row.get(sfdcColumn));
         }
         out.println();
     }
@@ -247,18 +238,49 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         out.print('"');
     }
 
-    private void addHeader(PrintStream out, DynaBean row)
+    private List<String> addBatchRequestHeader(PrintStream serverRequestOutput, DynaBean row, List<String> columns)
             throws LoadException {
         boolean first = true;
-        for (String sfdcColumn : getBatchHeaderColumns(row)) {
-            if (first) {
-                first = false;
-            } else {
-                out.print(',');
+        final List<String> cols = new ArrayList<String>();
+        final Set<String> addedCols = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+        for (final String userColumn : columns) {
+            final String sfdcColList = getMapper().getMapping(userColumn);
+            // if the column is not mapped, don't send it
+            if (sfdcColList == null || sfdcColList.length() == 0) {
+                // TODO: we should make it more obvious to users when we omit a column
+                getLogger().warn("Cannot find mapping for column: " + userColumn + ".  Omitting column");
+                continue;
             }
-            out.print(sfdcColumn.replace(':', '.'));
+            String[] sfdcColArray = sfdcColList.split(",");
+            for (String sfdcColumn : sfdcColArray) {
+                sfdcColumn = sfdcColumn.strip();
+                // TODO we don't really need to be this strict about a delete CSV file.. as long as the IDS are there
+                if (this.isDelete && (!first || !"id".equalsIgnoreCase(sfdcColumn)))
+                    throw new LoadException(Messages.getMessage(getClass(), "deleteCsvError"));
+                addFieldToBatchRequestHeader(serverRequestOutput, sfdcColumn, cols, addedCols, first);
+            }
+            if (first) first = false;
         }
-        out.println();
+        
+        // Handle constant field mappings in the field mapping file (.sdl)
+        for (DynaProperty dynaProperty : row.getDynaClass().getDynaProperties()) {
+            final String name = dynaProperty.getName();
+            if (row.get(name) != null && !addedCols.contains(name)) {
+                addFieldToBatchRequestHeader(serverRequestOutput, name, cols, addedCols, first);
+            }
+        }
+        serverRequestOutput.println();
+        return Collections.unmodifiableList(cols);
+    }
+
+    private static void addFieldToBatchRequestHeader(PrintStream serverRequestOutput, String sfdcColumn, List<String> cols, Set<String> addedCols,
+            boolean first) {
+        if (!first) {
+            serverRequestOutput.print(',');
+        }
+        serverRequestOutput.print(sfdcColumn.replace(':', '.'));
+        cols.add(sfdcColumn);
+        addedCols.add(sfdcColumn);
     }
 
     private void writeServerLoadBatchDataToCSV(ByteArrayOutputStream os) {
