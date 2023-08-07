@@ -51,6 +51,7 @@ public class Installer extends Thread {
     private static final String CREATE_START_MENU_SHORTCUT_ON_WINDOWS = ":createStartMenuShortcut";
 
     private static Logger logger;
+    private static String[] OS_SPECIFIC_DL_COMMAND = {"dataloader.bat", "dataloader_console", "dataloader.sh"};
     
     public void run() {
         System.out.println(Messages.getMessage(Installer.class, "exitMessage"));
@@ -59,15 +60,17 @@ public class Installer extends Thread {
     public static void install(String[] args) {
         try {
             String installationDir = ".";
-            final String INSTALL_COMPLETED_FILE = ".sf_dl_install";
-            Runtime.getRuntime().addShutdownHook(new Installer());
-            setLogger();
             installationDir = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation()
                     .toURI()).getParent();
-            Path installFilePath = Paths.get(installationDir + PATH_SEPARATOR + INSTALL_COMPLETED_FILE);
-            if (Files.exists(installFilePath) && AppUtil.getAppRunMode() != AppUtil.APP_RUN_MODE.INSTALL) {
-                // installation completed
-                return;
+            Runtime.getRuntime().addShutdownHook(new Installer());
+            setLogger();
+
+            for (String dlCmd : OS_SPECIFIC_DL_COMMAND) {
+                Path installFilePath = Paths.get(installationDir + PATH_SEPARATOR + dlCmd);
+                if (Files.exists(installFilePath) && AppUtil.getAppRunMode() != AppUtil.APP_RUN_MODE.INSTALL) {
+                    // installation completed
+                    return;
+                }
             }
             boolean hideBanner = false;
             boolean skipCopyArtifacts = false;
@@ -99,11 +102,6 @@ public class Installer extends Thread {
             if (!skipCreateAppsDirShortcut && AppUtil.isRunningOnMacOS()) {
                 logger.debug("going to create Applications folder shortcut");
                 createAppsDirShortcut(installationDir);
-            }
-            installFilePath = Paths.get(installationDir + PATH_SEPARATOR + INSTALL_COMPLETED_FILE);
-            Files.createFile(installFilePath);
-            if (AppUtil.isRunningOnWindows()) {
-                Files.setAttribute(installFilePath, "dos:hidden", true);
             }
             if (!skipCopyArtifacts) {
                 System.exit(0);
