@@ -102,15 +102,13 @@ public class DataLoaderRunner extends Thread {
             } catch (Throwable t) {
                 ProcessRunner.logErrorAndExitProcess("Unable to run process", t);
             }
-        } else if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.INSTALL) {
-            Installer.install(args);
         } else if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.ENCRYPT) {
             EncryptionUtil.main(args);
         } else {
             Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
             /* Run in the UI mode, get the controller instance with batchMode == false */
             logger = LogManager.getLogger(DataLoaderRunner.class);
-            extractInstallationArtifacts();
+            Installer.install(args);
             if (argsMap.containsKey(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
                 && "true".equalsIgnoreCase(argsMap.get(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
                 try {

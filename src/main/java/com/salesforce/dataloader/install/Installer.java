@@ -57,48 +57,37 @@ public class Installer extends Thread {
     }
 
     public static void install(String[] args) {
-        String installationDir = ".";
         try {
+            String installationDir = ".";
+            final String INSTALL_COMPLETED_FILE = ".sf_dl_install";
             Runtime.getRuntime().addShutdownHook(new Installer());
             setLogger();
+            installationDir = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation()
+                    .toURI()).getParent();
+            Path installFilePath = Paths.get(installationDir + PATH_SEPARATOR + INSTALL_COMPLETED_FILE);
+            if (Files.exists(installFilePath) && AppUtil.getAppRunMode() != AppUtil.APP_RUN_MODE.INSTALL) {
+                // installation completed
+                return;
+            }
             boolean hideBanner = false;
             boolean skipCopyArtifacts = false;
             boolean skipCreateDesktopShortcut = false;
             boolean skipCreateStartMenuShortcut = false;
             boolean skipCreateAppsDirShortcut = false;
             
-            for (int i = 0; i < args.length; i++) {
-                switch (args[i]) {
-                    case "-b":
-                        hideBanner = true;
-                        continue;
-                    case "-c":
-                        skipCopyArtifacts = true;
-                        continue;
-                    case "-d":
-                        skipCreateDesktopShortcut = true;
-                        continue;
-                    case "-s":
-                        skipCreateStartMenuShortcut = true;
-                        continue;
-                    case "-a":
-                        skipCreateAppsDirShortcut = true;
-                        continue;
-                    default:
-                        continue;
-                }
-            }
             if (!hideBanner) {
                 logger.debug("going to show banner");
                 AppUtil.showBanner();
             }
+            
+            skipCopyArtifacts = promptCurrentInstallationFolder();
             if (!skipCopyArtifacts) {
                 logger.debug("going to select installation folder");
                 installationDir = selectInstallationDir();
                 logger.debug("going to copy artifacts");
                 copyArtifacts(installationDir);
-                extractInstallationArtifactsFromJar(installationDir);
             }
+            extractInstallationArtifactsFromJar(installationDir);
             if (!skipCreateDesktopShortcut) {
                 logger.debug("going to create desktop shortcut");
                 createDesktopShortcut(installationDir);
@@ -111,16 +100,29 @@ public class Installer extends Thread {
                 logger.debug("going to create Applications folder shortcut");
                 createAppsDirShortcut(installationDir);
             }
+            installFilePath = Paths.get(installationDir + PATH_SEPARATOR + INSTALL_COMPLETED_FILE);
+            Files.createFile(installFilePath);
+            if (AppUtil.isRunningOnWindows()) {
+                Files.setAttribute(installFilePath, "dos:hidden", true);
+            }
+            if (!skipCopyArtifacts) {
+                System.exit(0);
+            }
         } catch (Exception ex) {
             handleException(ex, Level.FATAL);
             System.exit(-1);            
         }
     }
+    
+    private static boolean promptCurrentInstallationFolder() throws IOException {
+        String currentExecutionFolder = AppUtil.getDirContainingClassJar(Installer.class);
+        return loopingYesNoPrompt(Messages.getMessage(Installer.class, "promptCurrentInstallationFolder", currentExecutionFolder));
+    }
         
     private static String selectInstallationDir() throws IOException {
         String installationDir = "";
         System.out.println(Messages.getMessage(Installer.class, "initialMessage", USERHOME + PATH_SEPARATOR));
-        String installationDirRoot = promptAndGetUserInput("Provide the installation folder [default: dataloader] : ");
+        String installationDirRoot = promptAndGetUserInput(Messages.getMessage(Installer.class, "promptInstallationFolder"));
         if (installationDirRoot.isBlank()) {
             installationDirRoot = "dataloader";
         }
@@ -143,23 +145,14 @@ public class Installer extends Thread {
     private static void copyArtifacts(String installationDir) throws Exception {
         Path installationDirPath = Paths.get(installationDir);
         if (Files.exists(installationDirPath)) {
-            for (;;) {
-                System.out.println("");
-                final String prompt = Messages.getMessage(Installer.class, "overwriteInstallationDirPrompt", AppUtil.DATALOADER_VERSION, installationDir);
-                String input = promptAndGetUserInput(prompt);
-                if (input == null || input.isBlank()) {
-                    System.out.println(Messages.getMessage(Installer.class, "reprompt"));
-                } else if (Messages.getMessage(Installer.class, "promptAnswerYes").toLowerCase().startsWith(input.toLowerCase())) {
-                    System.out.println(Messages.getMessage(Installer.class, "deletionInProgressMessage", AppUtil.DATALOADER_VERSION));
-                    Messages.getMessage(Installer.class, "initialMessage");
-                    logger.debug("going to delete " + installationDir);
-                    FileUtils.deleteDirectory(new File(installationDir));
-                    break;
-                } else if (Messages.getMessage(Installer.class, "promptAnswerNo").toLowerCase().startsWith(input.toLowerCase())) {
-                    System.exit(0);
-                } else {
-                    System.out.println(Messages.getMessage(Installer.class, "reprompt"));
-                }
+            final String prompt = Messages.getMessage(Installer.class, "overwriteInstallationDirPrompt", AppUtil.DATALOADER_VERSION, installationDir);
+            if (loopingYesNoPrompt(prompt)) {
+                System.out.println(Messages.getMessage(Installer.class, "deletionInProgressMessage", AppUtil.DATALOADER_VERSION));
+                Messages.getMessage(Installer.class, "initialMessage");
+                logger.debug("going to delete " + installationDir);
+                FileUtils.deleteDirectory(new File(installationDir));
+            } else {
+                System.exit(0);
             }
         }
         String installationSourceDir = ".";
@@ -191,6 +184,22 @@ public class Installer extends Thread {
         deleteFilesFromDir(installationDir, "META-INF");
         logger.debug("going to delete zip files from " + installationDir);
         deleteFilesFromDir(installationDir, ".*.zip");
+    }
+    
+    private static boolean loopingYesNoPrompt(String prompt) throws IOException {
+        for (;;) {
+            System.out.println("");
+            String input = promptAndGetUserInput(prompt);
+            if (input == null || input.isBlank()) {
+                System.out.println(Messages.getMessage(Installer.class, "reprompt"));
+            } else if (Messages.getMessage(Installer.class, "promptAnswerYes").toLowerCase().startsWith(input.toLowerCase())) {
+                return true;
+            } else if (Messages.getMessage(Installer.class, "promptAnswerNo").toLowerCase().startsWith(input.toLowerCase())) {
+                return false;
+            } else {
+                System.out.println(Messages.getMessage(Installer.class, "reprompt"));
+            }
+        }
     }
     
     private static String promptAndGetUserInput(String prompt) throws IOException {
