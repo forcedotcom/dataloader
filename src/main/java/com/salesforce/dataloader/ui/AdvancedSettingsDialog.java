@@ -104,6 +104,7 @@ public class AdvancedSettingsDialog extends Dialog {
     private Button buttonWriteUtf8;
     private Button buttonEuroDates;
     private Button buttonTruncateFields;
+    private Button buttonKeepAccountTeam;
     private Button buttonUseBulkApi;
     private Button buttonUseBulkV2Api;
     private Button buttonBulkApiSerialMode;
@@ -198,7 +199,8 @@ public class AdvancedSettingsDialog extends Dialog {
 
     private final Map<Button, Boolean> oldBulkAPIDependencies = new HashMap<Button, Boolean>();
 
-    private void initBulkApiSetting(boolean enabled) {
+    private void setBulkSettings(boolean enabled) {
+        setButtonEnabled(Config.BULK_API_ENABLED, buttonUseBulkApi, enabled);
         setButtonEnabled(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode, enabled);
         setButtonEnabled(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent, enabled);
         setButtonEnabled(Config.INSERT_NULLS, buttonNulls, !enabled);
@@ -508,6 +510,25 @@ public class AdvancedSettingsDialog extends Dialog {
         data.widthHint = 5 * textSize.x;
         textQueryResultsDelimiterValue.setLayoutData(data);
         
+        // Keep Account team setting
+        Label labelKeepAccountTeam = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelKeepAccountTeam.setText(Labels.getString("AdvancedSettingsDialog.keepAccountTeam"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelKeepAccountTeam.setLayoutData(data);
+
+        boolean keepAccountTeam = config.getBoolean(Config.PROCESS_KEEP_ACCOUNT_TEAM);
+        buttonKeepAccountTeam = new Button(restComp, SWT.CHECK);
+        buttonKeepAccountTeam.setSelection(keepAccountTeam);
+        buttonKeepAccountTeam.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                super.widgetSelected(e);
+                boolean enabled = buttonKeepAccountTeam.getSelection();
+                // make sure the appropriate check boxes are enabled or disabled
+                setBulkSettings(!enabled);
+            }
+        });
+
         // Enable Bulk API Setting
         Label labelUseBulkApi = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelUseBulkApi.setText(Labels.getString("AdvancedSettingsDialog.useBulkApi")); //$NON-NLS-1$
@@ -527,7 +548,7 @@ public class AdvancedSettingsDialog extends Dialog {
                 logger.info("Setting batch size to " + newDefaultBatchSize);
                 textBatch.setText(String.valueOf(newDefaultBatchSize));
                 // make sure the appropriate check boxes are enabled or disabled
-                initBulkApiSetting(enabled);
+                setBulkSettings(enabled);
             }
         });
 
@@ -700,7 +721,7 @@ public class AdvancedSettingsDialog extends Dialog {
 
         // now that we've created all the buttons, make sure that buttons dependent on the bulk api
         // setting are enabled or disabled appropriately
-        initBulkApiSetting(useBulkAPI);
+        setBulkSettings(useBulkAPI);
         
         blankAgain = new Label(restComp, SWT.NONE);
         data = new GridData();
@@ -836,6 +857,7 @@ public class AdvancedSettingsDialog extends Dialog {
                 config.setValue(Config.PROXY_PORT, textProxyPort.getText());
                 config.setValue(Config.PROXY_USERNAME, textProxyUsername.getText());
                 config.setValue(Config.PROXY_NTLM_DOMAIN, textProxyNtlmDomain.getText());
+                config.setValue(Config.PROCESS_KEEP_ACCOUNT_TEAM, buttonKeepAccountTeam.getSelection());
                 config.setValue(Config.BULK_API_ENABLED, buttonUseBulkApi.getSelection());
                 config.setValue(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode.getSelection());
                 config.setValue(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
