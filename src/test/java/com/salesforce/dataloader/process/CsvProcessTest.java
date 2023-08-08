@@ -53,6 +53,7 @@ import com.sforce.soap.partner.sobject.SObject;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test for dataloader batch interface, also known as "integration framework"
@@ -520,6 +521,20 @@ public class CsvProcessTest extends ProcessTestBase {
                 assertEquals("Incorrect value for billing state returned", stateValue, acct.getField("BillingState"));
                 assertEquals("Incorrect value for shipping state returned", stateValue, acct.getField("ShippingState"));
                 assertEquals("Incorrect value for description returned", stateValue, acct.getField("Description"));
+            }
+        }
+    }
+    
+    @Test
+    public void testEmptyFirstRowFieldValueInCsv() throws Exception {
+        // update 2 records
+        Controller controller = runProcess(getUpdateTestConfig(false, null, 2), 2);
+
+        for (SObject acct : retrieveAccounts(controller, "Name", "Website")) {
+            String websiteVal = (String)acct.getField("Website");
+            String acctName = (String)acct.getField("Name");
+            if ("account Update #1".equals(acctName)) {
+                assertEquals("Incorrect value for field Website returned for the account " + acctName, "updated", websiteVal);
             }
         }
     }
