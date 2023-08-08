@@ -528,6 +528,8 @@ public class AdvancedSettingsDialog extends Dialog {
                 setBulkSettings(!enabled);
             }
         });
+        buttonKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.keepAccountTeamHelp"));
+        labelKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.keepAccountTeamHelp"));
 
         // Enable Bulk API Setting
         Label labelUseBulkApi = new Label(restComp, SWT.RIGHT | SWT.WRAP);
