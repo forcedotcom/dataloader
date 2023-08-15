@@ -211,7 +211,7 @@ public class NAProcessTest extends ProcessTestBase {
     }
 
     private String getCsvFieldValue(String csvFile, String fieldName) throws Exception {
-        CSVFileReader reader = new CSVFileReader(csvFile, getController());
+        CSVFileReader reader = new CSVFileReader(new File(csvFile), getController().getConfig(), true, false);
         reader.open();
         assertEquals(1, reader.getTotalRows());
         String fieldValue = (String)reader.readRow().get(fieldName);

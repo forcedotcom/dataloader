@@ -241,7 +241,7 @@ public class CsvProcessTest extends ProcessTestBase {
 
         List<String> ids = new ArrayList<String>();
         String fileName = resultController.getConfig().getString(Config.OUTPUT_SUCCESS);
-        final CSVFileReader successRdr = new CSVFileReader(fileName, getController());
+        final CSVFileReader successRdr = new CSVFileReader(new File(fileName), getController().getConfig(), true, false);
         try {
             // TODO: revise the use of Integer.MAX_VALUE
             for (Row row : successRdr.readRowList(Integer.MAX_VALUE)) {

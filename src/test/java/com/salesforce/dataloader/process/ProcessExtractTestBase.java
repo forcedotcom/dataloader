@@ -28,6 +28,7 @@ package com.salesforce.dataloader.process;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.*;
 
 import org.junit.Assert;
@@ -142,7 +143,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         final Set<String> unexpectedIds = new HashSet<String>();
         final Set<String> expectedIds = new HashSet<String>(Arrays.asList(ids));
         String fileName = control.getConfig().getString(Config.OUTPUT_SUCCESS);
-        final DataReader resultReader = new CSVFileReader(fileName, getController());
+        final DataReader resultReader = new CSVFileReader(new File(fileName), getController().getConfig(), true, false);
         try {
             resultReader.open();
 
@@ -300,7 +301,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         final Map<String, String> argMap = getTestConfig(soql, "Contact", true);
 
         runProcess(argMap, 1);
-        final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME), getController());
+        final CSVFileReader resultReader = new CSVFileReader(new File(argMap.get(Config.DAO_NAME)), getController().getConfig(), true, false);
         try {
             final Row resultRow = resultReader.readRow();
             assertEquals("Query returned incorrect Contact ID", contactId, resultRow.get("CONTACT_ID"));
@@ -356,7 +357,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                 // run the extract
                 runProcess(argmap, 1);
                 // open the results of the extraction
-                final CSVFileReader rdr = new CSVFileReader(argmap.get(Config.DAO_NAME), getController());
+                final CSVFileReader rdr = new CSVFileReader(new File(argmap.get(Config.DAO_NAME)), getController().getConfig(), true, false);
                 rdr.open();
                 Row row = rdr.readRow();
                 assertNotNull(row);
@@ -417,7 +418,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                     "Aggregate Relationships not supported in Bulk Query");
         } else {
             runProcess(argMap, 1, true);
-            final CSVFileReader resultReader = new CSVFileReader(argMap.get(Config.DAO_NAME), getController());
+            final CSVFileReader resultReader = new CSVFileReader(new File(argMap.get(Config.DAO_NAME)), getController().getConfig(), true, false);
             try {
                 assertEquals(String.valueOf(numRecords - 1), resultReader.readRow().get("MAX(NUMBEROFEMPLOYEES)"));
             } finally {
