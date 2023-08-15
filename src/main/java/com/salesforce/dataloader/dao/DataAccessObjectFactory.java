@@ -26,6 +26,9 @@
 package com.salesforce.dataloader.dao;
 
 import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+
 import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.config.Config;
@@ -52,7 +55,7 @@ public class DataAccessObjectFactory {
         logger.info(Messages.getFormattedString("DataAccessObjectFactory.creatingDao", new String[] {config.getString(Config.DAO_NAME), daoType}));
 
         if (CSV_READ_TYPE.equalsIgnoreCase(daoType)) {
-            dao = new CSVFileReader(config, false);
+            dao = new CSVFileReader(new File(config.getString(Config.DAO_NAME)), config, false, false);
         } else if (CSV_WRITE_TYPE.equalsIgnoreCase(daoType)) {
             dao = new CSVFileWriter(config.getString(Config.DAO_NAME), config, config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS));
         } else if (DATABASE_READ_TYPE.equalsIgnoreCase(daoType)) {

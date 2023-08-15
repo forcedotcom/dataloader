@@ -72,18 +72,6 @@ public class CSVFileReader implements DataReader {
     private char[] csvDelimiters;
     private Config config;
 
-    public CSVFileReader(Config config, boolean isQueryOperationResult) {
-        this(new File(config.getString(Config.DAO_NAME)), config, false, isQueryOperationResult);
-    }
-
-    // used only in tests
-    public CSVFileReader(String filePath, Controller controller) {
-        // Assume comma char as the delimiter => set 3rd param to true.
-        // Assume load operation by setting 4th param to false.
-        // 4th param setting is ignored if 3rd param is set to true. 
-        this(new File(filePath), controller.getConfig(), true, false);  
-    }
-
     // Handles 3 types of CSV files:
     // 1. CSV files provided by the user for upload operations: ignoreDelimiterConfig = false, isQueryOperationResult = false
     // 2. CSV files that are results of query operations: ignoreDelimiterConfig = false, isQueryOperationResult = true

@@ -86,7 +86,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
 
     protected void verifyErrors(Controller controller, String expectedErrorMessage) throws DataAccessObjectException {
         String fileName = controller.getConfig().getString(Config.OUTPUT_ERROR);
-        final CSVFileReader errReader = new CSVFileReader(fileName, controller);
+        final CSVFileReader errReader = new CSVFileReader(new File(fileName), getController().getConfig(), true, false);
         try {
             errReader.open();
             for (Row errorRow : errReader.readRowList(errReader.getTotalRows())) {
@@ -106,7 +106,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
 
     protected void verifySuccessIds(Controller ctl, Set<String> ids) throws DataAccessObjectException {
         String fileName = ctl.getConfig().getString(Config.OUTPUT_SUCCESS);
-        final CSVFileReader successRdr = new CSVFileReader(fileName, ctl);
+        final CSVFileReader successRdr = new CSVFileReader(new File(fileName), ctl.getConfig(), true, false);
         final Set<String> remaining = new HashSet<String>(ids);
         final Set<String> unexpected = new HashSet<String>();
         try {
@@ -616,7 +616,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             TemplateListener... listeners) throws DataAccessObjectException {
 
         String fileName = new File(getTestDataDir(), templateFileName).getAbsolutePath();
-        final CSVFileReader templateReader = new CSVFileReader(fileName, getController());
+        final CSVFileReader templateReader = new CSVFileReader(new File(fileName), getController().getConfig(), true, false);
         try {
             templateReader.open();
 
@@ -810,7 +810,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         assertNumRowsInCSVFile(successFile, numInserts + numUpdates);
 
         Row row = null;
-        CSVFileReader rdr = new CSVFileReader(successFile, getController());
+        CSVFileReader rdr = new CSVFileReader(new File(successFile), getController().getConfig(), true, false);
         String updateMsg = UPDATE_MSGS.get(ctl.getConfig().getOperationInfo());
         int insertsFound = 0;
         int updatesFound = 0;
@@ -917,7 +917,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     }
 
     private void assertNumRowsInCSVFile(String fName, int expectedRows) throws DataAccessObjectException {
-        CSVFileReader rdr = new CSVFileReader(fName, getController());
+        CSVFileReader rdr = new CSVFileReader(new File(fName), getController().getConfig(), true, false);
         rdr.open();
         int actualRows = rdr.getTotalRows();
         assertEquals("Wrong number of rows in file :" + fName, expectedRows, actualRows);
