@@ -140,6 +140,8 @@ public class Config {
     public static final int MAX_DAO_WRITE_BATCH_SIZE = 2000;
     public static final int MAX_BULK_API_BATCH_BYTES = 10000000;
     public static final int MAX_BULK_API_BATCH_SIZE = 10000;
+    public static final int MAX_BULKV2_API_JOB_BYTES = 150000000;
+    public static final int MAX_BULKV2_API_JOB_SIZE = 150000000;
     public static final int DEFAULT_BULK_API_BATCH_SIZE = 2000;
     public static final long DEFAULT_BULK_API_CHECK_STATUS_INTERVAL = 5000L;
     public static final String DEFAULT_ENDPOINT_URL = "https://login.salesforce.com";
@@ -301,6 +303,8 @@ public class Config {
     public static final String DAO_READ_BATCH_SIZE = "dataAccess.readBatchSize";
     public static final String DAO_WRITE_BATCH_SIZE = "dataAccess.writeBatchSize";
     public static final String DAO_SKIP_TOTAL_COUNT = "dataAccess.skipTotalCount";
+    public static final String DAO_READ_PREPROCESSOR_SCRIPT = "dataAccess.read.preProcessorScript";
+    public static final String DAO_WRITE_POSTPROCESSOR_SCRIPT = "dataAccess.write.postProcessorScript";
 
     /*
      * TODO: when batching is introduced to the DataAccess, these parameters will become useful
@@ -433,7 +437,9 @@ public class Config {
             API_VERSION_PROP,
             READ_CHARSET,
             READ_ONLY_CONFIG_PROPERTIES,
-            RICH_TEXT_FIELD_REGEX
+            RICH_TEXT_FIELD_REGEX,
+            DAO_READ_PREPROCESSOR_SCRIPT,
+            DAO_WRITE_POSTPROCESSOR_SCRIPT
     };
     
     /**
@@ -587,6 +593,8 @@ public class Config {
         setDefaultValue(PROCESS_KEEP_ACCOUNT_TEAM, false);
         setDefaultValue(WIZARD_WIDTH, DEFAULT_WIZARD_WIDTH);
         setDefaultValue(WIZARD_HEIGHT, DEFAULT_WIZARD_HEIGHT);
+        setDefaultValue(DAO_READ_PREPROCESSOR_SCRIPT, "");
+        setDefaultValue(DAO_WRITE_POSTPROCESSOR_SCRIPT, "");
     }
 
     /**
@@ -1136,7 +1144,7 @@ public class Config {
 
     private void removeUnsupportedProperties() {
         // do not save a value for enabling Bulk V2 
-        this.properties.remove(BULKV2_API_ENABLED);
+        //this.properties.remove(BULKV2_API_ENABLED);
     }
     
     private void removeDecryptedProperties() {
@@ -1328,6 +1336,12 @@ public class Config {
 
     public int getLoadBatchSize() {
         boolean bulkApi = isBulkAPIEnabled();
+        boolean bulkV2Api = this.isBulkV2APIEnabled();
+        
+        if (bulkApi && bulkV2Api) {
+            return MAX_BULKV2_API_JOB_SIZE;
+        }
+        
         int bs = -1;
         try {
             bs = getInt(LOAD_BATCH_SIZE);
@@ -1338,6 +1352,10 @@ public class Config {
     }
 
     public int getDefaultBatchSize(boolean bulkApi) {
+        boolean bulkV2Api = this.isBulkV2APIEnabled();
+        if (bulkApi && bulkV2Api) {
+            return MAX_BULKV2_API_JOB_SIZE;
+        }
         return bulkApi ? DEFAULT_BULK_API_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE;
     }
 

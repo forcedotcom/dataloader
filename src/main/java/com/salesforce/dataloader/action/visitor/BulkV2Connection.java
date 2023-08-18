@@ -410,6 +410,9 @@ public class BulkV2Connection  {
         	headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
         	requestBodyMap.put("object", job.getObject());
         	requestBodyMap.put("contentType", "CSV");
+        	if (operation.equals(OperationEnum.upsert)) {
+        	    requestBodyMap.put("externalIdFieldName", job.getExternalIdFieldName());
+        	}
         }
         return doSendJobRequestToServer(urlString, 
 										headers,
