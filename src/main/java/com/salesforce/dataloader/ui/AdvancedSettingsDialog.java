@@ -111,7 +111,6 @@ public class AdvancedSettingsDialog extends Dialog {
     private Button buttonBulkApiZipContent;
     private Button buttonCsvComma;
     private Button buttonCsvTab;
-    private Button buttonCsvOther;
     private Button buttonLoginFromBrowser;
     private static final String[] LOGGING_LEVEL = { "ALL", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
     private Combo comboLoggingLevelDropdown;
@@ -482,13 +481,6 @@ public class AdvancedSettingsDialog extends Dialog {
         buttonCsvTab = new Button(restComp, SWT.CHECK);
         buttonCsvTab.setSelection(config.getBoolean(Config.CSV_DELIMITER_TAB));
 
-        Label labelOtherCommand = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelOtherCommand.setText(Labels.getString("AdvancedSettingsDialog.useOtherAsCsvDelimiter"));
-        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        labelOtherCommand.setLayoutData(data);
-        buttonCsvOther = new Button(restComp, SWT.CHECK);
-        buttonCsvOther.setSelection(config.getBoolean(Config.CSV_DELIMITER_OTHER));
-
         Label labelOtherDelimiterValue = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelOtherDelimiterValue.setText(Labels.getString("AdvancedSettingsDialog.csvOtherDelimiterValue"));
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
@@ -823,11 +815,15 @@ public class AdvancedSettingsDialog extends Dialog {
                 config.setValue(Config.HIDE_WELCOME_SCREEN, buttonHideWelcomeScreen.getSelection());
                 config.setValue(Config.INSERT_NULLS, buttonNulls.getSelection());
                 config.setValue(Config.LOAD_BATCH_SIZE, textBatch.getText());
+                boolean isOtherDelimiterSpecified = textUploadCSVDelimiterValue.getText() != null
+                                                    && textUploadCSVDelimiterValue.getText().length() != 0;
                 if (!buttonCsvComma.getSelection()
                         && !buttonCsvTab.getSelection()
-                        && (!buttonCsvOther.getSelection()
-                        || textUploadCSVDelimiterValue.getText() == null
-                        || textUploadCSVDelimiterValue.getText().length() == 0)) {
+                        && !isOtherDelimiterSpecified) {
+                    MessageDialog alert = new MessageDialog(getParent().getShell(), "Warning", null,
+                            Labels.getString("AdvancedSettingsDialog.checkUploadDelimiterCheckbox"),
+                            MessageDialog.ERROR, new String[]{"OK"}, 0);
+                    alert.open();
                     return;
                 }
                 config.setValue(Config.CSV_DELIMITER_OTHER_VALUE, textUploadCSVDelimiterValue.getText());
@@ -838,7 +834,7 @@ public class AdvancedSettingsDialog extends Dialog {
                 config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, queryResultsDelimiterStr);
                 config.setValue(Config.CSV_DELIMITER_COMMA, buttonCsvComma.getSelection());
                 config.setValue(Config.CSV_DELIMITER_TAB, buttonCsvTab.getSelection());
-                config.setValue(Config.CSV_DELIMITER_OTHER, buttonCsvOther.getSelection());
+                config.setValue(Config.CSV_DELIMITER_OTHER, isOtherDelimiterSpecified);
 
                 config.setValue(Config.EXTRACT_REQUEST_SIZE, textQueryBatch.getText());
                 config.setValue(Config.ENDPOINT, currentTextEndpoint);
