@@ -25,15 +25,15 @@
  */
 package com.salesforce.dataloader.mapping;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class CaseInsensitiveSet {
-    private final HashMap<String, String> originalMap;
+    private final LinkedHashMap<String, String> originalMap;
 
     public CaseInsensitiveSet(){
-        originalMap = new HashMap<String, String>();
+        originalMap = new LinkedHashMap<String, String>();
     }
 
     public CaseInsensitiveSet(Set<String> values){
@@ -62,6 +62,6 @@ public class CaseInsensitiveSet {
     }
 
     public Set<String> getOriginalValues() {
-        return new HashSet<String>(originalMap.values());
+        return new LinkedHashSet<String>(originalMap.values());
     }
 }
