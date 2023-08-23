@@ -164,7 +164,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
 
                 // instantiate the map
                 logger.info(Messages.getString("Process.creatingMap")); //$NON-NLS-1$
-                controller.initializeOperationAndCreateMapper(config.getString(Config.DAO_TYPE), 
+                controller.initializeOperation(config.getString(Config.DAO_TYPE), 
                         config.getString(Config.DAO_NAME), config.getString(Config.ENTITY));
 
                 // execute the requested operation
