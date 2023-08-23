@@ -36,10 +36,8 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 
-public class LoadFinishDialog extends Dialog {
-    private String message;
+public class LoadFinishDialog extends BaseDialog {
     private Label label;
-    private Controller controller;
     private Button ok;
 
     /**
@@ -49,41 +47,7 @@ public class LoadFinishDialog extends Dialog {
      *            the parent
      */
     public LoadFinishDialog(Shell parent, Controller controller) {
-        this(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
-        this.controller = controller;
-    }
-
-    /**
-     * InputDialog constructor
-     *
-     * @param parent
-     *            the parent
-     * @param style
-     *            the style
-     */
-    public LoadFinishDialog(Shell parent, int style) {
-        // Let users override the default styles
-        super(parent, style);
-        setText(Labels.getString("LoadFinishDialog.title"));  //$NON-NLS-1$
-    }
-
-    /**
-     * Gets the message
-     *
-     * @return String
-     */
-    public String getMessage() {
-        return message;
-    }
-
-    /**
-     * Sets the message
-     *
-     * @param message
-     *            the new message
-     */
-    public void setMessage(String message) {
-        this.message = message;
+        super(parent, controller);
     }
 
     /**
@@ -93,13 +57,8 @@ public class LoadFinishDialog extends Dialog {
      */
     public boolean open() {
         // Create the dialog window
-        Shell shell = new Shell(getParent(), getStyle());
-        shell.setText(getText());
-        shell.setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
-        createContents(shell);
-        shell.pack();
-        shell.open();
-        Display display = getParent().getDisplay();
+        Shell shell = super.openAndGetShell();
+        Display display = shell.getDisplay();
 
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch()) {
@@ -116,7 +75,7 @@ public class LoadFinishDialog extends Dialog {
      * @param shell
      *            the dialog window
      */
-    private void createContents(final Shell shell) {
+    protected void createContents(final Shell shell) {
 
         GridData data;
 
@@ -131,7 +90,7 @@ public class LoadFinishDialog extends Dialog {
         labelInfo.setLayoutData(data);
 
         label = new Label(shell, SWT.NONE);
-        label.setText(message);
+        label.setText(getMessage());
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING);
         label.setLayoutData(data);
 
@@ -156,7 +115,7 @@ public class LoadFinishDialog extends Dialog {
         viewSuccess.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                openViewer(controller.getConfig().getString(Config.OUTPUT_SUCCESS));
+                openViewer(getController().getConfig().getString(Config.OUTPUT_SUCCESS));
             }
 
             @Override
@@ -169,7 +128,7 @@ public class LoadFinishDialog extends Dialog {
         viewErrors.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                openViewer(controller.getConfig().getString(Config.OUTPUT_ERROR));
+                openViewer(getController().getConfig().getString(Config.OUTPUT_ERROR));
             }
 
             @Override
@@ -193,7 +152,7 @@ public class LoadFinishDialog extends Dialog {
     }
 
     private void openViewer(String filename) {
-        CSVViewerDialog dlg = new CSVViewerDialog(getParent(), controller, false, false);
+        CSVViewerDialog dlg = new CSVViewerDialog(getParent(), getController(), false, false);
         dlg.setNumberOfRows(200000);
         dlg.setFileName(filename);
         try {

@@ -34,8 +34,6 @@ import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.LoggingUtil;
 import com.sforce.soap.partner.Connector;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -55,7 +53,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -69,10 +66,8 @@ import java.util.TimeZone;
 
 import static com.salesforce.dataloader.ui.UIUtils.isValidHttpsUrl;
 
-public class AdvancedSettingsDialog extends Dialog {
-    private String message;
+public class AdvancedSettingsDialog extends BaseDialog {
     private String input;
-    private Controller controller;
     private Text textBatch;
     private Text textQueryBatch;
     private Text textUploadCSVDelimiterValue;
@@ -96,7 +91,6 @@ public class AdvancedSettingsDialog extends Dialog {
 
     private final String defaultServer;
 
-    private final Logger logger = LogManager.getLogger(AdvancedSettingsDialog.class);
     private Button buttonHideWelcomeScreen;
     private Button buttonOutputExtractStatus;
     private Button buttonSortExtractFields;
@@ -121,10 +115,7 @@ public class AdvancedSettingsDialog extends Dialog {
      * @param parent the parent
      */
     public AdvancedSettingsDialog(Shell parent, Controller controller) {
-        super(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
-        setText(Labels.getString("AdvancedSettingsDialog.title")); //$NON-NLS-1$
-        setMessage(Labels.getString("AdvancedSettingsDialog.message")); //$NON-NLS-1$
-        this.controller = controller;
+        super(parent, controller);
 
         URI uri;
         String server = "";
@@ -135,24 +126,6 @@ public class AdvancedSettingsDialog extends Dialog {
             logger.error("", e);
         }
         defaultServer = server;
-    }
-
-    /**
-     * Gets the message
-     *
-     * @return String
-     */
-    public String getMessage() {
-        return message;
-    }
-
-    /**
-     * Sets the message
-     *
-     * @param message the new message
-     */
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     /**
@@ -180,13 +153,8 @@ public class AdvancedSettingsDialog extends Dialog {
      */
     public String open() {
         // Create the dialog window
-        Shell shell = new Shell(getParent(), getStyle());
-        shell.setText(getText());
-        shell.setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
-        createContents(shell);
-        shell.pack();
-        shell.open();
-        Display display = getParent().getDisplay();
+        Shell shell = super.openAndGetShell();
+        Display display = shell.getDisplay();
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch()) {
                 display.sleep();
@@ -209,7 +177,7 @@ public class AdvancedSettingsDialog extends Dialog {
 
     private void setButtonEnabled(String configKey, Button b, boolean enabled) {
         Boolean previousValue = oldBulkAPIDependencies.put(b, b.getSelection());
-        b.setSelection(enabled ? (previousValue != null ? previousValue : this.controller.getConfig().getBoolean(
+        b.setSelection(enabled ? (previousValue != null ? previousValue : getController().getConfig().getBoolean(
                 configKey)) : false);
         b.setEnabled(enabled);
     }
@@ -219,9 +187,9 @@ public class AdvancedSettingsDialog extends Dialog {
      *
      * @param shell the dialog window
      */
-    private void createContents(final Shell shell) {
+    protected void createContents(final Shell shell) {
 
-        final Config config = controller.getConfig();
+        final Config config = getController().getConfig();
         GridData data;
         
         GridLayout layout = new GridLayout(1, false);
@@ -263,7 +231,7 @@ public class AdvancedSettingsDialog extends Dialog {
 
         // Show the message
         Label label = new Label(topComp, SWT.NONE);
-        label.setText(message);
+        label.setText(getMessage());
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.heightHint = 30;
         data.widthHint = 370;
@@ -538,7 +506,7 @@ public class AdvancedSettingsDialog extends Dialog {
                 super.widgetSelected(e);
                 boolean enabled = buttonUseBulkApi.getSelection();
                 // update batch size when this setting changes
-                int newDefaultBatchSize = controller.getConfig().getDefaultBatchSize(enabled);
+                int newDefaultBatchSize = getController().getConfig().getDefaultBatchSize(enabled);
                 logger.info("Setting batch size to " + newDefaultBatchSize);
                 textBatch.setText(String.valueOf(newDefaultBatchSize));
                 // make sure the appropriate check boxes are enabled or disabled
@@ -687,7 +655,7 @@ public class AdvancedSettingsDialog extends Dialog {
         data.horizontalSpan = 2;
         blankAgain.setLayoutData(data);
         
-        String lastBatch = controller.getConfig().getString(LastRun.LAST_LOAD_BATCH_ROW);
+        String lastBatch = getController().getConfig().getString(LastRun.LAST_LOAD_BATCH_ROW);
         if (lastBatch.equals("")) { //$NON-NLS-1$
             lastBatch = "0"; //$NON-NLS-1$
         }
@@ -800,7 +768,7 @@ public class AdvancedSettingsDialog extends Dialog {
         ok.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                Config config = controller.getConfig();
+                Config config = getController().getConfig();
 
                 String currentTextEndpoint = textEndpoint.getText();
                 if (currentTextEndpoint != null && !currentTextEndpoint.isEmpty() && !isValidHttpsUrl(currentTextEndpoint)) {
@@ -872,9 +840,9 @@ public class AdvancedSettingsDialog extends Dialog {
                 	config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID, clientIdVal);
                 	config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID, clientIdVal);
                 }
-                controller.saveConfig();
-                controller.logout();
-                controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession();
+                getController().saveConfig();
+                getController().logout();
+                getController().updateLoaderWindowTitleAndCacheUserInfoForTheSession();
 
                 input = Labels.getString("UI.ok"); //$NON-NLS-1$
                 shell.close();
@@ -943,7 +911,7 @@ public class AdvancedSettingsDialog extends Dialog {
         final GridData gd = new GridData();
         if (widthHint > 0) gd.widthHint = widthHint;
         t.setLayoutData(gd);
-        String val = controller.getConfig().getString(configKey);
+        String val = getController().getConfig().getString(configKey);
         if ("".equals(val) && defaultValue != null) val = defaultValue;
         t.setText(String.valueOf(val));
         
