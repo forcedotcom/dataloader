@@ -167,7 +167,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private final Map<Button, Boolean> oldBulkAPIDependencies = new HashMap<Button, Boolean>();
 
     private void setBulkSettings(boolean enabled) {
-        setButtonEnabled(Config.BULK_API_ENABLED, buttonUseBulkApi, enabled);
         setButtonEnabled(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode, enabled);
         setButtonEnabled(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent, enabled);
         setButtonEnabled(Config.INSERT_NULLS, buttonNulls, !enabled);
