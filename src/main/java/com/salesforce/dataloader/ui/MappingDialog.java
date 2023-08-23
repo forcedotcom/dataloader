@@ -32,9 +32,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
-
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -57,11 +54,8 @@ import com.sforce.soap.partner.Field;
 /**
  * This class creates the mapping dialog
  */
-public class MappingDialog extends Dialog {
+public class MappingDialog extends BaseDialog {
     private String input;
-
-    private Controller controller;
-    private final Logger logger = LogManager.getLogger(MappingDialog.class);
 
     //the two tableViewers
     private TableViewer sforceTblViewer;
@@ -120,26 +114,8 @@ public class MappingDialog extends Dialog {
      */
     public MappingDialog(Shell parent, Controller controller, MappingPage page) {
         // Pass the default styles here
-        this(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
-        this.controller = controller;
+        super(parent, controller);
         this.page = page;
-
-    }
-
-    /**
-     * InputDialog constructor
-     *
-     * @param parent
-     *            the parent
-     * @param style
-     *            the style
-     */
-    public MappingDialog(Shell parent, int style) {
-        // Let users override the default styles
-        super(parent, style);
-        this.parent = parent;
-
-        setText(Labels.getString("MappingDialog.title")); //$NON-NLS-1$
     }
     
     public Shell getParent() {
@@ -172,13 +148,8 @@ public class MappingDialog extends Dialog {
      */
     public String open() {
         // Create the dialog window
-        Shell shell = new Shell(getParent(), getStyle() | SWT.RESIZE);
-        shell.setText(getText());
-        shell.setSize(600, 600);
-        createContents(shell);
-        shell.pack();
-        shell.open();
-        Display display = getParent().getDisplay();
+        Shell shell = super.openAndGetShell();
+        Display display = shell.getDisplay();
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch()) {
                 display.sleep();
@@ -194,7 +165,7 @@ public class MappingDialog extends Dialog {
      * @param shell
      *            the dialog window
      */
-    private void createContents(final Shell shell) {
+    protected void createContents(final Shell shell) {
         shell.setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
         shell.setLayout(new GridLayout(1, false));
         GridData data;
@@ -277,7 +248,7 @@ public class MappingDialog extends Dialog {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 // user is auto-mapping fields, not using a mapping file
-                controller.getConfig().setValue(Config.MAPPING_FILE, "");
+                getController().getConfig().setValue(Config.MAPPING_FILE, "");
                 //refresh the mapping page view
                 page.updateMapping();
                 page.packMappingColumns();
@@ -295,7 +266,7 @@ public class MappingDialog extends Dialog {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 FileDialog dlg = new FileDialog(shell, SWT.SAVE);
-                Config config = controller.getConfig();
+                Config config = getController().getConfig();
                 dlg.setFilterExtensions(new String[] { "*.sdl" });
                 String filename = dlg.open();
                 boolean cancel = false;
@@ -611,7 +582,7 @@ public class MappingDialog extends Dialog {
         ArrayList<Field> mappableFieldList = new ArrayList<Field>();
         ArrayList<Field> allFieldList = new ArrayList<Field>();
         Field field;
-        Config config = controller.getConfig();
+        Config config = getController().getConfig();
         OperationInfo operation = config.getOperationInfo();
         String extIdField = config.getString(Config.EXTERNAL_ID_FIELD);
         if(extIdField == null) {

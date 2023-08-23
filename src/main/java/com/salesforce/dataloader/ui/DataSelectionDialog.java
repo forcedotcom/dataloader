@@ -42,18 +42,11 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.util.DAORowUtil;
-import com.sforce.ws.ConnectionException;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
-public class DataSelectionDialog extends Dialog {
-    private final Logger logger = LogManager.getLogger(MappingPage.class);
-    private String message;
+public class DataSelectionDialog extends BaseDialog {
     private boolean success;
-    private Controller controller;
     private Button ok;
     private Label label;
 
@@ -64,42 +57,7 @@ public class DataSelectionDialog extends Dialog {
      *            the parent
      */
     public DataSelectionDialog(Shell parent, Controller controller) {
-        this(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
-        this.controller = controller;
-    }
-
-    /**
-     * InputDialog constructor
-     *
-     * @param parent
-     *            the parent
-     * @param style
-     *            the style
-     */
-    public DataSelectionDialog(Shell parent, int style) {
-        // Let users override the default styles
-        super(parent, style);
-        setText(Labels.getString("DataSelectionDialog.title")); //$NON-NLS-1$
-        setMessage(Labels.getString("DataSelectionDialog.message")); //$NON-NLS-1$
-    }
-
-    /**
-     * Gets the message
-     *
-     * @return String
-     */
-    public String getMessage() {
-        return message;
-    }
-
-    /**
-     * Sets the message
-     *
-     * @param message
-     *            the new message
-     */
-    public void setMessage(String message) {
-        this.message = message;
+        super(parent, controller);
     }
 
     /**
@@ -109,18 +67,13 @@ public class DataSelectionDialog extends Dialog {
      */
     public boolean open(String daoTypeStr, String daoNameStr, String sObjectName) {
         // Create the dialog window
-        final Shell shell = new Shell(getParent(), getStyle());
-        shell.setText(getText());
-        shell.setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
-        createContents(shell);
-        shell.pack();
-        shell.open();
-        Display display = getParent().getDisplay();
+        final Shell shell = super.openAndGetShell();
+        Display display = shell.getDisplay();
         BusyIndicator.showWhile(display, new Thread() {
             @Override
             public void run() {
                 try {
-                    controller.initializeOperation(daoTypeStr, daoNameStr, sObjectName);
+                    getController().initializeOperation(daoTypeStr, daoNameStr, sObjectName);
                 } catch (MappingInitializationException e) {
                     success = false;
                     ok.setEnabled(true);
@@ -129,7 +82,7 @@ public class DataSelectionDialog extends Dialog {
                     return;
                 }
 
-                String daoPath = controller.getConfig().getString(Config.DAO_NAME);
+                String daoPath = getController().getConfig().getString(Config.DAO_NAME);
                 File file = new File(daoPath);
 
                 if (!file.exists() || !file.canRead()) {
@@ -139,7 +92,7 @@ public class DataSelectionDialog extends Dialog {
                     shell.setText(Labels.getString("DataSelectionDialog.titleError"));
                     return;
                 }
-                DataReader dataReader = (DataReader)controller.getDao();
+                DataReader dataReader = (DataReader)getController().getDao();
 
                 List<String> header = null;
                 int totalRows = 0;
@@ -188,18 +141,18 @@ public class DataSelectionDialog extends Dialog {
                 }
                 success = true;
                 ok.setEnabled(true);
-                String apiInfoStr = controller.getAPIInfo();
+                String apiInfoStr = getController().getAPIInfo();
                 // Set the description
                 label.setText(Labels.getFormattedString(
                         "DataSelectionDialog.initSuccess", String.valueOf(totalRows))
                         + "\n\n"
                         + Labels.getString("AdvancedSettingsDialog.batchSize")
                         + " "
-                        + controller.getConfig().getString(Config.LOAD_BATCH_SIZE)
+                        + getController().getConfig().getString(Config.LOAD_BATCH_SIZE)
                         + "\n"
                         + Labels.getString("AdvancedSettingsDialog.startRow")
                         + " "
-                        + controller.getConfig().getString(Config.LOAD_ROW_TO_START_AT)
+                        + getController().getConfig().getString(Config.LOAD_ROW_TO_START_AT)
                         + "\n"
                         + apiInfoStr); //$NON-NLS-1$
                 label.getParent().pack();
@@ -222,14 +175,14 @@ public class DataSelectionDialog extends Dialog {
      * @param shell
      *            the dialog window
      */
-    private void createContents(final Shell shell) {
+    protected void createContents(final Shell shell) {
 
         GridLayout layout = new GridLayout(2, false);
         layout.verticalSpacing = 10;
         shell.setLayout(layout);
 
         label = new Label(shell, SWT.WRAP);
-        label.setText(message);
+        label.setText(getMessage());
         GridData labelData = new GridData();
         labelData.horizontalSpan = 2;
         labelData.widthHint = 400;

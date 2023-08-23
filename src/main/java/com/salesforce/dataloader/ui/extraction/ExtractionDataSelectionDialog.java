@@ -35,14 +35,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.ui.BaseDialog;
 import com.salesforce.dataloader.ui.Labels;
-import com.salesforce.dataloader.ui.UIUtils;
 import com.sforce.ws.ConnectionException;
 
-public class ExtractionDataSelectionDialog extends Dialog {
-    private String message;
+public class ExtractionDataSelectionDialog extends BaseDialog {
     private boolean success;
-    private Controller controller;
     private Button ok;
     private Label label;
 
@@ -54,42 +52,7 @@ public class ExtractionDataSelectionDialog extends Dialog {
      */
     public ExtractionDataSelectionDialog(Shell parent, Controller controller) {
         // Pass the default styles here
-        this(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
-        this.controller = controller;
-    }
-
-    /**
-     * InputDialog constructor
-     *
-     * @param parent
-     *            the parent
-     * @param style
-     *            the style
-     */
-    public ExtractionDataSelectionDialog(Shell parent, int style) {
-        // Let users override the default styles
-        super(parent, style);
-        setText(Labels.getString("ExtractionDataSelectionDialog.title")); //$NON-NLS-1$
-        setMessage(Labels.getString("ExtractionDataSelectionDialog.verifyingEntity")); //$NON-NLS-1$
-    }
-
-    /**
-     * Gets the message
-     *
-     * @return String
-     */
-    public String getMessage() {
-        return message;
-    }
-
-    /**
-     * Sets the message
-     *
-     * @param message
-     *            the new message
-     */
-    public void setMessage(String message) {
-        this.message = message;
+        super(parent, controller);
     }
 
     /**
@@ -99,19 +62,14 @@ public class ExtractionDataSelectionDialog extends Dialog {
      */
     public boolean open() {
         // Create the dialog window
-        Shell shell = new Shell(getParent(), getStyle());
-        shell.setText(getText());
-        shell.setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
-        createContents(shell);
-        shell.pack();
-        shell.open();
-        Display display = getParent().getDisplay();
+        Shell shell = super.openAndGetShell();
+        Display display = shell.getDisplay();
         BusyIndicator.showWhile(display, new Thread() {
             @Override
             public void run() {
                 try {
-                    controller.setFieldTypes();
-                    controller.setReferenceDescribes();
+                    getController().setFieldTypes();
+                    getController().setReferenceDescribes();
                     success = true;
                     ok.setEnabled(true);
                     label.setText(Labels.getString("ExtractionDataSelectionDialog.success")); //$NON-NLS-1$
@@ -140,8 +98,7 @@ public class ExtractionDataSelectionDialog extends Dialog {
      * @param shell
      *            the dialog window
      */
-    private void createContents(final Shell shell) {
-
+    protected void createContents(final Shell shell) {
         GridData data;
 
         GridLayout layout = new GridLayout(2, false);
@@ -149,7 +106,7 @@ public class ExtractionDataSelectionDialog extends Dialog {
         shell.setLayout(layout);
 
         label = new Label(shell, SWT.NONE);
-        label.setText(message);
+        label.setText(getMessage());
         data = new GridData();
         data.horizontalSpan = 2;
         data.widthHint = 250;

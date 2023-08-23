@@ -31,9 +31,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
-
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceColors;
 import org.eclipse.jface.resource.JFaceResources;
@@ -46,9 +43,8 @@ import org.eclipse.swt.widgets.*;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.util.StreamGobbler;
 
-public class HyperlinkDialog extends Dialog {
+public class HyperlinkDialog extends BaseDialog {
     private String boldMessage;
-    private String message;
     private String linkText;
     private String linkURL;
 
@@ -60,7 +56,6 @@ public class HyperlinkDialog extends Dialog {
         this.linkURL = linkURL;
     }
 
-    private Logger logger = LogManager.getLogger(HyperlinkDialog.class);
     private Text messageLabel;
     private Label titleLabel;
     private Label titleImage;
@@ -74,21 +69,7 @@ public class HyperlinkDialog extends Dialog {
      *            the parent
      */
     public HyperlinkDialog(Shell parent, Controller controller) {
-        this(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
-    }
-
-    /**
-     * InputDialog constructor
-     *
-     * @param parent
-     *            the parent
-     * @param style
-     *            the style
-     */
-    public HyperlinkDialog(Shell parent, int style) {
-        // Let users override the default styles
-        super(parent, style);
-
+        super(parent, controller);
     }
 
     /**
@@ -98,13 +79,8 @@ public class HyperlinkDialog extends Dialog {
      */
     public boolean open() {
         // Create the dialog window
-        Shell shell = new Shell(getParent(), getStyle());
-        shell.setText(getText());
-        shell.setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
-        createContents(shell);
-        shell.pack();
-        shell.open();
-        Display display = getParent().getDisplay();
+        Shell shell = super.openAndGetShell();
+        Display display = shell.getDisplay();
 
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch()) {
@@ -121,7 +97,7 @@ public class HyperlinkDialog extends Dialog {
      * @param shell
      *            the dialog window
      */
-    private void createContents(final Shell shell) {
+    protected void createContents(final Shell shell) {
 
         FormLayout layout = new FormLayout();
         shell.setLayout(layout);
@@ -165,7 +141,7 @@ public class HyperlinkDialog extends Dialog {
         messageLabel = new Text(shell, SWT.WRAP | SWT.READ_ONLY);
         messageLabel.setForeground(foreground);
         messageLabel.setBackground(background);
-        messageLabel.setText(message); // two lines
+        messageLabel.setText(this.getMessage()); // two lines
         messageLabel.setFont(JFaceResources.getDialogFont());
         FormData messageLabelData = new FormData();
         messageLabelData.top = new FormAttachment(titleLabel, 10);
@@ -273,14 +249,6 @@ public class HyperlinkDialog extends Dialog {
             }
         });
 
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public String getBoldMessage() {
