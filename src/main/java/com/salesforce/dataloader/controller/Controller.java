@@ -256,26 +256,15 @@ public class Controller {
         } catch (Exception e) {
             throw new MappingInitializationException(e);
         }
-        // Initialize with empty mapping 
-        this.mapper = getConfig().getOperationInfo().isExtraction() ? 
-                new SOQLMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), "") 
-              : new LoadMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), "");
-    }
-    
-    public void createMapperPostInitialize() throws MappingInitializationException {
         String mappingFile = config.getString(Config.MAPPING_FILE);
         if (mappingFile != null 
                 && !mappingFile.isBlank() && !Files.exists(Path.of(mappingFile))) {
             throw new MappingInitializationException("Mapping file " + mappingFile + " does not exist");
         }
-        this.mapper = getConfig().getOperationInfo().isExtraction() ? new SOQLMapper(getPartnerClient(),
-                dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) : new LoadMapper(getPartnerClient(), dao.getColumnNames(),
-                getFieldTypes().getFields(), mappingFile);
-    }
-
-    public void initializeOperationAndCreateMapper(String daoTypeStr, String daoNameStr, String sObjectName) throws MappingInitializationException {
-        initializeOperation(daoTypeStr, daoNameStr, sObjectName);
-        createMapperPostInitialize();
+        // Initialize mapping 
+        this.mapper = getConfig().getOperationInfo().isExtraction() ? 
+                new SOQLMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) 
+              : new LoadMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile);
     }
 
     public void createAndShowGUI() throws ControllerInitializationException {
