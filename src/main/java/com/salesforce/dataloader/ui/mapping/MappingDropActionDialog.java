@@ -33,16 +33,17 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import com.salesforce.dataloader.ui.BaseDialog;
 import com.salesforce.dataloader.ui.Labels;
-import com.salesforce.dataloader.ui.UIUtils;
 import com.salesforce.dataloader.ui.mapping.MappingDropAdapter.MAPPING_CHOICE;
 
-public class MappingDropActionDialog extends Dialog {
+public class MappingDropActionDialog extends BaseDialog {
     private Button replace;
     private Button add;
     private Button cancel;
     private Label label;
     private MappingDropAdapter dropAdapter;
+    private String csvField, currentlyMappedSforceFields;
 
     /**
      * InputDialog constructor
@@ -51,21 +52,8 @@ public class MappingDropActionDialog extends Dialog {
      *            the parent
      */
     public MappingDropActionDialog(MappingDropAdapter dropAdapter) {
-        this(dropAdapter.getMappingDialog().getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
+        super(dropAdapter.getMappingDialog().getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
         this.dropAdapter = dropAdapter;
-    }
-
-    /**
-     * InputDialog constructor
-     *
-     * @param parent
-     *            the parent
-     * @param style
-     *            the style
-     */
-    public MappingDropActionDialog(Shell parent, int style) {
-        // Let users override the default styles
-        super(parent, style);
     }
 
     /**
@@ -74,14 +62,10 @@ public class MappingDropActionDialog extends Dialog {
      * @return String
      */
     public void open(String csvField, String currentlyMappedSforceFields, String newSforceField) {
+        this.csvField = csvField;
+        this.currentlyMappedSforceFields = currentlyMappedSforceFields;
         // Create the dialog window
-        final Shell shell = new Shell(getParent(), getStyle());
-        shell.setText(Labels.getFormattedString("MappingDropActionDialog.title", 
-                new String[] {csvField, newSforceField}));
-        shell.setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
-        createContents(shell, csvField, currentlyMappedSforceFields, newSforceField);
-        shell.pack();
-        shell.open();
+        final Shell shell = super.openAndGetShell();
         Display display = getParent().getDisplay();
         // Set the description
         label.getParent().pack();
@@ -99,7 +83,7 @@ public class MappingDropActionDialog extends Dialog {
      * @param shell
      *            the dialog window
      */
-    private void createContents(final Shell shell, String csvField, String currentlyMappedSforceFields, String newSforceField) {
+    protected void createContents(final Shell shell) {
 
         final int WIDTH_HINT = 500;
         GridLayout layout = new GridLayout(1, false);

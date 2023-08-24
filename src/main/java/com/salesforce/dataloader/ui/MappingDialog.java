@@ -116,6 +116,7 @@ public class MappingDialog extends BaseDialog {
         // Pass the default styles here
         super(parent, controller);
         this.page = page;
+        this.parent = parent;
     }
     
     public Shell getParent() {
