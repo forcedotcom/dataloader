@@ -31,13 +31,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import com.sforce.soap.partner.Field;
 import org.apache.logging.log4j.Logger;
@@ -61,11 +61,6 @@ public abstract class Mapper {
     private static final Logger logger = LogManager.getLogger(Mapper.class);
 
     public static class InvalidMappingException extends RuntimeException {
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 1L;
-
         public InvalidMappingException(String msg, Throwable e) {
             super(msg, e);
         }
@@ -76,21 +71,21 @@ public abstract class Mapper {
     }
 
     private final CaseInsensitiveSet daoColumns;
-    private final LinkedHashMap<String, String> constants = caseInsensitiveMap();
+    private final Map<String, String> constants = caseInsensitiveMap();
 
-    protected final LinkedHashMap<String, String> map = caseInsensitiveMap();
+    private final Map<String, String> map = caseInsensitiveMap();
     private final PartnerClient client;
     private final CaseInsensitiveSet fields;
 
-    private <V> LinkedHashMap<String, V> caseInsensitiveMap() {
-        return new LinkedHashMap<String, V>();
+    private <V> Map<String, V> caseInsensitiveMap() {
+        return new TreeMap<String, V>(String.CASE_INSENSITIVE_ORDER);
     }
 
     protected Mapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
         this.client = client;
         this.fields = new CaseInsensitiveSet();
-        Set<String> daoColumns = new LinkedHashSet<String>();
+        Set<String> daoColumns = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         if (columnNames != null) {
             int i = 0;
             for (String colName : columnNames) {
