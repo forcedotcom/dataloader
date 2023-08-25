@@ -55,7 +55,8 @@ public class CsvUpsertProcessTest extends ProcessTestBase {
         return Arrays.asList(
                 TestVariant.defaultSettings(),
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED)
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED)
                 );
     }
 

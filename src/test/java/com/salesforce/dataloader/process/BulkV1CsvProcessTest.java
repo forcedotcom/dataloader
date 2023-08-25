@@ -34,7 +34,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.salesforce.dataloader.TestProgressMontitor;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
@@ -46,9 +45,9 @@ import com.salesforce.dataloader.util.AppUtil;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class BulkCsvProcessTest extends ProcessTestBase {
+public class BulkV1CsvProcessTest extends ProcessTestBase {
 
-    private static final String TASK_SUBJECT = "BulkCsvProcessTest";
+    private static final String TASK_SUBJECT = "BulkV1CsvProcessTest";
     private static final String TARGET_DIR = getProperty("target.dir").trim();
     private static final String CSV_DIR_PATH = TARGET_DIR + File.separator + "BatchTests";
     private static final String CSV_FILE_PATH = CSV_DIR_PATH + File.separator + "BatchTests.csv";

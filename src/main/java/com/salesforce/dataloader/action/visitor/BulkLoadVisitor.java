@@ -58,6 +58,7 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.LoadException;
@@ -413,12 +414,14 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         File tmpFile = new File(this.jobUtil.getStagingFileInOutputStatusDir("temp", ".csv"));
         String tmpFileName = tmpFile.getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
 
-    	this.jobUtil.getBulkV2LoadSuccessResults(tmpFileName);
-    	long rowCount = transferCSVContent(tmpFileName, successWriterFile);
-    	this.setSuccesses(rowCount);
+    	this.jobUtil.getBulkV2LoadSuccessResults(successWriterFile);
+    	CSVFileReader csvReader = new CSVFileReader(new File(successWriterFile), config, true, false);
+    	this.setSuccesses(csvReader.getTotalRows());
 
     	this.jobUtil.getBulkV2LoadErrorResults(tmpFileName);
-    	rowCount = transferCSVContent(tmpFileName, errorWriterFile);
+    	// Append error results to the errors found by data loader before uploading and stored
+    	// in errorWriterFile.
+    	long rowCount = transferCSVContent(tmpFileName, errorWriterFile);
     	this.setErrors(rowCount);
 
         // TODO for unprocessed records

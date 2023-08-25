@@ -808,24 +808,39 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         final String successFile = ctl.getConfig().getStringRequired(Config.OUTPUT_SUCCESS);
         //final String suceessFule2 = ctl.getConfig().
         assertNumRowsInCSVFile(successFile, numInserts + numUpdates);
+        boolean isBulkV2Operation = ctl.getConfig().isBulkV2APIEnabled();
 
         Row row = null;
         CSVFileReader rdr = new CSVFileReader(new File(successFile), getController().getConfig(), true, false);
-        String updateMsg = UPDATE_MSGS.get(ctl.getConfig().getOperationInfo());
+        String expectedUpdateStatusVal = UPDATE_MSGS.get(ctl.getConfig().getOperationInfo());
+        String expectedInsertStatusVal = INSERT_MSG;
+        if (isBulkV2Operation && !ctl.getConfig().getOperationInfo().isExtraction()) {
+            expectedInsertStatusVal = "true";
+            expectedUpdateStatusVal = "false";
+        }
         int insertsFound = 0;
         int updatesFound = 0;
         while ((row = rdr.readRow()) != null) {
-            String id = (String)row.get("ID");
+            String id = (String)row.get(Config.ID_COLUMN_NAME);
+            if (id == null) {
+                id = (String)row.get(Config.ID_COLUMN_NAME_IN_BULKV2);
+            }
             if (emptyId) assertEquals("Expected empty id", "", id);
             else
                 assertValidId(id);
-            String status = (String)row.get("STATUS");
-            if (INSERT_MSG.equals(status))
+            String statusValForRow = (String)row.get(Config.STATUS_COLUMN_NAME);
+            
+            // status column for Bulk v2 upload operation is different from that for all Bulk v1 operations
+            // and Bulk v2 extract operation
+            if (isBulkV2Operation && !ctl.getConfig().getOperationInfo().isExtraction()) {
+                statusValForRow = (String)row.get(Config.STATUS_COLUMN_NAME_IN_BULKV2);
+            }
+            if (expectedInsertStatusVal.equals(statusValForRow))
                 insertsFound++;
-            else if (updateMsg.equals(status))
+            else if (expectedUpdateStatusVal.equals(statusValForRow))
                 updatesFound++;
             else
-                Assert.fail("unrecognized status: " + status);
+                Assert.fail("unrecognized status: " + statusValForRow);
         }
         assertEquals("Wrong number of inserts in success file: " + successFile, numInserts, insertsFound);
         assertEquals("Wrong number of updates in success file: " + successFile, numUpdates, updatesFound);
