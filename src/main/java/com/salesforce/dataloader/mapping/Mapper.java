@@ -37,7 +37,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import com.sforce.soap.partner.Field;
 import org.apache.logging.log4j.Logger;
@@ -61,6 +60,11 @@ public abstract class Mapper {
     private static final Logger logger = LogManager.getLogger(Mapper.class);
 
     public static class InvalidMappingException extends RuntimeException {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
+
         public InvalidMappingException(String msg, Throwable e) {
             super(msg, e);
         }
@@ -71,21 +75,17 @@ public abstract class Mapper {
     }
 
     private final CaseInsensitiveSet daoColumns;
-    private final Map<String, String> constants = caseInsensitiveMap();
+    private final CaseInsensitiveMap constants = new CaseInsensitiveMap();
 
-    private final Map<String, String> map = caseInsensitiveMap();
+    protected final CaseInsensitiveMap map = new CaseInsensitiveMap();
     private final PartnerClient client;
     private final CaseInsensitiveSet fields;
-
-    private <V> Map<String, V> caseInsensitiveMap() {
-        return new TreeMap<String, V>(String.CASE_INSENSITIVE_ORDER);
-    }
 
     protected Mapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
         this.client = client;
         this.fields = new CaseInsensitiveSet();
-        Set<String> daoColumns = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+        CaseInsensitiveSet daoColumns = new CaseInsensitiveSet();
         if (columnNames != null) {
             int i = 0;
             for (String colName : columnNames) {
@@ -95,10 +95,10 @@ public abstract class Mapper {
                     logger.error(errorMsg);
                     throw new MappingInitializationException(errorMsg);
                 }
+                daoColumns.add(colName);
             }
-            daoColumns.addAll(columnNames);
         }
-        this.daoColumns = new CaseInsensitiveSet(Collections.unmodifiableSet(daoColumns));
+        this.daoColumns = daoColumns;
         if (fields != null) {
             for (Field field : fields) {
                 this.fields.add(field.getName());
@@ -234,7 +234,7 @@ public abstract class Mapper {
     }
 
     public boolean hasDaoColumn(String localName) {
-        return this.daoColumns.contains(localName);
+        return this.daoColumns.containsKey(localName);
     }
 
     public void removeMapping(String srcName) {

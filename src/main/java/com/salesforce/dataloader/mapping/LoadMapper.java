@@ -37,8 +37,9 @@ import org.apache.logging.log4j.LogManager;
 import org.springframework.util.StringUtils;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 /**
@@ -66,7 +67,7 @@ public class LoadMapper extends Mapper {
     }
 
     public Map<String, String> getMappingWithUnmappedColumns(boolean includeUnmapped) {
-        final Map<String, String> result = new HashMap<String, String>();
+        final CaseInsensitiveMap result = new CaseInsensitiveMap();
         
         // get mappings in the same order as DAO column order
         for (String daoColumn : getDaoColumns()) {
@@ -77,8 +78,7 @@ public class LoadMapper extends Mapper {
         }
         
         // Make sure to not miss existing mappings even if they are not in DAO.
-        final Map<String, String> currentMap = new HashMap<String, String>(getMap());
-        for (Map.Entry<String, String> currentMapEntry : currentMap.entrySet()) {
+        for (Map.Entry<String, String> currentMapEntry : getMap().entrySet()) {
             if (!result.containsKey(currentMapEntry.getKey())) {
                 result.put(currentMapEntry.getKey(), currentMapEntry.getValue());
             }
@@ -116,6 +116,26 @@ public class LoadMapper extends Mapper {
                 }
             }
         }
+    }
+    
+    
+    public Set<String> getMappedDaoColumns() {
+        Map<String, String> possibleMappings = this.getMappingWithUnmappedColumns(true);
+        LinkedHashSet<String> mappedColSet = new LinkedHashSet<String>();
+        for (String daoCol : possibleMappings.keySet()) {
+            String mappedName = this.map.get(daoCol);
+            if (mappedName != null) {
+                if (mappedName.contains(",")) {
+                    String[] mappedNameList = mappedName.split(",");
+                    for (int i=0; i<mappedNameList.length; i++) {
+                        mappedColSet.add(mappedNameList[i]);
+                    }
+                } else {
+                    mappedColSet.add(daoCol);
+                }
+            }
+        }
+        return mappedColSet;
     }
 
 }

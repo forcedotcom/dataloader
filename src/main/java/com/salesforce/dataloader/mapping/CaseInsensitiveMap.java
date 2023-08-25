@@ -25,39 +25,37 @@
  */
 package com.salesforce.dataloader.mapping;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
-public class CaseInsensitiveSet {
-    private final CaseInsensitiveMap originalMap = new CaseInsensitiveMap();
+public class CaseInsensitiveMap extends LinkedHashMap<String, String> {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    private final HashMap<String, String> lowercaseKeyToFirstTimeUseKeyMap = new HashMap<String, String>();
 
-    public CaseInsensitiveSet(){
+    @Override
+    public String put(String key, String value) {
+        return super.put(getFirstTimeUseKey(key), value);
     }
 
-    public CaseInsensitiveSet(Set<String> values){
-        this();
-        for(String value: values){
-            add(value);
-        }
+    // not @Override because that would require the key parameter to be of type Object
+    public String get(String key) {
+        return super.get(getFirstTimeUseKey(key));
     }
-
-    public void add(String value) {
-        originalMap.put(value, value);
-    }
-
+    
     public boolean containsKey(String key) {
-        return key != null ? originalMap.containsKey(key): false;
+        return super.containsKey(getFirstTimeUseKey(key));
+    }
+    
+    private String getFirstTimeUseKey(String suppliedKey) {
+        String firstTimeUseKey = lowercaseKeyToFirstTimeUseKeyMap.get(suppliedKey.toLowerCase());
+        if (firstTimeUseKey == null)  {
+            firstTimeUseKey = suppliedKey;
+            lowercaseKeyToFirstTimeUseKeyMap.put(firstTimeUseKey.toLowerCase(), firstTimeUseKey);
+        }
+        return firstTimeUseKey;
     }
 
-    public String getOriginal(String key){
-        return containsKey(key) ? (String) originalMap.get(key): key;
-    }
-
-    public boolean isEmpty(){
-        return originalMap.isEmpty();
-    }
-
-    public Set<String> getOriginalValues() {
-        return new LinkedHashSet<String>(originalMap.values());
-    }
 }
