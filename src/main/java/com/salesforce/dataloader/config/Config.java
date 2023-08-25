@@ -171,8 +171,10 @@ public class Config {
      * Constants that were made not configurable by choice
      */
     public static final String ID_COLUMN_NAME = "ID"; //$NON-NLS-1$
+    public static final String ID_COLUMN_NAME_IN_BULKV2 = "sf__id";
     public static final String ERROR_COLUMN_NAME = "ERROR"; //$NON-NLS-1$
     public static final String STATUS_COLUMN_NAME = "STATUS"; //$NON-NLS-1$
+    public static final String STATUS_COLUMN_NAME_IN_BULKV2 = "sf__Created"; //$NON-NLS-1$
 
     /**
      * The mapping from preference name to preference value (represented as strings).

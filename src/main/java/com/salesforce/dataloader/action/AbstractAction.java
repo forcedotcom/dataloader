@@ -256,7 +256,7 @@ abstract class AbstractAction implements IAction {
         if (config.isBulkV2APIEnabled()
         	&& !config.getString(Config.OPERATION).equals(OperationInfo.extract.name())
         	&& !config.getString(Config.OPERATION).equals(OperationInfo.extract_all.name())) {
-        	headers.add(0, "salesforce__id");
+            headers.add(0, Config.ID_COLUMN_NAME);
         	headers.add(1, Config.ERROR_COLUMN_NAME);
         } else {
 	        // add the ERROR column
@@ -279,8 +279,10 @@ abstract class AbstractAction implements IAction {
         if (config.isBulkV2APIEnabled()
         	&& !config.getString(Config.OPERATION).equals(OperationInfo.extract.name())
         	&& !config.getString(Config.OPERATION).equals(OperationInfo.extract_all.name())) {
-        	headers.add(0, "salesforce__id");
-        	headers.add(1, "created?");
+            if (headers.size() == 0 || !Config.ID_COLUMN_NAME.equals(headers.get(0))) {
+                headers.add(0, Config.ID_COLUMN_NAME);
+            }
+            headers.add(1, Config.STATUS_COLUMN_NAME_IN_BULKV2);
         } else {
 	        if (!Config.ID_COLUMN_NAME.equals(headers.get(0))) {
 	            headers.add(0, Config.ID_COLUMN_NAME);
