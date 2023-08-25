@@ -36,7 +36,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeMap;
 
 import com.sforce.soap.partner.Field;
 import org.apache.logging.log4j.Logger;

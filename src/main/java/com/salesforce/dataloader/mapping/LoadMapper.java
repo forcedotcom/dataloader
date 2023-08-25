@@ -37,9 +37,9 @@ import org.apache.logging.log4j.LogManager;
 import org.springframework.util.StringUtils;
 
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 
 /**
@@ -118,24 +118,23 @@ public class LoadMapper extends Mapper {
         }
     }
     
-    
-    public Set<String> getMappedDaoColumns() {
+    public List<String> getMappedDaoColumns() {
         Map<String, String> possibleMappings = this.getMappingWithUnmappedColumns(true);
-        LinkedHashSet<String> mappedColSet = new LinkedHashSet<String>();
+        LinkedList<String> mappedColList = new LinkedList<String>();
         for (String daoCol : possibleMappings.keySet()) {
             String mappedName = this.map.get(daoCol);
             if (mappedName != null) {
                 if (mappedName.contains(",")) {
                     String[] mappedNameList = mappedName.split(",");
                     for (int i=0; i<mappedNameList.length; i++) {
-                        mappedColSet.add(mappedNameList[i]);
+                        mappedColList.add(mappedNameList[i]);
                     }
                 } else {
-                    mappedColSet.add(daoCol);
+                    mappedColList.add(daoCol);
                 }
             }
         }
-        return mappedColSet;
+        return mappedColList;
     }
 
 }
