@@ -195,24 +195,7 @@ public class DataLoaderRunner extends Thread {
         // add the argument to indicate that JAVA_LIB_PATH has the folder containing SWT native libraries
         jvmArgs.add(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
         logger.debug("    " + AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
-        ProcessBuilder processBuilder = new ProcessBuilder(jvmArgs);
-        processBuilder.redirectErrorStream(true);
-        try {
-            Process process = processBuilder.start();
-            InputStream is = process.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            BufferedReader br = new BufferedReader(isr);
-            String line;
-
-            while ((line = br.readLine()) != null) {
-              System.out.println(line);
-            }
-
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        AppUtil.exec(jvmArgs, null);
     }
     
     private static String constructSwtJarNameFromOSAndArch(boolean skipOSAndArch) {

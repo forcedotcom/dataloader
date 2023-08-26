@@ -30,6 +30,7 @@ import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceColors;
@@ -41,7 +42,7 @@ import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.util.StreamGobbler;
+import com.salesforce.dataloader.util.AppUtil;
 
 public class HyperlinkDialog extends BaseDialog {
     private String boldMessage;
@@ -160,33 +161,25 @@ public class HyperlinkDialog extends BaseDialog {
                     @Override
                     public void run() {
                         int exitVal = 0;
-                        try {
-                            Process proc = null;
-                            if (System.getProperty("os.name").toLowerCase().indexOf("windows") >= 0)
-                                proc = Runtime.getRuntime().exec("rundll32 url.dll, FileProtocolHandler " + getLinkURL());
-                            else if (System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0){
-                                Desktop desktop = Desktop.getDesktop();
-                                try {
-                                    desktop.browse(new URI(getLinkURL()));
-                                } catch (URISyntaxException e) {
-                                    // TODO Auto-generated catch block
-                                    logger.error("Browser Error");
-                                }
+                        if (System.getProperty("os.name").toLowerCase().indexOf("windows") >= 0) {
+                            ArrayList<String> cmd = new ArrayList<String>();
+                            cmd.add("rundll32");
+                            cmd.add("url.dll,");
+                            cmd.add("FileProtocolHandler");
+                            cmd.add(getLinkURL());
+                            AppUtil.exec(cmd, "Browser Error");
+                        } else if (System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0){
+                            Desktop desktop = Desktop.getDesktop();
+                            try {
+                                desktop.browse(new URI(getLinkURL()));
+                            } catch (URISyntaxException | IOException e) {
+                                // TODO Auto-generated catch block
+                                logger.error("Browser Error");
                             }
-                            else {
-                                logger.error("OS is not supported.");
-                                return;
-                            }
-                                
-                            StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR"); //$NON-NLS-1$
-                            StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), "OUTPUT"); //$NON-NLS-1$
-                            errorGobbler.start();
-                            outputGobbler.start();
-                            exitVal = proc.waitFor();
-                        } catch (IOException iox) {
-                            logger.error("Browser Error", iox);
-                        } catch (InterruptedException ie) {
-                            logger.error("Browser Error", ie);
+                        }
+                        else {
+                            logger.error("OS is not supported.");
+                            return;
                         }
 
                         if (exitVal != 0) {

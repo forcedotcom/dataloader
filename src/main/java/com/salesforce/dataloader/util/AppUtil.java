@@ -26,9 +26,11 @@
 
 package com.salesforce.dataloader.util;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
@@ -40,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -51,6 +54,7 @@ import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.exception.ConfigInitializationException;
+import com.salesforce.dataloader.ui.Labels;
 
 /**
  * com.salesforce.dataloader.util
@@ -383,5 +387,32 @@ public class AppUtil {
     
     public static boolean isRunningOnLinux() {
         return getOSType() == OSType.LINUX;
+    }
+    
+    // Run a command in the native system while redirecting its stdout and stderr
+    public static int exec(List<String> command, String exceptionMessage) {
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        processBuilder.redirectErrorStream(true);
+        if (exceptionMessage == null) {
+           exceptionMessage = Messages.getString("AppUtil.processExecutionError");
+        }
+        int exitVal = -1;
+        try {
+            Process process = processBuilder.start();
+            InputStream is = process.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+
+            while ((line = br.readLine()) != null) {
+              System.out.println(line);
+            }
+
+            exitVal = process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            // TODO Auto-generated catch block
+            logger.error(exceptionMessage, e);
+        }
+        return exitVal;
     }
 }

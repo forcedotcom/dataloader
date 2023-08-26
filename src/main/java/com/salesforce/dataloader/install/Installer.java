@@ -35,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
@@ -338,16 +339,14 @@ public class Installer extends Thread {
     }
     
     private static void createShortcutOnWindows(final String shortcutCommand, String installationDir) throws IOException, InterruptedException {
-        String redirectWinCmdOutputStr = "";
-        if (logger.getLevel() == Level.DEBUG) {
-            redirectWinCmdOutputStr = " > debug.txt 2>&1";
-        }
-        String command = "cmd /c call \"" + installationDir + "\\util\\util.bat\"" 
-                + " " + shortcutCommand + " \"" + installationDir + "\"" + redirectWinCmdOutputStr;
-        logger.debug("going to execute windows command: ");
-        logger.debug(command);
-        Process p = Runtime.getRuntime().exec(command);
-        int exitVal = p.waitFor();
+        ArrayList<String> cmd = new ArrayList<String>();
+        cmd.add("cmd");
+        cmd.add("/c");
+        cmd.add("call");
+        cmd.add("\"" + installationDir + "\\util\\util.bat\"");
+        cmd.add(shortcutCommand);
+        cmd.add("\"" + installationDir + "\"");
+        int exitVal = AppUtil.exec(cmd, null);
         logger.debug("windows command exited with exit code: " + exitVal);
     }
     

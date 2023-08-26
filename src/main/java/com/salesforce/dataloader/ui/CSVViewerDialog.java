@@ -29,6 +29,7 @@ package com.salesforce.dataloader.ui;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,6 +60,7 @@ import com.salesforce.dataloader.exception.DataAccessObjectInitializationExcepti
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.ui.csvviewer.CSVContentProvider;
 import com.salesforce.dataloader.ui.csvviewer.CSVLabelProvider;
+import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DAORowUtil;
 import com.salesforce.dataloader.util.StreamGobbler;
 
@@ -188,21 +190,9 @@ public class CSVViewerDialog extends Dialog {
                     Thread runner = new Thread() {
                         @Override
                         public void run() {
-                            int exitVal = 0;
-                            try {
-                                String[] cmd = { "cmd.exe", "/c", "\"" + filename + "\"" }; //$NON-NLS-1$ //$NON-NLS-2$
-                                Process proc = Runtime.getRuntime().exec(cmd);
-                                StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR"); //$NON-NLS-1$
-                                StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), "OUTPUT"); //$NON-NLS-1$
-                                errorGobbler.start();
-                                outputGobbler.start();
-                                exitVal = proc.waitFor();
-                            } catch (IOException iox) {
-                                logger.error(Labels.getString("CSVViewerDialog.errorExternal"), iox); //$NON-NLS-1$
-                            } catch (InterruptedException ie) {
-                                logger.error(Labels.getString("CSVViewerDialog.errorExternal"), ie); //$NON-NLS-1$
-                            }
-
+                            String[] cmd = { "cmd.exe", "/c", "\"" + filename + "\"" }; //$NON-NLS-1$ //$NON-NLS-2$
+                            
+                            int exitVal = AppUtil.exec(Arrays.asList(cmd), Labels.getString("CSVViewerDialog.errorExternal"));
                             if (exitVal != 0) {
                                 logger.error(Labels.getString("CSVViewerDialog.errorProcessExit") + exitVal); //$NON-NLS-1$
                             }
