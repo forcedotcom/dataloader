@@ -1,0 +1,203 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>xls</groupId>
+  <artifactId>xlstocsv</artifactId>
+  <packaging>jar</packaging>
+  <version>0.1</version>
+  <name>XLS To CSV converter</name>
+  <url>TBD</url>
+  <organization>
+    <name></name>
+    <url></url>
+  </organization>
+
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>maven-eclipse-repo</id>
+      <url>https://maven-eclipse.github.io/maven</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+<!-- Runtime dependencies -->
+<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.20.0</version>
+    </dependency>
+<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
+    <dependency>
+        <groupId>org.apache.poi</groupId>
+        <artifactId>poi</artifactId>
+        <version>5.2.3</version>
+    </dependency>
+<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-csv -->
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-csv</artifactId>
+        <version>1.10.0</version>
+    </dependency>
+<!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
+    <dependency>
+        <groupId>org.apache.poi</groupId>
+        <artifactId>poi-ooxml</artifactId>
+        <version>5.2.3</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <defaultGoal>install</defaultGoal>
+
+    <plugins>
+
+<!-- plugins inherited from parent whose version needs to be specified
+     to clear mvn versions:display-plugin-updates
+ -->
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-clean-plugin -->
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-clean-plugin</artifactId>
+      <version>3.3.1</version>
+    </plugin>
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-deploy-plugin -->
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-deploy-plugin</artifactId>
+	  <version>3.1.1</version>
+	</plugin>
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-install-plugin -->
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-install-plugin</artifactId>
+	  <version>3.1.1</version>
+	</plugin>
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin -->
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-jar-plugin</artifactId>
+      <version>3.3.0</version>
+      <configuration>
+          <excludes>
+            <exclude>contrib/**</exclude>
+          </excludes>
+      </configuration>
+	</plugin>
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-site-plugin -->
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-site-plugin</artifactId>
+	  <version>3.12.1</version>
+	</plugin>
+
+<!-- plugins explicitly included in the project -->
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-enforcer-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.6</version>
+                </requireMavenVersion>
+              </rules>    
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+        
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <forceJavacCompilerUse>true</forceJavacCompilerUse>
+          <compilerArgs>
+            <!-- <arg>-verbose</arg> -->
+          </compilerArgs>
+        </configuration>
+      </plugin>
+
+      <plugin>
+<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.0</version>
+        <configuration>
+          <createDependencyReducedPom>false</createDependencyReducedPom>
+          <artifactSet>
+            <excludes>
+                <exclude>local.swt:swt*:</exclude>
+           </excludes>
+          </artifactSet>
+          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+              <mainClass>xls.XLSToCSVConverter</mainClass>
+              <manifestEntries>
+                <Main-Class>xls.XLSToCSVConverter</Main-Class>
+                <Multi-Release>true</Multi-Release>
+                <Permissions>all-permissions</Permissions>
+                <Application-Name>${project.name}</Application-Name>
+              </manifestEntries>
+            </transformer>
+          </transformers>
+          <minimizeJar>true</minimizeJar>
+          <filters>
+            <filter>
+               <artifact>org.apache.logging.log4j:log4j-core</artifact>
+               <includes>
+                   <include>**</include>
+               </includes>
+            </filter>
+             <filter>
+               <artifact>org.apache.logging.log4j:log4j-api</artifact>
+               <includes>
+                   <include>**</include>
+               </includes>
+            </filter>
+            <filter>
+               <artifact>org.springframework:spring-beans</artifact>
+               <includes>
+                   <include>**</include>
+               </includes>
+            </filter>
+            <filter>
+                <artifact>*:*</artifact>
+                <excludes>
+                    <exclude>**/Log4j2Plugins.dat</exclude>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+               </excludes>
+            </filter>
+          </filters>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-shaded-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
