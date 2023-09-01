@@ -310,7 +310,7 @@ public class HttpClientTransport implements HttpTransportInterface {
         	return null;
         }
 
-        if (enableCompression) {
+        if (enableCompression && currentConfig.isCompression()) {
             this.httpMethod.addHeader("Content-Encoding", "gzip");
             this.httpMethod.addHeader("Accept-Encoding", "gzip");
         }
