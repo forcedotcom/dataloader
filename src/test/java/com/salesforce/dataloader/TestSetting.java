@@ -45,7 +45,10 @@ public enum TestSetting {
     WRITE_UTF8_ENABLED(Config.WRITE_UTF8, Boolean.TRUE),
     WRITE_UTF8_DISABLED(Config.WRITE_UTF8, Boolean.FALSE),
     READ_UTF8_ENABLED(Config.READ_UTF8, Boolean.TRUE),
-    READ_UTF8_DISABLED(Config.READ_UTF8, Boolean.FALSE);
+    READ_UTF8_DISABLED(Config.READ_UTF8, Boolean.FALSE),
+    COMPRESSION_ENABLED(Config.NO_COMPRESSION, Boolean.FALSE),
+    COMPRESSION_DISABLED(Config.NO_COMPRESSION, Boolean.TRUE)
+    ;
 
     private final String parameter;
     private final Object value;
