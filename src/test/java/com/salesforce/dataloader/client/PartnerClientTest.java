@@ -42,6 +42,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -287,6 +288,15 @@ public class PartnerClientTest extends ProcessTestBase {
 
     @Test
     public void testUpdateBasic() throws Exception {
+        doTestUpdateBasic(false);
+    }
+    
+    @Test
+    public void testUpdateBasicWithoutCompression() throws Exception {
+        doTestUpdateBasic(true);
+    }
+        
+    private void doTestUpdateBasic(boolean noCompression) throws Exception {
         String id = getRandomAccountId();
 
         // setup our dynabeans
@@ -307,6 +317,8 @@ public class PartnerClientTest extends ProcessTestBase {
 
         List<DynaBean> beanList = new ArrayList<DynaBean>();
         beanList.add(sforceObj);
+        
+        getController().getConfig().setValue(Config.NO_COMPRESSION, noCompression);
 
         // get the client and make the insert call
         PartnerClient client = new PartnerClient(getController());
