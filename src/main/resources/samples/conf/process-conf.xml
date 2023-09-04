@@ -1,4 +1,5 @@
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" 
+    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 <beans>
     <bean id="accountMasterProcess"
           class="com.salesforce.dataloader.process.ProcessRunner"
