@@ -15,8 +15,10 @@ usage() {
 
 test=""
 debug=""
+encryptionFile=${HOME}/.dataloader/dataLoader.key
+password=""
 
-while getopts ":dv:t:" flag
+while getopts ":dv:t:f:" flag
 do
   case "${flag}" in
     d)
@@ -24,6 +26,9 @@ do
       ;;
     t)
       test="-Dtest=com.salesforce.dataloader.${OPTARG}"
+      ;;
+    f)
+      encryptionFile="${OPTARG}"
       ;;
     *)
       usage
@@ -42,4 +47,7 @@ if [ "$#" -lt 4 ]; then
 fi 
 
 echo $@
-mvn -Dtest.endpoint=${1} -Dtest.user.default=${2} -Dtest.user.restricted=${3} -Dtest.password=${4} clean verify ${debug} ${test}
+mvn clean package
+encryptedPassword="$(java -cp ./target/* com.salesforce.dataloader.process.DataLoaderRunner run.mode=encrypt -e ${4} ${encryptionFile} 2>&1 /dev/null | tail -1)"
+echo ${encryptedPassword}
+mvn -Dtest.endpoint=${1} -Dtest.user.default=${2} -Dtest.user.restricted=${3} -Dtest.password=${encryptedPassword} -Dtest.encryptionFile=${encryptionFile} verify ${debug} ${test}
