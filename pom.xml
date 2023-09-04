@@ -21,6 +21,7 @@
     <test.user.default>admin@org.com</test.user.default>
     <test.user.restricted>standard@org.com</test.user.restricted>
     <test.password></test.password><!-- use the encrypted password -->
+    <test.encryptionFile></test.encryptionFile>
     <test.redirect>false</test.redirect>
     <test.testfiles.directory>${project.build.testOutputDirectory}/testfiles</test.testfiles.directory>
   </properties>
@@ -179,9 +180,6 @@
       </resource>
     </resources>
 
-    <filters>
-      <filter>src/test/resources/testfilter.properties</filter>
-    </filters>
     <testResources>
       <testResource>
         <directory>src/test/resources</directory>
