@@ -15,7 +15,10 @@ usage() {
 
 test=""
 debug=""
-encryptionFile=${HOME}/.dataloader/dataLoader.key
+debugEncryption=""
+#encryptionFile=${HOME}/.dataloader/dataLoader.key
+encryptionFile=
+
 password=""
 
 while getopts ":dv:t:f:" flag
@@ -23,6 +26,8 @@ do
   case "${flag}" in
     d)
       debug="-Dmaven.surefire.debug"
+      debugEncryption="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=y"
+      
       ;;
     t)
       test="-Dtest=com.salesforce.dataloader.${OPTARG}"
@@ -46,8 +51,8 @@ if [ "$#" -lt 4 ]; then
   usage
 fi 
 
-echo $@
+#echo $@
+jarname="$(find ./target -name dataloader-[0-9][0-9].[0-9].[0-9].jar | tail -1)"
 mvn clean package
-encryptedPassword="$(java -cp ./target/* com.salesforce.dataloader.process.DataLoaderRunner run.mode=encrypt -e ${4} ${encryptionFile} 2>&1 /dev/null | tail -1)"
-echo ${encryptedPassword}
+encryptedPassword="$(java ${debugEncryption} -cp ${jarname} com.salesforce.dataloader.process.DataLoaderRunner run.mode=encrypt -e ${4} ${encryptionFile} | tail -1)"
 mvn -Dtest.endpoint=${1} -Dtest.user.default=${2} -Dtest.user.restricted=${3} -Dtest.password=${encryptedPassword} -Dtest.encryptionFile=${encryptionFile} verify ${debug} ${test}
