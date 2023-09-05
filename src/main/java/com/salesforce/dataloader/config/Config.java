@@ -1452,6 +1452,20 @@ public class Config {
 
     public void setOAuthEnvironment(String environment) {
         String clientId;
+        if (environment == null || environment.isBlank()) {
+            environment = OAUTH_PROD_ENVIRONMENT_VAL;
+        }
+        String[] envArray = getString(OAUTH_ENVIRONMENTS).split(",");
+        boolean isEnvMatch = false;
+        for (String env : envArray) {
+            env = env.strip();
+            if (env.equalsIgnoreCase(environment)) {
+                isEnvMatch = true;
+            }
+        }
+        if (!isEnvMatch) {
+            environment = OAUTH_PROD_ENVIRONMENT_VAL;
+        }
         if (getBoolean(BULK_API_ENABLED)) {
             clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_BULK_CLIENTID);
         } else {
