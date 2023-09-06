@@ -523,12 +523,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             login(apiVersionForTheSession);
             logger.debug("able to successfully invoke server APIs of version " + apiVersionForTheSession);
         } catch (UnexpectedErrorFault fault) {
-            if (fault.getExceptionCode() == ExceptionCode.UNSUPPORTED_API_VERSION) 
-            /*
-                && (apiVersionForTheSession.equals(getCurrentAPIVersionInWSC())
-               ) 
-            */
-            {
+            if (fault.getExceptionCode() == ExceptionCode.UNSUPPORTED_API_VERSION) {
                 logger.error("Failed to successfully invoke server APIs of version " + apiVersionForTheSession);
                 apiVersionForTheSession = getPreviousAPIVersionInWSC();
                 login(apiVersionForTheSession);
@@ -536,9 +531,23 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 logger.error("Failed to get user info using manually configured session id", fault);
                 throw fault;
             }
-        }   catch (ConnectionException e) {
-            logger.error("Failed to get user info using manually configured session id", e);
-            throw e;
+        } catch (ConnectionException e) {
+            String authEndpoint = config.getString(Config.ENDPOINT);
+            logger.warn(Messages.getMessage(this.getClass(), "failedUsernamePasswordAuth", 
+                                            authEndpoint, Config.ENDPOINT, e.getMessage()));
+            if (authEndpoint.contains("lightning.force.com")) {
+                authEndpoint = authEndpoint.replace("lightning.force.com", "my.salesforce.com");
+                config.setValue(Config.ENDPOINT, authEndpoint);
+                logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", authEndpoint, Config.ENDPOINT));
+                login();
+            } else if (!authEndpoint.equals(Config.DEFAULT_ENDPOINT_URL)) {
+                config.setValue(Config.ENDPOINT, Config.DEFAULT_ENDPOINT_URL);
+                logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", Config.DEFAULT_ENDPOINT_URL, Config.ENDPOINT));
+                login();
+            } else {
+                logger.error("Failed to get user info using manually configured session id", e);
+                throw e;   
+            }
         }
         return true; // exception thrown if there is an issue with login
     }
