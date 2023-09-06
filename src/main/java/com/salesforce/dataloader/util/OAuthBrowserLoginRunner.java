@@ -75,8 +75,8 @@ public class OAuthBrowserLoginRunner {
         } catch (Exception ex) {
             String oAuthServer = config.getString(Config.OAUTH_SERVER);
             logger.warn(Messages.getMessage(this.getClass(), "failedAuthStart", oAuthServer, ex.getMessage()));
-            if (oAuthServer.contains("lightning.force.com")) {
-                oAuthServer = oAuthServer.replace("lightning.force.com", "my.salesforce.com");
+            if (oAuthServer.contains(Config.LIGHTNING_ENDPOINT_URL_PART_VAL)) {
+                oAuthServer = oAuthServer.replace(Config.LIGHTNING_ENDPOINT_URL_PART_VAL, Config.MYSF_ENDPOINT_URL_PART_VAL);
                 config.setOAuthEnvironmentString(config.getString(Config.OAUTH_ENVIRONMENT), 
                                                     Config.OAUTH_PARTIAL_SERVER, oAuthServer);
                 try {

@@ -535,8 +535,8 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             String authEndpoint = config.getString(Config.ENDPOINT);
             logger.warn(Messages.getMessage(this.getClass(), "failedUsernamePasswordAuth", 
                                             authEndpoint, Config.ENDPOINT, e.getMessage()));
-            if (authEndpoint.contains("lightning.force.com")) {
-                authEndpoint = authEndpoint.replace("lightning.force.com", "my.salesforce.com");
+            if (authEndpoint.contains(Config.LIGHTNING_ENDPOINT_URL_PART_VAL)) {
+                authEndpoint = authEndpoint.replace(Config.LIGHTNING_ENDPOINT_URL_PART_VAL, Config.MYSF_ENDPOINT_URL_PART_VAL);
                 config.setValue(Config.ENDPOINT, authEndpoint);
                 logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", authEndpoint, Config.ENDPOINT));
                 login();
