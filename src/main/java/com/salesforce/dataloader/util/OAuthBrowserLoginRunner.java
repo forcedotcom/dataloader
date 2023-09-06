@@ -53,6 +53,7 @@ import com.google.gson.GsonBuilder;
 import com.salesforce.dataloader.client.SimplePost;
 import com.salesforce.dataloader.client.SimplePostFactory;
 import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.exception.OAuthBrowserLoginRunnerException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.model.OAuthToken;
@@ -73,13 +74,16 @@ public class OAuthBrowserLoginRunner {
             startBrowserLogin(config, skipUserCodePage);
         } catch (Exception ex) {
             String oAuthServer = config.getString(Config.OAUTH_SERVER);
+            logger.warn(Messages.getMessage(this.getClass(), "failedAuthStart", oAuthServer, ex.getMessage()));
             if (oAuthServer.contains("lightning.force.com")) {
                 oAuthServer = oAuthServer.replace("lightning.force.com", "my.salesforce.com");
                 config.setOAuthEnvironmentString(config.getString(Config.OAUTH_ENVIRONMENT), 
                                                     Config.OAUTH_PARTIAL_SERVER, oAuthServer);
                 try {
+                    logger.info(Messages.getMessage(this.getClass(), "retryAuthStart", oAuthServer));
                     startBrowserLogin(config, skipUserCodePage);
                 } catch (Exception e) {
+                    logger.warn(Messages.getMessage(this.getClass(), "failedAuthStart", oAuthServer, ex.getMessage()));
                     retryBrowserLoginWithDefaultURL(config, skipUserCodePage);
                 }
             } else {
@@ -90,6 +94,7 @@ public class OAuthBrowserLoginRunner {
     
     private void retryBrowserLoginWithDefaultURL(Config config, boolean skipUserCodePage)  throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
         String oAuthServer = Config.DEFAULT_ENDPOINT_URL;
+        logger.info(Messages.getMessage(this.getClass(), "retryAuthStart", oAuthServer));
         config.setOAuthEnvironmentString(config.getString(Config.OAUTH_ENVIRONMENT), 
                 Config.OAUTH_PARTIAL_SERVER, oAuthServer);
         startBrowserLogin(config, skipUserCodePage);
