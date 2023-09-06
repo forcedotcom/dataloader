@@ -145,6 +145,8 @@ public class Config {
     public static final int DEFAULT_BULK_API_BATCH_SIZE = 2000;
     public static final long DEFAULT_BULK_API_CHECK_STATUS_INTERVAL = 5000L;
     public static final String DEFAULT_ENDPOINT_URL = "https://login.salesforce.com";
+    public static final String LIGHTNING_ENDPOINT_URL_PART_VAL = "lightning.force.com";
+    public static final String MYSF_ENDPOINT_URL_PART_VAL = "mysalesforce.com";
     public static final String OAUTH_PROD_ENVIRONMENT_VAL = "Production";
     public static final String OAUTH_SB_ENVIRONMENT_VAL = "Sandbox";
 
