@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,13 +62,40 @@ public class OAuthBrowserLoginRunner {
     protected static Logger logger = LogManager.getLogger(OAuthBrowserLoginRunner.class);
     private static LoginStatus loginResult = LoginStatus.WAIT;
     private String verificationURLStr = null;
-    final String userCodeStr;
-    final String deviceCode;
-    final String oAuthTokenURLStr;
-    final Config config;
-    final Thread checkLoginThread;
+    String userCodeStr;
+    String deviceCode;
+    String oAuthTokenURLStr;
+    Config config;
+    Thread checkLoginThread;
 
     public OAuthBrowserLoginRunner(Config config, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
+        try {
+            startBrowserLogin(config, skipUserCodePage);
+        } catch (Exception ex) {
+            String oAuthServer = config.getString(Config.OAUTH_SERVER);
+            if (oAuthServer.contains("lightning.force.com")) {
+                oAuthServer = oAuthServer.replace("lightning.force.com", "my.salesforce.com");
+                config.setOAuthEnvironmentString(config.getString(Config.OAUTH_ENVIRONMENT), 
+                                                    Config.OAUTH_PARTIAL_SERVER, oAuthServer);
+                try {
+                    startBrowserLogin(config, skipUserCodePage);
+                } catch (Exception e) {
+                    retryBrowserLoginWithDefaultURL(config, skipUserCodePage);
+                }
+            } else {
+                retryBrowserLoginWithDefaultURL(config, skipUserCodePage);
+            }
+        }
+    }
+    
+    private void retryBrowserLoginWithDefaultURL(Config config, boolean skipUserCodePage)  throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
+        String oAuthServer = Config.DEFAULT_ENDPOINT_URL;
+        config.setOAuthEnvironmentString(config.getString(Config.OAUTH_ENVIRONMENT), 
+                Config.OAUTH_PARTIAL_SERVER, oAuthServer);
+        startBrowserLogin(config, skipUserCodePage);
+    }
+    
+    private void startBrowserLogin(Config config, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
         setLoginStatus(LoginStatus.WAIT);
         this.config = config;
         config.setOAuthEnvironment(config.getString(Config.OAUTH_ENVIRONMENT));
@@ -156,6 +182,7 @@ public class OAuthBrowserLoginRunner {
             // did not succeed in skipping the page with pre-filled user code, show it
             openURL(verificationURLStr);
         }
+
     }
        
     public void openURL(String url) {
