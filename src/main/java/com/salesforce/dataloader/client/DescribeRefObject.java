@@ -41,6 +41,7 @@ public class DescribeRefObject {
     private String parentObjectName;
     private Map<String, Field> parentFieldInfoMap;
     private Field childField;
+    public static final int MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD = 5;
 
     DescribeRefObject(String parentObjectName, Field childField, Map<String,Field> fieldInfoMap) {
         this.parentObjectName = parentObjectName;
