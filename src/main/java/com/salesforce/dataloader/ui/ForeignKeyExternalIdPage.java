@@ -34,10 +34,12 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 
+import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dyna.ObjectField;
 import com.sforce.soap.partner.Field;
+import com.sforce.soap.partner.FieldType;
 
 /**
  * Page for selecting external id fields for the foreign key objects
@@ -94,8 +96,38 @@ public class ForeignKeyExternalIdPage extends LoadPage {
 
         extIdSelections.clear();
         if(referenceObjects != null) {
+            MappingPage mappingPage = (MappingPage)getWizard().getPage(MappingPage.class.getSimpleName()); //$NON-NLS-1$
+            Field[] fields = mappingPage.getFieldTypes(); // get the list of sObject fields
+            HashMap<String, Field> lookupFieldMap = new HashMap<String, Field>();
+            for (Field field : fields) {
+                String[] referenceTos = field.getReferenceTo();
+                if (referenceTos != null && referenceTos.length > 0) {
+                    lookupFieldMap.put(field.getRelationshipName(), field);
+                }
+            }
+            OperationInfo operation = controller.getConfig().getOperationInfo();
             for(String relationshipName : referenceObjects.keySet()) {
-                createObjectExtIdUi(comp, relationshipName);
+                Field relationshipField = lookupFieldMap.get(relationshipName);
+                boolean isCreateableOrUpdateable = true;
+                if (relationshipField != null) {
+                    switch (operation) {
+                        case insert:
+                            if (!relationshipField.isCreateable()) {
+                                isCreateableOrUpdateable = false;
+                            }
+                            break;
+                        case update:
+                            if (!relationshipField.isUpdateable()) {
+                                isCreateableOrUpdateable = false;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                if (isCreateableOrUpdateable) {
+                    createObjectExtIdUi(comp, relationshipName);
+                }
             }
         }
         scrollComp.setMinSize(comp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -163,8 +195,21 @@ public class ForeignKeyExternalIdPage extends LoadPage {
             if(extIdFieldName != null && extIdFieldName.length() > 0
                     && ! extIdFieldName.equals(Labels.getString("ForeignKeyExternalIdPage.defaultComboText"))) {
                 DescribeRefObject refObjectInfo = referenceObjects.get(relationshipName);
-                extIdReferences.put(relationshipName, ObjectField.formatAsString(refObjectInfo.getObjectName(), extIdFieldName));
-                relatedFields.put(relationshipName,refObjectInfo.getFieldInfoMap().get(extIdFieldName));
+                extIdReferences.put(relationshipName, ObjectField.formatAsString(refObjectInfo.getParentObjectName(), extIdFieldName));
+                Field relatedField = new Field();
+                Field parentField = refObjectInfo.getFieldInfoMap().get(extIdFieldName);
+                Field childField = refObjectInfo.getChildField();
+                relatedField.setName(relationshipName + ":" + parentField.getName());
+                String childFieldLabel = childField.getLabel();
+                String[] childFieldLabelParts = childFieldLabel.split(" \\(.+\\)$");
+                relatedField.setLabel(childFieldLabelParts[0] + " (" + parentField.getLabel() + ")");
+                relatedField.setCreateable(parentField.isCreateable());
+                relatedField.setUpdateable(parentField.isUpdateable());
+                relatedField.setType(FieldType.reference);
+                String[] refToArray = new String[1];
+                refToArray[0] = refObjectInfo.getParentObjectName();
+                relatedField.setReferenceTo(refToArray);
+                relatedFields.put(relationshipName,relatedField);
             }
         }
 

@@ -38,19 +38,25 @@ import com.sforce.soap.partner.Field;
  */
 public class DescribeRefObject {
 
-    private String objectName;
-    private Map<String, Field> fieldInfoMap;
+    private String parentObjectName;
+    private Map<String, Field> parentFieldInfoMap;
+    private Field childField;
 
-    DescribeRefObject(String objectName, Map<String,Field> fieldInfoMap) {
-        this.objectName = objectName;
-        this.fieldInfoMap = fieldInfoMap;
+    DescribeRefObject(String parentObjectName, Field childField, Map<String,Field> fieldInfoMap) {
+        this.parentObjectName = parentObjectName;
+        this.parentFieldInfoMap = fieldInfoMap;
+        this.childField = childField;
     }
 
     public Map<String, Field> getFieldInfoMap() {
-        return fieldInfoMap;
+        return parentFieldInfoMap;
     }
 
-    public String getObjectName() {
-        return objectName;
+    public String getParentObjectName() {
+        return parentObjectName;
+    }
+    
+    public Field getChildField() {
+        return childField;
     }
 }

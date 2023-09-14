@@ -41,7 +41,6 @@ import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dyna.ObjectField;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.mapping.LoadMapper;
 import com.salesforce.dataloader.ui.mapping.MappingContentProvider;
@@ -232,16 +231,8 @@ public class MappingPage extends LoadPage {
     private Field[] addRelatedFields(Field[] fields) {
         List<Field> relatedFieldList = new LinkedList<Field>();
         for(Entry<String,Field> relatedFieldInfo : relatedFields.entrySet()) {
-            String relationshipName = relatedFieldInfo.getKey();
-            Field relatedField = relatedFieldInfo.getValue();
-            String mapFieldName = ObjectField.formatAsString(relationshipName, relatedField.getName());
-            Field mapField = new Field();
-            mapField.setName(mapFieldName);
-            mapField.setLabel(relationshipName + " " + relatedField.getLabel());
-            mapField.setType(FieldType.reference);
-            mapField.setCreateable(relatedField.isCreateable());
-            mapField.setUpdateable(relatedField.isUpdateable());
-            relatedFieldList.add(mapField);
+            Field lookupField = relatedFieldInfo.getValue();
+            relatedFieldList.add(lookupField);
         }
         relatedFieldList.addAll(Arrays.asList(fields));
         return relatedFieldList.toArray(fields);

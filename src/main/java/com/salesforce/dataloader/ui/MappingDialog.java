@@ -39,6 +39,8 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.*;
 import org.eclipse.swt.events.*;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -338,6 +340,9 @@ public class MappingDialog extends BaseDialog {
         mappingTblViewer = new TableViewer(shell, SWT.FULL_SELECTION);
         mappingTblViewer.setContentProvider(new MappingContentProvider());
         mappingTblViewer.setLabelProvider(new MappingLabelProvider());
+        mappingTblViewer.setSorter(new MappingViewerSorter());
+
+        data = new GridData(GridData.FILL_BOTH);
 
         //add drop support
         int ops = DND.DROP_MOVE;
@@ -379,10 +384,10 @@ public class MappingDialog extends BaseDialog {
             public void keyReleased(KeyEvent event) {}
         });
 
-        // Add the first column - name
-        TableColumn tc = new TableColumn(mappingTable, SWT.LEFT);
-        tc.setText(Labels.getString("MappingDialog.fileColumn")); //$NON-NLS-1$
-        tc.addSelectionListener(new SelectionAdapter() {
+        // Add the first column - column header in CSV file
+        TableColumn csvFieldsCol = new TableColumn(mappingTable, SWT.LEFT);
+        csvFieldsCol.setText(Labels.getString("MappingDialog.fileColumn")); //$NON-NLS-1$
+        csvFieldsCol.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 ((MappingViewerSorter)mappingTblViewer.getSorter()).doSort(MAPPING_DAO);
@@ -390,10 +395,10 @@ public class MappingDialog extends BaseDialog {
             }
         });
 
-        //Add the second column - label
-        tc = new TableColumn(mappingTable, SWT.LEFT);
-        tc.setText(Labels.getString("MappingDialog.sforceFieldName")); //$NON-NLS-1$
-        tc.addSelectionListener(new SelectionAdapter() {
+        //Add the second column - name of Salesforce object field
+        TableColumn sforceFieldNamesCol = new TableColumn(mappingTable, SWT.LEFT);
+        sforceFieldNamesCol.setText(Labels.getString("MappingDialog.sforceFieldName")); //$NON-NLS-1$
+        sforceFieldNamesCol.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 ((MappingViewerSorter)mappingTblViewer.getSorter()).doSort(MAPPING_SFORCE);
@@ -423,7 +428,7 @@ public class MappingDialog extends BaseDialog {
         //sforce field table viewer
         sforceTblViewer = new TableViewer(shell, SWT.FULL_SELECTION);
         sforceTblViewer.setContentProvider(new SforceContentProvider());
-        sforceTblViewer.setLabelProvider(new SforceLabelProvider());
+        sforceTblViewer.setLabelProvider(new SforceLabelProvider(this.getController()));
         sforceTblViewer.setSorter(new SforceViewerSorter());
         sforceTblViewer.addFilter(new SforceFieldsFilter(sforceFieldsSearch));
 
