@@ -742,11 +742,15 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 if (entityField.isCreateable() || entityField.isUpdateable()) {
                     String relationshipName = entityField.getRelationshipName();
                     String[] parentObjectNames = entityField.getReferenceTo();
+                    boolean haSingleParentObject = parentObjectNames.length == 1;
+                    if (parentObjectNames != null 
+                        && parentObjectNames.length >= DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD) {
+                        entityField.setLabel(entityField.getLabel() + " (Id)");
+                    }
                     if (parentObjectNames != null && parentObjectNames.length > 0 && parentObjectNames[0] != null
                             && relationshipName != null && relationshipName.length() > 0
+                            && parentObjectNames.length < DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD
                             && (entityField.isCreateable() || entityField.isUpdateable())) {
-
-                        boolean haSingleParentObject = parentObjectNames.length == 1;
                         
                         for (int parentObjectIndex = 0; parentObjectIndex < parentObjectNames.length; parentObjectIndex++ ) {
                             String parentObjectName = parentObjectNames[parentObjectIndex];

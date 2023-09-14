@@ -99,15 +99,19 @@ public class SforceLabelProvider implements ITableLabelProvider {
             if ("reference".equalsIgnoreCase(text)) {
                 text = "Lookup";
                 if (isReferenceField) {
-                    for (int i = 0; i < referenceTos.length; i++) {
-                        String refEntityName = referenceTos[i];
-                        if (i == 0) {
-                            text = text + " (" + refEntityName;
-                        } else {
-                            text = text + ", " + refEntityName;
+                    if (referenceTos.length >= DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD) {
+                        text = text + " (" + referenceTos.length + " objects)";
+                    } else {
+                        for (int i = 0; i < referenceTos.length; i++) {
+                            String refEntityName = referenceTos[i];
+                            if (i == 0) {
+                                text = text + " (" + refEntityName;
+                            } else {
+                                text = text + ", " + refEntityName;
+                            }
                         }
+                        text = text +")";
                     }
-                    text = text +")";
                 }
             }
             break;
