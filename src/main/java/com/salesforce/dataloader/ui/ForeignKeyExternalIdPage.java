@@ -29,6 +29,7 @@ package com.salesforce.dataloader.ui;
 import java.util.*;
 import java.util.List;
 
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.*;
@@ -53,6 +54,8 @@ public class ForeignKeyExternalIdPage extends LoadPage {
     private Composite containerComp;
     private ScrolledComposite scrollComp;
     private Map<String, DescribeRefObject> referenceObjects;
+    private int numChildFieldsWithNonIdLookupFieldSelections = 0;
+
 
     public ForeignKeyExternalIdPage(Controller controller) {
         super("ForeignKeyExternalIdPage", controller); //$NON-NLS-1$
@@ -95,29 +98,21 @@ public class ForeignKeyExternalIdPage extends LoadPage {
         scrollBar.setPageIncrement(20 * 5);
 
         extIdSelections.clear();
+        this.numChildFieldsWithNonIdLookupFieldSelections = 0;
         if(referenceObjects != null) {
-            MappingPage mappingPage = (MappingPage)getWizard().getPage(MappingPage.class.getSimpleName()); //$NON-NLS-1$
-            Field[] fields = mappingPage.getFieldTypes(); // get the list of sObject fields
-            HashMap<String, Field> lookupFieldMap = new HashMap<String, Field>();
-            for (Field field : fields) {
-                String[] referenceTos = field.getReferenceTo();
-                if (referenceTos != null && referenceTos.length > 0) {
-                    lookupFieldMap.put(field.getRelationshipName(), field);
-                }
-            }
-            OperationInfo operation = controller.getConfig().getOperationInfo();
             for(String relationshipName : referenceObjects.keySet()) {
-                Field relationshipField = lookupFieldMap.get(relationshipName);
+                OperationInfo operation = controller.getConfig().getOperationInfo();
+                Field childField = referenceObjects.get(relationshipName).getChildField();
                 boolean isCreateableOrUpdateable = true;
-                if (relationshipField != null) {
+                if (childField != null) {
                     switch (operation) {
                         case insert:
-                            if (!relationshipField.isCreateable()) {
+                            if (!childField.isCreateable()) {
                                 isCreateableOrUpdateable = false;
                             }
                             break;
                         case update:
-                            if (!relationshipField.isUpdateable()) {
+                            if (!childField.isUpdateable()) {
                                 isCreateableOrUpdateable = false;
                             }
                             break;
@@ -127,6 +122,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
                 }
                 if (isCreateableOrUpdateable) {
                     createObjectExtIdUi(comp, relationshipName);
+                    numChildFieldsWithNonIdLookupFieldSelections++;
                 }
             }
         }
@@ -237,5 +233,24 @@ public class ForeignKeyExternalIdPage extends LoadPage {
     @Override
     public void setPageComplete() {
         setPageComplete(true);
+    }
+    
+    @Override
+    protected OperationPage getNextPageOverride(){
+        setupPage();
+        if (numChildFieldsWithNonIdLookupFieldSelections == 0) {
+            // nothing to display, go to the next page
+            return (OperationPage)getNextPage();
+        }
+        return this;
+    }
+    
+    @Override
+    protected OperationPage getPreviousPageOverride(){
+        if (numChildFieldsWithNonIdLookupFieldSelections == 0) {
+            // nothing to display, go to the previous page
+            return (OperationPage)getPreviousPage();
+        }
+        return this;
     }
 }
