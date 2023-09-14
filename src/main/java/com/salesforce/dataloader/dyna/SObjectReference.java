@@ -69,7 +69,7 @@ public class SObjectReference {
         // build the reference SObject
         SObject sObjRef = new SObject();
         // set entity type, has to be set before all others
-        sObjRef.setType(entityRefInfo.getObjectName());
+        sObjRef.setType(entityRefInfo.getParentObjectName());
         // set external id, do type conversion as well
         Class typeClass = SforceDynaBean.getConverterClass(entityRefInfo.getFieldInfoMap().get(fieldName));
         Object extIdValue = ConvertUtils.convert(this.referenceExtIdValue.toString(), typeClass);

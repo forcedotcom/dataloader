@@ -46,6 +46,7 @@ import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Error;
 import com.sforce.soap.partner.Field;
+import com.sforce.soap.partner.FieldType;
 import com.sforce.soap.partner.LimitInfo;
 import com.sforce.soap.partner.LimitInfoHeader_element;
 import com.sforce.soap.partner.LoginResult;
@@ -740,38 +741,59 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 // relationship.
                 if (entityField.isCreateable() || entityField.isUpdateable()) {
                     String relationshipName = entityField.getRelationshipName();
-                    String[] referenceTos = entityField.getReferenceTo();
-                    if (referenceTos != null && referenceTos.length == 1 && referenceTos[0] != null
+                    String[] parentObjectNames = entityField.getReferenceTo();
+                    if (parentObjectNames != null && parentObjectNames.length > 0 && parentObjectNames[0] != null
                             && relationshipName != null && relationshipName.length() > 0
                             && (entityField.isCreateable() || entityField.isUpdateable())) {
 
-                        String refEntityName = referenceTos[0];
-
-                        // make sure that the object is legal to upsert
-                        Field[] refObjectFields = describeSObject(refEntityName).getFields();
-                        Map<String, Field> refFieldInfo = new HashMap<String, Field>();
-                        for (Field refField : refObjectFields) {
-                            if (refField.isExternalId()
-                                || "id".equalsIgnoreCase(refField.getName())
-                                || refField.isIdLookup()) {
-                                if (!entityName.equalsIgnoreCase(refEntityName)) {
-                                    // Change createable and updateable attributes of a reference field
-                                    // only if it is not a self-reference.
-                                    // 
-                                    // The conditional check is to address the issue [W-10811419]:
-                                    // Name (Auto-Number - a read-only field) field shows up in mapping dialog
-                                    // when parent entity is the same as child entity (self-ref) because
-                                    // the field's "isUpdateable" attribute may get changed from "false"
-                                    // to "true" in the following code.
-                                    refField.setCreateable(entityField.isCreateable());
-                                    refField.setUpdateable(entityField.isUpdateable());
+                        boolean haSingleParentObject = parentObjectNames.length == 1;
+                        
+                        for (int parentObjectIndex = 0; parentObjectIndex < parentObjectNames.length; parentObjectIndex++ ) {
+                            String parentObjectName = parentObjectNames[parentObjectIndex];
+    
+                            // make sure that the object is legal to upsert
+                            Field[] parentObjectFields = describeSObject(parentObjectName).getFields();
+                            Map<String, Field> parentFieldInfo = new HashMap<String, Field>();
+                            for (Field parentField : parentObjectFields) {
+                                if (parentField.isExternalId()
+                                    || parentField.isIdLookup()) {
+                                    if (parentField.getType() == FieldType.id) {
+                                        // add parents' id field labels in parenthesis to the child's
+                                        // field label.
+                                        String childFieldLabel = entityField.getLabel();
+                                        String[] childFieldLabelParts = childFieldLabel.split(" \\(.+\\)$");
+                                        childFieldLabel = childFieldLabelParts[0];
+                                        if (parentObjectIndex == 0) {
+                                            childFieldLabel = childFieldLabel + " (";
+                                        } else {
+                                            childFieldLabel = childFieldLabel + ", ";
+                                        }
+                                        childFieldLabel = childFieldLabel + parentField.getLabel();
+                                        if (parentObjectIndex == parentObjectNames.length - 1) {
+                                            childFieldLabel = childFieldLabel + ")";
+                                        }
+                                        entityField.setLabel(childFieldLabel);
+                                    } else if (haSingleParentObject) { // nonId lookup field on the parent entity
+                                        if (!entityName.equalsIgnoreCase(parentObjectName)) {
+                                            // Change createable and updateable attributes of a reference field
+                                            // only if it is not a self-reference.
+                                            // 
+                                            // The conditional check is to address the issue [W-10811419]:
+                                            // Name (Auto-Number - a read-only field) field shows up in mapping dialog
+                                            // when parent entity is the same as child entity (self-ref) because
+                                            // the field's "isUpdateable" attribute may get changed from "false"
+                                            // to "true" in the following code.
+                                            parentField.setCreateable(entityField.isCreateable());
+                                            parentField.setUpdateable(entityField.isUpdateable());
+                                        }
+                                        parentFieldInfo.put(parentField.getName(), parentField);
+                                    }
                                 }
-                                refFieldInfo.put(refField.getName(), refField);
                             }
-                        }
-                        if (!refFieldInfo.isEmpty()) {
-                            DescribeRefObject describe = new DescribeRefObject(refEntityName, refFieldInfo);
-                            referenceDescribes.put(relationshipName, describe);
+                            if (!parentFieldInfo.isEmpty()) {
+                                DescribeRefObject describe = new DescribeRefObject(parentObjectName, entityField, parentFieldInfo);
+                                referenceDescribes.put(relationshipName, describe);
+                            }
                         }
                     }
                 }
