@@ -27,6 +27,7 @@ package com.salesforce.dataloader.ui;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
@@ -134,5 +135,29 @@ public abstract class OperationPage extends WizardPage {
    // concrete subclasses must override this method if they allow Finish operation
    public boolean finishAllowed() {
        return false;
+   }
+   
+   public IWizardPage getNextPage() {
+       OperationPage nextPage = (OperationPage)super.getNextPage();
+       if (nextPage != null) {
+           nextPage = nextPage.getNextPageOverride();
+       }
+       return nextPage;
+   }
+   
+   protected OperationPage getNextPageOverride() {
+       return this;
+   }
+   
+   public IWizardPage getPreviousPage() {
+       OperationPage prevPage = (OperationPage)super.getPreviousPage();
+       if (prevPage != null) {
+           prevPage = prevPage.getPreviousPageOverride();
+       }
+       return prevPage;
+   }
+   
+   protected OperationPage getPreviousPageOverride() {
+       return this;
    }
 }
