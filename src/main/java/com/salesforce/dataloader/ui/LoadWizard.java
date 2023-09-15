@@ -174,6 +174,12 @@ public abstract class LoadWizard extends BaseWizard {
         public UpdateWizard(Controller controller) {
             super(controller, OperationInfo.update);
         }
+        
+        @Override
+        protected void hook_additionalLoadWizardPages() {
+            super.hook_additionalLoadWizardPages();
+            addPage(new ForeignKeyExternalIdPage(getController()));
+        }
     }
 
     public static final class UpsertWizard extends LoadWizard {
@@ -192,6 +198,12 @@ public abstract class LoadWizard extends BaseWizard {
     public static final class InsertWizard extends LoadWizard {
         public InsertWizard(Controller controller) {
             super(controller, OperationInfo.insert);
+        }
+        
+        @Override
+        protected void hook_additionalLoadWizardPages() {
+            super.hook_additionalLoadWizardPages();
+            addPage(new ForeignKeyExternalIdPage(getController()));
         }
     }
 
