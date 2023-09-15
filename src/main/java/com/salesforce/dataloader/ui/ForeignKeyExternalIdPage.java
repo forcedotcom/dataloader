@@ -29,7 +29,6 @@ package com.salesforce.dataloader.ui;
 import java.util.*;
 import java.util.List;
 
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.*;
@@ -37,6 +36,7 @@ import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.client.DescribeRefObject;
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dyna.ObjectField;
 import com.sforce.soap.partner.Field;
@@ -74,7 +74,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
 
     private void createFkExtIdUi() {
         getShell().setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
-
+        
         if(scrollComp != null) {
             scrollComp.dispose();
         }
@@ -137,7 +137,8 @@ public class ForeignKeyExternalIdPage extends LoadPage {
      */
     private void createObjectExtIdUi(Composite comp, String relationshipName) {
         Label labelExtId = new Label(comp, SWT.RIGHT);
-        labelExtId.setText(relationshipName);
+        DescribeRefObject extIdInfo = referenceObjects.get(relationshipName);
+        labelExtId.setText(relationshipName + " (" + extIdInfo.getParentObjectName() + ")");
         labelExtId.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 
         // Add the ext id dropdown
@@ -150,7 +151,6 @@ public class ForeignKeyExternalIdPage extends LoadPage {
 
         // get object's ext id info & set combo box to list of external id fields
         // set the objects reference information
-        DescribeRefObject extIdInfo = referenceObjects.get(relationshipName);
         List<String> fieldList = new ArrayList<String>(extIdInfo.getFieldInfoMap().keySet());
         // add default selection "not selected" to the list to allow users to go back to it
         fieldList.add(Labels.getString("ForeignKeyExternalIdPage.defaultComboText"));
@@ -253,4 +253,14 @@ public class ForeignKeyExternalIdPage extends LoadPage {
         }
         return this;
     }
+    
+    public boolean setupPage() {
+        boolean success = super.setupPage();
+        if (this.controller != null && this.controller.isLoggedIn()) {
+            String message = Labels.getFormattedString(this.getClass().getSimpleName() + ".pageMessage", this.controller.getConfig().getString(Config.ENTITY));
+            this.setMessage(message);
+        }
+        return success;
+    }
+
 }
