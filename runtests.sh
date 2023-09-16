@@ -16,14 +16,18 @@ usage() {
 test=""
 debug=""
 debugEncryption=""
+doClean="No"
 #encryptionFile=${HOME}/.dataloader/dataLoader.key
 encryptionFile=
 
 password=""
 
-while getopts ":dv:t:f:" flag
+while getopts ":dcv:t:f:" flag
 do
   case "${flag}" in
+    c)
+      doClean="Yes"
+      ;;
     d)
       debug="-Dmaven.surefire.debug"
       debugEncryption="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=y"
@@ -53,6 +57,11 @@ fi
 
 #echo $@
 jarname="$(find ./target -name dataloader-[0-9][0-9].[0-9].[0-9].jar | tail -1)"
-mvn clean package
+if [ ${doClean} == "Yes" ]; then
+    mvn clean package
+fi
+
+#echo "password = ${4}"
 encryptedPassword="$(java ${debugEncryption} -cp ${jarname} com.salesforce.dataloader.process.DataLoaderRunner run.mode=encrypt -e ${4} ${encryptionFile} | tail -1)"
+#echo "encryptedPassword = ${encryptedPassword}"
 mvn -Dtest.endpoint=${1} -Dtest.user.default=${2} -Dtest.user.restricted=${3} -Dtest.password=${encryptedPassword} -Dtest.encryptionFile=${encryptionFile} verify ${debug} ${test}
