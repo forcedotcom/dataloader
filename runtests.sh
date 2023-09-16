@@ -2,8 +2,10 @@
 
 usage() {
   echo "Usage: "
-  echo "$0 [-d] [-t <test class name without the package prefix com.salesforce.dataloader e.g. dyna.DateConverterTest>] <test org URL> <test admin username> <test regular user username> <encrypted test password>"
-  echo "listening on port 5005 for IDE to start the debugging session if -d is specified."
+  echo "$0 [-d] [-c] [-i][-t <test class name without the package prefix com.salesforce.dataloader e.g. dyna.DateConverterTest>] <test org URL> <test admin username> <test regular user username> <encrypted test password>"
+  echo "Listening on port 5005 for IDE to start the debugging session if -d is specified."
+  echo "Run 'mvn clean package' before encrypting password if -c is specified."
+  echo "Ignore test failures and continue test run if -i is specified."
   exit 1
 }
 
@@ -21,8 +23,9 @@ doClean="No"
 encryptionFile=
 
 password=""
+failfast="-Dsurefire.skipAfterFailureCount=1"
 
-while getopts ":dcv:t:f:" flag
+while getopts ":dicv:t:f:" flag
 do
   case "${flag}" in
     c)
@@ -38,6 +41,9 @@ do
       ;;
     f)
       encryptionFile="${OPTARG}"
+      ;;
+    i)
+      failfast=""
       ;;
     *)
       usage
@@ -64,4 +70,4 @@ fi
 #echo "password = ${4}"
 encryptedPassword="$(java ${debugEncryption} -cp ${jarname} com.salesforce.dataloader.process.DataLoaderRunner run.mode=encrypt -e ${4} ${encryptionFile} | tail -1)"
 #echo "encryptedPassword = ${encryptedPassword}"
-mvn -Dtest.endpoint=${1} -Dtest.user.default=${2} -Dtest.user.restricted=${3} -Dtest.password=${encryptedPassword} -Dtest.encryptionFile=${encryptionFile} verify ${debug} ${test}
+mvn ${failfast} -Dtest.endpoint=${1} -Dtest.user.default=${2} -Dtest.user.restricted=${3} -Dtest.password=${encryptedPassword} -Dtest.encryptionFile=${encryptionFile} verify ${debug} ${test}
