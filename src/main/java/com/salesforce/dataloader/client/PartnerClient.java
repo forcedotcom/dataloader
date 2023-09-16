@@ -364,6 +364,14 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 logger.error(
                         Messages.getFormattedString(
                                 "Client.operationError", new String[]{op.getName(), ex.getMessage()}), ex); //$NON-NLS-1$
+                if (ex instanceof ApiFault) {
+                    ApiFault fault = (ApiFault)ex;
+                    String faultMessage = fault.getExceptionMessage();
+                    logger.error(
+                            Messages.getFormattedString(
+                                    "Client.operationError", new String[]{op.getName(), faultMessage}), fault); //$NON-NLS-1$
+
+                }
                 // check retries
                 if (!checkConnectionException(ex, op.getName(), tryNum)) throw ex;
                 connectionException = ex;
