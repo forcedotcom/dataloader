@@ -39,7 +39,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.mapping.LoadMapper;
@@ -82,8 +81,6 @@ public class MappingPage extends LoadPage {
                 FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
                 String filename = dlg.open();
                 if (filename != null && !filename.isBlank()) { //$NON-NLS-1$
-                    Config config = controller.getConfig();
-                    config.setValue(Config.MAPPING_FILE, filename);
                     LoadMapper mapper = (LoadMapper)controller.getMapper();
                     mapper.clearMap();
                     try {
@@ -126,7 +123,6 @@ public class MappingPage extends LoadPage {
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.horizontalSpan = 2;
         mappingLabel.setLayoutData(data);
-        updateMappingLabel();
 
         //  mapping field table viewer
         mappingTblViewer = new TableViewer(comp, SWT.FULL_SELECTION);
@@ -176,7 +172,6 @@ public class MappingPage extends LoadPage {
      * Responsible for updating the mapping model
      */
     public void updateMapping() {
-        updateMappingLabel();
         // Set the table viewer's input
         if (mappingTblViewer != null) {
             mappingTblViewer.setInput(controller.getMapper());
@@ -257,20 +252,5 @@ public class MappingPage extends LoadPage {
     public void setPageComplete() {
         // no validations performed currently
         setPageComplete(true);
-    }
-    
-    private void updateMappingLabel() {
-        String mappingFile = controller.getConfig().getString(Config.MAPPING_FILE);
-        if (mappingFile == null) {
-            mappingFile = "";
-        }
-        String label = "";
-        if (mappingFile.isBlank()) {
-            label = Labels.getString(this.getClass().getSimpleName() + ".currentMapping");
-        } else {
-            label = Labels.getFormattedString(this.getClass().getSimpleName() + ".currentMappingFromFile", mappingFile);
-        }
-        mappingLabel.setText(label); //$NON-NLS-1$
-        mappingLabel.redraw();
     }
 }

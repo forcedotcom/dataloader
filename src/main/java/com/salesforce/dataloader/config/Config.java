@@ -425,6 +425,7 @@ public class Config {
             OAUTH_ACCESSTOKEN,
             OAUTH_REFRESHTOKEN,
             EXTERNAL_ID_FIELD,
+            MAPPING_FILE,
             EXTRACT_SOQL,
             OUTPUT_SUCCESS,
             OUTPUT_ERROR,
