@@ -39,8 +39,6 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.*;
 import org.eclipse.swt.events.*;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -250,8 +248,6 @@ public class MappingDialog extends BaseDialog {
         ok.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                // user is auto-mapping fields, not using a mapping file
-                getController().getConfig().setValue(Config.MAPPING_FILE, "");
                 //refresh the mapping page view
                 page.updateMapping();
                 page.packMappingColumns();
