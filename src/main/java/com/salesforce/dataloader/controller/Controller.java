@@ -54,7 +54,6 @@ import com.salesforce.dataloader.ui.LoaderWindow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
-import com.sforce.soap.partner.GetUserInfoResult;
 import com.sforce.soap.partner.LimitInfo;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
@@ -141,6 +140,7 @@ public class Controller {
         logger.info(Messages.getFormattedString("Controller.executeStart", operation)); //$NON-NLS-1$
         logger.debug("API info for the operation:" + getAPIInfo());
         action.execute();
+        this.getClient().getSession().performedSessionActivity(); // reset session activity timer
         this.lastExecutedAction = action;
     }
     
@@ -287,18 +287,11 @@ public class Controller {
         this.loaderWindow.run();
         saveConfig();
     }
-    
-    private GetUserInfoResult cachedUserInfoForTheSession = null;
-    
+        
     public void updateLoaderWindowTitleAndCacheUserInfoForTheSession() {
         if (isLoggedIn()) {
             try {
                 ConnectorConfig sessionConfig = getPartnerClient().getClient().getConfig();
-                try {
-                    this.cachedUserInfoForTheSession = getPartnerClient().getClient().getUserInfo();
-                } catch (ConnectionException e) {
-                    logger.debug("Unable to get user info from the server");
-                }
                 URL sessionURL = new URL(sessionConfig.getServiceEndpoint());
                 String sessionHost = sessionURL.getHost();
                 this.loaderWindow.updateTitle(sessionHost);
@@ -308,12 +301,7 @@ public class Controller {
             }
         } else {
             this.loaderWindow.updateTitle(null);
-            this.cachedUserInfoForTheSession = null;
         }
-    }
-    
-    public GetUserInfoResult getCachedUserInfoForTheSession() {
-        return this.cachedUserInfoForTheSession;
     }
 
     public static synchronized Controller getInstance(Map<String, String> argsMap) throws ControllerInitializationException, ParameterLoadException, ConfigInitializationException {

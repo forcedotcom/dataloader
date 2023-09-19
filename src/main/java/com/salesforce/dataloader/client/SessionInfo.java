@@ -25,6 +25,9 @@
  */
 package com.salesforce.dataloader.client;
 
+import java.util.Calendar;
+
+import com.sforce.soap.partner.GetUserInfoResult;
 
 public class SessionInfo {
 
@@ -36,18 +39,28 @@ public class SessionInfo {
 
     private final String sessionId;
     private final String serverUrl;
+    private final GetUserInfoResult userInfo;
+    private long lastActivityTimeInMsec = 0;
 
-    SessionInfo(String sessionId, String server) {
+    SessionInfo(String sessionId, String server, GetUserInfoResult userInfo) {
         this.sessionId = sessionId;
         this.serverUrl = server;
+        this.userInfo = userInfo;
+        if (this.userInfo != null) {
+            this.lastActivityTimeInMsec = Calendar.getInstance().getTimeInMillis();
+        }
     }
 
     SessionInfo() {
-        this(null, null);
+        this(null, null, null);
     }
 
     public boolean isSessionValid() {
-        return this.sessionId != null;
+        long currentTimeInMsec = Calendar.getInstance().getTimeInMillis();
+        long inSessionElapsedTimeInSec = (currentTimeInMsec - this.lastActivityTimeInMsec)/1000;
+        return (this.sessionId != null
+                && userInfo != null
+                && inSessionElapsedTimeInSec < userInfo.getSessionSecondsValid());
     }
 
     public void validate() throws NotLoggedInException {
@@ -60,5 +73,13 @@ public class SessionInfo {
 
     public String getServer() {
         return this.serverUrl;
+    }
+    
+    public GetUserInfoResult getUserInfoResult() {
+        return this.userInfo;
+    }
+    
+    public void performedSessionActivity() {
+        this.lastActivityTimeInMsec = Calendar.getInstance().getTimeInMillis();
     }
 }

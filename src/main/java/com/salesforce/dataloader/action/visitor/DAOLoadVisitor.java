@@ -41,6 +41,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
+import com.salesforce.dataloader.client.SessionInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
@@ -351,9 +352,10 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         if (this.phoneSforceFieldList == null || !this.phoneSforceFieldList.contains(fieldName)) {
             return fieldValue;
         }
-        String localeStr = Locale.getDefault().toString(); 
-        if (this.controller.getCachedUserInfoForTheSession() != null) {
-            localeStr = this.controller.getCachedUserInfoForTheSession().getUserLocale();
+        String localeStr = Locale.getDefault().toString();
+        SessionInfo sessionInfo = this.controller.getPartnerClient().getSession();
+        if (sessionInfo != null) {
+            localeStr = sessionInfo.getUserInfoResult().getUserLocale();
         }
         return DAORowUtil.getPhoneFieldValue((String)fieldValue, localeStr);
     }
