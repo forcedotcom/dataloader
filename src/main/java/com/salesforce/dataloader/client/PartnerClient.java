@@ -47,6 +47,7 @@ import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Error;
 import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.FieldType;
+import com.sforce.soap.partner.GetUserInfoResult;
 import com.sforce.soap.partner.LimitInfo;
 import com.sforce.soap.partner.LimitInfoHeader_element;
 import com.sforce.soap.partner.LoginResult;
@@ -359,6 +360,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 R result = op.run(arg);
                 if (result == null)
                     logger.info(Messages.getString("Client.resultNull")); //$NON-NLS-1$
+                this.getSession().performedSessionActivity(); // reset session activity timer
                 return result;
             } catch (ConnectionException ex) {
                 logger.error(
@@ -574,9 +576,9 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         String oauthAccessToken = config.getString(Config.OAUTH_ACCESSTOKEN);
         try {
             if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
-                conn = setConfiguredSessionId(conn, oauthAccessToken);
+                conn = setConfiguredSessionId(conn, oauthAccessToken, null);
             } else if (config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
-                conn = setConfiguredSessionId(conn, config.getString(Config.SFDC_INTERNAL_SESSION_ID));
+                conn = setConfiguredSessionId(conn, config.getString(Config.SFDC_INTERNAL_SESSION_ID), null);
             } else {
                 setSessionRenewer(conn);
                 loginInternal(conn);
@@ -606,11 +608,13 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         });
     }
 
-    private PartnerConnection setConfiguredSessionId(PartnerConnection conn, String sessionId) throws ConnectionException {
+    private PartnerConnection setConfiguredSessionId(PartnerConnection conn, String sessionId, GetUserInfoResult userInfo) throws ConnectionException {
         logger.info("Using manually configured session id to bypass login");
         conn.setSessionHeader(sessionId);
-        conn.getUserInfo(); // check to make sure we have a good connection
-        loginSuccess(conn, getServerUrl(config.getString(Config.ENDPOINT)));
+        if (userInfo == null) {
+            userInfo = conn.getUserInfo(); // check to make sure we have a good connection
+        }
+        loginSuccess(conn, getServerUrl(config.getString(Config.ENDPOINT)), userInfo);
         return conn;
     }
 
@@ -632,16 +636,16 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             if (config.getBoolean(Config.RESET_URL_ON_LOGIN)) {
                 cc.setServiceEndpoint(serverUrl);
             }
-            loginSuccess(conn, server);
+            loginSuccess(conn, server, loginResult.getUserInfo());
         } catch (ConnectionException ex) {
             logger.error(Messages.getMessage(getClass(), "loginError", cc.getAuthEndpoint(), ex.getMessage()), ex);
             throw ex;
         }
     }
 
-    private void loginSuccess(PartnerConnection conn, String serv) {
+    private void loginSuccess(PartnerConnection conn, String serv, GetUserInfoResult userInfo) {
         this.client = conn;
-        setSession(conn.getSessionHeader().getSessionId(), serv);
+        setSession(conn.getSessionHeader().getSessionId(), serv, userInfo);
     }
 
     private String getServerStringFromUrl(URL url) {

@@ -38,6 +38,7 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.sforce.soap.partner.Connector;
+import com.sforce.soap.partner.GetUserInfoResult;
 import com.sforce.ws.ConnectorConfig;
 
 /**
@@ -245,9 +246,9 @@ public abstract class ClientBase<ClientType> {
         setSession(new SessionInfo());
     }
 
-    protected void setSession(String sessionId, String server) {
+    protected void setSession(String sessionId, String server, GetUserInfoResult userInfo) {
 
-        setSession(new SessionInfo(sessionId, server));
+        setSession(new SessionInfo(sessionId, server, userInfo));
     }
 
     private void setSession(SessionInfo sess) {
