@@ -79,6 +79,7 @@ public abstract class Mapper {
     protected final CaseInsensitiveMap map = new CaseInsensitiveMap();
     private final PartnerClient client;
     private final CaseInsensitiveSet fields;
+    protected final String mappingFileName;
 
     protected Mapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
@@ -103,6 +104,7 @@ public abstract class Mapper {
                 this.fields.add(field.getName());
             }
         }
+        this.mappingFileName = mappingFileName;
         putPropertyFileMappings(mappingFileName);
     }
 
