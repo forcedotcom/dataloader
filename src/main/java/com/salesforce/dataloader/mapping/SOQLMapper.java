@@ -116,12 +116,17 @@ public class SOQLMapper extends Mapper {
     protected void putPropertyEntry(Entry<Object, Object> entry) {
         String dao = (String)entry.getValue();
         String sfdc = (String)entry.getKey();
-        if (isConstant(sfdc))
+        if (isConstant(sfdc)) {
             putConstant(dao, sfdc);
-        else if (!hasDaoColumns() || hasDaoColumn(dao)) try {
-            addSoqlFieldMapping((String)entry.getValue(), new SOQLFieldInfo(sfdc));
-        } catch (SOQLParserException e) {
-            throw new InvalidMappingException(e.getMessage(), e);
+        } else if (!hasDaoColumns() || hasDaoColumn(dao)) {
+            try {
+                addSoqlFieldMapping((String)entry.getValue(), new SOQLFieldInfo(sfdc));
+            } catch (SOQLParserException e) {
+                throw new InvalidMappingException(e.getMessage(), e);
+            } catch (InvalidMappingException e) {
+                logger.warn("Unable to find Salesforce object field " + sfdc + " specified in the mapping file " + this.mappingFileName);
+                logger.warn(e.getMessage());
+            }
         }
     }
 
