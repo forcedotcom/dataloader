@@ -23,7 +23,7 @@ doClean="No"
 encryptionFile=
 
 password=""
-failfast="-Dsurefire.skipAfterFailureCount=1"
+failfast="-Dsurefire.skipAfterFailureCount=5"
 
 while getopts ":dicv:t:f:" flag
 do
