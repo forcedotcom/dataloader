@@ -41,6 +41,7 @@ import com.salesforce.dataloader.ui.*;
 import com.salesforce.dataloader.ui.LoadWizard.DeleteWizard;
 import com.salesforce.dataloader.ui.LoadWizard.HardDeleteWizard;
 import com.salesforce.dataloader.ui.LoadWizard.InsertWizard;
+import com.salesforce.dataloader.ui.LoadWizard.UndeleteWizard;
 import com.salesforce.dataloader.ui.LoadWizard.UpdateWizard;
 import com.salesforce.dataloader.ui.LoadWizard.UpsertWizard;
 import com.salesforce.dataloader.ui.extraction.ExtractAllWizard;
@@ -59,6 +60,7 @@ public enum OperationInfoUIHelper {
     update(UpdateWizard.class),
     upsert(UpsertWizard.class),
     delete(DeleteWizard.class),
+    undelete(UndeleteWizard.class),
     hard_delete(HardDeleteWizard.class),
     extract(ExtractionWizard.class),
     extract_all(ExtractAllWizard.class);
@@ -85,6 +87,7 @@ public enum OperationInfoUIHelper {
     public String getIconName() {
         if (this == hard_delete) return delete.getIconName();
         if (this == upsert) return update.getIconName();
+        if (this == undelete) return update.getIconName();
         if (this == extract_all) return extract.getIconName();
         return name() + "_icon";
     }

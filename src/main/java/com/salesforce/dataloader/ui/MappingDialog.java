@@ -604,6 +604,7 @@ public class MappingDialog extends BaseDialog {
                 }
                 break;
             case delete:
+            case undelete:
             case hard_delete:
                 if (field.getType().toString().toLowerCase().equals("id")) {
                     isMappable = true;
