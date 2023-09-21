@@ -795,6 +795,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     static {
         UPDATE_MSGS = new EnumMap<OperationInfo, String>(OperationInfo.class);
         UPDATE_MSGS.put(OperationInfo.delete, "Item Deleted");
+        UPDATE_MSGS.put(OperationInfo.undelete, "Item Undeleted");
         UPDATE_MSGS.put(OperationInfo.hard_delete, "Item Hard Deleted");
         UPDATE_MSGS.put(OperationInfo.upsert, "Item Updated");
         UPDATE_MSGS.put(OperationInfo.update, "Item Updated");
