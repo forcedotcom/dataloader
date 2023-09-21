@@ -840,9 +840,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 	config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID, clientIdVal);
                 }
                 getController().saveConfig();
-                getController().logout();
-                getController().updateLoaderWindowTitleAndCacheUserInfoForTheSession();
-
                 input = Labels.getString("UI.ok"); //$NON-NLS-1$
                 shell.close();
             }
