@@ -285,7 +285,18 @@ public class CsvProcessTest extends ProcessTestBase {
         String deleteFileName = convertTemplateToInput(baseName + "Template.csv", baseName + ".csv", listener);
         Map<String, String> argMap = getTestConfig(OperationInfo.delete, deleteFileName, false);
         Controller theController = runProcess(argMap, 100);
-        verifySuccessIds(theController, listener.getAccountIds());
+        String[] accountIds = listener.getAccountIds();
+        verifySuccessIds(theController, accountIds);
+        if (argMap.containsKey(Config.BULK_API_ENABLED) && argMap.get(Config.BULK_API_ENABLED).equalsIgnoreCase("true")) {
+            return;
+        }
+        // partner API - do an undelete operation
+        argMap.put(Config.OPERATION, OperationInfo.undelete.name());
+        theController = runProcess(argMap, 100);
+        verifySuccessIds(theController, accountIds);
+        argMap.put(Config.OPERATION, OperationInfo.delete.name());
+        theController = runProcess(argMap, 100);
+        verifySuccessIds(theController, accountIds);
     }
 
     private class AttachmentTemplateListener extends AccountIdTemplateListener {
