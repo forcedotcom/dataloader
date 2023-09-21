@@ -105,11 +105,16 @@ public class LoaderWindow extends ApplicationWindow {
             @Override
             public void configValueChanged(String key, String oldValue, String newValue) {
                 if (Config.BULK_API_ENABLED.equals(key)) {
-                    boolean boolVal = false;
-                    if (newValue != null) boolVal = Boolean.valueOf(newValue);
-                    LoaderWindow.this.operationButtonsByIndex.get(OperationInfo.hard_delete).setEnabled(boolVal);
+                    boolean isBulkApiEnabled = false;
+                    if (newValue != null) isBulkApiEnabled = Boolean.valueOf(newValue);
+                    LoaderWindow.this.operationButtonsByIndex.get(OperationInfo.hard_delete).setEnabled(isBulkApiEnabled);
                     LoaderWindow.this.operationActionsByIndex.get(OperationInfo.hard_delete.getDialogIdx()).setEnabled(
-                            boolVal);
+                            isBulkApiEnabled);
+                    
+                    // disable Undelete button and action if bulk API is enabled
+                    LoaderWindow.this.operationButtonsByIndex.get(OperationInfo.undelete).setEnabled(!isBulkApiEnabled);
+                    LoaderWindow.this.operationActionsByIndex.get(OperationInfo.undelete.getDialogIdx()).setEnabled(
+                            !isBulkApiEnabled);
                     getShell().redraw();
                 }
             }

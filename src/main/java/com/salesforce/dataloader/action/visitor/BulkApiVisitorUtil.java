@@ -171,7 +171,7 @@ class BulkApiVisitorUtil {
 
     void createJob() throws AsyncApiException {
         JobInfo job = new JobInfo();
-        final OperationEnum op = this.config.getOperationInfo().getOperationEnum();
+        final OperationEnum op = this.config.getOperationInfo().getBulkOperationEnum();
         job.setOperation(op);
         if (op == OperationEnum.upsert) {
             job.setExternalIdFieldName(this.config.getString(Config.EXTERNAL_ID_FIELD));
@@ -337,13 +337,13 @@ class BulkApiVisitorUtil {
     }
     
     private boolean isBulkV2QueryJob() {
-        final OperationEnum op = this.config.getOperationInfo().getOperationEnum();
+        final OperationEnum op = this.config.getOperationInfo().getBulkOperationEnum();
         return (op == OperationEnum.query || op == OperationEnum.queryAll)
         && this.config.isBulkV2APIEnabled();
     }
     
     private boolean isBulkV2LoadJob() {
-        final OperationEnum op = this.config.getOperationInfo().getOperationEnum();
+        final OperationEnum op = this.config.getOperationInfo().getBulkOperationEnum();
         return op != OperationEnum.query && op != OperationEnum.queryAll
         && this.config.isBulkV2APIEnabled();
     }

@@ -48,13 +48,14 @@ public enum OperationInfo {
     update(UpdateAction.class, OperationInfoUIHelper.update),
     upsert(UpsertAction.class, OperationInfoUIHelper.upsert),
     delete(DeleteAction.class, OperationInfoUIHelper.delete),
+    undelete(UndeleteAction.class, null, OperationInfoUIHelper.undelete),
     hard_delete(null, BulkLoadAction.class, OperationInfoUIHelper.hard_delete),
     extract(PartnerExtractAction.class, BulkExtractAction.class, OperationInfoUIHelper.extract),
-    extract_all(PartnerExtractAllAction.class, null, OperationInfoUIHelper.extract_all);
+    extract_all(PartnerExtractAllAction.class, BulkExtractAction.class, OperationInfoUIHelper.extract_all);
 
     /** all operations, in order */
-    public static final OperationInfo[] ALL_OPERATIONS_IN_ORDER = { insert, update, upsert, delete, hard_delete,
-        extract, extract_all };
+    public static final OperationInfo[] ALL_OPERATIONS_IN_ORDER = 
+            { insert, update, upsert, delete, undelete, hard_delete, extract, extract_all };
 
     private static final Logger logger = LogManager.getLogger(OperationInfo.class);
 
@@ -125,12 +126,20 @@ public enum OperationInfo {
         return new OperationUIAction(ctl, this);
     }
 
-    public OperationEnum getOperationEnum() {
+    public OperationEnum getBulkOperationEnum() {
         switch (this) {
-        case hard_delete:
-            return OperationEnum.hardDelete;
+        case insert:
+            return OperationEnum.insert;
+        case update:
+            return OperationEnum.update;
+        case upsert:
+            return OperationEnum.upsert;
+        case delete:
+            return OperationEnum.delete;
         case extract:
             return OperationEnum.query;
+        case extract_all:
+            return OperationEnum.queryAll;
         default:
             return OperationEnum.valueOf(name());
         }
@@ -139,7 +148,11 @@ public enum OperationInfo {
     public boolean isDelete() {
         return this == delete || this == hard_delete;
     }
-
+    
+    public boolean isUndelete() {
+        return this == undelete;
+    }
+    
     public int getDialogIdx() {
         return this.uiHelper.getDialogIdx();
     }

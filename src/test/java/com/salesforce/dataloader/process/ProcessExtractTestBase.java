@@ -438,8 +438,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
 
     @Override
     protected boolean isBulkAPIEnabled(Map<String, String> argMap) {
-        // bulk api is not used for query all
-        return !isExtractAll() && super.isBulkAPIEnabled(argMap);
+        return super.isBulkAPIEnabled(argMap);
     }
     protected boolean isBulkV2APIEnabled(Map<String, String> argMap) {
         // bulk v2 api is not used for query all

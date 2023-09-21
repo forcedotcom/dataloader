@@ -150,7 +150,7 @@ public class DataSelectionPage extends LoadPage {
             for (Entry<String, DescribeGlobalSObjectResult> entry : entityDescribes.entrySet()) {
                 String objectName = entry.getKey();
                 DescribeGlobalSObjectResult objectDesc = entry.getValue();
-                if (operation.isDelete() && objectDesc.isDeletable()) {
+                if ((operation.isDelete() || operation.isUndelete()) && objectDesc.isDeletable()) {
                     inputDescribes.put(objectName, objectDesc);
                 } else if (operation == OperationInfo.insert && objectDesc.isCreateable()) {
                     inputDescribes.put(objectName, objectDesc);

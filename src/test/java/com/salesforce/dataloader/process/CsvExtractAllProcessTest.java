@@ -47,12 +47,16 @@ import java.util.Map;
 @RunWith(Parameterized.class)
 public class CsvExtractAllProcessTest extends ProcessExtractTestBase {
 
-// Data Loader supports Query All only through Partner API
-	@Parameterized.Parameters(name = "{0}")
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getParameters() {
-    	Object[][] configVariantsArray = new Object[1][0];
-    	configVariantsArray[0] = TestVariant.forSettings(TestSetting.BULK_API_DISABLED, TestSetting.BULK_V2_API_DISABLED);
-        return Arrays.asList(configVariantsArray);
+        return Arrays.asList(
+                // partner API
+                TestVariant.forSettings(TestSetting.BULK_API_DISABLED, TestSetting.BULK_V2_API_DISABLED),
+                // Bulk API
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_DISABLED)
+                // Bulk V2 Query API does not support query_all
+                // TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED)
+            );
     }
 
     public CsvExtractAllProcessTest(Map<String, String> config) throws Exception {

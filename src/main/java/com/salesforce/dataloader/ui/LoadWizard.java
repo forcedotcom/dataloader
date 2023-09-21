@@ -158,6 +158,12 @@ public abstract class LoadWizard extends BaseWizard {
             return button == SWT.YES;
         }
     }
+    
+    public static final class UndeleteWizard extends LoadWizard {
+        public UndeleteWizard(Controller controller) {
+            super(controller, OperationInfo.undelete);
+        }
+    }
 
     public static final class HardDeleteWizard extends LoadWizard {
         public HardDeleteWizard(Controller controller) {

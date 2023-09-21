@@ -54,6 +54,7 @@ import com.sforce.soap.partner.LoginResult;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.SaveResult;
+import com.sforce.soap.partner.UndeleteResult;
 import com.sforce.soap.partner.UpsertResult;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.soap.partner.fault.ExceptionCode;
@@ -137,6 +138,18 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
     };
 
+    private final ClientOperation<UndeleteResult[], String[]> UNDELETE_OPERATION = new ClientOperation<UndeleteResult[], String[]>() {
+        @Override
+        public String getName() {
+            return "undelete";
+        }
+
+        @Override
+        public UndeleteResult[] run(String[] ids) throws ConnectionException {
+            return getClient().undelete(ids);
+        }
+    };
+    
     private final ClientOperation<QueryResult, String> QUERY_OPERATION = new ClientOperation<QueryResult, String>() {
         @Override
         public String getName() {
@@ -407,6 +420,35 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         for (int j = 0; j < result.length; j++) {
             processResult(result[j].isSuccess(), "Client.itemDeleted", result[j].getId(), result[j].getErrors(), j);
+        }
+        return result;
+    }
+    
+    /**
+     * @param dynaBeans
+     * @return UndeleteResult array
+     * @throws ConnectionException
+     */
+    public UndeleteResult[] loadUndeletes(List<DynaBean> dynaBeans) throws ConnectionException {
+
+
+        DynaBean dynaBean;
+        String[] undels = new String[dynaBeans.size()];
+        for (int i = 0; i < dynaBeans.size(); i++) {
+            dynaBean = dynaBeans.get(i);
+            String id = (String) dynaBean.get("Id"); //$NON-NLS-1$
+            if (id == null) {
+                id = "";
+            }
+            undels[i] = id;
+        }
+        logger.debug(Messages.getString("Client.arraySize") + undels.length); //$NON-NLS-1$
+
+
+        UndeleteResult[] result = runOperation(UNDELETE_OPERATION, undels);
+
+        for (int j = 0; j < result.length; j++) {
+            processResult(result[j].isSuccess(), "Client.itemUndeleted", result[j].getId(), result[j].getErrors(), j);
         }
         return result;
     }

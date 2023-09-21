@@ -151,6 +151,13 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
                 }
                 daoRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
                 processResult(daoRow, deleteRes.getSuccess(), deleteRes.getId(), deleteRes.getErrors());
+            } else if (results instanceof UndeleteResult[]) {
+                UndeleteResult undeleteRes = (UndeleteResult)results[batchRowCounter];
+                if (undeleteRes.getSuccess()) {
+                    statusMsg = Messages.getString("DAOLoadVisitor.statusItemUndeleted");
+                }
+                daoRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
+                processResult(daoRow, undeleteRes.getSuccess(), undeleteRes.getId(), undeleteRes.getErrors());
             } else if (results instanceof UpsertResult[]) {
                 UpsertResult upsertRes = (UpsertResult)results[batchRowCounter];
                 if (upsertRes.getSuccess()) {
