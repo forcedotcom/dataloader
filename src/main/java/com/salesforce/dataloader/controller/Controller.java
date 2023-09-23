@@ -261,9 +261,9 @@ public class Controller {
                 && !mappingFile.isBlank() && !Files.exists(Path.of(mappingFile))) {
             throw new MappingInitializationException("Mapping file " + mappingFile + " does not exist");
         }
-        // Initialize mapping 
+        // Initialize mapping
         this.mapper = getConfig().getOperationInfo().isExtraction() ? 
-                new SOQLMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) 
+                new SOQLMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile, getConfig().getBoolean(Config.SKIP_LOCAL_SOQL_VERIFICATION)) 
               : new LoadMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile);
     }
 

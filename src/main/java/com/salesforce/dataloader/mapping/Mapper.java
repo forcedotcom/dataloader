@@ -143,7 +143,7 @@ public abstract class Mapper {
     }
 
     protected void mapConstants(Row rowMap) {
-        rowMap.putAll(this.constants);
+        rowMap.putAll(constants);
     }
 
     private Properties loadProperties(String fileName) throws MappingInitializationException {

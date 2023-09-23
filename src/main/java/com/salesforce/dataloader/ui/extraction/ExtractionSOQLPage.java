@@ -91,6 +91,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
     private ArrayList<Field> selectedFieldsInFieldViewer = new ArrayList<Field>();
     private Button addWhereClause;
     private Button clearAllWhereClauses;
+    private Button skipLocalChecksButton;
 
     public ExtractionSOQLPage(Controller controller) {
         super("ExtractionSOQLPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
@@ -497,6 +498,16 @@ public class ExtractionSOQLPage extends ExtractionPage {
             @Override
             public void modifyText(ModifyEvent arg0) {
                 setPageComplete();
+            }
+        });
+        
+        // skip local checks
+        skipLocalChecksButton = new Button(comp, SWT.CHECK);
+        skipLocalChecksButton.setText(Labels.getString(this.getClass().getSimpleName() + ".skipLocalValidation"));
+        skipLocalChecksButton.setSelection(controller.getConfig().getBoolean(Config.SKIP_LOCAL_SOQL_VERIFICATION));
+        skipLocalChecksButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent event) {
+                controller.getConfig().setValue(Config.SKIP_LOCAL_SOQL_VERIFICATION, skipLocalChecksButton.getSelection());
             }
         });
         labelSeparator = new Label(comp, SWT.SEPARATOR | SWT.HORIZONTAL);

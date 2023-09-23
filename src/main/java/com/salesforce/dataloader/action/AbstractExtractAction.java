@@ -137,8 +137,13 @@ abstract class AbstractExtractAction extends AbstractAction {
     @Override
     protected void initOperation() throws DataAccessObjectInitializationException, OperationException {
         // get columns that will be output from the query and open the outputs
-        final List<String> daoColumns = getDaoColumns();
-        getDao().setColumnNames(daoColumns);
+        if (getController().getConfig().getBoolean(Config.SKIP_LOCAL_SOQL_VERIFICATION)) {
+            getDao().setColumnNamesFromResults(true);
+        } else {
+            getDao().setColumnNamesFromResults(false);
+            final List<String> daoColumns = getDaoColumns();
+            getDao().setColumnNames(daoColumns);
+        }
     }
 
     @Override
