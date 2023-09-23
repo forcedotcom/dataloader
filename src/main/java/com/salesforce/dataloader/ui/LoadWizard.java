@@ -142,7 +142,9 @@ public abstract class LoadWizard extends BaseWizard {
     protected void hook_additionalLoadWizardPages() {}
 
     private String getConfirmationText() {
-        return getLabel("confFirstLine") + System.getProperty("line.separator") //$NON-NLS-1$ //$NON-NLS-2$
+        return getLabel("confFirstLine") 
+                + System.getProperty("line.separator") //$NON-NLS-1$ //$NON-NLS-2$
+                + System.getProperty("line.separator") //$NON-NLS-1$ //$NON-NLS-2$
                 + getLabel("confSecondLine"); //$NON-NLS-1$
     }
 
