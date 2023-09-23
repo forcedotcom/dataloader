@@ -66,6 +66,7 @@ import com.sforce.ws.util.FileUtil;
 public abstract class ProcessTestBase extends ConfigTestBase {
 
     private static Logger logger = LogManager.getLogger(ProcessTestBase.class);
+    private int serverApiInvocationThreshold = 50;
 
     protected ProcessTestBase() {
         super(Collections.<String, String>emptyMap());
@@ -775,7 +776,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             verifyFailureFile(controller, numFailures);        //A.S.: To be removed and replaced
             verifySuccessFile(controller, numInserts, numUpdates, emptyId);
             long serverAPIInvocations = HttpClientTransport.getServerInvocationCount();
-            assertTrue("Number of server invocations (" + serverAPIInvocations + ") have exceeded the threshold of 50", serverAPIInvocations <= 50);
+            assertTrue("Number of server invocations (" + serverAPIInvocations + ") have exceeded the threshold of " + serverApiInvocationThreshold, serverAPIInvocations <= serverApiInvocationThreshold);
         } else {
             assertFalse("Expected process to fail but got success: " + actualMessage, monitor.isSuccess());
         }
@@ -787,6 +788,10 @@ public abstract class ProcessTestBase extends ConfigTestBase {
 
         // return the controller used by the process so that the tests can validate success/error output files, etc
         return controller;
+    }
+    
+    protected void setServerApiInvocationThreshold(int threshold) {
+        serverApiInvocationThreshold = threshold;
     }
 
     private static final String INSERT_MSG = "Item Created";

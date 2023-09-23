@@ -125,13 +125,21 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         argMap.put(Config.ENTITY, entity);
         argMap.put(Config.EXTRACT_SOQL, soql);
         argMap.put(Config.ENABLE_EXTRACT_STATUS_OUTPUT, Config.TRUE);
+        argMap.put(Config.SKIP_LOCAL_SOQL_VERIFICATION, Config.FALSE);
         argMap.put(Config.EXTRACT_REQUEST_SIZE, "2000");
         if (!useMappingFile) {
             argMap.remove(Config.MAPPING_FILE);
         }
         return argMap;
     }
+    
+    Map<String, String> getSkipLocalValidationTestConfig(String soql, String entity, boolean useMappingFile) {
 
+        final Map<String, String> argMap = getTestConfig(soql, entity, useMappingFile);
+        argMap.put(Config.SKIP_LOCAL_SOQL_VERIFICATION, Config.TRUE);
+        return argMap;
+    }
+    
     // Utility functions
     protected void verifyIdsInCSV(Controller control, String[] ids) throws DataAccessObjectException {
         verifyIdsInCSV(control, ids, false);
@@ -297,8 +305,15 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
 
     protected void runSoqlRelationshipTest(String contactId, String accountId, final String soql)
             throws ProcessInitializationException, DataAccessObjectException {
-
-        final Map<String, String> argMap = getTestConfig(soql, "Contact", true);
+        setServerApiInvocationThreshold(100);
+        Map<String, String> argMap = getTestConfig(soql, "Contact", true);
+        doRunSoqlRelationshipTest(contactId, accountId, soql, argMap);
+        argMap = getSkipLocalValidationTestConfig(soql, "Contact", true);
+        doRunSoqlRelationshipTest(contactId, accountId, soql, argMap);
+    }
+    
+    private void doRunSoqlRelationshipTest(String contactId, String accountId, final String soql, Map<String, String> argMap)
+            throws ProcessInitializationException, DataAccessObjectException {
 
         runProcess(argMap, 1);
         final CSVFileReader resultReader = new CSVFileReader(new File(argMap.get(Config.DAO_NAME)), getController().getConfig(), true, false);
@@ -335,6 +350,10 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
             
         }
         Controller control = runProcess(getTestConfig(soql, "Account", true), numRecords);
+        // verify IDs and phone format 
+        verifyIdsInCSV(control, accountIds, true);
+        
+        control = runProcess(getSkipLocalValidationTestConfig(soql, "Account", true), numRecords);
         // verify IDs and phone format 
         verifyIdsInCSV(control, accountIds, true);
     }

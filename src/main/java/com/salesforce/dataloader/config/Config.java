@@ -344,7 +344,7 @@ public class Config {
     public static final String DUPLICATE_RULE_INCLUDE_RECORD_DETAILS = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.includeRecordDetails"; //$NON-NLS-1$
     public static final String DUPLICATE_RULE_RUN_AS_CURRENT_USER = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.runAsCurrentUser"; //$NON-NLS-1$
     public static final String BULKV2_API_ENABLED = PILOT_PROPERTY_PREFIX + "sfdc.useBulkV2Api";
-
+    public static final String SKIP_LOCAL_SOQL_VERIFICATION = "loader.query.skipLocalVerification";
     /*
      * ===============================
      * End of config properties
@@ -600,6 +600,7 @@ public class Config {
         setDefaultValue(WIZARD_HEIGHT, DEFAULT_WIZARD_HEIGHT);
         setDefaultValue(DAO_READ_PREPROCESSOR_SCRIPT, "");
         setDefaultValue(DAO_WRITE_POSTPROCESSOR_SCRIPT, "");
+        setDefaultValue(SKIP_LOCAL_SOQL_VERIFICATION, false);
     }
 
     /**

@@ -66,10 +66,17 @@ public class SOQLMapper extends Mapper {
     private static final Logger logger = LogManager.getLogger(SOQLMapper.class);
 
     private SOQLInfo soqlInfo;
+    private boolean skipMappings = false;
 
     public SOQLMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
+        this(client, columnNames, fields, mappingFileName, false);
+    }
+    
+    public SOQLMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName, boolean skipMappings)
+            throws MappingInitializationException {
         super(client, columnNames, fields, mappingFileName);
+        this.skipMappings = skipMappings;
     }
 
     public List<String> getDaoColumnsForSoql() {
@@ -95,6 +102,9 @@ public class SOQLMapper extends Mapper {
             XmlObject field = fields.next();
             final String fieldName = prefix + field.getName().getLocalPart();
             String localName = getMapping(fieldName);
+            if (localName == null) {
+                localName = fieldName;
+            }
             if (localName != null) {
                 Object value = field.getValue();
                 QName xmlType = field.getXmlType();
@@ -138,7 +148,13 @@ public class SOQLMapper extends Mapper {
             if ("Id".equalsIgnoreCase(sfdcName)) id.append(val);
             String localName = getMapping(sfdcName);
             if (localName == null) {
-                logger.warn("sfdc returned row that cannot be mapped: " + sfdcName);
+                if (this.skipMappings) {
+                    this.map.put(sfdcName, sfdcName);
+                    localName = sfdcName;
+                    resultRow.put(localName, val);
+                } else {
+                    logger.warn("sfdc returned row that cannot be mapped: " + sfdcName);
+                }
             } else {
                 resultRow.put(localName, val);
             }
@@ -153,7 +169,7 @@ public class SOQLMapper extends Mapper {
         } catch (SOQLParserException e) {
             throw new InvalidMappingException(e.getMessage(), e);
         }
-        if (hasMappings()) return;
+        if (hasMappings() || skipMappings) return;
         // if we didn't map any fields from the properties file, then we do the default soql mapping
         for (SOQLFieldInfo fieldInfo : soqlInfo.getSelectedFields()) {
             addSoqlFieldMapping(fieldInfo.toString(), fieldInfo);

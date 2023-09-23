@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -60,6 +61,7 @@ public class CSVFileWriter implements DataWriter {
     private BufferedWriter fileOut;
     private List<String> columnNames = new ArrayList<String>();
     private int currentRowNumber = 0;
+    private boolean isSetColumnNamesFromResults = false;
 
     /**
      * <code>open</code> is true if the writer file is open, false otherwise.
@@ -163,6 +165,9 @@ public class CSVFileWriter implements DataWriter {
      */
     @Override
     public boolean writeRow(Row row) throws DataAccessObjectException {
+        if (this.isSetColumnNamesFromResults && this.columnNames == null || this.columnNames.isEmpty()) {
+            extractColumnNamesFromRow(row);
+        }
         CSVColumnVisitor visitor = new CSVColumnVisitor(fileOut, false, this.columnDelimiter);
         try {
             visitColumns(columnNames, row, visitor);
@@ -174,6 +179,11 @@ public class CSVFileWriter implements DataWriter {
             logger.error(Messages.getString("CSVWriter.errorWriting"), e); //$NON-NLS-1$
             throw new DataAccessObjectException(Messages.getString("CSVWriter.errorWriting"), e); //$NON-NLS-1$
         }
+    }
+    
+    private void extractColumnNamesFromRow(Row row) throws DataAccessObjectInitializationException {
+        Set<String> fieldNameSet = row.keySet();
+        setColumnNames(new ArrayList<String>(fieldNameSet));    
     }
 
     /*
@@ -233,6 +243,10 @@ public class CSVFileWriter implements DataWriter {
         this.columnNames = columnNames;
 
         writeHeaderRow();
+    }
+    
+    public void setColumnNamesFromResults(boolean flag) {
+        this.isSetColumnNamesFromResults = flag;
     }
 
     public boolean isOpen() {
