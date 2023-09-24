@@ -106,6 +106,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonCsvComma;
     private Button buttonCsvTab;
     private Button buttonLoginFromBrowser;
+    private Button buttonCloseWizardOnFinish;
     private static final String[] LOGGING_LEVEL = { "ALL", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
     private Combo comboLoggingLevelDropdown;
     
@@ -689,6 +690,18 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.horizontalSpan = 2;
         blankAgain.setLayoutData(data);
         
+        Label closeWizardOnFinishCheckboxText = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        closeWizardOnFinishCheckboxText.setText(Labels.getString("AdvancedSettingsDialog.closeWizardOnFinish"));
+        closeWizardOnFinishCheckboxText.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+        boolean closeWizardOnFinish = config.getBoolean(Config.WIZARD_CLOSE_ON_FINISH);
+        buttonCloseWizardOnFinish = new Button(restComp, SWT.CHECK);
+        buttonCloseWizardOnFinish.setSelection(closeWizardOnFinish);
+
+        blankAgain = new Label(restComp, SWT.NONE);
+        data = new GridData();
+        data.horizontalSpan = 2;
+        blankAgain.setLayoutData(data);
+        
         Label labelLoggingConfigFile = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelLoggingConfigFile.setText(Labels.getString("AdvancedSettingsDialog.loggingConfigFile")); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
@@ -828,6 +841,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
                 config.setValue(Config.BULKV2_API_ENABLED, buttonUseBulkV2Api.getSelection());
                 config.setValue(Config.OAUTH_LOGIN_FROM_BROWSER, buttonLoginFromBrowser.getSelection());
+                config.setValue(Config.WIZARD_CLOSE_ON_FINISH, buttonCloseWizardOnFinish.getSelection());
                 LoggingUtil.setLoggingLevel(LOGGING_LEVEL[comboLoggingLevelDropdown.getSelectionIndex()]);
                 String clientIdVal = textProductionClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {

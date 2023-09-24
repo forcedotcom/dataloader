@@ -77,5 +77,9 @@ public abstract class BaseWizard extends Wizard {
     protected WizardPage getFinishPage() {
         return finishPage;
     }
+    
+    protected boolean closeWizardPagePostSuccessfulFinish() {
+        return getConfig().getBoolean(Config.WIZARD_CLOSE_ON_FINISH);
+    }
 
 }
