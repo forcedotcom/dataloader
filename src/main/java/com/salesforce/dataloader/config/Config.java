@@ -412,6 +412,7 @@ public class Config {
     public static final String READ_ONLY_CONFIG_PROPERTIES = "config.properties.readonly";
     public static final String WIZARD_WIDTH = "sfdc.ui.wizard.width";
     public static final String WIZARD_HEIGHT = "sfdc.ui.wizard.height";
+    public static final String WIZARD_CLOSE_ON_FINISH = "sfdc.ui.wizard.closeOnFinish";
     public static final int DEFAULT_WIZARD_WIDTH = 600;
     public static final int DEFAULT_WIZARD_HEIGHT = 700;
     
@@ -601,6 +602,7 @@ public class Config {
         setDefaultValue(DAO_READ_PREPROCESSOR_SCRIPT, "");
         setDefaultValue(DAO_WRITE_POSTPROCESSOR_SCRIPT, "");
         setDefaultValue(SKIP_LOCAL_SOQL_VERIFICATION, false);
+        setDefaultValue(WIZARD_CLOSE_ON_FINISH, true);
     }
 
     /**

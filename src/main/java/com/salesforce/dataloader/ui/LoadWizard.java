@@ -107,7 +107,7 @@ public abstract class LoadWizard extends BaseWizard {
             return false;
         }
 
-        return true;
+        return closeWizardPagePostSuccessfulFinish();
     }
 
     @Override
