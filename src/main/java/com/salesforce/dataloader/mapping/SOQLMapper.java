@@ -66,17 +66,17 @@ public class SOQLMapper extends Mapper {
     private static final Logger logger = LogManager.getLogger(SOQLMapper.class);
 
     private SOQLInfo soqlInfo;
-    private boolean skipMappings = false;
+    private boolean skipSoQLMapping = false;
 
     public SOQLMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
         this(client, columnNames, fields, mappingFileName, false);
     }
     
-    public SOQLMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName, boolean skipMappings)
+    public SOQLMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName, boolean skipSoQLMapping)
             throws MappingInitializationException {
         super(client, columnNames, fields, mappingFileName);
-        this.skipMappings = skipMappings;
+        this.skipSoQLMapping = skipSoQLMapping;
     }
 
     public List<String> getDaoColumnsForSoql() {
@@ -93,6 +93,10 @@ public class SOQLMapper extends Mapper {
         mapPartnerSObject(map, "", sobj);
         mapConstants(map);
         return map;
+    }
+    
+    public void setSkipSoQLMapping(boolean skipSoQLMapping) {
+        this.skipSoQLMapping = skipSoQLMapping;
     }
 
     private void mapPartnerSObject(Row map, String prefix, XmlObject sobj) {
@@ -148,7 +152,7 @@ public class SOQLMapper extends Mapper {
             if ("Id".equalsIgnoreCase(sfdcName)) id.append(val);
             String localName = getMapping(sfdcName);
             if (localName == null) {
-                if (this.skipMappings) {
+                if (this.skipSoQLMapping) {
                     this.map.put(sfdcName, sfdcName);
                     localName = sfdcName;
                     resultRow.put(localName, val);
@@ -169,7 +173,7 @@ public class SOQLMapper extends Mapper {
         } catch (SOQLParserException e) {
             throw new InvalidMappingException(e.getMessage(), e);
         }
-        if (hasMappings() || skipMappings) return;
+        if (hasMappings() || skipSoQLMapping) return;
         // if we didn't map any fields from the properties file, then we do the default soql mapping
         for (SOQLFieldInfo fieldInfo : soqlInfo.getSelectedFields()) {
             addSoqlFieldMapping(fieldInfo.toString(), fieldInfo);

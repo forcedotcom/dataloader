@@ -136,11 +136,13 @@ abstract class AbstractExtractAction extends AbstractAction {
 
     @Override
     protected void initOperation() throws DataAccessObjectInitializationException, OperationException {
+        
+        SOQLMapper mapper = (SOQLMapper)getController().getMapper();
+        mapper.clearMap();
+        mapper.setSkipSoQLMapping(getController().getConfig().getBoolean(Config.SKIP_LOCAL_SOQL_VERIFICATION));
+        getDao().setColumnNamesFromResults(getController().getConfig().getBoolean(Config.SKIP_LOCAL_SOQL_VERIFICATION));
         // get columns that will be output from the query and open the outputs
-        if (getController().getConfig().getBoolean(Config.SKIP_LOCAL_SOQL_VERIFICATION)) {
-            getDao().setColumnNamesFromResults(true);
-        } else {
-            getDao().setColumnNamesFromResults(false);
+        if (!getController().getConfig().getBoolean(Config.SKIP_LOCAL_SOQL_VERIFICATION)) {
             final List<String> daoColumns = getDaoColumns();
             getDao().setColumnNames(daoColumns);
         }
