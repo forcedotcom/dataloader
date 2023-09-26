@@ -49,6 +49,11 @@ public class CaseInsensitiveMap extends LinkedHashMap<String, String> {
         return super.containsKey(getFirstTimeUseKey(key));
     }
     
+    public void clear() {
+        this.lowercaseKeyToFirstTimeUseKeyMap.clear();
+        super.clear();
+    }
+    
     private String getFirstTimeUseKey(String suppliedKey) {
         String firstTimeUseKey = lowercaseKeyToFirstTimeUseKeyMap.get(suppliedKey.toLowerCase());
         if (firstTimeUseKey == null)  {

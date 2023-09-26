@@ -136,6 +136,8 @@ public enum OperationInfo {
             return OperationEnum.upsert;
         case delete:
             return OperationEnum.delete;
+        case hard_delete:
+            return OperationEnum.hardDelete;
         case extract:
             return OperationEnum.query;
         case extract_all:
