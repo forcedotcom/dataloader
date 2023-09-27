@@ -125,7 +125,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         argMap.put(Config.ENTITY, entity);
         argMap.put(Config.EXTRACT_SOQL, soql);
         argMap.put(Config.ENABLE_EXTRACT_STATUS_OUTPUT, Config.TRUE);
-        argMap.put(Config.SKIP_LOCAL_SOQL_VERIFICATION, Config.FALSE);
+        argMap.put(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS, Config.TRUE);
         argMap.put(Config.EXTRACT_REQUEST_SIZE, "2000");
         if (!useMappingFile) {
             argMap.remove(Config.MAPPING_FILE);
@@ -133,10 +133,10 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         return argMap;
     }
     
-    Map<String, String> getSkipLocalValidationTestConfig(String soql, String entity, boolean useMappingFile) {
+    Map<String, String> getDoNotLimitOutputToQueryFieldsTestConfig(String soql, String entity, boolean useMappingFile) {
 
         final Map<String, String> argMap = getTestConfig(soql, entity, useMappingFile);
-        argMap.put(Config.SKIP_LOCAL_SOQL_VERIFICATION, Config.TRUE);
+        argMap.put(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS, Config.FALSE);
         return argMap;
     }
     
@@ -308,7 +308,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         setServerApiInvocationThreshold(100);
         Map<String, String> argMap = getTestConfig(soql, "Contact", true);
         doRunSoqlRelationshipTest(contactId, accountId, soql, argMap);
-        argMap = getSkipLocalValidationTestConfig(soql, "Contact", true);
+        argMap = getDoNotLimitOutputToQueryFieldsTestConfig(soql, "Contact", true);
         doRunSoqlRelationshipTest(contactId, accountId, soql, argMap);
     }
     
@@ -353,7 +353,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         // verify IDs and phone format 
         verifyIdsInCSV(control, accountIds, true);
         
-        control = runProcess(getSkipLocalValidationTestConfig(soql, "Account", true), numRecords);
+        control = runProcess(getDoNotLimitOutputToQueryFieldsTestConfig(soql, "Account", true), numRecords);
         // verify IDs and phone format 
         verifyIdsInCSV(control, accountIds, true);
     }

@@ -85,7 +85,7 @@ abstract class AbstractExtractAction extends AbstractAction {
         return (IQueryVisitor)super.getVisitor();
     }
 
-    private List<String> getDaoColumns() {
+    private List<String> getDaoColumnsFromMapper() {
         ((SOQLMapper)getController().getMapper()).initSoqlMapping(getConfig().getString(Config.EXTRACT_SOQL));
         return ((SOQLMapper)getController().getMapper()).getDaoColumnsForSoql();
     }
@@ -131,18 +131,14 @@ abstract class AbstractExtractAction extends AbstractAction {
 
     @Override
     protected List<String> getStatusColumns() throws ExtractException {
-        return getDaoColumns();
+        return getDaoColumnsFromMapper();
     }
 
     @Override
     protected void initOperation() throws DataAccessObjectInitializationException, OperationException {
-        
-        SOQLMapper mapper = (SOQLMapper)getController().getMapper();
-        mapper.setSkipSoQLMapping(getController().getConfig().getBoolean(Config.SKIP_LOCAL_SOQL_VERIFICATION));
-        getDao().setColumnNamesFromResults(getController().getConfig().getBoolean(Config.SKIP_LOCAL_SOQL_VERIFICATION));
-        // get columns that will be output from the query and open the outputs
-        if (!getController().getConfig().getBoolean(Config.SKIP_LOCAL_SOQL_VERIFICATION)) {
-            final List<String> daoColumns = getDaoColumns();
+        getDao().setColumnNamesFromResults(!getController().getConfig().getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS));
+        if (getController().getConfig().getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
+            final List<String> daoColumns = getDaoColumnsFromMapper();
             getDao().setColumnNames(daoColumns);
         }
     }
