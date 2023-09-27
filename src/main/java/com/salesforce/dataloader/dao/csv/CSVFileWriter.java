@@ -61,7 +61,7 @@ public class CSVFileWriter implements DataWriter {
     private BufferedWriter fileOut;
     private List<String> columnNames = new ArrayList<String>();
     private int currentRowNumber = 0;
-    private boolean isSetColumnNamesFromResults = false;
+    private boolean isHeaderRowWritten = false;
 
     /**
      * <code>open</code> is true if the writer file is open, false otherwise.
@@ -85,7 +85,6 @@ public class CSVFileWriter implements DataWriter {
         this.capitalizedHeadings = true;
         encoding = config.getCsvEncoding(true);
         logger.debug(this.getClass().getName(), "encoding used to write to CSV file is " + encoding);
-        
         if (columnDelimiterStr.length() == 0) {
             columnDelimiterStr = AppUtil.COMMA;
         }
@@ -132,6 +131,14 @@ public class CSVFileWriter implements DataWriter {
 
         if (fileOut != null) {
             try {
+                if (!isHeaderRowWritten) {
+                    try {
+                        writeHeaderRow();
+                    } catch (DataAccessObjectInitializationException e) {
+                        logger.warn("Unable to write header row in the file " + fileName);
+                    }
+                }
+                this.isHeaderRowWritten = false;
                 fileOut.close();
             } catch (IOException e) {
                 logger.error(Messages.getString("CSVWriter.errorClosing"), e); //$NON-NLS-1$
@@ -147,11 +154,15 @@ public class CSVFileWriter implements DataWriter {
     }
 
     private void writeHeaderRow() throws DataAccessObjectInitializationException {
+        if (this.isHeaderRowWritten) {
+            return;
+        }
         CSVColumnVisitor visitor = new CSVColumnVisitor(fileOut, false, this.columnDelimiter);
         try {
             visitHeaderColumns(this.columnNames, visitor);
             fileOut.newLine();
             visitor.newRow();
+            this.isHeaderRowWritten = true;
         } catch (IOException e) {
             String errMsg = Messages.getString("CSVWriter.errorWriting");
             logger.error(errMsg, e);
@@ -165,7 +176,7 @@ public class CSVFileWriter implements DataWriter {
      */
     @Override
     public boolean writeRow(Row row) throws DataAccessObjectException {
-        if (this.isSetColumnNamesFromResults && this.columnNames == null || this.columnNames.isEmpty()) {
+        if (this.columnNames == null || this.columnNames.isEmpty()) {
             extractColumnNamesFromRow(row);
         }
         CSVColumnVisitor visitor = new CSVColumnVisitor(fileOut, false, this.columnDelimiter);
@@ -243,10 +254,6 @@ public class CSVFileWriter implements DataWriter {
         this.columnNames = columnNames;
 
         writeHeaderRow();
-    }
-    
-    public void setColumnNamesFromResults(boolean flag) {
-        this.isSetColumnNamesFromResults = flag;
     }
 
     public boolean isOpen() {

@@ -62,6 +62,4 @@ public interface DataWriter extends DataAccessObject {
      * @throws DataAccessObjectException
      */
     boolean writeRowList(List<Row> inputRowList) throws DataAccessObjectException;
-    
-    public void setColumnNamesFromResults(boolean flag);
 }

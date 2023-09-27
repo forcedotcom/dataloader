@@ -281,7 +281,4 @@ public class DatabaseWriter implements DataWriter {
         // TODO: Ordered column names can possibly used for ordered output from the write. Currently, this is not used
         // since writeRow will contain column information anyway and order doesn't matter in database
     }
-    
-    public void setColumnNamesFromResults(boolean flag) {
-    }
 }
