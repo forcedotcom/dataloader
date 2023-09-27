@@ -263,7 +263,7 @@ public class Controller {
         }
         // Initialize mapping
         this.mapper = getConfig().getOperationInfo().isExtraction() ? 
-                new SOQLMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile, getConfig().getBoolean(Config.SKIP_LOCAL_SOQL_VERIFICATION)) 
+                new SOQLMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) 
               : new LoadMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile);
     }
 

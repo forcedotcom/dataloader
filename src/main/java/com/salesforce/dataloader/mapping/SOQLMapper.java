@@ -31,7 +31,6 @@ import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.mapping.SOQLInfo.SOQLFieldInfo;
 import com.salesforce.dataloader.mapping.SOQLInfo.SOQLParserException;
 import com.salesforce.dataloader.model.Row;
-import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.FieldType;
@@ -52,7 +51,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 
@@ -67,8 +65,8 @@ import javax.xml.namespace.QName;
 
 /*
  * Mapping for extraction operations has the following parts:
- * 1. A mapping file.
- * 2. A mapping array provided in the constructor.
+ * 1. A mapping file provided in the constructor. Mapper.map stores its mappings.
+ * 2. A mapping array provided in the constructor. Mapper.daoColumns field stores this array.
  * 3. SoQL - fields specified in the query. This is skipped if skipSoQLMapping == true in the constructor.
  * 4. query results - fields returned in the results. This is skipped if skipSoQLMapping == false.
  * 
@@ -77,24 +75,24 @@ import javax.xml.namespace.QName;
  *     start with 1, overlay 2, produce an output file containing fields from the union of 1, 2, and 3.
  * If skipSoQLMapping == true (no client-side SoQL checks, no client-side parsing of SoQL query)
  *     produce an output file containing all fields in the result. Use mapped field name if the field is mapped.
+ *     
+ * map field defined in Mapper class stores mapping set in 1 and 2.
+ * soqlMap field defined in SOQLMapper class stores 1, 2, and 3 or 1, 2, and 4 in initSoQLMapping() as follows:
+ * - Construct a map based on SoQL query. It maps entity field names to aliases specified in SoQL by invoking addSOQLFieldMapping().
+ *   e.g. if the query is 'select a.name from Account a', soqlMap will contain "name":"a.name" as an entry.
+ *   
+ * - if there are mappings from 1 and 2, get the list of soql query fields and recreate soqlMap.
  */
 public class SOQLMapper extends Mapper {
 
     private static final Logger logger = LogManager.getLogger(SOQLMapper.class);
 
     private SOQLInfo soqlInfo;
-    private boolean skipSoQLMapping = false;
     private CaseInsensitiveMap extractionMap = new CaseInsensitiveMap();
 
     public SOQLMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
-        this(client, columnNames, fields, mappingFileName, false);
-    }
-    
-    public SOQLMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName, boolean skipSoQLMapping)
-            throws MappingInitializationException {
         super(client, columnNames, fields, mappingFileName);
-        this.skipSoQLMapping = skipSoQLMapping;
     }
 
     public List<String> getDaoColumnsForSoql() {
@@ -183,26 +181,20 @@ public class SOQLMapper extends Mapper {
         Row resultRow = new Row();
         Iterator<String> headerIter = headers.listIterator();
         for (String val : values) {
-            String sfdcName = headerIter.next();
-            if ("Id".equalsIgnoreCase(sfdcName)) id.append(val);
-            String localName = getMapping(sfdcName);
-            if (localName == null) {
-                if (this.skipSoQLMapping) {
-                    this.map.put(sfdcName, sfdcName);
-                    localName = sfdcName;
-                    resultRow.put(localName, val);
-                } else {
-                    logger.warn("sfdc returned row that cannot be mapped: " + sfdcName);
-                }
-            } else {
-                resultRow.put(localName, val);
+            String sfdcFieldName = headerIter.next();
+            if ("Id".equalsIgnoreCase(sfdcFieldName)) id.append(val);
+            String daoColumnName = getMapping(sfdcFieldName);
+            if (daoColumnName == null) {
+                this.map.put(sfdcFieldName, sfdcFieldName);
+                daoColumnName = sfdcFieldName;
+                logger.info("SoQL query returned a field that cannot be mapped: " + sfdcFieldName);
             }
+            resultRow.put(daoColumnName, val);
         }
         mapConstants(resultRow);
         return resultRow;
     }
 
-    //
     public void initSoqlMapping(String soql) {
         try {
             this.soqlInfo = new SOQLInfo(soql);
@@ -210,42 +202,44 @@ public class SOQLMapper extends Mapper {
             throw new InvalidMappingException(e.getMessage(), e);
         }
         initializeSoQLMap();
-        if (skipSoQLMapping) return;
 
-        // if we didn't map any fields from the properties file, then we do the default soql mapping
+        // overlay mapping file
         for (SOQLFieldInfo fieldInfo : soqlInfo.getSelectedFields()) {
             addSoqlFieldMapping(fieldInfo, fieldInfo.toString());
         }
         
         if (hasDaoColumns()) {
-            // if no mapping file was provided, but dao col names are known (eg database writer), then we should get
-            // the dao names correct
-            List<Map.Entry<String, String>> entries = new LinkedList<Map.Entry<String, String>>(getMap().entrySet());
+            List<Map.Entry<String, String>> soqlBasedMappingEntries = new LinkedList<Map.Entry<String, String>>(getMap().entrySet());
             clearMap();
 
             // FIXME UGLY, NESTED LOOPS
             List<String> daoColumns = new LinkedList<String>(getDaoColumns());
-            ListIterator<String> daoIter = daoColumns.listIterator();
-            while (daoIter.hasNext()) {
-                String daoColName = daoIter.next();
-                ListIterator<Entry<String, String>> entryIter = entries.listIterator();
-                while (entryIter.hasNext()) {
-                    Entry<String, String> ent = entryIter.next();
-                    String sfdcName = ent.getKey();
-                    String autoDaoName = ent.getValue();
-                    if (sfdcName.equalsIgnoreCase(daoColName) || autoDaoName.equalsIgnoreCase(daoColName)) {
-                        putMapping(sfdcName, daoColName);
-                        entryIter.remove();
-                        daoIter.remove();
+            ListIterator<String> daoColumnIter = daoColumns.listIterator();
+            while (daoColumnIter.hasNext()) {
+                String daoColName = daoColumnIter.next();
+                ListIterator<Entry<String, String>> oldMappingEntryIter = soqlBasedMappingEntries.listIterator();
+                while (oldMappingEntryIter.hasNext()) {
+                    Entry<String, String> oldMappingEntry = oldMappingEntryIter.next();
+                    String sfdcFieldName = oldMappingEntry.getKey();
+                    String oldDaoName = oldMappingEntry.getValue();
+                    if (sfdcFieldName.equalsIgnoreCase(daoColName) || oldDaoName.equalsIgnoreCase(daoColName)) {
+                        putMapping(sfdcFieldName, daoColName);
+                        oldMappingEntryIter.remove();
+                        daoColumnIter.remove();
                         break;
                     }
                 }
             }
             addDaoMappingToExtractionMapping();
-            if (!daoColumns.isEmpty())
-                throw new InvalidMappingException("The following dao columns could not be mapped: " + daoColumns);
-            if (!entries.isEmpty()) {
-                logger.warn("The following select fields were not mapped: " + entries);
+                        
+            if (!daoColumns.isEmpty()) {
+                logger.warn("The following DAO columns could not be mapped: " + daoColumns);
+            }
+            if (!soqlBasedMappingEntries.isEmpty()) {
+                logger.warn("The following SoQL SELECT fields were not mapped: " + soqlBasedMappingEntries);
+                for (SOQLFieldInfo fieldInfo : soqlInfo.getSelectedFields()) {
+                    addSoqlFieldMapping(fieldInfo, fieldInfo.toString());
+                }
             }
         }
     }
@@ -284,10 +278,10 @@ public class SOQLMapper extends Mapper {
         putMapping(normalizeSoql(fieldInfo), daoName);
     }
     
-    private void addSoqlFieldMapping(SOQLFieldInfo fieldInfo, String daoName) {
-        String sfdcField = normalizeSoql(fieldInfo);
-        if (!this.extractionMap.containsKey(sfdcField)) {
-            this.extractionMap.put(sfdcField, daoName);
+    private void addSoqlFieldMapping(SOQLFieldInfo fieldInfo, String soqlFieldName) {
+        String sfdcFieldName = normalizeSoql(fieldInfo);
+        if (!this.extractionMap.containsKey(sfdcFieldName)) {
+            this.extractionMap.put(sfdcFieldName, soqlFieldName);
         }
     }
 
