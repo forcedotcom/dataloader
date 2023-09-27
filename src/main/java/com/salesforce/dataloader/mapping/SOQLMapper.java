@@ -111,10 +111,6 @@ public class SOQLMapper extends Mapper {
         return row;
     }
     
-    public void setSkipSoQLMapping(boolean skipSoQLMapping) {
-        this.skipSoQLMapping = skipSoQLMapping;
-    }
-    
     // overwrite parent's methods to use soqlMap instead of map
     public String getMapping(String srcName, boolean strictMatching) {
         if (extractionMap.containsKey(srcName)) {

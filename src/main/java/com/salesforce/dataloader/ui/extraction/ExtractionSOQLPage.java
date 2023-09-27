@@ -503,11 +503,11 @@ public class ExtractionSOQLPage extends ExtractionPage {
         
         // skip local checks
         skipLocalChecksButton = new Button(comp, SWT.CHECK);
-        skipLocalChecksButton.setText(Labels.getString(this.getClass().getSimpleName() + ".skipLocalValidation"));
-        skipLocalChecksButton.setSelection(controller.getConfig().getBoolean(Config.SKIP_LOCAL_SOQL_VERIFICATION));
+        skipLocalChecksButton.setText(Labels.getString(this.getClass().getSimpleName() + ".limitOutputToQueryFields"));
+        skipLocalChecksButton.setSelection(controller.getConfig().getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS));
         skipLocalChecksButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent event) {
-                controller.getConfig().setValue(Config.SKIP_LOCAL_SOQL_VERIFICATION, skipLocalChecksButton.getSelection());
+                controller.getConfig().setValue(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS, skipLocalChecksButton.getSelection());
             }
         });
         labelSeparator = new Label(comp, SWT.SEPARATOR | SWT.HORIZONTAL);
