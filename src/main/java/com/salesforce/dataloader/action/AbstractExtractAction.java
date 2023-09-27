@@ -136,7 +136,6 @@ abstract class AbstractExtractAction extends AbstractAction {
 
     @Override
     protected void initOperation() throws DataAccessObjectInitializationException, OperationException {
-        getDao().setColumnNamesFromResults(!getController().getConfig().getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS));
         if (getController().getConfig().getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
             final List<String> daoColumns = getDaoColumnsFromMapper();
             getDao().setColumnNames(daoColumns);
