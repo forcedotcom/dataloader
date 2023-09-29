@@ -123,7 +123,7 @@ public class ExtractionFinishDialog extends BaseDialog {
         viewExtraction.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                openViewer(getController().getConfig().getString(Config.DAO_NAME));
+                openViewer(getController().getConfig().getString(Config.DAO_NAME), false);
             }
 
             @Override
@@ -140,7 +140,7 @@ public class ExtractionFinishDialog extends BaseDialog {
             viewErrors.addSelectionListener(new SelectionListener() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    openViewer(getController().getConfig().getString(Config.OUTPUT_ERROR));
+                    openViewer(getController().getConfig().getString(Config.OUTPUT_ERROR), true);
                 }
 
                 @Override
@@ -164,8 +164,8 @@ public class ExtractionFinishDialog extends BaseDialog {
         shell.setDefaultButton(ok);
     }
 
-    private void openViewer(String filename) {
-        CSVViewerDialog dlg = new CSVViewerDialog(getParent(), getController(), false, true);
+    private void openViewer(String filename, boolean ignoreDelimiterConfig) {
+        CSVViewerDialog dlg = new CSVViewerDialog(getParent(), getController(), ignoreDelimiterConfig, true);
         dlg.setNumberOfRows(200000);
         dlg.setFileName(filename);
         try {
