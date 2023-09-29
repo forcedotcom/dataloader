@@ -140,6 +140,7 @@ public class CSVFileWriter implements DataWriter {
                 }
                 this.isHeaderRowWritten = false;
                 fileOut.close();
+                fileOut = null;
             } catch (IOException e) {
                 logger.error(Messages.getString("CSVWriter.errorClosing"), e); //$NON-NLS-1$
             }
@@ -177,7 +178,8 @@ public class CSVFileWriter implements DataWriter {
     @Override
     public boolean writeRow(Row row) throws DataAccessObjectException {
         if (this.columnNames == null || this.columnNames.isEmpty()) {
-            extractColumnNamesFromRow(row);
+           List<String>colNames = getColumnNamesFromRow(row);
+           this.setColumnNames(colNames);
         }
         CSVColumnVisitor visitor = new CSVColumnVisitor(fileOut, false, this.columnDelimiter);
         try {
@@ -192,9 +194,9 @@ public class CSVFileWriter implements DataWriter {
         }
     }
     
-    private void extractColumnNamesFromRow(Row row) throws DataAccessObjectInitializationException {
+    public List<String> getColumnNamesFromRow(Row row) throws DataAccessObjectInitializationException {
         Set<String> fieldNameSet = row.keySet();
-        setColumnNames(new ArrayList<String>(fieldNameSet));    
+        return new ArrayList<String>(fieldNameSet);    
     }
 
     /*

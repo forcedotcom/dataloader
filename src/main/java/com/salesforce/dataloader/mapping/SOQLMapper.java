@@ -89,6 +89,7 @@ public class SOQLMapper extends Mapper {
 
     private SOQLInfo soqlInfo;
     private CaseInsensitiveMap extractionMap = new CaseInsensitiveMap();
+    private boolean isInitialized = false;
 
     public SOQLMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
@@ -96,10 +97,10 @@ public class SOQLMapper extends Mapper {
     }
 
     public List<String> getDaoColumnsForSoql() {
+        Collection<String> daoColumnsCollection = this.extractionMap.values();
         List<String> daoColumns = new ArrayList<String>();
-        for (SOQLFieldInfo fieldInfo : soqlInfo.getSelectedFields()) {
-            String daoColumn = getMapping(normalizeSoql(fieldInfo));
-            if (daoColumn != null) daoColumns.add(daoColumn);
+        for (String daoCol : daoColumnsCollection) {
+            daoColumns.add(daoCol);
         }
         return daoColumns;
     }
@@ -192,6 +193,9 @@ public class SOQLMapper extends Mapper {
     }
 
     public void initSoqlMapping(String soql) {
+        if (this.isInitialized) {
+            return;
+        }
         try {
             this.soqlInfo = new SOQLInfo(soql);
         } catch (SOQLParserException e) {
@@ -203,9 +207,28 @@ public class SOQLMapper extends Mapper {
         for (SOQLFieldInfo fieldInfo : soqlInfo.getSelectedFields()) {
             addSoqlFieldMapping(fieldInfo, fieldInfo.toString());
         }
-        
+        _mapDaoColumns();
+        this.isInitialized = true;
+    }
+    
+    public void initSoqlMappingFromResultFields(List<String> resultFields) {
+        if (this.isInitialized) {
+            return;
+        }
+        initializeSoQLMap();
+        for (String resultField : resultFields) {
+            if (!this.extractionMap.containsKey(resultField)) {
+                this.extractionMap.put(resultField, resultField);
+            }
+        }
+        _mapDaoColumns();
+        this.isInitialized = true;
+    }
+
+    private void _mapDaoColumns() {
         if (hasDaoColumns()) {
             List<Map.Entry<String, String>> soqlBasedMappingEntries = new LinkedList<Map.Entry<String, String>>(getMap().entrySet());
+
             clearMap();
 
             // FIXME UGLY, NESTED LOOPS
@@ -226,21 +249,21 @@ public class SOQLMapper extends Mapper {
                     }
                 }
             }
-            addDaoMappingToExtractionMapping();
+            copyDaoMappingToExtractionMapping();
                         
             if (!daoColumns.isEmpty()) {
                 logger.warn("The following DAO columns could not be mapped: " + daoColumns);
             }
             if (!soqlBasedMappingEntries.isEmpty()) {
-                logger.warn("The following SoQL SELECT fields were not mapped: " + soqlBasedMappingEntries);
+                logger.warn("The following SoQL SELECT or result fields were not mapped: " + soqlBasedMappingEntries);
                 for (SOQLFieldInfo fieldInfo : soqlInfo.getSelectedFields()) {
                     addSoqlFieldMapping(fieldInfo, fieldInfo.toString());
                 }
             }
         }
     }
-    
-    public void addDaoMappingToExtractionMapping() {
+
+    public void copyDaoMappingToExtractionMapping() {
         this.extractionMap.putAll(this.map);
     }
     
@@ -251,6 +274,7 @@ public class SOQLMapper extends Mapper {
     public void clearMap() {
         super.clearMap();
         this.extractionMap.clear();
+        this.isInitialized = false;
     }
     
     public void removeMapping(String srcName) {
@@ -271,17 +295,17 @@ public class SOQLMapper extends Mapper {
     }
 
     private void addExtractionMapping(String daoName, SOQLFieldInfo fieldInfo) {
-        putMapping(normalizeSoql(fieldInfo), daoName);
+        putMapping(normalizeFieldInSoql(fieldInfo), daoName);
     }
     
     private void addSoqlFieldMapping(SOQLFieldInfo fieldInfo, String soqlFieldName) {
-        String sfdcFieldName = normalizeSoql(fieldInfo);
+        String sfdcFieldName = normalizeFieldInSoql(fieldInfo);
         if (!this.extractionMap.containsKey(sfdcFieldName)) {
             this.extractionMap.put(sfdcFieldName, soqlFieldName);
         }
     }
-
-    private String normalizeSoql(SOQLFieldInfo fieldInfo) {
+    
+    private String normalizeFieldInSoql(SOQLFieldInfo fieldInfo) {
         String normalizedFieldName = evalSfdcField(fieldInfo.getFieldName());
         return fieldInfo.isAggregate() ? fieldInfo.getAlias() : normalizedFieldName;
     }
@@ -325,16 +349,16 @@ public class SOQLMapper extends Mapper {
                 throw new InvalidMappingException("Connection error while parsing field expression " + fieldExpr, e);
             }
         } else {
-            return getSfdcField(describeResult, fieldExpr).getName();
+            return getSfdcFieldName(describeResult, fieldExpr);
         }
 
     }
 
-    private Field getSfdcField(DescribeSObjectResult describeResult, String fieldName) {
+    private String getSfdcFieldName(DescribeSObjectResult describeResult, String fieldName) {
         for (Field f : describeResult.getFields()) {
-            if (f.getName().equalsIgnoreCase(fieldName)) return f;
+            if (f.getName().equalsIgnoreCase(fieldName)) return f.getName();
         }
-        throw new InvalidMappingException("No such field " + fieldName + " on entity " + describeResult.getName());
+        return fieldName;
     }
 
     private Field getReferenceField(DescribeSObjectResult describeResult, String relName) {
