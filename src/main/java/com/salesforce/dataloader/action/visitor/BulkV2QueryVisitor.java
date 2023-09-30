@@ -29,6 +29,7 @@ package com.salesforce.dataloader.action.visitor;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
@@ -48,9 +49,9 @@ public class BulkV2QueryVisitor extends AbstractBulkQueryVisitor {
 
     private String jobId;
 
-    public BulkV2QueryVisitor(Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
+    public BulkV2QueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {
-        super(controller, monitor, queryWriter, successWriter, errorWriter);
+        super(action, controller, monitor, queryWriter, successWriter, errorWriter);
     }
 
     @Override

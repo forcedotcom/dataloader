@@ -26,6 +26,7 @@
 
 package com.salesforce.dataloader.action.visitor;
 
+import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -59,8 +60,9 @@ abstract class AbstractQueryVisitor extends AbstractVisitor implements IQueryVis
     private final List<Row> batchRows;
     private final List<String> batchIds;
     private final int batchSize;
+    protected final AbstractExtractAction action;
 
-    public AbstractQueryVisitor(Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
+    public AbstractQueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
         this.queryWriter = queryWriter;
@@ -68,6 +70,7 @@ abstract class AbstractQueryVisitor extends AbstractVisitor implements IQueryVis
         this.batchRows = new LinkedList<Row>();
         this.batchIds = new LinkedList<String>();
         this.batchSize = getWriteBatchSize();
+        this.action = action;
     }
 
     @Override

@@ -46,7 +46,7 @@ import com.salesforce.dataloader.util.AppUtil;
  * @author Colin jarvis
  * @since 21.0
  */
-abstract class AbstractExtractAction extends AbstractAction {
+abstract public class AbstractExtractAction extends AbstractAction {
 
     protected AbstractExtractAction(Controller controller, ILoaderProgress monitor)
             throws DataAccessObjectInitializationException {
@@ -61,7 +61,7 @@ abstract class AbstractExtractAction extends AbstractAction {
 
     @Override
     protected boolean writeStatus() {
-        return getConfig().getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT);
+        return getConfig().getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS) && getConfig().getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT);
     }
 
     @Override

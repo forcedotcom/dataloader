@@ -30,12 +30,20 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.exception.OperationException;
+import com.salesforce.dataloader.mapping.SOQLMapper;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
@@ -50,10 +58,12 @@ import com.sforce.ws.ConnectionException;
 public class PartnerQueryVisitor extends AbstractQueryVisitor {
 
     private QueryResult qr;
+    private final Logger logger;
 
-    public PartnerQueryVisitor(Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
+    public PartnerQueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {
-        super(controller, monitor, queryWriter, successWriter, errorWriter);
+        super(action, controller, monitor, queryWriter, successWriter, errorWriter);
+        this.logger = LogManager.getLogger(getClass());
     }
 
     @Override
@@ -77,7 +87,7 @@ public class PartnerQueryVisitor extends AbstractQueryVisitor {
             }
             for (int i = 0; i < sfdcResults.length; i++) {
                 // add row to batch
-                addResultRow(getDaoRow(sfdcResults[i]), sfdcResults[i].getId());
+                addResultRow(getDaoRow(sfdcResults[i], i==0), sfdcResults[i].getId());
             }
             if (this.qr.getDone()) {
                 break;
@@ -87,7 +97,38 @@ public class PartnerQueryVisitor extends AbstractQueryVisitor {
         }
     }
 
-    private Row getDaoRow(SObject sob) {
+    private Row getDaoRow(SObject sob, boolean firstRowInBatch) {
+        if (firstRowInBatch 
+            && !this.controller.getConfig().getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
+            // header field is not set in the mapper
+            Row row = getMapper().mapPartnerSObjectSfdcToLocal(sob);
+            try {
+                List<String> queryResultFieldsList;
+                queryResultFieldsList = ((DataWriter)controller.getDao()).getColumnNamesFromRow(row);
+                SOQLMapper mapper = (SOQLMapper)this.controller.getMapper();
+                mapper.initSoqlMappingFromResultFields(queryResultFieldsList);
+                final List<String> daoColumns = mapper.getDaoColumnsForSoql();
+                // setting DAO's column names forces output to be restricted to the provided field names
+                ((DataWriter)controller.getDao()).setColumnNames(daoColumns);
+                if (getConfig().getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT)) {
+                    try {
+                        if (this.getErrorWriter() == null) {
+                            this.setErrorWriter(this.action.createErrorWriter());
+                            this.action.openErrorWriter(daoColumns);
+                        }
+                        if (this.getSuccessWriter() == null) {
+                            this.setSuccessWriter(this.action.createSuccesWriter());
+                            this.action.openSuccessWriter(daoColumns);
+                        }
+                    } catch (OperationException e) {
+                        throw new DataAccessObjectInitializationException(e);
+                    }
+                }
+            } catch (DataAccessObjectInitializationException e) {
+                // TODO Auto-generated catch block
+                logger.warn("Unable to map query result fields to DAO columns");
+            }
+        }
         Row row = getMapper().mapPartnerSObjectSfdcToLocal(sob);
         for (Map.Entry<String, Object> ent : row.entrySet()) {
             Object newVal = convertFieldValue(ent.getValue());

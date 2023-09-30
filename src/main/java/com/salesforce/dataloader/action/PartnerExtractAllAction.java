@@ -47,7 +47,7 @@ class PartnerExtractAllAction extends AbstractExtractAction {
 
     @Override
     protected IVisitor createVisitor() {
-        return new PartnerQueryAllVisitor(getController(), getMonitor(), getDao(), getSuccessWriter(), getErrorWriter());
+        return new PartnerQueryAllVisitor(this, getController(), getMonitor(), getDao(), getSuccessWriter(), getErrorWriter());
     }
 
 }

@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
+import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
@@ -54,9 +55,9 @@ public class BulkV1QueryVisitor extends AbstractBulkQueryVisitor {
 
     private BatchInfo[] batches;
 
-    public BulkV1QueryVisitor(Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
+    public BulkV1QueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {
-        super(controller, monitor, queryWriter, successWriter, errorWriter);
+        super(action, controller, monitor, queryWriter, successWriter, errorWriter);
     }
 
     @Override

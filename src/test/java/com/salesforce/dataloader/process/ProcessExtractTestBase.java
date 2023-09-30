@@ -349,7 +349,9 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                     .getSOQL("ID, BILLINGADDRESS, NAME, TYPE, PHONE, ACCOUNTNUMBER__C, WEBSITE, ANNUALREVENUE, LASTMODIFIEDDATE, ORACLE_ID__C");
             
         }
-        Controller control = runProcess(getTestConfig(soql, "Account", true), numRecords);
+        Map<String, String> testConfig = getTestConfig(soql, "Account", true);
+        testConfig.put(Config.DAO_WRITE_BATCH_SIZE, "10"); // total 100 entries in the results file, write in chunks of 10
+        Controller control = runProcess(testConfig, numRecords);
         // verify IDs and phone format 
         verifyIdsInCSV(control, accountIds, true);
         
