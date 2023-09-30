@@ -34,11 +34,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.exception.OperationException;
+import com.salesforce.dataloader.mapping.SOQLMapper;
 import com.salesforce.dataloader.model.Row;
 import com.sforce.async.CSVReader;
 
@@ -50,9 +54,9 @@ import com.sforce.async.CSVReader;
  */
 abstract public class AbstractBulkQueryVisitor extends AbstractQueryVisitor {
 
-    public AbstractBulkQueryVisitor(Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
+    public AbstractBulkQueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {
-        super(controller, monitor, queryWriter, successWriter, errorWriter);
+        super(action, controller, monitor, queryWriter, successWriter, errorWriter);
     }
     
     protected void writeExtractionForServerStream(InputStream serverResultStream) throws IOException, DataAccessObjectException {
@@ -88,10 +92,12 @@ abstract public class AbstractBulkQueryVisitor extends AbstractQueryVisitor {
                 List<String> headers;
                 headers = rdr.nextRecord();
                 List<String> csvRow;
+                boolean isFirstRowInBatch = true;
                 while ((csvRow = rdr.nextRecord()) != null) {
                     final StringBuilder id = new StringBuilder();
-                    final Row daoRow = getDaoRow(headers, csvRow, id);
+                    final Row daoRow = getDaoRow(headers, csvRow, id, isFirstRowInBatch);
                     addResultRow(daoRow, id.toString());
+                    isFirstRowInBatch = false;
                 }
             } finally {
                 resultStream.close();
@@ -103,8 +109,30 @@ abstract public class AbstractBulkQueryVisitor extends AbstractQueryVisitor {
         }
     }
 
-    private Row getDaoRow(List<String> headers, List<String> csvRow, StringBuilder id) {
-        return getMapper().mapCsvRowSfdcToLocal(headers, csvRow, id);
+    private Row getDaoRow(List<String> queryResultHeaders, List<String> csvRow, 
+            StringBuilder id, boolean isFirstRowInBatch) throws DataAccessObjectInitializationException {
+        if (isFirstRowInBatch 
+            && !getConfig().getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
+            SOQLMapper mapper = (SOQLMapper)this.controller.getMapper();
+            mapper.initSoqlMappingFromResultFields(queryResultHeaders);
+            final List<String> daoColumns = mapper.getDaoColumnsForSoql();
+            if (getConfig().getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT)) {
+                try {
+                    if (this.getErrorWriter() == null) {
+                        this.setErrorWriter(this.action.createErrorWriter());
+                        this.action.openErrorWriter(daoColumns);
+                    }
+                    if (this.getSuccessWriter() == null) {
+                        this.setSuccessWriter(this.action.createSuccesWriter());
+                        this.action.openSuccessWriter(daoColumns);
+                    }
+                } catch (OperationException | DataAccessObjectInitializationException e) {
+                    throw new DataAccessObjectInitializationException(e);
+                }
+            }
+        }
+        return getMapper().mapCsvRowSfdcToLocal(queryResultHeaders, csvRow, id);
+
     }
 
 }

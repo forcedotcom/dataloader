@@ -47,8 +47,8 @@ public abstract class AbstractVisitor implements IVisitor {
 
     protected final Controller controller;
     private final ILoaderProgress monitor;
-    private final DataWriter successWriter;
-    private final DataWriter errorWriter;
+    private DataWriter successWriter;
+    private DataWriter errorWriter;
     private long errors;
     private long successes;
     private final LoadRateCalculator rateCalculator;
@@ -64,6 +64,13 @@ public abstract class AbstractVisitor implements IVisitor {
     }
 
     protected abstract boolean writeStatus();
+    
+    protected void setSuccessWriter(DataWriter successWriter) {
+        this.successWriter = successWriter;
+    }
+    protected void setErrorWriter(DataWriter errorWriter) {
+        this.errorWriter = errorWriter;
+    }
 
     protected void addSuccess() {
         this.successes++;

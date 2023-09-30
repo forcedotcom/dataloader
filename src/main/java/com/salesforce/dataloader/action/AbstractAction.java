@@ -64,8 +64,8 @@ abstract class AbstractAction implements IAction {
     private final Controller controller;
     private final IVisitor visitor;
 
-    private final DataWriter successWriter;
-    private final DataWriter errorWriter;
+    protected DataWriter successWriter;
+    protected DataWriter errorWriter;
     private final DataAccessObject dao;
 
     private final Logger logger;
@@ -171,9 +171,11 @@ abstract class AbstractAction implements IAction {
 
     private void closeAll() {
         getDao().close();
-        if (writeStatus()) {
-            getSuccessWriter().close();
-            getErrorWriter().close();
+        if (this.successWriter != null) {
+            this.successWriter.close();
+        }
+        if (this.errorWriter != null) {
+            this.errorWriter.close();
         }
     }
 
@@ -229,27 +231,29 @@ abstract class AbstractAction implements IAction {
      * @return Error Writer
      * @throws DataAccessObjectInitializationException
      */
-    private DataWriter createErrorWriter() throws DataAccessObjectInitializationException {
+    public DataWriter createErrorWriter() throws DataAccessObjectInitializationException {
         final String filename = getConfig().getString(Config.OUTPUT_ERROR);
         if (filename == null || filename.length() == 0)
             throw new DataAccessObjectInitializationException(getMessage("errorMissingErrorFile"));
         // TODO: Make sure that specific DAO is not mentioned: use DataReader, DataWriter, or DataAccessObject
-        return new CSVFileWriter(filename, getConfig(), AppUtil.COMMA);
+        this.errorWriter = new CSVFileWriter(filename, getConfig(), AppUtil.COMMA);
+        return this.errorWriter;
     }
 
     /**
      * @return Success Writer
      * @throws DataAccessObjectInitializationException
      */
-    private DataWriter createSuccesWriter() throws DataAccessObjectInitializationException {
+    public DataWriter createSuccesWriter() throws DataAccessObjectInitializationException {
         final String filename = getConfig().getString(Config.OUTPUT_SUCCESS);
         if (filename == null || filename.length() == 0)
             throw new DataAccessObjectInitializationException(getMessage("errorMissingSuccessFile"));
         // TODO: Make sure that specific DAO is not mentioned: use DataReader, DataWriter, or DataAccessObject
-        return new CSVFileWriter(filename, getConfig(), AppUtil.COMMA);
+        this.successWriter = new CSVFileWriter(filename, getConfig(), AppUtil.COMMA);
+        return this.successWriter;
     }
 
-    private void openErrorWriter(List<String> headers) throws OperationException {
+    public void openErrorWriter(List<String> headers) throws OperationException {
         headers = new LinkedList<String>(headers);
         Config config = this.controller.getConfig();
 
@@ -271,7 +275,7 @@ abstract class AbstractAction implements IAction {
         }
     }
 
-    private void openSuccessWriter(List<String> headers) throws LoadException {
+    public void openSuccessWriter(List<String> headers) throws LoadException {
         headers = new LinkedList<String>(headers);
         Config config = this.controller.getConfig();
 
