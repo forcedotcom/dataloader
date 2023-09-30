@@ -340,7 +340,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         final int numRecords = 100;
         final String[] accountIds = insertExtractTestRecords(numRecords, accountGen);
         
-        final String soql;
+        String soql;
         if (isBulkAPIEnabled(this.getTestConfig())) {
             soql= accountGen
                     .getSOQL("ID, NAME, TYPE, PHONE, ACCOUNTNUMBER__C, WEBSITE, ANNUALREVENUE, LASTMODIFIEDDATE, ORACLE_ID__C");
@@ -355,9 +355,25 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         // verify IDs and phone format 
         verifyIdsInCSV(control, accountIds, true);
         
-        control = runProcess(getDoNotLimitOutputToQueryFieldsTestConfig(soql, "Account", true), numRecords);
+        testConfig = getDoNotLimitOutputToQueryFieldsTestConfig(soql, "Account", true);
+        control = runProcess(testConfig, numRecords);
         // verify IDs and phone format 
         verifyIdsInCSV(control, accountIds, true);
+        
+        String bulkApiEnabledStr = testConfig.get(Config.BULK_API_ENABLED);
+        String bulkV2ApiEnabledStr = testConfig.get(Config.BULKV2_API_ENABLED);
+
+        if (bulkApiEnabledStr == null || bulkApiEnabledStr.toLowerCase().equals("false")) {
+            // Bulk v1 does not support Select fields()
+            // Bulk v2 supports Select fields but Account sobject's standard fields contain compound
+            // fields which are not supported by Bulk v2.
+            soql = accountGen
+                    .getSOQL("fields(standard)"); // fields are not explicitly specified in SOQL
+            testConfig = getDoNotLimitOutputToQueryFieldsTestConfig(soql, "Account", true);
+            control = runProcess(testConfig, numRecords);
+            // verify IDs and phone format 
+            verifyIdsInCSV(control, accountIds, true);
+        }
     }
 
     public void testPolymorphicRelationshipExtract() throws Exception {
