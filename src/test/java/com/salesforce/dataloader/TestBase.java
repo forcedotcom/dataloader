@@ -151,6 +151,8 @@ abstract class TestBase {
     protected static final String ACCOUNT_WHERE_CLAUSE = "AccountNumber__c like '" + ACCOUNT_NUMBER_PREFIX + "%'";
     protected static final String CONTACT_TITLE_PREFIX = "CONTTL";
     protected static final String CONTACT_WHERE_CLAUSE = "Title like '" + CONTACT_TITLE_PREFIX + "%'";
+    protected static final String TESTFIELD_FIELD_PREFIX = "testfield__";
+    protected static final String TESTFIELD_WHERE_CLAUSE = "TestField__c like '" + TESTFIELD_FIELD_PREFIX + "%'";
     protected static final int SAVE_RECORD_LIMIT = 200;
 
     protected String baseName; // / base name of the test (without the "test")

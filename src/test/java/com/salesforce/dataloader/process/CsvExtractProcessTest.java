@@ -97,6 +97,11 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
     public void testExtractAccountCsv() throws Exception {
         runTestExtractAccountCsv();
     }
+    
+    @Test
+    public void testSelectFieldsSoql() throws Exception {
+        runTestSelectFieldsSoql();
+    }
 
     @Override
     @Test

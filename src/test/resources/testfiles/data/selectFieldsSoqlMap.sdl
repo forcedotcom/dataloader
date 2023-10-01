@@ -1,0 +1,5 @@
+# extract account mapping values for query from salesforce (left) and update to csv file (right)
+# salesforceFieldName=csvFieldName
+Id=testfield_id
+Name=testfield_name
+testfield__c=customfield
