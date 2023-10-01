@@ -518,6 +518,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         public SObject getObject(int i, boolean negativeTest) {
             String seqStr = String.format("%06d", i);
             SObject testField = createSObject();
+            testField.setField("Name", TESTFIELD_FIELD_PREFIX + seqStr);
             testField.setField("TestField__c", TESTFIELD_FIELD_PREFIX + seqStr);
             return testField;
         }
