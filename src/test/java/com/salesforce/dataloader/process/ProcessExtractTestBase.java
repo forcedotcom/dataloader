@@ -251,6 +251,30 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         runSoqlRelationshipTest(contactId, accountId,
                 "Select c.Id, C.Name, TestField__r.TestField__c, CONTACT.account.NAME, c.account.Id From Contact c Where Id = '" + contactId + "'");
     }
+    
+    protected void runTestSelectFieldsSoql() throws ProcessInitializationException,
+    DataAccessObjectException {
+
+        final TestFieldGenerator testFieldGen = new TestFieldGenerator();
+        final String[] testFieldIds = insertSfdcRecords(1, false, testFieldGen);
+
+        // TEST only if it is Partner or Bulk v2
+        // set batch process parameters
+        if (!isBulkAPIEnabled(this.getTestConfig()) || isBulkV2APIEnabled(this.getTestConfig())) {
+            String soql = "SELECT fields(standard) FROM TestField__c WHERE id='" + testFieldIds[0] + "'"; // fields are not explicitly specified in SOQL
+            Map<String, String> testConfig = getDoNotLimitOutputToQueryFieldsTestConfig(soql, "Account", true);
+            Controller control = runProcess(testConfig, 1);
+            // verify IDs and phone format 
+            verifyIdsInCSV(control, testFieldIds, true);
+        }
+        // cleanup
+        try {
+            getBinding().delete(testFieldIds);
+        } catch (ConnectionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+     }
 
     public abstract void testSoqlWithTableNameInSelect() throws Exception;
 
@@ -360,10 +384,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         // verify IDs and phone format 
         verifyIdsInCSV(control, accountIds, true);
         
-        String bulkApiEnabledStr = testConfig.get(Config.BULK_API_ENABLED);
-        String bulkV2ApiEnabledStr = testConfig.get(Config.BULKV2_API_ENABLED);
-
-        if (bulkApiEnabledStr == null || bulkApiEnabledStr.toLowerCase().equals("false")) {
+        if (!isBulkAPIEnabled(this.getTestConfig())) {
             // Bulk v1 does not support Select fields()
             // Bulk v2 supports Select fields but Account sobject's standard fields contain compound
             // fields which are not supported by Bulk v2.

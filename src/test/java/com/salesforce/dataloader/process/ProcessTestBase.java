@@ -509,6 +509,36 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         }
     }
 
+    protected static class TestFieldGenerator extends AbstractSObjectGenerator {
+        /**
+         * @param i
+         * @return SObject contact
+         */
+        @Override
+        public SObject getObject(int i, boolean negativeTest) {
+            String seqStr = String.format("%06d", i);
+            SObject testField = createSObject();
+            testField.setField("TestField__c", TESTFIELD_FIELD_PREFIX + seqStr);
+            return testField;
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @seecom.salesforce.dataloader.process.ProcessTestBase.SObjectGetter#
+         * getEntityName()
+         */
+        @Override
+        public String getEntityName() {
+            return "TestField__c";
+        }
+
+        @Override
+        public String getSOQL(String selectFields) {
+            return generateSOQL(selectFields, TESTFIELD_WHERE_CLAUSE);
+        }
+    }
+    
     /**
      * @param entityName
      * @param whereClause
