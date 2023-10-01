@@ -265,7 +265,29 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
             Map<String, String> testConfig = getDoNotLimitOutputToQueryFieldsTestConfig(soql, "Account", true);
             Controller control = runProcess(testConfig, 1);
             // verify IDs and phone format 
-            verifyIdsInCSV(control, testFieldIds, true);
+            verifyIdsInCSV(control, testFieldIds, false);
+            String fileName = control.getConfig().getString(Config.OUTPUT_SUCCESS);
+            final DataReader resultReader = new CSVFileReader(new File(fileName), getController().getConfig(), true, false);
+            try {
+                resultReader.open();
+
+                // go through item by item and assert that it's there
+                Row row;
+                int rowIdx = 0;
+                while ((row = resultReader.readRow()) != null) {
+                    final String resultId = (String)row.get(Config.ID_COLUMN_NAME);
+                    assertValidId(resultId);
+                    assertEquals(resultId, testFieldIds[rowIdx]);
+                    
+                    final String resultName = (String)row.get("name_to_test");
+                    assertTrue("Name field not mapped to DAO name in success file", 
+                            resultName != null && !resultName.isBlank() && resultName.startsWith("testfield__"));
+                    rowIdx++;
+                }
+            } finally {
+                resultReader.close();
+            }
+
         }
         // cleanup
         try {
