@@ -86,9 +86,10 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Text textProxyPassword;
     private Text textTimezone;
     private Button buttonLocalSystemTimezone;
-    private Text textProductionClientID;
-    private Text textSandboxClientID;
-
+    private Text textProductionPartnerClientID;
+    private Text textSandboxPartnerClientID;
+    private Text textProductionBulkClientID;
+    private Text textSandboxBulkClientID;
     private final String defaultServer;
 
     private Button buttonHideWelcomeScreen;
@@ -630,23 +631,40 @@ public class AdvancedSettingsDialog extends BaseDialog {
         buttonLoginFromBrowser.setSelection(doLoginFromBrowser);
         
         Label clientIdInProductionText = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        clientIdInProductionText.setText(Labels.getString("AdvancedSettingsDialog.clientIdInProduction"));
+        clientIdInProductionText.setText(Labels.getString("AdvancedSettingsDialog.partnerClientIdInProduction"));
         clientIdInProductionText.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-        this.textProductionClientID = new Text(restComp, SWT.NONE);
+        this.textProductionPartnerClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
-        textProductionClientID.setLayoutData(data);
+        textProductionPartnerClientID.setLayoutData(data);
     	String clientId = config.getOAuthEnvironmentString(Config.OAUTH_PROD_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_PARTNER_CLIENTID);
-    	this.textProductionClientID.setText(clientId);
+    	this.textProductionPartnerClientID.setText(clientId);
+        
+        clientIdInProductionText = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        clientIdInProductionText.setText(Labels.getString("AdvancedSettingsDialog.bulkClientIdInProduction"));
+        clientIdInProductionText.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+        this.textProductionBulkClientID = new Text(restComp, SWT.NONE);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        textProductionBulkClientID.setLayoutData(data);
+        clientId = config.getOAuthEnvironmentString(Config.OAUTH_PROD_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_BULK_CLIENTID);
+        this.textProductionBulkClientID.setText(clientId);
         
         Label clientIdInSandboxText = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        clientIdInSandboxText.setText(Labels.getString("AdvancedSettingsDialog.clientIdInSandbox"));
+        clientIdInSandboxText.setText(Labels.getString("AdvancedSettingsDialog.partnerClientIdInSandbox"));
         clientIdInSandboxText.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-        this.textSandboxClientID = new Text(restComp, SWT.NONE);
+        this.textSandboxPartnerClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
-        textSandboxClientID.setLayoutData(data);
+        textSandboxPartnerClientID.setLayoutData(data);
     	clientId = config.getOAuthEnvironmentString(Config.OAUTH_SB_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_PARTNER_CLIENTID);
-    	this.textSandboxClientID.setText(clientId);
-       
+    	this.textSandboxPartnerClientID.setText(clientId);
+        
+        clientIdInSandboxText = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        clientIdInSandboxText.setText(Labels.getString("AdvancedSettingsDialog.bulkClientIdInSandbox"));
+        clientIdInSandboxText.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+        this.textSandboxBulkClientID = new Text(restComp, SWT.NONE);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        textSandboxBulkClientID.setLayoutData(data);
+        clientId = config.getOAuthEnvironmentString(Config.OAUTH_SB_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_BULK_CLIENTID);
+        this.textSandboxBulkClientID.setText(clientId);       
         //////////////////////////////////////////////////
         //Row to start At
 
@@ -843,15 +861,21 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.OAUTH_LOGIN_FROM_BROWSER, buttonLoginFromBrowser.getSelection());
                 config.setValue(Config.WIZARD_CLOSE_ON_FINISH, buttonCloseWizardOnFinish.getSelection());
                 LoggingUtil.setLoggingLevel(LOGGING_LEVEL[comboLoggingLevelDropdown.getSelectionIndex()]);
-                String clientIdVal = textProductionClientID.getText();
+                String clientIdVal = textProductionPartnerClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
                 	config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID, clientIdVal);
-                	config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID, clientIdVal);
                 }
-                clientIdVal = textSandboxClientID.getText();
+                clientIdVal = textSandboxPartnerClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
                 	config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID, clientIdVal);
-                	config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID, clientIdVal);
+                }
+                clientIdVal = textProductionBulkClientID.getText();
+                if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
+                    config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID, clientIdVal);
+                }
+                clientIdVal = textSandboxBulkClientID.getText();
+                if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
+                    config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID, clientIdVal);
                 }
                 getController().saveConfig();
                 input = Labels.getString("UI.ok"); //$NON-NLS-1$
