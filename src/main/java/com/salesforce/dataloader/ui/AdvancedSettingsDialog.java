@@ -863,19 +863,39 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 LoggingUtil.setLoggingLevel(LOGGING_LEVEL[comboLoggingLevelDropdown.getSelectionIndex()]);
                 String clientIdVal = textProductionPartnerClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
-                	config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID, clientIdVal);
+                    String propName = Config.OAUTH_PREFIX + Config.OAUTH_PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID;
+                    String currentClientIdVal = config.getString(propName);
+                    if (!clientIdVal.equals(currentClientIdVal)) {
+                        config.setValue(propName, clientIdVal);
+                        getController().logout();
+                    }
                 }
                 clientIdVal = textSandboxPartnerClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
-                	config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID, clientIdVal);
+                    String propName = Config.OAUTH_PREFIX + Config.OAUTH_SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID;
+                    String currentClientIdVal = config.getString(propName);
+                    if (!clientIdVal.equals(currentClientIdVal)) {
+                    	config.setValue(propName, clientIdVal);
+                        getController().logout();
+                    }
                 }
                 clientIdVal = textProductionBulkClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
-                    config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID, clientIdVal);
+                    String propName = Config.OAUTH_PREFIX + Config.OAUTH_PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID;
+                    String currentClientIdVal = config.getString(propName);
+                    if (!clientIdVal.equals(currentClientIdVal)) {
+                        config.setValue(propName, clientIdVal);
+                        getController().logout();
+                    }
                 }
                 clientIdVal = textSandboxBulkClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
-                    config.setValue(Config.OAUTH_PREFIX + Config.OAUTH_SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID, clientIdVal);
+                    String propName = Config.OAUTH_PREFIX + Config.OAUTH_SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID;
+                    String currentClientIdVal = config.getString(propName);
+                    if (!clientIdVal.equals(currentClientIdVal)) {
+                        config.setValue(propName, clientIdVal);
+                        getController().logout();
+                    }
                 }
                 getController().saveConfig();
                 input = Labels.getString("UI.ok"); //$NON-NLS-1$
