@@ -53,6 +53,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
+import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -235,9 +236,17 @@ public class CSVViewerDialog extends Dialog {
         CSVFileReader csvReader = new CSVFileReader(new File(filename),
                                         controller.getConfig(), ignoreDelimiterConfig, isQueryOperationResult);
         try {
-            csvReader.open();
+            List<String> header = new ArrayList<String>();
+            header.add("");
+            try {
+                csvReader.open();
+                header = csvReader.getColumnNames();
+            } catch (DataAccessObjectInitializationException ex) {
+                if (!Messages.getString("CSVFileDAO.errorHeaderRow").equals(ex.getMessage())) {
+                    throw ex;
+                }
+            }
 
-            List<String> header = csvReader.getColumnNames();
 
             //sforce field table viewer
             csvTblViewer = new TableViewer(shell, SWT.FULL_SELECTION);
