@@ -286,6 +286,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                 }
             } finally {
                 resultReader.close();
+                deleteSfdcRecordsCreatedSinceTestStart("TestField__c");
             }
 
         }

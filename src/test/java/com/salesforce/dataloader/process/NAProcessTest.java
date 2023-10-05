@@ -26,12 +26,15 @@
 package com.salesforce.dataloader.process;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -267,8 +270,8 @@ public class NAProcessTest extends ProcessTestBase {
     }
 
     @Override
+    @After
     public void cleanRecords() {
-        deleteSfdcRecords("Task", "Subject='" + TASK_SUBJECT + "'", 0);
+        deleteSfdcRecordsCreatedSinceTestStart("Task");
     }
-
 }
