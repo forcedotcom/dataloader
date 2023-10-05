@@ -29,11 +29,12 @@ package com.salesforce.dataloader.process;
 import static org.junit.Assert.*;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
@@ -78,11 +79,11 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         HttpClientTransport.resetServerInvocationCount();
     }
 
-    @Before
+    @After
     public void cleanRecords() {
         // cleanup the records that might've been created on previous tests
-        deleteSfdcRecords("Account", ACCOUNT_WHERE_CLAUSE, 0);
-        deleteSfdcRecords("Contact", CONTACT_WHERE_CLAUSE, 0);
+        deleteSfdcRecordsCreatedSinceTestStart("Account");
+        deleteSfdcRecordsCreatedSinceTestStart("Contact");
     }
 
     protected void verifyErrors(Controller controller, String expectedErrorMessage) throws DataAccessObjectException {
@@ -540,6 +541,27 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         }
     }
     
+    private final Calendar testStartTime = Calendar.getInstance();
+    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private final String testStartTimeFormattedString = formatter.format(testStartTime.getTime());
+    private static GetUserInfoResult userInfo = null;
+    protected void deleteSfdcRecordsCreatedSinceTestStart(String entityName) {
+        if (userInfo == null) {
+            PartnerConnection conn = getBinding();
+            try {
+                userInfo = conn.getUserInfo();
+            } catch (ConnectionException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        String WHERE_CLAUSE = "IsDeleted=false AND CreatedDate > " 
+                                + testStartTimeFormattedString;
+        if (userInfo != null) {
+            WHERE_CLAUSE +=  " AND CreatedById = '" + userInfo.getUserId() + "'";
+        }
+        deleteSfdcRecords(entityName, WHERE_CLAUSE, 0);
+    }
     /**
      * @param entityName
      * @param whereClause
