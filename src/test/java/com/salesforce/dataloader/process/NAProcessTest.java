@@ -268,10 +268,4 @@ public class NAProcessTest extends ProcessTestBase {
             if (writer != null) writer.close();
         }
     }
-
-    @Override
-    @After
-    public void cleanRecords() {
-        deleteSfdcRecordsCreatedSinceTestStart("Task");
-    }
 }

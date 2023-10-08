@@ -78,7 +78,7 @@ public class TestRecordsUtil extends ProcessTestBase {
         } else if("upsert".equals(operation)) {
             upsertSfdcAccounts(numRecords);
         } else if("delete".equals(operation)) {
-            deleteSfdcRecords("Account",whereClause, 0);
+            this.getBinding().deleteSfdcRecords("Account",whereClause, 0);
         }
     }
 

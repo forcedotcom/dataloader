@@ -45,6 +45,7 @@ import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.springframework.util.StringUtils;
@@ -158,16 +159,26 @@ abstract class TestBase {
     protected String baseName; // / base name of the test (without the "test")
     private Controller controller;
     String oldThreadName;
-    PartnerConnection binding;
-
+    PartnerConnectionForTest binding;
+    
     @Before
     public void basicSetUp() throws Exception {
         File testStatusDir = new File(TEST_STATUS_DIR);
         if (!testStatusDir.exists()) testStatusDir.mkdirs();
 
         // reset binding
+        if (this.binding != null) {
+            this.binding.cleanup();
+        }
         this.binding = null;
         setupTestName();
+    }
+    
+    @After
+    public void cleanup() {
+        if (this.controller != null && this.binding != null) {
+            this.binding.cleanup();
+        }
     }
 
     private void setupTestName() {
@@ -212,11 +223,15 @@ abstract class TestBase {
         return controller;
     }
 
+    protected void setController(Controller controller) {
+        this.controller = controller;
+    }
+    
     String apiVersionForTheSession = null;
     /**
      * @return PartnerConnection - binding to use to call the salesforce API
      */
-    protected PartnerConnection getBinding() {
+    protected PartnerConnectionForTest getBinding() {
         if(binding != null) {
             return binding;
         }
@@ -286,7 +301,7 @@ abstract class TestBase {
      * @return PartnerConnection
      * @throws com.sforce.ws.ConnectionException
      */
-    private PartnerConnection newConnection(ConnectorConfig bindingConfig, int retries, int maxRetries) {
+    private PartnerConnectionForTest newConnection(ConnectorConfig bindingConfig, int retries, int maxRetries) {
         try {
             PartnerConnection newBinding = Connector.newConnection(bindingConfig);
 
@@ -303,7 +318,7 @@ abstract class TestBase {
                 newBinding.setSessionHeader(loginResult.getSessionId());
                 bindingConfig.setServiceEndpoint(loginResult.getServerUrl());
             }
-            return newBinding;
+            return new PartnerConnectionForTest(getController(), newBinding);
         } catch (ConnectionException e) {
             // in case of exception try to get a connection again
             if (retries < maxRetries) {
@@ -342,7 +357,7 @@ abstract class TestBase {
     /**
      * @param e
      */
-    protected PartnerConnection checkBinding(int retries, ApiFault e) {
+    protected PartnerConnectionForTest checkBinding(int retries, ApiFault e) {
         logger.info("Retry#" + retries + " getting a binding after an error.  Code: " + e.getExceptionCode().toString()
                 + ", detail: " + e.getExceptionMessage());
         if (retries < 3) // && (e.getExceptionCode() == ExceptionCode.INVALID_SESSION_ID ||
@@ -367,5 +382,4 @@ abstract class TestBase {
         t.printStackTrace(new PrintWriter(stackTrace));
         fail("Unexpected exception of type " + t.getClass().getCanonicalName(), t);
     }
-
 }

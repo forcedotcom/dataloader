@@ -77,12 +77,6 @@ public class BulkV1CsvProcessTest extends ProcessTestBase {
         argMap.put(Config.BULK_API_ENABLED, Boolean.TRUE.toString());
     }
 
-    @Override
-    @After
-    public void cleanRecords() {
-        deleteSfdcRecordsCreatedSinceTestStart("Task");
-    }
-
     @Test
     public void testBatchSizes() throws Exception {
         writeCsv(validRow, validRow);
