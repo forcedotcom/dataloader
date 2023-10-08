@@ -29,14 +29,12 @@ package com.salesforce.dataloader.process;
 import static org.junit.Assert.*;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 
 import com.salesforce.dataloader.*;
 import com.salesforce.dataloader.action.OperationInfo;
@@ -82,8 +80,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     @After
     public void cleanRecords() {
         // cleanup the records that might've been created on previous tests
-        deleteSfdcRecordsCreatedSinceTestStart("Account");
-        deleteSfdcRecordsCreatedSinceTestStart("Contact");
+        this.getBinding().cleanup();
     }
 
     protected void verifyErrors(Controller controller, String expectedErrorMessage) throws DataAccessObjectException {
@@ -538,95 +535,6 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         @Override
         public String getSOQL(String selectFields) {
             return generateSOQL(selectFields, TESTFIELD_WHERE_CLAUSE);
-        }
-    }
-    
-    private final Calendar testStartTime = Calendar.getInstance();
-    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-    private final String testStartTimeFormattedString = formatter.format(testStartTime.getTime());
-    private static GetUserInfoResult userInfo = null;
-    protected void deleteSfdcRecordsCreatedSinceTestStart(String entityName) {
-        if (userInfo == null) {
-            PartnerConnection conn = getBinding();
-            try {
-                userInfo = conn.getUserInfo();
-            } catch (ConnectionException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        String WHERE_CLAUSE = "IsDeleted=false AND CreatedDate > " 
-                                + testStartTimeFormattedString;
-        if (userInfo != null) {
-            WHERE_CLAUSE +=  " AND CreatedById = '" + userInfo.getUserId() + "'";
-        }
-        deleteSfdcRecords(entityName, WHERE_CLAUSE, 0);
-    }
-    /**
-     * @param entityName
-     * @param whereClause
-     * @param retries
-     */
-    protected void deleteSfdcRecords(String entityName, String whereClause,
-            int retries) {
-        try {
-            // query for records
-            String soql = "select Id from " + entityName + " where " + whereClause;
-            logger.debug("Querying " + entityName + "s to delete with soql: " + soql);
-            int deletedCount = 0;
-            PartnerConnection conn = getBinding();
-            // now delete them 200 at a time.... we should use bulk api here
-            for (QueryResult qr = conn.query(soql); qr != null && qr.getRecords().length > 0; qr = qr.isDone() ? null
-                    : conn.queryMore(qr.getQueryLocator())) {
-                deleteSfdcRecords(qr, 0);
-                deletedCount += qr.getRecords().length;
-                logger.debug("Deleted " + deletedCount + " out of " + qr.getSize() + " total deleted records");
-            }
-            logger.info("Deleted " + deletedCount + " total objects of type " + entityName);
-        } catch (ApiFault e) {
-            if (checkBinding(++retries, e) != null) {
-                deleteSfdcRecords(entityName, whereClause, retries);
-            }
-            Assert.fail("Failed to query " + entityName + "s to delete ("
-                    + whereClause + "), error: " + e.getExceptionMessage());
-        } catch (ConnectionException e) {
-            Assert.fail("Failed to query " + entityName + "s to delete ("
-                    + whereClause + "), error: " + e.getMessage());
-        }
-    }
-
-    /**
-     * @param qryResult
-     */
-    protected void deleteSfdcRecords(QueryResult qryResult, int retries) {
-        try {
-            List<String> toDeleteIds = new ArrayList<String>();
-            for (int i = 0; i < qryResult.getRecords().length; i++) {
-                SObject record = qryResult.getRecords()[i];
-                toDeleteIds.add(record.getId());
-                // when SAVE_RECORD_LIMIT records are reached or
-                // if we're on the last query result record, do the delete
-                if (i > 0 && (i + 1) % SAVE_RECORD_LIMIT == 0
-                        || i == qryResult.getRecords().length - 1) {
-                    DeleteResult[] delResults = getBinding().delete(
-                            toDeleteIds.toArray(new String[] {}));
-                    for (int j = 0; j < delResults.length; j++) {
-                        DeleteResult delResult = delResults[j];
-                        if (!delResult.getSuccess()) {
-                            logger.warn("Delete returned an error: " + delResult.getErrors()[0].getMessage(),
-                                    new RuntimeException());
-                        }
-                    }
-                    toDeleteIds.clear();
-                }
-            }
-        } catch (ApiFault e) {
-            if (checkBinding(++retries, e) != null) {
-                deleteSfdcRecords(qryResult, retries);
-            }
-            Assert.fail("Failed to delete records, error: " + e.getExceptionMessage());
-        } catch (ConnectionException e) {
-            Assert.fail("Failed to delete records, error: " + e.getMessage());
         }
     }
 
