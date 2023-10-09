@@ -318,7 +318,7 @@ abstract class TestBase {
                 newBinding.setSessionHeader(loginResult.getSessionId());
                 bindingConfig.setServiceEndpoint(loginResult.getServerUrl());
             }
-            return new PartnerConnectionForTest(getController(), newBinding);
+            return new PartnerConnectionForTest(newBinding);
         } catch (ConnectionException e) {
             // in case of exception try to get a connection again
             if (retries < maxRetries) {

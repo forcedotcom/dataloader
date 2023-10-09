@@ -58,13 +58,17 @@ public class PartnerConnectionForTest extends TestBase {
     private static Logger logger = LogManager.getLogger(PartnerConnectionForTest.class);
     private PartnerConnection binding;
     private static HashSet<String> sObjectTypesCreatedOrUpserted = new HashSet<String>();
-
     private static final Calendar testStartTime = Calendar.getInstance();
-    private static GetUserInfoResult userInfo = null;
+    private static boolean cleanedOnInitialize = false;
     
-    public PartnerConnectionForTest(Controller controller, PartnerConnection binding) {
-        this.setController(controller); 
+    public PartnerConnectionForTest(PartnerConnection binding) {
         this.binding = binding;
+        if (!cleanedOnInitialize) {
+            deleteSfdcRecords("Account", ACCOUNT_WHERE_CLAUSE, 0);
+            deleteSfdcRecords("Contact", CONTACT_WHERE_CLAUSE, 0);
+            deleteSfdcRecords("TestField__c", TESTFIELD_WHERE_CLAUSE, 0);
+            cleanedOnInitialize = true;
+        }
     }
     
     public SaveResult[] create(SObject[] sobjectArray) throws ConnectionException {
@@ -109,7 +113,7 @@ public class PartnerConnectionForTest extends TestBase {
     }
     
     public void cleanup() {
-        if (this.getController() == null || this.binding == null) {
+        if (this.binding == null) {
             return;
         }
         synchronized(sObjectTypesCreatedOrUpserted) {
@@ -119,31 +123,16 @@ public class PartnerConnectionForTest extends TestBase {
         }
     }
     
-    private static boolean cleanedOnInitialize = false;
     public void deleteSfdcRecordsCreatedSinceTestStart(String entityName) {
-        if (this.getController() == null || this.binding == null) {
+        if (this.binding == null) {
             return;
-        }
-        if (!cleanedOnInitialize) {
-            deleteSfdcRecords("Account", ACCOUNT_WHERE_CLAUSE, 0);
-            deleteSfdcRecords("Contact", CONTACT_WHERE_CLAUSE, 0);
-            deleteSfdcRecords("TestField__c", TESTFIELD_WHERE_CLAUSE, 0);
-            cleanedOnInitialize = true;
         }
         deleteSfdcRecordsCreatedSince(entityName, testStartTime);
     }
 
     private void deleteSfdcRecordsCreatedSince(String entityName, Calendar calendar) {
-        if (this.getController() == null || this.binding == null) {
+        if (this.binding == null) {
             return;
-        }
-        if (userInfo == null) {
-            try {
-                userInfo = this.binding.getUserInfo();
-            } catch (ConnectionException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
         }
         String createdByClause = "";
         if (calendar != null) {
@@ -151,11 +140,7 @@ public class PartnerConnectionForTest extends TestBase {
             String testStartTimeFormattedString = formatter.format(calendar.getTime());
             createdByClause = "CreatedDate > " + testStartTimeFormattedString;
         }
-        String WHERE_CLAUSE = createdByClause;
-        if (userInfo != null) {
-            WHERE_CLAUSE +=  " AND CreatedById = '" + userInfo.getUserId() + "'";
-        }
-        deleteSfdcRecords(entityName, WHERE_CLAUSE, 0);
+        deleteSfdcRecords(entityName, createdByClause, 0);
     }
     /**
      * @param entityName
@@ -164,7 +149,7 @@ public class PartnerConnectionForTest extends TestBase {
      */
     public void deleteSfdcRecords(String entityName, String whereClause,
             int retries) {
-        if (this.getController() == null || this.binding == null) {
+        if (this.binding == null) {
             return;
         }
         try {
