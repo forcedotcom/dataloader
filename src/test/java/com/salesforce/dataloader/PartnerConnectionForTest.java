@@ -67,6 +67,10 @@ public class PartnerConnectionForTest extends TestBase {
             deleteSfdcRecords("Account", ACCOUNT_WHERE_CLAUSE, 0);
             deleteSfdcRecords("Contact", CONTACT_WHERE_CLAUSE, 0);
             deleteSfdcRecords("TestField__c", TESTFIELD_WHERE_CLAUSE, 0);
+            sObjectTypesCreatedOrUpserted.add("Account");
+            sObjectTypesCreatedOrUpserted.add("Contact");
+            sObjectTypesCreatedOrUpserted.add("Task");
+            sObjectTypesCreatedOrUpserted.add("TestField__c");
             cleanedOnInitialize = true;
         }
     }
@@ -149,8 +153,27 @@ public class PartnerConnectionForTest extends TestBase {
      */
     public void deleteSfdcRecords(String entityName, String whereClause,
             int retries) {
-        if (this.binding == null) {
+        if (this.binding == null || retries >= 3) {
             return;
+        }
+        String entitySpecificClause = "";
+        switch (entityName.toLowerCase()) {
+            case "account":
+                entitySpecificClause = ACCOUNT_WHERE_CLAUSE;
+                break;
+            case "contact":
+                entitySpecificClause = CONTACT_WHERE_CLAUSE;
+                break;
+            case "testfield__c":
+                entitySpecificClause = TESTFIELD_WHERE_CLAUSE;
+                break;
+        }
+        if (!whereClause.contains(entitySpecificClause)) {
+            if (whereClause == null || whereClause.isBlank()) {
+                whereClause = entitySpecificClause;
+            } else {
+                whereClause = "(" + whereClause + ") OR " + entitySpecificClause;
+            }
         }
         try {
             // query for records
@@ -166,9 +189,7 @@ public class PartnerConnectionForTest extends TestBase {
             }
             logger.info("Deleted " + deletedCount + " total objects of type " + entityName);
         } catch (ApiFault e) {
-            if (checkBinding(++retries, e) != null) {
-                deleteSfdcRecords(entityName, whereClause, retries);
-            }
+            deleteSfdcRecords(entityName, whereClause, retries);
             Assert.fail("Failed to query " + entityName + "s to delete ("
                     + whereClause + "), error: " + e.getExceptionMessage());
         } catch (ConnectionException e) {

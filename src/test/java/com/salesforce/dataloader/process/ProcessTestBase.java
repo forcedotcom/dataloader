@@ -77,12 +77,6 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         HttpClientTransport.resetServerInvocationCount();
     }
 
-    @After
-    public void cleanRecords() {
-        // cleanup the records that might've been created on previous tests
-        this.getBinding().cleanup();
-    }
-
     protected void verifyErrors(Controller controller, String expectedErrorMessage) throws DataAccessObjectException {
         String fileName = controller.getConfig().getString(Config.OUTPUT_ERROR);
         final CSVFileReader errReader = new CSVFileReader(new File(fileName), getController().getConfig(), true, false);
@@ -718,7 +712,8 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         {
             args[i++] = entry.getKey() + "=" + entry.getValue();
         }
-        final TestProgressMontitor monitor = new TestProgressMontitor();        
+        this.getBinding(); // establish the test connection if not done so already
+        final TestProgressMontitor monitor = new TestProgressMontitor();
         return DataLoaderRunner.runApp(args, monitor);
     }
 
