@@ -223,10 +223,6 @@ abstract class TestBase {
         return controller;
     }
 
-    protected void setController(Controller controller) {
-        this.controller = controller;
-    }
-    
     String apiVersionForTheSession = null;
     /**
      * @return PartnerConnection - binding to use to call the salesforce API
