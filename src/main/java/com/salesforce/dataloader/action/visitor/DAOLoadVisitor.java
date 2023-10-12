@@ -292,9 +292,6 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
     public static String convertToHTMLFormatting(String fvalue, String regex) {
         String[] outsideHTMLTags = fvalue.split(regex);
-        if (outsideHTMLTags.length == 0) {
-            return escapeHTMLChars(fvalue);
-        }
         Pattern htmlTagInRichTextPattern = Pattern.compile(regex);
         Matcher matcher = htmlTagInRichTextPattern.matcher(fvalue);
         String htmlEscapedValue = "";
