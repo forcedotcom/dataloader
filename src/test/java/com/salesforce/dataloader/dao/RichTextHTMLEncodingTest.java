@@ -155,8 +155,15 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
     }
     
     @Test
-    public void testNoWhitespaceInText() throws Exception {    
+    public void testSingleHTMLTagNoWhitespaceInText() throws Exception {    
         String origText = "<img   alt=\"dlscreenshot\"   src=\"https://ashit-dev-ed.file.force.com/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId=0684W00000eYv7k&operationContext=CHATTER&contentId=05T4W000020p7wj\"></img>";
+        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        assertEquals("Incorrect conversion of " + origText, origText.length(), convertedText.length());
+    }
+    
+    @Test
+    public void testMultipleHTMLTagNoWhitespaceInText() throws Exception {    
+        String origText = "<br></br><br/><br>";
         String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
         assertEquals("Incorrect conversion of " + origText, origText.length(), convertedText.length());
     }
