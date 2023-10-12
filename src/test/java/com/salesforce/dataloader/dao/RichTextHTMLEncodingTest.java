@@ -153,6 +153,14 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
                 "&gt;", parts[1].substring(0,4));
     }
+    
+    @Test
+    public void testNoWhitespaceInText() throws Exception {    
+        String origText = "<img   alt=\"dlscreenshot\"   src=\"https://ashit-dev-ed.file.force.com/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId=0684W00000eYv7k&operationContext=CHATTER&contentId=05T4W000020p7wj\"></img>";
+        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        assertEquals("Incorrect conversion of " + origText, origText.length(), convertedText.length());
+    }
+
 
     private static final String HTML_WHITESPACE_ENCODING = "&nbsp;";
     private static final Pattern HTML_WHITESPACE_PATTERN = Pattern.compile(HTML_WHITESPACE_ENCODING);
