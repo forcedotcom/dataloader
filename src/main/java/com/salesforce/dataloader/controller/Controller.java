@@ -261,6 +261,9 @@ public class Controller {
                 && !mappingFile.isBlank() && !Files.exists(Path.of(mappingFile))) {
             throw new MappingInitializationException("Mapping file " + mappingFile + " does not exist");
         }
+        if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.UI) {
+            mappingFile = null;  // Do not use mapping file value set in config.properties in the interactive (UI) mode
+        }
         // Initialize mapping
         this.mapper = getConfig().getOperationInfo().isExtraction() ? 
                 new SOQLMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) 
