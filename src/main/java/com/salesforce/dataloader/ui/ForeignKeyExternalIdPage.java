@@ -199,8 +199,8 @@ public class ForeignKeyExternalIdPage extends LoadPage {
                 String childFieldLabel = childField.getLabel();
                 String[] childFieldLabelParts = childFieldLabel.split(" \\(.+\\)$");
                 relatedField.setLabel(childFieldLabelParts[0] + " (" + parentField.getLabel() + ")");
-                relatedField.setCreateable(parentField.isCreateable());
-                relatedField.setUpdateable(parentField.isUpdateable());
+                relatedField.setCreateable(childField.isCreateable());
+                relatedField.setUpdateable(childField.isUpdateable());
                 relatedField.setType(FieldType.reference);
                 String[] refToArray = new String[1];
                 refToArray[0] = refObjectInfo.getParentObjectName();
