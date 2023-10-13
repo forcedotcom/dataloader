@@ -35,17 +35,12 @@ import com.salesforce.dataloader.security.EncryptionUtil;
 import com.salesforce.dataloader.ui.UIUtils;
 import com.salesforce.dataloader.util.AppUtil;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.lang.management.ManagementFactory;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -68,14 +63,6 @@ public class DataLoaderRunner extends Thread {
     public void run() {
         // called just before the program closes
         HttpClientTransport.closeConnections();
-    }
-    
-    private static void extractInstallationArtifacts() {
-        try {
-            Installer.extractInstallationArtifactsFromJar(AppUtil.getDirContainingClassJar(DataLoaderRunner.class));
-        } catch (URISyntaxException | IOException ex) {
-            ex.printStackTrace();
-        }
     }
 
     public static void main(String[] args) {
