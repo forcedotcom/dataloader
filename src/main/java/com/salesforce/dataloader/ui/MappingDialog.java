@@ -288,7 +288,6 @@ public class MappingDialog extends BaseDialog {
                 }
 
                 if (!cancel) {
-                    config.setValue(Config.MAPPING_FILE, filename);
                     try {
                         mapper.save(filename);
                     } catch (IOException e1) {
