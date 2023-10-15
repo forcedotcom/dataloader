@@ -151,7 +151,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
 
         // get object's ext id info & set combo box to list of external id fields
         // set the objects reference information
-        List<String> fieldList = new ArrayList<String>(extIdInfo.getFieldInfoMap().keySet());
+        List<String> fieldList = new ArrayList<String>(extIdInfo.getParentObjectFieldMap().keySet());
         // add default selection "not selected" to the list to allow users to go back to it
         fieldList.add(Labels.getString("ForeignKeyExternalIdPage.defaultComboText"));
         UIUtils.setComboItems(extIdCombo, fieldList, Labels.getString("ForeignKeyExternalIdPage.defaultComboText"));
@@ -193,7 +193,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
                 DescribeRefObject refObjectInfo = referenceObjects.get(relationshipName);
                 extIdReferences.put(relationshipName, ObjectField.formatAsString(refObjectInfo.getParentObjectName(), extIdFieldName));
                 Field relatedField = new Field();
-                Field parentField = refObjectInfo.getFieldInfoMap().get(extIdFieldName);
+                Field parentField = refObjectInfo.getParentObjectFieldMap().get(extIdFieldName);
                 Field childField = refObjectInfo.getChildField();
                 relatedField.setName(relationshipName + ":" + parentField.getName());
                 String childFieldLabel = childField.getLabel();
