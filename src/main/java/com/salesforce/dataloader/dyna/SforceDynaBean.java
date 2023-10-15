@@ -90,7 +90,7 @@ public class SforceDynaBean {
 
                 DescribeRefObject refInfo = controller.getReferenceDescribes().get(relationshipName);
                 if(refInfo != null) {
-                    for(String refFieldName : refInfo.getFieldInfoMap().keySet()) {
+                    for(String refFieldName : refInfo.getParentObjectFieldMap().keySet()) {
                         // property name contains information for mapping
                         dynaProps.add(new DynaProperty(ObjectField.formatAsString(relationshipName, refFieldName),
                                 SObjectReference.class));

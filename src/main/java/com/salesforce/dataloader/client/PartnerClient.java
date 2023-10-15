@@ -788,23 +788,22 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             Field[] entityFields = getFieldTypes().getFields();
             String entityName = this.config.getString(Config.ENTITY);
 
-            for (Field entityField : entityFields) {
+            for (Field childObjectField : entityFields) {
                 // upsert on references (aka foreign keys) is supported only
                 // 1. When field has relationship is set and refers to exactly one object
                 // 2. When field is either createable or updateable. If neither is true, upsert will never work for that
                 // relationship.
-                if (entityField.isCreateable() || entityField.isUpdateable()) {
-                    String relationshipName = entityField.getRelationshipName();
-                    String[] parentObjectNames = entityField.getReferenceTo();
+                if (childObjectField.isCreateable() || childObjectField.isUpdateable()) {
+                    String relationshipName = childObjectField.getRelationshipName();
+                    String[] parentObjectNames = childObjectField.getReferenceTo();
                     boolean haSingleParentObject = parentObjectNames.length == 1;
                     if (parentObjectNames != null 
                         && parentObjectNames.length >= DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD) {
-                        entityField.setLabel(entityField.getLabel() + " (Id)");
+                        childObjectField.setLabel(childObjectField.getLabel() + " (Id)");
                     }
                     if (parentObjectNames != null && parentObjectNames.length > 0 && parentObjectNames[0] != null
                             && relationshipName != null && relationshipName.length() > 0
-                            && parentObjectNames.length < DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD
-                            && (entityField.isCreateable() || entityField.isUpdateable())) {
+                            && parentObjectNames.length < DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD) {
                         
                         for (int parentObjectIndex = 0; parentObjectIndex < parentObjectNames.length; parentObjectIndex++ ) {
                             String parentObjectName = parentObjectNames[parentObjectIndex];
@@ -818,7 +817,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                                     if (parentField.getType() == FieldType.id) {
                                         // add parents' id field labels in parenthesis to the child's
                                         // field label.
-                                        String childFieldLabel = entityField.getLabel();
+                                        String childFieldLabel = childObjectField.getLabel();
                                         String[] childFieldLabelParts = childFieldLabel.split(" \\(.+\\)$");
                                         childFieldLabel = childFieldLabelParts[0];
                                         if (parentObjectIndex == 0) {
@@ -830,27 +829,15 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                                         if (parentObjectIndex == parentObjectNames.length - 1) {
                                             childFieldLabel = childFieldLabel + ")";
                                         }
-                                        entityField.setLabel(childFieldLabel);
+                                        childObjectField.setLabel(childFieldLabel);
                                     } else if (haSingleParentObject) { // nonId lookup field on the parent entity
-                                        if (!entityName.equalsIgnoreCase(parentObjectName)) {
-                                            // Change createable and updateable attributes of a reference field
-                                            // only if it is not a self-reference.
-                                            // 
-                                            // The conditional check is to address the issue [W-10811419]:
-                                            // Name (Auto-Number - a read-only field) field shows up in mapping dialog
-                                            // when parent entity is the same as child entity (self-ref) because
-                                            // the field's "isUpdateable" attribute may get changed from "false"
-                                            // to "true" in the following code.
-                                            parentField.setCreateable(entityField.isCreateable());
-                                            parentField.setUpdateable(entityField.isUpdateable());
-                                        }
                                         parentFieldInfo.put(parentField.getName(), parentField);
                                     }
                                 }
                             }
                             if (!parentFieldInfo.isEmpty()) {
-                                DescribeRefObject describe = new DescribeRefObject(parentObjectName, entityField, parentFieldInfo);
-                                referenceDescribes.put(relationshipName, describe);
+                                DescribeRefObject describeRelationship = new DescribeRefObject(parentObjectName, childObjectField, parentFieldInfo);
+                                referenceDescribes.put(relationshipName, describeRelationship);
                             }
                         }
                     }
@@ -969,9 +956,15 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             for (Map.Entry<String, DescribeRefObject> ent : refs.entrySet()) {
                 String relName = ent.getKey().toLowerCase();
                 if (apiName.startsWith(relName)) {
-                    for (Map.Entry<String, Field> refEntry : ent.getValue().getFieldInfoMap().entrySet()) {
+                    for (Map.Entry<String, Field> refEntry : ent.getValue().getParentObjectFieldMap().entrySet()) {
                         String thisRefName = relName + ":" + refEntry.getKey().toLowerCase();
-                        if (apiName.equals(thisRefName)) return refEntry.getValue();
+                        if (apiName.contains(".")) {
+                            thisRefName = relName + ":" 
+                                    + ent.getValue().getParentObjectName()
+                                    + "." + refEntry.getKey().toLowerCase();
+                        }
+                        
+                        if (apiName.equalsIgnoreCase(thisRefName)) return refEntry.getValue();
                     }
                 }
             }

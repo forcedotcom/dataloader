@@ -49,7 +49,7 @@ public class DescribeRefObject {
         this.childField = childField;
     }
 
-    public Map<String, Field> getFieldInfoMap() {
+    public Map<String, Field> getParentObjectFieldMap() {
         return parentFieldInfoMap;
     }
 
