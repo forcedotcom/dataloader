@@ -793,52 +793,53 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 // 1. When field has relationship is set and refers to exactly one object
                 // 2. When field is either createable or updateable. If neither is true, upsert will never work for that
                 // relationship.
-                if (childObjectField.isCreateable() || childObjectField.isUpdateable()) {
-                    String relationshipName = childObjectField.getRelationshipName();
-                    String[] parentObjectNames = childObjectField.getReferenceTo();
-                    boolean haSingleParentObject = parentObjectNames.length == 1;
-                    if (parentObjectNames != null 
-                        && parentObjectNames.length >= DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD) {
-                        childObjectField.setLabel(childObjectField.getLabel() + " (Id)");
-                    }
-                    if (parentObjectNames != null && parentObjectNames.length > 0 && parentObjectNames[0] != null
-                            && relationshipName != null && relationshipName.length() > 0
-                            && parentObjectNames.length < DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD) {
-                        
-                        for (int parentObjectIndex = 0; parentObjectIndex < parentObjectNames.length; parentObjectIndex++ ) {
-                            String parentObjectName = parentObjectNames[parentObjectIndex];
-    
-                            // make sure that the object is legal to upsert
-                            Field[] parentObjectFields = describeSObject(parentObjectName).getFields();
-                            Map<String, Field> parentFieldInfo = new HashMap<String, Field>();
-                            for (Field parentField : parentObjectFields) {
-                                if (parentField.isExternalId()
-                                    || parentField.isIdLookup()) {
-                                    if (parentField.getType() == FieldType.id) {
-                                        // add parents' id field labels in parenthesis to the child's
-                                        // field label.
-                                        String childFieldLabel = childObjectField.getLabel();
-                                        String[] childFieldLabelParts = childFieldLabel.split(" \\(.+\\)$");
-                                        childFieldLabel = childFieldLabelParts[0];
-                                        if (parentObjectIndex == 0) {
-                                            childFieldLabel = childFieldLabel + " (";
-                                        } else {
-                                            childFieldLabel = childFieldLabel + ", ";
-                                        }
-                                        childFieldLabel = childFieldLabel + parentField.getLabel();
-                                        if (parentObjectIndex == parentObjectNames.length - 1) {
-                                            childFieldLabel = childFieldLabel + ")";
-                                        }
-                                        childObjectField.setLabel(childFieldLabel);
-                                    } else if (haSingleParentObject) { // nonId lookup field on the parent entity
-                                        parentFieldInfo.put(parentField.getName(), parentField);
-                                    }
+                String[] parentObjectNames = childObjectField.getReferenceTo();
+                String relationshipName = childObjectField.getRelationshipName();
+                if (parentObjectNames == null || parentObjectNames.length == 0 || parentObjectNames[0] == null
+                    || relationshipName == null || relationshipName.length() == 0
+                    || (!childObjectField.isCreateable() && !childObjectField.isUpdateable())) {
+                    continue;
+                }
+
+                boolean haSingleParentObject = parentObjectNames.length == 1;
+                if (parentObjectNames.length >= DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD) {
+                    childObjectField.setLabel(childObjectField.getLabel() + " (Id)");
+                } else {
+                    for (int parentObjectIndex = 0; parentObjectIndex < parentObjectNames.length; parentObjectIndex++ ) {
+                        String parentObjectName = parentObjectNames[parentObjectIndex];
+
+                        // make sure that the object is legal to upsert
+                        Field[] parentObjectFields = describeSObject(parentObjectName).getFields();
+                        Map<String, Field> parentFieldInfo = new HashMap<String, Field>();
+                        for (Field parentField : parentObjectFields) {
+                            if (!parentField.isIdLookup()) {
+                                continue;
+                            }
+                            if (parentField.getType() == FieldType.id) {
+                                // add parents' id field labels in parenthesis to the child's
+                                // field label.
+                                String childFieldLabel = childObjectField.getLabel();
+                                String[] childFieldLabelParts = childFieldLabel.split(" \\(.+\\)$");
+                                childFieldLabel = childFieldLabelParts[0];
+                                if (parentObjectIndex == 0) {
+                                    childFieldLabel = childFieldLabel + " (";
+                                } else {
+                                    childFieldLabel = childFieldLabel + ", ";
+                                }
+                                childFieldLabel = childFieldLabel + parentField.getLabel();
+                                if (parentObjectIndex == parentObjectNames.length - 1) {
+                                    childFieldLabel = childFieldLabel + ")";
+                                }
+                                childObjectField.setLabel(childFieldLabel);
+                            } else { // non-Id lookup field on the parent entity
+                                if (haSingleParentObject) {
+                                    parentFieldInfo.put(parentField.getName(), parentField);
                                 }
                             }
-                            if (!parentFieldInfo.isEmpty()) {
-                                DescribeRefObject describeRelationship = new DescribeRefObject(parentObjectName, childObjectField, parentFieldInfo);
-                                referenceDescribes.put(relationshipName, describeRelationship);
-                            }
+                        } // for loop
+                        if (!parentFieldInfo.isEmpty()) {
+                            DescribeRefObject describeRelationship = new DescribeRefObject(parentObjectName, childObjectField, parentFieldInfo);
+                            referenceDescribes.put(relationshipName, describeRelationship);
                         }
                     }
                 }
