@@ -810,7 +810,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
                         // make sure that the object is legal to upsert
                         Field[] parentObjectFields = describeSObject(parentObjectName).getFields();
-                        Map<String, Field> parentFieldInfo = new HashMap<String, Field>();
+                        Map<String, Field> parentIdLookupFieldMap = new HashMap<String, Field>();
                         for (Field parentField : parentObjectFields) {
                             if (!parentField.isIdLookup()) {
                                 continue;
@@ -833,12 +833,14 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                                 childObjectField.setLabel(childFieldLabel);
                             } else { // non-Id lookup field on the parent entity
                                 if (haSingleParentObject) {
-                                    parentFieldInfo.put(parentField.getName(), parentField);
+                                    parentIdLookupFieldMap.put(parentField.getName(), parentField);
                                 }
                             }
                         } // for loop
-                        if (!parentFieldInfo.isEmpty()) {
-                            DescribeRefObject describeRelationship = new DescribeRefObject(parentObjectName, childObjectField, parentFieldInfo);
+                        if (!parentIdLookupFieldMap.isEmpty()) {
+                            // A non-empty parentIdLookupFieldMap implies non-polymorphic lookup relationship
+                            // to a parent object that has idLookup fields.
+                            DescribeRefObject describeRelationship = new DescribeRefObject(parentObjectName, childObjectField, parentIdLookupFieldMap);
                             referenceDescribes.put(relationshipName, describeRelationship);
                         }
                     }
