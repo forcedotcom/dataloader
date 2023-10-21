@@ -69,19 +69,33 @@ public class CsvExtractAggregateQueryProcessTest extends ProcessTestBase {
         String accountId = insertAccount("acctNameXyz");
         String contactId = insertContact(accountId);
         runExtraction("select Count(Id), Account.Name from Contact where Id='" + contactId + "' GROUP BY Account.Name");
-        validateAccountNameInOutputFile("acctNameXyz");
+        validateAccountNameInOutputFile("acctNameXyz", true);
+        runExtractionDoNotLimitOutputToQueryFields("select Count(Id), Account.Name from Contact where Id='" + contactId + "' GROUP BY Account.Name");
+        validateAccountNameInOutputFile("acctNameXyz", false);
     }
 
     private void runExtraction(String extractionQuery) throws ProcessInitializationException, DataAccessObjectException {
         testConfig.put(Config.EXTRACT_SOQL, extractionQuery);
+        testConfig.put(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS, Config.TRUE);
         runProcess(testConfig, 1, true);
     }
 
-    private void validateAccountNameInOutputFile(final String accountName) throws IOException {
+    private void runExtractionDoNotLimitOutputToQueryFields(String extractionQuery) throws ProcessInitializationException, DataAccessObjectException {
+        testConfig.put(Config.EXTRACT_SOQL, extractionQuery);
+        testConfig.put(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS, Config.FALSE);
+        runProcess(testConfig, 1, true);
+    }
+
+    private void validateAccountNameInOutputFile(final String accountName, boolean isLimitOutputToQueryFields) throws IOException {
         FileInputStream fis = new FileInputStream(new File(testConfig.get(Config.DAO_NAME)));
         try {
             CSVReader rdr = new CSVReader(fis, StandardCharsets.UTF_8.name());
-            int acctNameIndex = rdr.nextRecord().indexOf("ACCOUNT.NAME");
+            int acctNameIndex = 0;
+            if (isLimitOutputToQueryFields) {
+                acctNameIndex = rdr.nextRecord().indexOf("ACCOUNT.NAME");
+            } else {
+                acctNameIndex = rdr.nextRecord().indexOf("NAME");
+            }
             assertEquals(accountName, rdr.nextRecord().get(acctNameIndex));
         } finally {
             IOUtils.closeQuietly(fis);
