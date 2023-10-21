@@ -139,6 +139,10 @@ abstract public class AbstractExtractAction extends AbstractAction {
         if (getController().getConfig().getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
             final List<String> daoColumns = getDaoColumnsFromMapper();
             getDao().setColumnNames(daoColumns);
+        } else {
+            // check for syntactical correctness and presence of nested soql.
+            // nested soql is currently not supported.
+            ((SOQLMapper)getController().getMapper()).parseSoql(getConfig().getString(Config.EXTRACT_SOQL));
         }
     }
 
