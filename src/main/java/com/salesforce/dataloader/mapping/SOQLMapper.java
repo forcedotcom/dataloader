@@ -191,6 +191,15 @@ public class SOQLMapper extends Mapper {
         mapConstants(resultRow);
         return resultRow;
     }
+    
+    public boolean parseSoql(String soql) throws InvalidMappingException {
+        try {
+            new SOQLInfo(soql);
+        } catch (SOQLParserException e) {
+            throw new InvalidMappingException(e.getMessage(), e);
+        }
+        return true;
+    }
 
     public void initSoqlMapping(String soql) {
         if (this.isInitialized) {
