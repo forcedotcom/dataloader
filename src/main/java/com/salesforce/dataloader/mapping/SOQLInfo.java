@@ -54,7 +54,7 @@ class SOQLInfo {
             fieldString = getTrimmed(fieldString);
             int lparenIdx = fieldString.indexOf('(');
             // no nested queries!
-            if (lparenIdx == 0) throw invalidSoql("Nested queries are not supported");
+            if (lparenIdx == 0) throw invalidSoql("Nested queries are not supported in SOQL SELECT clause");
             if (lparenIdx < 0) {
                 // normal field
                 this.fieldName = fieldString;
