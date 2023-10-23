@@ -175,7 +175,7 @@ public class SoqlInfoTest {
     @Test
     public void testNestedQuery() {
         runInvalidQueryTest("select id, (select name from contacts) from account blarney",
-                "Nested queries are not supported");
+                "Nested queries are not supported in SOQL SELECT clause");
     }
 
     @Test

@@ -217,7 +217,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         soql = "Select Account.Name, (Select Contact.LastName FROM Account.Contacts) FROM Account";
         argmap = getTestConfig(soql, "Account", false);
         // this error message to change
-        runProcessNegative(argmap, "Invalid soql: Nested queries are not supported");
+        runProcessNegative(argmap, "Invalid soql: Nested queries are not supported in SOQL SELECT clause");
     }
 
     public abstract void testSoqlWithRelationships() throws Exception;
