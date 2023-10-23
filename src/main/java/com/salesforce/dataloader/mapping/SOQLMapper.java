@@ -281,7 +281,6 @@ public class SOQLMapper extends Mapper {
     }
     
     public void clearMap() {
-        super.clearMap();
         this.extractionMap.clear();
         this.isInitialized = false;
     }
