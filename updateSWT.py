@@ -92,7 +92,8 @@ def downloadAndExtractZip(url):
 
     page = requests.get(zipURL)
     soup = BeautifulSoup(page.content, "html.parser")
-    zipURL = soup.find(id="novaContent").find_next("a").find_next("a")['href']
+    divWithZip = soup.find("div", {"class":"mirror-well"})
+    zipURL = divWithZip.find_next("a")['href']
     zipURL = "https://www.eclipse.org/downloads/" + zipURL
 #    print(zipURL)
 
