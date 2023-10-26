@@ -179,6 +179,9 @@ public class DateConverterTest {
         assertValidDate("String to calendar conversation fails when minutes not specified with non-GMT timezone", dateStringWithFullBasicTime, calDateGMT, false);
         assertValidDate("String to calendar conversation fails when minutes not specified with sans-T format", dateStringWithoutT, calDateGMT, false);
 
+        dateStringWithoutT = "20111015"; //yyyyMMdd
+        calDateGMT.set(2011, 9, 15, 0, 0, 0);
+        assertValidDate("String to calendar conversation fails when minutes not specified with sans-T format", dateStringWithoutT, calDateGMT, false);
     }
 
     /**
