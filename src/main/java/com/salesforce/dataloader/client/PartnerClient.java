@@ -756,7 +756,12 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         setEntityTypes();
         if (this.describeGlobalResults.isEmpty()) {
             for (DescribeGlobalSObjectResult res : entityTypes.getSobjects()) {
-                if (res != null) this.describeGlobalResults.put(res.getName(), res);
+                if (res != null) {
+                    if (res.getLabel().startsWith("__MISSING LABEL__")) {
+                        res.setLabel(res.getName());
+                    }
+                    this.describeGlobalResults.put(res.getName(), res);
+                }
             }
         }
 
