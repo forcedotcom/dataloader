@@ -3,10 +3,10 @@
   <groupId>local.swt</groupId>
   <artifactId>swtwin32_x86_64</artifactId>
   <versioning>
-    <release>4.28</release>
+    <release>4.29</release>
     <versions>
-      <version>4.28</version>
+      <version>4.29</version>
     </versions>
-    <lastUpdated>20230819183906</lastUpdated>
+    <lastUpdated>20231026215948</lastUpdated>
   </versioning>
 </metadata>
