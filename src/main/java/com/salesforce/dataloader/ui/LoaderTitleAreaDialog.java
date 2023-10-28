@@ -85,7 +85,7 @@ public class LoaderTitleAreaDialog extends Dialog {
     Color titleAreaColor;
     private String message = ""; //$NON-NLS-1$
     private String errorMessage;
-    private Link messageLabel;
+    private Link messageLink;
     private Composite workArea;
     private Label messageImageLabel;
     private Image messageImage;
@@ -235,10 +235,10 @@ public class LoaderTitleAreaDialog extends Dialog {
         messageImageLabel.setBackground(background);
 
         // Message label @ bottom, center
-        messageLabel = new Link(parent, SWT.WRAP | SWT.READ_ONLY);
-        JFaceColors.setColors(messageLabel, foreground, background);
-        messageLabel.setText(" \n "); // two lines//$NON-NLS-1$
-        messageLabel.setFont(JFaceResources.getDialogFont());
+        messageLink = new Link(parent, SWT.WRAP | SWT.READ_ONLY);
+        JFaceColors.setColors(messageLink, foreground, background);
+        messageLink.setText(" \n "); // two lines//$NON-NLS-1$
+        messageLink.setFont(JFaceResources.getDialogFont());
         // Filler labels
         leftFillerLabel = new Label(parent, SWT.CENTER);
         leftFillerLabel.setBackground(background);
@@ -248,7 +248,7 @@ public class LoaderTitleAreaDialog extends Dialog {
         determineTitleImageLargest();
         if (titleImageLargest)
             return titleImage;
-        return messageLabel;
+        return messageLink;
     }
     /**
      * Determine if the title image is larger than the title message and message
@@ -257,13 +257,13 @@ public class LoaderTitleAreaDialog extends Dialog {
     private void determineTitleImageLargest() {
         int titleY = titleImage.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
         int labelY = titleLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-        labelY += messageLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-        FontData[] data = messageLabel.getFont().getFontData();
+        labelY += messageLink.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+        FontData[] data = messageLink.getFont().getFontData();
         labelY += data[0].getHeight();
         titleImageLargest = titleY > labelY;
     }
     /**
-     * Set the layout values for the messageLabel, messageImageLabel and
+     * Set the layout values for the messageLink, messageImageLabel and
      * fillerLabel for the case where there is a normal message.
      *
      * @param verticalSpacing
@@ -277,19 +277,19 @@ public class LoaderTitleAreaDialog extends Dialog {
         messageImageData.top = new FormAttachment(titleLabel, verticalSpacing);
         messageImageData.left = new FormAttachment(0, H_GAP_IMAGE);
         messageImageLabel.setLayoutData(messageImageData);
-        FormData messageLabelData = new FormData();
-        messageLabelData.top = new FormAttachment(titleLabel, verticalSpacing);
-        messageLabelData.right = new FormAttachment(titleImage);
-        messageLabelData.left = new FormAttachment(messageImageLabel,
+        FormData messageLinkData = new FormData();
+        messageLinkData.top = new FormAttachment(titleLabel, verticalSpacing);
+        messageLinkData.right = new FormAttachment(titleImage);
+        messageLinkData.left = new FormAttachment(messageImageLabel,
                 horizontalSpacing);
         if (titleImageLargest)
-            messageLabelData.bottom = new FormAttachment(titleImage, 0,
+            messageLinkData.bottom = new FormAttachment(titleImage, 0,
                     SWT.BOTTOM);
-        messageLabel.setLayoutData(messageLabelData);
+        messageLink.setLayoutData(messageLinkData);
         FormData fillerData = new FormData();
         fillerData.left = new FormAttachment(0, horizontalSpacing);
         fillerData.top = new FormAttachment(messageImageLabel, 0);
-        fillerData.bottom = new FormAttachment(messageLabel, 0, SWT.BOTTOM);
+        fillerData.bottom = new FormAttachment(messageLink, 0, SWT.BOTTOM);
         bottomFillerLabel.setLayoutData(fillerData);
         FormData data = new FormData();
         data.top = new FormAttachment(messageImageLabel, 0, SWT.TOP);
@@ -350,24 +350,24 @@ public class LoaderTitleAreaDialog extends Dialog {
             updateMessage(message);
             messageImageLabel.setImage(messageImage);
             setImageLabelVisible(messageImage != null);
-            messageLabel.setToolTipText(message);
+            messageLink.setToolTipText(message);
         } else {
             //Add in a space for layout purposes but do not
             //change the instance variable
             String displayedErrorMessage = " " + errorMessage; //$NON-NLS-1$
             updateMessage(displayedErrorMessage);
-            messageLabel.setToolTipText(errorMessage);
+            messageLink.setToolTipText(errorMessage);
             if (!showingError) {
                 // we were not previously showing an error
                 showingError = true;
                 // lazy initialize the error background color and image
                 if (errorMsgAreaBackground == null) {
                     errorMsgAreaBackground = JFaceColors
-                            .getErrorBackground(messageLabel.getDisplay());
+                            .getErrorBackground(messageLink.getDisplay());
                     errorMsgImage = getImageFromRegistry(DLG_IMG_TITLE_ERROR);
                 }
                 // show the error
-                normalMsgAreaBackground = messageLabel.getBackground();
+                normalMsgAreaBackground = messageLink.getBackground();
                 setMessageBackgrounds(true);
                 messageImageLabel.setImage(errorMsgImage);
                 setImageLabelVisible(true);
@@ -402,7 +402,7 @@ public class LoaderTitleAreaDialog extends Dialog {
             data = new FormData();
             data.top = new FormAttachment(messageImageLabel, 0);
             data.left = new FormAttachment(0, 0);
-            data.bottom = new FormAttachment(messageLabel, 0, SWT.BOTTOM);
+            data.bottom = new FormAttachment(messageLink, 0, SWT.BOTTOM);
             data.right = new FormAttachment(messageImageLabel, 0, SWT.RIGHT);
             bottomFillerLabel.setLayoutData(data);
             data = new FormData();
@@ -411,15 +411,15 @@ public class LoaderTitleAreaDialog extends Dialog {
             data.bottom = new FormAttachment(messageImageLabel, 0, SWT.BOTTOM);
             data.right = new FormAttachment(messageImageLabel, 0);
             leftFillerLabel.setLayoutData(data);
-            FormData messageLabelData = new FormData();
-            messageLabelData.top = new FormAttachment(titleLabel,
+            FormData messageLinkData = new FormData();
+            messageLinkData.top = new FormAttachment(titleLabel,
                     verticalSpacing);
-            messageLabelData.right = new FormAttachment(titleImage);
-            messageLabelData.left = new FormAttachment(messageImageLabel, 0);
+            messageLinkData.right = new FormAttachment(titleImage);
+            messageLinkData.left = new FormAttachment(messageImageLabel, 0);
             if (titleImageLargest)
-                messageLabelData.bottom = new FormAttachment(titleImage, 0,
+                messageLinkData.bottom = new FormAttachment(titleImage, 0,
                         SWT.BOTTOM);
-            messageLabel.setLayoutData(messageLabelData);
+            messageLink.setLayoutData(messageLinkData);
         }
         //Do not layout before the dialog area has been created
         //to avoid incomplete calculations.
@@ -504,12 +504,12 @@ public class LoaderTitleAreaDialog extends Dialog {
             updateMessage(shownMessage);
             messageImageLabel.setImage(messageImage);
             setImageLabelVisible(messageImage != null);
-            messageLabel.setToolTipText(message);
+            messageLink.setToolTipText(message);
             layoutForNewMessage();
         }
     }
     /**
-     * Update the contents of the messageLabel.
+     * Update the contents of the messageLink.
      *
      * @param newMessage
      *            the message to use
@@ -518,8 +518,8 @@ public class LoaderTitleAreaDialog extends Dialog {
         //Be sure there are always 2 lines for layout purposes
         if (newMessage != null && newMessage.indexOf('\n') == -1)
             newMessage = newMessage + "\n "; //$NON-NLS-1$
-        messageLabel.setText(newMessage);
-        messageLabel.addSelectionListener(new SelectionAdapter() {
+        messageLink.setText(newMessage);
+        messageLink.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 UIUtils.openURL(e.text);
@@ -564,7 +564,7 @@ public class LoaderTitleAreaDialog extends Dialog {
             if (titleImageLargest)
                 top = titleImage;
             else
-                top = messageLabel;
+                top = messageLink;
             resetWorkAreaAttachments(top);
         }
     }
@@ -584,7 +584,7 @@ public class LoaderTitleAreaDialog extends Dialog {
             if (titleImageLargest)
                 top = titleImage;
             else
-                top = messageLabel;
+                top = messageLink;
             resetWorkAreaAttachments(top);
         }
     }
@@ -613,7 +613,7 @@ public class LoaderTitleAreaDialog extends Dialog {
             color = errorMsgAreaBackground;
         else
             color = normalMsgAreaBackground;
-        messageLabel.setBackground(color);
+        messageLink.setBackground(color);
         messageImageLabel.setBackground(color);
         bottomFillerLabel.setBackground(color);
         leftFillerLabel.setBackground(color);
