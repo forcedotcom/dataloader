@@ -30,6 +30,7 @@ import org.eclipse.jface.action.Action;
 
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.*;
+import com.salesforce.dataloader.util.AppUtil;
 
 /**
  * @author Lexi Viripaeff
@@ -50,11 +51,28 @@ public class HelpUIAction extends Action {
     public void run() {
         HyperlinkDialog dlg = new HyperlinkDialog(LoaderWindow.getApp().getShell(), controller);
         dlg.setText(Labels.getString("HelpUIAction.dlgTitle")); //$NON-NLS-1$
-        dlg.setMessage(Labels.getString("HelpUIAction.dlgMsg")); //$NON-NLS-1$
-        dlg.setLinkText(Labels.getString("HelpUIAction.dlgLinkText")); //$NON-NLS-1$
-        dlg.setLinkURL(Labels.getString("HelpUIAction.dlgURL")); //$NON-NLS-1$
+        dlg.setMessage(
+                getLoaderUpgradeMessage()
+                + System.getProperty("line.separator")
+                + Labels.getString("HelpUIAction.dlgMsg")
+                + System.getProperty("line.separator")
+                + Labels.getString("HelpUIAction.dlgLinkText")
+            ); //$NON-NLS-1$
         dlg.setBoldMessage(Labels.getString("HelpUIAction.msgHeader")); //$NON-NLS-1$
         dlg.open();
+    }
+    
+    private String getLoaderUpgradeMessage() {
+        String upgradeMsg = "";
+        if (!AppUtil.DATALOADER_VERSION.equals(AppUtil.getLatestDownloadableDataLoaderVersion())) {
+            upgradeMsg = 
+                    Labels.getFormattedString("LoaderDownloadDialog.messageLineOne", 
+                                            new String[] {AppUtil.getLatestDownloadableDataLoaderVersion(), 
+                                                          AppUtil.DATALOADER_DOWNLOAD_URL})
+                    + System.getProperty("line.separator")
+                    + System.getProperty("line.separator");
+        }
+        return upgradeMsg;
     }
 
 }

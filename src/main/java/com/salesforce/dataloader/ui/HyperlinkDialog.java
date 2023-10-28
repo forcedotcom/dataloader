@@ -26,12 +26,6 @@
 
 package com.salesforce.dataloader.ui;
 
-import java.awt.Desktop;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceColors;
 import org.eclipse.jface.resource.JFaceResources;
@@ -42,26 +36,13 @@ import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.util.AppUtil;
 
 public class HyperlinkDialog extends BaseDialog {
     private String boldMessage;
-    private String linkText;
-    private String linkURL;
-
-    public String getLinkURL() {
-        return linkURL;
-    }
-
-    public void setLinkURL(String linkURL) {
-        this.linkURL = linkURL;
-    }
-
-    private Text messageLabel;
     private Label titleLabel;
     private Label titleImage;
     private Label titleBanner;
-    private Hyperlink link;
+    private Link link;
 
     /**
      * InputDialog constructor
@@ -139,68 +120,24 @@ public class HyperlinkDialog extends BaseDialog {
         titleData.left = new FormAttachment(0, 10);
         titleLabel.setLayoutData(titleData);
 
-        messageLabel = new Text(shell, SWT.WRAP | SWT.READ_ONLY);
-        messageLabel.setForeground(foreground);
-        messageLabel.setBackground(background);
-        messageLabel.setText(this.getMessage()); // two lines
-        messageLabel.setFont(JFaceResources.getDialogFont());
+        link = new Link(shell, SWT.WRAP | SWT.READ_ONLY);
+        link.setForeground(foreground);
+        link.setBackground(background);
+        link.setText(this.getMessage()); // two lines
+        link.setFont(JFaceResources.getDialogFont());
         FormData messageLabelData = new FormData();
         messageLabelData.top = new FormAttachment(titleLabel, 10);
         messageLabelData.right = new FormAttachment(titleImage);
         messageLabelData.left = new FormAttachment(0, 10);
         //        messageLabelData.bottom = new FormAttachment(titleImage, 0, SWT.BOTTOM);
-        messageLabel.setLayoutData(messageLabelData);
-
-        link = new Hyperlink(shell, SWT.NONE);
-        link.setText(getLinkText());
-        link.setBackground(background);
-        link.addSelectionListener(new SelectionListener() {
+        link.setLayoutData(messageLabelData);   
+        link.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                Thread runner = new Thread() {
-                    @Override
-                    public void run() {
-                        int exitVal = 0;
-                        if (System.getProperty("os.name").toLowerCase().indexOf("windows") >= 0) {
-                            ArrayList<String> cmd = new ArrayList<String>();
-                            cmd.add("rundll32");
-                            cmd.add("url.dll,");
-                            cmd.add("FileProtocolHandler");
-                            cmd.add(getLinkURL());
-                            AppUtil.exec(cmd, "Browser Error");
-                        } else if (System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0){
-                            Desktop desktop = Desktop.getDesktop();
-                            try {
-                                desktop.browse(new URI(getLinkURL()));
-                            } catch (URISyntaxException | IOException e) {
-                                // TODO Auto-generated catch block
-                                logger.error("Browser Error");
-                            }
-                        }
-                        else {
-                            logger.error("OS is not supported.");
-                            return;
-                        }
-
-                        if (exitVal != 0) {
-                            logger.error("Process exited with error" + exitVal);
-                        }
-                    }
-                };
-
-                runner.setPriority(Thread.MAX_PRIORITY);
-                runner.start();
+                UIUtils.openURL(e.text);
             }
-
-            @Override
-            public void widgetDefaultSelected(SelectionEvent e) {}
         });
-        FormData linkData = new FormData();
-        linkData.top = new FormAttachment(messageLabel);
-        linkData.right = new FormAttachment(titleImage);
-        linkData.left = new FormAttachment(0, 10);
-        link.setLayoutData(linkData);
-
+        
         Composite greyArea = new Composite(shell, SWT.NULL);
         GridLayout childLayout = new GridLayout(1, false);
         childLayout.marginHeight = 0;
@@ -250,13 +187,5 @@ public class HyperlinkDialog extends BaseDialog {
 
     public void setBoldMessage(String message) {
         boldMessage = message;
-    }
-
-    public String getLinkText() {
-        return linkText;
-    }
-
-    public void setLinkText(String linkText) {
-        this.linkText = linkText;
     }
 }
