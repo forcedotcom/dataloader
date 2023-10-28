@@ -31,6 +31,8 @@ import org.eclipse.jface.resource.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
@@ -83,7 +85,7 @@ public class LoaderTitleAreaDialog extends Dialog {
     Color titleAreaColor;
     private String message = ""; //$NON-NLS-1$
     private String errorMessage;
-    private Text messageLabel;
+    private Link messageLabel;
     private Composite workArea;
     private Label messageImageLabel;
     private Image messageImage;
@@ -233,7 +235,7 @@ public class LoaderTitleAreaDialog extends Dialog {
         messageImageLabel.setBackground(background);
 
         // Message label @ bottom, center
-        messageLabel = new Text(parent, SWT.WRAP | SWT.READ_ONLY);
+        messageLabel = new Link(parent, SWT.WRAP | SWT.READ_ONLY);
         JFaceColors.setColors(messageLabel, foreground, background);
         messageLabel.setText(" \n "); // two lines//$NON-NLS-1$
         messageLabel.setFont(JFaceResources.getDialogFont());
@@ -517,6 +519,12 @@ public class LoaderTitleAreaDialog extends Dialog {
         if (newMessage != null && newMessage.indexOf('\n') == -1)
             newMessage = newMessage + "\n "; //$NON-NLS-1$
         messageLabel.setText(newMessage);
+        messageLabel.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                UIUtils.openURL(e.text);
+            }
+          });
     }
     /**
      * Sets the title to be shown in the title area of this dialog.
