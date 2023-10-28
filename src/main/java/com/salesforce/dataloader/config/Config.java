@@ -204,6 +204,7 @@ public class Config {
 
     // Loader Preferences
     public static final String HIDE_WELCOME_SCREEN = "loader.hideWelcome";
+    public static final String SHOW_LOADER_UPGRADE_SCREEN = "loader.ui.showUpgrade";
 
     // Delimiter settings
     public static final String CSV_DELIMITER_COMMA = "loader.csvComma";
@@ -523,6 +524,7 @@ public class Config {
      */
     private void setDefaults() {
         setDefaultValue(HIDE_WELCOME_SCREEN, true);
+        setDefaultValue(SHOW_LOADER_UPGRADE_SCREEN, true);
 
         setDefaultValue(CSV_DELIMITER_COMMA, true);
         setDefaultValue(CSV_DELIMITER_TAB, true);

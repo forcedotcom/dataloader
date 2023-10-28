@@ -27,20 +27,17 @@
 package com.salesforce.dataloader.ui;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 
 import com.salesforce.dataloader.util.AppUtil;
 
 /**
- * Splash screen for the loader.
+ * Upgrade dialog for the loader.
  * 
- * @author Lexi Viripaeff
- * @since 6.0
  */
-public class LoaderDownloadDialog extends LoaderTitleAreaDialog {
+public class LoaderUpgradeDialog extends LoaderTitleAreaDialog {
 
 
     /**
@@ -49,7 +46,7 @@ public class LoaderDownloadDialog extends LoaderTitleAreaDialog {
      * @param shell
      *            the parent shell
      */
-    public LoaderDownloadDialog(Shell activeShell) {
+    public LoaderUpgradeDialog(Shell activeShell) {
         super(activeShell);
     }
 
