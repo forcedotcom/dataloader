@@ -93,6 +93,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private final String defaultServer;
 
     private Button buttonHideWelcomeScreen;
+    private Button buttonShowLoaderUpgradeScreen;
     private Button buttonOutputExtractStatus;
     private Button buttonSortExtractFields;
     private Button buttonReadUtf8;
@@ -268,6 +269,14 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         buttonHideWelcomeScreen = new Button(restComp, SWT.CHECK);
         buttonHideWelcomeScreen.setSelection(config.getBoolean(Config.HIDE_WELCOME_SCREEN));
+
+        // Hide welecome screen
+        Label labelShowLoaderUpgradeScreen = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelShowLoaderUpgradeScreen.setText(Labels.getString("AdvancedSettingsDialog.showLoaderUpgradeScreen")); //$NON-NLS-1$
+        labelShowLoaderUpgradeScreen.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+
+        buttonShowLoaderUpgradeScreen = new Button(restComp, SWT.CHECK);
+        buttonShowLoaderUpgradeScreen.setSelection(config.getBoolean(Config.SHOW_LOADER_UPGRADE_SCREEN));
 
         //batch size
         Label labelBatch = new Label(restComp, SWT.RIGHT | SWT.WRAP);
@@ -811,6 +820,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 }
                 //set the configValues
                 config.setValue(Config.HIDE_WELCOME_SCREEN, buttonHideWelcomeScreen.getSelection());
+                config.setValue(Config.SHOW_LOADER_UPGRADE_SCREEN, buttonShowLoaderUpgradeScreen.getSelection());
                 config.setValue(Config.INSERT_NULLS, buttonNulls.getSelection());
                 config.setValue(Config.LOAD_BATCH_SIZE, textBatch.getText());
                 boolean isOtherDelimiterSpecified = textUploadCSVDelimiterValue.getText() != null

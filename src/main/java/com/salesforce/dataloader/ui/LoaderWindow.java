@@ -200,7 +200,9 @@ public class LoaderWindow extends ApplicationWindow {
         if (!config.getBoolean(Config.HIDE_WELCOME_SCREEN)) {
             displayTitleDialog(Display.getDefault(), this.operationActionsByIndex, this.controller.getConfig());
         }
-        displayUpgradeDialog(Display.getDefault());
+        if (config.getBoolean(Config.SHOW_LOADER_UPGRADE_SCREEN)) {
+            displayUpgradeDialog(Display.getDefault());
+        }
         
         comp.pack();
         parent.pack();
@@ -294,8 +296,8 @@ public class LoaderWindow extends ApplicationWindow {
         display.asyncExec(new Thread() {
             @Override
             public void run() {
-                LoaderDownloadDialog dlg = new LoaderDownloadDialog(display.getActiveShell());
-                int result = dlg.open();
+                LoaderUpgradeDialog dlg = new LoaderUpgradeDialog(display.getActiveShell());
+                dlg.open();
             }
         });
     }
