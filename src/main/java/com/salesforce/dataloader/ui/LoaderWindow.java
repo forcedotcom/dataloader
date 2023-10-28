@@ -47,6 +47,7 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Config.ConfigListener;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.uiActions.*;
+import com.salesforce.dataloader.util.AppUtil;
 
 /**
  * The main class for the Loader UI.
@@ -199,7 +200,8 @@ public class LoaderWindow extends ApplicationWindow {
         if (!config.getBoolean(Config.HIDE_WELCOME_SCREEN)) {
             displayTitleDialog(Display.getDefault(), this.operationActionsByIndex, this.controller.getConfig());
         }
-
+        displayUpgradeDialog(Display.getDefault());
+        
         comp.pack();
         parent.pack();
 
@@ -281,6 +283,19 @@ public class LoaderWindow extends ApplicationWindow {
 
                 for (Entry<Integer, OperationUIAction> ent : map.entrySet())
                     if (result == ent.getKey()) ent.getValue().run();
+            }
+        });
+    }
+    
+    private void displayUpgradeDialog(final Display display) {
+        if (AppUtil.DATALOADER_VERSION.equals(AppUtil.getLatestDownloadableDataLoaderVersion())) {
+            return; // running app's version matches with downloadable version.
+        }
+        display.asyncExec(new Thread() {
+            @Override
+            public void run() {
+                LoaderDownloadDialog dlg = new LoaderDownloadDialog(display.getActiveShell());
+                int result = dlg.open();
             }
         });
     }
