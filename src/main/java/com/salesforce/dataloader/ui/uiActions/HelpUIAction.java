@@ -63,15 +63,14 @@ public class HelpUIAction extends Action {
     }
     
     private String getLoaderUpgradeMessage() {
-        String upgradeMsg = "";
+        String upgradeMsg = Labels.getString("HelpUIAction.latestVersion");
         if (!AppUtil.DATALOADER_VERSION.equals(AppUtil.getLatestDownloadableDataLoaderVersion())) {
             upgradeMsg = 
                     Labels.getFormattedString("LoaderDownloadDialog.messageLineOne", 
                                             new String[] {AppUtil.getLatestDownloadableDataLoaderVersion(), 
-                                                          AppUtil.DATALOADER_DOWNLOAD_URL})
-                    + System.getProperty("line.separator")
-                    + System.getProperty("line.separator");
+                                                          AppUtil.DATALOADER_DOWNLOAD_URL});
         }
+        upgradeMsg += System.getProperty("line.separator") + System.getProperty("line.separator");
         return upgradeMsg;
     }
 
