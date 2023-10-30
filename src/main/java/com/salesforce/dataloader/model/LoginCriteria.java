@@ -95,11 +95,11 @@ public class LoginCriteria {
     }
 
     public void updateConfig(Config config) {
-        config.setValue(Config.USERNAME, config.STRING_DEFAULT);
-        config.setValue(Config.PASSWORD, config.STRING_DEFAULT);
+        config.setValue(Config.USERNAME, Config.STRING_DEFAULT);
+        config.setValue(Config.PASSWORD, Config.STRING_DEFAULT);
         config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
-        config.setValue(Config.SFDC_INTERNAL_SESSION_ID, config.STRING_DEFAULT);
-        config.setValue(Config.OAUTH_ENVIRONMENT, config.STRING_DEFAULT);
+        config.setValue(Config.SFDC_INTERNAL_SESSION_ID, Config.STRING_DEFAULT);
+        config.setValue(Config.OAUTH_ENVIRONMENT, Config.STRING_DEFAULT);
 
         switch (getMode()){
             case LoginCriteria.UsernamePasswordLoginStandard:

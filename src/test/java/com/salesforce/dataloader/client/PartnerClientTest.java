@@ -62,6 +62,7 @@ import static org.junit.Assert.assertTrue;
  * @author Alex Warshavsky
  * @since 8.0
  */
+@SuppressWarnings("unused")
 public class PartnerClientTest extends ProcessTestBase {
 
     @Test

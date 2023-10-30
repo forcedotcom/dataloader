@@ -61,6 +61,7 @@ public class OAuthLoginDefaultControl extends Composite {
 
         grid.createPadding(2);
 
+        @SuppressWarnings("unused")
         Label emptyLabel = grid.createLabel(8, "");
         loginButton = grid.createButton(2, SWT.PUSH | SWT.FILL | SWT.FLAT, Labels.getString("SettingsPage.login"));
         loginButton.addListener(SWT.Selection, this::loginButton_Clicked);

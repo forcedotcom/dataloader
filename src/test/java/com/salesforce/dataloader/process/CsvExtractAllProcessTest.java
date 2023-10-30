@@ -44,6 +44,7 @@ import java.util.Map;
  * @author Aleksandr Shulman, Colin Jarvis
  * @since 21.0
  */
+@SuppressWarnings("unused")
 @RunWith(Parameterized.class)
 public class CsvExtractAllProcessTest extends ProcessExtractTestBase {
 

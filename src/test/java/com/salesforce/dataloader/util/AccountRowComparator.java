@@ -30,7 +30,6 @@ import com.salesforce.dataloader.model.Row;
 import static com.salesforce.dataloader.dao.database.DatabaseTestUtil.NAME_COL;
 
 import java.util.Comparator;
-import java.util.Map;
 
 /**
  * Comparator for the account rows from the database reader.

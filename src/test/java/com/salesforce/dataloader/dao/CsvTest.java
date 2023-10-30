@@ -39,8 +39,6 @@ import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.AppUtil;
 
-import org.junit.Assert;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

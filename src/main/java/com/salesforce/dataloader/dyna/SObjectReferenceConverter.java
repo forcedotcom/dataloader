@@ -83,6 +83,7 @@ public class SObjectReferenceConverter implements Converter {
      *  successfully
      */
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Object convert(Class type, Object value) {
         try {
             Object refValue = value;

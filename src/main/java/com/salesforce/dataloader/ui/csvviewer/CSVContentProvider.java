@@ -44,9 +44,8 @@ public class CSVContentProvider implements IStructuredContentProvider {
      * @return Object[]
      */
     @Override
-    @SuppressWarnings("unchecked")
     public Object[] getElements(Object arg0) {
-        List rowList = (List) arg0;
+        List<?> rowList = (List<?>) arg0;
         return rowList.toArray(new List[rowList.size()]);
 
     }

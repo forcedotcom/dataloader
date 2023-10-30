@@ -29,10 +29,8 @@ import org.apache.commons.beanutils.ConversionException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.util.AppUtil;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;

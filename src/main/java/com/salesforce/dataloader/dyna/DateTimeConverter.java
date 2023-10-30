@@ -120,6 +120,7 @@ public class DateTimeConverter implements Converter {
 
 
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Object convert(Class type, Object value) {
         if (value == null) {
             return null;

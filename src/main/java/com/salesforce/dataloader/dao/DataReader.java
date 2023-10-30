@@ -27,7 +27,6 @@
 package com.salesforce.dataloader.dao;
 
 import java.util.List;
-import java.util.Map;
 
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.model.Row;

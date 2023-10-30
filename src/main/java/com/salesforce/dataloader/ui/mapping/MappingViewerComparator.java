@@ -29,14 +29,14 @@ package com.salesforce.dataloader.ui.mapping;
 import java.util.Map.Entry;
 
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 
 import com.salesforce.dataloader.ui.MappingDialog;
 
 /**
  * This class implements the sorting for the SforceTable
  */
-public class MappingViewerSorter extends ViewerSorter {
+public class MappingViewerComparator extends ViewerComparator {
     private static final int ASCENDING = 0;
     private static final int DESCENDING = 1;
 
@@ -68,7 +68,7 @@ public class MappingViewerSorter extends ViewerSorter {
             return -1;
         if (s2 == null)
             return 1;
-        return collator.compare(s1, s2);
+        return s1.compareToIgnoreCase(s2);
     }
 
     /**

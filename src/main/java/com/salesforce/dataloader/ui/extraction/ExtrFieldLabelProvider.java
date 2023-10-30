@@ -50,6 +50,7 @@ public class ExtrFieldLabelProvider extends CellLabelProvider {
     @Override
     public void addListener(ILabelProviderListener arg0) {
         // Throw it away
+        @SuppressWarnings("unused")
         ILabelProviderListener listener = arg0;
     }
 

@@ -323,25 +323,6 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
         }
     }
 
-    /**
-     * Calculates the difference in size between the given page and the page container. A larger page results in a
-     * positive delta.
-     *
-     * @param page
-     *            the page
-     * @return the size difference encoded as a <code>new Point(deltaWidth,deltaHeight)</code>
-     */
-    private Point calculatePageSizeDelta(IWizardPage page) {
-        Control pageControl = page.getControl();
-        if (pageControl == null)
-            // control not created yet
-            return new Point(0, 0);
-        Point contentSize = pageControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-        Rectangle rect = pageContainerLayout.getClientArea(pageContainer);
-        Point containerSize = new Point(rect.width, rect.height);
-        return new Point(Math.max(0, contentSize.x - containerSize.x), Math.max(0, contentSize.y - containerSize.y));
-    }
-
     /*
      * (non-Javadoc) Method declared on Dialog.
      */
@@ -1047,14 +1028,15 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      *            the saved UI state as returned by <code>aboutToStart</code>
      * @see #aboutToStart
      */
+    @SuppressWarnings("unchecked")
     private void stopped(Object savedState) {
         if (getShell() != null) {
             if (wizard.needsProgressMonitor()) {
                 progressMonitorPart.setVisible(false);
                 progressMonitorPart.removeFromCancelComponent(cancelButton);
             }
-            Map state = (Map)savedState;
-            restoreUIState(state);
+            Map<?,?> state = (Map<?,?>)savedState;
+            restoreUIState((Map<String, Boolean>)state);
             cancelButton.addSelectionListener(cancelListener);
             setDisplayCursor(null);
             cancelButton.setCursor(null);

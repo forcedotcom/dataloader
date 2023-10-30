@@ -27,6 +27,7 @@ package com.salesforce.dataloader.model;
 
 import com.salesforce.dataloader.util.DateOnlyCalendar;
 
+@SuppressWarnings("serial")
 public class NADateOnlyCalendarValue  extends DateOnlyCalendar {
 
     private static final NADateOnlyCalendarValue INSTANCE = new NADateOnlyCalendarValue();

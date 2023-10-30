@@ -25,11 +25,8 @@
  */
 package com.salesforce.dataloader.ui;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+
 import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.model.OAuthToken;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.logging.log4j.Logger;
@@ -41,10 +38,6 @@ import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.HashMap;

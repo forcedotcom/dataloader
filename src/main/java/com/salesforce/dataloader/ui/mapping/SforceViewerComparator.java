@@ -24,28 +24,67 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.ui.entitySelection;
+package com.salesforce.dataloader.ui.mapping;
 
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 
-import com.sforce.soap.partner.DescribeGlobalSObjectResult;
+import com.salesforce.dataloader.ui.MappingDialog;
+import com.sforce.soap.partner.Field;
 
 /**
- * Sorts the Entity Lists
- *
- * @author Lexi Viripaeff
- * @since 6.0
+ * This class implements the sorting for the SforceTable
  */
-public class EntityViewerSorter extends ViewerSorter {
-    @Override
-    public int compare(Viewer viewer, Object e1, Object e2) {
-        DescribeGlobalSObjectResult d1 = (DescribeGlobalSObjectResult)e1;
-        DescribeGlobalSObjectResult d2 = (DescribeGlobalSObjectResult)e2;
+public class SforceViewerComparator extends ViewerComparator {
+    private static final int ASCENDING = 0;
+    private static final int DESCENDING = 1;
 
-        // Determine which column and do the appropriate sort
-        return collator.compare(d1.getLabel(), d2.getLabel());
+    private int column = 0;
+    private int direction = ASCENDING;
+
+    /**
+     * Does the sort. If it's a different column from the previous sort, do an ascending sort. If it's the same column
+     * as the last sort, toggle the sort direction.
+     *
+     * @param column
+     */
+    public void doSort(int column) {
+        if (column == this.column) {
+            // Same column as last sort; toggle the direction
+            direction = 1 - direction;
+        } else {
+            // New column; do an ascending sort
+            this.column = column;
+            direction = ASCENDING;
+        }
     }
 
+    /**
+     * Compares the object for sorting
+     */
+    @Override
+    public int compare(Viewer viewer, Object e1, Object e2) {
+        int rc = 0;
+        Field f1 = (Field)e1;
+        Field f2 = (Field)e2;
 
+        // Determine which column and do the appropriate sort
+        switch (column) {
+        case MappingDialog.FIELD_LABEL:
+            rc = f1.getLabel().compareToIgnoreCase(f2.getLabel());
+            break;
+        case MappingDialog.FIELD_NAME:
+            rc = f1.getName().compareToIgnoreCase(f2.getName());
+            break;
+        case MappingDialog.FIELD_TYPE:
+            rc = f1.getType().toString().compareToIgnoreCase(f2.getType().toString());
+            break;
+        }
+
+
+        // If descending order, flip the direction
+        if (direction == DESCENDING) rc = -rc;
+
+        return rc;
+    }
 }

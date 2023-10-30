@@ -87,6 +87,7 @@ public final class BooleanConverter implements Converter {
      *  successfully
      */
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Object convert(Class type, Object value) {
 
         if (value == null || value instanceof Boolean) {

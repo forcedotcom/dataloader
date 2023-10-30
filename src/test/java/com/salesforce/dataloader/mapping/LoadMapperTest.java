@@ -50,6 +50,7 @@ import static org.junit.Assert.assertTrue;
  * @author Federico Recio
  * @since 8.0
  */
+@SuppressWarnings("unused")
 public class LoadMapperTest extends ConfigTestBase {
 
     private static final String[] SOURCE_NAMES = { "sourceOne", "sourceTwo", "sourceThree" };

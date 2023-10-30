@@ -41,7 +41,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -1199,19 +1198,6 @@ public class Config {
     }
 
     /**
-     * @param propName name of the property
-     * @return old value of the property
-     */
-    private String encryptProperty(String propName) throws GeneralSecurityException, UnsupportedEncodingException {
-        String oldValue = getString(propName);
-        if (oldValue != null && oldValue.length() > 0) {
-
-            putValue(propName, encrypter.encryptMsg(oldValue));
-        }
-        return oldValue;
-    }
-
-    /**
      * Saves this config to the given output stream. The given string is inserted as header
      * information.
      *
@@ -1261,10 +1247,6 @@ public class Config {
         setValue(name, value, false);
     }
     
-    private void setDefaultValue(String name, Date value) {
-        setValue(name, value, true);
-    }
-    
     private void setValue(String name, Date value, boolean skipIfAlreadySet) {
         setProperty(name, DATE_FORMATTER.format(value), skipIfAlreadySet);
     }
@@ -1274,10 +1256,6 @@ public class Config {
      */
     public void setValue(String name, String... values) {
         setValue(name, false, values);
-    }
-    
-    private void setDefaultValue(String name, String... values) {
-        setValue(name, true, values);
     }
     
     private void setValue(String name,  boolean skipIfAlreadySet, String... values) {

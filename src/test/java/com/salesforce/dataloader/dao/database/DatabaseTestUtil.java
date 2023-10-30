@@ -55,6 +55,7 @@ import java.util.Map;
  * @author Alex Warshavsky
  * @since 8.0
  */
+@SuppressWarnings("serial")
 public class DatabaseTestUtil {
 
     private static final Logger logger = LogManager.getLogger(DatabaseTestUtil.class);

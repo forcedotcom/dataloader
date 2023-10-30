@@ -47,6 +47,7 @@ import static org.junit.Assert.assertTrue;
  * @author Federico Recio
  * @since 27.0
  */
+@SuppressWarnings("unused")
 public class SOQLMapperTest extends ConfigTestBase {
 
     private SOQLMapper soqlMapper;
