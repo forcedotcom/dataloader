@@ -28,7 +28,6 @@ package com.salesforce.dataloader.action.visitor;
 
 import com.salesforce.dataloader.model.Row;
 
-import java.util.Map;
 
 /**
  * Visitor to calculate the size of a DataAccessObject

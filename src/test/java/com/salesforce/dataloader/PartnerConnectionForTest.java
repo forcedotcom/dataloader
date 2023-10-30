@@ -35,7 +35,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 
-import com.salesforce.dataloader.controller.Controller;
 import com.sforce.soap.partner.DeleteResult;
 import com.sforce.soap.partner.GetUserInfoResult;
 import com.sforce.soap.partner.PartnerConnection;

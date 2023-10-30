@@ -27,7 +27,6 @@
 package com.salesforce.dataloader.ui;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -63,7 +62,6 @@ import com.salesforce.dataloader.ui.csvviewer.CSVContentProvider;
 import com.salesforce.dataloader.ui.csvviewer.CSVLabelProvider;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DAORowUtil;
-import com.salesforce.dataloader.util.StreamGobbler;
 
 /**
  * This class creates the mapping dialog

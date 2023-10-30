@@ -28,15 +28,12 @@ package com.salesforce.dataloader.ui;
 
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
@@ -45,11 +42,10 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
 import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.ui.entitySelection.EntityContentProvider;
 import com.salesforce.dataloader.ui.entitySelection.EntityFilter;
 import com.salesforce.dataloader.ui.entitySelection.EntityLabelProvider;
-import com.salesforce.dataloader.ui.entitySelection.EntityViewerSorter;
+import com.salesforce.dataloader.ui.entitySelection.EntityViewerComparator;
 
 public class EntitySelectionListViewerUtil {
     private static final String PROPERTIES_PREFIX_STR = "DataSelectionPage";
@@ -94,7 +90,7 @@ public class EntitySelectionListViewerUtil {
             
         });
         listViewer.addFilter(filter);
-        listViewer.setSorter(new EntityViewerSorter());
+        listViewer.setComparator(new EntityViewerComparator());
         
         filterAll.addSelectionListener(new SelectionAdapter() {
             @Override

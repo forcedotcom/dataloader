@@ -26,8 +26,6 @@
 
 package com.salesforce.dataloader.ui.mapping;
 
-import java.util.Map;
-
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -35,23 +33,17 @@ import org.eclipse.swt.graphics.Image;
 import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.MappingDialog;
-import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Field;
-import com.sforce.soap.partner.FieldType;
-import com.sforce.ws.ConnectionException;
+
 
 /**
  * This class provides the labels for PlayerTable
  */
 public class SforceLabelProvider implements ITableLabelProvider {
-    private Controller controller;
-    private Map<String, DescribeRefObject> referenceObjects;
 
 
     // Constructs a PlayerLabelProvider
     public SforceLabelProvider(Controller controller) {
-        this.controller = controller;
-        this.referenceObjects = controller.getReferenceDescribes();
     }
 
 

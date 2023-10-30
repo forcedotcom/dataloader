@@ -26,6 +26,7 @@
 
 package com.salesforce.dataloader.exception;
 
+@SuppressWarnings("serial")
 public class OAuthBrowserLoginRunnerException extends Exception{
 
     /**

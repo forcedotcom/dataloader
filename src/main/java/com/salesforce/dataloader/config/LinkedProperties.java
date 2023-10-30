@@ -34,6 +34,7 @@ import java.util.function.Function;
 /**
  * A simple replacement for properties that will allow us to maintain order on a proprties object
  */
+@SuppressWarnings("serial")
 public class LinkedProperties extends Properties {
     private final LinkedHashMap<Object, Object> sorted =new LinkedHashMap<>();
 

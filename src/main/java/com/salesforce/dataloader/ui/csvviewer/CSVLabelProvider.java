@@ -57,7 +57,7 @@ public class CSVLabelProvider implements ITableLabelProvider {
      */
     @Override
     public String getColumnText(Object arg0, int arg1) {
-        List elem = (List)arg0;
+        List<?> elem = (List<?>)arg0;
         if (elem.size() > arg1) {
             Object obj = elem.get(arg1);
             return obj != null ? obj.toString() : "";

@@ -78,6 +78,7 @@ public final class DoubleConverter implements Converter {
      *                if conversion cannot be performed successfully
      */
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Object convert(Class type, Object value) {
         if (value == null || String.valueOf(value).length() == 0) {
             return null;

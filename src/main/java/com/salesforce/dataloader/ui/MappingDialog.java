@@ -265,7 +265,6 @@ public class MappingDialog extends BaseDialog {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 FileDialog dlg = new FileDialog(shell, SWT.SAVE);
-                Config config = getController().getConfig();
                 dlg.setFilterExtensions(new String[] { "*.sdl" });
                 String filename = dlg.open();
                 boolean cancel = false;
@@ -335,7 +334,7 @@ public class MappingDialog extends BaseDialog {
         mappingTblViewer = new TableViewer(shell, SWT.FULL_SELECTION);
         mappingTblViewer.setContentProvider(new MappingContentProvider());
         mappingTblViewer.setLabelProvider(new MappingLabelProvider());
-        mappingTblViewer.setSorter(new MappingViewerSorter());
+        mappingTblViewer.setComparator(new MappingViewerComparator());
 
         data = new GridData(GridData.FILL_BOTH);
 
@@ -360,7 +359,7 @@ public class MappingDialog extends BaseDialog {
                 //\u007f is delete
                 if (event.character == '\u007f' || event.character == '\b') {
                     IStructuredSelection selection = (IStructuredSelection)mappingTblViewer.getSelection();
-                    for (Iterator it = selection.iterator(); it.hasNext();) {
+                    for (Iterator<?> it = selection.iterator(); it.hasNext();) {
                         @SuppressWarnings("unchecked")
                         Map.Entry<String, String> elem = (Entry<String, String>)it.next();
                         String oldSforce = elem.getValue();
@@ -385,7 +384,7 @@ public class MappingDialog extends BaseDialog {
         csvFieldsCol.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                ((MappingViewerSorter)mappingTblViewer.getSorter()).doSort(MAPPING_DAO);
+                ((MappingViewerComparator)mappingTblViewer.getComparator()).doSort(MAPPING_DAO);
                 mappingTblViewer.refresh();
             }
         });
@@ -396,7 +395,7 @@ public class MappingDialog extends BaseDialog {
         sforceFieldNamesCol.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                ((MappingViewerSorter)mappingTblViewer.getSorter()).doSort(MAPPING_SFORCE);
+                ((MappingViewerComparator)mappingTblViewer.getComparator()).doSort(MAPPING_SFORCE);
                 mappingTblViewer.refresh();
             }
         });
@@ -424,7 +423,7 @@ public class MappingDialog extends BaseDialog {
         sforceTblViewer = new TableViewer(shell, SWT.FULL_SELECTION);
         sforceTblViewer.setContentProvider(new SforceContentProvider());
         sforceTblViewer.setLabelProvider(new SforceLabelProvider(this.getController()));
-        sforceTblViewer.setSorter(new SforceViewerSorter());
+        sforceTblViewer.setComparator(new SforceViewerComparator());
         sforceTblViewer.addFilter(new SforceFieldsFilter(sforceFieldsSearch));
 
         //add drag support
@@ -447,7 +446,7 @@ public class MappingDialog extends BaseDialog {
         tc.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                ((SforceViewerSorter)sforceTblViewer.getSorter()).doSort(FIELD_NAME);
+                ((SforceViewerComparator)sforceTblViewer.getComparator()).doSort(FIELD_NAME);
                 sforceTblViewer.refresh();
             }
         });
@@ -458,7 +457,7 @@ public class MappingDialog extends BaseDialog {
         tc.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                ((SforceViewerSorter)sforceTblViewer.getSorter()).doSort(FIELD_LABEL);
+                ((SforceViewerComparator)sforceTblViewer.getComparator()).doSort(FIELD_LABEL);
                 sforceTblViewer.refresh();
             }
         });
@@ -469,7 +468,7 @@ public class MappingDialog extends BaseDialog {
         tc.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                ((SforceViewerSorter)sforceTblViewer.getSorter()).doSort(FIELD_TYPE);
+                ((SforceViewerComparator)sforceTblViewer.getComparator()).doSort(FIELD_TYPE);
                 sforceTblViewer.refresh();
             }
         });

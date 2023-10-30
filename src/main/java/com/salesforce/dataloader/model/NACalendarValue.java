@@ -30,6 +30,7 @@ import java.util.GregorianCalendar;
 /**
  * Represents a null value for a datetime field.
  */
+@SuppressWarnings("serial")
 public class NACalendarValue extends GregorianCalendar {
 
     private static final NACalendarValue INSTANCE = new NACalendarValue();

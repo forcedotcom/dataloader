@@ -33,7 +33,6 @@ import java.util.*;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.junit.After;
 import org.junit.Assert;
 
 import com.salesforce.dataloader.*;

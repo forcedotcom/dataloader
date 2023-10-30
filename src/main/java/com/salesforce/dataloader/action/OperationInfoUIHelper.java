@@ -33,7 +33,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.graphics.Image;
 
-import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;

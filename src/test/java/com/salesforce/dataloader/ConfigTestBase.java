@@ -26,8 +26,6 @@
 package com.salesforce.dataloader;
 
 import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.exception.ConfigInitializationException;
-import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.util.AppUtil;
 
 import org.junit.Before;

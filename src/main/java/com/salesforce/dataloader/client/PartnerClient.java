@@ -791,7 +791,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
         if (getDescribeGlobalResults() != null) {
             Field[] entityFields = getFieldTypes().getFields();
-            String entityName = this.config.getString(Config.ENTITY);
 
             for (Field childObjectField : entityFields) {
                 // upsert on references (aka foreign keys) is supported only

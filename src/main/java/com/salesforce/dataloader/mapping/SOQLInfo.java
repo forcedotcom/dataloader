@@ -37,6 +37,7 @@ import com.salesforce.dataloader.util.AppUtil;
  * @author Colin Jarvis
  * @since 21.0
  */
+@SuppressWarnings("serial")
 class SOQLInfo {
 
     static class SOQLParserException extends Exception {

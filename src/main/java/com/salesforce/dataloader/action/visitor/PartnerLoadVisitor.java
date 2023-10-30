@@ -28,7 +28,6 @@ package com.salesforce.dataloader.action.visitor;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import com.salesforce.dataloader.model.Row;
 import org.apache.commons.beanutils.DynaBean;

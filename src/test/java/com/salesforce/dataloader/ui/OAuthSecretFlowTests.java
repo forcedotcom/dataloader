@@ -137,6 +137,7 @@ public class OAuthSecretFlowTests extends ConfigTestBase {
             when(mockSimplePost.getInput()).thenAnswer(i -> input);
             when(mockSimplePost.isSuccessful()).thenReturn(true);
 
+            @SuppressWarnings("unused")
             SimplePost simplePost = OAuthSecretFlow.OAuthSecretBrowserListener.handleSecondPost("simplePost", config);
 
             String expected = "ACCESS";
@@ -164,6 +165,7 @@ public class OAuthSecretFlowTests extends ConfigTestBase {
             when(mockSimplePost.getInput()).thenAnswer(i -> input);
             when(mockSimplePost.isSuccessful()).thenReturn(true);
 
+            @SuppressWarnings("unused")
             SimplePost simplePost = OAuthSecretFlow.OAuthSecretBrowserListener.handleSecondPost("simplePost", config);
 
             String expected = "REFRESHTOKEN";
@@ -190,6 +192,7 @@ public class OAuthSecretFlowTests extends ConfigTestBase {
             when(mockSimplePost.getInput()).thenAnswer(i -> input);
             when(mockSimplePost.isSuccessful()).thenReturn(true);
 
+            @SuppressWarnings("unused")
             SimplePost simplePost = OAuthSecretFlow.OAuthSecretBrowserListener.handleSecondPost("simplePost", config);
 
             String expected = "http://INSTANCEURL";

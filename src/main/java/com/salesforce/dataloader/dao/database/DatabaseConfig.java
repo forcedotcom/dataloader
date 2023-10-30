@@ -51,7 +51,8 @@ public class DatabaseConfig {
         	dbConfigFileLocation = "file://".concat(dbConfigFileLocation);
         }
         
-    	ApplicationContext  configFactory = new FileSystemXmlApplicationContext(dbConfigFileLocation);
+    	@SuppressWarnings("resource")
+        ApplicationContext  configFactory = new FileSystemXmlApplicationContext(dbConfigFileLocation);
         return (DatabaseConfig)configFactory.getBean(dbConnectionName);
     }
 

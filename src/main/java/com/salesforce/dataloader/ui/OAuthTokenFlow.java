@@ -28,11 +28,8 @@ package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.model.OAuthToken;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressEvent;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 import java.io.UnsupportedEncodingException;

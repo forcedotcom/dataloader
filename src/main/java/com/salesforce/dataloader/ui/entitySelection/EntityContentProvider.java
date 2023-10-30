@@ -46,7 +46,7 @@ public class EntityContentProvider implements IStructuredContentProvider {
      */
     @Override
     public Object[] getElements(Object arg0) {
-        return ((HashMap)arg0).values().toArray();
+        return ((HashMap<?, ?>)arg0).values().toArray();
     }
 
     /**

@@ -63,7 +63,7 @@ public class MappingDragListener extends DragSourceAdapter {
                 IStructuredSelection selection = (IStructuredSelection)viewer.getSelection();
                 Field[] fields = (Field[])viewer.getInput();
                 ArrayList<Field> fieldList = new ArrayList<Field>(Arrays.asList(fields));
-                for (Iterator it = selection.iterator(); it.hasNext();) {
+                for (Iterator<?> it = selection.iterator(); it.hasNext();) {
                     Field eventField = (Field)it.next();
                     fieldList.remove(eventField);
                 }

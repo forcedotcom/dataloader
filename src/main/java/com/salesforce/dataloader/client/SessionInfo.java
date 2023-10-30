@@ -29,6 +29,7 @@ import java.util.Calendar;
 
 import com.sforce.soap.partner.GetUserInfoResult;
 
+@SuppressWarnings("serial")
 public class SessionInfo {
 
     public static class NotLoggedInException extends RuntimeException {

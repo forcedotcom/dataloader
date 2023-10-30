@@ -54,6 +54,7 @@ import static org.junit.Assert.assertTrue;
  * @since 21.0
  */
 @RunWith(Parameterized.class)
+@SuppressWarnings("unused")
 public class CsvExtractProcessTest extends ProcessExtractTestBase {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getParameters() {

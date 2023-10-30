@@ -63,6 +63,7 @@ import static org.junit.Assert.assertNull;
  * @userstory Commenting existing data loader tests and uploading into QA force
  */
 @RunWith(Parameterized.class)
+@SuppressWarnings("unused")
 public class CsvProcessTest extends ProcessTestBase {
 
     public CsvProcessTest(Map<String, String> config) {
