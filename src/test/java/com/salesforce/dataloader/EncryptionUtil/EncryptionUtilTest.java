@@ -140,6 +140,7 @@ public class EncryptionUtilTest {
         String encryptedPassword = encryptionAesUtil.encryptMsg(passwordText);
         EncryptedDataSource dataSource = new EncryptedDataSource();
         dataSource.setPassword(encryptedPassword);
+        @SuppressWarnings("deprecation")
         String savedPassword = dataSource.getPassword();
         dataSource.close();
         Assert.assertNotEquals("Encrypted password should be not be equal to original password", passwordText, encryptedPassword);                

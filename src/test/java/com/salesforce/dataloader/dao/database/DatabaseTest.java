@@ -27,7 +27,6 @@ package com.salesforce.dataloader.dao.database;
 
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.database.DatabaseTestUtil.DateType;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.AccountRowComparator;
