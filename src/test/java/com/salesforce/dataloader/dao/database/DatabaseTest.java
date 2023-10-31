@@ -155,12 +155,8 @@ public class DatabaseTest extends ConfigTestBase {
                     assertTrue("Error reading data row #" + i + ": the row shouldn't be empty", readRow.size() > 0);
                     Row expectedRow = DatabaseTestUtil.getInsertOrUpdateAccountRow(isInsert, rowsProcessed, DatabaseTestUtil.DateType.VALIDATION);
                     // verify all expected data
-                    for(String colName : VALIDATE_COLS) {
-                        if(validateDates && colName.equals(DateType.DATE)) {
-                            verifyCol(DatabaseTestUtil.LAST_UPDATED_COL, readRow, expectedRow);
-                        } else {
-                            verifyCol(colName, readRow, expectedRow);
-                        }
+                    for (String colName : VALIDATE_COLS) {
+                        verifyCol(colName, readRow, expectedRow);
                     }
 
                     rowsProcessed++;
