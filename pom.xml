@@ -187,7 +187,6 @@
       </testResource>
     </testResources>
 
-	<pluginManagement>
     <plugins>
 <!-- https://mvnrepository.com/artifact/org.codehaus.mojo/versions-maven-plugin -->
       <plugin>
@@ -524,6 +523,5 @@
         </executions>
       </plugin>
     </plugins>
-    </pluginManagement>
   </build>
 </project>
