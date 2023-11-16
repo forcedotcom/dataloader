@@ -206,6 +206,7 @@ public class LoaderWindow extends ApplicationWindow {
         
         comp.pack();
         parent.pack();
+        addMenuBar();
 
         return parent;
     }
@@ -298,6 +299,7 @@ public class LoaderWindow extends ApplicationWindow {
             public void run() {
                 LoaderUpgradeDialog dlg = new LoaderUpgradeDialog(display.getActiveShell());
                 dlg.open();
+                addMenuBar();
             }
         });
     }
