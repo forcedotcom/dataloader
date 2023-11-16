@@ -237,6 +237,7 @@ public class Config {
     public static final String DEBUG_MESSAGES_FILE = "sfdc.debugMessagesFile"; //$NON-NLS-1$
     public static final String RESET_URL_ON_LOGIN = "sfdc.resetUrlOnLogin"; //$NON-NLS-1$
     public static final String TRUNCATE_FIELDS = "sfdc.truncateFields";//$NON-NLS-1$
+    public static final String FORMAT_PHONE_FIELDS = "sfdc.formatPhoneFields";//$NON-NLS-1$
     public static final String BULK_API_ENABLED = "sfdc.useBulkApi";
     public static final String BULK_API_SERIAL_MODE = "sfdc.bulkApiSerialMode";
     public static final String BULK_API_CHECK_STATUS_INTERVAL = "sfdc.bulkApiCheckStatusInterval";
@@ -549,6 +550,7 @@ public class Config {
         setDefaultValue(DAO_WRITE_BATCH_SIZE, DEFAULT_DAO_WRITE_BATCH_SIZE);
         setDefaultValue(DAO_READ_BATCH_SIZE, DEFAULT_DAO_READ_BATCH_SIZE);
         setDefaultValue(TRUNCATE_FIELDS, true);
+        setDefaultValue(FORMAT_PHONE_FIELDS, false);
         // TODO: When we're ready, make Bulk API turned on by default.
         setDefaultValue(BULK_API_ENABLED, useBulkApiByDefault());
         setDefaultValue(BULK_API_SERIAL_MODE, false);

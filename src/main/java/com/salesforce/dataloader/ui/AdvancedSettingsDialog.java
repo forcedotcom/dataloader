@@ -100,6 +100,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonWriteUtf8;
     private Button buttonEuroDates;
     private Button buttonTruncateFields;
+    private Button buttonFormatPhoneFields;
     private Button buttonKeepAccountTeam;
     private Button buttonUseBulkApi;
     private Button buttonUseBulkV2Api;
@@ -444,6 +445,15 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         buttonTruncateFields = new Button(restComp, SWT.CHECK);
         buttonTruncateFields.setSelection(config.getBoolean(Config.TRUNCATE_FIELDS));
+
+        //format phone fields on the client side
+        Label labelFormatPhoneFields = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelFormatPhoneFields.setText(Labels.getString("AdvancedSettingsDialog.formatPhoneFields"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelTruncateFields.setLayoutData(data);
+
+        buttonFormatPhoneFields = new Button(restComp, SWT.CHECK);
+        buttonFormatPhoneFields.setSelection(config.getBoolean(Config.FORMAT_PHONE_FIELDS));
 
         Label labelCsvCommand = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelCsvCommand.setText(Labels.getString("AdvancedSettingsDialog.useCommaAsCsvDelimiter"));
@@ -851,6 +861,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.RESET_URL_ON_LOGIN, buttonResetUrl.getSelection());
                 config.setValue(Config.NO_COMPRESSION, buttonCompression.getSelection());
                 config.setValue(Config.TRUNCATE_FIELDS, buttonTruncateFields.getSelection());
+                config.setValue(Config.FORMAT_PHONE_FIELDS, buttonFormatPhoneFields.getSelection());
                 config.setValue(Config.TIMEOUT_SECS, textTimeout.getText());
                 config.setValue(Config.SORT_EXTRACT_FIELDS, buttonSortExtractFields.getSelection());
                 config.setValue(Config.ENABLE_EXTRACT_STATUS_OUTPUT, buttonOutputExtractStatus.getSelection());
