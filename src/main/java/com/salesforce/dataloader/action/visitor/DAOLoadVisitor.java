@@ -346,7 +346,9 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
     private Object getPhoneFieldValue(String fieldName, Object fieldValue) {
         getHtmlFormattedAndPhoneSforceFieldList();
-        if (this.phoneSforceFieldList == null || !this.phoneSforceFieldList.contains(fieldName)) {
+        if (this.phoneSforceFieldList == null
+                || !this.phoneSforceFieldList.contains(fieldName)
+                || !this.getConfig().getBoolean(Config.FORMAT_PHONE_FIELDS)) {
             return fieldValue;
         }
         String localeStr = Locale.getDefault().toString();
