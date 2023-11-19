@@ -802,6 +802,8 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 if (parentObjectNames == null || parentObjectNames.length == 0 || parentObjectNames[0] == null
                     || relationshipName == null || relationshipName.length() == 0
                     || (!childObjectField.isCreateable() && !childObjectField.isUpdateable())) {
+                    // parent-child relationship either does not exist or
+                    // it is neither modifiable nor updateable.
                     continue;
                 }
 
@@ -809,48 +811,54 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 if (parentObjectNames.length >= DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD) {
                     childObjectField.setLabel(childObjectField.getLabel() + " (Id)");
                 } else {
-                    for (int parentObjectIndex = 0; parentObjectIndex < parentObjectNames.length; parentObjectIndex++ ) {
-                        String parentObjectName = parentObjectNames[parentObjectIndex];
-
-                        // make sure that the object is legal to upsert
-                        Field[] parentObjectFields = describeSObject(parentObjectName).getFields();
-                        Map<String, Field> parentIdLookupFieldMap = new HashMap<String, Field>();
-                        for (Field parentField : parentObjectFields) {
-                            if (!parentField.isIdLookup()) {
-                                continue;
-                            }
-                            if (parentField.getType() == FieldType.id) {
-                                // add parents' id field labels in parenthesis to the child's
-                                // field label.
-                                String childFieldLabel = childObjectField.getLabel();
-                                String[] childFieldLabelParts = childFieldLabel.split(" \\(.+\\)$");
-                                childFieldLabel = childFieldLabelParts[0];
-                                if (parentObjectIndex == 0) {
-                                    childFieldLabel = childFieldLabel + " (";
-                                } else {
-                                    childFieldLabel = childFieldLabel + ", ";
-                                }
-                                childFieldLabel = childFieldLabel + parentField.getLabel();
-                                if (parentObjectIndex == parentObjectNames.length - 1) {
-                                    childFieldLabel = childFieldLabel + ")";
-                                }
-                                childObjectField.setLabel(childFieldLabel);
-                            } else { // non-Id lookup field on the parent entity
-                                if (haSingleParentObject) {
-                                    parentIdLookupFieldMap.put(parentField.getName(), parentField);
-                                }
-                            }
-                        } // for loop
-                        if (!parentIdLookupFieldMap.isEmpty()) {
-                            // A non-empty parentIdLookupFieldMap implies non-polymorphic lookup relationship
-                            // to a parent object that has idLookup fields.
-                            DescribeRefObject describeRelationship = new DescribeRefObject(parentObjectName, childObjectField, parentIdLookupFieldMap);
-                            referenceDescribes.put(relationshipName, describeRelationship);
-                        }
-                    }
+                    processParentObjectArrayForLookupReferences(parentObjectNames, childObjectField, haSingleParentObject);
                 }
             }
         }
+    }
+    
+    private void processParentObjectArrayForLookupReferences(String[] parentObjectNames, Field childObjectField, boolean haSingleParentObject) throws ConnectionException {
+        for (int parentObjectIndex = 0; parentObjectIndex < parentObjectNames.length; parentObjectIndex++ ) {
+            String parentObjectName = parentObjectNames[parentObjectIndex];
+            processParentObjectForLookupReferences(parentObjectName, childObjectField, haSingleParentObject, parentObjectIndex, parentObjectNames.length);
+        }
+    }
+    
+    private void processParentObjectForLookupReferences(String parentObjectName, Field childObjectField, boolean haSingleParentObject, int parentObjectIndex, int totalParentObjects) throws ConnectionException {
+        Field[] parentObjectFields = describeSObject(parentObjectName).getFields();
+        Map<String, Field> parentIdLookupFieldMap = new HashMap<String, Field>();
+        for (Field parentField : parentObjectFields) {
+            processParentFieldForLookupReference(parentField, childObjectField, haSingleParentObject, parentObjectIndex, totalParentObjects, parentIdLookupFieldMap);
+        }
+        if (!parentIdLookupFieldMap.isEmpty()) {
+            DescribeRefObject describeRelationship = new DescribeRefObject(parentObjectName, childObjectField, parentIdLookupFieldMap);
+            referenceDescribes.put(childObjectField.getRelationshipName(), describeRelationship);
+        }
+    }
+    
+    private void processParentFieldForLookupReference(Field parentField, Field childObjectField, boolean haSingleParentObject, int parentObjectIndex, int totalParentObjects, Map<String, Field> parentIdLookupFieldMap) {
+        if (!parentField.isIdLookup()) {
+            return;
+        }
+        if (parentField.getType() == FieldType.id) {
+            updateChildFieldLabelWithParentIdLabels(parentField, childObjectField, parentObjectIndex, totalParentObjects);
+        } else if (haSingleParentObject) {
+            parentIdLookupFieldMap.put(parentField.getName(), parentField);
+        }
+    }
+    
+    private void updateChildFieldLabelWithParentIdLabels(Field parentField, Field childObjectField, int parentObjectIndex, int totalParentObjects) {
+        String childFieldLabel = childObjectField.getLabel().split(" \\(.+\\)$")[0];
+        if (parentObjectIndex == 0) {
+            childFieldLabel += " (";
+        } else {
+            childFieldLabel += ", ";
+        }
+        childFieldLabel += parentField.getLabel();
+        if (parentObjectIndex == totalParentObjects - 1) {
+            childFieldLabel += ")";
+        }
+        childObjectField.setLabel(childFieldLabel);
     }
 
     /**
