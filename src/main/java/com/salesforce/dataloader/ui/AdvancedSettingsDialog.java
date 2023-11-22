@@ -96,6 +96,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonShowLoaderUpgradeScreen;
     private Button buttonOutputExtractStatus;
     private Button buttonSortExtractFields;
+    private Button buttonLimitQueryResultColumnsToFieldsInQuery;
     private Button buttonReadUtf8;
     private Button buttonWriteUtf8;
     private Button buttonEuroDates;
@@ -400,6 +401,15 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         buttonSortExtractFields = new Button(restComp, SWT.CHECK);
         buttonSortExtractFields.setSelection(config.getBoolean(Config.SORT_EXTRACT_FIELDS));
+        
+        // enable/disable limiting query result columns to fields specified in the SOQL query
+        Label labelLimitQueryResultColumnsToFieldsInQuery = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelLimitQueryResultColumnsToFieldsInQuery.setText(Labels.getString(this.getClass().getSimpleName() + ".limitOutputToQueryFields")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelSortExtractFields.setLayoutData(data);
+       
+        buttonLimitQueryResultColumnsToFieldsInQuery = new Button(restComp, SWT.CHECK);
+        buttonLimitQueryResultColumnsToFieldsInQuery.setSelection(config.getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS));
 
         //enable/disable output of success file for extracts
         Label labelOutputExtractStatus = new Label(restComp, SWT.RIGHT | SWT.WRAP);
@@ -864,6 +874,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.FORMAT_PHONE_FIELDS, buttonFormatPhoneFields.getSelection());
                 config.setValue(Config.TIMEOUT_SECS, textTimeout.getText());
                 config.setValue(Config.SORT_EXTRACT_FIELDS, buttonSortExtractFields.getSelection());
+                config.setValue(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS, buttonLimitQueryResultColumnsToFieldsInQuery.getSelection());
                 config.setValue(Config.ENABLE_EXTRACT_STATUS_OUTPUT, buttonOutputExtractStatus.getSelection());
                 config.setValue(Config.READ_UTF8, buttonReadUtf8.getSelection());
                 config.setValue(Config.WRITE_UTF8, buttonWriteUtf8.getSelection());
