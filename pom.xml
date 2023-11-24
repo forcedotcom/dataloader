@@ -142,7 +142,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jdbc</artifactId>
-      <version>6.1.0</version>
+      <version>6.1.1</version>
       <scope>test</scope>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
