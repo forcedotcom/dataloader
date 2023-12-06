@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>local.swt</groupId>
-  <artifactId>swtmac_aarch64</artifactId>
-  <version>4.29</version>
+  <artifactId>swtwin32_x86_64</artifactId>
+  <version>4.30</version>
   <description>POM was created from install:install-file</description>
 </project>
