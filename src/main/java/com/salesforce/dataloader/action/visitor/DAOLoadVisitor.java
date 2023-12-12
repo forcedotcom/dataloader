@@ -314,17 +314,18 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         if (input == null) {
             return null;
         }
+        String unescapedInput = StringEscapeUtils.unescapeHtml4(input);
         StringBuffer htmlFormattedStr = new StringBuffer("");
-        for (int i = 0, len = input.length(); i < len; i++) {
-            char c = input.charAt(i);
+        for (int i = 0, len = unescapedInput.length(); i < len; i++) {
+            char c = unescapedInput.charAt(i);
             int cval = c;
             char nextChar = 0;
-            if (i+1 < input.length()) {
-                nextChar = input.charAt(i+1);
+            if (i+1 < unescapedInput.length()) {
+                nextChar = unescapedInput.charAt(i+1);
             }
             char prevChar = 0;
             if (i > 0) {
-                prevChar = input.charAt(i-1);
+                prevChar = unescapedInput.charAt(i-1);
             }
 
             boolean isCharWhitespace = Character.isWhitespace(c) || cval == NONBREAKING_SPACE_ASCII_VAL;
