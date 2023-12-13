@@ -30,6 +30,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.junit.Test;
 
 import com.salesforce.dataloader.ConfigTestBase;
@@ -166,6 +167,16 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
         String origText = "<br></br><br/><br>";
         String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
         assertEquals("Incorrect conversion of " + origText, origText.length(), convertedText.length());
+    }
+    
+    @Test
+    public void testHTMLEncodedString() throws Exception {
+        String origText = "  &amp; & < * $ ~ % &quot;6400L -37° &#127752;  ";
+        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        assertEquals("Incorrect conversion of " + origText, origText.length() + 24, convertedText.length());
+        assertEquals("Incorrect conversion of " + origText,
+                        StringEscapeUtils.unescapeHtml4(origText).length(),
+                        StringEscapeUtils.unescapeHtml4(convertedText).length());
     }
 
 
