@@ -1556,11 +1556,17 @@ public class Config {
         Config config = null;
         try {
             config = new Config(configFilePath, argMap);
+            currentConfig = config;
             logger.info(Messages.getMessage(Config.class, "configInit")); //$NON-NLS-1$
         } catch (IOException | ProcessInitializationException e) {
             throw new ConfigInitializationException(Messages.getMessage(Config.class, "errorConfigLoad", configFilePath), e);
         }
         return config;
+    }
+    
+    private static Config currentConfig = null;
+    public static Config getCurrentConfig() {
+        return currentConfig;
     }
     
     public static interface ConfigListener {

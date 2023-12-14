@@ -27,12 +27,16 @@
 package com.salesforce.dataloader.dyna;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.Converter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.ws.util.FileUtil;
@@ -101,7 +105,18 @@ public final class FileByteArrayConverter implements Converter {
                 file.setReadable(true);
             }
             FileUtil.copy(new FileInputStream(absolutePath), byteStream);
-            return byteStream.toByteArray();
+            Path pathToValueFile = Path.of(absolutePath);
+            String mimeType = Files.probeContentType(pathToValueFile);
+            Config config = Config.getCurrentConfig();
+            if (mimeType.equalsIgnoreCase("text/plain")
+                    && config != null
+                    && config.getBoolean(Config.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT)) {
+                String content = byteStream.toString();
+                String formattedContent = DAOLoadVisitor.convertToHTMLFormatting(content, DAOLoadVisitor.DEFAULT_RICHTEXT_REGEX);
+                return formattedContent.getBytes();
+            } else {
+                return byteStream.toByteArray();
+            }
         } catch (Exception e) {
             if (e instanceof java.io.FileNotFoundException) {
                 if (AppUtil.getOSType() == AppUtil.OSType.MACOSX 
