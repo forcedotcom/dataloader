@@ -171,12 +171,17 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
     
     @Test
     public void testHTMLEncodedString() throws Exception {
-        String origText = "  &amp; & < * $ ~ % &quot;6400L -37° &#127752;  ";
+        String origText = "  &amp; & < * $ ~ % &quot;6400L -37° &#127752; \n1  \r2  \r\n3";
         String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
-        assertEquals("Incorrect conversion of " + origText, origText.length() + 24, convertedText.length());
+        int diff = convertedText.length() - origText.length();
+        assertEquals("Incorrect conversion of " + origText, origText.length() + 45, convertedText.length());
+
+        String unescapedOrigText = StringEscapeUtils.unescapeHtml4(origText);
+        String unescapedConvertedText = StringEscapeUtils.unescapeHtml4(convertedText);
+        diff = unescapedConvertedText.length() - unescapedOrigText.length();
         assertEquals("Incorrect conversion of " + origText,
-                        StringEscapeUtils.unescapeHtml4(origText).length(),
-                        StringEscapeUtils.unescapeHtml4(convertedText).length());
+                unescapedOrigText.length()+11,
+                unescapedConvertedText.length());
     }
 
 
