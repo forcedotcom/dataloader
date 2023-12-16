@@ -193,10 +193,12 @@ public class LoaderWindow extends ApplicationWindow {
 
         createButtons(comp);
 
-        getStatusLineManager().setMessage(Labels.getString("LoaderWindow.chooseAction"));
+        getStatusLineManager().setMessage(Labels.getString("LoaderWindow.chooseAction"));        
+        comp.pack();
+        parent.pack();
+        addMenuBar();
 
         Config config = controller.getConfig();
-
         if (!config.getBoolean(Config.HIDE_WELCOME_SCREEN)) {
             displayTitleDialog(Display.getDefault(), this.operationActionsByIndex, this.controller.getConfig());
         }
@@ -204,10 +206,6 @@ public class LoaderWindow extends ApplicationWindow {
             displayUpgradeDialog(Display.getDefault());
         }
         
-        comp.pack();
-        parent.pack();
-        addMenuBar();
-
         return parent;
     }
 
