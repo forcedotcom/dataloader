@@ -60,7 +60,7 @@
     <dependency>
       <groupId>com.force.api</groupId>
       <artifactId>force-partner-api</artifactId>
-      <version>59.0.0</version>
+      <version>60.0.0</version>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-dbcp2 -->
     <dependency>
