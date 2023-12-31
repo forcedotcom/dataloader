@@ -1,6 +1,6 @@
 # Prerequisites
 
-Latest release of Data Loader requires JRE 11 or later.
+Latest release of Data Loader requires JRE 17 or later.
 
 # Installing Data Loader
 Salesforce officially supports Data Loader for Windows and macOS. All other operating systems are unsupported. The list of supported macOS and Windows versions and CPU architecture for a released version of Data Loader is provided in the [Release Notes](https://github.com/forcedotcom/dataloader/releases) for that release.
