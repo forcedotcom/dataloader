@@ -1,6 +1,6 @@
 # Prerequisites
 
-Latest release of Data Loader requires JRE 17 or later.
+Java Runtime Environment (JRE) is required to install and run Data Loader. Review the installation instructions of the latest release for the required JRE version.
 
 # Installing Data Loader
 Salesforce officially supports Data Loader for Windows and macOS. All other operating systems are unsupported. The list of supported macOS and Windows versions and CPU architecture for a released version of Data Loader is provided in the [Release Notes](https://github.com/forcedotcom/dataloader/releases) for that release.
@@ -93,7 +93,7 @@ NOTE:
 Remove all personal, business-specific, and all other sensitive information from the files you share (e.g. config files, log files, screenshots, csv files, and others) before reporting an issue, especially on a public forum such as github.
 
 # Building Data Loader
-Developers need to use JDK 11 or later to build Data Loader. For example, developers can use [Zulu OpenJDK](https://www.azul.com/downloads/zulu) to build Data Loader.
+See the property setting for "<maven.compiler.release>" property in pom.xml to find out the JDK version to compile with.
 
     git clone git@github.com:forcedotcom/dataloader.git
     cd dataloader
