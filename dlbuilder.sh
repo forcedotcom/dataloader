@@ -6,7 +6,7 @@ run_mvn() {
   # run a mvn build to download dependencies from the central maven repo
   mvn clean compile
   # remove vulnerable class from log4j jar file
-  log4j_version_num=`awk '/<artifactId>log4j-core/{getline; print}' pom.xml | awk '{$1=$1};1' `
+  log4j_version_num=$(awk '/<artifactId>log4j-core/{getline; print}' pom.xml | awk '{$1=$1};1' )
   log4j_version_num=${log4j_version_num#<version>};
   log4j_version_num=${log4j_version_num%</version>};
   
