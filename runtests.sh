@@ -22,7 +22,6 @@ doClean="No"
 #encryptionFile=${HOME}/.dataloader/dataLoader.key
 encryptionFile=
 
-password=""
 failfast="-Dsurefire.skipAfterFailureCount=5"
 
 while getopts ":dicv:t:f:" flag
@@ -62,11 +61,15 @@ if [ "$#" -lt 4 ]; then
 fi 
 
 #echo $@
-jarname="$(find ./target -name dataloader-[0-9][0-9].[0-9].[0-9].jar | tail -1)"
 if [ ${doClean} == "Yes" ]; then
-    mvn clean package
+    mvn clean package -Dmaven.test.skip=true
 fi
 
+if [ ! -d ./target ]; then
+    mvn package -Dmaven.test.skip=true
+fi
+
+jarname="$(find ./target -name dataloader-[0-9][0-9].[0-9].[0-9].jar | tail -1)"
 #echo "password = ${4}"
 encryptedPassword="$(java ${debugEncryption} -cp ${jarname} com.salesforce.dataloader.process.DataLoaderRunner run.mode=encrypt -e ${4} ${encryptionFile} | tail -1)"
 #echo "encryptedPassword = ${encryptedPassword}"
