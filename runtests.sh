@@ -69,8 +69,13 @@ if [ ! -d ./target ]; then
     mvn package -Dmaven.test.skip=true
 fi
 
-jarname="$(find ./target -name dataloader-[0-9][0-9].[0-9].[0-9].jar | tail -1)"
+jarname="$(find ./target -name 'dataloader-[0-9][0-9].[0-9].[0-9].jar' | tail -1)"
 #echo "password = ${4}"
 encryptedPassword="$(java ${debugEncryption} -cp ${jarname} com.salesforce.dataloader.process.DataLoaderRunner run.mode=encrypt -e ${4} ${encryptionFile} | tail -1)"
+
+# uncomment the following lines to debug issues with password encryption
 #echo "encryptedPassword = ${encryptedPassword}"
+#decryptedPassword="$(java ${debugEncryption} -cp ${jarname} com.salesforce.dataloader.process.DataLoaderRunner run.mode=encrypt -d ${encryptedPassword} ${encryptionFile} | tail -1)"
+#echo "decryptedPassword = ${decryptedPassword}"
+
 mvn ${failfast} -Dtest.endpoint=${1} -Dtest.user.default=${2} -Dtest.user.restricted=${3} -Dtest.password=${encryptedPassword} -Dtest.encryptionFile=${encryptionFile} verify ${debug} ${test}
