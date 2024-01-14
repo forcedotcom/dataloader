@@ -61,22 +61,7 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
     @Override
     protected void loadBatch() throws DataAccessObjectException, LoadException {
         Object[] results = null;
-        Config config = this.controller.getConfig();
-        OwnerChangeOption keepAccountTeamOption = new OwnerChangeOption();
-        OwnerChangeOption[] ownerChangeOptionArray;
-        if (config.getBoolean(Config.PROCESS_KEEP_ACCOUNT_TEAM) 
-                && "Account".equalsIgnoreCase(config.getString(Config.ENTITY))) {
-            // Support for Keeping Account keepAccountTeam during Account ownership change
-            // More details at https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_header_ownerchangeoptions.htm
-            keepAccountTeamOption.setExecute(true);
-            keepAccountTeamOption.setType(OwnerChangeOptionType.KeepAccountTeam); // Transfer Open opportunities owned by the account's owner
-            ownerChangeOptionArray = new OwnerChangeOption[] {keepAccountTeamOption};
-        } else {
-            // clear ownerChangeOptions from the existing connection otherwise.
-            ownerChangeOptionArray = new OwnerChangeOption[] {};
-        }
-        this.controller.getPartnerClient().getClient().setOwnerChangeOptions(ownerChangeOptionArray);
-        
+        setHeaders();
         try {
             results = executeClientAction(getController().getPartnerClient(), dynaArray);
         } catch (ApiFault e) {
@@ -85,7 +70,20 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
             handleException(e);
         }
 
-        // set the current processed
+        writeOutputToWriter(results);
+        setLastRunProperties(results);
+
+        // update Monitor
+        getProgressMonitor().worked(results.length);
+        getProgressMonitor().setSubTask(getRateCalculator().calculateSubTask(getNumberOfRows(), getNumberErrors()));
+
+        // now clear the arrays
+        clearArrays();
+
+    }
+    
+    private void setLastRunProperties(Object[] results) throws LoadException {
+        // set the last processed row number in the config (*_lastRun.properties) file
         int currentProcessed;
         try {
             currentProcessed = getConfig().getInt(LastRun.LAST_LOAD_BATCH_ROW);
@@ -102,16 +100,28 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
             getLogger().error(errMsg, e);
             handleException(errMsg, e);
         }
-
-        writeOutputToWriter(results);
-
-        // update Monitor
-        getProgressMonitor().worked(results.length);
-        getProgressMonitor().setSubTask(getRateCalculator().calculateSubTask(getNumberOfRows(), getNumberErrors()));
-
-        // now clear the arrays
-        clearArrays();
-
+    }
+    
+    private void setHeaders() {
+        setKeepAccountTeamHeader();
+    }
+    
+    private void setKeepAccountTeamHeader() {
+        Config config = this.controller.getConfig();
+        OwnerChangeOption keepAccountTeamOption = new OwnerChangeOption();
+        OwnerChangeOption[] ownerChangeOptionArray;
+        if (config.getBoolean(Config.PROCESS_KEEP_ACCOUNT_TEAM) 
+                && "Account".equalsIgnoreCase(config.getString(Config.ENTITY))) {
+            // Support for Keeping Account keepAccountTeam during Account ownership change
+            // More details at https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_header_ownerchangeoptions.htm
+            keepAccountTeamOption.setExecute(true);
+            keepAccountTeamOption.setType(OwnerChangeOptionType.KeepAccountTeam); // Transfer Open opportunities owned by the account's owner
+            ownerChangeOptionArray = new OwnerChangeOption[] {keepAccountTeamOption};
+        } else {
+            // clear ownerChangeOptions from the existing connection otherwise.
+            ownerChangeOptionArray = new OwnerChangeOption[] {};
+        }
+        this.controller.getPartnerClient().getClient().setOwnerChangeOptions(ownerChangeOptionArray);
     }
 
     private void writeOutputToWriter(Object[] results)
