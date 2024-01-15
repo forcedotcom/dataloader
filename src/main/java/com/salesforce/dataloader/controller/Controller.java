@@ -186,11 +186,6 @@ public class Controller {
     public boolean loginIfSessionExists() {
         return loginIfSessionExists(getClient());
     }
-
-    public boolean setEntityDescribes() throws ConnectionException {
-        validateSession();
-        return getPartnerClient().setEntityDescribes();
-    }
     
     public static void setAPIVersion(String apiVersionStr) {
         API_VERSION = apiVersionStr;

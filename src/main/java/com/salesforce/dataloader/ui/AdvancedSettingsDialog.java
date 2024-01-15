@@ -103,6 +103,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonTruncateFields;
     private Button buttonFormatPhoneFields;
     private Button buttonKeepAccountTeam;
+    private Button buttonCacheDescribeGlobalResults;
     private Button buttonUseBulkApi;
     private Button buttonUseBulkV2Api;
     private Button buttonBulkApiSerialMode;
@@ -500,6 +501,15 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.widthHint = 5 * textSize.x;
         textQueryResultsDelimiterValue.setLayoutData(data);
         
+        Label labelCacheDescribeGlobalResults = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelCacheDescribeGlobalResults.setText(Labels.getString("AdvancedSettingsDialog.cacheDescribeGlobalResults"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelCacheDescribeGlobalResults.setLayoutData(data);
+
+        boolean cacheDescribeGlobalResults = config.getBoolean(Config.CACHE_DESCRIBE_GLOBAL_RESULTS);
+        buttonCacheDescribeGlobalResults = new Button(restComp, SWT.CHECK);
+        buttonCacheDescribeGlobalResults.setSelection(cacheDescribeGlobalResults);
+        
         // Keep Account team setting
         Label labelKeepAccountTeam = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelKeepAccountTeam.setText(Labels.getString("AdvancedSettingsDialog.keepAccountTeam"));
@@ -520,7 +530,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         });
         buttonKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.keepAccountTeamHelp"));
         labelKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.keepAccountTeamHelp"));
-
+        
         // Enable Bulk API Setting
         Label labelUseBulkApi = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelUseBulkApi.setText(Labels.getString("AdvancedSettingsDialog.useBulkApi")); //$NON-NLS-1$
@@ -886,6 +896,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.PROXY_USERNAME, textProxyUsername.getText());
                 config.setValue(Config.PROXY_NTLM_DOMAIN, textProxyNtlmDomain.getText());
                 config.setValue(Config.PROCESS_KEEP_ACCOUNT_TEAM, buttonKeepAccountTeam.getSelection());
+                config.setValue(Config.CACHE_DESCRIBE_GLOBAL_RESULTS, buttonCacheDescribeGlobalResults.getSelection());
                 config.setValue(Config.BULK_API_ENABLED, buttonUseBulkApi.getSelection());
                 config.setValue(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode.getSelection());
                 config.setValue(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());

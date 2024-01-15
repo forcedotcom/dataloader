@@ -141,8 +141,7 @@ public class SettingsPage extends OperationPage {
     }
 
     public static boolean isNeeded(Controller controller) {
-        return (!controller.loginIfSessionExists() || controller.getEntityDescribes() == null || controller
-                .getEntityDescribes().isEmpty());
+        return (!controller.isLoggedIn());
     }
 
     private void authenticationCompleted(Boolean success){

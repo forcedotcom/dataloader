@@ -202,17 +202,12 @@ public class PartnerClientTest extends ProcessTestBase {
     @Test
     public void testSetEntityDescribe() throws Exception{
         PartnerClient client = new PartnerClient(getController());
-        assertTrue(client.setEntityDescribes());
         assertNotNull(client.getDescribeGlobalResults());
-        assertEquals(client.getEntityTypes().getSobjects().length, client
-                .getDescribeGlobalResults().size());
     }
 
     @Test
     public void testDescribeSObjects() throws Exception {
         PartnerClient client = new PartnerClient(getController());
-        assertTrue(client.getEntityDescribeMap().isEmpty());
-        client.setEntityDescribes();
 
         int numDescribes = 0;
         for (String objectType : client.getDescribeGlobalResults().keySet()){
@@ -221,7 +216,6 @@ public class PartnerClientTest extends ProcessTestBase {
         		numDescribes++;
                 assertNotNull(describeResult);
                 assertEquals(objectType, describeResult.getName());
-                assertEquals(numDescribes, client.getEntityDescribeMap().size());
         	} catch (Exception ex) {
         		if (ex.getMessage().contains("jsonNot")) {
         			System.out.println("PartnerClient.testDescribeSObjects: Unable to call describeSObject for " + objectType);

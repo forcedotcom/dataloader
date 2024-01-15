@@ -212,7 +212,8 @@ public class Config {
     public static final String CSV_DELIMITER_OTHER_VALUE = "loader.csvOtherValue";
     public static final String CSV_DELIMITER_FOR_QUERY_RESULTS = "loader.query.delimiter";
     public static final String BUFFER_UNPROCESSED_BULK_QUERY_RESULTS = "loader.bufferUnprocessedBulkQueryResults";
-
+    public static final String CACHE_DESCRIBE_GLOBAL_RESULTS = "loader.cacheSObjectNamesAndFields";
+    
     //Special Internal Configs
     public static final String SFDC_INTERNAL = "sfdcInternal"; //$NON-NLS-1$
     public static final String SFDC_INTERNAL_IS_SESSION_ID_LOGIN = "sfdcInternal.isSessionIdLogin"; //$NON-NLS-1$
@@ -606,6 +607,7 @@ public class Config {
         setDefaultValue(DAO_WRITE_POSTPROCESSOR_SCRIPT, "");
         setDefaultValue(LIMIT_OUTPUT_TO_QUERY_FIELDS, true);
         setDefaultValue(WIZARD_CLOSE_ON_FINISH, true);
+        setDefaultValue(CACHE_DESCRIBE_GLOBAL_RESULTS, true);
     }
 
     /**
