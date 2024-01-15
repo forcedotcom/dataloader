@@ -130,7 +130,7 @@ public class AuthenticationRunner {
 	                return;
             	}
             }
-            if (controller.login() && controller.setEntityDescribes()) {
+            if (controller.login() && controller.getEntityDescribes() != null) {
                 messenger.accept(Labels.getString("SettingsPage.loginSuccessful"));
                 controller.saveConfig();
                 controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession();

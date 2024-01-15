@@ -223,10 +223,10 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
     };
 
-    private DescribeGlobalResult entityTypes;
-    private final Map<String, DescribeRefObject> referenceDescribes = new HashMap<String, DescribeRefObject>();
-    private final Map<String, DescribeGlobalSObjectResult> describeGlobalResults = new HashMap<String, DescribeGlobalSObjectResult>();
-    private final Map<String, DescribeSObjectResult> entityDescribes = new HashMap<String, DescribeSObjectResult>();
+    private DescribeGlobalResult describeGlobalResults;
+    private final Map<String, DescribeRefObject> referenceEntitiesDescribesMap = new HashMap<String, DescribeRefObject>();
+    private final Map<String, DescribeGlobalSObjectResult> describeGlobalResultsMap = new HashMap<String, DescribeGlobalSObjectResult>();
+    private final Map<String, DescribeSObjectResult> entityFieldDescribesMap = new HashMap<String, DescribeSObjectResult>();
 
     private final boolean enableRetries;
     private final int maxRetries;
@@ -526,15 +526,31 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     public Map<String, DescribeGlobalSObjectResult> getDescribeGlobalResults() {
-        return describeGlobalResults;
+        if (this.describeGlobalResults == null || !config.getBoolean(Config.CACHE_DESCRIBE_GLOBAL_RESULTS)) {
+            this.describeGlobalResultsMap.clear();
+            try {
+                this.describeGlobalResults = runOperation(DESCRIBE_GLOBAL_OPERATION, null);
+            } catch (ConnectionException e) {
+                logger.error("Failed to get description of sobjects", e.getMessage());
+                return null;
+            }
+        }
+        
+        if (this.describeGlobalResultsMap.isEmpty()) {
+            for (DescribeGlobalSObjectResult res : describeGlobalResults.getSobjects()) {
+                if (res != null) {
+                    if (res.getLabel().startsWith("__MISSING LABEL__")) {
+                        res.setLabel(res.getName());
+                    }
+                    this.describeGlobalResultsMap.put(res.getName(), res);
+                }
+            }
+        }
+        return describeGlobalResultsMap;
     }
 
-    Map<String, DescribeSObjectResult> getEntityDescribeMap() {
-        return this.entityDescribes;
-    }
-
-    DescribeGlobalResult getEntityTypes() {
-        return entityTypes;
+    private Map<String, DescribeSObjectResult> getCachedEntityDescribeMap() {
+        return this.entityFieldDescribesMap;
     }
 
     public DescribeSObjectResult getFieldTypes() {
@@ -547,7 +563,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     public Map<String, DescribeRefObject> getReferenceDescribes() {
-        return referenceDescribes;
+        return referenceEntitiesDescribesMap;
     }
     
     public LimitInfo getAPILimitInfo() {
@@ -750,42 +766,12 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     /**
-     * Gets the sObject describes for all entities
-     */
-    public boolean setEntityDescribes() throws ConnectionException {
-        setEntityTypes();
-        if (this.describeGlobalResults.isEmpty()) {
-            for (DescribeGlobalSObjectResult res : entityTypes.getSobjects()) {
-                if (res != null) {
-                    if (res.getLabel().startsWith("__MISSING LABEL__")) {
-                        res.setLabel(res.getName());
-                    }
-                    this.describeGlobalResults.put(res.getName(), res);
-                }
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Gets the available objects from the global describe
-     */
-    private void setEntityTypes() throws ConnectionException {
-        if (this.entityTypes == null)
-            this.entityTypes = runOperation(DESCRIBE_GLOBAL_OPERATION, null);
-    }
-
-    /**
      * Set the map of references to object external id info for current entity
      *
      * @throws ConnectionException
      */
     public void setFieldReferenceDescribes() throws ConnectionException {
-        referenceDescribes.clear();
-        if (getDescribeGlobalResults().isEmpty()) {
-            setEntityDescribes();
-        }
+        referenceEntitiesDescribesMap.clear();
         if (getFieldTypes() == null) {
             setFieldTypes();
         }
@@ -832,7 +818,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
         if (!parentIdLookupFieldMap.isEmpty()) {
             DescribeRefObject describeRelationship = new DescribeRefObject(parentObjectName, childObjectField, parentIdLookupFieldMap);
-            referenceDescribes.put(childObjectField.getRelationshipName(), describeRelationship);
+            referenceEntitiesDescribesMap.put(childObjectField.getRelationshipName(), describeRelationship);
         }
     }
     
@@ -918,11 +904,14 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
      */
 
     public DescribeSObjectResult describeSObject(String entity) throws ConnectionException {
-        DescribeSObjectResult result = getEntityDescribeMap().get(entity);
+        DescribeSObjectResult result = null;
+        if (config.getBoolean(Config.CACHE_DESCRIBE_GLOBAL_RESULTS)) {
+            result = getCachedEntityDescribeMap().get(entity);
+        }
         if (result == null) {
             result = runOperation(DESCRIBE_SOBJECT_OPERATION, entity);
             if (result != null) {
-                getEntityDescribeMap().put(result.getName(), result);
+                getCachedEntityDescribeMap().put(result.getName(), result);
             }
         }
         return result;
