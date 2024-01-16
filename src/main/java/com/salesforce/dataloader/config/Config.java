@@ -302,6 +302,7 @@ public class Config {
     public static final String ENCRYPTION_KEY_FILE = "process.encryptionKeyFile"; //$NON-NLS-1$
     public static final String PROCESS_THREAD_NAME = "process.thread.name";
     public static final String PROCESS_KEEP_ACCOUNT_TEAM = "process.keepAccountTeam";
+    public static final String PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE = "process.batchMode.exitWithErrorOnFailedRows";
 
     // data access configuration (e.g., for CSV file, database, etc).
     public static final String DAO_TYPE = "dataAccess.type"; //$NON-NLS-1$
@@ -441,6 +442,7 @@ public class Config {
             WIRE_OUTPUT,
             PROCESS_THREAD_NAME,
             PROCESS_BULK_CACHE_DATA_FROM_DAO,
+            PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE,
             SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV,
             API_VERSION_PROP,
             READ_CHARSET,
@@ -608,6 +610,7 @@ public class Config {
         setDefaultValue(LIMIT_OUTPUT_TO_QUERY_FIELDS, true);
         setDefaultValue(WIZARD_CLOSE_ON_FINISH, true);
         setDefaultValue(CACHE_DESCRIBE_GLOBAL_RESULTS, true);
+        setDefaultValue(PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE, false);
     }
 
     /**

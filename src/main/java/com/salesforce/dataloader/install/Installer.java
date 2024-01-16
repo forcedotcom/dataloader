@@ -105,11 +105,11 @@ public class Installer extends Thread {
                 createAppsDirShortcut(installationDir);
             }
             if (!skipCopyArtifacts) {
-                System.exit(0);
+                System.exit(AppUtil.EXIT_CODE_NO_ERRORS);
             }
         } catch (Exception ex) {
             handleException(ex, Level.FATAL);
-            System.exit(-1);            
+            System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
     }
     
@@ -151,7 +151,7 @@ public class Installer extends Thread {
                 logger.debug("going to delete " + installationDir);
                 FileUtils.deleteDirectory(new File(installationDir));
             } else {
-                System.exit(0);
+                System.exit(AppUtil.EXIT_CODE_NO_ERRORS);
             }
         }
         String installationSourceDir = ".";
@@ -172,7 +172,7 @@ public class Installer extends Thread {
         }
         if (dataloaderJar == null) {
             logger.fatal("Did not find Data Loader jar in the installation artifacts. Unable to install Data Loader");
-            System.exit(-1);
+            System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
         FileUtils.copyFileToDirectory(new File(dataloaderJar), new File(installationDir));
         logger.debug("going to delete \\.* files from " + installationDir);

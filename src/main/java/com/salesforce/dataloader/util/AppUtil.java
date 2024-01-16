@@ -98,6 +98,11 @@ public class AppUtil {
     public static final String CLI_OPTION_CONFIG_DIR_PROP = "salesforce.config.dir";
     public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
     public static final String DATALOADER_DOWNLOAD_URL = "https://developer.salesforce.com/tools/data-loader";
+    public static final int EXIT_CODE_NO_ERRORS = 0;
+    public static final int EXIT_CODE_CLIENT_ERROR = 1;
+    public static final int EXIT_CODE_SERVER_ERROR = 2;
+    public static final int EXIT_CODE_OPERATION_ERROR = 3;
+    public static final int EXIT_CODE_RESULTS_ERROR = 4;
     
     private static APP_RUN_MODE appRunMode = APP_RUN_MODE.UI;
     private static Logger logger = null;
@@ -109,7 +114,7 @@ public class AppUtil {
             versionProps.load(AppUtil.class.getClassLoader().getResourceAsStream("com/salesforce/dataloader/version.properties"));
         } catch (IOException e) {
             e.printStackTrace();
-            System.exit(-1);
+            System.exit(EXIT_CODE_CLIENT_ERROR);
         }
 
         DATALOADER_VERSION=versionProps.getProperty("dataloader.version");
@@ -346,7 +351,7 @@ public class AppUtil {
                     + "          for example:\n"
                     + "\n"
                     + "              process ../myconfigdir");
-            System.exit(-1);
+            System.exit(EXIT_CODE_CLIENT_ERROR);
         }
         if (!argsMap.containsKey(AppUtil.CLI_OPTION_CONFIG_DIR_PROP)) {
             argsMap.put(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, args[0]);

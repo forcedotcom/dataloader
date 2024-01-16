@@ -43,6 +43,7 @@ public class SWTProgressAdapter implements ILoaderProgress {
     private String dispMessage;
     private final Controller controller;
     private boolean success = false;
+    private int numRowsWithError = 0;
 
     public SWTProgressAdapter(IProgressMonitor monitor_, Controller controller) {
         monitor = monitor_;
@@ -161,6 +162,17 @@ public class SWTProgressAdapter implements ILoaderProgress {
     @Override
     public int getNumberBatchesTotal() {
         return this.numberBatchesTotal;
+    }
+
+    @Override
+    public void setNumberRowsWithError(int rowsWithError) {
+        this.numRowsWithError = rowsWithError;
+        
+    }
+
+    @Override
+    public int getNumberRowsWithError() {
+        return this.numRowsWithError;
     }
 
 }

@@ -24,20 +24,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.action.progress;
+package com.salesforce.dataloader.util;
 
-public interface ILoaderProgress {
-
-    void beginTask(String name, int totalWork);
-    void doneError(String message);
-    void doneSuccess(String message);
-    void worked(int worked);
-    void setSubTask(String name);
-    boolean isCanceled();
-    boolean isSuccess();
-    String getMessage();
-    void setNumberBatchesTotal(int numberBatchesTotal);
-    int getNumberBatchesTotal();
-    void setNumberRowsWithError(int rowsWithError);
-    int getNumberRowsWithError();
+public class ExitException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+    private int exitCode = AppUtil.EXIT_CODE_NO_ERRORS;
+    public ExitException(Throwable ex, int exitCode) {
+        super(ex);
+        this.exitCode = exitCode;
+    }
+    
+    public ExitException(String message, int exitCode) {
+        super(message);
+        this.exitCode = exitCode;
+    }
+    
+    public int getExitCode() {
+        return this.exitCode;
+    }
 }

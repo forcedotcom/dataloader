@@ -48,6 +48,7 @@ public enum NihilistProgressAdapter implements ILoaderProgress {
     //logger
     private final Logger logger = LogManager.getLogger(getClass());
     private String message = "";
+    private int numRowsWithError = 0;
 
     @Override
     public void beginTask(String name, int totalWork) {
@@ -108,6 +109,17 @@ public enum NihilistProgressAdapter implements ILoaderProgress {
     @Override
     public int getNumberBatchesTotal() {
         return this.numberBatchesTotal;
+    }
+
+    @Override
+    public void setNumberRowsWithError(int rowsWithError) {
+        this.numRowsWithError = rowsWithError;
+        
+    }
+
+    @Override
+    public int getNumberRowsWithError() {
+        return this.numRowsWithError;
     }
 
 }

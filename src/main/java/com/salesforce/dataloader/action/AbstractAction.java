@@ -147,6 +147,9 @@ abstract class AbstractAction implements IAction {
                 exceptions.add(e);
             }
             try {
+                if (this.errorWriter != null) {
+                    getMonitor().setNumberRowsWithError(this.errorWriter.getCurrentRowNumber());
+                }
                 //if no exceptions occurred then display success/error
                 if (exceptions.size() == 0) {
                     final Object[] args = {String.valueOf(getVisitor().getNumberSuccesses()),

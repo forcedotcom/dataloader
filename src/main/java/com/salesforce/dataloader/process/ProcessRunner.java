@@ -67,6 +67,7 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.util.AppUtil;
+import com.salesforce.dataloader.util.ExitException;
 import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
 import com.sforce.soap.partner.fault.ApiFault;
 
@@ -236,13 +237,22 @@ public class ProcessRunner implements InitializingBean, IProcess {
         }
     }
 
-    public static void logErrorAndExitProcess(String message, Throwable err) {
-        if (logger == null || err == null) {
-            System.err.println(message);
-            throw new RuntimeException(message);
-        } else {
-            logger.fatal(message, err);
-            throw new RuntimeException(err.getMessage());
+    public static void logErrorAndExitProcess(String message, Throwable throwable, int exitCode) {
+        if (throwable == null) {
+            if (logger == null) {
+                System.err.println(message);
+            } else {
+                logger.fatal(message);
+            }
+            throw new ExitException(message, exitCode); // expect caller to exit
+        } else { // throwable != null
+            if (logger == null) {
+                System.err.println(throwable.getMessage());
+                throwable.printStackTrace();
+            } else {
+                logger.fatal(message, throwable);
+            }
+            throw new ExitException(throwable, exitCode);
         }
     }
     
@@ -253,13 +263,22 @@ public class ProcessRunner implements InitializingBean, IProcess {
             // create the process
             runner = ProcessRunner.getInstance(argMap);
             if (runner == null) {
-                logErrorAndExitProcess("Process runner is null", new NullPointerException());
+                logErrorAndExitProcess("Process runner is null",
+                        new NullPointerException(), AppUtil.EXIT_CODE_CLIENT_ERROR);
             }
             // run the process
             runner.run(progressMonitor);
             progressMonitor = runner.getMonitor();
-            if (progressMonitor != null && (progressMonitor.isCanceled() || !progressMonitor.isSuccess())) {
-                logErrorAndExitProcess(progressMonitor.getMessage(), null);
+            if (progressMonitor != null) {
+                if (progressMonitor.isCanceled()) {
+                    logErrorAndExitProcess(progressMonitor.getMessage(), null, AppUtil.EXIT_CODE_CLIENT_ERROR);
+                } else if (!progressMonitor.isSuccess()) {
+                    logErrorAndExitProcess(progressMonitor.getMessage(), null, AppUtil.EXIT_CODE_SERVER_ERROR);
+                } else if (Config.getCurrentConfig() != null
+                        && Config.getCurrentConfig().getBoolean(Config.PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE)
+                        && progressMonitor.getNumberRowsWithError() > 0) {
+                    DataLoaderRunner.setExitCode(AppUtil.EXIT_CODE_RESULTS_ERROR);
+                }
             }
         } catch (Throwable t) {
             if (t.getClass().equals(UnsupportedOperationException.class)) {
@@ -267,7 +286,10 @@ public class ProcessRunner implements InitializingBean, IProcess {
                 // after a negative test of an operation results in an exception
                 throw (UnsupportedOperationException)t;
             }
-            logErrorAndExitProcess("Unable to run process", t);
+            if (t.getClass().equals(ExitException.class)) {
+                throw (ExitException)t;
+            }
+            logErrorAndExitProcess("Unable to run process", t, AppUtil.EXIT_CODE_OPERATION_ERROR);
         }
         return runner;
     }

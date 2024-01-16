@@ -45,7 +45,8 @@ public class TestProgressMontitor implements ILoaderProgress {
     private boolean success;
     private String message;
     private final List<String> subTasksInOrder = new ArrayList<String>();
-    private int numberBatchesTotal;
+    private int numberBatchesTotal = 0;
+    private int numRowsWithError = 0;
 
     @Override
     public void beginTask(String name, int totalWork) {
@@ -113,6 +114,17 @@ public class TestProgressMontitor implements ILoaderProgress {
 
     public List<String> getSubTasks() {
         return Collections.unmodifiableList(this.subTasksInOrder);
+    }
+
+    @Override
+    public void setNumberRowsWithError(int rowsWithError) {
+        this.numRowsWithError = rowsWithError;
+        
+    }
+
+    @Override
+    public int getNumberRowsWithError() {
+        return this.numRowsWithError;
     }
 
 }
