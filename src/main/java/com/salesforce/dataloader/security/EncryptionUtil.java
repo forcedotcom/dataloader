@@ -27,6 +27,8 @@ package com.salesforce.dataloader.security;
 
 import java.security.GeneralSecurityException;
 
+import com.salesforce.dataloader.util.AppUtil;
+
 public class EncryptionUtil {
 
     /**
@@ -85,20 +87,20 @@ public class EncryptionUtil {
         // args[1] = key (optional)
         if (args.length < 1) {
             printUsage();
-            System.exit(-1);
+            System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
 
         int i = 0;
         String option = args[i];
         if (option.length() < 2 || option.charAt(0) != '-') {
             System.out.println("Invalid option format: " + args[i]);
-            System.exit(-1);
+            System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
         // make sure enough arguments are provided
         if (arrayTooSmall(args, i) && option.charAt(1) != 'k') {
             System.out.println("Option '" + option + "' requires at least one parameter.  Please check usage.\n");
             printUsage();
-            System.exit(-1);
+            System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
         // advance index to param and save the param value
         String param = null;
@@ -113,7 +115,7 @@ public class EncryptionUtil {
                     } catch (Exception e) {
                         System.out.println("Error setting the key from file: "
                                 + keyFilename + ", error: " + e.getMessage());
-                        System.exit(-1);
+                        System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
                     }
                 }
                 try {
@@ -121,7 +123,7 @@ public class EncryptionUtil {
                     System.out.println("The output string of encryption is: \n" + encrypted);
                 } catch (Exception e) {
                     System.out.println("Error setting the key: " + e.getMessage());
-                    System.exit(-1);
+                    System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
                 }
 
                 break;
@@ -136,7 +138,7 @@ public class EncryptionUtil {
                     } else {
                         System.out.println("Please provide correct parameters!");
                         printUsage();
-                        System.exit(-1);
+                        System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
                     }
                 } catch (Exception e) {
                     System.out.println("Error occurred:  " + e.getMessage());
@@ -152,7 +154,7 @@ public class EncryptionUtil {
                         encAes.setCipherKeyFromFilePath(keyFilename);
                     } catch (GeneralSecurityException e) {
                         System.out.println("Failed in decryption: " + e.getMessage() + "\n Make sure using the same keyfile to decrypt.");
-                        System.exit(-1);
+                        System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
                     }
                 }
                 try {
@@ -160,14 +162,14 @@ public class EncryptionUtil {
                     System.out.println("The output string of decryption is: \n" + plainText);
                 } catch (Exception e) {
                     System.out.println("Failed in decryption: " + e.getMessage() + "\n Make sure using the same keyfile to decrypt.");
-                    System.exit(-1);
+                    System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
                 }
                 break;
 
             default:
                 System.out.println("Unsupported option: " + option);
                 printUsage();
-                System.exit(-1);
+                System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
     }
 

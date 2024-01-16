@@ -34,6 +34,7 @@ import com.salesforce.dataloader.install.Installer;
 import com.salesforce.dataloader.security.EncryptionUtil;
 import com.salesforce.dataloader.ui.UIUtils;
 import com.salesforce.dataloader.util.AppUtil;
+import com.salesforce.dataloader.util.ExitException;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -59,6 +60,7 @@ public class DataLoaderRunner extends Thread {
     private static final String PATH_SEPARATOR = System.getProperty("path.separator");
     private static final String FILE_SEPARATOR = System.getProperty("file.separator");
     private static Logger logger;
+    private static int exitCode = AppUtil.EXIT_CODE_NO_ERRORS;
 
     public void run() {
         // called just before the program closes
@@ -68,11 +70,15 @@ public class DataLoaderRunner extends Thread {
     public static void main(String[] args) {
         try {
             runApp(args, null);
+            System.exit(exitCode);
+        } catch (ExitException ex) {
+            System.exit(ex.getExitCode());
         } finally {
             if (logger != null) {
                 logger.debug("Number of server API invocations = " + HttpClientTransport.getServerInvocationCount());
             }
         }
+        System.exit(exitCode);
     }
     
     public static IProcess runApp(String[] args, ILoaderProgress monitor) {
@@ -81,14 +87,10 @@ public class DataLoaderRunner extends Thread {
             args = AppUtil.initializeAppConfig(args);
         } catch (FactoryConfigurationError | Exception ex) {
             ex.printStackTrace();
-            System.exit(-1);
+            System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
         if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH) {
-            try {
-                return ProcessRunner.runBatchMode(AppUtil.convertCommandArgsArrayToArgMap(args), monitor);
-            } catch (Throwable t) {
-                ProcessRunner.logErrorAndExitProcess("Unable to run process", t);
-            }
+            return ProcessRunner.runBatchMode(AppUtil.convertCommandArgsArrayToArgMap(args), monitor);
         } else if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.ENCRYPT) {
             EncryptionUtil.main(args);
         } else {
@@ -116,6 +118,10 @@ public class DataLoaderRunner extends Thread {
             }
         }
         return null;
+    }
+    
+    public static void setExitCode(int codeVal) {
+        exitCode = codeVal;
     }
     
     private static void rerunWithSWTNativeLib(String[] args) {
@@ -153,7 +159,7 @@ public class DataLoaderRunner extends Thread {
             logger.error("Unable to find SWT jar for " 
                     + System.getProperty("os.name") + " : "
                     + System.getProperty("os.arch"));
-            System.exit(-1);
+            System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
         
         // set classpath
