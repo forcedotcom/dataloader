@@ -49,6 +49,7 @@ import com.salesforce.dataloader.exception.UnsupportedOperationException;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.Base64;
+import com.salesforce.dataloader.action.progress.NihilistProgressAdapter;
 import com.sforce.soap.partner.*;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.soap.partner.sobject.SObject;
@@ -712,7 +713,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             args[i++] = entry.getKey() + "=" + entry.getValue();
         }
         this.getBinding(); // establish the test connection if not done so already
-        final TestProgressMontitor monitor = new TestProgressMontitor();
+        final NihilistProgressAdapter monitor = new NihilistProgressAdapter();
         return DataLoaderRunner.runApp(args, monitor);
     }
 
