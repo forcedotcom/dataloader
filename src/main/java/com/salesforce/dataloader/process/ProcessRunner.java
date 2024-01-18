@@ -116,7 +116,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
 
     public synchronized void run(ILoaderProgress monitor) throws Exception {
         if (monitor == null) {
-            monitor = NihilistProgressAdapter.get();
+            monitor = new NihilistProgressAdapter();
         }
         this.monitor = monitor;
         final String oldName = Thread.currentThread().getName();

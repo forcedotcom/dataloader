@@ -37,15 +37,13 @@ import org.eclipse.swt.widgets.Display;
 /**
  * @author Lexi Viripaeff
  */
-public class SWTProgressAdapter implements ILoaderProgress {
+public class SWTProgressAdapter extends NihilistProgressAdapter {
 
     private IProgressMonitor monitor = null;
-    private String dispMessage;
     private final Controller controller;
-    private boolean success = false;
-    private int numRowsWithError = 0;
 
     public SWTProgressAdapter(IProgressMonitor monitor_, Controller controller) {
+        super();
         monitor = monitor_;
         this.controller = controller;
     }
@@ -55,13 +53,10 @@ public class SWTProgressAdapter implements ILoaderProgress {
      */
     @Override
     public void beginTask(String name, int totalWork) {
+        super.beginTask(name, totalWork);
         monitor.beginTask(name, totalWork);
     }
-
-    public void done() {
-        monitor.done();
-    }
-
+    
     /*
      * (non-Javadoc)
      *
@@ -69,10 +64,9 @@ public class SWTProgressAdapter implements ILoaderProgress {
      */
     @Override
     public void doneSuccess(String message) {
-        success = true;
+        super.doneSuccess(message);
         monitor.done();
         controller.setLastOperationSuccessful(true);
-        dispMessage = message;
         Display.getDefault().syncExec(new Thread() {
             @Override
             public void run() {
@@ -80,11 +74,11 @@ public class SWTProgressAdapter implements ILoaderProgress {
                 //if extraction pop open an extraction finished dialog
                 if (controller.getConfig().getOperationInfo().isExtraction()) {
                     ExtractionFinishDialog dlg = new ExtractionFinishDialog(LoaderWindow.getApp().getShell(), controller);
-                    dlg.setMessage(dispMessage);
+                    dlg.setMessage(getMessage());
                     dlg.open();
                 } else {
                     LoadFinishDialog dlg = new LoadFinishDialog(LoaderWindow.getApp().getShell(), controller);
-                    dlg.setMessage(dispMessage);
+                    dlg.setMessage(getMessage());
                     dlg.open();
                 }
             }
@@ -94,26 +88,17 @@ public class SWTProgressAdapter implements ILoaderProgress {
 
     @Override
     public void doneError(String message) {
-        success = false;
+        super.doneError(message);
         monitor.done();
         controller.setLastOperationSuccessful(false);
-        dispMessage = message;
         Display.getDefault().syncExec(new Thread() {
             @Override
             public void run() {
-                UIUtils.errorMessageBox(LoaderWindow.getApp().getShell(), dispMessage);
+                UIUtils.errorMessageBox(LoaderWindow.getApp().getShell(), getMessage());
             }
         });
     }
-    
-    public boolean isSuccess() {
-        return this.success;
-    }
-    
-    public String getMessage() {
-        return this.dispMessage;
-    }
- 
+
     /*
      * (non-Javadoc)
      *
@@ -121,6 +106,7 @@ public class SWTProgressAdapter implements ILoaderProgress {
      */
     @Override
     public void worked(int worked) {
+        super.worked(worked);
         monitor.worked(worked);
     }
 
@@ -130,6 +116,7 @@ public class SWTProgressAdapter implements ILoaderProgress {
      * @see com.sfdc.action.progress.ILoaderProgress#setTaskName(java.lang.String)
      */
     public void setTaskName(String name) {
+        super.setTaskName(name);
         monitor.setTaskName(name);
     }
 
@@ -140,6 +127,7 @@ public class SWTProgressAdapter implements ILoaderProgress {
      */
     @Override
     public void setSubTask(String name) {
+        super.setSubTask(name);
         monitor.subTask(name);
     }
 
@@ -152,27 +140,4 @@ public class SWTProgressAdapter implements ILoaderProgress {
     public boolean isCanceled() {
         return monitor.isCanceled();
     }
-
-    private int numberBatchesTotal = 0;
-    @Override
-    public void setNumberBatchesTotal(int numberBatchesTotal) {
-        this.numberBatchesTotal = numberBatchesTotal;
-    }
-
-    @Override
-    public int getNumberBatchesTotal() {
-        return this.numberBatchesTotal;
-    }
-
-    @Override
-    public void setNumberRowsWithError(int rowsWithError) {
-        this.numRowsWithError = rowsWithError;
-        
-    }
-
-    @Override
-    public int getNumberRowsWithError() {
-        return this.numRowsWithError;
-    }
-
 }
