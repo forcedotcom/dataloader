@@ -334,7 +334,6 @@ public class MappingDialog extends BaseDialog {
         mappingTblViewer = new TableViewer(shell, SWT.FULL_SELECTION);
         mappingTblViewer.setContentProvider(new MappingContentProvider());
         mappingTblViewer.setLabelProvider(new MappingLabelProvider());
-        mappingTblViewer.setComparator(new MappingViewerComparator());
 
         data = new GridData(GridData.FILL_BOTH);
 
@@ -384,6 +383,9 @@ public class MappingDialog extends BaseDialog {
         csvFieldsCol.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
+                if (mappingTblViewer.getComparator() == null) {
+                    mappingTblViewer.setComparator(new MappingViewerComparator());
+                }
                 ((MappingViewerComparator)mappingTblViewer.getComparator()).doSort(MAPPING_DAO);
                 mappingTblViewer.refresh();
             }
@@ -395,6 +397,9 @@ public class MappingDialog extends BaseDialog {
         sforceFieldNamesCol.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
+                if (mappingTblViewer.getComparator() == null) {
+                    mappingTblViewer.setComparator(new MappingViewerComparator());
+                }
                 ((MappingViewerComparator)mappingTblViewer.getComparator()).doSort(MAPPING_SFORCE);
                 mappingTblViewer.refresh();
             }
@@ -413,7 +418,6 @@ public class MappingDialog extends BaseDialog {
         if (mappingTable.getItemCount() > 0) {
             mappingTable.showItem(mappingTable.getItem(0));
         }
-
     }
 
     private void initializeSforceViewer(Shell shell, Text sforceFieldsSearch) {
