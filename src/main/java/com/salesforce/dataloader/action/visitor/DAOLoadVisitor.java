@@ -228,6 +228,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         try {
             DataReader dao = (DataReader)getController().getDao();
             getRateCalculator().start(dao.getTotalRows());
+            getProgressMonitor().setSubTask(getRateCalculator().calculateSubTask(getNumberOfRows(), getNumberErrors()));
         } catch (Exception e) {
             logger.error("Unable to get total rows to upload from CSV or database");
             getRateCalculator().start(0);
