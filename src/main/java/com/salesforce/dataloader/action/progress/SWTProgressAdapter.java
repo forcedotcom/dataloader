@@ -113,16 +113,6 @@ public class SWTProgressAdapter extends NihilistProgressAdapter {
     /*
      * (non-Javadoc)
      *
-     * @see com.sfdc.action.progress.ILoaderProgress#setTaskName(java.lang.String)
-     */
-    public void setTaskName(String name) {
-        super.setTaskName(name);
-        monitor.setTaskName(name);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
      * @see com.sfdc.action.progress.ILoaderProgress#setSubTask(java.lang.String)
      */
     @Override
