@@ -49,7 +49,6 @@ public class NihilistProgressAdapter implements ILoaderProgress {
     private int numRowsWithError = 0;
     private int numberBatchesTotal = 0;
     private final Logger logger = LogManager.getLogger(getClass());
-    private String taskName;
     private int workDone;
     private int totalWork;
     private final List<String> subTasksInOrder = new ArrayList<String>();
@@ -60,7 +59,6 @@ public class NihilistProgressAdapter implements ILoaderProgress {
     }
 
     public void beginTask(String name, int totalWork) {
-        this.taskName = name;
         this.totalWork = totalWork;
     }
     
@@ -80,17 +78,9 @@ public class NihilistProgressAdapter implements ILoaderProgress {
         this.workDone += worked;
     }
 
-    public void setTaskName(String name) {
-        this.taskName = name;
-    }
-
     public void setSubTask(String name) {
         this.subTasksInOrder.add(name);
         logger.info(name);
-    }
-    
-    public String getTaskName() {
-        return this.taskName;
     }
 
     public int getTotalWork() {

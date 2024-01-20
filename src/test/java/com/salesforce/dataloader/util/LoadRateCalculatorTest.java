@@ -39,7 +39,7 @@ public class LoadRateCalculatorTest {
        rateCalculator.start(3600);
        String message = rateCalculator.calculateSubTask(0, 0);
        assertEquals("incorrect rate calculation: ", 
-               "Processed 0 of 3,600 total records. There are 0 successes and 0 errors.",
+               "Processed 0 of 3,600 records with 0 successes and 0 errors.",
                message);
 
    }
@@ -55,7 +55,8 @@ public class LoadRateCalculatorTest {
            e.printStackTrace();
        }
        message = rateCalculator.calculateSubTask(1, 0);
-       boolean success = message.contains("There are 1 successes and 0 errors. \nRate: 3,600 records per hour.");
+       boolean success = message.contains("1 successes and 0 errors")
+                           && message.contains("Rate: 3,600 records per hour");
        assertTrue("incorrect rate calculation: ", success);
    }
 
@@ -79,8 +80,8 @@ public class LoadRateCalculatorTest {
            e.printStackTrace();
        }
        message = rateCalculator.calculateSubTask(2, 1);
-       boolean success = message.contains("Processed 2 of 3,600 total records in 2 seconds. There are 1 successes and 1 errors. \nRate: 3,600 records per hour.");
-       assertTrue("incorrect rate calculation: ", success);
+       boolean success = message.contains("Processed 2 of 3,600 records in 0 minutes, 2 seconds with 1 successes and 1 errors. \nRate: 3,600 records per hour.");
+       assertTrue("incorrect rate calculation - " + message, success);
        
        rateCalculator.start(3600);
        try {
@@ -90,8 +91,11 @@ public class LoadRateCalculatorTest {
            e.printStackTrace();
        }
        message = rateCalculator.calculateSubTask(3, 1);
-       success = message.contains("Processed 3 of 3,600 total records in 3 seconds. There are 2 successes and 1 errors. \nRate: 3,600 records per hour.");
-       assertTrue("incorrect rate calculation: ", success);
+       success = message.contains("Processed 3 of 3,600 records") 
+               && message.contains("0 minutes, 3 seconds")
+               && message.contains("2 successes and 1 errors")
+               && message.contains("Rate: 3,600 records per hour");
+       assertTrue("incorrect rate calculation - " + message, success);
        
        rateCalculator.start(3600);
        try {
@@ -101,19 +105,26 @@ public class LoadRateCalculatorTest {
            e.printStackTrace();
        }
        message = rateCalculator.calculateSubTask(4, 1);
-       success = message.contains("Processed 4 of 3,600 total records in 4 seconds. There are 3 successes and 1 errors. \nRate: 3,600 records per hour.");
-       assertTrue("incorrect rate calculation: ", success);
+       success = message.contains("Processed 4 of 3,600 records") 
+               && message.contains("0 minutes, 4 seconds")
+               && message.contains("3 successes and 1 errors")
+               && message.contains("Rate: 3,600 records per hour");
+       assertTrue("incorrect rate calculation - " + message, success);
        
        rateCalculator.start(3600);
        try {
-           Thread.sleep(3000);
+           Thread.sleep(63000); // sleep for a minute
        } catch (InterruptedException e) {
            // TODO Auto-generated catch block
            e.printStackTrace();
        }
        message = rateCalculator.calculateSubTask(7, 2);
-       success = message.contains("Processed 7 of 3,600 total records in 7 seconds. There are 5 successes and 2 errors. \nRate: 3,600 records per hour.");
-       assertTrue("incorrect rate calculation: ", success);
+       success = message.contains("Processed 7 of 3,600 records in 1 minutes, 7 seconds with 5 successes and 2 errors. \nRate: 376 records per hour.");
+       success = message.contains("Processed 7 of 3,600 records") 
+               && message.contains("1 minutes, 7 seconds")
+               && message.contains("5 successes and 2 errors")
+               && message.contains("Rate: 376 records per hour");
+       assertTrue("incorrect rate calculation - " + message, success);
    }
 
    @Test
@@ -129,8 +140,8 @@ public class LoadRateCalculatorTest {
        }
        message = rateCalculator.calculateSubTask(1, 0);
        assertEquals("incorrect rate calculation: ", 
-               "Processed 1 of 999,999,999 total records. "
-               + "There are 1 successes and 0 errors.",
+               "Processed 1 of 999,999,999 records with 1 successes and 0 errors.",
                message);
    }
+   
 }

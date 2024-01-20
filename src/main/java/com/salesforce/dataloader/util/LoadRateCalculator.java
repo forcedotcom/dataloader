@@ -63,6 +63,7 @@ public class LoadRateCalculator {
         long hourlyProcessingRate;
 
         final long totalElapsedTimeInSec = (currentLoadTime.getTime() - this.startTime.getTime())/1000;
+        final long elapsedTimeInMinutes = totalElapsedTimeInSec / 60;
         if (totalElapsedTimeInSec == 0) {
             hourlyProcessingRate = 0;
         } else {
@@ -89,7 +90,7 @@ public class LoadRateCalculator {
                     numSuccessInJob,       // {2}
                     numErrorsInJob);       // {3}
         }
-        // LoadRateCalculator.processed=Processed {0} of {1} total records in {7} seconds. 
+        // LoadRateCalculator.processed=Processed {0} of {1} total records in {8} minutes, {7} seconds. 
         // There are {5} successes and {6} errors. \nRate: {2} records per hour. 
         // Estimated time to complete: {3} minutes and {4} seconds. 
         return Messages.getMessage(getClass(), "processed", 
@@ -100,7 +101,8 @@ public class LoadRateCalculator {
                 remainingSeconds,        // {4}
                 numSuccessInJob,       // {5}
                 numErrorsInJob,       // {6}
-                totalElapsedTimeInSec // {7}
+                totalElapsedTimeInSec - (60 * elapsedTimeInMinutes), // {7}
+                elapsedTimeInMinutes // {8}
             );
     }
 }
