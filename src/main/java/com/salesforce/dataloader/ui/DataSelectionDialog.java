@@ -34,14 +34,11 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 import com.salesforce.dataloader.config.Config;
@@ -55,7 +52,7 @@ public class DataSelectionDialog extends BaseDialog {
     private boolean success;
     private Button ok;
     private Label label;
-    private Link contentNoteLimitLink;
+    private ContentLimitLink contentNoteLimitLink;
 
     /**
      * InputDialog constructor
@@ -140,10 +137,7 @@ public class DataSelectionDialog extends BaseDialog {
                 success = true;
                 ok.setEnabled(true);
                 String apiInfoStr = getController().getAPIInfo();
-                String contentNoteLimitsStr = "";
-                if ("ContentNote".equalsIgnoreCase(sObjectName)) {
-                    contentNoteLimitsStr = "\n\n<a href=\"https://help.salesforce.com/s/articleView?id=sf.content_file_size_limits.htm&type=5\">ContentNote limits</a>";
-                }
+                
                 // Set the description
                 label.setText(Labels.getFormattedString(
                         "DataSelectionDialog.initSuccess", String.valueOf(totalRows))
@@ -159,8 +153,7 @@ public class DataSelectionDialog extends BaseDialog {
                         + apiInfoStr
                     ); //$NON-NLS-1$
                 
-                contentNoteLimitLink.setText(contentNoteLimitsStr);
-                label.getParent().pack();
+                 label.getParent().pack();
             }
 
         });
@@ -193,18 +186,11 @@ public class DataSelectionDialog extends BaseDialog {
         labelData.widthHint = 400;
         label.setLayoutData(labelData);
         
-        contentNoteLimitLink = new Link(shell, SWT.WRAP);
-        contentNoteLimitLink.setText("");
+        contentNoteLimitLink = new ContentLimitLink(shell, SWT.WRAP, getController());
         GridData linkData = new GridData();
         linkData.horizontalSpan = 2;
         linkData.widthHint = 400;
         contentNoteLimitLink.setLayoutData(linkData);
-        contentNoteLimitLink.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                UIUtils.openURL(e.text);
-            }
-          });
 
         //the bottom separator
         Label labelSeparatorBottom = new Label(shell, SWT.SEPARATOR | SWT.HORIZONTAL);
