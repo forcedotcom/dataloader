@@ -107,6 +107,7 @@ public class AppUtil {
     private static APP_RUN_MODE appRunMode = APP_RUN_MODE.UI;
     private static Logger logger = null;
     private static String latestDownloadableDataLoaderVersion;
+    private static final ArrayList<String> CONTENT_SOBJECT_LIST = new ArrayList<String>();
     
     static {
         Properties versionProps = new Properties();
@@ -121,7 +122,7 @@ public class AppUtil {
         String[] versionParts = DATALOADER_VERSION.split("\\.");
         DATALOADER_SHORT_VERSION=versionParts[0];
         MIN_JAVA_VERSION=versionProps.getProperty("java.min.version");
-
+        CONTENT_SOBJECT_LIST.add("ContentNote".toLowerCase());
     }
     
     public static String[] initializeAppConfig(String[] args) throws FactoryConfigurationError, IOException, ConfigInitializationException {
@@ -261,10 +262,14 @@ public class AppUtil {
         useGMTForDateFieldValue = val;
     }
     
+    public static boolean isContentSObject(String sObjectName) {
+        return CONTENT_SOBJECT_LIST.contains(sObjectName.toLowerCase());
+    }
     private static boolean useGMTForDateFieldValue;
     public static boolean isUseGMTForDateFieldValue() {
         return useGMTForDateFieldValue;
     }
+    
     private static String configurationsDir = null;
     public static synchronized String getConfigurationsDir() {
         if (configurationsDir == null) {

@@ -50,6 +50,7 @@ import com.salesforce.dataloader.mapping.Mapper;
 public class FinishPage extends LoadPage {
 
     private DirectoryFieldEditor dirFE;
+    private ContentLimitLink contentNoteLimitLink;
 
     public FinishPage(Controller controller) {
         this("FinishPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
@@ -88,6 +89,9 @@ public class FinishPage extends LoadPage {
             }
             
         });
+
+        contentNoteLimitLink = new ContentLimitLink(comp, SWT.WRAP, getController());
+        
         hook_createControl(comp);
         setControl(comp);
         setupPage();
@@ -122,11 +126,13 @@ public class FinishPage extends LoadPage {
             });
             return false;
         }
+
         setPageComplete();
         IWizardContainer wizardContainer = this.getContainer();
         if (wizardContainer != null) {
             wizardContainer.updateButtons();
         }
+        contentNoteLimitLink.setVisible();
         if (!controller.saveConfig()) return false;
         return true;
     }
