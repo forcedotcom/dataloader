@@ -60,8 +60,8 @@ public class SObjectReference {
     public void addReferenceToSObject(Controller controller, SObject sObj, String refFieldName) throws ParameterLoadException {
         // break the name into relationship and field name components
         ObjectField refField = new ObjectField(refFieldName);
-        String relationshipName = refField.getObjectName();
-        String fieldName = refField.getFieldName();
+        String relationshipName = refField.getRelationshipName();
+        String parentFieldName = refField.getParentFieldName();
 
         // get object info for the given reference (foreign key) relationship
         DescribeRefObject entityRefInfo = controller.getReferenceDescribes().get(relationshipName);
@@ -71,9 +71,9 @@ public class SObjectReference {
         // set entity type, has to be set before all others
         sObjRef.setType(entityRefInfo.getParentObjectName());
         // set external id, do type conversion as well
-        Class<?> typeClass = SforceDynaBean.getConverterClass(entityRefInfo.getParentObjectFieldMap().get(fieldName));
+        Class<?> typeClass = SforceDynaBean.getConverterClass(entityRefInfo.getParentObjectFieldMap().get(parentFieldName));
         Object extIdValue = ConvertUtils.convert(this.referenceExtIdValue.toString(), typeClass);
-        sObjRef.setField(fieldName, extIdValue);
+        sObjRef.setField(parentFieldName, extIdValue);
         // Add the sObject reference as a child elemetn, name set to relationshipName
         sObj.addField(relationshipName, sObjRef);
     }
@@ -100,7 +100,7 @@ public class SObjectReference {
     }
 
     public static String getRelationshipField(Controller controller, String refFieldName) {
-        final String relName = new ObjectField(refFieldName).getObjectName();
+        final String relName = new ObjectField(refFieldName).getRelationshipName();
         controller.getReferenceDescribes().get(relName).getParentObjectFieldMap();
         for (Field f : controller.getFieldTypes().getFields()) {
             if (f != null) {

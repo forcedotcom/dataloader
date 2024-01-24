@@ -34,44 +34,49 @@ package com.salesforce.dataloader.dyna;
  * @since 8.0
  */
 public class ObjectField {
-    private String objectName;
-    private String fieldName;
+    private String relationshipName;
+    private String parentFieldName;
+    private String parentObjectName = null;
     public static final String VALUE_SEPARATOR_CHAR = ":"; //$NON-NLS-1$
-
-    /**
-     * @param objectName
-     * @param fieldName
-     */
-    public ObjectField(String objectName, String fieldName) {
-        this.objectName = objectName;
-        this.fieldName = fieldName;
-    }
+    // old format - <relationship name attribute of relationship field>:<idLookup field of parent sObject>
+    // Example - "Owner:username" where Account.Owner field is a lookup 
+    // field to User object, username is an idLookup field in User
+    //
+    // new format to support polymorphic lookup relationship - 
+    //      <parent object name>:<relationship name attribute of relationship field>.<idLookup field of parent sObject>
+    // Example - "Account:Owner.username"
+    public static final String NEW_FORMAT_VALUE_SEPARATOR_CHAR = ".";
+    public static final String NEW_FORMAT_OBJECT_NAME_SEPARATOR_CHAR = ":";
 
     /**
      * @param objectField
      */
     public ObjectField(String objectField) {
-        String[] refFieldNameInfo = objectField.split(ObjectField.VALUE_SEPARATOR_CHAR);
-        objectName = refFieldNameInfo[0];
-        fieldName = refFieldNameInfo[1];
+        String[] refFieldNameInfo = objectField.split(ObjectField.NEW_FORMAT_VALUE_SEPARATOR_CHAR);
+        if (refFieldNameInfo.length < 2) {
+            refFieldNameInfo = objectField.split(ObjectField.VALUE_SEPARATOR_CHAR);
+            relationshipName = refFieldNameInfo[0];
+            parentFieldName = refFieldNameInfo[1];  
+        } else { // new format
+            parentFieldName = refFieldNameInfo[1];
+            refFieldNameInfo = objectField.split(ObjectField.NEW_FORMAT_OBJECT_NAME_SEPARATOR_CHAR);
+            relationshipName = refFieldNameInfo[1];
+            parentObjectName = refFieldNameInfo[0];
+        }
     }
 
-    /**
-     * @param objectFieldArray
-     */
-    public ObjectField(String[] objectFieldArray) {
-        objectName = objectFieldArray[0];
-        fieldName = objectFieldArray[1];
+    public String getParentFieldName() {
+        return parentFieldName;
     }
 
-    public String getFieldName() {
-        return fieldName;
+    public String getRelationshipName() {
+        return relationshipName;
     }
 
-    public String getObjectName() {
-        return objectName;
+    public String getParentObjectName() {
+        return parentObjectName;
     }
-
+    
     /**
      * @param objectName
      * @param fieldName
@@ -81,11 +86,23 @@ public class ObjectField {
         return objectName + ObjectField.VALUE_SEPARATOR_CHAR + fieldName;
     }
 
+    static public String formatAsString(String parentObjectName, String objectName, String fieldName) {
+        return parentObjectName 
+                + ObjectField.NEW_FORMAT_OBJECT_NAME_SEPARATOR_CHAR 
+                + objectName 
+                + ObjectField.NEW_FORMAT_VALUE_SEPARATOR_CHAR 
+                + fieldName;
+    }
+    
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        return formatAsString(objectName, fieldName);
+        if (parentObjectName == null) {
+            return formatAsString(relationshipName, parentFieldName);
+        } else {
+            return formatAsString(parentObjectName, relationshipName, parentFieldName);
+        }
     }
 }
