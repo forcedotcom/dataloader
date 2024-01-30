@@ -34,6 +34,7 @@ import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.client.PartnerClient;
+import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dao.DataAccessObject;
@@ -205,7 +206,7 @@ public class Controller {
         return getPartnerClient().getFieldTypes();
     }
 
-    public Map<String, DescribeRefObject> getReferenceDescribes() {
+    public ReferenceEntitiesDescribeMap getReferenceDescribes() {
         validateSession();
         return getPartnerClient().getReferenceDescribes();
     }

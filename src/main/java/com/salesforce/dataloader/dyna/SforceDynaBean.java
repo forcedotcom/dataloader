@@ -88,12 +88,18 @@ public class SforceDynaBean {
             if (fieldType == FieldType.reference && field.getReferenceTo().length == 1 &&
                     relationshipName != null && relationshipName.length() > 0) {
 
-                DescribeRefObject refInfo = controller.getReferenceDescribes().get(relationshipName);
-                if(refInfo != null) {
-                    for(String refFieldName : refInfo.getParentObjectFieldMap().keySet()) {
+                DescribeRefObject parent = controller.getReferenceDescribes().getParentSObject(relationshipName);
+                if(parent != null) {
+                    for(String refFieldName : parent.getParentObjectFieldMap().keySet()) {
                         // property name contains information for mapping
-                        dynaProps.add(new DynaProperty(ObjectField.formatAsString(relationshipName, refFieldName),
-                                SObjectReference.class));
+                        // add old format to dyna props
+                        dynaProps.add(new DynaProperty(
+                                        RelationshipField.formatAsString(relationshipName, refFieldName),
+                                        SObjectReference.class));
+                        // add new format to dyna props
+                        dynaProps.add(new DynaProperty(
+                                RelationshipField.formatAsString(parent.getParentObjectName(), relationshipName, refFieldName),
+                                    SObjectReference.class));
                     }
                 }
             }
@@ -209,7 +215,6 @@ public class SforceDynaBean {
         DynaBean sforceObj = null;
         try {
             sforceObj = dynaClass.newInstance();
-
             //This does an automatic conversion of types.
             BeanUtils.copyProperties(sforceObj, sforceDataRow);
             return sforceObj;

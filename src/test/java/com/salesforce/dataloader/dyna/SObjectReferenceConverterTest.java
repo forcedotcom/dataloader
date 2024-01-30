@@ -80,11 +80,23 @@ public class SObjectReferenceConverterTest extends ConfigTestBase {
         String fkFieldName = ConfigTestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD;
 
         try {
-            ref.addReferenceToSObject(getController(), sObj, ObjectField.formatAsString("Parent",
+            // legacy formatting
+            ref.addReferenceToSObject(getController(), sObj, RelationshipField.formatAsString("Parent",
                     ConfigTestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD));
 
             SObject child = (SObject)sObj.getChild(relationshipName);
             boolean succeeded = child != null && child.getField(fkFieldName) != null && child.getField(fkFieldName)
+                    .equals(refValue);
+            if (expectSuccess && !succeeded || !expectSuccess && succeeded) {
+                Assert.fail();
+            }
+            
+            // new formatting
+            ref.addReferenceToSObject(getController(), sObj, RelationshipField.formatAsString("Account", "Parent",
+                    ConfigTestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD));
+
+            child = (SObject)sObj.getChild(relationshipName);
+            succeeded = child != null && child.getField(fkFieldName) != null && child.getField(fkFieldName)
                     .equals(refValue);
             if (expectSuccess && !succeeded || !expectSuccess && succeeded) {
                 Assert.fail();

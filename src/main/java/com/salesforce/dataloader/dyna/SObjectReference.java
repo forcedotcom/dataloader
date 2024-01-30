@@ -59,21 +59,20 @@ public class SObjectReference {
      */
     public void addReferenceToSObject(Controller controller, SObject sObj, String refFieldName) throws ParameterLoadException {
         // break the name into relationship and field name components
-        ObjectField refField = new ObjectField(refFieldName);
-        String relationshipName = refField.getObjectName();
-        String fieldName = refField.getFieldName();
+        RelationshipField refField = new RelationshipField(refFieldName, true);
+        String relationshipName = refField.getRelationshipName();
+        String parentFieldName = refField.getParentFieldName();
 
-        // get object info for the given reference (foreign key) relationship
-        DescribeRefObject entityRefInfo = controller.getReferenceDescribes().get(relationshipName);
+        DescribeRefObject entityRefInfo = controller.getReferenceDescribes().getParentSObject(refField.toFormattedRelationshipString());
 
         // build the reference SObject
         SObject sObjRef = new SObject();
         // set entity type, has to be set before all others
         sObjRef.setType(entityRefInfo.getParentObjectName());
-        // set external id, do type conversion as well
-        Class<?> typeClass = SforceDynaBean.getConverterClass(entityRefInfo.getParentObjectFieldMap().get(fieldName));
+        // set idLookup, do type conversion as well
+        Class<?> typeClass = SforceDynaBean.getConverterClass(entityRefInfo.getParentObjectFieldMap().get(parentFieldName));
         Object extIdValue = ConvertUtils.convert(this.referenceExtIdValue.toString(), typeClass);
-        sObjRef.setField(fieldName, extIdValue);
+        sObjRef.setField(parentFieldName, extIdValue);
         // Add the sObject reference as a child elemetn, name set to relationshipName
         sObj.addField(relationshipName, sObjRef);
     }
@@ -100,8 +99,8 @@ public class SObjectReference {
     }
 
     public static String getRelationshipField(Controller controller, String refFieldName) {
-        final String relName = new ObjectField(refFieldName).getObjectName();
-        controller.getReferenceDescribes().get(relName).getParentObjectFieldMap();
+        final String relName = new RelationshipField(refFieldName, true).getRelationshipName();
+        controller.getReferenceDescribes().getParentSObject(relName).getParentObjectFieldMap();
         for (Field f : controller.getFieldTypes().getFields()) {
             if (f != null) {
                 if (relName.equals(f.getRelationshipName())) { return f.getName(); }

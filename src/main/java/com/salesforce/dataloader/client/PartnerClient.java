@@ -224,7 +224,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     };
 
     private DescribeGlobalResult describeGlobalResults;
-    private final Map<String, DescribeRefObject> referenceEntitiesDescribesMap = new HashMap<String, DescribeRefObject>();
+    private final ReferenceEntitiesDescribeMap referenceEntitiesDescribesMap = new ReferenceEntitiesDescribeMap();
     private final Map<String, DescribeGlobalSObjectResult> describeGlobalResultsMap = new HashMap<String, DescribeGlobalSObjectResult>();
     private final Map<String, DescribeSObjectResult> entityFieldDescribesMap = new HashMap<String, DescribeSObjectResult>();
 
@@ -562,7 +562,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
     }
 
-    public Map<String, DescribeRefObject> getReferenceDescribes() {
+    public ReferenceEntitiesDescribeMap getReferenceDescribes() {
         return referenceEntitiesDescribesMap;
     }
     
@@ -938,42 +938,23 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     private final Map<String, Field> fieldsByName = new HashMap<String, Field>();
 
-    public Field getField(String apiName) {
-        apiName = apiName.toLowerCase();
-        Field field = this.fieldsByName.get(apiName);
+    public Field getField(String sObjectFieldName) {
+        sObjectFieldName = sObjectFieldName.toLowerCase();
+        Field field = this.fieldsByName.get(sObjectFieldName);
         if (field == null) {
-            field = lookupField(apiName);
-            this.fieldsByName.put(apiName, field);
+            field = lookupField(sObjectFieldName);
+            this.fieldsByName.put(sObjectFieldName, field);
         }
         return field;
     }
 
-    private Field lookupField(String apiName) {
+    private Field lookupField(String sObjectFieldName) {
         // look for field on target object
         for (Field f : getFieldTypes().getFields()) {
-            if (apiName.equals(f.getName().toLowerCase()) || apiName.equals(f.getLabel().toLowerCase()))
+            if (sObjectFieldName.equals(f.getName().toLowerCase()) || sObjectFieldName.equals(f.getLabel().toLowerCase()))
                 return f;
         }
-        // look for reference field on target object
-        if (apiName.contains(":")) {
-            Map<String, DescribeRefObject> refs = getReferenceDescribes();
-            for (Map.Entry<String, DescribeRefObject> ent : refs.entrySet()) {
-                String relName = ent.getKey().toLowerCase();
-                if (apiName.startsWith(relName)) {
-                    for (Map.Entry<String, Field> refEntry : ent.getValue().getParentObjectFieldMap().entrySet()) {
-                        String thisRefName = relName + ":" + refEntry.getKey().toLowerCase();
-                        if (apiName.contains(".")) {
-                            thisRefName = relName + ":" 
-                                    + ent.getValue().getParentObjectName()
-                                    + "." + refEntry.getKey().toLowerCase();
-                        }
-                        
-                        if (apiName.equalsIgnoreCase(thisRefName)) return refEntry.getValue();
-                    }
-                }
-            }
-        }
-        return null;
+        return this.referenceEntitiesDescribesMap.getParentField(sObjectFieldName);
     }
 
 }

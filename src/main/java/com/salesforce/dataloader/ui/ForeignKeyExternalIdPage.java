@@ -36,9 +36,10 @@ import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.client.DescribeRefObject;
+import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dyna.ObjectField;
+import com.salesforce.dataloader.dyna.RelationshipField;
 import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.FieldType;
 
@@ -53,7 +54,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
     private final Map<String,Combo> extIdSelections = new HashMap<String,Combo>();
     private Composite containerComp;
     private ScrolledComposite scrollComp;
-    private Map<String, DescribeRefObject> referenceObjects;
+    private ReferenceEntitiesDescribeMap referenceObjects;
     private int numChildFieldsWithNonIdLookupFieldSelections = 0;
 
 
@@ -102,7 +103,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
         if(referenceObjects != null) {
             for(String relationshipName : referenceObjects.keySet()) {
                 OperationInfo operation = controller.getConfig().getOperationInfo();
-                Field childField = referenceObjects.get(relationshipName).getChildField();
+                Field childField = referenceObjects.getParentSObject(relationshipName).getChildField();
                 boolean isCreateableOrUpdateable = true;
                 if (childField != null) {
                     switch (operation) {
@@ -137,8 +138,8 @@ public class ForeignKeyExternalIdPage extends LoadPage {
      */
     private void createObjectExtIdUi(Composite comp, String relationshipName) {
         Label labelExtId = new Label(comp, SWT.RIGHT);
-        DescribeRefObject extIdInfo = referenceObjects.get(relationshipName);
-        labelExtId.setText(relationshipName + " (" + extIdInfo.getParentObjectName() + ")");
+        DescribeRefObject extIdInfo = referenceObjects.getParentSObject(relationshipName);
+        labelExtId.setText(relationshipName);
         labelExtId.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 
         // Add the ext id dropdown
@@ -190,12 +191,14 @@ public class ForeignKeyExternalIdPage extends LoadPage {
             // make sure that the item selection has occurred and that the default text is not displayed anymore
             if(extIdFieldName != null && extIdFieldName.length() > 0
                     && ! extIdFieldName.equals(Labels.getString("ForeignKeyExternalIdPage.defaultComboText"))) {
-                DescribeRefObject refObjectInfo = referenceObjects.get(relationshipName);
-                extIdReferences.put(relationshipName, ObjectField.formatAsString(refObjectInfo.getParentObjectName(), extIdFieldName));
+                DescribeRefObject refObjectInfo = referenceObjects.getParentSObject(relationshipName);
+                extIdReferences.put(relationshipName, RelationshipField.formatAsString(refObjectInfo.getParentObjectName(), extIdFieldName));
                 Field relatedField = new Field();
                 Field parentField = refObjectInfo.getParentObjectFieldMap().get(extIdFieldName);
                 Field childField = refObjectInfo.getChildField();
-                relatedField.setName(relationshipName + ":" + parentField.getName());
+                RelationshipField relField = new RelationshipField(relationshipName, false);
+                relField.setParentFieldName(parentField.getName());
+                relatedField.setName(relField.toString());
                 String childFieldLabel = childField.getLabel();
                 String[] childFieldLabelParts = childFieldLabel.split(" \\(.+\\)$");
                 relatedField.setLabel(childFieldLabelParts[0] + " (" + parentField.getLabel() + ")");
