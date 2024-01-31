@@ -124,11 +124,6 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     @Override
     public boolean visit(Row row) throws OperationException, DataAccessObjectException,
     ConnectionException {
-        if (controller.getConfig().getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
-            || !controller.getConfig().getBoolean(Config.BULK_API_ENABLED)) {
-            // either batch mode or cache bulk data uploaded from DAO
-            this.daoRowList.add(row);
-        }
         // the result are sforce fields mapped to data
         Row sforceDataRow = getMapper().mapData(row);
         try {
@@ -141,6 +136,11 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
                     Object value = this.getFieldValue(fName, dynaBean.get(fName));
                     dynaBean.set(fName, value);
                 }
+            }
+            if (controller.getConfig().getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                    || !controller.getConfig().getBoolean(Config.BULK_API_ENABLED)) {
+                // either batch mode or cache bulk data uploaded from DAO
+                this.daoRowList.add(row);
             }
             dynaArray.add(dynaBean);
             this.batchRowToDAORowList.add(this.processedDAORowCounter);

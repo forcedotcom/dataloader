@@ -138,9 +138,6 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
         }
         for (int i = 0; i < this.daoRowList.size(); i++) {
             Row daoRow = this.daoRowList.get(i);
-            if (!isRowConversionSuccessful(startAtDAORow + i)) {
-                continue;
-            }
             String statusMsg = null;
             if (results instanceof SaveResult[]) {
                 SaveResult saveRes = (SaveResult)results[batchRowCounter];
