@@ -144,12 +144,16 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             }
             dynaArray.add(dynaBean);
             this.batchRowToDAORowList.add(this.processedDAORowCounter);
+            this.processedDAORowCounter++;
         } catch (ConversionException | IllegalAccessException conve) {
             String errMsg = Messages.getMessage("Visitor", "conversionErrorMsg", conve.getMessage());
             getLogger().error(errMsg, conve);
 
             conversionFailed(row, errMsg);
             // this row cannot be added since conversion has failed
+            if (!controller.getConfig().getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
+                this.processedDAORowCounter++;
+            }
             return false;
         } catch (InvocationTargetException e) {
             // TODO Auto-generated catch block
@@ -157,8 +161,6 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         } catch (NoSuchMethodException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } finally {
-            this.processedDAORowCounter++;
         }
 
         // load the batch

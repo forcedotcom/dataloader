@@ -532,7 +532,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         for (final Row row : rows) {
             boolean conversionSuccessOfRow = isRowConversionSuccessful(skippedRowsCount 
                         + this.firstDAORowForCurrentBatch + dataReaderRowCount++);
-            if (!conversionSuccessOfRow) {
+            if (!conversionSuccessOfRow && !controller.getConfig().getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
                 continue; // this DAO row failed to convert and was not part of the batch sent to the server. Go to the next one
             }
             final List<String> res = resultRdr.nextRecord();
