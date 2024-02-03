@@ -31,6 +31,8 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 
@@ -52,10 +54,11 @@ import com.sforce.soap.partner.FieldType;
 public class ForeignKeyExternalIdPage extends LoadPage {
 
     private final Map<String,Combo> extIdSelections = new HashMap<String,Combo>();
+    private final Map<String,Combo> parentSelections = new HashMap<String,Combo>();
     private Composite containerComp;
     private ScrolledComposite scrollComp;
     private ReferenceEntitiesDescribeMap referenceObjects;
-    private int numChildFieldsWithNonIdLookupFieldSelections = 0;
+    private boolean hasParentEntitiesWithIdLookupField = false;
 
 
     public ForeignKeyExternalIdPage(Controller controller) {
@@ -85,7 +88,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
         Composite comp = new Composite(scrollComp, SWT.NONE);
         scrollComp.setContent(comp);
 
-        GridLayout gridLayout = new GridLayout(2, false);
+        GridLayout gridLayout = new GridLayout(3, false);
         gridLayout.horizontalSpacing = 10;
         gridLayout.marginHeight = 20;
         gridLayout.verticalSpacing = 7;
@@ -99,9 +102,12 @@ public class ForeignKeyExternalIdPage extends LoadPage {
         scrollBar.setPageIncrement(20 * 5);
 
         extIdSelections.clear();
-        this.numChildFieldsWithNonIdLookupFieldSelections = 0;
+        parentSelections.clear();
+        this.hasParentEntitiesWithIdLookupField = false;
         if(referenceObjects != null) {
-            for(String relationshipName : referenceObjects.keySet()) {
+            List<String> sortedRelationshipList = new ArrayList<>(referenceObjects.keySet());
+            Collections.sort(sortedRelationshipList);
+            for(String relationshipName : sortedRelationshipList) {
                 OperationInfo operation = controller.getConfig().getOperationInfo();
                 Field childField = referenceObjects.getParentSObject(relationshipName).getChildField();
                 boolean isCreateableOrUpdateable = true;
@@ -123,7 +129,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
                 }
                 if (isCreateableOrUpdateable) {
                     createObjectExtIdUi(comp, relationshipName);
-                    numChildFieldsWithNonIdLookupFieldSelections++;
+                    hasParentEntitiesWithIdLookupField = true;
                 }
             }
         }
@@ -137,18 +143,53 @@ public class ForeignKeyExternalIdPage extends LoadPage {
      * @param relationshipName
      */
     private void createObjectExtIdUi(Composite comp, String relationshipName) {
-        Label labelExtId = new Label(comp, SWT.RIGHT);
-        DescribeRefObject extIdInfo = referenceObjects.getParentSObject(relationshipName);
-        labelExtId.setText(relationshipName);
-        labelExtId.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+        RelationshipField relField = new RelationshipField(relationshipName, false);
 
-        // Add the ext id dropdown
-        Combo extIdCombo = new Combo(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
+        // Add parent dropdown
+        if (relField.getParentObjectName() == null) {
+            // shouldn't happen
+            return;
+        }
+        Combo parentCombo = this.parentSelections.get(relField.getRelationshipName());
+        if (parentCombo == null) {
+            // first parent object
+            Label labelExtId = new Label(comp, SWT.RIGHT);
+            labelExtId.setText(relField.getRelationshipName() + ":");
+            labelExtId.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 
-        // The width comes out based on number of pixels, not characters
-        GridData extIdData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-        extIdData.widthHint = 150;
-        extIdCombo.setLayoutData(extIdData);
+            parentCombo = new Combo(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
+            GridData parentData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+            parentData.widthHint = 150;
+            parentCombo.setLayoutData(parentData);
+            parentCombo.add(relField.getParentObjectName());
+            parentCombo.select(0);
+            parentCombo.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent event) {
+                    String parentName = ((Combo)event.widget).getText();
+                    Combo parentLookupIdFieldCombo = extIdSelections.get(relField.toFormattedRelationshipString());
+                    parentLookupIdFieldCombo.removeAll();
+                    RelationshipField selectedRelationship = new RelationshipField(parentName, relField.getRelationshipName());
+                    populateParentLookupFieldCombo(parentLookupIdFieldCombo, selectedRelationship);
+                }
+            });
+            parentSelections.put(relField.getRelationshipName(), parentCombo);
+            // Add the ext id dropdown
+            Combo extIdCombo = new Combo(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
+
+            // The width comes out based on number of pixels, not characters
+            GridData extIdData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+            extIdData.widthHint = 150;
+            extIdCombo.setLayoutData(extIdData);
+            populateParentLookupFieldCombo(extIdCombo, relField);
+            extIdSelections.put(relField.toFormattedRelationshipString(), extIdCombo);
+        } else {
+            parentCombo.add(relField.getParentObjectName());
+        }
+    }
+    
+    private void populateParentLookupFieldCombo(Combo extIdCombo, RelationshipField relField) {
+        DescribeRefObject extIdInfo = referenceObjects.getParentSObject(relField.toFormattedRelationshipString());
 
         // get object's ext id info & set combo box to list of external id fields
         // set the objects reference information
@@ -156,8 +197,6 @@ public class ForeignKeyExternalIdPage extends LoadPage {
         // add default selection "not selected" to the list to allow users to go back to it
         fieldList.add(Labels.getString("ForeignKeyExternalIdPage.defaultComboText"));
         UIUtils.setComboItems(extIdCombo, fieldList, Labels.getString("ForeignKeyExternalIdPage.defaultComboText"));
-
-        extIdSelections.put(relationshipName, extIdCombo);
     }
 
     /**
@@ -184,21 +223,17 @@ public class ForeignKeyExternalIdPage extends LoadPage {
         Map<String,Field> relatedFields = new HashMap<String,Field>();
 
         // foreign key references (if any set)
-        Map<String,String> extIdReferences = new HashMap<String,String>();
-        for(String relationshipName : extIdSelections.keySet()) {
-            Combo combo = extIdSelections.get(relationshipName);
-            String extIdFieldName = combo.getText();
+        for(String relationshipNameInCombo : extIdSelections.keySet()) {
+            Combo combo = extIdSelections.get(relationshipNameInCombo);
+            String lookupFieldInParent = combo.getText();
+            RelationshipField relationshipField = getSelectedParentSObjectForLookupField(relationshipNameInCombo, lookupFieldInParent);
             // make sure that the item selection has occurred and that the default text is not displayed anymore
-            if(extIdFieldName != null && extIdFieldName.length() > 0
-                    && ! extIdFieldName.equals(Labels.getString("ForeignKeyExternalIdPage.defaultComboText"))) {
-                DescribeRefObject refObjectInfo = referenceObjects.getParentSObject(relationshipName);
-                extIdReferences.put(relationshipName, RelationshipField.formatAsString(refObjectInfo.getParentObjectName(), extIdFieldName));
+            if(relationshipField != null) {
+                DescribeRefObject refDescribe = referenceObjects.getParentSObject(relationshipField.toFormattedRelationshipString());
                 Field relatedField = new Field();
-                Field parentField = refObjectInfo.getParentObjectFieldMap().get(extIdFieldName);
-                Field childField = refObjectInfo.getChildField();
-                RelationshipField relField = new RelationshipField(relationshipName, false);
-                relField.setParentFieldName(parentField.getName());
-                relatedField.setName(relField.toString());
+                Field parentField = refDescribe.getParentObjectFieldMap().get(lookupFieldInParent);
+                Field childField = refDescribe.getChildField();
+                relatedField.setName(relationshipField.toString());
                 String childFieldLabel = childField.getLabel();
                 String[] childFieldLabelParts = childFieldLabel.split(" \\(.+\\)$");
                 relatedField.setLabel(childFieldLabelParts[0] + " (" + parentField.getLabel() + ")");
@@ -206,13 +241,32 @@ public class ForeignKeyExternalIdPage extends LoadPage {
                 relatedField.setUpdateable(childField.isUpdateable());
                 relatedField.setType(FieldType.reference);
                 String[] refToArray = new String[1];
-                refToArray[0] = refObjectInfo.getParentObjectName();
+                refToArray[0] = refDescribe.getParentObjectName();
                 relatedField.setReferenceTo(refToArray);
-                relatedFields.put(relationshipName,relatedField);
+                relatedFields.put(relationshipField.toString(),relatedField);
             }
         }
 
         return relatedFields;
+    }
+    
+    private RelationshipField getSelectedParentSObjectForLookupField(String relationshipNameInCombo, String selectedIdLookupField) {
+        if(selectedIdLookupField != null && selectedIdLookupField.length() > 0
+                && ! selectedIdLookupField.equals(Labels.getString("ForeignKeyExternalIdPage.defaultComboText"))) {
+            RelationshipField possibleParentSObjectField = new RelationshipField(relationshipNameInCombo, false);
+            Combo parentSObjectCombo = this.parentSelections.get(possibleParentSObjectField.getRelationshipName());
+            if (parentSObjectCombo == null) {
+                return null;
+            }
+            String actualParentSObjectName = parentSObjectCombo.getText();
+            String fullRelationshipName = RelationshipField.formatAsString(
+                    actualParentSObjectName
+                    , possibleParentSObjectField.getRelationshipName()
+                    , selectedIdLookupField);
+            RelationshipField actualParentSObjectField = new RelationshipField(fullRelationshipName, true);
+            return actualParentSObjectField;
+        }
+        return null;
     }
 
     /*
@@ -241,7 +295,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
     @Override
     protected OperationPage getNextPageOverride(){
         setupPage();
-        if (numChildFieldsWithNonIdLookupFieldSelections == 0) {
+        if (!hasParentEntitiesWithIdLookupField) {
             // nothing to display, go to the next page
             return (OperationPage)getNextPage();
         }
@@ -250,7 +304,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
     
     @Override
     protected OperationPage getPreviousPageOverride(){
-        if (numChildFieldsWithNonIdLookupFieldSelections == 0) {
+        if (!hasParentEntitiesWithIdLookupField) {
             // nothing to display, go to the previous page
             return (OperationPage)getPreviousPage();
         }

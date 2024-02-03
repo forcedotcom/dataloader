@@ -793,28 +793,27 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                     continue;
                 }
 
-                boolean haSingleParentObject = parentObjectNames.length == 1;
                 if (parentObjectNames.length >= DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD) {
                     childObjectField.setLabel(childObjectField.getLabel() + " (Id)");
                 } else {
-                    processParentObjectArrayForLookupReferences(parentObjectNames, childObjectField, haSingleParentObject);
+                    processParentObjectArrayForLookupReferences(parentObjectNames, childObjectField);
                 }
             }
         }
     }
     
-    private void processParentObjectArrayForLookupReferences(String[] parentObjectNames, Field childObjectField, boolean haSingleParentObject) throws ConnectionException {
+    private void processParentObjectArrayForLookupReferences(String[] parentObjectNames, Field childObjectField) throws ConnectionException {
         for (int parentObjectIndex = 0; parentObjectIndex < parentObjectNames.length; parentObjectIndex++ ) {
             String parentObjectName = parentObjectNames[parentObjectIndex];
-            processParentObjectForLookupReferences(parentObjectName, childObjectField, haSingleParentObject, parentObjectIndex, parentObjectNames.length);
+            processParentObjectForLookupReferences(parentObjectName, childObjectField, parentObjectIndex, parentObjectNames.length);
         }
     }
     
-    private void processParentObjectForLookupReferences(String parentObjectName, Field childObjectField, boolean haSingleParentObject, int parentObjectIndex, int totalParentObjects) throws ConnectionException {
+    private void processParentObjectForLookupReferences(String parentObjectName, Field childObjectField, int parentObjectIndex, int numParentTypes) throws ConnectionException {
         Field[] parentObjectFields = describeSObject(parentObjectName).getFields();
         Map<String, Field> parentIdLookupFieldMap = new HashMap<String, Field>();
         for (Field parentField : parentObjectFields) {
-            processParentFieldForLookupReference(parentField, childObjectField, haSingleParentObject, parentObjectIndex, totalParentObjects, parentIdLookupFieldMap);
+            processParentFieldForLookupReference(parentField, childObjectField, numParentTypes, parentObjectIndex, numParentTypes, parentIdLookupFieldMap);
         }
         if (!parentIdLookupFieldMap.isEmpty()) {
             DescribeRefObject describeRelationship = new DescribeRefObject(parentObjectName, childObjectField, parentIdLookupFieldMap);
@@ -822,13 +821,13 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
     }
     
-    private void processParentFieldForLookupReference(Field parentField, Field childObjectField, boolean haSingleParentObject, int parentObjectIndex, int totalParentObjects, Map<String, Field> parentIdLookupFieldMap) {
+    private void processParentFieldForLookupReference(Field parentField, Field childObjectField, int numParentTypes, int parentObjectIndex, int totalParentObjects, Map<String, Field> parentIdLookupFieldMap) {
         if (!parentField.isIdLookup()) {
             return;
         }
         if (parentField.getType() == FieldType.id) {
             updateChildFieldLabelWithParentIdLabels(parentField, childObjectField, parentObjectIndex, totalParentObjects);
-        } else if (haSingleParentObject) {
+        } else if (numParentTypes <= DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD) {
             parentIdLookupFieldMap.put(parentField.getName(), parentField);
         }
     }
