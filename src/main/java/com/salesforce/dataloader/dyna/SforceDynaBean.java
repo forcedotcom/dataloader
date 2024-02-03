@@ -85,21 +85,24 @@ public class SforceDynaBean {
             // NOTE: currently only fields with one reference are supported on the server
             FieldType fieldType = field.getType();
             String relationshipName = field.getRelationshipName();
-            if (fieldType == FieldType.reference && field.getReferenceTo().length == 1 &&
+            if (fieldType == FieldType.reference && field.getReferenceTo().length <= DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD &&
                     relationshipName != null && relationshipName.length() > 0) {
 
-                DescribeRefObject parent = controller.getReferenceDescribes().getParentSObject(relationshipName);
-                if(parent != null) {
-                    for(String refFieldName : parent.getParentObjectFieldMap().keySet()) {
-                        // property name contains information for mapping
-                        // add old format to dyna props
-                        dynaProps.add(new DynaProperty(
-                                        RelationshipField.formatAsString(relationshipName, refFieldName),
+                for (String parentName : field.getReferenceTo()) {
+                    RelationshipField relField = new RelationshipField(parentName, relationshipName);
+                    DescribeRefObject parent = controller.getReferenceDescribes().getParentSObject(relField.toFormattedRelationshipString());
+                    if(parent != null) {
+                        for(String refFieldName : parent.getParentObjectFieldMap().keySet()) {
+                            // property name contains information for mapping
+                            // add old format to dyna props
+                            dynaProps.add(new DynaProperty(
+                                            RelationshipField.formatAsString(relationshipName, refFieldName),
+                                            SObjectReference.class));
+                            // add new format to dyna props
+                            dynaProps.add(new DynaProperty(
+                                    RelationshipField.formatAsString(parent.getParentObjectName(), relationshipName, refFieldName),
                                         SObjectReference.class));
-                        // add new format to dyna props
-                        dynaProps.add(new DynaProperty(
-                                RelationshipField.formatAsString(parent.getParentObjectName(), relationshipName, refFieldName),
-                                    SObjectReference.class));
+                        }
                     }
                 }
             }
