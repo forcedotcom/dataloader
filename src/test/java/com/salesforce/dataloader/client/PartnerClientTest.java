@@ -480,29 +480,6 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
-    private void doUpsert(String entity, Map<String, Object> sforceMapping) throws Exception {
-        // now convert to a dynabean array for the client
-        // setup our dynabeans
-        BasicDynaClass dynaClass = setupDynaClass(entity);
-
-        DynaBean sforceObj = dynaClass.newInstance();
-
-        // This does an automatic conversion of types.
-        BeanUtils.copyProperties(sforceObj, sforceMapping);
-
-        List<DynaBean> beanList = new ArrayList<DynaBean>();
-        beanList.add(sforceObj);
-
-        // get the client and make the insert call
-        PartnerClient client = new PartnerClient(getController());
-        UpsertResult[] results = client.loadUpserts(beanList);
-        for (UpsertResult result : results) {
-            if (!result.getSuccess()) {
-                Assert.fail("Upsert returned an error: " + result.getErrors()[0].getMessage());
-            }
-        }
-    }
-
     /**
      * Basic failing - forgetting the external id or foreign key external id
      */
@@ -651,68 +628,4 @@ public class PartnerClientTest extends ProcessTestBase {
 
         return records[0].getId();
     }
-
-    /**
-     * Make sure to set external id field
-     */
-    private String setExtIdField(String extIdField) {
-        getController().getConfig().setValue(Config.EXTERNAL_ID_FIELD, extIdField);
-        return extIdField;
-    }
-
-    /**
-     * Get a random account external id for upsert testing
-     * 
-     * @param entity
-     *            TODO
-     * @param whereClause
-     *            TODO
-     * @param prevValue
-     *            Indicate that the value should be different from the specified
-     *            value or null if uniqueness not required
-     * @return String Account external id value
-     */
-    private Object getRandomExtId(String entity, String whereClause, Object prevValue) throws ConnectionException {
-
-        // insert couple of accounts so there're at least two records to work with
-        upsertSfdcRecords(entity, 2);
-
-        // get the client and make the query call
-        String extIdField = getController().getConfig().getString(Config.EXTERNAL_ID_FIELD);
-        PartnerClient client = new PartnerClient(getController());
-        // only get the records that have external id set, avoid nulls
-        String soql = "select " + extIdField + " from " + entity + " where " + whereClause + " and " + extIdField
-                + " != null";
-        if (prevValue != null) {
-            soql += " and "
-                    + extIdField
-                    + "!= "
-                    + (prevValue.getClass().equals(String.class) ? ("'" + prevValue + "'") : String
-                            .valueOf(prevValue));
-        }
-        QueryResult result = client.query(soql);
-        SObject[] records = result.getRecords();
-        assertNotNull("Operation should return non-null values", records);
-        assertTrue("Operation should return 1 or more records", records.length > 0);
-        assertNotNull("Records should have non-null field: " + extIdField + " values", records[0]
-                .getField(extIdField));
-
-        return records[0].getField(extIdField);
-    }
-
-    private BasicDynaClass setupDynaClass(String entity) throws ConnectionException {
-        getController().getConfig().setValue(Config.ENTITY, entity);
-        PartnerClient client = getController().getPartnerClient();
-        if (!client.isLoggedIn()) {
-            client.connect();
-        }
-
-        getController().setFieldTypes();
-        getController().setReferenceDescribes();
-        DynaProperty[] dynaProps = SforceDynaBean.createDynaProps(getController().getPartnerClient().getFieldTypes(), getController());
-        BasicDynaClass dynaClass = SforceDynaBean.getDynaBeanInstance(dynaProps);
-        SforceDynaBean.registerConverters(getController().getConfig());
-        return dynaClass;
-    }
-
 }

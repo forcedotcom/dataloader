@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -88,15 +89,64 @@ public class CsvProcessTest extends ProcessTestBase {
      */
     @Test
     public void testInsertAccountCsv() throws Exception {
-        runProcess(getTestConfig(OperationInfo.insert, false), 100);
+        Map<String, String> configMap = getTestConfig(OperationInfo.insert, false);
+        if (isSettingEnabled(configMap, Config.BULK_API_ZIP_CONTENT)
+                || isSettingEnabled(configMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, Config.BULK_API_SERIAL_MODE)
+                || isSettingEnabled(configMap, Config.NO_COMPRESSION)
+                ) {
+            return;
+        }
+        runProcess(configMap, 100);
     }
 
+    /**
+     * Tests the insert operation on Account - Positive test.
+     */
+    @Test
+    public void testInsertTaskWithContactAsWhoCsv() throws Exception {
+        Map<String, String> configMap = getTestConfig(OperationInfo.insert, false);
+        if (isSettingEnabled(configMap, Config.BULK_API_ZIP_CONTENT)
+                || isSettingEnabled(configMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, Config.BULK_API_SERIAL_MODE)
+                || isSettingEnabled(configMap, Config.NO_COMPRESSION)
+                ) {
+            return;
+        }
+        Map<String, Object> sforceMapping = new HashMap<String, Object>();
+        sforceMapping.put("Email", "contactFor@PolymorphicMappingOfTask.com");
+        sforceMapping.put("Subject", "Contact to test Polymorphic mapping of Who relationship on Task");
+        sforceMapping.put("FirstName", "newFirstName" + System.currentTimeMillis());
+        sforceMapping.put("LastName", "newLastName" + System.currentTimeMillis());
+        // Title is set for easier test data cleanup
+        sforceMapping.put("Title", CONTACT_TITLE_PREFIX + System.currentTimeMillis());
+
+        String extIdField = setExtIdField(DEFAULT_CONTACT_EXT_ID_FIELD);
+        Object extIdValue = getRandomExtId("Contact", CONTACT_WHERE_CLAUSE, null);
+        sforceMapping.put(extIdField, extIdValue);
+
+        String oldExtIdField = getController().getConfig().getString(Config.EXTERNAL_ID_FIELD);
+        setExtIdField(extIdField);
+        doUpsert("Contact", sforceMapping);
+        setExtIdField(oldExtIdField);
+        configMap.put(Config.ENTITY, "Task");
+        runProcess(configMap, 1);
+    }
+    
     /**
      * Tests update operation with input coming from a CSV file. Relies on the id's in the CSV on being in the database
      */
     @Test
     public void testUpdateAccountCsv() throws Exception {
-        runProcess(getUpdateTestConfig(false, null, 100), 100);
+        Map<String, String> configMap = getUpdateTestConfig(false, null, 100);
+        if (isSettingEnabled(configMap, Config.BULK_API_ZIP_CONTENT)
+                || isSettingEnabled(configMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, Config.BULK_API_SERIAL_MODE)
+                || isSettingEnabled(configMap, Config.NO_COMPRESSION)
+                ) {
+            return;
+        }
+        runProcess(configMap, 100);
     }
 
     /**
@@ -104,8 +154,16 @@ public class CsvProcessTest extends ProcessTestBase {
      */
     @Test
     public void testUpsertAccountCsv() throws Exception {
+        Map<String, String> configMap = getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 50);
+        if (isSettingEnabled(configMap, Config.BULK_API_ZIP_CONTENT)
+                || isSettingEnabled(configMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, Config.BULK_API_SERIAL_MODE)
+                || isSettingEnabled(configMap, Config.NO_COMPRESSION)
+                ) {
+            return;
+        }
         // manually inserts 50 accounts, then upserts 100 accounts (50 inserts and 50 updates)
-        runUpsertProcess(getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 50), 50, 50);
+        runUpsertProcess(configMap, 50, 50);
     }
 
     /**
@@ -121,7 +179,14 @@ public class CsvProcessTest extends ProcessTestBase {
      */
     @Test
     public void testConstantMappingInCsv() throws Exception {
-
+        Map<String, String> configMap = getTestConfig(OperationInfo.insert, false);
+        if (isSettingEnabled(configMap, Config.BULK_API_ZIP_CONTENT)
+                || isSettingEnabled(configMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, Config.BULK_API_SERIAL_MODE)
+                || isSettingEnabled(configMap, Config.NO_COMPRESSION)
+                ) {
+            return;
+        }
         // The use case is as follows:
         // This company in this scenario only does business in the state of CA, therefore billing and shipping
         // addresses are hard coded to that.
@@ -131,8 +196,7 @@ public class CsvProcessTest extends ProcessTestBase {
         final String industryValue = "Aerospace";
 
         // insert the values
-        Map<String, String> argumentMap = getTestConfig(OperationInfo.insert, false);
-        for (SObject acct : retrieveAccounts(runProcess(argumentMap, 2), "Industry", "BillingState", "ShippingState")) {
+        for (SObject acct : retrieveAccounts(runProcess(configMap, 2), "Industry", "BillingState", "ShippingState")) {
 
             assertEquals("Incorrect value for industry returned",
                     industryValue, acct.getField("Industry"));
@@ -153,6 +217,15 @@ public class CsvProcessTest extends ProcessTestBase {
      */
     @Test
     public void testDescriptionAsConstantMappingInCsv() throws Exception {
+        Map<String, String> configMap = getTestConfig(OperationInfo.insert, getTestDataDir()
+                + "/constantMappingInCsv.csv", false);
+        if (isSettingEnabled(configMap, Config.BULK_API_ZIP_CONTENT)
+                || isSettingEnabled(configMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, Config.BULK_API_SERIAL_MODE)
+                || isSettingEnabled(configMap, Config.NO_COMPRESSION)
+                ) {
+            return;
+        }
         // The use case is as follows:
         // This company in this scenario only does business in the state of CA, therefore billing and shipping
         // addresses are hard coded to that.
@@ -161,9 +234,8 @@ public class CsvProcessTest extends ProcessTestBase {
         final String descriptionValue = "Some Description";
 
         // insert the values
-        Map<String, String> argumentMap = getTestConfig(OperationInfo.insert, getTestDataDir()
-                + "/constantMappingInCsv.csv", false);
-        Controller controller = runProcess(argumentMap, 2);
+
+        Controller controller = runProcess(configMap, 2);
         for (SObject acct : retrieveAccounts(controller, "Description", "BillingState", "ShippingState")) {
             assertEquals("Incorrect value for billing state returned", stateValue, acct.getField("BillingState"));
             assertEquals("Incorrect value for shipping state returned", stateValue, acct.getField("ShippingState"));
@@ -180,7 +252,15 @@ public class CsvProcessTest extends ProcessTestBase {
      */
     @Test
     public void testFieldAndConstantFieldClash()  throws Exception {
-
+        Map<String, String> configMap = getTestConfig(OperationInfo.insert,
+                getTestDataDir() + "/constantMappingInCsvClashing.csv", false);
+        if (isSettingEnabled(configMap, Config.BULK_API_ZIP_CONTENT)
+                || isSettingEnabled(configMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, Config.BULK_API_SERIAL_MODE)
+                || isSettingEnabled(configMap, Config.NO_COMPRESSION)
+                ) {
+            return;
+        }
         // The use case is as follows:
         // This company in this scenario only does business in the state of CA, therefore billing and shipping
         // addresses are hard coded to that.
@@ -190,9 +270,7 @@ public class CsvProcessTest extends ProcessTestBase {
         final String industryValue = "Aerospace";
 
         // insert the values
-        Map<String, String> argumentMap = getTestConfig(OperationInfo.insert,
-                getTestDataDir() + "/constantMappingInCsvClashing.csv", false);
-        for (SObject acct : retrieveAccounts(runProcess(argumentMap, 2), "Industry", "BillingState", "ShippingState")) {
+        for (SObject acct : retrieveAccounts(runProcess(configMap, 2), "Industry", "BillingState", "ShippingState")) {
 
             assertEquals("Incorrect value for industry returned",
                     industryValue, acct.getField("Industry"));
@@ -324,6 +402,10 @@ public class CsvProcessTest extends ProcessTestBase {
         final Map<String, String> argMap = getTestConfig(OperationInfo.insert, fileName, false);
         argMap.put(Config.ENTITY, "Attachment");
 
+        if (isSettingEnabled(argMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
+            return;
+        }
+        
         // this feature does not work when bulk api is enabled but the zip content type is not
         final boolean bulkApi = isBulkAPIEnabled(argMap);
         final boolean zipContent = isSettingEnabled(argMap, Config.BULK_API_ZIP_CONTENT);
@@ -383,9 +465,15 @@ public class CsvProcessTest extends ProcessTestBase {
         // insert the values
         Map<String, String> argumentMap = getTestConfig(OperationInfo.insert,
                 getTestDataDir() + "/accountsForInsert.csv", 
-                
                 getTestDataDir() + "/nonMappedFieldsPermittedInDLTransactionMap.sdl",
                 false);
+        if (isSettingEnabled(argumentMap, Config.BULK_API_ZIP_CONTENT)
+                || isSettingEnabled(argumentMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(argumentMap, Config.BULK_API_SERIAL_MODE)
+                || isSettingEnabled(argumentMap, Config.NO_COMPRESSION)
+                ) {
+            return;
+        }
         argumentMap.put(Config.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, 
                         Boolean.toString(preserveWhitespaceInRichText));
 
@@ -473,7 +561,13 @@ public class CsvProcessTest extends ProcessTestBase {
         //find the csv file
         Map<String, String> argumentMap = getTestConfig(OperationInfo.insert,
                 getTestDataDir() + "/timeZoneFormatTesting.csv", false);
-
+        if (isSettingEnabled(argumentMap, Config.BULK_API_ZIP_CONTENT)
+                || isSettingEnabled(argumentMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(argumentMap, Config.BULK_API_SERIAL_MODE)
+                || isSettingEnabled(argumentMap, Config.NO_COMPRESSION)
+                ) {
+            return;
+        }
         //insert into the account on the custom fields specified
         SObject[] returnedAccounts = retrieveAccounts(runProcess(argumentMap, numberOfRows), dateField);
 
@@ -522,6 +616,13 @@ public class CsvProcessTest extends ProcessTestBase {
         // insert the values
         Map<String, String> argumentMap = getTestConfig(OperationInfo.insert, getTestDataDir()
                 + "/oneToManySforceFieldsMappingInCsv.csv", false);
+        if (isSettingEnabled(argumentMap, Config.BULK_API_ZIP_CONTENT)
+                || isSettingEnabled(argumentMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(argumentMap, Config.BULK_API_SERIAL_MODE)
+                || isSettingEnabled(argumentMap, Config.NO_COMPRESSION)
+                ) {
+            return;
+        }
         Controller controller = runProcess(argumentMap, 2);
         for (SObject acct : retrieveAccounts(controller, "Name", "Description", "BillingState", "ShippingState")) {
             if ("ABC Corp".equals(acct.getField("Name"))) {
@@ -540,8 +641,16 @@ public class CsvProcessTest extends ProcessTestBase {
     
     @Test
     public void testEmptyFirstRowFieldValueInCsv() throws Exception {
+        Map<String, String> argumentMap = getUpdateTestConfig(false, null, 2);
+        if (isSettingEnabled(argumentMap, Config.BULK_API_ZIP_CONTENT)
+                || isSettingEnabled(argumentMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(argumentMap, Config.BULK_API_SERIAL_MODE)
+                || isSettingEnabled(argumentMap, Config.NO_COMPRESSION)
+                ) {
+            return;
+        }
         // update 2 records
-        Controller controller = runProcess(getUpdateTestConfig(false, null, 2), 2);
+        Controller controller = runProcess(argumentMap, 2);
 
         for (SObject acct : retrieveAccounts(controller, "Name", "Website")) {
             String websiteVal = (String)acct.getField("Website");

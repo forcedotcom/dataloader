@@ -59,6 +59,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
+import com.salesforce.dataloader.dyna.RelationshipField;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.LoadException;
@@ -280,7 +281,27 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         if (!first) {
             serverRequestOutput.print(',');
         }
-        serverRequestOutput.print(sfdcColumn.replace(':', '.'));
+        // Make sure that relationship field header is in the formats
+        // specified at https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/datafiles_csv_rel_field_header_row.htm
+        //     Format for Polymorphic relations:  ObjectType:RelationshipName.IndexedFieldName
+        //     Format for single parent type relations: RelationshipName.IndexedFieldName
+        String sfdcColumnForBulk = sfdcColumn;
+        if (RelationshipField.isRelationshipFieldMapping(sfdcColumn)) {
+            RelationshipField relField = new RelationshipField(sfdcColumn, true);
+            if (relField.getParentObjectName() == null) {
+                if (relField.getParentFieldName() == null) {
+                    sfdcColumnForBulk = relField.getRelationshipName();
+                } else {
+                    sfdcColumnForBulk = relField.getRelationshipName() 
+                            + "." + relField.getParentFieldName();
+                }
+            } else {
+                sfdcColumnForBulk = relField.getParentObjectName()
+                        + ":" + relField.getRelationshipName() 
+                        + "." + relField.getParentFieldName();
+            }
+        }
+        serverRequestOutput.print(sfdcColumnForBulk);
         cols.add(sfdcColumn);
         addedCols.add(sfdcColumn);
     }
