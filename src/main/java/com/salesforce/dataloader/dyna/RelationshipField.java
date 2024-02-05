@@ -58,7 +58,7 @@ public class RelationshipField {
     }
     
     // fieldName param can be in one of the following formats:
-    // format 1: alphanumeric string without any ':' or '#' in it. Represents name of child's non-polymorphic relationship field
+    // format 1: alphanumeric string without any ':' or '-' in it. Represents name of child's non-polymorphic relationship field
     // format 1 => it is name of a non-polymorphic relationship field in child object.
     //
     // format 2: alphanumeric string with a ':' in it
@@ -67,7 +67,7 @@ public class RelationshipField {
     //      - this is the new format for keys of the hashmap referenceEntitiesDescribeMap
     //   interpretation 2 (legacy format): <child relationship field name>:<parent idlookup field name>
     //
-    // format 3: alphanumeric string with a single ':' and a single '#' in it
+    // format 3: alphanumeric string with a single ':' and a single '-' in it
     // format 3 => it is name of a field in child object with reference to an idlookup field in parent object
     //
     // Given 2 interpretations of format 2, an additional parameter, 'isFieldName', is required.
@@ -92,12 +92,12 @@ public class RelationshipField {
                     relationshipName = fieldNameParts[0];
                     parentObjectName = fieldNameParts[1];
                 }
-            } else { // Should not happen - no ':' char in name, may have '#' char
+            } else { // Should not happen - no ':' char in name, may have '-' char
                 if (parentFieldName == null) { // no ':' and no '.' in name
-                    logger.error("field name " + fieldName + " does not have ':' or '.' char" );
+                    logger.error("field name " + fieldName + " does not have ':' or '-' char" );
                 } else {
-                    // '#' char in name but no ':'
-                    logger.error("field name " + fieldName + " has '.' but does not have ':' char" );
+                    // '-' char in name but no ':'
+                    logger.error("field name " + fieldName + " has '-' but does not have ':' char" );
                 }
             }
         } else { // format 1 or format 2, interpretation 1
@@ -163,6 +163,19 @@ public class RelationshipField {
                 + parentIDLookupFieldName;
     }
     
+    static public boolean isRelationshipFieldMapping(String fieldName) {
+        if (fieldName == null || fieldName.isBlank()) {
+            return false;
+        }
+        if (fieldName.contains(NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR)) {
+            if (fieldName.contains(NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR)) {
+                return true;
+            }
+        } else if (fieldName.contains(OLD_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR)) {
+            return true;
+        }
+        return false;
+    }
     
     /* (non-Javadoc)
      * @see java.lang.Object#toString()

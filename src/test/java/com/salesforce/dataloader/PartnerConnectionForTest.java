@@ -167,7 +167,7 @@ public class PartnerConnectionForTest extends TestBase {
                 entitySpecificClause = TESTFIELD_WHERE_CLAUSE;
                 break;
         }
-        if (!whereClause.contains(entitySpecificClause)) {
+        if (whereClause == null || !whereClause.contains(entitySpecificClause)) {
             if (whereClause == null || whereClause.isBlank()) {
                 whereClause = entitySpecificClause;
             } else {
