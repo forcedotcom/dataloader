@@ -32,14 +32,17 @@ import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.dyna.RelationshipField;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
 import com.salesforce.dataloader.model.Row;
 import com.sforce.soap.partner.QueryResult;
+import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -97,6 +100,31 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         } else {
             runProcess(argMap, 1);
         }
+    }
+    
+    @Test
+    public void testPolymorphicRelationshipInAttachment() throws ProcessInitializationException, DataAccessObjectException, ConnectionException {
+        // convert the template using the parent account id
+        Map<String, String> configMap = getTestConfig(OperationInfo.insert, false);
+
+        // this feature does not work when bulk api is enabled but the zip content type is not
+        final boolean bulkApi = isBulkAPIEnabled(configMap);
+        final boolean zipContent = isSettingEnabled(configMap, Config.BULK_API_ZIP_CONTENT);
+        if (bulkApi && !zipContent) {
+            return;
+        }
+        AccountGenerator acctGen = new AccountGenerator();
+        SObject[] parentAccts = new SObject[1];
+        parentAccts[0] = acctGen.getObject(0, false);
+        
+        // value of Oracle_id__c = 1-000000
+        SaveResult[] results = getBinding().create(parentAccts);
+        parentAccts[0].addField("id", results[0]);
+        
+        configMap.put(Config.ENTITY, "Attachment");
+        RelationshipField parentRel = new RelationshipField("Account", "Parent");
+        parentRel.setParentFieldName(DEFAULT_ACCOUNT_EXT_ID_FIELD);
+        runProcess(configMap, 1);
     }
 
     /**
