@@ -85,9 +85,8 @@ public class SforceDynaBean {
             // NOTE: currently only fields with one reference are supported on the server
             FieldType fieldType = field.getType();
             String relationshipName = field.getRelationshipName();
-            if (fieldType == FieldType.reference && field.getReferenceTo().length <= DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD &&
+            if (fieldType == FieldType.reference &&
                     relationshipName != null && relationshipName.length() > 0) {
-
                 for (String parentName : field.getReferenceTo()) {
                     RelationshipField relField = new RelationshipField(parentName, relationshipName);
                     DescribeRefObject parent = controller.getReferenceDescribes().getParentSObject(relField.toFormattedRelationshipString());

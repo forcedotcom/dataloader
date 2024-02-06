@@ -36,6 +36,7 @@ package com.salesforce.dataloader.client;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.dyna.RelationshipField;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
@@ -938,7 +939,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     private final Map<String, Field> fieldsByName = new HashMap<String, Field>();
 
     public Field getField(String sObjectFieldName) {
-        sObjectFieldName = sObjectFieldName.toLowerCase();
         Field field = this.fieldsByName.get(sObjectFieldName);
         if (field == null) {
             field = lookupField(sObjectFieldName);
@@ -948,10 +948,29 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private Field lookupField(String sObjectFieldName) {
+        boolean isRelationshipField = RelationshipField.isRelationshipFieldMapping(sObjectFieldName);
+        RelationshipField relField = new RelationshipField(sObjectFieldName, true);
         // look for field on target object
         for (Field f : getFieldTypes().getFields()) {
-            if (sObjectFieldName.equals(f.getName().toLowerCase()) || sObjectFieldName.equals(f.getLabel().toLowerCase()))
+            if (sObjectFieldName.equalsIgnoreCase(f.getName()) || sObjectFieldName.equalsIgnoreCase(f.getLabel())) {
                 return f;
+            }
+            if (isRelationshipField
+                    && relField != null
+                    && relField.getRelationshipName().equalsIgnoreCase(f.getRelationshipName())) {
+                Field parentField = this.referenceEntitiesDescribesMap.getParentField(sObjectFieldName);
+                if (parentField != null) {
+                    return parentField;
+                }
+                // need to add the relationship mapping to referenceEntitiesDescribesMap
+                try {
+                    processParentObjectForLookupReferences(relField.getParentObjectName(), f, 0, 1);
+                } catch (ConnectionException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                return this.referenceEntitiesDescribesMap.getParentField(sObjectFieldName);
+            }
         }
         return this.referenceEntitiesDescribesMap.getParentField(sObjectFieldName);
     }

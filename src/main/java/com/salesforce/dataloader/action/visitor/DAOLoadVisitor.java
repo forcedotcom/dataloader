@@ -71,8 +71,8 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     protected final List<DynaBean> dynaArray;
     private HashMap<Integer, Boolean> rowConversionFailureMap;
 
-    protected final BasicDynaClass dynaClass;
-    protected final DynaProperty[] dynaProps;
+    protected BasicDynaClass dynaClass = null;
+    protected DynaProperty[] dynaProps = null;
 
     private final int batchSize;
     protected List<Row> daoRowList = new ArrayList<Row>();
@@ -94,9 +94,6 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         dynaArray = new LinkedList<DynaBean>();
 
         SforceDynaBean.registerConverters(getConfig());
-
-        dynaProps = SforceDynaBean.createDynaProps(controller.getFieldTypes(), controller);
-        dynaClass = SforceDynaBean.getDynaBeanInstance(dynaProps);
 
         this.batchSize = getConfig().getLoadBatchSize();
         rowConversionFailureMap = new HashMap<Integer, Boolean>();
@@ -131,6 +128,16 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         }
         // the result are sforce fields mapped to data
         Row sforceDataRow = getMapper().mapData(row);
+        
+        // Make sure to initialize dynaClass only after mapping a row.
+        // This is to make sure that all polymorphic field mappings specified
+        // in the mapping file are mapped to parent object.
+        if (dynaProps == null) {
+            dynaProps = SforceDynaBean.createDynaProps(controller.getFieldTypes(), controller);
+        }
+        if (dynaClass == null) {
+            dynaClass = SforceDynaBean.getDynaBeanInstance(dynaProps);
+        }
         try {
             convertBulkAPINulls(sforceDataRow);
             DynaBean dynaBean = SforceDynaBean.convertToDynaBean(dynaClass, sforceDataRow);

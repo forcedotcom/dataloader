@@ -1,0 +1,5 @@
+# extract account mapping values for query from salesforce (left) and update to csv file (right)
+# salesforceFieldName=csvFieldName
+Name=Name
+Body=Body
+Parent\:Account-Oracle_Id__c=Parent\:Account-Oracle_Id__c
