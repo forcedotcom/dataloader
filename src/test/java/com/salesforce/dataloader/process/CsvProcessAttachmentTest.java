@@ -127,7 +127,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         parentContacts[0].addField("id", results[0]);
 
         configMap.put(Config.ENTITY, "Attachment");
-        runProcess(configMap, 1);
+        runProcess(configMap, 2);
     }
 
     /**

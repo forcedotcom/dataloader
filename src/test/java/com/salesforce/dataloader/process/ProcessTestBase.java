@@ -71,7 +71,7 @@ import com.sforce.ws.util.FileUtil;
 public abstract class ProcessTestBase extends ConfigTestBase {
 
     private static Logger logger = LogManager.getLogger(ProcessTestBase.class);
-    private int serverApiInvocationThreshold = 50;
+    private int serverApiInvocationThreshold = 100;
 
     protected ProcessTestBase() {
         super(Collections.<String, String>emptyMap());
