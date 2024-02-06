@@ -3,3 +3,4 @@
 Name=Name
 Body=Body
 Parent\:Account-Oracle_Id__c=Parent\:Account-Oracle_Id__c
+Parent\:Contact-Email=Parent\:Contact-Email

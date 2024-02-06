@@ -1,2 +1,3 @@
-Name,Body,Parent:Account-Oracle_Id__c
-TestAttachment_01.txt,"target/test-classes/testfiles/data/attachment.txt","1-000000"
+Name,Body,Parent:Account-Oracle_Id__c,Parent:Contact-Email
+accountAttachment.txt,"target/test-classes/testfiles/data/attachment.txt","1-000000",""
+contactAttachment.txt,"target/test-classes/testfiles/data/attachment.txt","","contact0@testcustomer.com"

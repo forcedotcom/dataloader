@@ -32,7 +32,6 @@ import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dyna.RelationshipField;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
@@ -116,14 +115,18 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         AccountGenerator acctGen = new AccountGenerator();
         SObject[] parentAccts = new SObject[1];
         parentAccts[0] = acctGen.getObject(0, false);
-        
         // value of Oracle_id__c = 1-000000
         SaveResult[] results = getBinding().create(parentAccts);
         parentAccts[0].addField("id", results[0]);
-        
+ 
+        ContactGenerator contactGen = new ContactGenerator();
+        SObject[] parentContacts = new SObject[1];
+        parentContacts[0] = contactGen.getObject(0, false);
+        // value of Oracle_id__c = 1-000000
+        results = getBinding().create(parentContacts);
+        parentContacts[0].addField("id", results[0]);
+
         configMap.put(Config.ENTITY, "Attachment");
-        RelationshipField parentRel = new RelationshipField("Account", "Parent");
-        parentRel.setParentFieldName(DEFAULT_ACCOUNT_EXT_ID_FIELD);
         runProcess(configMap, 1);
     }
 
