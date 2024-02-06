@@ -487,6 +487,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             contact.setField("Title", titleValue);
             contact.setField("Phone", "415-555-" + seqStr);
             contact.setField(DEFAULT_CONTACT_EXT_ID_FIELD, (double) i);
+            contact.setField("Email", "contact"+i+"@testcustomer.com");
             return contact;
         }
 
