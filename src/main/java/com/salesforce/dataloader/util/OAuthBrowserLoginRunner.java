@@ -99,6 +99,7 @@ public class OAuthBrowserLoginRunner {
         startBrowserLogin(config, skipUserCodePage);
     }
     
+    // Browser login uses OAuth 2.0 Device Flow - https://help.salesforce.com/s/articleView?id=sf.remoteaccess_oauth_device_flow.htm&type=5
     private void startBrowserLogin(Config config, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
         setLoginStatus(LoginStatus.WAIT);
         this.config = config;
