@@ -47,7 +47,6 @@ import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Error;
 import com.sforce.soap.partner.Field;
-import com.sforce.soap.partner.FieldType;
 import com.sforce.soap.partner.GetUserInfoResult;
 import com.sforce.soap.partner.LimitInfo;
 import com.sforce.soap.partner.LimitInfoHeader_element;
@@ -793,12 +792,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                     // it is neither modifiable nor updateable.
                     continue;
                 }
-
-                if (parentObjectNames.length >= DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD) {
-                    childObjectField.setLabel(childObjectField.getLabel() + " (Id)");
-                } else {
-                    processParentObjectArrayForLookupReferences(parentObjectNames, childObjectField);
-                }
+                processParentObjectArrayForLookupReferences(parentObjectNames, childObjectField);
             }
         }
     }
@@ -826,25 +820,8 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         if (!parentField.isIdLookup()) {
             return;
         }
-        if (parentField.getType() == FieldType.id) {
-            updateChildFieldLabelWithParentIdLabels(parentField, childObjectField, parentObjectIndex, totalParentObjects);
-        } else if (numParentTypes <= DescribeRefObject.MAX_PARENT_OBJECTS_IN_REFERENCING_FIELD) {
-            parentIdLookupFieldMap.put(parentField.getName(), parentField);
-        }
-    }
-    
-    private void updateChildFieldLabelWithParentIdLabels(Field parentField, Field childObjectField, int parentObjectIndex, int totalParentObjects) {
-        String childFieldLabel = childObjectField.getLabel().split(" \\(.+\\)$")[0];
-        if (parentObjectIndex == 0) {
-            childFieldLabel += " (";
-        } else {
-            childFieldLabel += ", ";
-        }
-        childFieldLabel += parentField.getLabel();
-        if (parentObjectIndex == totalParentObjects - 1) {
-            childFieldLabel += ")";
-        }
-        childObjectField.setLabel(childFieldLabel);
+        parentIdLookupFieldMap.put(parentField.getName(), parentField);
+
     }
 
     /**
