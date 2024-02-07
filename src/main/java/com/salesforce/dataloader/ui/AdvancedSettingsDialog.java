@@ -555,7 +555,9 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 buttonKeepAccountTeam.setSelection(!enabled);
             }
         });
-        buttonKeepAccountTeam.setSelection(!buttonUseBulkApi.getSelection());
+        if (useBulkAPI) {
+            buttonKeepAccountTeam.setSelection(false);
+        }
 
         // Bulk API serial concurrency mode setting
         Label labelBulkApiSerialMode = new Label(restComp, SWT.RIGHT | SWT.WRAP);
