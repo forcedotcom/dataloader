@@ -525,6 +525,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 super.widgetSelected(e);
                 boolean enabled = buttonKeepAccountTeam.getSelection();
                 // make sure the appropriate check boxes are enabled or disabled
+                buttonUseBulkApi.setSelection(!enabled);
                 setBulkSettings(!enabled);
             }
         });
@@ -551,8 +552,10 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 textBatch.setText(String.valueOf(newDefaultBatchSize));
                 // make sure the appropriate check boxes are enabled or disabled
                 setBulkSettings(enabled);
+                buttonKeepAccountTeam.setSelection(!enabled);
             }
         });
+        buttonKeepAccountTeam.setSelection(!buttonUseBulkApi.getSelection());
 
         // Bulk API serial concurrency mode setting
         Label labelBulkApiSerialMode = new Label(restComp, SWT.RIGHT | SWT.WRAP);
