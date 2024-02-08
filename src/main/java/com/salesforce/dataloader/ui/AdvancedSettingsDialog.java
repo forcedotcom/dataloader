@@ -525,8 +525,10 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 super.widgetSelected(e);
                 boolean enabled = buttonKeepAccountTeam.getSelection();
                 // make sure the appropriate check boxes are enabled or disabled
-                buttonUseBulkApi.setSelection(!enabled);
-                setBulkSettings(!enabled);
+                if (enabled) {
+                    buttonUseBulkApi.setSelection(false);
+                    setBulkSettings(false);
+                }
             }
         });
         buttonKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.keepAccountTeamHelp"));
@@ -552,7 +554,9 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 textBatch.setText(String.valueOf(newDefaultBatchSize));
                 // make sure the appropriate check boxes are enabled or disabled
                 setBulkSettings(enabled);
-                buttonKeepAccountTeam.setSelection(!enabled);
+                if (enabled) {
+                    buttonKeepAccountTeam.setSelection(false);
+                }
             }
         });
         if (useBulkAPI) {
