@@ -159,7 +159,7 @@ public class ExternalIdPage extends LoadPage {
 
         // prepare next page
         LoadPage nextPage = null;
-        ForeignKeyExternalIdPage fkExtIdPage = (ForeignKeyExternalIdPage) getWizard().getPage(ForeignKeyExternalIdPage.class.getSimpleName()); //$NON-NLS-1$
+        ChooseLookupFieldForRelationshipPage fkExtIdPage = (ChooseLookupFieldForRelationshipPage) getWizard().getPage(ChooseLookupFieldForRelationshipPage.class.getSimpleName()); //$NON-NLS-1$
         if(controller.getReferenceDescribes().size() > 0) {
             nextPage = fkExtIdPage;
         } else {
