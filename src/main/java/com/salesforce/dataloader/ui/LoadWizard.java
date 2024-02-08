@@ -186,7 +186,7 @@ public abstract class LoadWizard extends BaseWizard {
         @Override
         protected void hook_additionalLoadWizardPages() {
             super.hook_additionalLoadWizardPages();
-            addPage(new ForeignKeyExternalIdPage(getController()));
+            addPage(new ChooseLookupFieldForRelationshipPage(getController()));
         }
     }
 
@@ -199,7 +199,7 @@ public abstract class LoadWizard extends BaseWizard {
         protected void hook_additionalLoadWizardPages() {
             super.hook_additionalLoadWizardPages();
             addPage(new ExternalIdPage(getController()));
-            addPage(new ForeignKeyExternalIdPage(getController()));
+            addPage(new ChooseLookupFieldForRelationshipPage(getController()));
         }
     }
 
@@ -211,7 +211,7 @@ public abstract class LoadWizard extends BaseWizard {
         @Override
         protected void hook_additionalLoadWizardPages() {
             super.hook_additionalLoadWizardPages();
-            addPage(new ForeignKeyExternalIdPage(getController()));
+            addPage(new ChooseLookupFieldForRelationshipPage(getController()));
         }
     }
 

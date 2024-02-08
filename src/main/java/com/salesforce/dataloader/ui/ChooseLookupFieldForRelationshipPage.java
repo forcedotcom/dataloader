@@ -33,6 +33,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 
@@ -51,7 +53,7 @@ import com.sforce.soap.partner.FieldType;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class ForeignKeyExternalIdPage extends LoadPage {
+public class ChooseLookupFieldForRelationshipPage extends LoadPage {
 
     private final Map<String,Combo> extIdSelections = new HashMap<String,Combo>();
     private final Map<String,Combo> parentSelections = new HashMap<String,Combo>();
@@ -61,8 +63,8 @@ public class ForeignKeyExternalIdPage extends LoadPage {
     private boolean hasParentEntitiesWithIdLookupField = false;
 
 
-    public ForeignKeyExternalIdPage(Controller controller) {
-        super("ForeignKeyExternalIdPage", controller); //$NON-NLS-1$
+    public ChooseLookupFieldForRelationshipPage(Controller controller) {
+        super("ChooseLookupFieldForRelationshipPage", controller); //$NON-NLS-1$
         // Mark this page as completed as the selected sObject may not have any foreign key
         setPageComplete();
     }
@@ -88,7 +90,7 @@ public class ForeignKeyExternalIdPage extends LoadPage {
         Composite comp = new Composite(scrollComp, SWT.NONE);
         scrollComp.setContent(comp);
 
-        GridLayout gridLayout = new GridLayout(3, false);
+        GridLayout gridLayout = new GridLayout(5, false);
         gridLayout.horizontalSpacing = 10;
         gridLayout.marginHeight = 20;
         gridLayout.verticalSpacing = 7;
@@ -105,6 +107,35 @@ public class ForeignKeyExternalIdPage extends LoadPage {
         parentSelections.clear();
         this.hasParentEntitiesWithIdLookupField = false;
         if(referenceObjects != null) {
+            Label relNameHeader = new Label(comp, SWT.RIGHT);
+            relNameHeader.setText(Labels.getString(getClass().getSimpleName() + ".relationshipHeader"));
+            relNameHeader.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+            Font f = relNameHeader.getFont();
+            FontData[] farr = f.getFontData();
+            FontData fd = farr[0];
+            fd.setStyle(SWT.BOLD);
+            relNameHeader.setFont(new Font(Display.getCurrent(), fd));
+
+            Label parentObjectSeparator = new Label(comp, SWT.CENTER);
+            parentObjectSeparator.setText(RelationshipField.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR);
+            parentObjectSeparator.setFont(new Font(Display.getCurrent(), fd));
+
+            Label parentObjectNameHeader = new Label(comp, SWT.RIGHT);
+            parentObjectNameHeader.setText(Labels.getString(
+                    getClass().getSimpleName() + ".parentObjectHeader"));
+            parentObjectNameHeader.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
+            parentObjectNameHeader.setFont(new Font(Display.getCurrent(), fd));
+
+            Label parentLookupFieldSeparator = new Label(comp, SWT.CENTER);
+            parentLookupFieldSeparator.setText(RelationshipField.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR);
+            parentLookupFieldSeparator.setFont(new Font(Display.getCurrent(), fd));
+
+            Label idLookupFieldNameHeader = new Label(comp, SWT.RIGHT);
+            idLookupFieldNameHeader.setText(Labels.getString(
+                    getClass().getSimpleName() + ".parentLookupFieldHeader"));
+            idLookupFieldNameHeader.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
+            idLookupFieldNameHeader.setFont(new Font(Display.getCurrent(), fd));
+
             List<String> sortedRelationshipList = new ArrayList<>(referenceObjects.keySet());
             Collections.sort(sortedRelationshipList);
             for(String relationshipName : sortedRelationshipList) {
@@ -150,12 +181,16 @@ public class ForeignKeyExternalIdPage extends LoadPage {
             // shouldn't happen
             return;
         }
+        
         Combo parentCombo = this.parentSelections.get(relField.getRelationshipName());
         if (parentCombo == null) {
             // first parent object
-            Label labelExtId = new Label(comp, SWT.RIGHT);
-            labelExtId.setText(relField.getRelationshipName() + ":");
-            labelExtId.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+            Label relName = new Label(comp, SWT.RIGHT);
+            relName.setText(relField.getRelationshipName());
+            relName.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+
+            Label parentObjectSeparator = new Label(comp, SWT.CENTER);
+            parentObjectSeparator.setText(RelationshipField.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR);
 
             parentCombo = new Combo(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
             GridData parentData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -174,6 +209,8 @@ public class ForeignKeyExternalIdPage extends LoadPage {
                 }
             });
             parentSelections.put(relField.getRelationshipName(), parentCombo);
+            Label parentLookupFieldSeparator = new Label(comp, SWT.CENTER);
+            parentLookupFieldSeparator.setText(RelationshipField.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR);
             // Add the ext id dropdown
             Combo extIdCombo = new Combo(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
 
@@ -195,7 +232,8 @@ public class ForeignKeyExternalIdPage extends LoadPage {
         // set the objects reference information
         List<String> fieldList = new ArrayList<String>(extIdInfo.getParentObjectFieldMap().keySet());
         // add default selection "not selected" to the list to allow users to go back to it
-        fieldList.add(Labels.getString("ForeignKeyExternalIdPage.defaultComboText"));
+        fieldList.add(Labels.getString(
+                Labels.getString(getClass().getSimpleName() + ".defaultComboText")));
         UIUtils.setComboItems(extIdCombo, fieldList, Labels.getString("ForeignKeyExternalIdPage.defaultComboText"));
     }
 

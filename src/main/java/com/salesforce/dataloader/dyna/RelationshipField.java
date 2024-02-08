@@ -49,8 +49,8 @@ public class RelationshipField {
     // new format to support polymorphic lookup relationship - 
     //      <parent object name>:<relationship name attribute of relationship field>.<idLookup field of parent sObject>
     // Example - "Account:Owner.username"
-    private static final String NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR = "-";
-    private static final String NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR = ":";
+    public static final String NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR = "-";
+    public static final String NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR = ":";
     
     public RelationshipField(String parentObjectName, String relationshipName) {
         this.parentObjectName = parentObjectName;
