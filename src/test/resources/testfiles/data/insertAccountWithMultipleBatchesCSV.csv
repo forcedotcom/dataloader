@@ -1,0 +1,4 @@
+oracle_id,name,CustomDateTime
+o1,o1acct,"2010-10-14T12:00:00.000GMT"
+o2,o2acct,wrongdate
+o3,o3acct,"2010-10-14T12:00:00.000GMT"

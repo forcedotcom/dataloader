@@ -1,0 +1,5 @@
+#Mapping values
+#Tue Jun 20 18:59:17 PDT 2006
+oracle_id=oracle_id__c
+name=name
+CustomDateTime=CustomDateTime__c
