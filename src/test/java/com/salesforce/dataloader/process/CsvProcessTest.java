@@ -48,12 +48,15 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dyna.DateTimeConverter;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.sobject.SObject;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test for dataloader batch interface, also known as "integration framework"
@@ -98,6 +101,30 @@ public class CsvProcessTest extends ProcessTestBase {
             return;
         }
         runProcess(configMap, 100);
+    }
+    
+    @Test
+    public void testInsertAccountWithMultipleBatchesCSV() throws ProcessInitializationException, DataAccessObjectException {
+        Map<String, String> configMap = getTestConfig(OperationInfo.insert, false);
+        if (isSettingEnabled(configMap, Config.BULK_API_ZIP_CONTENT)
+                || isSettingEnabled(configMap, Config.BULK_API_SERIAL_MODE)
+                || isSettingEnabled(configMap, Config.NO_COMPRESSION)
+                ) {
+            return;
+        }
+        if (isSettingEnabled(configMap, Config.BULK_API_ENABLED)
+                && !isSettingEnabled(configMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
+            return;
+        }
+        configMap.put(Config.LOAD_BATCH_SIZE, "1");
+        Controller controller = runProcessWithErrors(configMap, 2, 1);
+        String successFileName = controller.getConfig().getString(Config.OUTPUT_SUCCESS);
+        File successFile = new File(successFileName);
+        CSVFileReader csvReader = new CSVFileReader(successFile, controller.getConfig(), false, false);
+        Row row1 = csvReader.readRow();
+        Row row2 = csvReader.readRow();
+        assertTrue("incorrect success row 1", row1.get("oracle_id").equals("o1"));
+        assertTrue("incorrect success row 2, expected oracle_id = o3", row1.get("oracle_id").equals("o3"));
     }
 
     /**
