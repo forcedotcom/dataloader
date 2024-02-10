@@ -601,7 +601,7 @@ public class Config {
         setDefaultValue(LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
         setDefaultValue(Config.CLI_OPTION_RUN_MODE, Config.RUN_MODE_UI_VAL);
         setDefaultValue(SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV, false);
-        setDefaultValue(PROCESS_BULK_CACHE_DATA_FROM_DAO, false);
+        setDefaultValue(PROCESS_BULK_CACHE_DATA_FROM_DAO, true);
         setDefaultValue(PROCESS_KEEP_ACCOUNT_TEAM, false);
         setDefaultValue(WIZARD_WIDTH, DEFAULT_WIZARD_WIDTH);
         setDefaultValue(WIZARD_HEIGHT, DEFAULT_WIZARD_HEIGHT);
