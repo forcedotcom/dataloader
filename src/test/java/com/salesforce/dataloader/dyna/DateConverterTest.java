@@ -27,6 +27,7 @@ package com.salesforce.dataloader.dyna;
 
 import org.apache.commons.beanutils.ConversionException;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.salesforce.dataloader.util.AppUtil;
@@ -325,23 +326,35 @@ public class DateConverterTest {
      */
     @Test
     public void testDateOnly() {
-
+        testDateOnly(true);
+        testDateOnly(false);
+    }
+    
+    private void testDateOnly(boolean useEuropeanDateFormat) {
         Calendar expCalDate = Calendar.getInstance(TZ);
 
         expCalDate.clear();
-        expCalDate.set(2004, 03, 29);
+        // yyyy, mm, dd
+        expCalDate.set(2020, 10, 05);
 
-        assertValidDate("2004-04-29 00:00:00z", expCalDate, false);
-        assertValidDate("2004-04-29 00:00:00", expCalDate, false);
-        assertValidDate("2004-04-29 00:00", expCalDate, false);
-        assertValidDate("2004-04-29 00", expCalDate, false);
-        assertValidDate("2004-04-29", expCalDate, false);
-        assertValidDate("2004-04-29 ", expCalDate, false);
-        assertValidDate("2004-04-29T", expCalDate, false);
-        assertValidDate("2004-04-29Tz", expCalDate, false);
+        assertValidDate("2020-11-05 00:00:00z", expCalDate, useEuropeanDateFormat);
+        assertValidDate("2020-11-05 00:00:00", expCalDate, useEuropeanDateFormat);
+        assertValidDate("2020-11-05 00:00", expCalDate, useEuropeanDateFormat);
+        assertValidDate("2020-11-05 00", expCalDate, useEuropeanDateFormat);
+        assertValidDate("2020-11-05", expCalDate, useEuropeanDateFormat);
+        assertValidDate("2020-11-05 ", expCalDate, useEuropeanDateFormat);
+        assertValidDate("2020-11-05T", expCalDate, useEuropeanDateFormat);
+        assertValidDate("2020-11-05Tz", expCalDate, useEuropeanDateFormat);
+        assertValidDate("20201105", expCalDate, useEuropeanDateFormat);
+        assertValidDate("20201105 ", expCalDate, useEuropeanDateFormat);
+        if (useEuropeanDateFormat) {
+            assertValidDate("05/11/2020", expCalDate, useEuropeanDateFormat);
+        } else {
+            assertValidDate("11/05/2020", expCalDate, useEuropeanDateFormat);
+        }
 
         //should fail
-        assertStringAndCalendarDoNotMatch("2004-04-29 00:00:01", expCalDate, false);
+        assertStringAndCalendarDoNotMatch("2020-11-05 00:00:01", expCalDate, useEuropeanDateFormat);
     }
 
 
