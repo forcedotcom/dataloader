@@ -32,6 +32,7 @@ import org.eclipse.swt.graphics.Image;
 
 import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.dyna.RelationshipField;
 import com.salesforce.dataloader.ui.MappingDialog;
 import com.sforce.soap.partner.Field;
 
@@ -73,8 +74,8 @@ public class SforceLabelProvider implements ITableLabelProvider {
         switch (arg1) {
         case MappingDialog.FIELD_NAME:
             text = field.getName();
-            if (isReferenceField && !text.contains(":")) {
-                text = text + ":Id";
+            if (isReferenceField && !text.contains(RelationshipField.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR)) {
+                text = field.getRelationshipName() + RelationshipField.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR + "Id";
             }
             break;
         case MappingDialog.FIELD_LABEL:

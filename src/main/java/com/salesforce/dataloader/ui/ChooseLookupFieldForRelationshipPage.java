@@ -232,9 +232,9 @@ public class ChooseLookupFieldForRelationshipPage extends LoadPage {
         // set the objects reference information
         List<String> fieldList = new ArrayList<String>(extIdInfo.getParentObjectFieldMap().keySet());
         // add default selection "not selected" to the list to allow users to go back to it
-        fieldList.add(Labels.getString(
-                Labels.getString(getClass().getSimpleName() + ".defaultComboText")));
-        UIUtils.setComboItems(extIdCombo, fieldList, Labels.getString("ForeignKeyExternalIdPage.defaultComboText"));
+        String defaultListItemStr = Labels.getString(getClass().getSimpleName() + ".defaultComboText");
+        fieldList.add(defaultListItemStr);
+        UIUtils.setComboItems(extIdCombo, fieldList, defaultListItemStr);
     }
 
     /**
@@ -266,7 +266,8 @@ public class ChooseLookupFieldForRelationshipPage extends LoadPage {
             String lookupFieldInParent = combo.getText();
             RelationshipField relationshipField = getSelectedParentSObjectForLookupField(relationshipNameInCombo, lookupFieldInParent);
             // make sure that the item selection has occurred and that the default text is not displayed anymore
-            if(relationshipField != null) {
+            if(relationshipField != null
+                    && !relationshipField.getParentFieldName().equalsIgnoreCase(Labels.getString(getClass().getSimpleName() + ".defaultComboText"))) {
                 DescribeRefObject refDescribe = referenceObjects.getParentSObject(relationshipField.toFormattedRelationshipString());
                 Field relatedField = new Field();
                 Field parentField = refDescribe.getParentObjectFieldMap().get(lookupFieldInParent);
