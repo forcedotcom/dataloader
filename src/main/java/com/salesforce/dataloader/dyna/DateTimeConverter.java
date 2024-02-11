@@ -204,7 +204,11 @@ public class DateTimeConverter implements Converter {
         return NACalendarValue.getInstance();
     }
 
-    /* Helper function to produce all the patterns that DL supports */
+    /*
+     * Helper function to produce all the patterns that DL supports.
+     * These patterns are a subset of patterns supported by Java text.SimpleDateFormat
+     * https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
+     */
     static List<String> getSupportedPatterns(boolean europeanDates) {
 
         List<String> basePatterns = new ArrayList<String>();
@@ -290,7 +294,14 @@ public class DateTimeConverter implements Converter {
         basePatterns.addAll(slashPatternsWithT);
 
         List<String> timeZones = new ArrayList<>();
+        // uppercase Z => RFC822 TimeZone
         basePatterns.forEach(p -> timeZones.add(p + "Z"));
+        basePatterns.forEach(p -> timeZones.add(p + " Z"));
+
+        // uppercase X => ISO8601 TimeZone
+        basePatterns.forEach(p -> timeZones.add(p + "XXX"));
+        basePatterns.forEach(p -> timeZones.add(p + " XXX"));
+
         basePatterns.addAll(timeZones);
 
         return basePatterns;

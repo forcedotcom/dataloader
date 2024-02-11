@@ -643,6 +643,8 @@ public class DateConverterTest {
         assertInvalidDate("20A4-11-08", null, false);
     }
 
+    // test user-specified timezones and date formats specified at
+    // https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/supported_data_types.htm
     @Test
     public void testUserSpecifiedTimeZoneIsUsed() throws Exception {
         DateTimeConverter AsianTZDateConverter = new DateTimeConverter(TimeZone.getTimeZone("Asia/Tokyo"));
@@ -774,6 +776,51 @@ public class DateConverterTest {
         assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
         assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), result.getTimeZone());
 
+        result = (Calendar) USTZDateConverter.convert(null, "2012-06-07 00:00:00 PST");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), result.getTimeZone());
+
+        result = (Calendar) USTZDateConverter.convert(null, "2012-06-07 00:00:00Pacific Standard Time");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), result.getTimeZone());
+
+        result = (Calendar) USTZDateConverter.convert(null, "2012-06-07 00:00:00 Pacific Standard Time");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), result.getTimeZone());
+
+        result = (Calendar) USTZDateConverter.convert(null, "2012-06-07 00:00:00GMT-08:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), result.getTimeZone());
+ 
+        result = (Calendar) USTZDateConverter.convert(null, "2012-06-07 00:00:00 GMT-08:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), result.getTimeZone());
+        
+        result = (Calendar) USTZDateConverter.convert(null, "2012-06-07 00:00:00-08:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), result.getTimeZone());
+        
+        result = (Calendar) USTZDateConverter.convert(null, "2012-06-07 00:00:00 -08:00");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), result.getTimeZone());
+        
+        result = (Calendar) USTZDateConverter.convert(null, "2012-06-07 00:00:00-0800");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), result.getTimeZone());
+        
+        result = (Calendar) USTZDateConverter.convert(null, "2012-06-07 00:00:00 -0800");
+        assertEquals(6, result.get(Calendar.MONTH) + 1);
+        assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
+        assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), result.getTimeZone());
+        
         result = (Calendar) AsianTZDateConverter.convert(null, "2012-06-07 00:00:00JST");
         assertEquals(6, result.get(Calendar.MONTH) + 1);
         assertEquals(7, result.get(Calendar.DAY_OF_MONTH));
