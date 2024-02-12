@@ -620,7 +620,7 @@ public class CsvProcessTest extends ProcessTestBase {
     @Test
     public void testErrorsGeneratedOnInvalidDateMatching() throws Exception {
 
-    	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(0, 3,3);
+    	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(0, 4, 2);
     }
 
     /**
@@ -632,7 +632,7 @@ public class CsvProcessTest extends ProcessTestBase {
      */
     @Test
     public void testErrorsGeneratedOnInvalidDateMatchingWithOffset() throws Exception {
-    	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(2, 2, 2);
+    	runTestErrorsGeneratedOnInvalidDateMatchWithOffset(2, 3, 1);
     }
     
     @Test

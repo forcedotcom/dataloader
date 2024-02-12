@@ -338,6 +338,7 @@ public class DateConverterTest {
         expCalDate.set(2020, 10, 05);
 
         assertValidDate("2020-11-05 00:00:00z", expCalDate, useEuropeanDateFormat);
+        assertValidDate("2020-11-05 00:00:00Z", expCalDate, useEuropeanDateFormat);
         assertValidDate("2020-11-05 00:00:00", expCalDate, useEuropeanDateFormat);
         assertValidDate("2020-11-05 00:00", expCalDate, useEuropeanDateFormat);
         assertValidDate("2020-11-05 00", expCalDate, useEuropeanDateFormat);
@@ -345,6 +346,7 @@ public class DateConverterTest {
         assertValidDate("2020-11-05 ", expCalDate, useEuropeanDateFormat);
         assertValidDate("2020-11-05T", expCalDate, useEuropeanDateFormat);
         assertValidDate("2020-11-05Tz", expCalDate, useEuropeanDateFormat);
+        assertValidDate("2020-11-05TZ", expCalDate, useEuropeanDateFormat);
         assertValidDate("20201105", expCalDate, useEuropeanDateFormat);
         assertValidDate("20201105 ", expCalDate, useEuropeanDateFormat);
         if (useEuropeanDateFormat) {

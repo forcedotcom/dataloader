@@ -144,40 +144,16 @@ public class DateTimeConverter implements Converter {
 
         if (len == 0) return null;
 
-        String gmtDateString = null;
-        if ("z".equalsIgnoreCase(dateString.substring(len - 1)))
-            gmtDateString = dateString.substring(0, len - 1);
+        TimeZone timeZoneForValue = this.timeZone;
+        if ("z".equalsIgnoreCase(dateString.substring(len - 1))) {
+            dateString = dateString.substring(0, len - 1);
+            timeZoneForValue = GMT_TZ;
+        }
 
         for (String basePattern : useEuroDates ? supportedEuropeanPatterns : supportedRegularPatterns) {
-            if (gmtDateString != null)
-                cal = tryParse(GMT_TZ, gmtDateString, basePattern);
-            else
-                cal = tryParse(this.timeZone, dateString, basePattern, basePattern + "'Z'Z", basePattern + "'z'Z",
-                        basePattern + "z");
+            cal = tryParse(timeZoneForValue, dateString, basePattern);
             if (cal != null) return cal;
         }
-
-        // FIXME -- BUG: this format is picked up as a mistake instead of MM-dd-yyyy or dd-MM-yyyy
-        cal = parseDate(this.timeZone, dateString, "yyyy-MM-dd");
-        if (cal != null) return cal;
-
-        if (useEuroDates) {
-            cal = tryParse(this.timeZone, dateString, "dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy");
-
-            // FIXME -- Warning: this never gets picked up because of yyyy-MM-dd
-            /*
-             * Calendar cal = parseDate("dd-MM-yyyy", dateString); if (cal != null) return cal;
-             */
-        } else {
-            cal = tryParse(this.timeZone, dateString, "MM/dd/yyyy HH:mm:ss", "MM/dd/yyyy");
-
-            //FIXME -- Warning: this never gets picked up because of yyyy-MM-dd
-            /*
-             * Calendar cal = parseDate("MM-dd-yyyy", dateString); if (cal != null) return cal;
-             */
-        }
-
-        if (cal != null) return cal;
 
         DateFormat df = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT);
         df.setTimeZone(this.timeZone);
@@ -221,6 +197,7 @@ public class DateTimeConverter implements Converter {
         extendedPatterns.add("yyyy-MM-dd'T'HH:mm");
         extendedPatterns.add("yyyy-MM-dd'T'HH");
         extendedPatterns.add("yyyy-MM-dd'T'"); //?
+        extendedPatterns.add("yyyy-MM-dd");
 
         //As per ISO 8601 5.2.1.1, when only the days are omitted, a - is necessary between year and month
         List<String> extendedPatternsDateOnly = new ArrayList<String>();
@@ -268,17 +245,18 @@ public class DateTimeConverter implements Converter {
 
         // Using a space instead of 'T' to separate date and time
         List<String> slashPatternsWithoutT = new ArrayList<String>();
-        extendedPatternsWithoutT.add(baseDate +" HH:mm:ss.SSS");
-        extendedPatternsWithoutT.add(baseDate +" HH:mm:ss");
-        extendedPatternsWithoutT.add(baseDate +" HH:mm");
-        extendedPatternsWithoutT.add(baseDate +" HH");
-        extendedPatternsWithoutT.add(baseDate +" HHZ");
+        slashPatternsWithoutT.add(baseDate +" HH:mm:ss.SSS");
+        slashPatternsWithoutT.add(baseDate +" HH:mm:ss");
+        slashPatternsWithoutT.add(baseDate +" HH:mm");
+        slashPatternsWithoutT.add(baseDate +" HH");
+        slashPatternsWithoutT.add(baseDate +" HHZ");
+        slashPatternsWithoutT.add(baseDate);
 
         List<String> slashPatternsWithT = new ArrayList<String>();
-        extendedPatternsWithoutT.add(baseDate +  "'T'HH:mm:ss.SSS");
-        extendedPatternsWithoutT.add(baseDate +  "'T'HH:mm:ss");
-        extendedPatternsWithoutT.add(baseDate +  "'T'HH:mm");
-        extendedPatternsWithoutT.add(baseDate +  "'T'HH");
+        slashPatternsWithT.add(baseDate +  "'T'HH:mm:ss.SSS");
+        slashPatternsWithT.add(baseDate +  "'T'HH:mm:ss");
+        slashPatternsWithT.add(baseDate +  "'T'HH:mm");
+        slashPatternsWithT.add(baseDate +  "'T'HH");
 
         //order is important here because if it matches against the wrong format first, it will
         //misinterpret the time
@@ -292,7 +270,7 @@ public class DateTimeConverter implements Converter {
         basePatterns.addAll(extendedPatternsWithoutT);
         basePatterns.addAll(slashPatternsWithoutT);
         basePatterns.addAll(slashPatternsWithT);
-
+        
         List<String> timeZones = new ArrayList<>();
         // uppercase Z => RFC822 TimeZone
         basePatterns.forEach(p -> timeZones.add(p + "Z"));
@@ -301,6 +279,10 @@ public class DateTimeConverter implements Converter {
         // uppercase X => ISO8601 TimeZone
         basePatterns.forEach(p -> timeZones.add(p + "XXX"));
         basePatterns.forEach(p -> timeZones.add(p + " XXX"));
+
+        basePatterns.forEach(p -> timeZones.add(p + "'Z'Z"));
+        basePatterns.forEach(p -> timeZones.add(p + "'z'Z"));
+        basePatterns.forEach(p -> timeZones.add(p + "z"));
 
         basePatterns.addAll(timeZones);
 
