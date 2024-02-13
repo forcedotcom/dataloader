@@ -926,15 +926,17 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     private Field lookupField(String sObjectFieldName) {
         boolean isRelationshipField = RelationshipField.isRelationshipFieldMapping(sObjectFieldName);
-        RelationshipField relField = new RelationshipField(sObjectFieldName, true);
         // look for field on target object
         for (Field f : getFieldTypes().getFields()) {
             if (sObjectFieldName.equalsIgnoreCase(f.getName()) || sObjectFieldName.equalsIgnoreCase(f.getLabel())) {
                 return f;
             }
-            if (isRelationshipField
-                    && relField != null
-                    && relField.getRelationshipName().equalsIgnoreCase(f.getRelationshipName())) {
+            if (isRelationshipField) {
+                RelationshipField relField = new RelationshipField(sObjectFieldName, true);
+                if (relField == null
+                        || !relField.getRelationshipName().equalsIgnoreCase(f.getRelationshipName())) {
+                    continue;
+                }
                 Field parentField = this.referenceEntitiesDescribesMap.getParentField(sObjectFieldName);
                 if (parentField != null) {
                     return parentField;
