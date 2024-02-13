@@ -42,14 +42,6 @@ public class DateOnlyConverter extends DateTimeConverter implements Converter {
         super(tz, useEuroDateFormat);
     }
 
-    public DateOnlyConverter(TimeZone tz, Object defaultValue, boolean useEuroDateFormat) {
-        super(tz, defaultValue, useEuroDateFormat);
-    }
-
-    public DateOnlyConverter(TimeZone tz, Object defaultValue) {
-       super(tz, defaultValue);
-    }
-
     Calendar getCalendar(TimeZone tz) {
         return DateOnlyCalendar.getInstance(tz);
     }

@@ -44,41 +44,19 @@ public class DateTimeConverter implements Converter {
 
     static Logger logger = LogManager.getLogger(DateTimeConverter.class);
     /**
-     * The default value specified to our Constructor, if any.
-     */
-    final Object defaultValue;
-
-    /**
      * Should we return the default value on conversion errors?
      */
-    final boolean useDefault;
     final boolean useEuroDates;
     final TimeZone timeZone;
 
-
-
     public DateTimeConverter(TimeZone tz) {
-        this(tz, null, false, false);
+        this(tz, false);
 
     }
 
     public DateTimeConverter(TimeZone tz, boolean useEuroDateFormat) {
-        this(tz, null, useEuroDateFormat, false);
-    }
-
-    public DateTimeConverter(TimeZone tz, Object defaultValue, boolean useEuroDateFormat) {
-        this(tz, defaultValue, useEuroDateFormat, true);
-    }
-
-    private DateTimeConverter(TimeZone tz, Object defaultValue, boolean useEuroDateFormat, boolean useDefault) {
         this.timeZone = tz;
-        this.defaultValue = defaultValue;
-        this.useDefault = useDefault;
         this.useEuroDates = useEuroDateFormat;
-    }
-
-    public DateTimeConverter(TimeZone tz, Object defaultValue) {
-        this(tz, defaultValue, false, true);
     }
 
     Calendar parseDate(TimeZone tz, String dateString, String pattern) {
@@ -165,11 +143,7 @@ public class DateTimeConverter implements Converter {
         cal = parseDate(dateString, df);
         if (cal != null) return cal;
 
-        if (useDefault) {
-            return defaultValue;
-        } else {
-            throw new ConversionException("Failed to parse date: " + value);
-        }
+        throw new ConversionException("Failed to parse date: " + value);
     }
     
     Calendar getCalendar(TimeZone timezone) {
