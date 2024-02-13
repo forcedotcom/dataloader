@@ -502,6 +502,7 @@ public class DateConverterTest {
         expCalDate.clear();
         expCalDate.set(1984, 04 - 1, 12, 6, 34, 22);
         assertValidDate("1984-04-12T06:34:22", expCalDate, false);
+        assertValidDate("1984-04-12T08:34:22+02:00", expCalDate, false);
     }
 
 
