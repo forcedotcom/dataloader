@@ -45,33 +45,7 @@ public final class BooleanConverter implements Converter {
 
     public BooleanConverter() {
 
-        this.defaultValue = null;
-        this.useDefault = false;
-
     }
-
-    public BooleanConverter(Object defaultValue) {
-
-        this.defaultValue = defaultValue;
-        this.useDefault = true;
-
-    }
-
-
-    // ----------------------------------------------------- Instance Variables
-
-
-    /**
-     * The default value specified to our Constructor, if any.
-     */
-    private Object defaultValue = null;
-
-
-    /**
-     * Should we return the default value on conversion errors?
-     */
-    private boolean useDefault = true;
-
 
     // --------------------------------------------------------- Public Methods
 
@@ -112,17 +86,11 @@ public final class BooleanConverter implements Converter {
                     stringValue.equalsIgnoreCase("off") ||
                     stringValue.equalsIgnoreCase("0")) {
                 return (Boolean.FALSE);
-            } else if (useDefault) {
-                return (defaultValue);
             } else {
                 throw new ConversionException(stringValue);
             }
         } catch (ClassCastException e) {
-            if (useDefault) {
-                return (defaultValue);
-            } else {
-                throw new ConversionException(e);
-            }
+            throw new ConversionException(e);
         }
 
     }
