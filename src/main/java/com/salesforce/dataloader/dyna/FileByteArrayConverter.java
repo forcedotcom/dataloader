@@ -53,30 +53,8 @@ public final class FileByteArrayConverter implements Converter {
     // ----------------------------------------------------------- Constructors
 
     public FileByteArrayConverter() {
-
-        this.defaultValue = null;
-        this.useDefault = false;
         logger = LogManager.getLogger(this.getClass().getName());
     }
-
-    public FileByteArrayConverter(Object defaultValue) {
-
-        this.defaultValue = defaultValue;
-        this.useDefault = true;
-
-    }
-
-    // ----------------------------------------------------- Instance Variables
-
-    /**
-     * The default value specified to our Constructor, if any.
-     */
-    private Object defaultValue = null;
-
-    /**
-     * Should we return the default value on conversion errors?
-     */
-    private boolean useDefault = true;
 
     // --------------------------------------------------------- Public Methods
 
@@ -133,11 +111,7 @@ public final class FileByteArrayConverter implements Converter {
                     logger.error(Messages.getMessage(this.getClass(), "insufficientAccessToContentGenericMsg", absolutePath));
                 }
             }
-            if (useDefault) {
-                return (defaultValue);
-            } else {
-                throw new ConversionException(e);
-            }
+            throw new ConversionException(e);
         }
     }
 

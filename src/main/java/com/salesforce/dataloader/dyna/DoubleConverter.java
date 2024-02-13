@@ -40,30 +40,7 @@ public final class DoubleConverter implements Converter {
     // ----------------------------------------------------------- Constructors
 
     public DoubleConverter() {
-
-        this.defaultValue = null;
-        this.useDefault = false;
-
     }
-
-    public DoubleConverter(Object defaultValue) {
-
-        this.defaultValue = defaultValue;
-        this.useDefault = true;
-
-    }
-
-    // ----------------------------------------------------- Instance Variables
-
-    /**
-     * The default value specified to our Constructor, if any.
-     */
-    private Object defaultValue = null;
-
-    /**
-     * Should we return the default value on conversion errors?
-     */
-    private boolean useDefault = true;
 
     // --------------------------------------------------------- Public Methods
 
@@ -90,11 +67,7 @@ public final class DoubleConverter implements Converter {
         try {
             return (Double.valueOf(value.toString()));
         } catch (Exception e) {
-            if (useDefault) {
-                return (defaultValue);
-            } else {
-                throw new ConversionException(e);
-            }
+            throw new ConversionException(e);
         }
 
     }
