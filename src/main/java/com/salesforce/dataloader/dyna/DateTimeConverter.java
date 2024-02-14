@@ -49,20 +49,9 @@ public class DateTimeConverter implements Converter {
     final boolean useEuroDates;
     final TimeZone timeZone;
 
-    public DateTimeConverter(TimeZone tz) {
-        this(tz, false);
-
-    }
-
     public DateTimeConverter(TimeZone tz, boolean useEuroDateFormat) {
         this.timeZone = tz;
         this.useEuroDates = useEuroDateFormat;
-    }
-
-    Calendar parseDate(TimeZone tz, String dateString, String pattern) {
-        final DateFormat df = new SimpleDateFormat(pattern);
-        df.setTimeZone(tz);
-        return parseDate(dateString, df);
     }
 
     private Calendar parseDate(String dateString, DateFormat fmt) {
@@ -78,25 +67,6 @@ public class DateTimeConverter implements Converter {
         return null;
     }
 
-    /**
-     * Attempts to parse a date string using the given formatting patterns
-     * 
-     * @param dateString
-     *            The date string to parse
-     * @param patterns
-     *            Patterns to try. These will be used in the constructor for SimpleDateFormat
-     * @return A Calendar object representing the given date string
-     */
-    private Calendar tryParse(TimeZone tz, String dateString, String... patterns) {
-        if (patterns == null) return null;
-        for (String pattern : patterns) {
-            Calendar cal = parseDate(tz, dateString, pattern);
-            if (cal != null) return cal;
-        }
-        return null;
-    }
-
-
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public Object convert(Class type, Object value) {
@@ -107,15 +77,14 @@ public class DateTimeConverter implements Converter {
         if(value instanceof NATextValue) {
             return getNAValueCalendar();
         }
+
+        if (value instanceof Calendar) { return value; }
         
         Calendar cal = getCalendar(this.timeZone);
-
         if (value instanceof Date) {
             cal.setTimeInMillis(((Date)value).getTime());
             return cal;
         }
-
-        if (value instanceof Calendar) { return value; }
 
         String dateString = value.toString().trim();
         int len = dateString.length();
@@ -128,8 +97,10 @@ public class DateTimeConverter implements Converter {
             timeZoneForValue = GMT_TZ;
         }
 
-        for (String basePattern : useEuroDates ? supportedEuropeanPatterns : supportedRegularPatterns) {
-            cal = tryParse(timeZoneForValue, dateString, basePattern);
+        for (String pattern : useEuroDates ? supportedEuropeanPatterns : supportedRegularPatterns) {
+            final DateFormat df = new SimpleDateFormat(pattern);
+            df.setTimeZone(timeZoneForValue);
+            cal = parseDate(dateString, df);
             if (cal != null) return cal;
         }
 
@@ -146,11 +117,12 @@ public class DateTimeConverter implements Converter {
         throw new ConversionException("Failed to parse date: " + value);
     }
     
-    Calendar getCalendar(TimeZone timezone) {
+    // NOTE: Always use this method to get Calendar instance
+    protected Calendar getCalendar(TimeZone timezone) {
         return Calendar.getInstance(timezone);
     }
     
-    Calendar getNAValueCalendar() {
+    protected Calendar getNAValueCalendar() {
         return NACalendarValue.getInstance();
     }
 
@@ -159,7 +131,7 @@ public class DateTimeConverter implements Converter {
      * These patterns are a subset of patterns supported by Java text.SimpleDateFormat
      * https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
      */
-    static List<String> getSupportedPatterns(boolean europeanDates) {
+    private static List<String> getSupportedPatterns(boolean europeanDates) {
 
         List<String> basePatterns = new ArrayList<String>();
 

@@ -193,7 +193,7 @@ public class DateConverterTest {
     public void testDateConverterWithNull() {
 
         Calendar calDate;
-        DateTimeConverter converter = new DateTimeConverter(TZ);
+        DateTimeConverter converter = new DateTimeConverter(TZ, false);
 
         // test null and empty string
         calDate = (Calendar) converter.convert(null, null);
@@ -213,7 +213,7 @@ public class DateConverterTest {
     public void testDateClosureUnderCalendarConversion() {
 
         Calendar calDate;
-        DateTimeConverter converter = new DateTimeConverter(TZ);
+        DateTimeConverter converter = new DateTimeConverter(TZ, false);
 
         // if we pass in a calendar, should get the same Calendar back
         Calendar testCalDate = Calendar.getInstance();
@@ -650,9 +650,9 @@ public class DateConverterTest {
     // https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/supported_data_types.htm
     @Test
     public void testUserSpecifiedTimeZoneIsUsed() throws Exception {
-        DateTimeConverter AsianTZDateConverter = new DateTimeConverter(TimeZone.getTimeZone("Asia/Tokyo"));
-        DateTimeConverter USTZDateConverter = new DateTimeConverter(TimeZone.getTimeZone("America/Los_Angeles"));
-        DateTimeConverter GMTTZDateConverter = new DateTimeConverter(TimeZone.getTimeZone("GMT"));
+        DateTimeConverter AsianTZDateConverter = new DateTimeConverter(TimeZone.getTimeZone("Asia/Tokyo"), false);
+        DateTimeConverter USTZDateConverter = new DateTimeConverter(TimeZone.getTimeZone("America/Los_Angeles"), false);
+        DateTimeConverter GMTTZDateConverter = new DateTimeConverter(TimeZone.getTimeZone("GMT"), false);
         DateOnlyConverter AsianTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("Asia/Tokyo"), false);
         DateOnlyConverter USTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("America/Los_Angeles"), false);
         DateOnlyConverter GMTTZDateOnlyConverter = new DateOnlyConverter(TimeZone.getTimeZone("GMT"), false);
