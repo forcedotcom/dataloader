@@ -34,19 +34,15 @@ import org.apache.commons.beanutils.Converter;
 
 public class DateOnlyConverter extends DateTimeConverter implements Converter {
 
-    public DateOnlyConverter(TimeZone tz) {
-        super(tz);
-    }
-
     public DateOnlyConverter(TimeZone tz, boolean useEuroDateFormat) {
         super(tz, useEuroDateFormat);
     }
 
-    Calendar getCalendar(TimeZone tz) {
+    protected Calendar getCalendar(TimeZone tz) {
         return DateOnlyCalendar.getInstance(tz);
     }
 
-    Calendar getNAValueCalendar() {
+    protected Calendar getNAValueCalendar() {
         return NADateOnlyCalendarValue.getInstance();
     }
-} 
+}

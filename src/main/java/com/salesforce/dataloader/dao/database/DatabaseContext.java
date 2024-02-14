@@ -289,7 +289,7 @@ public class DatabaseContext {
             return ((Date)paramValue).getTime();
         }
         else if(paramValue instanceof String) {
-            Calendar cal = (Calendar)new DateTimeConverter(tz).convert(java.util.Calendar.class, paramValue);
+            Calendar cal = (Calendar)new DateTimeConverter(tz, false).convert(java.util.Calendar.class, paramValue);
             return cal.getTimeInMillis();
         } else {
             throw new IllegalArgumentException(Messages.getFormattedString("DatabaseDAO.errorParamMappingType", paramValue.getClass().getName()));
