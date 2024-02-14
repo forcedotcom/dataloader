@@ -168,6 +168,11 @@ public class AppUtil {
         if (codeSource != null && codeSource.getLocation() != null) {
             try {
                 String jarFilePath = codeSource.getLocation().toURI().toString();
+                try {
+                    jarFilePath = java.net.URLDecoder.decode(jarFilePath, StandardCharsets.UTF_8.name());
+                } catch (UnsupportedEncodingException e) {
+                    // ignore
+                }
                 return jarFilePath.substring(jarFilePath.indexOf('/'));
             } catch (URISyntaxException e) {
                 return null;
