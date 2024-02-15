@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>60.0.0</version>
+  <version>60.0.1</version>
   <name>Salesforce Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
