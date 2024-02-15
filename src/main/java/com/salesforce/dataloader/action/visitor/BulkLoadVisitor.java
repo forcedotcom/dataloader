@@ -64,7 +64,6 @@ import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.LoadException;
 import com.salesforce.dataloader.exception.OperationException;
-import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.model.NACalendarValue;
 import com.salesforce.dataloader.model.NADateOnlyCalendarValue;
 import com.salesforce.dataloader.model.NATextValue;
@@ -542,17 +541,9 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final int idIdx = hdrIndices.get(ID_RESULT_COL);
         final int errIdx = hdrIndices.get(ERROR_RESULT_COL);
         hdrIndices = null;
-        int dataReaderRowCount = 0;
-        int skippedRowsCount = 0;
-        try {
-            skippedRowsCount = controller.getConfig().getInt(Config.LOAD_ROW_TO_START_AT);
-        } catch (ParameterLoadException e) {
-            // @ignored
-        }
 
         for (final Row row : rows) {
-            boolean conversionSuccessOfRow = isRowConversionSuccessful(skippedRowsCount 
-                        + this.firstDAORowForCurrentBatch + dataReaderRowCount++);
+            boolean conversionSuccessOfRow = isRowConversionSuccessful();
             if (!conversionSuccessOfRow) {
                 continue; // this DAO row failed to convert and was not part of the batch sent to the server. Go to the next one
             }

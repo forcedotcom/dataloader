@@ -110,8 +110,20 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         }
     }
     
-    protected boolean isRowConversionSuccessful(int dataSourceRow) {
-        Boolean conversionFailure = this.rowConversionFailureMap.get(dataSourceRow);
+    private int rowConversionCheckCounter = 0;
+    private boolean gotSkippedRowsCount = false;
+    private int skippedRowsCount = 0;
+    protected boolean isRowConversionSuccessful() {
+        if (!gotSkippedRowsCount) {
+            try {
+                skippedRowsCount = controller.getConfig().getInt(Config.LOAD_ROW_TO_START_AT);
+                gotSkippedRowsCount = true;
+            } catch (ParameterLoadException e) {
+                // @ignored
+            }
+        }
+        int rowToCheck = skippedRowsCount + rowConversionCheckCounter++;
+        Boolean conversionFailure = this.rowConversionFailureMap.get(rowToCheck);
         if (conversionFailure != null && conversionFailure.booleanValue()) {
             return false;
         }

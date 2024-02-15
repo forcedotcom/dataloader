@@ -130,15 +130,9 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
         // have to do this because although saveResult and deleteResult
         // are a) not the same class yet b) not subclassed
         int batchRowCounter = 0;
-        int startAtDAORow = 0;
-        try {
-            startAtDAORow = controller.getConfig().getInt(Config.LOAD_ROW_TO_START_AT);
-        } catch (ParameterLoadException e) {
-            // @ignored
-        }
         for (int i = 0; i < this.daoRowList.size(); i++) {
             Row daoRow = this.daoRowList.get(i);
-            if (!isRowConversionSuccessful(startAtDAORow + i)) {
+            if (!isRowConversionSuccessful()) {
                 continue;
             }
             String statusMsg = null;
