@@ -53,6 +53,7 @@ public class DataSelectionDialog extends BaseDialog {
     private Button ok;
     private Label label;
     private ContentLimitLink contentNoteLimitLink;
+    private String delimiterList = "";
 
     /**
      * InputDialog constructor
@@ -62,6 +63,18 @@ public class DataSelectionDialog extends BaseDialog {
      */
     public DataSelectionDialog(Shell parent, Controller controller) {
         super(parent, controller);
+        if (controller.getConfig().getBoolean(Config.CSV_DELIMITER_COMMA)) {
+            this.delimiterList = " ','";
+        }
+        if (controller.getConfig().getBoolean(Config.CSV_DELIMITER_TAB)) {
+            this.delimiterList += " '<tab>'";
+        }
+        if (controller.getConfig().getBoolean(Config.CSV_DELIMITER_OTHER)) {
+            String otherDelimiters = controller.getConfig().getString(Config.CSV_DELIMITER_OTHER_VALUE);
+            for (char c : otherDelimiters.toCharArray()) {
+                this.delimiterList += " '" + c + "'";
+            }
+        }
     }
     
     private void handleCSVReadError(Shell shell, String errorText) {
@@ -92,7 +105,11 @@ public class DataSelectionDialog extends BaseDialog {
                 try {
                     getController().initializeOperation(daoTypeStr, daoNameStr, sObjectName);
                 } catch (MappingInitializationException e) {
-                    handleCSVReadError(shell, Labels.getString("DataSelectionDialog.errorRead"));
+                    handleCSVReadError(shell, 
+                            Labels.getString("DataSelectionDialog.errorRead")
+                            + Labels.getFormattedString("DataSelectionDialog.errorReadExceptionDetails", 
+                                    e.getMessage())
+                        );
                     return;
                 }
 
@@ -100,7 +117,10 @@ public class DataSelectionDialog extends BaseDialog {
                 File file = new File(daoPath);
 
                 if (!file.exists() || !file.canRead()) {
-                    handleCSVReadError(shell, Labels.getString("DataSelectionDialog.errorRead"));
+                    handleCSVReadError(shell, 
+                            Labels.getString("DataSelectionDialog.errorRead")
+                            + Labels.getString("DataSelectionDialog.errorReadPermissionDetails")
+                        );
                     return;
                 }
                 DataReader dataReader = (DataReader)getController().getDao();
@@ -116,7 +136,10 @@ public class DataSelectionDialog extends BaseDialog {
                         int response = UIUtils.errorMessageBox(shell, error);
                         // in case user doesn't want to continue, treat this as an error
                         if(response != SWT.YES) {
-                            handleCSVReadError(shell, Labels.getString("DataSelectionDialog.errorCSVFormat"));
+                            handleCSVReadError(shell, 
+                                    Labels.getString("DataSelectionDialog.errorCSVFormat")
+                                    + Labels.getFormattedString("DataSelectionDialog.errorCSVDetails",
+                                            delimiterList));
                             return;
                         }
                     }
@@ -124,12 +147,18 @@ public class DataSelectionDialog extends BaseDialog {
                     totalRows = dataReader.getTotalRows();
 
                     if ((header = dataReader.getColumnNames())== null || header.size() == 0) {
-                        handleCSVReadError(shell, Labels.getString("DataSelectionDialog.errorCSVFormat"));
+                        handleCSVReadError(shell, 
+                                Labels.getString("DataSelectionDialog.errorCSVFormat")
+                                + Labels.getFormattedString("DataSelectionDialog.errorCSVDetails",
+                                        delimiterList));
                         return;
                     }
 
                 } catch (DataAccessObjectException e) {
-                    handleCSVReadError(shell, Labels.getString("DataSelectionDialog.errorCSVFormat"));
+                    handleCSVReadError(shell, 
+                            Labels.getString("DataSelectionDialog.errorCSVFormat")
+                            + Labels.getFormattedString("DataSelectionDialog.errorCSVDetails",
+                                    delimiterList));
                     return;
                 } finally {
                     dataReader.close();
