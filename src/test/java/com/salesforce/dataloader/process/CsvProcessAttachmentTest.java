@@ -76,9 +76,12 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         return Arrays.asList(
                 TestVariant.defaultSettings(),
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED),
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_SERIAL_MODE_ENABLED),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED));
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED, TestSetting.BULK_API_SERIAL_MODE_ENABLED),
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED)
+            );
     }
 
     @Test
@@ -92,9 +95,13 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
 
         // this feature does not work when bulk api is enabled but the zip content type is not
         final boolean bulkApi = isBulkAPIEnabled(argMap);
+        final boolean bulkV2Api = isBulkV2APIEnabled(argMap);
         final boolean zipContent = isSettingEnabled(argMap, Config.BULK_API_ZIP_CONTENT);
-        if (bulkApi && !zipContent) {
+        if ((bulkApi || bulkV2Api) && !zipContent) {
             final String failureMessage = "Data Loader cannot map \"Body\" field using Bulk API and CSV content type.  Please enable the ZIP_CSV content type for Bulk API.";
+            runProcessNegative(argMap, failureMessage);
+        } else if (bulkV2Api && zipContent) {
+            final String failureMessage = "Exit UNSUPPORTEDCONTENTTYPE : UnsupportedContentType : ZIP_CSV is not a valid Content-Type";
             runProcessNegative(argMap, failureMessage);
         } else {
             runProcess(argMap, 1);
@@ -108,8 +115,11 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
 
         // this feature does not work when bulk api is enabled but the zip content type is not
         final boolean bulkApi = isBulkAPIEnabled(configMap);
+        final boolean bulkV2Api = isBulkV2APIEnabled(configMap);
         final boolean zipContent = isSettingEnabled(configMap, Config.BULK_API_ZIP_CONTENT);
         if (bulkApi && !zipContent) {
+            return;
+        } else if (bulkV2Api) {
             return;
         }
         AccountGenerator acctGen = new AccountGenerator();
@@ -150,9 +160,13 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
 
         // this feature does not work when bulk api is enabled but the zip content type is not
         final boolean bulkApi = isBulkAPIEnabled(argMap);
+        final boolean bulkV2Api = isBulkV2APIEnabled(argMap);
         final boolean zipContent = isSettingEnabled(argMap, Config.BULK_API_ZIP_CONTENT);
-        if (bulkApi && !zipContent) {
+        if ((bulkApi || bulkV2Api) && !zipContent) {
             final String failureMessage = "Data Loader cannot map \"Body\" field using Bulk API and CSV content type.  Please enable the ZIP_CSV content type for Bulk API.";
+            runProcessNegative(argMap, failureMessage);
+        } else if (bulkV2Api && zipContent) {
+            final String failureMessage = "Exit UNSUPPORTEDCONTENTTYPE : UnsupportedContentType : ZIP_CSV is not a valid Content-Type";
             runProcessNegative(argMap, failureMessage);
         } else {
             runProcessWithAttachmentListener(argMap, 3, myAttachmentTemplateListener, "Bay-Bridge.jpg", "BayBridgeBW.jpg", "BayBridgeFromTreasureIsland.jpg");

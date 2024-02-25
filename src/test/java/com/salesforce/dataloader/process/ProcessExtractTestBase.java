@@ -387,7 +387,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         final String[] accountIds = insertExtractTestRecords(numRecords, accountGen);
         
         String soql;
-        if (isBulkAPIEnabled(this.getTestConfig())) {
+        if (isBulkAPIEnabled(this.getTestConfig()) || isBulkV2APIEnabled(this.getTestConfig())) {
             soql= accountGen
                     .getSOQL("ID, NAME, TYPE, PHONE, ACCOUNTNUMBER__C, WEBSITE, ANNUALREVENUE, LASTMODIFIEDDATE, ORACLE_ID__C");
         } else {
@@ -406,7 +406,8 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         // verify IDs and phone format 
         verifyIdsInCSV(control, accountIds, true);
         
-        if (!isBulkAPIEnabled(this.getTestConfig())) {
+        if (!isBulkAPIEnabled(this.getTestConfig())
+                && !isBulkV2APIEnabled(this.getTestConfig())) {
             // Bulk v1 does not support Select fields()
             // Bulk v2 supports Select fields but Account sobject's standard fields contain compound
             // fields which are not supported by Bulk v2.
@@ -427,7 +428,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
             final String soql = "SELECT Id, Owner.Name, Lead.Owner.Id, x.owner.lastname, OwnerId FROM Lead x where id='"
                     + leadidArr[0] + "'";
             final Map<String, String> argmap = getTestConfig(soql, "Lead", true);
-            if (isBulkAPIEnabled(argmap)) {
+            if (isBulkAPIEnabled(argmap) || isBulkV2APIEnabled(argmap)) {
                 // bulk api doesn't support foreign key relationships so it will always fail
                 final String expectedError = "Batch failed: InvalidBatch : Failed to process query: FUNCTIONALITY_NOT_ENABLED: Foreign Key Relationships not supported in Bulk Query";
                 runProcessNegative(
@@ -492,7 +493,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
 
         final String soql = accountGen.getSOQL("max(numberofemployees) max_emps");
         final Map<String, String> argMap = getTestConfig(soql, "Account", false);
-        if (isBulkAPIEnabled(argMap)) {
+        if (isBulkAPIEnabled(argMap) || isBulkV2APIEnabled(this.getTestConfig())) {
             runProcessNegative(
                     argMap,
                     "Aggregate Relationships not supported in Bulk Query");
@@ -516,12 +517,8 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         return ids;
     }
 
-    @Override
-    protected boolean isBulkAPIEnabled(Map<String, String> argMap) {
-        return super.isBulkAPIEnabled(argMap);
-    }
     protected boolean isBulkV2APIEnabled(Map<String, String> argMap) {
         // bulk v2 api is not used for query all
-        return !isExtractAll() && super.isBulkAPIEnabled(argMap) && isSettingEnabled(argMap, Config.BULKV2_API_ENABLED);
+        return !isExtractAll() && super.isBulkV2APIEnabled(argMap);
     }
 }

@@ -156,7 +156,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
     @Test
     public void testInsertNullsDB() throws Exception {
         Map<String, String> args = getTestConfig();
-        if (isBulkAPIEnabled(args)) {
+        if (isBulkAPIEnabled(args) || isBulkV2APIEnabled(args)) {
             logger.info("testInsertNulls is disabled for bulk api");
             return;
         }

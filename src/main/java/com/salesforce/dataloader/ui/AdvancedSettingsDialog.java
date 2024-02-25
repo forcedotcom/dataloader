@@ -534,6 +534,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
         buttonKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.keepAccountTeamHelp"));
         labelKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.keepAccountTeamHelp"));
         
+        
+        Label empty = new Label(restComp, SWT.NONE);
+        data = new GridData();
+        data.horizontalSpan = 2;
+        empty.setLayoutData(data);
+
         // Enable Bulk API Setting
         Label labelUseBulkApi = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelUseBulkApi.setText(Labels.getString("AdvancedSettingsDialog.useBulkApi")); //$NON-NLS-1$
@@ -562,7 +568,32 @@ public class AdvancedSettingsDialog extends BaseDialog {
         if (useBulkAPI) {
             buttonKeepAccountTeam.setSelection(false);
         }
+        
+        // Enable Bulk API Setting
+        Label labelUseBulkV2API = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelUseBulkV2API.setText(Labels.getString("AdvancedSettingsDialog.enableBulkV2")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelUseBulkV2API.setLayoutData(data);
 
+        boolean useBulkV2Api = useBulkAPI && config.getBoolean(Config.BULKV2_API_ENABLED);
+        buttonUseBulkV2Api = new Button(restComp, SWT.CHECK);
+        buttonUseBulkV2Api.setSelection(useBulkV2Api);
+        buttonUseBulkV2Api.setEnabled(useBulkAPI);
+        buttonUseBulkV2Api.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                super.widgetSelected(e);
+                boolean selected = buttonUseBulkV2Api.getSelection();
+                // make sure the appropriate check boxes are enabled or disabled
+                if (selected) {
+                    buttonBulkApiZipContent.setSelection(false);
+                    buttonBulkApiZipContent.setEnabled(false);
+                } else {
+                    buttonBulkApiZipContent.setEnabled(true);
+                }
+            }
+        });
+        
         // Bulk API serial concurrency mode setting
         Label labelBulkApiSerialMode = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelBulkApiSerialMode.setText(Labels.getString("AdvancedSettingsDialog.bulkApiSerialMode")); //$NON-NLS-1$
@@ -581,25 +612,19 @@ public class AdvancedSettingsDialog extends BaseDialog {
         buttonBulkApiZipContent.setSelection(config.getBoolean(Config.BULK_API_SERIAL_MODE));
         buttonBulkApiZipContent.setEnabled(useBulkAPI);
         
-        // Enable Bulk API Setting
-        Label labelUseBulkV2Query = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelUseBulkV2Query.setText(Labels.getString("AdvancedSettingsDialog.enableBulkV2Query")); //$NON-NLS-1$
-        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        labelUseBulkV2Query.setLayoutData(data);
-        // hide the label to enable/disable Bulk V2 query
-        labelUseBulkV2Query.setVisible(false);
-
-        boolean useBulkV2Api = useBulkAPI && config.getBoolean(Config.BULKV2_API_ENABLED);
-        buttonUseBulkV2Api = new Button(restComp, SWT.CHECK);
-        buttonUseBulkV2Api.setSelection(useBulkV2Api);
-        buttonUseBulkV2Api.setEnabled(useBulkAPI);
-        
-        // hide the checkbox to enable/disable Bulk V2
-        buttonUseBulkV2Api.setVisible(false);
+        empty = new Label(restComp, SWT.NONE);
+        data = new GridData();
+        data.horizontalSpan = 2;
+        empty.setLayoutData(data);
 
         // timezone
         textTimezone = createTimezoneTextInput(restComp, "AdvancedSettingsDialog.timezone", Config.TIMEZONE, TimeZone.getDefault().getID(), 30 * textSize.x);
-
+        
+        empty = new Label(restComp, SWT.NONE);
+        data = new GridData();
+        data.horizontalSpan = 2;
+        empty.setLayoutData(data);
+        
         // proxy Host
         Label labelProxyHost = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelProxyHost.setText(Labels.getString("AdvancedSettingsDialog.proxyHost")); //$NON-NLS-1$
@@ -666,7 +691,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data = new GridData(GridData.FILL_HORIZONTAL);
         textProxyNtlmDomain.setLayoutData(data);
         
-        Label empty = new Label(restComp, SWT.NONE);
+        empty = new Label(restComp, SWT.NONE);
         data = new GridData();
         data.horizontalSpan = 2;
         empty.setLayoutData(data);
