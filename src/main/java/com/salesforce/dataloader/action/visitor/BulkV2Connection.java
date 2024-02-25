@@ -228,14 +228,6 @@ public class BulkV2Connection  {
         this.authHeaderValue = AUTH_HEADER_VALUE_PREFIX + getConfig().getSessionId();
     }
     
-    public JobInfo createJob(JobInfo job) throws AsyncApiException {
-        ContentType type = job.getContentType();
-        if (type != null && type != ContentType.CSV) {
-            throw new AsyncApiException("Unsupported Content Type", AsyncExceptionCode.FeatureNotEnabled);
-        }
-        return createJob(job, ContentType.CSV);
-    }
-    
     public JobInfo getJobStatus(String jobId, boolean isQuery) throws AsyncApiException {
         return getJobStatus(jobId, isQuery, ContentType.JSON);
     }
@@ -392,7 +384,7 @@ public class BulkV2Connection  {
         return urlString;
     }
     
-    private JobInfo createJob(JobInfo job, ContentType contentType) throws AsyncApiException {
+    public JobInfo createJob(JobInfo job) throws AsyncApiException {
         ContentType type = job.getContentType();
         if (type != null && type != ContentType.CSV) {
             throw new AsyncApiException("Unsupported Content Type", AsyncExceptionCode.FeatureNotEnabled);
@@ -409,7 +401,7 @@ public class BulkV2Connection  {
         } else {
         	headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
         	requestBodyMap.put("object", job.getObject());
-        	requestBodyMap.put("contentType", "CSV");
+        	requestBodyMap.put("contentType", type.toString());
         	if (operation.equals(OperationEnum.upsert)) {
         	    requestBodyMap.put("externalIdFieldName", job.getExternalIdFieldName());
         	}

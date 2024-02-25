@@ -908,11 +908,13 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     }
 
     protected boolean isBulkAPIEnabled(Map<String, String> argMap) {
-        return isSettingEnabled(argMap, Config.BULK_API_ENABLED);
+        return isSettingEnabled(argMap, Config.BULK_API_ENABLED)
+                && !isSettingEnabled(argMap, Config.BULKV2_API_ENABLED);
     }
     
     protected boolean isBulkV2APIEnabled(Map<String, String> argMap) {
-        return isBulkAPIEnabled(argMap) && isSettingEnabled(argMap, Config.BULKV2_API_ENABLED);
+        return isSettingEnabled(argMap, Config.BULK_API_ENABLED)
+                && isSettingEnabled(argMap, Config.BULKV2_API_ENABLED);
     }
     protected boolean isSettingEnabled(Map<String, String> argMap, String configKey) {
         return Config.TRUE.equalsIgnoreCase(argMap.get(configKey));
