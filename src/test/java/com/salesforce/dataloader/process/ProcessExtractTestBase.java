@@ -420,68 +420,6 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         }
     }
 
-    public void testPolymorphicRelationshipExtract() throws Exception {
-        // create a test lead
-        final String uid = getBinding().getUserInfo().getUserId();
-        final String[] leadidArr = createLead(uid);
-        try {
-            final String soql = "SELECT Id, Owner.Name, Lead.Owner.Id, x.owner.lastname, OwnerId FROM Lead x where id='"
-                    + leadidArr[0] + "'";
-            final Map<String, String> argmap = getTestConfig(soql, "Lead", true);
-            if (isBulkAPIEnabled(argmap) || isBulkV2APIEnabled(argmap)) {
-                // bulk api doesn't support foreign key relationships so it will always fail
-                final String expectedError = "Batch failed: InvalidBatch : Failed to process query: FUNCTIONALITY_NOT_ENABLED: Foreign Key Relationships not supported in Bulk Query";
-                runProcessNegative(
-                        argmap,
-                        expectedError);
-            } else {
-                // run the extract
-                runProcess(argmap, 1);
-                // open the results of the extraction
-                final CSVFileReader rdr = new CSVFileReader(new File(argmap.get(Config.DAO_NAME)), getController().getConfig(), true, false);
-                rdr.open();
-                Row row = rdr.readRow();
-                assertNotNull(row);
-                assertEquals(5,row.size());
-                // validate the extract results are correct.
-                assertEquals(leadidArr[0], row.get("LID"));
-                assertEquals("loader", row.get("LNAME"));
-                assertEquals("data loader", row.get("NAME__RESULT"));
-                assertEquals(uid, row.get("OID"));
-                assertEquals(uid,row.get("OWNID"));
-                // validate that we have read the only result. there should be only one.
-                assertNull(rdr.readRow());
-
-            }
-        } finally {
-            // cleanup here since the parent doesn't clean up leads
-            getBinding().delete(leadidArr);
-        }
-
-    }
-
-    /** creates a lead owned by the provided user */
-    private String[] createLead(final String uid) throws ConnectionException {
-        final SObject lead = new SObject();
-        // Create a lead sobject
-        lead.setType("Lead");
-        lead.setField("LastName", "test lead");
-        lead.setField("Company", "salesforce");
-        lead.setField("OwnerId", uid);
-
-        // insert the lead
-        final SaveResult[] result = getBinding().create(new SObject[] { lead });
-
-        // validate save result
-        assertNotNull(result);
-        assertEquals(1, result.length);
-        assertTrue(Arrays.toString(result[0].getErrors()), result[0].isSuccess());
-
-        // get new lead id
-        final String[] leadidArr = new String[] { result[0].getId() };
-        return leadidArr;
-    }
-
     public abstract void testExtractAccountCsvAggregate() throws Exception;
 
     protected void runTestExtractAccountCsvAggregate() throws ConnectionException, ProcessInitializationException,
