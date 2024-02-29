@@ -133,7 +133,6 @@ package com.salesforce.dataloader.action.visitor;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -146,15 +145,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
 import javax.xml.namespace.QName;
 
 import org.apache.logging.log4j.LogManager;
@@ -164,6 +158,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesforce.dataloader.client.HttpTransportInterface;
+import com.salesforce.dataloader.exception.HttpClientTransportException;
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.AsyncExceptionCode;
 import com.sforce.async.ContentType;
@@ -172,13 +167,10 @@ import com.sforce.async.JobStateEnum;
 import com.sforce.async.OperationEnum;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
-import com.sforce.ws.MessageHandler;
-import com.sforce.ws.MessageHandlerWithHeaders;
 import com.sforce.ws.bind.CalendarCodec;
 import com.sforce.ws.bind.TypeMapper;
 import com.sforce.ws.parser.PullParserException;
 import com.sforce.ws.parser.XmlInputStream;
-import com.sforce.ws.util.FileUtil;
 
 enum HttpMethod {
     GET,
@@ -280,7 +272,7 @@ public class BulkV2Connection  {
         }
         try {
             return doGetQueryResultStream(new URL(urlString), getHeaders(JSON_CONTENT_TYPE, CSV_CONTENT_TYPE));
-        } catch (IOException e) {
+        } catch (IOException | ConnectionException e) {
             throw new AsyncApiException("Failed to get query results for job " + jobId, AsyncExceptionCode.ClientInputError, e);
         }
     }
@@ -427,8 +419,9 @@ public class BulkV2Connection  {
             headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
     	}
 		try {
-	        InputStream in;
+	        InputStream in = null;
 	        boolean successfulRequest = true;
+            HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
 	        if (requestMethod == HttpMethod.GET) {
 	        	if (requestBodyMap != null && !requestBodyMap.isEmpty()) {
 	        		Set<Object> paramNameSet = requestBodyMap.keySet();
@@ -443,10 +436,13 @@ public class BulkV2Connection  {
 	        		}
 	        	}
 	        	// make a get request
-	            HttpURLConnection httpConnection = openHttpConnection(new URL(urlString), headers);
-	            in = doHttpGet(httpConnection, new URL(urlString));
+	        	try {
+	        	    HttpURLConnection conn = transport.openHttpGetConnection(urlString, headers);
+	        	    in = transport.httpGet(conn, urlString);
+	        	} catch (HttpClientTransportException ex) {
+	                parseAndThrowException(ex);
+	        	}
 	        } else {
-	        	HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
 		        OutputStream out;
 		        if (requestMethod == HttpMethod.PATCH) {
 		        	out = transport.connect(urlString, headers, true, HttpTransportInterface.SupportedHttpMethodType.PATCH);
@@ -492,17 +488,31 @@ public class BulkV2Connection  {
 	    return config;
 	}
 	
-	static void parseAndThrowException(InputStream in, ContentType type) throws AsyncApiException {
+	private static void parseAndThrowException(HttpClientTransportException ex) throws AsyncApiException {
+        ContentType type = null;
+        String contentTypeHeader = ex.getConnection().getContentType();
+        if (contentTypeHeader != null) {
+            if (contentTypeHeader.contains(XML_CONTENT_TYPE)) {
+                type = ContentType.XML;
+            } else if (contentTypeHeader.contains(JSON_CONTENT_TYPE)) {
+                type = ContentType.JSON;
+            }
+        }
+        parseAndThrowException(ex.getInputStream(), type);
+	}
+	
+	static void parseAndThrowException(InputStream is, ContentType type) throws AsyncApiException {
 	    try {
 	        AsyncApiException exception;
-	        BulkV2Error[] errorList = deserializeJsonToObject(in, BulkV2Error[].class);
+	        
+	        BulkV2Error[] errorList = deserializeJsonToObject(is, BulkV2Error[].class);
 	        if (errorList[0].message.contains("Aggregate Relationships not supported in Bulk Query")) {
 	            exception = new AsyncApiException(errorList[0].message, AsyncExceptionCode.FeatureNotEnabled);
 	        } else {
 	            exception = new AsyncApiException(errorList[0].errorCode + " : " + errorList[0].message, AsyncExceptionCode.Unknown);
 	        }
 	        throw exception;
-	    } catch (IOException e) {
+	    } catch (IOException | NullPointerException e) {
 	        throw new AsyncApiException("Failed to parse exception", AsyncExceptionCode.ClientInputError, e);
 	    }
 	}
@@ -535,101 +545,23 @@ public class BulkV2Connection  {
 	    return mapper.readValue(in, tmpClass);
 	}
 	
-    private HttpURLConnection openHttpConnection(URL url, HashMap<String, String> headers) throws IOException {
-        HttpURLConnection connection = getConfig().createConnection(url, null);
-        SSLContext sslContext = getConfig().getSslContext();
-        if (sslContext != null && connection instanceof HttpsURLConnection) {
-            ((HttpsURLConnection)connection).setSSLSocketFactory(sslContext.getSocketFactory());
-        }
-        if (headers != null && !headers.isEmpty()) {
-        	Set<String> headerNameSet = headers.keySet();
-        	for (String headerName : headerNameSet) {
-        		connection.setRequestProperty(headerName, headers.get(headerName));
-        	}
-        }
-        connection.setRequestProperty(AUTH_HEADER, this.authHeaderValue);
-        return connection;
-    }
-        
-    private InputStream doHttpGet(HttpURLConnection connection, URL url) throws IOException, AsyncApiException {
-        boolean success = true;
-        InputStream in;
-        try {
-            in = connection.getInputStream();
-        } catch (IOException e) {
-            success = false;
-            in = connection.getErrorStream();
-        }
-
-        String encoding = connection.getHeaderField("Content-Encoding");
-        if ("gzip".equals(encoding)) {
-            in = new GZIPInputStream(in);
-        }
-
-        if (getConfig().isTraceMessage() || getConfig().hasMessageHandlers()) {
-            byte[] bytes = FileUtil.toBytes(in);
-            in = new ByteArrayInputStream(bytes);
-
-            if (getConfig().hasMessageHandlers()) {
-                Iterator<MessageHandler> it = getConfig().getMessagerHandlers();
-                while (it.hasNext()) {
-                    MessageHandler handler = it.next();
-                    if (handler instanceof MessageHandlerWithHeaders) {
-                        ((MessageHandlerWithHeaders)handler).handleRequest(url, new byte[0], null);
-                        ((MessageHandlerWithHeaders)handler).handleResponse(url, bytes, connection.getHeaderFields());
-                    } else {
-                        handler.handleRequest(url, new byte[0]);
-                        handler.handleResponse(url, bytes);
-                    }
-                }
-            }
-
-            if (getConfig().isTraceMessage()) {
-                getConfig().getTraceStream().println(url.toExternalForm());
-
-                Map<String, List<String>> headers = connection.getHeaderFields();
-                for (Map.Entry<String, List<String>>entry : headers.entrySet()) {
-                    StringBuffer sb = new StringBuffer();
-                    List<String> values = entry.getValue();
-
-                    if (values != null) {
-                        for (String v : values) {
-                            sb.append(v);
-                        }
-                    }
-
-                    getConfig().getTraceStream().println(entry.getKey() + ": " + sb.toString());
-                }
-
-                getConfig().teeInputStream(bytes);
-            }
-        }
-
-        if (!success) {
-            ContentType type = null;
-            String contentTypeHeader = connection.getContentType();
-            if (contentTypeHeader != null) {
-                if (contentTypeHeader.contains(XML_CONTENT_TYPE)) {
-                    type = ContentType.XML;
-                } else if (contentTypeHeader.contains(JSON_CONTENT_TYPE)) {
-                    type = ContentType.JSON;
-                }
-            }
-            parseAndThrowException(in, type);
-        }
-        return in;
-    }
-    
     /**********************************
      * 
      * private, extract (aka query) methods 
+     * @throws ConnectionException 
      * 
      **********************************/
-    private InputStream doGetQueryResultStream(URL resultsURL, HashMap<String, String> headers) throws IOException, AsyncApiException {
-        HttpURLConnection httpConnection = openHttpConnection(resultsURL, headers);
-        InputStream is = doHttpGet(httpConnection, resultsURL);
-        this.queryLocator = httpConnection.getHeaderField("Sforce-Locator");
-        this.numberOfRecordsInQueryResult = Integer.valueOf(httpConnection.getHeaderField("Sforce-NumberOfRecords"));
+    private InputStream doGetQueryResultStream(URL resultsURL, HashMap<String, String> headers) throws IOException, AsyncApiException, ConnectionException {
+        InputStream is = null;
+        try {
+            HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
+            HttpURLConnection httpConnection = transport.openHttpGetConnection(resultsURL.toString(), headers);
+            is = transport.httpGet(httpConnection, resultsURL.toString());
+            this.queryLocator = httpConnection.getHeaderField("Sforce-Locator");
+            this.numberOfRecordsInQueryResult = Integer.valueOf(httpConnection.getHeaderField("Sforce-NumberOfRecords"));
+        } catch (HttpClientTransportException ex) {
+            parseAndThrowException(ex);
+        }
         return is;
     }
     
@@ -642,13 +574,17 @@ public class BulkV2Connection  {
 
     private InputStream doGetIngestResultsStream(String jobId, String resultsType) throws AsyncApiException {
         String resultsURLString = constructRequestURL(jobId, false) + resultsType;
+        InputStream is = null;
         try {
-        	URL resultsURL = new URL(resultsURLString);
-            HttpURLConnection httpConnection = openHttpConnection(resultsURL, getHeaders(JSON_CONTENT_TYPE, CSV_CONTENT_TYPE));
-            return doHttpGet(httpConnection, resultsURL);
-        } catch (IOException e) {
+            HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
+            HttpURLConnection httpConnection = transport.openHttpGetConnection(resultsURLString, headers);
+            is = transport.httpGet(httpConnection, resultsURLString);
+        } catch (IOException | ConnectionException e) {
             throw new AsyncApiException("Failed to get " + resultsType + " for job id " + jobId, AsyncExceptionCode.ClientInputError, e);
+        } catch (HttpClientTransportException e) {
+            parseAndThrowException(e);
         }
+        return is;
     }
     
     private void doSaveIngestResults(String jobId, String filename, String resultsType) throws AsyncApiException {

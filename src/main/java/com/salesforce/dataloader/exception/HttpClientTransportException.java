@@ -24,40 +24,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.client;
+package com.salesforce.dataloader.exception;
 
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.io.InputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.salesforce.dataloader.exception.HttpClientTransportException;
-import com.sforce.async.AsyncApiException;
-import com.sforce.ws.transport.Transport;
+import java.net.HttpURLConnection;
 
 /**
- * This interface defines a Transport.
  *
- * @author http://cheenath.com
- * @version 1.0
- * @since 1.0  Nov 30, 2005
+ * @since 60.0
  */
-public interface HttpTransportInterface extends Transport {
-	enum SupportedHttpMethodType {
-		PUT,
-		POST,
-		PATCH
-	}
-    OutputStream connect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression,
-    		HttpTransportInterface.SupportedHttpMethodType httpMethod) throws IOException;
+@SuppressWarnings("serial")
+public class HttpClientTransportException extends OperationException {
 
-    void connect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression,
-    		HttpTransportInterface.SupportedHttpMethodType httpMethod, InputStream contentInputStream, String contentEncoding) throws IOException;
+    private InputStream inputStream;
+    private HttpURLConnection connection;
     
-    HttpURLConnection openHttpGetConnection(String urlStr, Map<String, String> headers) throws IOException;
-    InputStream httpGet(HttpURLConnection connection, String urlStr) throws IOException, AsyncApiException, HttpClientTransportException;
+    public HttpClientTransportException() {
+        super();
+    }
+
+    public HttpClientTransportException(String message, HttpURLConnection conn, InputStream is) {
+        super(message);
+        connection = conn;
+        inputStream = is;
+    }
+
+    public HttpClientTransportException(Throwable cause, HttpURLConnection conn, InputStream is) {
+        super(cause);
+        connection = conn;
+        inputStream = is;
+    }
+
+    public HttpClientTransportException(String message, Throwable cause, HttpURLConnection conn, InputStream is) {
+        super(message, cause);
+        connection = conn;
+        inputStream = is;
+    }
+    
+    public InputStream getInputStream() {
+        return inputStream;
+    }
+
+    public HttpURLConnection getConnection() {
+        return connection;
+    }
 }
