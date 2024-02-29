@@ -30,8 +30,14 @@ import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
+import com.salesforce.dataloader.model.Row;
+import com.sforce.soap.partner.GetUserInfoResult;
+import com.sforce.soap.partner.SaveResult;
+import com.sforce.soap.partner.sobject.SObject;
+import com.sforce.ws.ConnectionException;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -45,6 +51,8 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -152,7 +160,62 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
     public void testForNonQueryableSObjects() throws Exception {
         runTestForNonQueryableSObjects();
     }
+    
+    @Test
+    public void testPolymorphicRelationshipExtract() throws Exception {
+        // create a test lead
+        final String uid = getBinding().getUserInfo().getUserId();
+        final String[] leadidArr = createLead(uid);
+        try {
+            final String soql = "SELECT Id, Owner.Name, Lead.Owner.Id, x.owner.lastname, OwnerId FROM Lead x where id='"
+                    + leadidArr[0] + "'";
+            final Map<String, String> argmap = getTestConfig(soql, "Lead", true);
+                // run the extract
+                runProcess(argmap, 1);
+                GetUserInfoResult userInfo = getBinding().getUserInfo();
+                
+                // open the results of the extraction
+                final CSVFileReader rdr = new CSVFileReader(new File(argmap.get(Config.DAO_NAME)), getController().getConfig(), true, false);
+                rdr.open();
+                Row row = rdr.readRow();
+                assertNotNull(row);
+                assertEquals(5,row.size());
+                // validate the extract results are correct.
+                assertEquals(leadidArr[0], row.get("LID"));
+                assertTrue(userInfo.getUserFullName().contains(row.get("LNAME").toString()));
+                assertEquals(userInfo.getUserFullName(), row.get("NAME__RESULT"));
+                assertEquals(uid, row.get("OID"));
+                assertEquals(uid,row.get("OWNID"));
+                // validate that we have read the only result. there should be only one.
+                assertNull(rdr.readRow());
+        } finally {
+            // cleanup here since the parent doesn't clean up leads
+            getBinding().delete(leadidArr);
+        }
 
+    }
+
+    /** creates a lead owned by the provided user */
+    private String[] createLead(final String uid) throws ConnectionException {
+        final SObject lead = new SObject();
+        // Create a lead sobject
+        lead.setType("Lead");
+        lead.setField("LastName", "test lead");
+        lead.setField("Company", "salesforce");
+        lead.setField("OwnerId", uid);
+
+        // insert the lead
+        final SaveResult[] result = getBinding().create(new SObject[] { lead });
+
+        // validate save result
+        assertNotNull(result);
+        assertEquals(1, result.length);
+        assertTrue(Arrays.toString(result[0].getErrors()), result[0].isSuccess());
+
+        // get new lead id
+        final String[] leadidArr = new String[] { result[0].getId() };
+        return leadidArr;
+    }
     /**
      * @param enableLastRunOutput
      */
