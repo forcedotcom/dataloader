@@ -28,6 +28,7 @@ package com.salesforce.dataloader.action.visitor;
 
 import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
+import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
@@ -43,9 +44,19 @@ import com.sforce.async.AsyncApiException;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Superclass for all query visitors
@@ -61,6 +72,7 @@ abstract class AbstractQueryVisitor extends AbstractVisitor implements IQueryVis
     private final List<String> batchIds;
     private final int batchSize;
     protected final AbstractExtractAction action;
+    private static final Logger logger = LogManager.getLogger(AbstractQueryVisitor.class);
 
     public AbstractQueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {
@@ -114,10 +126,94 @@ abstract class AbstractQueryVisitor extends AbstractVisitor implements IQueryVis
     }
 
     protected void addResultRow(Row row, String id) throws DataAccessObjectException {
+        if (controller.getConfig().getBoolean(Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS)) {
+            getRTFDataForRow(row);
+        }
         this.batchRows.add(row);
         this.batchIds.add(id);
         if (this.batchSize == this.batchRows.size()) {
             writeBatch();
+        }
+    }
+    
+
+    private static final String IMG_TAG_SRC_ATTR_PATTERN = "<img\\s+(?:[^>]*?\\s+)?src=\"([^\"]*)\"(?:\\s+[^>]*?)?>";
+    private void getRTFDataForRow(Row row) {
+        for (String colName : row.keySet()) {
+            Object colVal = row.get(colName);
+            boolean isColValModified = false;
+            if (colVal == null) {
+                continue;
+            }
+            String strValOfCol = colVal.toString();
+            String[] outsideIMGTagSrcAttrParts = strValOfCol.split(IMG_TAG_SRC_ATTR_PATTERN);
+            Pattern htmlTagInRichTextPattern = Pattern.compile(IMG_TAG_SRC_ATTR_PATTERN);
+            Matcher matcher = htmlTagInRichTextPattern.matcher(strValOfCol);
+            int idx = 0;
+            String newValOfCol = "";
+            while (matcher.find()) {
+                String imageTagSrcAttrValue = matcher.group();
+                String[] imageTagParts = imageTagSrcAttrValue.split("src\\s*=\\s*\"([^\"]+)\"");
+                if (imageTagParts.length == 2 && imageTagSrcAttrValue.contains(".file.force.com/servlet/rtaImage?")) {
+                    String srcAttrWithBinaryContent = imageTagSrcAttrValue.substring(imageTagParts[0].length(), imageTagSrcAttrValue.length() - imageTagParts[1].length());
+                    String[] srcAttrNameValue = srcAttrWithBinaryContent.split("=", 2);
+                    String binaryContent = getBinaryContentForURL(srcAttrNameValue[1].replace("\"",""), colName);
+                    imageTagSrcAttrValue = imageTagParts[0] + " src=\"data:image/png;base64," + binaryContent + "\"" + imageTagParts[1];
+                    isColValModified = true;
+                }
+                if (idx >= outsideIMGTagSrcAttrParts.length) {
+                    newValOfCol += imageTagSrcAttrValue;
+                } else {
+                    newValOfCol += outsideIMGTagSrcAttrParts[idx] + imageTagSrcAttrValue;
+                }
+                idx++;
+            }
+            if (outsideIMGTagSrcAttrParts.length > idx) {
+                newValOfCol += outsideIMGTagSrcAttrParts[idx];
+            }
+            if (isColValModified) {
+                row.put(colName, newValOfCol);
+            }
+        }
+    }
+    
+    private String getBinaryContentForURL(String urlStr, String fieldName) {
+        try {
+            urlStr = java.net.URLDecoder.decode(urlStr, StandardCharsets.UTF_8.name());
+            URI uri = new URI(urlStr);
+            String queryStr = uri.getQuery();
+            String[] queryParams = queryStr.split("&amp;");
+            String sobjectId = "";
+            String refId = "";
+            for (String param : queryParams) {
+                String[] nameValPair = param.split("=");
+                if (nameValPair[0].equals("eid")) {
+                    sobjectId = nameValPair[1];
+                } else if (nameValPair[0].equals("refid")) {
+                    refId = nameValPair[1];
+                }
+            }
+            urlStr = "https://" 
+                    + uri.getHost() 
+                    + "/services/data/v"
+                    + Controller.getAPIVersion()
+                    + "/sobjects/"
+                    + controller.getConfig().getString(Config.ENTITY)
+                    + "/"
+                    + sobjectId
+                    + "/richTextImageFields/"
+                    + fieldName
+                    + "/"
+                    + refId;
+            
+            HttpTransportInterface transport = (HttpTransportInterface) controller.getClient().getConnectorConfig().createTransport();
+            HttpURLConnection httpConnection = transport.openHttpGetConnection(urlStr, null);
+            InputStream is = transport.httpGet(httpConnection, urlStr);
+            byte[] binaryResponse = is.readAllBytes();
+            return Base64.getEncoder().encodeToString(binaryResponse);
+        } catch (Exception e) {
+            logger.warn("Unable get image data : " + e.getMessage());
+            return urlStr;
         }
     }
 

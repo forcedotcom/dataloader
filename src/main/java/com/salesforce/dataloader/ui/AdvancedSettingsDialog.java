@@ -104,6 +104,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonFormatPhoneFields;
     private Button buttonKeepAccountTeam;
     private Button buttonCacheDescribeGlobalResults;
+    private Button buttonIncludeRTFBinaryDataInQueryResults;
     private Button buttonUseBulkApi;
     private Button buttonUseBulkV2Api;
     private Button buttonBulkApiSerialMode;
@@ -501,6 +502,19 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.widthHint = 5 * textSize.x;
         textQueryResultsDelimiterValue.setLayoutData(data);
         
+        
+        // include image data for Rich Text Fields in query results
+        // Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS
+        Label labelIncludeRTFBinaryDataInQueryResults = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelIncludeRTFBinaryDataInQueryResults.setText(Labels.getString("AdvancedSettingsDialog.includeRTFBinaryDataInQueryResults"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelIncludeRTFBinaryDataInQueryResults.setLayoutData(data);
+
+        boolean includeRTFBinaryDataInQueryResults = config.getBoolean(Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS);
+        buttonIncludeRTFBinaryDataInQueryResults = new Button(restComp, SWT.CHECK);
+        buttonIncludeRTFBinaryDataInQueryResults.setSelection(includeRTFBinaryDataInQueryResults);
+
+        // Cache DescribeGlobal results across operations
         Label labelCacheDescribeGlobalResults = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelCacheDescribeGlobalResults.setText(Labels.getString("AdvancedSettingsDialog.cacheDescribeGlobalResults"));
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
@@ -931,6 +945,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.PROXY_NTLM_DOMAIN, textProxyNtlmDomain.getText());
                 config.setValue(Config.PROCESS_KEEP_ACCOUNT_TEAM, buttonKeepAccountTeam.getSelection());
                 config.setValue(Config.CACHE_DESCRIBE_GLOBAL_RESULTS, buttonCacheDescribeGlobalResults.getSelection());
+                config.setValue(Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, buttonIncludeRTFBinaryDataInQueryResults.getSelection());
                 config.setValue(Config.BULK_API_ENABLED, buttonUseBulkApi.getSelection());
                 config.setValue(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode.getSelection());
                 config.setValue(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());

@@ -327,8 +327,15 @@ public class Controller {
         return this.partnerClient;
     }
 
-    private ClientBase<?> getClient() {
-        return this.config.useBulkAPIForCurrentOperation() ? getBulkV1Client() : getPartnerClient();
+    public ClientBase<?> getClient() {
+        if (this.config.useBulkAPIForCurrentOperation()) {
+            if (this.config.isBulkV2APIEnabled()) {
+                return getBulkV2Client();
+            } else {
+                return getBulkV1Client();
+            }
+        }
+        return getPartnerClient();
     }
 
     public BulkV1Client getBulkV1Client() {

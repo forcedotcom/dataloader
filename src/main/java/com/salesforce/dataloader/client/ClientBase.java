@@ -86,6 +86,7 @@ public abstract class ClientBase<ClientType> {
         if (apiVersionStr != null && !apiVersionStr.isEmpty()) {
             apiVersionForTheSession = apiVersionStr;
         }
+        Controller.setAPIVersion(apiVersionForTheSession);
     }
 
     public final boolean connect(SessionInfo sess) {
@@ -115,6 +116,10 @@ public abstract class ClientBase<ClientType> {
         return apiVersionForTheSession;
     }
 
+    public ConnectorConfig getConnectorConfig() {
+        return getConnectorConfig(apiVersionForTheSession);
+    }
+    
     protected ConnectorConfig getConnectorConfig(String apiVersionStr) {
         ConnectorConfig cc = new ConnectorConfig();
         cc.setTransport(HttpClientTransport.class);

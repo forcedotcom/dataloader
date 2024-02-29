@@ -29,8 +29,15 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
@@ -49,9 +56,14 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 
+import com.salesforce.dataloader.exception.HttpClientTransportException;
+import com.sforce.async.AsyncApiException;
 import com.sforce.ws.ConnectorConfig;
+import com.sforce.ws.MessageHandler;
+import com.sforce.ws.MessageHandlerWithHeaders;
 import com.sforce.ws.tools.VersionInfo;
 import com.sforce.ws.transport.*;
+import com.sforce.ws.util.FileUtil;
 
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -355,5 +367,88 @@ public class HttpClientTransport implements HttpTransportInterface {
     
     public static boolean isReuseConnection() {
     	return reuseConnection;
+    }
+    
+    private static final String AUTH_HEADER_VALUE_PREFIX = "Bearer ";
+    private static final String AUTH_HEADER = "Authorization";
+
+    public HttpURLConnection openHttpGetConnection(String urlStr, Map<String, String> headers) throws IOException {
+        URL url = new URL(urlStr);
+        HttpURLConnection connection = currentConfig.createConnection(url, null);
+        SSLContext sslContext = currentConfig.getSslContext();
+        if (sslContext != null && connection instanceof HttpsURLConnection) {
+            ((HttpsURLConnection)connection).setSSLSocketFactory(sslContext.getSocketFactory());
+        }
+        if (headers != null && !headers.isEmpty()) {
+            Set<String> headerNameSet = headers.keySet();
+            for (String headerName : headerNameSet) {
+                connection.setRequestProperty(headerName, headers.get(headerName));
+            }
+        }
+        String authHeaderValue = AUTH_HEADER_VALUE_PREFIX + currentConfig.getSessionId();
+        connection.setRequestProperty(AUTH_HEADER, authHeaderValue);
+        return connection;
+    }
+    
+    public InputStream httpGet(HttpURLConnection connection, String urlStr) throws IOException, AsyncApiException, HttpClientTransportException {
+        boolean success = true;
+        InputStream in;
+        URL url = new URL(urlStr);
+        try {
+            in = connection.getInputStream();
+        } catch (IOException e) {
+            success = false;
+            in = connection.getErrorStream();
+        }
+
+        String encoding = connection.getHeaderField("Content-Encoding");
+        if ("gzip".equals(encoding)) {
+            in = new GZIPInputStream(in);
+        }
+
+        if (currentConfig.isTraceMessage() || currentConfig.hasMessageHandlers()) {
+            byte[] bytes = FileUtil.toBytes(in);
+            in = new ByteArrayInputStream(bytes);
+
+            if (currentConfig.hasMessageHandlers()) {
+                Iterator<MessageHandler> it = currentConfig.getMessagerHandlers();
+                while (it.hasNext()) {
+                    MessageHandler handler = it.next();
+                    if (handler instanceof MessageHandlerWithHeaders) {
+                        ((MessageHandlerWithHeaders)handler).handleRequest(url, new byte[0], null);
+                        ((MessageHandlerWithHeaders)handler).handleResponse(url, bytes, connection.getHeaderFields());
+                    } else {
+                        handler.handleRequest(url, new byte[0]);
+                        handler.handleResponse(url, bytes);
+                    }
+                }
+            }
+
+            if (currentConfig.isTraceMessage()) {
+                currentConfig.getTraceStream().println(url.toExternalForm());
+
+                Map<String, List<String>> headers = connection.getHeaderFields();
+                for (Map.Entry<String, List<String>>entry : headers.entrySet()) {
+                    StringBuffer sb = new StringBuffer();
+                    List<String> values = entry.getValue();
+
+                    if (values != null) {
+                        for (String v : values) {
+                            sb.append(v);
+                        }
+                    }
+
+                    currentConfig.getTraceStream().println(entry.getKey() + ": " + sb.toString());
+                }
+
+                currentConfig.teeInputStream(bytes);
+            }
+        }
+
+        if (!success) {
+            HttpClientTransportException ex = new HttpClientTransportException("Unsuccessful GET operation", connection, in);
+            throw ex;
+        }
+        return in;
     }
 }

@@ -212,6 +212,7 @@ public class Config {
     public static final String CSV_DELIMITER_OTHER_VALUE = "loader.csvOtherValue";
     public static final String CSV_DELIMITER_FOR_QUERY_RESULTS = "loader.query.delimiter";
     public static final String BUFFER_UNPROCESSED_BULK_QUERY_RESULTS = "loader.bufferUnprocessedBulkQueryResults";
+    public static final String INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS = "loader.query.includeBinaryData";
     public static final String CACHE_DESCRIBE_GLOBAL_RESULTS = "loader.cacheSObjectNamesAndFields";
     
     //Special Internal Configs
@@ -611,6 +612,7 @@ public class Config {
         setDefaultValue(WIZARD_CLOSE_ON_FINISH, true);
         setDefaultValue(CACHE_DESCRIBE_GLOBAL_RESULTS, true);
         setDefaultValue(PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE, false);
+        setDefaultValue(INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, false);
     }
 
     /**
