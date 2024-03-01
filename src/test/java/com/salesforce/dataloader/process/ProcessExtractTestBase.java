@@ -118,7 +118,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
 
     protected abstract boolean isExtractAll();
 
-    protected Map<String, String> getTestConfig(String soql, String entity, boolean useMappingFile) {
+    protected Map<String, String> getExtractionTestConfig(String soql, String entity, boolean useMappingFile) {
 
         final Map<String, String> argMap = getTestConfig(isExtractAll() ? OperationInfo.extract_all
                 : OperationInfo.extract, true);
@@ -135,7 +135,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
     
     Map<String, String> getDoNotLimitOutputToQueryFieldsTestConfig(String soql, String entity, boolean useMappingFile) {
 
-        final Map<String, String> argMap = getTestConfig(soql, entity, useMappingFile);
+        final Map<String, String> argMap = getExtractionTestConfig(soql, entity, useMappingFile);
         argMap.put(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS, Config.FALSE);
         return argMap;
     }
@@ -215,7 +215,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         String soql = null;
         Map<String, String> argmap = null;
         soql = "Select Account.Name, (Select Contact.LastName FROM Account.Contacts) FROM Account";
-        argmap = getTestConfig(soql, "Account", false);
+        argmap = getExtractionTestConfig(soql, "Account", false);
         // this error message to change
         runProcessNegative(argmap, "Invalid soql: Nested queries are not supported in SOQL SELECT clause");
     }
@@ -304,7 +304,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
     ConnectionException {
         final ExtractContactGenerator contactGenerator = new ExtractContactGenerator();
         final String soql = contactGenerator.getSOQL("Contact.Id, Contact.Account.id");
-        final Map<String, String> argmap = getTestConfig(soql, "Contact", false);
+        final Map<String, String> argmap = getExtractionTestConfig(soql, "Contact", false);
         final String[] contactIds = insertExtractTestRecords(10, contactGenerator);
         Controller control = runProcess(argmap, contactIds.length);
         verifyIdsInCSV(control, contactIds);
@@ -317,7 +317,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         final String nonQueryableType = "AggregateResult";
 
         final String soql = "select id from " + nonQueryableType;
-        final Map<String, String> argmap = getTestConfig(soql, nonQueryableType, false);
+        final Map<String, String> argmap = getExtractionTestConfig(soql, nonQueryableType, false);
 
         if (isBulkV2APIEnabled(argmap) || !isBulkAPIEnabled(argmap)) {
             // Partner or Bulk v2 query 
@@ -346,13 +346,13 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
 
     private void runExtractNegativeTest(String soql, String expectedErrorMsg) throws ProcessInitializationException,
     DataAccessObjectException {
-        runProcessNegative(getTestConfig(soql, "Account", false), expectedErrorMsg);
+        runProcessNegative(getExtractionTestConfig(soql, "Account", false), expectedErrorMsg);
     }
 
     protected void runSoqlRelationshipTest(String contactId, String accountId, final String soql)
             throws ProcessInitializationException, DataAccessObjectException {
         setServerApiInvocationThreshold(100);
-        Map<String, String> argMap = getTestConfig(soql, "Contact", true);
+        Map<String, String> argMap = getExtractionTestConfig(soql, "Contact", true);
         doRunSoqlRelationshipTest(contactId, accountId, soql, argMap);
         argMap = getDoNotLimitOutputToQueryFieldsTestConfig(soql, "Contact", true);
         doRunSoqlRelationshipTest(contactId, accountId, soql, argMap);
@@ -395,7 +395,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                     .getSOQL("ID, BILLINGADDRESS, NAME, TYPE, PHONE, ACCOUNTNUMBER__C, WEBSITE, ANNUALREVENUE, LASTMODIFIEDDATE, ORACLE_ID__C");
             
         }
-        Map<String, String> testConfig = getTestConfig(soql, "Account", true);
+        Map<String, String> testConfig = getExtractionTestConfig(soql, "Account", true);
         testConfig.put(Config.DAO_WRITE_BATCH_SIZE, "10"); // total 100 entries in the results file, write in chunks of 10
         Controller control = runProcess(testConfig, numRecords);
         // verify IDs and phone format 
@@ -430,7 +430,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         insertExtractTestRecords(numRecords, accountGen);
 
         final String soql = accountGen.getSOQL("max(numberofemployees) max_emps");
-        final Map<String, String> argMap = getTestConfig(soql, "Account", false);
+        final Map<String, String> argMap = getExtractionTestConfig(soql, "Account", false);
         if (isBulkAPIEnabled(argMap) || isBulkV2APIEnabled(this.getTestConfig())) {
             runProcessNegative(
                     argMap,
