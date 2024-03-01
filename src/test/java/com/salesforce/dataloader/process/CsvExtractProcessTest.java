@@ -28,6 +28,7 @@ package com.salesforce.dataloader.process;
 
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
+import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
@@ -45,8 +46,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -169,7 +172,7 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
         try {
             final String soql = "SELECT Id, Owner.Name, Lead.Owner.Id, x.owner.lastname, OwnerId FROM Lead x where id='"
                     + leadidArr[0] + "'";
-            final Map<String, String> argmap = getTestConfig(soql, "Lead", true);
+            final Map<String, String> argmap = getExtractionTestConfig(soql, "Lead", true);
                 // run the extract
                 runProcess(argmap, 1);
                 GetUserInfoResult userInfo = getBinding().getUserInfo();
@@ -222,7 +225,7 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
     private void testLastRunOutput(boolean useDefault, String baseProcessName, boolean enableOutput, String outputDir)
             throws DataAccessObjectException, ProcessInitializationException {
         final String soql = "Select ID FROM ACCOUNT WHERE " + ACCOUNT_WHERE_CLAUSE + " limit 1";
-        Map<String, String> argMap = getTestConfig(soql, "Account", false);
+        Map<String, String> argMap = getExtractionTestConfig(soql, "Account", false);
         argMap.remove(Config.LAST_RUN_OUTPUT_DIR);
 
         // set last run output paramerers
@@ -278,4 +281,53 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
         runMalformedQueriesTest();
     }
 
+    @Test
+    public void testBinaryDataInRTFQueryResult() throws Exception {
+        testBinaryDataInRTFQueryResult("true");
+        testBinaryDataInRTFQueryResult("false");
+    }
+    
+    private void testBinaryDataInRTFQueryResult(String inclueRTFBinaryData) throws Exception {
+        // insert an account with binary data
+        Map<String, String> insertArgMap = getTestConfig(OperationInfo.insert,
+                getTestDataDir() + "/acctsWithBinaryDataInRTF.csv", false);
+        Controller controller = runProcess(insertArgMap, 1);
+        List<String> ids = new ArrayList<String>();
+        String fileName = controller.getConfig().getString(Config.OUTPUT_SUCCESS);
+        final CSVFileReader successRdr = new CSVFileReader(new File(fileName), getController().getConfig(), true, false);
+        String idFieldName = this.isBulkV2APIEnabled(insertArgMap)?"sf__Id":"ID";
+        try {
+            for (Row row : successRdr.readRowList(Integer.MAX_VALUE)) {
+                final String rowId = (String) row.get(idFieldName);
+                if (rowId != null) {
+                    ids.add(rowId);
+                }
+            }
+        } finally {
+            successRdr.close();
+        }
+
+        // set config property loader.query.includeBinaryData to true
+        String soql = "Select ID,RICHTEXT__C FROM Account where id='" + ids.get(0) + "'";
+        Map<String, String> queryArgMap = getExtractionTestConfig(soql, "Account", false);
+        queryArgMap.put(Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, inclueRTFBinaryData);
+
+        // query the account and verify results
+        controller = runProcess(queryArgMap, 1);
+        CSVFileReader queryResultsReader = new CSVFileReader(new File(queryArgMap.get(Config.DAO_NAME)), getController().getConfig(), true, false);
+        queryResultsReader.open();
+        Row queryResultsRow = queryResultsReader.readRow();
+        String queryResultsRTVal = (String)queryResultsRow.get("RICHTEXT__c");
+
+        if ("true".equalsIgnoreCase(inclueRTFBinaryData)) {
+            CSVFileReader uploadedCSVReader = new CSVFileReader(new File(getTestDataDir() + "/acctsWithBinaryDataInRTF.csv"), getController().getConfig(), true, false);
+            uploadedCSVReader.open();
+            Row uploadedRow = uploadedCSVReader.readRow();
+            String uploadedRTVal = (String)queryResultsRow.get("RICHTEXT__c");
+            assertEquals("Binary data in query result file does not match uploaded data: " 
+            + queryArgMap.get(Config.DAO_NAME), queryResultsRTVal, uploadedRTVal);
+        } else {
+            assertTrue(queryResultsRTVal.contains(".file.force.com/servlet/rtaImage?"));
+        }
+    }
 }
