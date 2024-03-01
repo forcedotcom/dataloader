@@ -589,13 +589,13 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     private boolean login() throws ConnectionException, ApiFault {
         disconnect();
         try {
-            login(apiVersionForTheSession);
+            dologin();
             logger.debug("able to successfully invoke server APIs of version " + apiVersionForTheSession);
         } catch (UnexpectedErrorFault fault) {
             if (fault.getExceptionCode() == ExceptionCode.UNSUPPORTED_API_VERSION) {
                 logger.error("Failed to successfully invoke server APIs of version " + apiVersionForTheSession);
                 apiVersionForTheSession = getPreviousAPIVersionInWSC();
-                login(apiVersionForTheSession);
+                login();
             } else {
                 logger.error("Failed to get user info using manually configured session id", fault);
                 throw fault;
@@ -621,10 +621,10 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         return true; // exception thrown if there is an issue with login
     }
     
-    private boolean login(String apiVersionStr) throws ConnectionException, ApiFault {
+    private boolean dologin() throws ConnectionException, ApiFault {
         // Attempt the login giving the user feedback
         logger.info(Messages.getString("Client.sforceLogin")); //$NON-NLS-1$
-        final ConnectorConfig cc = getLoginConnectorConfig(apiVersionStr);
+        final ConnectorConfig cc = getLoginConnectorConfig();
         boolean savedIsTraceMessage = cc.isTraceMessage();
         cc.setTraceMessage(false);
         PartnerConnection conn = Connector.newConnection(cc);
@@ -645,12 +645,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             throw ex;
         } finally {
             cc.setTraceMessage(savedIsTraceMessage);
-        }
-        synchronized (apiVersionForTheSession) {
-            if (!isValidApiVersionForTheSession) {
-                apiVersionForTheSession = apiVersionStr;
-                isValidApiVersionForTheSession = true;
-            }
         }
         return true;
 
@@ -731,9 +725,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         } catch (ConnectionException e) {
             // ignore
         } finally {
-            synchronized (apiVersionForTheSession) {
-                isValidApiVersionForTheSession = false;
-            }
             disconnect();
         }
         return true;
@@ -845,22 +836,22 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     @Override
-    protected ConnectorConfig getConnectorConfig(String apiVersionStr) {
-        ConnectorConfig cc = super.getConnectorConfig(apiVersionStr);
+    public ConnectorConfig getConnectorConfig() {
+        ConnectorConfig cc = super.getConnectorConfig();
         cc.setManualLogin(true);
         return cc;
     }
     
-    public static String getServicePathForAPIVersion(String apiVersionStr) {
+    public static String getServicePath() {
         // Auth endpoint is a SOAP service
-        return ClientBase.getServicePathForAPIVersion(DEFAULT_AUTH_ENDPOINT_URL.getPath(), apiVersionStr);
+        return ClientBase.getServicePathWithAPIVersion(DEFAULT_AUTH_ENDPOINT_URL.getPath());
     }
 
-    private synchronized ConnectorConfig getLoginConnectorConfig(String apiVersion) {
-        this.connectorConfig = getConnectorConfig(apiVersion);
+    private synchronized ConnectorConfig getLoginConnectorConfig() {
+        this.connectorConfig = getConnectorConfig();
         String serverUrl = getDefaultServer();
-        this.connectorConfig.setAuthEndpoint(serverUrl + getServicePathForAPIVersion(apiVersion));
-        this.connectorConfig.setServiceEndpoint(serverUrl + getServicePathForAPIVersion(apiVersion));
+        this.connectorConfig.setAuthEndpoint(serverUrl + getServicePath());
+        this.connectorConfig.setServiceEndpoint(serverUrl + getServicePath());
         return this.connectorConfig;
     }
 

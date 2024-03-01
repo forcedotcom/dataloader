@@ -266,9 +266,10 @@ abstract class TestBase {
         String configEndpoint = getController().getConfig().getString(Config.ENDPOINT);
         if (!configEndpoint.equals("")) { //$NON-NLS-1$
             try {
-                bindingConfig.setAuthEndpoint(configEndpoint + PartnerClient.getServicePathForAPIVersion(apiVersionStr));
-                bindingConfig.setServiceEndpoint(configEndpoint + PartnerClient.getServicePathForAPIVersion(apiVersionStr)); // Partner SOAP service
-                bindingConfig.setRestEndpoint(configEndpoint + BulkV1Client.getServicePathForAPIVersion(apiVersionStr));  // REST service: Bulk v1       
+                PartnerClient.setAPIVersion(apiVersionStr);
+                bindingConfig.setAuthEndpoint(configEndpoint + PartnerClient.getServicePath());
+                bindingConfig.setServiceEndpoint(configEndpoint + PartnerClient.getServicePath()); // Partner SOAP service
+                bindingConfig.setRestEndpoint(configEndpoint + BulkV1Client.getServicePath());  // REST service: Bulk v1       
                 bindingConfig.setManualLogin(true);
                 // set long timeout for tests with larger data sets
                 bindingConfig.setReadTimeout(5 * 60 * 1000);
