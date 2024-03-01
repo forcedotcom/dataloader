@@ -66,7 +66,6 @@ public abstract class ClientBase<ClientType> {
     public static final String BULKV1_ENDPOINT_PATH = "/services/async/" + getCurrentAPIVersionInWSC();
     public static final String BULKV2_ENDPOINT_PATH = "/services/data/v" + getCurrentAPIVersionInWSC() + "/jobs/";
     protected static String apiVersionForTheSession = getCurrentAPIVersionInWSC();
-    protected static boolean isValidApiVersionForTheSession = false;
 
     protected final Logger logger;
     protected final Controller controller;
@@ -86,12 +85,11 @@ public abstract class ClientBase<ClientType> {
         if (apiVersionStr != null && !apiVersionStr.isEmpty()) {
             apiVersionForTheSession = apiVersionStr;
         }
-        Controller.setAPIVersion(apiVersionForTheSession);
     }
 
     public final boolean connect(SessionInfo sess) {
         setSession(sess);
-        return connectPostLogin(getConnectorConfig(apiVersionForTheSession));
+        return connectPostLogin(getConnectorConfig());
     }
 
     private static final String BASE_CLIENT_NAME = "DataLoader";
@@ -112,15 +110,15 @@ public abstract class ClientBase<ClientType> {
                 .toString(); //$NON-NLS-1$
     }
     
-    public String getAPIVersion() {
+    public static String getAPIVersion() {
         return apiVersionForTheSession;
+    }
+    
+    public static synchronized void setAPIVersion(String version) {
+        apiVersionForTheSession = version;
     }
 
     public ConnectorConfig getConnectorConfig() {
-        return getConnectorConfig(apiVersionForTheSession);
-    }
-    
-    protected ConnectorConfig getConnectorConfig(String apiVersionStr) {
         ConnectorConfig cc = new ConnectorConfig();
         cc.setTransport(HttpClientTransport.class);
         cc.setSessionId(getSessionId());
@@ -212,9 +210,9 @@ public abstract class ClientBase<ClientType> {
         }
         String server = getSession().getServer();
         if (server != null) {
-            cc.setAuthEndpoint(server + PartnerClient.getServicePathForAPIVersion(apiVersionStr));
-            cc.setServiceEndpoint(server + PartnerClient.getServicePathForAPIVersion(apiVersionStr)); // Partner SOAP service
-            cc.setRestEndpoint(server + BulkV1Client.getServicePathForAPIVersion(apiVersionStr));  // REST service: Bulk v1
+            cc.setAuthEndpoint(server + PartnerClient.getServicePath());
+            cc.setServiceEndpoint(server + PartnerClient.getServicePath()); // Partner SOAP service
+            cc.setRestEndpoint(server + BulkV1Client.getServicePath());  // REST service: Bulk v1
         }
         return cc;
     }
@@ -233,9 +231,9 @@ public abstract class ClientBase<ClientType> {
     }
     
     // used for SOAP and Bulk v1 service endpoints but not for bulk v2 service
-    protected static String getServicePathForAPIVersion(String path, String apiVersionStr) {
+    protected static String getServicePathWithAPIVersion(String path) {
         String[] pathPartArray = path.split("\\/");
-        pathPartArray[pathPartArray.length-1] = apiVersionStr;
+        pathPartArray[pathPartArray.length-1] = apiVersionForTheSession;
         StringBuffer buf = new StringBuffer();
         for (int i = 0; i < pathPartArray.length; i++) {
             buf.append(pathPartArray[i] + "/");

@@ -153,7 +153,7 @@ public class Controller {
         if (this.partnerClient == null) {
             return null;
         }
-        String apiInfoStr = Labels.getFormattedString("Operation.apiVersion", partnerClient.getAPIVersion());
+        String apiInfoStr = Labels.getFormattedString("Operation.apiVersion", PartnerClient.getAPIVersion());
         LimitInfo apiLimitInfo = this.partnerClient.getAPILimitInfo();
         if (apiLimitInfo != null) {
             apiInfoStr = Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
@@ -188,12 +188,8 @@ public class Controller {
         return loginIfSessionExists(getClient());
     }
     
-    public static void setAPIVersion(String apiVersionStr) {
-        API_VERSION = apiVersionStr;
-    }
-    
     public static String getAPIVersion() {
-        return API_VERSION;
+        return ClientBase.getAPIVersion();
     }
 
     public Map<String, DescribeGlobalSObjectResult> getEntityDescribes() {
