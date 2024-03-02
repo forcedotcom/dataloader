@@ -376,12 +376,19 @@ public class CsvProcessTest extends ProcessTestBase {
     }
 
     /**
-     * Tests Upsert on foreign key for the records based on the CSV file
+     * Tests Upsert on non-polymorphic foreign key (Relationship lookup) for the records 
+     * using idlookup field of the parent object
      */
     @Test
-    public void testUpsertFkAccountCsv() throws Exception {
+    public void testUpsertFkAccountOldFormatCsv() throws Exception {
         // manually inserts 100 accounts, then upserts specifying account parent for 50 accounts
         runUpsertProcess(getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 100), 0, 50);
+    }
+    
+    @Test
+    public void testUpsertFkAccountNewFormatCsv() throws Exception {
+        // manually inserts 100 accounts, then upserts specifying account parent for 5 accounts
+        runUpsertProcess(getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 10), 0, 5);
     }
 
     /**

@@ -36,7 +36,7 @@ package com.salesforce.dataloader.client;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dyna.RelationshipField;
+import com.salesforce.dataloader.dyna.ParentIdLookupFieldForRelationship;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
@@ -803,7 +803,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
         if (!parentIdLookupFieldMap.isEmpty()) {
             DescribeRefObject describeRelationship = new DescribeRefObject(parentObjectName, childObjectField, parentIdLookupFieldMap);
-            referenceEntitiesDescribesMap.put(childObjectField.getRelationshipName(), describeRelationship);
+            referenceEntitiesDescribesMap.put(childObjectField.getRelationshipName(), describeRelationship, numParentTypes);
         }
     }
     
@@ -916,14 +916,14 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private Field lookupField(String sObjectFieldName) {
-        boolean isRelationshipField = RelationshipField.isRelationshipFieldMapping(sObjectFieldName);
+        boolean isRelationshipField = ParentIdLookupFieldForRelationship.isRelationshipFieldMapping(sObjectFieldName);
         // look for field on target object
         for (Field f : getFieldTypes().getFields()) {
             if (sObjectFieldName.equalsIgnoreCase(f.getName()) || sObjectFieldName.equalsIgnoreCase(f.getLabel())) {
                 return f;
             }
             if (isRelationshipField) {
-                RelationshipField relField = new RelationshipField(sObjectFieldName, true);
+                ParentIdLookupFieldForRelationship relField = new ParentIdLookupFieldForRelationship(sObjectFieldName, true);
                 if (relField == null
                         || !relField.getRelationshipName().equalsIgnoreCase(f.getRelationshipName())) {
                     continue;

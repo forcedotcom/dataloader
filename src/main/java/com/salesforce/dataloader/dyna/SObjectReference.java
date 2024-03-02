@@ -59,7 +59,7 @@ public class SObjectReference {
      */
     public void addReferenceToSObject(Controller controller, SObject sObj, String refFieldName) throws ParameterLoadException {
         // break the name into relationship and field name components
-        RelationshipField refField = new RelationshipField(refFieldName, true);
+        ParentIdLookupFieldForRelationship refField = new ParentIdLookupFieldForRelationship(refFieldName, true);
         String relationshipName = refField.getRelationshipName();
         String parentFieldName = refField.getParentFieldName();
 
@@ -99,7 +99,7 @@ public class SObjectReference {
     }
 
     public static String getRelationshipField(Controller controller, String refFieldName) {
-        final String relName = new RelationshipField(refFieldName, true).getRelationshipName();
+        final String relName = new ParentIdLookupFieldForRelationship(refFieldName, true).getRelationshipName();
         controller.getReferenceDescribes().getParentSObject(relName).getParentObjectFieldMap();
         for (Field f : controller.getFieldTypes().getFields()) {
             if (f != null) {

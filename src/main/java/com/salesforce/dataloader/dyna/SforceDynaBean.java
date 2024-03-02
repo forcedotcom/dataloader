@@ -88,18 +88,18 @@ public class SforceDynaBean {
             if (fieldType == FieldType.reference &&
                     relationshipName != null && relationshipName.length() > 0) {
                 for (String parentName : field.getReferenceTo()) {
-                    RelationshipField relField = new RelationshipField(parentName, relationshipName);
+                    ParentIdLookupFieldForRelationship relField = new ParentIdLookupFieldForRelationship(parentName, relationshipName);
                     DescribeRefObject parent = controller.getReferenceDescribes().getParentSObject(relField.toFormattedRelationshipString());
                     if(parent != null) {
                         for(String refFieldName : parent.getParentObjectFieldMap().keySet()) {
                             // property name contains information for mapping
                             // add old format to dyna props
                             dynaProps.add(new DynaProperty(
-                                            RelationshipField.formatAsString(relationshipName, refFieldName),
+                                            ParentIdLookupFieldForRelationship.formatAsString(relationshipName, refFieldName),
                                             SObjectReference.class));
                             // add new format to dyna props
                             dynaProps.add(new DynaProperty(
-                                    RelationshipField.formatAsString(parent.getParentObjectName(), relationshipName, refFieldName),
+                                    ParentIdLookupFieldForRelationship.formatAsString(parent.getParentObjectName(), relationshipName, refFieldName),
                                         SObjectReference.class));
                         }
                     }
