@@ -1,0 +1,6 @@
+NAME,TYPE,PHONE,ACCOUNTNUMBER__C,WEBSITE,ANNUALREVENUE,ORACLE_ID__C,PARENT
+account UpsertFk #05,Account,415-555-0005,ACCT_05,http://www.accountUpsertFk05.com,05000,1-000005,1-000000
+account UpsertFk #06,Account,415-555-0006,ACCT_06,http://www.accountUpsertFk06.com,06000,1-000006,1-000001
+account UpsertFk #07,Account,415-555-0007,ACCT_07,http://www.accountUpsertFk07.com,07000,1-000007,1-000002
+account UpsertFk #08,Account,415-555-0008,ACCT_08,http://www.accountUpsertFk08.com,08000,1-000008,1-000003
+account UpsertFk #09,Account,415-555-0009,ACCT_09,http://www.accountUpsertFk09.com,09000,1-000009,1-000004

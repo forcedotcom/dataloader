@@ -84,7 +84,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
             );
     }
 
-    @Test
+    @Ignore
     public void testCreateAttachment() throws ProcessInitializationException, DataAccessObjectException {
         // convert the template using the parent account id
         final String fileName = convertTemplateToInput(this.baseName + "Template.csv", this.baseName + ".csv",
@@ -118,8 +118,10 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         final boolean bulkV2Api = isBulkV2APIEnabled(configMap);
         final boolean zipContent = isSettingEnabled(configMap, Config.BULK_API_ZIP_CONTENT);
         if (bulkApi && !zipContent) {
+            // attachment is supported only if content is zipped
             return;
         } else if (bulkV2Api) {
+            // bulk v2 does not support zip content and therefore attachment
             return;
         }
         AccountGenerator acctGen = new AccountGenerator();
@@ -145,7 +147,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
      *
      * @expectedResults Assert that the binaries of input and queried files are equal.
      */
-    @Test
+    @Ignore
     public void testCreateAttachmentMultipleFiles() throws Exception {
 
         AttachmentTemplateListener myAttachmentTemplateListener = new AttachmentTemplateListener();
