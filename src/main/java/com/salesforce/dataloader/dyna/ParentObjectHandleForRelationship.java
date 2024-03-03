@@ -35,21 +35,49 @@ import org.apache.logging.log4j.Logger;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class RelationshipParentSObject {
+public class ParentObjectHandleForRelationship {
     private String relationshipName;
     private String parentObjectName = null;
     private Integer numParentTypes = null;
-    private static final Logger logger = LogManager.getLogger(RelationshipParentSObject.class);
+    private static final Logger logger = LogManager.getLogger(ParentObjectHandleForRelationship.class);
 
-    public static final String NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR = "-";
     public static final String NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR = ":";
   
-    public RelationshipParentSObject(String parentObjectName, String relationshipName, Integer numParentTypes) {
+    public ParentObjectHandleForRelationship(String parentObjectName, String relationshipName, Integer numParentTypes) {
+        initialize(parentObjectName, relationshipName, numParentTypes);
+    }
+    
+    // parentAndRelationshipName param can be in one of the following formats:
+    // format 1: alphanumeric string without any ':' or '-' in it. Represents name of child's non-polymorphic relationship field
+    // format 1 => it is name of a non-polymorphic relationship field in child object.
+    //
+    // format 2: alphanumeric string with a ':' in it
+    // format 2 has 1 interpretations:
+    //   interpretation 1: <child relationship field name>:<parent sobject name>
+    //      - this is the new format for keys of the hashmap referenceEntitiesDescribeMap
+
+    public ParentObjectHandleForRelationship(String parentAndRelationshipName, Integer numParentTypes) {
+        String relationshipName = null;
+        String parentObjectName = null;
+        String[] fieldNameParts = parentAndRelationshipName.split(IdLookupHandleForRelationship.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR);
+        if (fieldNameParts.length == 2) { // discard the part containing parent's idLookup field name
+            parentAndRelationshipName = fieldNameParts[0];
+        }
+        fieldNameParts = parentAndRelationshipName.split(IdLookupHandleForRelationship.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR);
+        if (fieldNameParts.length == 2) { // format 2, interpretation 1
+            relationshipName = fieldNameParts[0];
+            parentObjectName = fieldNameParts[1];
+        } else { // format 1
+            relationshipName = parentAndRelationshipName;
+        }
+        initialize(parentObjectName, relationshipName, null);
+    }
+
+    private void initialize(String parentObjectName, String relationshipName, Integer numParentTypes) {
         this.parentObjectName = parentObjectName;
         this.relationshipName = relationshipName;
         this.numParentTypes = numParentTypes;
     }
-    
     public Integer getNumParentTypes() {
         return numParentTypes;
     }
@@ -67,7 +95,7 @@ public class RelationshipParentSObject {
             return relationshipName;
         }
         return relationshipName 
-                + RelationshipParentSObject.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR
+                + ParentObjectHandleForRelationship.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR
                 + parentObjectName;
     }
 }
