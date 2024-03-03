@@ -84,7 +84,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
             );
     }
 
-    @Ignore
+    @Test
     public void testCreateAttachment() throws ProcessInitializationException, DataAccessObjectException {
         // convert the template using the parent account id
         final String fileName = convertTemplateToInput(this.baseName + "Template.csv", this.baseName + ".csv",
@@ -147,7 +147,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
      *
      * @expectedResults Assert that the binaries of input and queried files are equal.
      */
-    @Ignore
+    @Test
     public void testCreateAttachmentMultipleFiles() throws Exception {
 
         AttachmentTemplateListener myAttachmentTemplateListener = new AttachmentTemplateListener();

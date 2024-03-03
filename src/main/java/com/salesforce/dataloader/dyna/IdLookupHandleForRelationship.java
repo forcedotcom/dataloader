@@ -28,17 +28,11 @@ package com.salesforce.dataloader.dyna;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Container for an object field of format
- *     objectName:fieldName
- * 
- * @author Alex Warshavsky
- * @since 8.0
- */
-public class ParentIdLookupFieldForRelationship {
+
+public class IdLookupHandleForRelationship {
     private String parentFieldName = null;
-    private RelationshipParentSObject parent = null;
-    private static final Logger logger = LogManager.getLogger(ParentIdLookupFieldForRelationship.class);
+    private ParentObjectHandleForRelationship parent = null;
+    private static final Logger logger = LogManager.getLogger(IdLookupHandleForRelationship.class);
 
     private static final String OLD_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR = ":"; //$NON-NLS-1$
     // old format - <relationship name attribute of relationship field>:<idLookup field of parent sObject>
@@ -50,14 +44,6 @@ public class ParentIdLookupFieldForRelationship {
     // Example - "Account:Owner.username"
     public static final String NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR = "-";
     public static final String NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR = ":";
-  
-    public ParentIdLookupFieldForRelationship(String parentObjectName, String relationshipName, Integer numParentTypes) {
-        parent = new RelationshipParentSObject(parentObjectName, relationshipName, numParentTypes);
-    }
-    
-    public ParentIdLookupFieldForRelationship(String parentObjectName, String relationshipName) {
-        this(parentObjectName, relationshipName, 1);
-    }
     
     // fieldName param can be in one of the following formats:
     // format 1: alphanumeric string without any ':' or '-' in it. Represents name of child's non-polymorphic relationship field
@@ -76,15 +62,15 @@ public class ParentIdLookupFieldForRelationship {
     // If 'hasParentIdLookupFieldName' == true, the code processes fieldName parameter according 
     // to the 2nd interpretation for format 2. It processes fieldName parameter according to 1st interpretation otherwise.
 
-    public ParentIdLookupFieldForRelationship(String fieldName, boolean hasParentIdLookupFieldName) {
-        String[] fieldNameParts = fieldName.split(ParentIdLookupFieldForRelationship.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR);
+    public IdLookupHandleForRelationship(String fieldName, boolean hasParentIdLookupFieldName) {
+        String[] fieldNameParts = fieldName.split(IdLookupHandleForRelationship.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR);
         if (fieldNameParts.length == 2) {
             // parent name not specified
             parentFieldName = fieldNameParts[1];
             hasParentIdLookupFieldName = true; // '.' char shows up only in format 3
             fieldName = fieldNameParts[0];
         }
-        fieldNameParts = fieldName.split(ParentIdLookupFieldForRelationship.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR);
+        fieldNameParts = fieldName.split(IdLookupHandleForRelationship.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR);
         String relationshipName = null;
         String parentObjectName = null;
         if (hasParentIdLookupFieldName) { // format 2, interpretation 2 or format 3
@@ -112,14 +98,14 @@ public class ParentIdLookupFieldForRelationship {
                 relationshipName = fieldName;
             }
         }
-        parent = new RelationshipParentSObject(parentObjectName, relationshipName, null);
+        parent = new ParentObjectHandleForRelationship(parentObjectName, relationshipName, null);
     }
 
     public String getParentFieldName() {
         return parentFieldName;
     }
     
-    public RelationshipParentSObject getParent() {
+    public ParentObjectHandleForRelationship getParent() {
         return parent;
     }
     
@@ -132,7 +118,7 @@ public class ParentIdLookupFieldForRelationship {
             return parent.getRelationshipName();
         }
         return parent.getRelationshipName() 
-                + ParentIdLookupFieldForRelationship.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR
+                + IdLookupHandleForRelationship.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR
                 + parent.getParentObjectName();
     }
     
@@ -153,14 +139,14 @@ public class ParentIdLookupFieldForRelationship {
      * @return String formatted as objectName:fieldName
      */
     static public String formatAsString(String relationshipName, String parentIDLookupFieldName) {
-        return relationshipName + ParentIdLookupFieldForRelationship.OLD_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR + parentIDLookupFieldName;
+        return relationshipName + IdLookupHandleForRelationship.OLD_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR + parentIDLookupFieldName;
     }
 
     static public String formatAsString(String parentObjectName, String relationshipName, String parentIDLookupFieldName) {
         return relationshipName 
-                + ParentIdLookupFieldForRelationship.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR 
+                + IdLookupHandleForRelationship.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR 
                 + parentObjectName 
-                + ParentIdLookupFieldForRelationship.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR 
+                + IdLookupHandleForRelationship.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR 
                 + parentIDLookupFieldName;
     }
     
