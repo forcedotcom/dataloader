@@ -49,8 +49,8 @@ public class ReferenceEntitiesDescribeMap {
     
     public void put(String relationshipFieldName, DescribeRefObject parent, int numParentTypes) {
         ParentIdLookupFieldForRelationship objField = new ParentIdLookupFieldForRelationship(parent.getParentObjectName(), relationshipFieldName, numParentTypes);
-        referenceEntitiesDescribeMap.put(objField.toFormattedRelationshipString(), parent);
-        relationshipFieldMap.put(objField.toFormattedRelationshipString(), objField);
+        referenceEntitiesDescribeMap.put(objField.getParent().toString(), parent);
+        relationshipFieldMap.put(objField.getParent().toString(), objField);
     }
     
     // fieldName could be in the old format that assumes single parent: 
@@ -77,7 +77,7 @@ public class ReferenceEntitiesDescribeMap {
     
     public ParentIdLookupFieldForRelationship get(String relationshipFieldName) {
         ParentIdLookupFieldForRelationship fieldFromInput = new ParentIdLookupFieldForRelationship(relationshipFieldName, true);
-        return this.relationshipFieldMap.get(fieldFromInput.toFormattedRelationshipString());
+        return this.relationshipFieldMap.get(fieldFromInput.getParent().toString());
     }
     // fieldName could be in the old format that assumes single parent: 
     // <relationship name attr of the field on child sobject>:<idlookup field name on parent sobject>
@@ -88,7 +88,7 @@ public class ReferenceEntitiesDescribeMap {
         ParentIdLookupFieldForRelationship fieldName4LR = new ParentIdLookupFieldForRelationship(fieldName, true);
         if (fieldName4LR == null 
                 || fieldName4LR.getParentFieldName() == null 
-                || fieldName4LR.getRelationshipName() == null) {
+                || fieldName4LR.getParent().getRelationshipName() == null) {
             return null;
         } else {
             DescribeRefObject parent = getParentSObject(fieldName4LR);
@@ -105,7 +105,7 @@ public class ReferenceEntitiesDescribeMap {
     }
     
     private DescribeRefObject getParentSObject(ParentIdLookupFieldForRelationship fieldName4LR) {
-        if (fieldName4LR == null || fieldName4LR.getRelationshipName() == null) {
+        if (fieldName4LR == null || fieldName4LR.getParent().getRelationshipName() == null) {
             return null;
         }
         for (Map.Entry<String, DescribeRefObject> ent : referenceEntitiesDescribeMap.entrySet()) {

@@ -38,19 +38,19 @@ import org.apache.logging.log4j.Logger;
 public class RelationshipParentSObject {
     private String relationshipName;
     private String parentObjectName = null;
-    private int numParentTypes = 1;
+    private Integer numParentTypes = null;
     private static final Logger logger = LogManager.getLogger(RelationshipParentSObject.class);
 
     public static final String NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR = "-";
     public static final String NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR = ":";
   
-    public RelationshipParentSObject(String parentObjectName, String relationshipName, int numParentTypes) {
+    public RelationshipParentSObject(String parentObjectName, String relationshipName, Integer numParentTypes) {
         this.parentObjectName = parentObjectName;
         this.relationshipName = relationshipName;
         this.numParentTypes = numParentTypes;
     }
     
-    public int getNumParentTypes() {
+    public Integer getNumParentTypes() {
         return numParentTypes;
     }
 
@@ -62,7 +62,7 @@ public class RelationshipParentSObject {
         return parentObjectName;
     }
     
-    public String toFormattedRelationshipString() {
+    public String toString() {
         if (parentObjectName == null) {
             return relationshipName;
         }

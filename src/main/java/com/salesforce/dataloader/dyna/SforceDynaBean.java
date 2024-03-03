@@ -89,7 +89,7 @@ public class SforceDynaBean {
                     relationshipName != null && relationshipName.length() > 0) {
                 for (String parentName : field.getReferenceTo()) {
                     ParentIdLookupFieldForRelationship relField = new ParentIdLookupFieldForRelationship(parentName, relationshipName);
-                    DescribeRefObject parent = controller.getReferenceDescribes().getParentSObject(relField.toFormattedRelationshipString());
+                    DescribeRefObject parent = controller.getReferenceDescribes().getParentSObject(relField.getParent().toString());
                     if(parent != null) {
                         for(String refFieldName : parent.getParentObjectFieldMap().keySet()) {
                             // property name contains information for mapping

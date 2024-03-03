@@ -925,7 +925,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             if (isRelationshipField) {
                 ParentIdLookupFieldForRelationship relField = new ParentIdLookupFieldForRelationship(sObjectFieldName, true);
                 if (relField == null
-                        || !relField.getRelationshipName().equalsIgnoreCase(f.getRelationshipName())) {
+                        || !relField.getParent().getRelationshipName().equalsIgnoreCase(f.getRelationshipName())) {
                     continue;
                 }
                 Field parentField = this.referenceEntitiesDescribesMap.getParentField(sObjectFieldName);
@@ -934,7 +934,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 }
                 // need to add the relationship mapping to referenceEntitiesDescribesMap
                 try {
-                    processParentObjectForLookupReferences(relField.getParentObjectName(), f, 0, 1);
+                    processParentObjectForLookupReferences(relField.getParent().getParentObjectName(), f, 0, 1);
                 } catch (ConnectionException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();

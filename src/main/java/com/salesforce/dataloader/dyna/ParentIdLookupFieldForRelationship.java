@@ -36,10 +36,8 @@ import org.apache.logging.log4j.Logger;
  * @since 8.0
  */
 public class ParentIdLookupFieldForRelationship {
-    private String relationshipName;
-    private String parentFieldName;
-    private String parentObjectName = null;
-    private int numParentTypes = 1;
+    private String parentFieldName = null;
+    private RelationshipParentSObject parent = null;
     private static final Logger logger = LogManager.getLogger(ParentIdLookupFieldForRelationship.class);
 
     private static final String OLD_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR = ":"; //$NON-NLS-1$
@@ -53,10 +51,8 @@ public class ParentIdLookupFieldForRelationship {
     public static final String NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR = "-";
     public static final String NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR = ":";
   
-    public ParentIdLookupFieldForRelationship(String parentObjectName, String relationshipName, int numParentTypes) {
-        this.parentObjectName = parentObjectName;
-        this.relationshipName = relationshipName;
-        this.numParentTypes = numParentTypes;
+    public ParentIdLookupFieldForRelationship(String parentObjectName, String relationshipName, Integer numParentTypes) {
+        parent = new RelationshipParentSObject(parentObjectName, relationshipName, numParentTypes);
     }
     
     public ParentIdLookupFieldForRelationship(String parentObjectName, String relationshipName) {
@@ -89,6 +85,8 @@ public class ParentIdLookupFieldForRelationship {
             fieldName = fieldNameParts[0];
         }
         fieldNameParts = fieldName.split(ParentIdLookupFieldForRelationship.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR);
+        String relationshipName = null;
+        String parentObjectName = null;
         if (hasParentIdLookupFieldName) { // format 2, interpretation 2 or format 3
             if (fieldNameParts.length == 2) {
                 if (parentFieldName == null) {// format 2, interpretation 2
@@ -114,45 +112,38 @@ public class ParentIdLookupFieldForRelationship {
                 relationshipName = fieldName;
             }
         }
+        parent = new RelationshipParentSObject(parentObjectName, relationshipName, null);
     }
 
     public String getParentFieldName() {
         return parentFieldName;
     }
     
-    public int getNumParentTypes() {
-        return numParentTypes;
+    public RelationshipParentSObject getParent() {
+        return parent;
     }
     
     public void setParentFieldName(String parentIdLookupFieldName) {
         this.parentFieldName = parentIdLookupFieldName;
     }
-
-    public String getRelationshipName() {
-        return relationshipName;
-    }
-
-    public String getParentObjectName() {
-        return parentObjectName;
-    }
     
     public String toFormattedRelationshipString() {
-        if (parentObjectName == null) {
-            return relationshipName;
+        if (parent.getParentObjectName() == null) {
+            return parent.getRelationshipName();
         }
-        return relationshipName 
+        return parent.getRelationshipName() 
                 + ParentIdLookupFieldForRelationship.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR
-                + parentObjectName;
+                + parent.getParentObjectName();
     }
     
     public boolean isRelationshipName(String nameStr) {
-        if (this.relationshipName == null) {
+        if (parent.getRelationshipName() == null) {
             return false;
         }
-        if (parentObjectName == null) {
-            return nameStr.toLowerCase().startsWith(this.relationshipName.toLowerCase());
+        if (parent.getParentObjectName() == null) {
+            return nameStr.toLowerCase().startsWith(parent.getRelationshipName().toLowerCase());
         } else {
-            return nameStr.toLowerCase().equalsIgnoreCase(this.relationshipName + NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR + this.parentObjectName);
+            return nameStr.toLowerCase().equalsIgnoreCase(parent.getRelationshipName() + NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR + parent.getParentObjectName());
         }
     }
     
@@ -192,10 +183,10 @@ public class ParentIdLookupFieldForRelationship {
      */
     @Override
     public String toString() {
-        if (parentObjectName == null) {
-            return formatAsString(relationshipName, parentFieldName);
+        if (parent.getParentObjectName() == null) {
+            return formatAsString(parent.getRelationshipName(), parentFieldName);
         } else {
-            return formatAsString(parentObjectName, relationshipName, parentFieldName);
+            return formatAsString(parent.getParentObjectName(), parent.getRelationshipName(), parentFieldName);
         }
     }
 }

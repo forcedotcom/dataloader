@@ -177,16 +177,16 @@ public class ChooseLookupFieldForRelationshipPage extends LoadPage {
         ParentIdLookupFieldForRelationship relField = new ParentIdLookupFieldForRelationship(relationshipName, false);
 
         // Add parent dropdown
-        if (relField.getParentObjectName() == null) {
+        if (relField.getParent().getParentObjectName() == null) {
             // shouldn't happen
             return;
         }
         
-        Combo parentCombo = this.parentSelections.get(relField.getRelationshipName());
+        Combo parentCombo = this.parentSelections.get(relField.getParent().getRelationshipName());
         if (parentCombo == null) {
             // first parent object
             Label relName = new Label(comp, SWT.RIGHT);
-            relName.setText(relField.getRelationshipName());
+            relName.setText(relField.getParent().getRelationshipName());
             relName.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 
             Label parentObjectSeparator = new Label(comp, SWT.CENTER);
@@ -196,19 +196,19 @@ public class ChooseLookupFieldForRelationshipPage extends LoadPage {
             GridData parentData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
             parentData.widthHint = 150;
             parentCombo.setLayoutData(parentData);
-            parentCombo.add(relField.getParentObjectName());
+            parentCombo.add(relField.getParent().getParentObjectName());
             parentCombo.select(0);
             parentCombo.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent event) {
                     String parentName = ((Combo)event.widget).getText();
-                    Combo parentLookupIdFieldCombo = extIdSelections.get(relField.toFormattedRelationshipString());
+                    Combo parentLookupIdFieldCombo = extIdSelections.get(relField.getParent().toString());
                     parentLookupIdFieldCombo.removeAll();
-                    ParentIdLookupFieldForRelationship selectedRelationship = new ParentIdLookupFieldForRelationship(parentName, relField.getRelationshipName());
+                    ParentIdLookupFieldForRelationship selectedRelationship = new ParentIdLookupFieldForRelationship(parentName, relField.getParent().getRelationshipName());
                     populateParentLookupFieldCombo(parentLookupIdFieldCombo, selectedRelationship);
                 }
             });
-            parentSelections.put(relField.getRelationshipName(), parentCombo);
+            parentSelections.put(relField.getParent().getRelationshipName(), parentCombo);
             Label parentLookupFieldSeparator = new Label(comp, SWT.CENTER);
             parentLookupFieldSeparator.setText(ParentIdLookupFieldForRelationship.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR);
             // Add the ext id dropdown
@@ -219,14 +219,14 @@ public class ChooseLookupFieldForRelationshipPage extends LoadPage {
             extIdData.widthHint = 150;
             extIdCombo.setLayoutData(extIdData);
             populateParentLookupFieldCombo(extIdCombo, relField);
-            extIdSelections.put(relField.toFormattedRelationshipString(), extIdCombo);
+            extIdSelections.put(relField.getParent().toString(), extIdCombo);
         } else {
-            parentCombo.add(relField.getParentObjectName());
+            parentCombo.add(relField.getParent().getParentObjectName());
         }
     }
     
     private void populateParentLookupFieldCombo(Combo extIdCombo, ParentIdLookupFieldForRelationship relField) {
-        DescribeRefObject extIdInfo = referenceObjects.getParentSObject(relField.toFormattedRelationshipString());
+        DescribeRefObject extIdInfo = referenceObjects.getParentSObject(relField.getParent().toString());
 
         // get object's ext id info & set combo box to list of external id fields
         // set the objects reference information
@@ -268,7 +268,7 @@ public class ChooseLookupFieldForRelationshipPage extends LoadPage {
             // make sure that the item selection has occurred and that the default text is not displayed anymore
             if(relationshipField != null
                     && !relationshipField.getParentFieldName().equalsIgnoreCase(Labels.getString(getClass().getSimpleName() + ".defaultComboText"))) {
-                DescribeRefObject refDescribe = referenceObjects.getParentSObject(relationshipField.toFormattedRelationshipString());
+                DescribeRefObject refDescribe = referenceObjects.getParentSObject(relationshipField.getParent().toString());
                 Field relatedField = new Field();
                 Field parentField = refDescribe.getParentObjectFieldMap().get(lookupFieldInParent);
                 Field childField = refDescribe.getChildField();
@@ -293,14 +293,14 @@ public class ChooseLookupFieldForRelationshipPage extends LoadPage {
         if(selectedIdLookupField != null && selectedIdLookupField.length() > 0
                 && ! selectedIdLookupField.equals(Labels.getString("ForeignKeyExternalIdPage.defaultComboText"))) {
             ParentIdLookupFieldForRelationship possibleParentSObjectField = new ParentIdLookupFieldForRelationship(relationshipNameInCombo, false);
-            Combo parentSObjectCombo = this.parentSelections.get(possibleParentSObjectField.getRelationshipName());
+            Combo parentSObjectCombo = this.parentSelections.get(possibleParentSObjectField.getParent().getRelationshipName());
             if (parentSObjectCombo == null) {
                 return null;
             }
             String actualParentSObjectName = parentSObjectCombo.getText();
             String fullRelationshipName = ParentIdLookupFieldForRelationship.formatAsString(
                     actualParentSObjectName
-                    , possibleParentSObjectField.getRelationshipName()
+                    , possibleParentSObjectField.getParent().getRelationshipName()
                     , selectedIdLookupField);
             ParentIdLookupFieldForRelationship actualParentSObjectField = new ParentIdLookupFieldForRelationship(fullRelationshipName, true);
             return actualParentSObjectField;

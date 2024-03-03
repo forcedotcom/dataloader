@@ -288,20 +288,20 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         if (ParentIdLookupFieldForRelationship.isRelationshipFieldMapping(sfdcColumn)) {
             ParentIdLookupFieldForRelationship parentRelationship = getController().getPartnerClient().getReferenceDescribes().get(sfdcColumn);
             int numParentTypes = 1;
-            if (parentRelationship != null) {
-                numParentTypes = parentRelationship.getNumParentTypes();
+            if (parentRelationship != null && parentRelationship.getParent().getNumParentTypes() != null) {
+                numParentTypes = parentRelationship.getParent().getNumParentTypes();
             }
             ParentIdLookupFieldForRelationship relField = new ParentIdLookupFieldForRelationship(sfdcColumn, true);
-            if (relField.getParentObjectName() == null || numParentTypes == 1) {
+            if (relField.getParent().getParentObjectName() == null || numParentTypes == 1) {
                 if (relField.getParentFieldName() == null) {
-                    sfdcColumnForBulk = relField.getRelationshipName();
+                    sfdcColumnForBulk = relField.getParent().getRelationshipName();
                 } else {
-                    sfdcColumnForBulk = relField.getRelationshipName() 
+                    sfdcColumnForBulk = relField.getParent().getRelationshipName() 
                             + "." + relField.getParentFieldName();
                 }
             } else {
-                sfdcColumnForBulk = relField.getParentObjectName()
-                        + ":" + relField.getRelationshipName() 
+                sfdcColumnForBulk = relField.getParent().getParentObjectName()
+                        + ":" + relField.getParent().getRelationshipName() 
                         + "." + relField.getParentFieldName();
             }
         }
