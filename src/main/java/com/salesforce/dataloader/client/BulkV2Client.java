@@ -52,7 +52,7 @@ public class BulkV2Client extends ClientBase<BulkV2Connection> {
     protected boolean connectPostLogin(ConnectorConfig cc) {
         try {
             // Set up a connection object with the given config
-            this.client = new BulkV2Connection(cc);
+            this.client = new BulkV2Connection(cc, controller);
 
         } catch (AsyncApiException e) {
             logger.error(Messages.getMessage(getClass(), "loginError", cc.getAuthEndpoint(), e.getExceptionMessage()),

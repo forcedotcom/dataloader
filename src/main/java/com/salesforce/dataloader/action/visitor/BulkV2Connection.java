@@ -157,10 +157,14 @@ import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.client.HttpTransportInterface;
+import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.AsyncExceptionCode;
+import com.sforce.async.BulkConnection;
 import com.sforce.async.ContentType;
 import com.sforce.async.JobInfo;
 import com.sforce.async.JobStateEnum;
@@ -179,7 +183,7 @@ enum HttpMethod {
     PUT
 }
 
-public class BulkV2Connection  {
+public class BulkV2Connection extends BulkConnection {
     private static final String URI_STEM_QUERY = "query/";
     private static final String URI_STEM_INGEST = "ingest/";
     private static final String AUTH_HEADER = "Authorization";
@@ -204,8 +208,10 @@ public class BulkV2Connection  {
     private String authHeaderValue = "";
     private String queryLocator = "";
     private int numberOfRecordsInQueryResult = 0;
-    private ConnectorConfig config;
+    private ConnectorConfig connectorConfig;
     private HashMap<String, String> headers = new HashMap<String, String>();
+    private Controller controller = null;
+    
     private static Logger logger = LogManager.getLogger(BulkV2Connection.class);
 
     public static final TypeMapper typeMapper = new TypeMapper(null, null, false);
@@ -215,17 +221,23 @@ public class BulkV2Connection  {
      * public, common methods 
      * 
      **********************************/
-    public BulkV2Connection(ConnectorConfig connectorConfig) throws AsyncApiException {
-        this.config = connectorConfig;
+    public BulkV2Connection(ConnectorConfig connectorConfig, Controller controller) throws AsyncApiException {
+        super(connectorConfig);
+        this.connectorConfig = connectorConfig;
         this.authHeaderValue = AUTH_HEADER_VALUE_PREFIX + getConfig().getSessionId();
+        this.controller = controller;
     }
     
-    public JobInfo getJobStatus(String jobId, boolean isQuery) throws AsyncApiException {
-        return getJobStatus(jobId, isQuery, ContentType.JSON);
+    public JobInfo getJobStatus(String jobId) throws AsyncApiException {
+        return getJobStatus(jobId, ContentType.JSON);
     }
     
-    public JobInfo getJobStatus(String jobId, boolean isQuery, ContentType contentType) throws AsyncApiException {
-        String urlString = constructRequestURL(jobId, isQuery);
+    public JobInfo closeJob(String jobId) throws AsyncApiException {
+        return getJobStatus(jobId);
+    }
+    
+    public JobInfo getJobStatus(String jobId, ContentType contentType) throws AsyncApiException {
+        String urlString = constructRequestURL(jobId);
         HashMap<String, String> headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
     	// there is nothing in the request body.
     	return doSendJobRequestToServer(urlString, 
@@ -242,7 +254,7 @@ public class BulkV2Connection  {
     }
     
     public JobInfo setJobState(String jobId, boolean isQuery, JobStateEnum state, String errorMessage) throws AsyncApiException {
-        String urlString = constructRequestURL(jobId, isQuery);
+        String urlString = constructRequestURL(jobId);
         HashMap<String, String> headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
     	HashMap<Object, Object> requestBodyMap = new HashMap<Object, Object>();
     	requestBodyMap.put("state", state.toString());
@@ -262,11 +274,11 @@ public class BulkV2Connection  {
      * 
      **********************************/
     public JobInfo getExtractJobStatus(String jobId) throws AsyncApiException {
-        return getJobStatus(jobId, true);
+        return getJobStatus(jobId);
     }        
 
     public InputStream getQueryResultStream(String jobId, String locator) throws AsyncApiException {
-    	String urlString =  constructRequestURL(jobId, true) + "results/";
+    	String urlString =  constructRequestURL(jobId) + "results/";
         if (locator != null && !locator.isEmpty() && !"null".equalsIgnoreCase(locator)) {
         	urlString += "?locator=" + locator;
         }
@@ -301,7 +313,7 @@ public class BulkV2Connection  {
     		throw new AsyncApiException(csvFileName + " size exceeds the max file size accepted by Bulk V2 (150 MB)", AsyncExceptionCode.ClientInputError);
     	}
     	
-        String urlString = constructRequestURL(jobId, false) + "batches/";
+        String urlString = constructRequestURL(jobId) + "batches/";
         HashMap<String, String> headers = getHeaders(CSV_CONTENT_TYPE, JSON_CONTENT_TYPE);
         try {
         	HttpTransportInterface transport = (HttpTransportInterface)getConfig().createTransport();
@@ -319,7 +331,7 @@ public class BulkV2Connection  {
         }
         
         // Mark upload as completed
-        urlString = constructRequestURL(jobId, false);
+        urlString = constructRequestURL(jobId);
         headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
 
     	setJobState(jobId, false, JobStateEnum.UploadComplete, "Failed to mark completion of the upload");
@@ -327,7 +339,7 @@ public class BulkV2Connection  {
     }
     
     public JobInfo getIngestJobStatus(String jobId) throws AsyncApiException {
-        return getJobStatus(jobId, false);
+        return getJobStatus(jobId);
     }
     
     public void saveIngestSuccessResults(String jobId, String filename) throws AsyncApiException {
@@ -363,12 +375,13 @@ public class BulkV2Connection  {
      * private, common methods 
      * 
      **********************************/
-    private String constructRequestURL(String jobId, boolean isQuery) {
+    private String constructRequestURL(String jobId) {
         String urlString = getConfig().getRestEndpoint();
         if (jobId == null) {
         	jobId = "";
         }
-        if (isQuery) {
+        boolean isExtraction = controller.getConfig().getOperationInfo().isExtraction();
+        if (isExtraction) {
         	urlString += URI_STEM_QUERY + jobId + "/";
         } else {
         	urlString += URI_STEM_INGEST + jobId + "/";
@@ -382,7 +395,7 @@ public class BulkV2Connection  {
             throw new AsyncApiException("Unsupported Content Type", AsyncExceptionCode.FeatureNotEnabled);
         }
         OperationEnum operation = job.getOperation();
-        String urlString = constructRequestURL(job.getId(), operation.equals(OperationEnum.query));
+        String urlString = constructRequestURL(job.getId());
         HashMap<String, String>headers = null;
         
     	HashMap<Object, Object> requestBodyMap = new HashMap<Object, Object>();
@@ -483,10 +496,6 @@ public class BulkV2Connection  {
 	        throw new AsyncApiException(exceptionMessageString, AsyncExceptionCode.ClientInputError, e);
 		}
 	}
-    
-	private ConnectorConfig getConfig() {
-	    return config;
-	}
 	
 	private static void parseAndThrowException(HttpClientTransportException ex) throws AsyncApiException {
         ContentType type = null;
@@ -522,8 +531,8 @@ public class BulkV2Connection  {
 	    newMap.put(REQUEST_CONTENT_TYPE_HEADER, requestContentType);
 	    newMap.put(ACCEPT_CONTENT_TYPES_HEADER, acceptContentType);
 	    newMap.put(AUTH_HEADER, this.authHeaderValue);
-	    newMap.put(SFORCE_CALL_OPTIONS_HEADER, this.config.getRequestHeader("Sforce-Call-Options"));
-	    logger.debug("Sforce-Call-Options : " + this.config.getRequestHeader("Sforce-Call-Options"));
+	    newMap.put(SFORCE_CALL_OPTIONS_HEADER, this.connectorConfig.getRequestHeader("Sforce-Call-Options"));
+	    logger.debug("Sforce-Call-Options : " + this.connectorConfig.getRequestHeader("Sforce-Call-Options"));
 	    for (Map.Entry<String, String> entry : headers.entrySet()) {
             newMap.put(entry.getKey(), entry.getValue());
         }
@@ -573,7 +582,7 @@ public class BulkV2Connection  {
      **********************************/
 
     private InputStream doGetIngestResultsStream(String jobId, String resultsType) throws AsyncApiException {
-        String resultsURLString = constructRequestURL(jobId, false) + resultsType;
+        String resultsURLString = constructRequestURL(jobId) + resultsType;
         InputStream is = null;
         try {
             HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
