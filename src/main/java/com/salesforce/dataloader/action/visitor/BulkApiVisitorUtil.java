@@ -64,7 +64,7 @@ class BulkApiVisitorUtil {
 
     private static final Logger logger = LogManager.getLogger(BulkApiVisitorUtil.class);
 
-    private final BulkClientConnection client;
+    private final BulkConnection client;
 
     private JobInfo jobInfo;
     private int recordsProcessed;
@@ -94,7 +94,7 @@ class BulkApiVisitorUtil {
         this.config = ctl.getConfig();
         this.controller = ctl;
         if (isBulkV2QueryJob() || isBulkV2LoadJob()) {
-            this.client = new BulkClientConnection(ctl.getBulkV2Client().getClient(), this.config);
+            this.client = ctl.getBulkV2Client().getClient();
         	try {
 				bulkV2LoadUploadFile = new File(getStagingFileInOutputStatusDir("bulkV2LoadUpload_", ".csv"));
 				bulkV2LoadUploadWriter = new FileOutputStream(this.bulkV2LoadUploadFile);
@@ -103,7 +103,7 @@ class BulkApiVisitorUtil {
 				this.config.setValue(Config.BULKV2_API_ENABLED, false);
 			}
         } else {
-            this.client = new BulkClientConnection(ctl.getBulkV1Client().getClient(), this.config);
+            this.client = ctl.getBulkV1Client().getClient();
         }
 
         try {
@@ -295,7 +295,7 @@ class BulkApiVisitorUtil {
         if (timeRemaining <= 0) {
             while (retryCount++ < maxAttemptsCount) {
                 try {
-                    this.jobInfo = this.client.getJobStatus(getJobId(), this.jobInfo.getOperation() == OperationEnum.query);
+                    this.jobInfo = this.client.getJobStatus(getJobId());
                     updateJobStatus();
                     return this.checkStatusInterval;
                 } catch (AsyncApiException ex) {
@@ -362,11 +362,11 @@ class BulkApiVisitorUtil {
     }
     
     void awaitCompletionAndCloseJob() throws AsyncApiException {
-        this.jobInfo = this.client.getJobStatus(getJobId(), this.jobInfo.getOperation() == OperationEnum.query);
+        this.jobInfo = this.client.getJobStatus(getJobId());
         updateJobStatus();
         awaitJobCompletion();
         if (!isBulkV2QueryJob() && !isBulkV2LoadJob()) {
-        	this.jobInfo = this.client.closeJob(getJobId(), this.jobInfo.getOperation() == OperationEnum.query);
+        	this.jobInfo = this.client.closeJob(getJobId());
         }
     }
 
