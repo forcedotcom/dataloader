@@ -47,7 +47,7 @@ import com.sforce.ws.ConnectorConfig;
  * @author Colin Jarvis
  * @since 17.0
  */
-public abstract class ClientBase<ClientType> {
+public abstract class ClientBase<ConnectionType> {
 
     private static Logger LOG = LogManager.getLogger(PartnerClient.class);
 
@@ -75,7 +75,7 @@ public abstract class ClientBase<ClientType> {
 
     protected abstract boolean connectPostLogin(ConnectorConfig connectorConfig);
 
-    public abstract ClientType getClient();
+    public abstract ConnectionType getConnection();
 
     protected ClientBase(Controller controller, Logger logger) {
         this.controller = controller;

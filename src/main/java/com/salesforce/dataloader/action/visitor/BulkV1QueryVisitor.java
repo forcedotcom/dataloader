@@ -86,13 +86,13 @@ public class BulkV1QueryVisitor extends AbstractBulkQueryVisitor {
     private void writeExtractionForBatch(BatchInfo batch) throws AsyncApiException, ExtractException, DataAccessObjectException {
         if (batch.getState() == BatchStateEnum.Failed)
             throw new ExtractException("Batch failed: " + batch.getStateMessage());
-        final QueryResultList results = getController().getBulkV1Client().getClient()
+        final QueryResultList results = getController().getBulkV1Client().getConnection()
                 .getQueryResultList(batch.getJobId(), batch.getId());
 
         for (final String resultId : results.getResult()) {
             if (getProgressMonitor().isCanceled()) return;
             try {
-                final InputStream serverResultStream = getController().getBulkV1Client().getClient()
+                final InputStream serverResultStream = getController().getBulkV1Client().getConnection()
                         .getQueryResultStream(batch.getJobId(), batch.getId(), resultId);
                 writeExtractionForServerStream(serverResultStream);
             }  catch (final IOException e) {

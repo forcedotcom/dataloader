@@ -203,7 +203,7 @@ public class NAProcessTest extends ProcessTestBase {
         task.setField("OwnerId", userId);
         task.setField("Subject", TASK_SUBJECT);
         task.setField(fieldToNullName, fieldToNullValue);
-        SaveResult[] result = getController().getPartnerClient().getClient().create(new SObject[] { task });
+        SaveResult[] result = getController().getPartnerClient().getConnection().create(new SObject[] { task });
         assertEquals(1, result.length);
         if (!result[0].getSuccess())
             Assert.fail("creation of task failed with error " + result[0].getErrors()[0].getMessage());

@@ -44,7 +44,7 @@ public class BulkV2Client extends ClientBase<BulkV2Connection> {
         super(controller, LOG);
     }
     
-    public BulkV2Connection getClient() {
+    public BulkV2Connection getConnection() {
         return client;
     }
     

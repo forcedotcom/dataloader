@@ -134,7 +134,7 @@ public class AuthenticationRunner {
                 messenger.accept(Labels.getString("SettingsPage.loginSuccessful"));
                 controller.saveConfig();
                 controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession();
-                PartnerConnection conn = controller.getPartnerClient().getClient();
+                PartnerConnection conn = controller.getPartnerClient().getConnection();
                 logger.debug("org_id = " + conn.getUserInfo().getOrganizationId());
                 logger.debug("user_id = " + conn.getUserInfo().getUserId());
                 if (logger.getLevel() == Level.DEBUG) { 

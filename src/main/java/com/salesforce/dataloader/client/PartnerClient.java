@@ -81,7 +81,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     private static Logger LOG = LogManager.getLogger(PartnerClient.class);
 
-    PartnerConnection client;
+    PartnerConnection connection;
     private ConnectorConfig connectorConfig = null;
 
     private static interface ClientOperation<RESULT, ARG> {
@@ -98,7 +98,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public SaveResult[] run(SObject[] sObjects) throws ConnectionException {
-            return getClient().create(sObjects);
+            return getConnection().create(sObjects);
         }
     };
 
@@ -110,7 +110,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public SaveResult[] run(SObject[] sObjects) throws ConnectionException {
-            return getClient().update(sObjects);
+            return getConnection().update(sObjects);
         }
     };
 
@@ -122,7 +122,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public UpsertResult[] run(SObject[] sObjects) throws ConnectionException {
-            return getClient().upsert(config.getString(Config.EXTERNAL_ID_FIELD), sObjects);
+            return getConnection().upsert(config.getString(Config.EXTERNAL_ID_FIELD), sObjects);
         }
     };
 
@@ -134,7 +134,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public DeleteResult[] run(String[] ids) throws ConnectionException {
-            return getClient().delete(ids);
+            return getConnection().delete(ids);
         }
     };
 
@@ -146,7 +146,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public UndeleteResult[] run(String[] ids) throws ConnectionException {
-            return getClient().undelete(ids);
+            return getConnection().undelete(ids);
         }
     };
     
@@ -158,7 +158,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public QueryResult run(String queryString) throws ConnectionException {
-            return getClient().query(queryString);
+            return getConnection().query(queryString);
         }
     };
 
@@ -170,7 +170,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public QueryResult run(String queryString) throws ConnectionException {
-            return getClient().queryAll(queryString);
+            return getConnection().queryAll(queryString);
         }
     };
 
@@ -182,7 +182,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public QueryResult run(String queryString) throws ConnectionException {
-            return getClient().queryMore(queryString);
+            return getConnection().queryMore(queryString);
         }
     };
 
@@ -207,7 +207,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public DescribeGlobalResult run(Object ignored) throws ConnectionException {
-            return getClient().describeGlobal();
+            return getConnection().describeGlobal();
         }
     };
 
@@ -219,7 +219,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public DescribeSObjectResult run(String entity) throws ConnectionException {
-            return getClient().describeSObject(entity);
+            return getConnection().describeSObject(entity);
         }
     };
 
@@ -252,10 +252,10 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     @Override
     protected boolean connectPostLogin(ConnectorConfig cc) {
-        if (getClient() == null)
+        if (getConnection() == null)
             throw new IllegalStateException("Client should be logged in already");
 
-        getClient().setCallOptions(ClientBase.getClientName(this.config), null);
+        getConnection().setCallOptions(ClientBase.getClientName(this.config), null);
         // query header
         int querySize;
         try {
@@ -264,7 +264,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             querySize = Config.DEFAULT_EXTRACT_REQUEST_SIZE;
         }
         if (querySize > 0) {
-            getClient().setQueryOptions(querySize);
+            getConnection().setQueryOptions(querySize);
         }
 
         // assignment rule for update
@@ -273,16 +273,16 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             if (rule.length() > 15) {
                 rule = rule.substring(0, 15);
             }
-            getClient().setAssignmentRuleHeader(rule, false);
+            getConnection().setAssignmentRuleHeader(rule, false);
         }
 
         // field truncation
-        getClient().setAllowFieldTruncationHeader(config.getBoolean(Config.TRUNCATE_FIELDS));
+        getConnection().setAllowFieldTruncationHeader(config.getBoolean(Config.TRUNCATE_FIELDS));
 
         // TODO: make this configurable
-        getClient().setDisableFeedTrackingHeader(true);
+        getConnection().setDisableFeedTrackingHeader(true);
 
-        getClient().setDuplicateRuleHeader(
+        getConnection().setDuplicateRuleHeader(
             config.getBoolean(Config.DUPLICATE_RULE_ALLOW_SAVE),
             config.getBoolean(Config.DUPLICATE_RULE_INCLUDE_RECORD_DETAILS),
             config.getBoolean(Config.DUPLICATE_RULE_RUN_AS_CURRENT_USER)
@@ -521,8 +521,8 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     @Override
-    public PartnerConnection getClient() {
-        return this.client;
+    public PartnerConnection getConnection() {
+        return this.connection;
     }
 
     public Map<String, DescribeGlobalSObjectResult> getDescribeGlobalResults() {
@@ -567,7 +567,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
     
     public LimitInfo getAPILimitInfo() {
-        LimitInfoHeader_element limitInfoElement = getClient().getLimitInfoHeader();
+        LimitInfoHeader_element limitInfoElement = getConnection().getLimitInfoHeader();
         for (LimitInfo info : limitInfoElement.getLimitInfo()) {
             if ("API REQUESTS".equalsIgnoreCase(info.getType())) {
                 return info;
@@ -696,7 +696,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private void loginSuccess(PartnerConnection conn, String serv, GetUserInfoResult userInfo) {
-        this.client = conn;
+        this.connection = conn;
         setSession(conn.getSessionHeader().getSessionId(), serv, userInfo);
     }
 
@@ -719,7 +719,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     public boolean logout() {
         try {
-            PartnerConnection pc = getClient();
+            PartnerConnection pc = getConnection();
             if (pc != null) pc.logout();
             
         } catch (ConnectionException e) {
@@ -732,7 +732,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     public void disconnect() {
         clearSession();
-        this.client = null;
+        this.connection = null;
     }
 
     /**

@@ -66,7 +66,7 @@ public class BulkV2QueryVisitor extends AbstractBulkQueryVisitor {
 
     @Override
     protected void writeExtraction() throws AsyncApiException, ExtractException, DataAccessObjectException {
-        BulkV2Connection v2Conn = getController().getBulkV2Client().getClient();
+        BulkV2Connection v2Conn = getController().getBulkV2Client().getConnection();
         try {
             InputStream serverResultStream = v2Conn.getQueryResultStream(this.jobId, "");
             writeExtractionForServerStream(serverResultStream);

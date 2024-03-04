@@ -71,10 +71,10 @@ public class PartnerClientTest extends ProcessTestBase {
         assertFalse(getController().getConfig().getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN));
         boolean connect = client.connect();
         assertTrue(connect);
-        assertNotNull(client.getClient());
+        assertNotNull(client.getConnection());
 
         client.connect(client.getSession());
-        assertTrue(client.getClient().getDisableFeedTrackingHeader().isDisableFeedTracking());
+        assertTrue(client.getConnection().getDisableFeedTrackingHeader().isDisableFeedTracking());
     }
 
     @Test
