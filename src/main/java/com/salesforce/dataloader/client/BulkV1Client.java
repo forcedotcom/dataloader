@@ -44,7 +44,7 @@ import com.sforce.ws.ConnectorConfig;
  */
 public class BulkV1Client extends ClientBase<BulkV1Connection> {
     private static Logger LOG = LogManager.getLogger(BulkV1Client.class);
-    private BulkV1Connection client;
+    private BulkV1Connection connection;
     private ConnectorConfig connectorConfig = null;
 
     public BulkV1Client(Controller controller) {
@@ -52,15 +52,15 @@ public class BulkV1Client extends ClientBase<BulkV1Connection> {
     }
 
     @Override
-    public BulkV1Connection getClient() {
-        return client;
+    public BulkV1Connection getConnection() {
+        return connection;
     }
 
     @Override
     protected boolean connectPostLogin(ConnectorConfig cc) {
         try {
             // Set up a connection object with the given config
-            this.client = new BulkV1Connection(cc);
+            this.connection = new BulkV1Connection(cc);
         } catch (AsyncApiException e) {
             logger.error(Messages.getMessage(getClass(), "loginError", cc.getAuthEndpoint(), e.getExceptionMessage()),
                     e);

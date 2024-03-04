@@ -286,7 +286,7 @@ public class Controller {
     public void updateLoaderWindowTitleAndCacheUserInfoForTheSession() {
         if (isLoggedIn()) {
             try {
-                ConnectorConfig sessionConfig = getPartnerClient().getClient().getConfig();
+                ConnectorConfig sessionConfig = getPartnerClient().getConnection().getConfig();
                 URL sessionURL = new URL(sessionConfig.getServiceEndpoint());
                 String sessionHost = sessionURL.getHost();
                 this.loaderWindow.updateTitle(sessionHost);

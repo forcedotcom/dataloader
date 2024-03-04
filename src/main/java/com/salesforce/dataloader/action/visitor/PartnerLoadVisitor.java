@@ -121,7 +121,7 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
             // clear ownerChangeOptions from the existing connection otherwise.
             ownerChangeOptionArray = new OwnerChangeOption[] {};
         }
-        this.controller.getPartnerClient().getClient().setOwnerChangeOptions(ownerChangeOptionArray);
+        this.controller.getPartnerClient().getConnection().setOwnerChangeOptions(ownerChangeOptionArray);
     }
 
     private void writeOutputToWriter(Object[] results)
