@@ -36,7 +36,7 @@ package com.salesforce.dataloader.client;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dyna.IdLookupHandleForRelationship;
+import com.salesforce.dataloader.dyna.ParentIdLookupFieldString;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
@@ -916,14 +916,14 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private Field lookupField(String sObjectFieldName) {
-        boolean isRelationshipField = IdLookupHandleForRelationship.isRelationshipFieldMapping(sObjectFieldName);
+        boolean isRelationshipField = ParentIdLookupFieldString.isRelationshipFieldMapping(sObjectFieldName);
         // look for field on target object
         for (Field f : getFieldTypes().getFields()) {
             if (sObjectFieldName.equalsIgnoreCase(f.getName()) || sObjectFieldName.equalsIgnoreCase(f.getLabel())) {
                 return f;
             }
             if (isRelationshipField) {
-                IdLookupHandleForRelationship relField = new IdLookupHandleForRelationship(sObjectFieldName, true);
+                ParentIdLookupFieldString relField = new ParentIdLookupFieldString(sObjectFieldName, true);
                 if (relField == null
                         || !relField.getParent().getRelationshipName().equalsIgnoreCase(f.getRelationshipName())) {
                     continue;

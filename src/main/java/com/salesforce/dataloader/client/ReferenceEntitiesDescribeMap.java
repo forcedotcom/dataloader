@@ -30,8 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.salesforce.dataloader.dyna.IdLookupHandleForRelationship;
-import com.salesforce.dataloader.dyna.ParentObjectHandleForRelationship;
+import com.salesforce.dataloader.dyna.ParentIdLookupFieldString;
+import com.salesforce.dataloader.dyna.ParentSObjectString;
 import com.sforce.soap.partner.Field;
 
 /**
@@ -40,7 +40,7 @@ import com.sforce.soap.partner.Field;
 public class ReferenceEntitiesDescribeMap {
 
     private Map<String, DescribeRefObject> referenceEntitiesDescribeMap = new HashMap<String, DescribeRefObject>();
-    private Map<String, ParentObjectHandleForRelationship> relationshipFieldMap = new HashMap<String, ParentObjectHandleForRelationship>();
+    private Map<String, ParentSObjectString> relationshipFieldMap = new HashMap<String, ParentSObjectString>();
     /**
      * 
      */
@@ -49,7 +49,7 @@ public class ReferenceEntitiesDescribeMap {
     }
     
     public void put(String relationshipFieldName, DescribeRefObject parent, int numParentTypes) {
-        ParentObjectHandleForRelationship objField = new ParentObjectHandleForRelationship(parent.getParentObjectName(), relationshipFieldName, numParentTypes);
+        ParentSObjectString objField = new ParentSObjectString(parent.getParentObjectName(), relationshipFieldName, numParentTypes);
         referenceEntitiesDescribeMap.put(objField.toString(), parent);
         relationshipFieldMap.put(objField.toString(), objField);
     }
@@ -61,7 +61,7 @@ public class ReferenceEntitiesDescribeMap {
     // <name of parent object>:<rel name on child object>.<idlookup field name on parent>
 
     public DescribeRefObject getParentSObject(String lookupFieldName) {
-        return getParentSObject(new IdLookupHandleForRelationship(lookupFieldName, false));
+        return getParentSObject(new ParentIdLookupFieldString(lookupFieldName, false));
     }
     
     public void clear() {
@@ -76,8 +76,8 @@ public class ReferenceEntitiesDescribeMap {
         return this.referenceEntitiesDescribeMap.keySet();
     }
     
-    public ParentObjectHandleForRelationship get(String relationshipFieldName) {
-        ParentObjectHandleForRelationship fieldFromInput = new ParentObjectHandleForRelationship(relationshipFieldName, null);
+    public ParentSObjectString get(String relationshipFieldName) {
+        ParentSObjectString fieldFromInput = new ParentSObjectString(relationshipFieldName, null);
         return this.relationshipFieldMap.get(fieldFromInput.toString());
     }
     // fieldName could be in the old format that assumes single parent: 
@@ -86,7 +86,7 @@ public class ReferenceEntitiesDescribeMap {
     // fieldName could also be in the new format
     // <name of parent object>:<rel name on child object>.<idlookup field name on parent>
     public Field getParentField(String fieldName) {
-        IdLookupHandleForRelationship fieldName4LR = new IdLookupHandleForRelationship(fieldName, true);
+        ParentIdLookupFieldString fieldName4LR = new ParentIdLookupFieldString(fieldName, true);
         if (fieldName4LR == null 
                 || fieldName4LR.getParentFieldName() == null 
                 || fieldName4LR.getParent().getRelationshipName() == null) {
@@ -105,7 +105,7 @@ public class ReferenceEntitiesDescribeMap {
         }
     }
     
-    private DescribeRefObject getParentSObject(IdLookupHandleForRelationship fieldName4LR) {
+    private DescribeRefObject getParentSObject(ParentIdLookupFieldString fieldName4LR) {
         if (fieldName4LR == null || fieldName4LR.getParent().getRelationshipName() == null) {
             return null;
         }
