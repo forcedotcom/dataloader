@@ -35,15 +35,15 @@ import org.apache.logging.log4j.Logger;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class ParentObjectHandleForRelationship {
+public class ParentSObjectString {
     private String relationshipName;
     private String parentObjectName = null;
     private Integer numParentTypes = null;
-    private static final Logger logger = LogManager.getLogger(ParentObjectHandleForRelationship.class);
+    private static final Logger logger = LogManager.getLogger(ParentSObjectString.class);
 
     public static final String NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR = ":";
   
-    public ParentObjectHandleForRelationship(String parentObjectName, String relationshipName, Integer numParentTypes) {
+    public ParentSObjectString(String parentObjectName, String relationshipName, Integer numParentTypes) {
         initialize(parentObjectName, relationshipName, numParentTypes);
     }
     
@@ -56,14 +56,14 @@ public class ParentObjectHandleForRelationship {
     //   interpretation 1: <child relationship field name>:<parent sobject name>
     //      - this is the new format for keys of the hashmap referenceEntitiesDescribeMap
 
-    public ParentObjectHandleForRelationship(String parentAndRelationshipName, Integer numParentTypes) {
+    public ParentSObjectString(String parentAndRelationshipName, Integer numParentTypes) {
         String relationshipName = null;
         String parentObjectName = null;
-        String[] fieldNameParts = parentAndRelationshipName.split(IdLookupHandleForRelationship.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR);
+        String[] fieldNameParts = parentAndRelationshipName.split(ParentIdLookupFieldString.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR);
         if (fieldNameParts.length == 2) { // discard the part containing parent's idLookup field name
             parentAndRelationshipName = fieldNameParts[0];
         }
-        fieldNameParts = parentAndRelationshipName.split(IdLookupHandleForRelationship.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR);
+        fieldNameParts = parentAndRelationshipName.split(ParentIdLookupFieldString.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR);
         if (fieldNameParts.length == 2) { // format 2, interpretation 1
             relationshipName = fieldNameParts[0];
             parentObjectName = fieldNameParts[1];
@@ -95,7 +95,7 @@ public class ParentObjectHandleForRelationship {
             return relationshipName;
         }
         return relationshipName 
-                + ParentObjectHandleForRelationship.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR
+                + ParentSObjectString.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR
                 + parentObjectName;
     }
 }

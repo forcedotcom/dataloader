@@ -59,8 +59,8 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
-import com.salesforce.dataloader.dyna.IdLookupHandleForRelationship;
-import com.salesforce.dataloader.dyna.ParentObjectHandleForRelationship;
+import com.salesforce.dataloader.dyna.ParentIdLookupFieldString;
+import com.salesforce.dataloader.dyna.ParentSObjectString;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.LoadException;
@@ -286,13 +286,13 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         //     Format for Polymorphic relations:  ObjectType:RelationshipName.IndexedFieldName
         //     Format for single parent type relations: RelationshipName.IndexedFieldName
         String sfdcColumnForBulk = sfdcColumn;
-        if (IdLookupHandleForRelationship.isRelationshipFieldMapping(sfdcColumn)) {
-            ParentObjectHandleForRelationship parentRelationship = getController().getPartnerClient().getReferenceDescribes().get(sfdcColumn);
+        if (ParentIdLookupFieldString.isRelationshipFieldMapping(sfdcColumn)) {
+            ParentSObjectString parentRelationship = getController().getPartnerClient().getReferenceDescribes().get(sfdcColumn);
             int numParentTypes = 1;
             if (parentRelationship != null && parentRelationship.getNumParentTypes() != null) {
                 numParentTypes = parentRelationship.getNumParentTypes();
             }
-            IdLookupHandleForRelationship relField = new IdLookupHandleForRelationship(sfdcColumn, true);
+            ParentIdLookupFieldString relField = new ParentIdLookupFieldString(sfdcColumn, true);
             if (relField.getParent().getParentObjectName() == null || numParentTypes == 1) {
                 if (relField.getParentFieldName() == null) {
                     sfdcColumnForBulk = relField.getParent().getRelationshipName();
