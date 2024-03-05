@@ -42,6 +42,7 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.LoadException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.exception.RelationshipFormatException;
 import com.sforce.soap.partner.*;
 import com.sforce.soap.partner.sobject.SObject;
 
@@ -88,20 +89,31 @@ public class SforceDynaBean {
             if (fieldType == FieldType.reference &&
                     relationshipName != null && relationshipName.length() > 0) {
                 for (String parentName : field.getReferenceTo()) {
-                    ParentSObjectString parentHandleForRelationship = new ParentSObjectString(parentName, relationshipName, null);
+                    ParentSObjectFormatter parentHandleForRelationship;
+                    try {
+                        parentHandleForRelationship = new ParentSObjectFormatter(parentName, relationshipName, null);
+                    } catch (RelationshipFormatException e) {
+                        logger.error(e.getMessage());
+                        continue;
+                    }
                     DescribeRefObject parent = controller.getReferenceDescribes().getParentSObject(parentHandleForRelationship.toString());
                     if(parent != null) {
                         for(String refFieldName : parent.getParentObjectFieldMap().keySet()) {
                             // property name contains information for mapping
                             // add old format to dyna props
-                            dynaProps.add(new DynaProperty(
-                                            ParentIdLookupFieldString.formatAsString(relationshipName, refFieldName),
-                                            SObjectReference.class));
-                            // add new format to dyna props
-                            dynaProps.add(new DynaProperty(
-                                    ParentIdLookupFieldString.formatAsString(parent.getParentObjectName(), relationshipName, refFieldName),
+                            try {
+                                dynaProps.add(new DynaProperty(
+                                                new ParentIdLookupFieldFormatter(null, relationshipName, refFieldName).toString(),
+                                                SObjectReference.class));
+                                dynaProps.add(new DynaProperty(
+                                        new ParentIdLookupFieldFormatter(parent.getParentObjectName(), relationshipName, refFieldName).toString(),
                                         SObjectReference.class));
-                        }
+                             } catch (RelationshipFormatException e) {
+                                // TODO Auto-generated catch block
+                               logger.error(e.getMessage());
+                            }
+                            // add new format to dyna props
+                       }
                     }
                 }
             }

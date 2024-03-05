@@ -36,10 +36,11 @@ package com.salesforce.dataloader.client;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dyna.ParentIdLookupFieldString;
+import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
+import com.salesforce.dataloader.exception.RelationshipFormatException;
 import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.DeleteResult;
 import com.sforce.soap.partner.DescribeGlobalResult;
@@ -916,16 +917,19 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private Field lookupField(String sObjectFieldName) {
-        boolean isRelationshipField = ParentIdLookupFieldString.isRelationshipFieldMapping(sObjectFieldName);
+        ParentIdLookupFieldFormatter parentLookupFieldFormatter = null;
+        try {
+            parentLookupFieldFormatter = new ParentIdLookupFieldFormatter(sObjectFieldName);
+        } catch (RelationshipFormatException ex) {
+            // ignore
+        }
         // look for field on target object
         for (Field f : getFieldTypes().getFields()) {
             if (sObjectFieldName.equalsIgnoreCase(f.getName()) || sObjectFieldName.equalsIgnoreCase(f.getLabel())) {
                 return f;
             }
-            if (isRelationshipField) {
-                ParentIdLookupFieldString relField = new ParentIdLookupFieldString(sObjectFieldName, true);
-                if (relField == null
-                        || !relField.getParent().getRelationshipName().equalsIgnoreCase(f.getRelationshipName())) {
+            if (parentLookupFieldFormatter != null) {
+                if (!parentLookupFieldFormatter.getParent().getRelationshipName().equalsIgnoreCase(f.getRelationshipName())) {
                     continue;
                 }
                 Field parentField = this.referenceEntitiesDescribesMap.getParentField(sObjectFieldName);
@@ -934,7 +938,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 }
                 // need to add the relationship mapping to referenceEntitiesDescribesMap
                 try {
-                    processParentObjectForLookupReferences(relField.getParent().getParentObjectName(), f, 0, 1);
+                    processParentObjectForLookupReferences(parentLookupFieldFormatter.getParent().getParentObjectName(), f, 0, 1);
                 } catch (ConnectionException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();

@@ -26,10 +26,14 @@
 package com.salesforce.dataloader.dyna;
 
 import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.DescribeRefObject;
+import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.exception.RelationshipFormatException;
 import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.sobject.SObject;
 
@@ -42,6 +46,7 @@ import com.sforce.soap.partner.sobject.SObject;
 public class SObjectReference {
 
     private final Object referenceExtIdValue;
+    private static final Logger logger = LogManager.getLogger(SObjectReference.class);
 
     /**
      * @param refValue
@@ -59,7 +64,13 @@ public class SObjectReference {
      */
     public void addReferenceToSObject(Controller controller, SObject sObj, String refFieldName) throws ParameterLoadException {
         // break the name into relationship and field name components
-        ParentIdLookupFieldString refField = new ParentIdLookupFieldString(refFieldName, true);
+        ParentIdLookupFieldFormatter refField;
+        try {
+            refField = new ParentIdLookupFieldFormatter(refFieldName);
+        } catch (RelationshipFormatException e) {
+            logger.error(e.getMessage());
+            return;
+        }
         String relationshipName = refField.getParent().getRelationshipName();
         String parentFieldName = refField.getParentFieldName();
 
@@ -99,7 +110,13 @@ public class SObjectReference {
     }
 
     public static String getRelationshipField(Controller controller, String refFieldName) {
-        final String relName = new ParentIdLookupFieldString(refFieldName, true).getParent().getRelationshipName();
+        String relName;
+        try {
+            relName = new ParentIdLookupFieldFormatter(refFieldName).getParent().getRelationshipName();
+        } catch (RelationshipFormatException e) {
+            logger.error(e.getMessage());
+            return null;
+        }
         controller.getReferenceDescribes().getParentSObject(relName).getParentObjectFieldMap();
         for (Field f : controller.getFieldTypes().getFields()) {
             if (f != null) {

@@ -149,17 +149,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import javax.xml.namespace.QName;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.client.HttpTransportInterface;
-import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
 import com.sforce.async.AsyncApiException;
@@ -172,7 +168,6 @@ import com.sforce.async.OperationEnum;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.bind.CalendarCodec;
-import com.sforce.ws.bind.TypeMapper;
 import com.sforce.ws.parser.PullParserException;
 import com.sforce.ws.parser.XmlInputStream;
 
@@ -191,30 +186,17 @@ public class BulkV2Connection extends BulkConnection {
     private static final String ACCEPT_CONTENT_TYPES_HEADER = "ACCEPT";
     private static final String SFORCE_CALL_OPTIONS_HEADER = "Sforce-Call-Options";
     private static final String AUTH_HEADER_VALUE_PREFIX = "Bearer ";
-    public static final String NAMESPACE = "http://www.force.com/2009/06/asyncapi/dataload";
-    public static final String SESSION_ID = "X-SFDC-Session";
-    public static final String XML_CONTENT_TYPE = "application/xml";
-    public static final String CSV_CONTENT_TYPE = "text/csv";
-    public static final String JSON_CONTENT_TYPE = "application/json";
-    public static final String ZIP_XML_CONTENT_TYPE = "zip/xml";
-    public static final String ZIP_CSV_CONTENT_TYPE = "zip/csv";
-    public static final String ZIP_JSON_CONTENT_TYPE = "zip/json";
-    public static final String UTF_8 = StandardCharsets.UTF_8.name();
-    public static final String INGEST_RESULTS_SUCCESSFUL = "successfulResults";
-    public static final String INGEST_RESULTS_UNSUCCESSFUL = "failedResults";
-    public static final String INGEST_RECORDS_UNPROCESSED = "unprocessedrecords";
-    public static final QName JOB_QNAME = new QName(NAMESPACE, "jobInfo");
+    private static final String UTF_8 = StandardCharsets.UTF_8.name();
+    private static final String INGEST_RESULTS_SUCCESSFUL = "successfulResults";
+    private static final String INGEST_RESULTS_UNSUCCESSFUL = "failedResults";
+    private static final String INGEST_RECORDS_UNPROCESSED = "unprocessedrecords";
 
-    private String authHeaderValue = "";
     private String queryLocator = "";
     private int numberOfRecordsInQueryResult = 0;
-    private ConnectorConfig connectorConfig;
     private HashMap<String, String> headers = new HashMap<String, String>();
     private Controller controller = null;
     
     private static Logger logger = LogManager.getLogger(BulkV2Connection.class);
-
-    public static final TypeMapper typeMapper = new TypeMapper(null, null, false);
 
     /**********************************
      * 
@@ -223,8 +205,6 @@ public class BulkV2Connection extends BulkConnection {
      **********************************/
     public BulkV2Connection(ConnectorConfig connectorConfig, Controller controller) throws AsyncApiException {
         super(connectorConfig);
-        this.connectorConfig = connectorConfig;
-        this.authHeaderValue = AUTH_HEADER_VALUE_PREFIX + getConfig().getSessionId();
         this.controller = controller;
     }
     
@@ -528,11 +508,12 @@ public class BulkV2Connection extends BulkConnection {
 	
 	private HashMap<String, String> getHeaders(String requestContentType, String acceptContentType) {
 	    HashMap<String, String> newMap = new HashMap<String, String>();
+        String authHeaderValue = AUTH_HEADER_VALUE_PREFIX + getConfig().getSessionId();
 	    newMap.put(REQUEST_CONTENT_TYPE_HEADER, requestContentType);
 	    newMap.put(ACCEPT_CONTENT_TYPES_HEADER, acceptContentType);
-	    newMap.put(AUTH_HEADER, this.authHeaderValue);
-	    newMap.put(SFORCE_CALL_OPTIONS_HEADER, this.connectorConfig.getRequestHeader("Sforce-Call-Options"));
-	    logger.debug("Sforce-Call-Options : " + this.connectorConfig.getRequestHeader("Sforce-Call-Options"));
+	    newMap.put(AUTH_HEADER, authHeaderValue);
+	    newMap.put(SFORCE_CALL_OPTIONS_HEADER, getConfig().getRequestHeader("Sforce-Call-Options"));
+	    logger.debug("Sforce-Call-Options : " + getConfig().getRequestHeader("Sforce-Call-Options"));
 	    for (Map.Entry<String, String> entry : headers.entrySet()) {
             newMap.put(entry.getKey(), entry.getValue());
         }

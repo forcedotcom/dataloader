@@ -81,8 +81,9 @@ public class SObjectReferenceConverterTest extends ConfigTestBase {
 
         try {
             // legacy formatting
-            ref.addReferenceToSObject(getController(), sObj, ParentIdLookupFieldString.formatAsString("Parent",
-                    ConfigTestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD));
+            ref.addReferenceToSObject(getController(), sObj, 
+                    new ParentIdLookupFieldFormatter(null, "Parent",
+                            ConfigTestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD).toString());
 
             SObject child = (SObject)sObj.getChild(relationshipName);
             boolean succeeded = child != null && child.getField(fkFieldName) != null && child.getField(fkFieldName)
@@ -92,8 +93,8 @@ public class SObjectReferenceConverterTest extends ConfigTestBase {
             }
             
             // new formatting
-            ref.addReferenceToSObject(getController(), sObj, ParentIdLookupFieldString.formatAsString("Account", "Parent",
-                    ConfigTestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD));
+            ref.addReferenceToSObject(getController(), sObj, new ParentIdLookupFieldFormatter("Account", "Parent",
+                    ConfigTestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD).toString());
 
             child = (SObject)sObj.getChild(relationshipName);
             succeeded = child != null && child.getField(fkFieldName) != null && child.getField(fkFieldName)
