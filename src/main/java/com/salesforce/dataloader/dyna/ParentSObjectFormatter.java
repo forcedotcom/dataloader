@@ -28,6 +28,8 @@ package com.salesforce.dataloader.dyna;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.salesforce.dataloader.exception.RelationshipFormatException;
+
 /**
  * Container for an object field of format
  *     objectName:fieldName
@@ -35,15 +37,15 @@ import org.apache.logging.log4j.Logger;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class ParentSObjectString {
+public class ParentSObjectFormatter {
     private String relationshipName;
     private String parentObjectName = null;
     private Integer numParentTypes = null;
-    private static final Logger logger = LogManager.getLogger(ParentSObjectString.class);
+    private static final Logger logger = LogManager.getLogger(ParentSObjectFormatter.class);
 
     public static final String NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR = ":";
   
-    public ParentSObjectString(String parentObjectName, String relationshipName, Integer numParentTypes) {
+    public ParentSObjectFormatter(String parentObjectName, String relationshipName, Integer numParentTypes) throws RelationshipFormatException{
         initialize(parentObjectName, relationshipName, numParentTypes);
     }
     
@@ -56,24 +58,30 @@ public class ParentSObjectString {
     //   interpretation 1: <child relationship field name>:<parent sobject name>
     //      - this is the new format for keys of the hashmap referenceEntitiesDescribeMap
 
-    public ParentSObjectString(String parentAndRelationshipName, Integer numParentTypes) {
+    public ParentSObjectFormatter(String formattedName, Integer numParentTypes) throws RelationshipFormatException {
         String relationshipName = null;
         String parentObjectName = null;
-        String[] fieldNameParts = parentAndRelationshipName.split(ParentIdLookupFieldString.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR);
-        if (fieldNameParts.length == 2) { // discard the part containing parent's idLookup field name
-            parentAndRelationshipName = fieldNameParts[0];
+        if (formattedName == null) {
+            throw new RelationshipFormatException("relationship parent name not specified");
         }
-        fieldNameParts = parentAndRelationshipName.split(ParentIdLookupFieldString.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR);
+        String[] fieldNameParts = formattedName.split(ParentIdLookupFieldFormatter.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR);
+        if (fieldNameParts.length == 2) { // discard the part containing parent's idLookup field name
+            formattedName = fieldNameParts[0];
+        }
+        fieldNameParts = formattedName.split(ParentSObjectFormatter.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR);
         if (fieldNameParts.length == 2) { // format 2, interpretation 1
             relationshipName = fieldNameParts[0];
             parentObjectName = fieldNameParts[1];
         } else { // format 1
-            relationshipName = parentAndRelationshipName;
+            relationshipName = formattedName;
         }
         initialize(parentObjectName, relationshipName, null);
     }
 
-    private void initialize(String parentObjectName, String relationshipName, Integer numParentTypes) {
+    private void initialize(String parentObjectName, String relationshipName, Integer numParentTypes) throws RelationshipFormatException{
+        if ((relationshipName == null || relationshipName.isBlank())) {
+            throw new RelationshipFormatException("Relationship name not specified");
+        }
         this.parentObjectName = parentObjectName;
         this.relationshipName = relationshipName;
         this.numParentTypes = numParentTypes;
@@ -95,7 +103,18 @@ public class ParentSObjectString {
             return relationshipName;
         }
         return relationshipName 
-                + ParentSObjectString.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR
+                + ParentSObjectFormatter.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR
                 + parentObjectName;
+    }
+    
+    public boolean matches(String nameToCompareWith) {
+        if (relationshipName == null) {
+            return false;
+        }
+        if (parentObjectName == null) {
+            return nameToCompareWith.toLowerCase().startsWith(relationshipName.toLowerCase());
+        } else {
+            return nameToCompareWith.toLowerCase().equalsIgnoreCase(relationshipName + NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR + parentObjectName);
+        }
     }
 }

@@ -59,12 +59,13 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
-import com.salesforce.dataloader.dyna.ParentIdLookupFieldString;
-import com.salesforce.dataloader.dyna.ParentSObjectString;
+import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
+import com.salesforce.dataloader.dyna.ParentSObjectFormatter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.LoadException;
 import com.salesforce.dataloader.exception.OperationException;
+import com.salesforce.dataloader.exception.RelationshipFormatException;
 import com.salesforce.dataloader.model.NACalendarValue;
 import com.salesforce.dataloader.model.NADateOnlyCalendarValue;
 import com.salesforce.dataloader.model.NATextValue;
@@ -286,13 +287,13 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         //     Format for Polymorphic relations:  ObjectType:RelationshipName.IndexedFieldName
         //     Format for single parent type relations: RelationshipName.IndexedFieldName
         String sfdcColumnForBulk = sfdcColumn;
-        if (ParentIdLookupFieldString.isRelationshipFieldMapping(sfdcColumn)) {
-            ParentSObjectString parentRelationship = getController().getPartnerClient().getReferenceDescribes().get(sfdcColumn);
+        try {
+            ParentIdLookupFieldFormatter relField = new ParentIdLookupFieldFormatter(sfdcColumn);
+            ParentSObjectFormatter parentRelationship = getController().getPartnerClient().getReferenceDescribes().get(sfdcColumn);
             int numParentTypes = 1;
             if (parentRelationship != null && parentRelationship.getNumParentTypes() != null) {
                 numParentTypes = parentRelationship.getNumParentTypes();
             }
-            ParentIdLookupFieldString relField = new ParentIdLookupFieldString(sfdcColumn, true);
             if (relField.getParent().getParentObjectName() == null || numParentTypes == 1) {
                 if (relField.getParentFieldName() == null) {
                     sfdcColumnForBulk = relField.getParent().getRelationshipName();
@@ -305,6 +306,9 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                         + ":" + relField.getParent().getRelationshipName() 
                         + "." + relField.getParentFieldName();
             }
+
+        } catch (RelationshipFormatException ex) {
+            // ignore
         }
         serverRequestOutput.print(sfdcColumnForBulk);
         cols.add(sfdcColumn);

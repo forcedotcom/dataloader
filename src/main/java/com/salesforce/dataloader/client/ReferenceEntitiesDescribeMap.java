@@ -30,8 +30,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.salesforce.dataloader.dyna.ParentIdLookupFieldString;
-import com.salesforce.dataloader.dyna.ParentSObjectString;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
+import com.salesforce.dataloader.dyna.ParentSObjectFormatter;
+import com.salesforce.dataloader.exception.RelationshipFormatException;
 import com.sforce.soap.partner.Field;
 
 /**
@@ -40,7 +44,9 @@ import com.sforce.soap.partner.Field;
 public class ReferenceEntitiesDescribeMap {
 
     private Map<String, DescribeRefObject> referenceEntitiesDescribeMap = new HashMap<String, DescribeRefObject>();
-    private Map<String, ParentSObjectString> relationshipFieldMap = new HashMap<String, ParentSObjectString>();
+    private Map<String, ParentSObjectFormatter> relationshipFieldMap = new HashMap<String, ParentSObjectFormatter>();
+    private static final Logger logger = LogManager.getLogger(ReferenceEntitiesDescribeMap.class);
+
     /**
      * 
      */
@@ -49,21 +55,18 @@ public class ReferenceEntitiesDescribeMap {
     }
     
     public void put(String relationshipFieldName, DescribeRefObject parent, int numParentTypes) {
-        ParentSObjectString objField = new ParentSObjectString(parent.getParentObjectName(), relationshipFieldName, numParentTypes);
+        ParentSObjectFormatter objField = null;
+        try {
+            objField = new ParentSObjectFormatter(parent.getParentObjectName(), relationshipFieldName, numParentTypes);
+        } catch (RelationshipFormatException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return;
+        }
         referenceEntitiesDescribeMap.put(objField.toString(), parent);
         relationshipFieldMap.put(objField.toString(), objField);
     }
-    
-    // fieldName could be in the old format that assumes single parent: 
-    // <relationship name attr of the field on child sobject>:<idlookup field name on parent sobject>
-    //
-    // fieldName could also be in the new format
-    // <name of parent object>:<rel name on child object>.<idlookup field name on parent>
-
-    public DescribeRefObject getParentSObject(String lookupFieldName) {
-        return getParentSObject(new ParentIdLookupFieldString(lookupFieldName, false));
-    }
-    
+       
     public void clear() {
         this.referenceEntitiesDescribeMap.clear();
     }
@@ -76,8 +79,14 @@ public class ReferenceEntitiesDescribeMap {
         return this.referenceEntitiesDescribeMap.keySet();
     }
     
-    public ParentSObjectString get(String relationshipFieldName) {
-        ParentSObjectString fieldFromInput = new ParentSObjectString(relationshipFieldName, null);
+    public ParentSObjectFormatter get(String relationshipFieldName) {
+        ParentSObjectFormatter fieldFromInput = null;
+        try {
+            fieldFromInput = new ParentSObjectFormatter(relationshipFieldName, null);
+        } catch (RelationshipFormatException e) {
+            logger.error(e.getMessage());
+            return null;
+        }
         return this.relationshipFieldMap.get(fieldFromInput.toString());
     }
     // fieldName could be in the old format that assumes single parent: 
@@ -86,18 +95,23 @@ public class ReferenceEntitiesDescribeMap {
     // fieldName could also be in the new format
     // <name of parent object>:<rel name on child object>.<idlookup field name on parent>
     public Field getParentField(String fieldName) {
-        ParentIdLookupFieldString fieldName4LR = new ParentIdLookupFieldString(fieldName, true);
-        if (fieldName4LR == null 
-                || fieldName4LR.getParentFieldName() == null 
-                || fieldName4LR.getParent().getRelationshipName() == null) {
+        ParentIdLookupFieldFormatter lookupFieldStr = null;
+        try {
+            lookupFieldStr = new ParentIdLookupFieldFormatter(fieldName);
+        } catch (RelationshipFormatException e) {
+            logger.error(e.getMessage());
+        }
+        if (lookupFieldStr == null 
+                || lookupFieldStr.getParentFieldName() == null 
+                || lookupFieldStr.getParent().getRelationshipName() == null) {
             return null;
         } else {
-            DescribeRefObject parent = getParentSObject(fieldName4LR);
+            DescribeRefObject parent = getParentSObject(lookupFieldStr.getParent());
             if (parent == null) {
                 return null;
             }
             for (Map.Entry<String, Field> refEntry : parent.getParentObjectFieldMap().entrySet()) {
-                if (fieldName4LR.getParentFieldName().equalsIgnoreCase(refEntry.getKey())) {
+                if (lookupFieldStr.getParentFieldName().equalsIgnoreCase(refEntry.getKey())) {
                     return refEntry.getValue();
                 }
             }
@@ -105,13 +119,27 @@ public class ReferenceEntitiesDescribeMap {
         }
     }
     
-    private DescribeRefObject getParentSObject(ParentIdLookupFieldString fieldName4LR) {
-        if (fieldName4LR == null || fieldName4LR.getParent().getRelationshipName() == null) {
+    // fieldName could be in the old format that assumes single parent: 
+    // <relationship name attr of the field on child sobject>:<idlookup field name on parent sobject>
+    //
+    // fieldName could also be in the new format
+    // <name of parent object>:<rel name on child object>.<idlookup field name on parent>
+
+    public DescribeRefObject getParentSObject(String lookupFieldName) {
+        try {
+            return getParentSObject(new ParentSObjectFormatter(lookupFieldName, null));
+        } catch (RelationshipFormatException e) {
+            logger.error(e.getMessage());
+        }
+        return null;
+    }
+ 
+    private DescribeRefObject getParentSObject(ParentSObjectFormatter parentStr) {
+        if (parentStr == null || parentStr.getRelationshipName() == null) {
             return null;
         }
         for (Map.Entry<String, DescribeRefObject> ent : referenceEntitiesDescribeMap.entrySet()) {
-            String relNameInEntry = ent.getKey().toLowerCase();
-            if (fieldName4LR.isRelationshipName(relNameInEntry)) {
+            if (parentStr.matches(ent.getKey())) {
                 return ent.getValue();
             }
         }

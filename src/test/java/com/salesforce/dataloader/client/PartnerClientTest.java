@@ -26,7 +26,7 @@
 package com.salesforce.dataloader.client;
 
 import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.dyna.ParentIdLookupFieldString;
+import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.process.ProcessTestBase;
 import com.sforce.soap.partner.DeleteResult;
@@ -430,7 +430,7 @@ public class PartnerClientTest extends ProcessTestBase {
                     doUpsertAccount(false);
                     parentExtIdValue = getRandomExtId("Account", ACCOUNT_WHERE_CLAUSE, extIdValue);
                 }
-                sforceMapping.put(ParentIdLookupFieldString.formatAsString("Parent", extIdField), parentExtIdValue);
+                sforceMapping.put(new ParentIdLookupFieldFormatter(null, "Parent", extIdField).toString(), parentExtIdValue);
             }
 
             doUpsert("Account", sforceMapping);
@@ -467,7 +467,7 @@ public class PartnerClientTest extends ProcessTestBase {
                     doUpsertAccount(false);
                     accountExtIdValue = getRandomExtId("Account", ACCOUNT_WHERE_CLAUSE, accountExtIdValue);
                 }
-                sforceMapping.put(ParentIdLookupFieldString.formatAsString("Account", acctExtIdField), accountExtIdValue);
+                sforceMapping.put(new ParentIdLookupFieldFormatter(null, "Account", acctExtIdField).toString(), accountExtIdValue);
 
                 // restore ext id field
                 setExtIdField(oldExtIdField);
@@ -500,7 +500,7 @@ public class PartnerClientTest extends ProcessTestBase {
         if (upsertFk) {
             sforceMapping.put(extIdField, extIdValue);
             // forget to set the foreign key external id value
-            sforceMapping.put(ParentIdLookupFieldString.formatAsString("Parent", extIdField), "bogus");
+            sforceMapping.put(new ParentIdLookupFieldFormatter(null, "Parent", extIdField).toString(), "bogus");
         }
 
         // now convert to a dynabean array for the client
