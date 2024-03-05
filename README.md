@@ -7,9 +7,10 @@ Salesforce officially supports Data Loader for Windows and macOS. All other oper
 
 Follow the installation instructions for [macOS](https://help.salesforce.com/articleView?id=sf.loader_install_mac.htm) and [Windows](https://help.​salesforce.com/articleView?id=​loader_install_windows.htm).
 
-Installing on Linux: Extract contents of Data Loader zip file, rename `install.command` as `install.sh`, and run the following command:
-
-    ./install.sh
+Installing on Linux: 
+- Extract contents of Data Loader zip file
+- Rename `install.command` as `install.sh`
+- Run the command in a shell terminal: `./install.sh`
 
 # Running Data Loader in GUI mode
 
@@ -94,7 +95,7 @@ Remove all personal, business-specific, and all other sensitive information from
 
 # Building Data Loader
 See the property setting for "<maven.compiler.release>" property in pom.xml to find out the JDK version to compile with.
-
+```
     git clone git@github.com:forcedotcom/dataloader.git
     cd dataloader
     git submodule init
@@ -102,13 +103,18 @@ See the property setting for "<maven.compiler.release>" property in pom.xml to f
     mvn clean package -DskipTests 
         or
     ./dlbuilder.sh
+```
 
 `dataloader_v<x.y.z>.zip` will be created in the root directory of the local git clone.
 
 # Debugging Data Loader
-To run data loader for debugging with an IDE
+To run data loader for debugging with an IDE (remote debugging, port 5005), run the following command in the git clone root folder:
 
-    java -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005  dataloader-x.y.z.jar
+    ./rundl.sh -d
+    
+    OR
+    
+    java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005 -cp target/dataloader-x.y.z.jar com.salesforce.dataloader.process.DataLoaderRunner salesforce.config.dir=./configs
 
 # Testing Data Loader
 
