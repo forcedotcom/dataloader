@@ -2,8 +2,9 @@
 
 debug=""
 batchmodeargs=""
-
-while getopts ":dbv:" flag
+encryptionargs=""
+configdir="salesforce.config.dir=./configs"
+while getopts ":dbe:v:" flag
 do
   case "${flag}" in
     d)
@@ -12,6 +13,10 @@ do
     b)
       batchmodeargs="./configs upsertAccounts run.mode=batch"
       ;;
+    e)
+      encryptionargs="run.mode=encrypt"
+      configdir=""
+      ;;
     v)
       version="${OPTARG}"
       ;;
@@ -19,4 +24,6 @@ do
 done
 
 jarname="$(find ./target -name 'dataloader-[0-9][0-9].[0-9].[0-9].jar' | tail -1)"
-java ${debug} -cp ${jarname} com.salesforce.dataloader.process.DataLoaderRunner ${batchmodeargs} $@ salesforce.config.dir=./configs
+
+
+java ${debug} -cp ${jarname} com.salesforce.dataloader.process.DataLoaderRunner ${batchmodeargs} ${configdir} ${encryptionargs} $@
