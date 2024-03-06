@@ -44,7 +44,6 @@ import com.sforce.soap.partner.Field;
 public class ReferenceEntitiesDescribeMap {
 
     private Map<String, DescribeRefObject> referenceEntitiesDescribeMap = new HashMap<String, DescribeRefObject>();
-    private Map<String, ParentSObjectFormatter> relationshipFieldMap = new HashMap<String, ParentSObjectFormatter>();
     private static final Logger logger = LogManager.getLogger(ReferenceEntitiesDescribeMap.class);
 
     /**
@@ -54,17 +53,16 @@ public class ReferenceEntitiesDescribeMap {
         
     }
     
-    public void put(String relationshipFieldName, DescribeRefObject parent, int numParentTypes) {
+    public void put(String relationshipFieldName, DescribeRefObject parent) {
         ParentSObjectFormatter objField = null;
         try {
-            objField = new ParentSObjectFormatter(parent.getParentObjectName(), relationshipFieldName, numParentTypes);
+            objField = new ParentSObjectFormatter(parent.getParentObjectName(), relationshipFieldName);
         } catch (RelationshipFormatException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             return;
         }
         referenceEntitiesDescribeMap.put(objField.toString(), parent);
-        relationshipFieldMap.put(objField.toString(), objField);
     }
        
     public void clear() {
@@ -78,17 +76,7 @@ public class ReferenceEntitiesDescribeMap {
     public Set<String> keySet() {
         return this.referenceEntitiesDescribeMap.keySet();
     }
-    
-    public ParentSObjectFormatter get(String relationshipFieldName) {
-        ParentSObjectFormatter fieldFromInput = null;
-        try {
-            fieldFromInput = new ParentSObjectFormatter(relationshipFieldName, null);
-        } catch (RelationshipFormatException e) {
-            logger.error(e.getMessage());
-            return null;
-        }
-        return this.relationshipFieldMap.get(fieldFromInput.toString());
-    }
+
     // fieldName could be in the old format that assumes single parent: 
     // <relationship name attr of the field on child sobject>:<idlookup field name on parent sobject>
     //
@@ -127,7 +115,7 @@ public class ReferenceEntitiesDescribeMap {
 
     public DescribeRefObject getParentSObject(String lookupFieldName) {
         try {
-            return getParentSObject(new ParentSObjectFormatter(lookupFieldName, null));
+            return getParentSObject(new ParentSObjectFormatter(lookupFieldName));
         } catch (RelationshipFormatException e) {
             logger.error(e.getMessage());
         }

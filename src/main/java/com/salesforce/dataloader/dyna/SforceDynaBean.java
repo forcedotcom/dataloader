@@ -91,7 +91,7 @@ public class SforceDynaBean {
                 for (String parentName : field.getReferenceTo()) {
                     ParentSObjectFormatter parentHandleForRelationship;
                     try {
-                        parentHandleForRelationship = new ParentSObjectFormatter(parentName, relationshipName, null);
+                        parentHandleForRelationship = new ParentSObjectFormatter(parentName, relationshipName);
                     } catch (RelationshipFormatException e) {
                         logger.error(e.getMessage());
                         continue;

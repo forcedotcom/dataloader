@@ -53,6 +53,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
+import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
@@ -289,10 +290,12 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         String sfdcColumnForBulk = sfdcColumn;
         try {
             ParentIdLookupFieldFormatter relField = new ParentIdLookupFieldFormatter(sfdcColumn);
-            ParentSObjectFormatter parentRelationship = getController().getPartnerClient().getReferenceDescribes().get(sfdcColumn);
+            DescribeRefObject parentRef = getController().getPartnerClient().getReferenceDescribes().getParentSObject(sfdcColumn);
             int numParentTypes = 1;
-            if (parentRelationship != null && parentRelationship.getNumParentTypes() != null) {
-                numParentTypes = parentRelationship.getNumParentTypes();
+            if (parentRef != null 
+                    && parentRef.getChildField() != null
+                    && parentRef.getChildField().getReferenceTo() != null) {
+                numParentTypes = parentRef.getChildField().getReferenceTo().length;
             }
             if (relField.getParent().getParentObjectName() == null || numParentTypes == 1) {
                 if (relField.getParentFieldName() == null) {

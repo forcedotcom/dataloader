@@ -804,7 +804,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
         if (!parentIdLookupFieldMap.isEmpty()) {
             DescribeRefObject describeRelationship = new DescribeRefObject(parentObjectName, childObjectField, parentIdLookupFieldMap);
-            referenceEntitiesDescribesMap.put(childObjectField.getRelationshipName(), describeRelationship, numParentTypes);
+            referenceEntitiesDescribesMap.put(childObjectField.getRelationshipName(), describeRelationship);
         }
     }
     

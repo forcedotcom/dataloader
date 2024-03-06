@@ -100,11 +100,11 @@ public class ParentIdLookupFieldFormatter {
                 relationshipName = formattedFieldName;
             }
         }
-        parentSObjectFormatter = new ParentSObjectFormatter(parentObjectName, relationshipName, null);
+        parentSObjectFormatter = new ParentSObjectFormatter(parentObjectName, relationshipName);
     }
     
     public ParentIdLookupFieldFormatter(String parentObjectName, String relationshipName, String parentIdLookupFieldName) throws RelationshipFormatException {
-        parentSObjectFormatter = new ParentSObjectFormatter(parentObjectName, relationshipName, null);
+        parentSObjectFormatter = new ParentSObjectFormatter(parentObjectName, relationshipName);
         this.parentFieldName = parentIdLookupFieldName;
     }
 

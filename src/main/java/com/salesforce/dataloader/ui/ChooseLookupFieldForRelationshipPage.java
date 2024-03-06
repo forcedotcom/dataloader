@@ -178,7 +178,7 @@ public class ChooseLookupFieldForRelationshipPage extends LoadPage {
     private void createUIToMapParentLookupFieldChoices(Composite comp, String relationshipName) {
         ParentSObjectFormatter relField;
         try {
-            relField = new ParentSObjectFormatter(relationshipName, null);
+            relField = new ParentSObjectFormatter(relationshipName);
         } catch (RelationshipFormatException e) {
             logger.error(e.getMessage());
             return;
@@ -214,7 +214,7 @@ public class ChooseLookupFieldForRelationshipPage extends LoadPage {
                     parentLookupIdFieldCombo.removeAll();
                     ParentSObjectFormatter selectedRelationship;
                     try {
-                        selectedRelationship = new ParentSObjectFormatter(parentName, relField.getRelationshipName(), null);
+                        selectedRelationship = new ParentSObjectFormatter(parentName, relField.getRelationshipName());
                     } catch (RelationshipFormatException e) {
                         // TODO Auto-generated catch block
                         logger.error(e.getMessage());
@@ -309,7 +309,7 @@ public class ChooseLookupFieldForRelationshipPage extends LoadPage {
                 && ! selectedIdLookupField.equals(Labels.getString("ForeignKeyExternalIdPage.defaultComboText"))) {
             ParentSObjectFormatter selectedParentSObjectField;
             try {
-                selectedParentSObjectField = new ParentSObjectFormatter(parentAndRelNameInCombo, null);
+                selectedParentSObjectField = new ParentSObjectFormatter(parentAndRelNameInCombo);
             } catch (RelationshipFormatException e) {
                 // TODO Auto-generated catch block
                 logger.error(e.getMessage());
