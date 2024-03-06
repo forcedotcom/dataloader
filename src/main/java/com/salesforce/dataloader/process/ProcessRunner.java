@@ -210,11 +210,15 @@ public class ProcessRunner implements InitializingBean, IProcess {
     }
 
     public synchronized void setConfigOverrideMap(Map<String, String> configOverrideMap) {
-        if (this.configOverrideMap.isEmpty())
+        if (this.configOverrideMap.isEmpty()) {
             this.configOverrideMap.putAll(configOverrideMap);
-        else
+            if (getName() != null && !getName().isBlank()) {
+                this.configOverrideMap.put(Config.PROCESS_NAME, getName());
+            }
+        } else {
             throw new IllegalStateException("Attempting to set configOverrideMap but there are already "
                     + this.configOverrideMap.size() + " entries");
+        }
     }
 
     public synchronized String getName() {
