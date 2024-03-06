@@ -40,13 +40,12 @@ import com.salesforce.dataloader.exception.RelationshipFormatException;
 public class ParentSObjectFormatter {
     private String relationshipName;
     private String parentObjectName = null;
-    private Integer numParentTypes = null;
     private static final Logger logger = LogManager.getLogger(ParentSObjectFormatter.class);
 
     public static final String NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR = ":";
   
-    public ParentSObjectFormatter(String parentObjectName, String relationshipName, Integer numParentTypes) throws RelationshipFormatException{
-        initialize(parentObjectName, relationshipName, numParentTypes);
+    public ParentSObjectFormatter(String parentObjectName, String relationshipName) throws RelationshipFormatException{
+        initialize(parentObjectName, relationshipName);
     }
     
     // parentAndRelationshipName param can be in one of the following formats:
@@ -58,7 +57,7 @@ public class ParentSObjectFormatter {
     //   interpretation 1: <child relationship field name>:<parent sobject name>
     //      - this is the new format for keys of the hashmap referenceEntitiesDescribeMap
 
-    public ParentSObjectFormatter(String formattedName, Integer numParentTypes) throws RelationshipFormatException {
+    public ParentSObjectFormatter(String formattedName) throws RelationshipFormatException {
         String relationshipName = null;
         String parentObjectName = null;
         if (formattedName == null) {
@@ -75,19 +74,15 @@ public class ParentSObjectFormatter {
         } else { // format 1
             relationshipName = formattedName;
         }
-        initialize(parentObjectName, relationshipName, null);
+        initialize(parentObjectName, relationshipName);
     }
 
-    private void initialize(String parentObjectName, String relationshipName, Integer numParentTypes) throws RelationshipFormatException{
+    private void initialize(String parentObjectName, String relationshipName) throws RelationshipFormatException{
         if ((relationshipName == null || relationshipName.isBlank())) {
             throw new RelationshipFormatException("Relationship name not specified");
         }
         this.parentObjectName = parentObjectName;
         this.relationshipName = relationshipName;
-        this.numParentTypes = numParentTypes;
-    }
-    public Integer getNumParentTypes() {
-        return numParentTypes;
     }
 
     public String getRelationshipName() {
