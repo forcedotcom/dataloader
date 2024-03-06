@@ -490,7 +490,10 @@ public class Config {
     }
     
     private String getLastRunPrefix() {
-        String lastRunFilePrefix = getString(Config.OPERATION);
+        String lastRunFilePrefix = getString(Config.PROCESS_NAME);
+        if (lastRunFilePrefix == null || lastRunFilePrefix.isBlank()) {
+            lastRunFilePrefix = getString(Config.ENTITY) + getString(Config.OPERATION);
+        }
         if (lastRunFilePrefix == null || lastRunFilePrefix.isBlank()) {
             lastRunFilePrefix = RUN_MODE_UI_VAL;
         }
