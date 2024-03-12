@@ -108,7 +108,7 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.jface</artifactId>
-      <version>3.32.0</version>
+      <version>3.33.0</version>
       <exclusions>
         <exclusion>
           <groupId>org.eclipse.platform</groupId>
