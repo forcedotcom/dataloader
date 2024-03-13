@@ -137,11 +137,14 @@ public class Config {
     public static final int MAX_LOAD_BATCH_SIZE = 200;
     public static final int MAX_DAO_READ_BATCH_SIZE = 200;
     public static final int MAX_DAO_WRITE_BATCH_SIZE = 2000;
+    
+    // Bulk v1 and v2 limits specified at https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_bulkapi.htm
     public static final int MAX_BULK_API_BATCH_BYTES = 10000000;
     public static final int MAX_BULK_API_BATCH_SIZE = 10000;
     public static final int MAX_BULKV2_API_JOB_BYTES = 150000000;
     public static final int MAX_BULKV2_API_JOB_SIZE = 150000000;
     public static final int DEFAULT_BULK_API_BATCH_SIZE = 2000;
+    
     public static final long DEFAULT_BULK_API_CHECK_STATUS_INTERVAL = 5000L;
     public static final String DEFAULT_ENDPOINT_URL = "https://login.salesforce.com";
     public static final String LIGHTNING_ENDPOINT_URL_PART_VAL = "lightning.force.com";
