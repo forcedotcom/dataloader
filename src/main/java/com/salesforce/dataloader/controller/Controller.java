@@ -183,10 +183,6 @@ public class Controller {
         if (!isLoggedIn()) return false;
         return clientToLogin.connect(getPartnerClient().getSession());
     }
-
-    public boolean loginIfSessionExists() {
-        return loginIfSessionExists(getClient());
-    }
     
     public static String getAPIVersion() {
         return ClientBase.getAPIVersion();

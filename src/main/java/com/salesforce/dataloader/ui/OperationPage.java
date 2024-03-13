@@ -110,9 +110,6 @@ public abstract class OperationPage extends WizardPage {
                        break;
                    }
                }
-               Point currentShellSize = this.getShell().getSize();
-               // Point shellSize = this.getShell().computeSize(currentShellSize.x , currentShellSize.y);
-               this.getShell().setSize(currentShellSize.x + 1, currentShellSize.y + 1);
            }
        }
 
