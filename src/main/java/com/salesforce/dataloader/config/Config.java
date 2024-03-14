@@ -243,10 +243,13 @@ public class Config {
     public static final String RESET_URL_ON_LOGIN = "sfdc.resetUrlOnLogin"; //$NON-NLS-1$
     public static final String TRUNCATE_FIELDS = "sfdc.truncateFields";//$NON-NLS-1$
     public static final String FORMAT_PHONE_FIELDS = "sfdc.formatPhoneFields";//$NON-NLS-1$
+
     public static final String BULK_API_ENABLED = "sfdc.useBulkApi";
     public static final String BULK_API_SERIAL_MODE = "sfdc.bulkApiSerialMode";
     public static final String BULK_API_CHECK_STATUS_INTERVAL = "sfdc.bulkApiCheckStatusInterval";
     public static final String BULK_API_ZIP_CONTENT = "sfdc.bulkApiZipContent";
+    public static final String BULKV2_API_ENABLED = "sfdc.useBulkV2Api";
+
     public static final String WIRE_OUTPUT = "sfdc.wireOutput";
     public static final String TIMEZONE = "sfdc.timezone";
 
@@ -350,7 +353,6 @@ public class Config {
     public static final String DUPLICATE_RULE_ALLOW_SAVE = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.allowSave"; //$NON-NLS-1$
     public static final String DUPLICATE_RULE_INCLUDE_RECORD_DETAILS = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.includeRecordDetails"; //$NON-NLS-1$
     public static final String DUPLICATE_RULE_RUN_AS_CURRENT_USER = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.runAsCurrentUser"; //$NON-NLS-1$
-    public static final String BULKV2_API_ENABLED = PILOT_PROPERTY_PREFIX + "sfdc.useBulkV2Api";
     public static final String LIMIT_OUTPUT_TO_QUERY_FIELDS = "loader.query.limitOutputToQueryFields";
     /*
      * ===============================
