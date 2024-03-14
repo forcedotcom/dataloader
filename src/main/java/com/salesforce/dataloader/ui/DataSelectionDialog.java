@@ -173,7 +173,7 @@ public class DataSelectionDialog extends BaseDialog {
                         + "\n\n"
                         + Labels.getString("AdvancedSettingsDialog.batchSize")
                         + " "
-                        + getController().getConfig().getString(Config.LOAD_BATCH_SIZE)
+                        + getController().getConfig().getString(String.valueOf(getController().getConfig().getLoadBatchSize()))
                         + "\n"
                         + Labels.getString("AdvancedSettingsDialog.startRow")
                         + " "
