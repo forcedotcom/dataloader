@@ -179,6 +179,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         setButtonEnabled(Config.INSERT_NULLS, buttonNulls, !enabled);
         setButtonEnabled(Config.TRUNCATE_FIELDS, buttonTruncateFields, !enabled);
         setButtonEnabled(Config.BULKV2_API_ENABLED, buttonUseBulkV2Api, enabled);
+        textBatch.setEnabled(!buttonUseBulkV2Api.getSelection());
     }
 
     private void setButtonEnabled(String configKey, Button b, boolean enabled) {
@@ -220,7 +221,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.widthHint = 400;
 
         // START TOP COMPONENT
-
         Composite topComp = new Composite(container, SWT.NONE);
         layout = new GridLayout(1, false);
         layout.marginHeight = 0;
@@ -289,7 +289,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         labelBatch.setLayoutData(data);
 
         textBatch = new Text(restComp, SWT.BORDER);
-        textBatch.setText(config.getString(Config.LOAD_BATCH_SIZE));
+        textBatch.setText(Integer.toString(config.getLoadBatchSize()));
         textBatch.addVerifyListener(new VerifyListener() {
             @Override
             public void verifyText(VerifyEvent event) {
@@ -567,14 +567,15 @@ public class AdvancedSettingsDialog extends BaseDialog {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 super.widgetSelected(e);
-                boolean enabled = buttonUseBulkApi.getSelection();
+                boolean enabledBulkV1 = buttonUseBulkApi.getSelection();
+                setBulkSettings(enabledBulkV1);
+                boolean enabledBulkV2 = buttonUseBulkV2Api.getSelection();
                 // update batch size when this setting changes
-                int newDefaultBatchSize = getController().getConfig().getDefaultBatchSize(enabled);
+                int newDefaultBatchSize = getController().getConfig().getDefaultBatchSize(enabledBulkV1, enabledBulkV2);
                 logger.info("Setting batch size to " + newDefaultBatchSize);
                 textBatch.setText(String.valueOf(newDefaultBatchSize));
                 // make sure the appropriate check boxes are enabled or disabled
-                setBulkSettings(enabled);
-                if (enabled) {
+                if (enabledBulkV1) {
                     buttonKeepAccountTeam.setSelection(false);
                 }
             }
@@ -593,6 +594,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         buttonUseBulkV2Api = new Button(restComp, SWT.CHECK);
         buttonUseBulkV2Api.setSelection(useBulkV2Api);
         buttonUseBulkV2Api.setEnabled(useBulkAPI);
+        textBatch.setEnabled(!useBulkV2Api);
         buttonUseBulkV2Api.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -602,9 +604,16 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 if (selected) {
                     buttonBulkApiZipContent.setSelection(false);
                     buttonBulkApiZipContent.setEnabled(false);
+                    textBatch.setEnabled(false);
                 } else {
-                    buttonBulkApiZipContent.setEnabled(true);
+                    textBatch.setEnabled(true);
                 }
+                boolean enabledBulkV1 = buttonUseBulkApi.getSelection();
+                buttonBulkApiZipContent.setEnabled(true);
+                // get default batch size for Bulk v1 and set it
+                int newDefaultBatchSize = getController().getConfig().getDefaultBatchSize(enabledBulkV1, selected);
+                logger.info("Setting batch size to " + newDefaultBatchSize);
+                textBatch.setText(String.valueOf(newDefaultBatchSize));
             }
         });
         

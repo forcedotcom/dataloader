@@ -53,7 +53,7 @@ public abstract class LoadPage extends OperationPage {
     protected String getConfigInfo() {
         return Labels.getString("AdvancedSettingsDialog.batchSize")
         + " "
-        + controller.getConfig().getString(Config.LOAD_BATCH_SIZE)
+        + controller.getConfig().getLoadBatchSize()
         + "    "
         + Labels.getString("AdvancedSettingsDialog.startRow")
         + " "
