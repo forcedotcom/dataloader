@@ -61,7 +61,6 @@ import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
-import com.salesforce.dataloader.dyna.ParentSObjectFormatter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.LoadException;

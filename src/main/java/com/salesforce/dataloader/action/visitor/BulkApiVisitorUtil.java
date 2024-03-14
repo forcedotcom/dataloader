@@ -27,10 +27,7 @@ package com.salesforce.dataloader.action.visitor;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -48,7 +45,6 @@ import com.salesforce.dataloader.exception.ExtractException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.util.LoadRateCalculator;
 import com.sforce.async.AsyncApiException;
-import com.sforce.async.AsyncExceptionCode;
 import com.sforce.async.BatchInfo;
 import com.sforce.async.BatchInfoList;
 import com.sforce.async.BatchStateEnum;
@@ -85,23 +81,13 @@ class BulkApiVisitorUtil {
     private String queryChunkStartRow = "";
     private Config config = null;
     private Controller controller;
-    private File bulkV2LoadUploadFile;
-    private OutputStream bulkV2LoadUploadWriter = null;
     private int bulkV2LoadBatchCount = 0;
-    private boolean bulkV2LoadContentUploaded = false;
 
     BulkApiVisitorUtil(Controller ctl, ILoaderProgress monitor, LoadRateCalculator rateCalc, boolean updateProgress) {
         this.config = ctl.getConfig();
         this.controller = ctl;
         if (isBulkV2QueryJob() || isBulkV2LoadJob()) {
             this.connection = ctl.getBulkV2Client().getConnection();
-        	try {
-				bulkV2LoadUploadFile = new File(getStagingFileInOutputStatusDir("bulkV2LoadUpload_", ".csv"));
-				bulkV2LoadUploadWriter = new FileOutputStream(this.bulkV2LoadUploadFile);
-			} catch (IOException e) {
-				this.config.setValue(Config.BULK_API_ENABLED, true);
-				this.config.setValue(Config.BULKV2_API_ENABLED, false);
-			}
         } else {
             this.connection = ctl.getBulkV1Client().getConnection();
         }
@@ -252,35 +238,11 @@ class BulkApiVisitorUtil {
     }
     
     void processBulkV2LoadBatch(InputStream batchContent) throws AsyncApiException {
-        try {
-	        //download batch to be uploaded into the buffering file
-	        int bytesRead;
-	        byte[] buffer = new byte[8 * 1024];
-	        while ((bytesRead = batchContent.read(buffer)) != -1) {
-	        	this.bulkV2LoadUploadWriter.write(buffer, 0, bytesRead);
-	        }
-        } catch (IOException e) {
-			throw new AsyncApiException(e.getMessage(), AsyncExceptionCode.Unknown);
-		}
-    }
-
-    void uploadJobContent() throws AsyncApiException {
-    	try {
-			this.bulkV2LoadUploadWriter.flush();
-	    	this.bulkV2LoadUploadWriter.close();
-	    	this.bulkV2LoadContentUploaded = true;
-	    	BulkV2Connection v2conn = this.controller.getBulkV2Client().getConnection();
-	    	this.jobInfo = v2conn.startIngest(this.getJobId(), this.bulkV2LoadUploadFile.getAbsolutePath());
-		} catch (IOException e) {
-			throw new AsyncApiException(e.getMessage(), AsyncExceptionCode.Unknown);
-		}
+        BulkV2Connection v2conn = this.controller.getBulkV2Client().getConnection();
+        this.jobInfo = v2conn.startIngest(this.getJobId(), batchContent);
     }
 
     long periodicCheckStatus() throws AsyncApiException {
-    	if (isBulkV2LoadJob() && !this.bulkV2LoadContentUploaded) {
-    		uploadJobContent();
-    	}
-
         if (this.monitor.isCanceled()) return 0;
         final long timeRemaining = this.checkStatusInterval - (System.currentTimeMillis() - this.lastStatusUpdate);
         int retryCount = 0;
@@ -322,17 +284,6 @@ class BulkApiVisitorUtil {
                 Thread.sleep(sleepTime);
             } catch (final InterruptedException e) {}
             sleepTime = periodicCheckStatus();
-        }
-        if (this.bulkV2LoadUploadFile != null) {
-        	try {
-				this.bulkV2LoadUploadWriter.close();
-				this.bulkV2LoadUploadFile.delete();
-				this.bulkV2LoadUploadWriter = null;
-				this.bulkV2LoadUploadFile = null;
-			} catch (IOException e) {
-				logger.warn("Unable to close and delete bulk v2 Load staging file");
-			}
-        	this.bulkV2LoadUploadFile = null;
         }
     }
     
