@@ -133,8 +133,6 @@ package com.salesforce.dataloader.action.visitor;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -282,32 +280,21 @@ public class BulkV2Connection extends BulkConnection {
      * public, ingest (create, update, upsert, delete) methods 
      * 
      **********************************/
-    // needed for all upload operations (non-query operations)
-    public JobInfo startIngest(String jobId, String csvFileName) throws AsyncApiException {
-    	File csvFile = new File(csvFileName);
-    	if (!csvFile.exists()) {
-    		throw new AsyncApiException(csvFileName + " not found.", AsyncExceptionCode.ClientInputError);
-    	}
-    	// Bulk V2 ingest does not accept CSV exceeding 150 MB in size
-    	if (csvFile.length() > 150 * 1024 * 1024) {
-    		throw new AsyncApiException(csvFileName + " size exceeds the max file size accepted by Bulk V2 (150 MB)", AsyncExceptionCode.ClientInputError);
-    	}
-    	
+    // needed for all upload operations (non-query operations)	
+    public JobInfo startIngest(String jobId, InputStream bulkUploadStream) throws AsyncApiException {
         String urlString = constructRequestURL(jobId) + "batches/";
         HashMap<String, String> headers = getHeaders(CSV_CONTENT_TYPE, JSON_CONTENT_TYPE);
         try {
         	HttpTransportInterface transport = (HttpTransportInterface)getConfig().createTransport();
-            transport.connect(urlString, headers, true, HttpTransportInterface.SupportedHttpMethodType.PUT, new FileInputStream(csvFile), CSV_CONTENT_TYPE);
+            transport.connect(urlString, headers, true, HttpTransportInterface.SupportedHttpMethodType.PUT, bulkUploadStream, CSV_CONTENT_TYPE);
 
             // Following is needed to actually send the request to the server
             InputStream serverResponseStream = transport.getContent();
             if (!transport.isSuccessful()) {
 	            parseAndThrowException(serverResponseStream, ContentType.JSON);
             }
-        }catch (IOException e) {
-            throw new AsyncApiException("Failed to send contents of " + csvFileName + " to server for job " + jobId, AsyncExceptionCode.ClientInputError, e);
-        } catch (ConnectionException e) {
-            throw new AsyncApiException("Failed to send contents of " + csvFileName + " to server for job " + jobId, AsyncExceptionCode.ClientInputError, e);
+        }catch (IOException | ConnectionException e) {
+            throw new AsyncApiException("Failed to upload to server for job " + jobId, AsyncExceptionCode.ClientInputError, e);
         }
         
         // Mark upload as completed
