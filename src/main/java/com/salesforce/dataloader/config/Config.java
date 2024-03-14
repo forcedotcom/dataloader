@@ -1351,11 +1351,10 @@ public class Config {
         } catch (ParameterLoadException e) {
         }
         int maxBatchSize = bulkApi ? MAX_BULK_API_BATCH_SIZE : MAX_LOAD_BATCH_SIZE;
-        return bs > maxBatchSize ? maxBatchSize : bs > 0 ? bs : getDefaultBatchSize(bulkApi);
+        return bs > maxBatchSize ? maxBatchSize : bs > 0 ? bs : getDefaultBatchSize(bulkApi, bulkV2Api);
     }
 
-    public int getDefaultBatchSize(boolean bulkApi) {
-        boolean bulkV2Api = this.isBulkV2APIEnabled();
+    public int getDefaultBatchSize(boolean bulkApi, boolean bulkV2Api) {
         if (bulkApi && bulkV2Api) {
             return MAX_BULKV2_API_JOB_SIZE;
         }
