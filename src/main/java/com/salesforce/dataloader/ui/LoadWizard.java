@@ -94,7 +94,7 @@ public abstract class LoadWizard extends BaseWizard {
         if (!wizardhook_validateFinish()) { return false; }
 
         try {
-            ProgressMonitorDialog dlg = new ProgressMonitorDialog(getShell());
+            DLProgressMonitorDialog dlg = new DLProgressMonitorDialog(getShell());
             dlg.run(true, true, new SWTLoadRunable(getController()));
 
         } catch (InvocationTargetException e) {
