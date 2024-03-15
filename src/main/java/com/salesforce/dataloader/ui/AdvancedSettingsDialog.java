@@ -113,6 +113,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonCsvTab;
     private Button buttonLoginFromBrowser;
     private Button buttonCloseWizardOnFinish;
+    private Button buttonPopulateResultsFolderOnFinishStep;
     private static final String[] LOGGING_LEVEL = { "ALL", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
     private Combo comboLoggingLevelDropdown;
     
@@ -408,7 +409,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         Label labelLimitQueryResultColumnsToFieldsInQuery = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelLimitQueryResultColumnsToFieldsInQuery.setText(Labels.getString(this.getClass().getSimpleName() + ".limitOutputToQueryFields")); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        labelSortExtractFields.setLayoutData(data);
+        labelLimitQueryResultColumnsToFieldsInQuery.setLayoutData(data);
        
         buttonLimitQueryResultColumnsToFieldsInQuery = new Button(restComp, SWT.CHECK);
         buttonLimitQueryResultColumnsToFieldsInQuery.setSelection(config.getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS));
@@ -462,7 +463,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         Label labelFormatPhoneFields = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelFormatPhoneFields.setText(Labels.getString("AdvancedSettingsDialog.formatPhoneFields"));
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        labelTruncateFields.setLayoutData(data);
+        labelFormatPhoneFields.setLayoutData(data);
 
         buttonFormatPhoneFields = new Button(restComp, SWT.CHECK);
         buttonFormatPhoneFields.setSelection(config.getBoolean(Config.FORMAT_PHONE_FIELDS));
@@ -811,6 +812,13 @@ public class AdvancedSettingsDialog extends BaseDialog {
         buttonCloseWizardOnFinish = new Button(restComp, SWT.CHECK);
         buttonCloseWizardOnFinish.setSelection(closeWizardOnFinish);
 
+        Label populateResultsFolderOnFinishStepText = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        populateResultsFolderOnFinishStepText.setText(Labels.getString("AdvancedSettingsDialog.populateResultsFolderOnFinishStep"));
+        populateResultsFolderOnFinishStepText.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+        boolean populateResultsFolderOnFinishStep = config.getBoolean(Config.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER);
+        buttonPopulateResultsFolderOnFinishStep = new Button(restComp, SWT.CHECK);
+        buttonPopulateResultsFolderOnFinishStep.setSelection(populateResultsFolderOnFinishStep);
+        
         blankAgain = new Label(restComp, SWT.NONE);
         data = new GridData();
         data.horizontalSpan = 2;
@@ -961,6 +969,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.BULKV2_API_ENABLED, buttonUseBulkV2Api.getSelection());
                 config.setValue(Config.OAUTH_LOGIN_FROM_BROWSER, buttonLoginFromBrowser.getSelection());
                 config.setValue(Config.WIZARD_CLOSE_ON_FINISH, buttonCloseWizardOnFinish.getSelection());
+                config.setValue(Config.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER, buttonPopulateResultsFolderOnFinishStep.getSelection());
                 LoggingUtil.setLoggingLevel(LOGGING_LEVEL[comboLoggingLevelDropdown.getSelectionIndex()]);
                 String clientIdVal = textProductionPartnerClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
