@@ -100,6 +100,7 @@ public class SettingsPage extends OperationPage {
                 grid.hide(layouts[1]);
             }
         }
+        setupPage();
     }
     
     public void setNextPageName(String name) {
@@ -172,11 +173,6 @@ public class SettingsPage extends OperationPage {
         grid.show(showControl);
 
         control.layout(false);
-    }
-
-    @Override
-    public boolean setupPage() {
-        return true;
     }
     
     @Override
