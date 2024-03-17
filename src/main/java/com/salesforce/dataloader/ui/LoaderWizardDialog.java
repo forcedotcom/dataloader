@@ -44,7 +44,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.exception.ParameterLoadException;
 
 /**
  * A dialog to show a wizard to the end user.
@@ -95,7 +94,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     private SelectionAdapter cancelListener;
     private boolean isMovingToPreviousPage = false;
     private Composite pageContainer;
-    private PageContainerFillLayout pageContainerLayout = new PageContainerFillLayout(5, 5, 300, 225);
+    private PageContainerFillLayout pageContainerLayout = new PageContainerFillLayout(5, 5, 600, 800);
     private int pageWidth = SWT.DEFAULT;
     private int pageHeight = SWT.DEFAULT;
     private static final String FOCUS_CONTROL = "focusControl"; //$NON-NLS-1$
@@ -144,32 +143,38 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
             minimumHeight = minH;
         }
 
+        private Point computedSizePoint = null;
         /*
          * (non-Javadoc) Method declared on Layout.
          */
         @Override
         public Point computeSize(Composite composite, int wHint, int hHint, boolean force) {
-            if (wHint != SWT.DEFAULT && hHint != SWT.DEFAULT) return new Point(wHint, hHint);
-            Point result = null;
+            if (computedSizePoint != null) {
+                return computedSizePoint;
+            }
+            if (wHint != SWT.DEFAULT && hHint != SWT.DEFAULT) {
+                computedSizePoint = new Point(wHint, hHint);
+                return computedSizePoint;
+            }
             Control[] children = composite.getChildren();
             if (children.length > 0) {
-                result = new Point(0, 0);
+                computedSizePoint = new Point(0, 0);
                 for (int i = 0; i < children.length; i++) {
                     Point cp = children[i].computeSize(wHint, hHint, force);
-                    result.x = Math.max(result.x, cp.x);
-                    result.y = Math.max(result.y, cp.y);
+                    computedSizePoint.x = Math.max(computedSizePoint.x, cp.x);
+                    computedSizePoint.y = Math.max(computedSizePoint.y, cp.y);
                 }
-                result.x = result.x + 2 * marginWidth;
-                result.y = result.y + 2 * marginHeight;
+                computedSizePoint.x = computedSizePoint.x + 2 * marginWidth;
+                computedSizePoint.y = computedSizePoint.y + 2 * marginHeight;
             } else {
                 Rectangle rect = composite.getClientArea();
-                result = new Point(rect.width, rect.height);
+                computedSizePoint = new Point(rect.width, rect.height);
             }
-            result.x = Math.max(result.x, minimumWidth);
-            result.y = Math.max(result.y, minimumHeight);
-            if (wHint != SWT.DEFAULT) result.x = wHint;
-            if (hHint != SWT.DEFAULT) result.y = hHint;
-            return result;
+            computedSizePoint.x = Math.max(computedSizePoint.x, minimumWidth);
+            computedSizePoint.y = Math.max(computedSizePoint.y, minimumHeight);
+            if (wHint != SWT.DEFAULT) computedSizePoint.x = wHint;
+            if (hHint != SWT.DEFAULT) computedSizePoint.y = hHint;
+            return computedSizePoint;
         }
 
         /**
@@ -925,7 +930,6 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
                 // This allows the wizard to open to the correct size
                 createPageControls();
                 // Ensure the dialog is large enough for the wizard
-                updateSizeForWizard(wizard);
                 pageContainer.layout(true);
             }
         } else {
@@ -1125,21 +1129,6 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     }
 
     /**
-     * Changes the shell size to the given size, ensuring that it is no larger than the display bounds.
-     *
-     * @param width
-     *            the shell width
-     * @param height
-     *            the shell height
-     */
-    private void setShellSize(int width, int height) {
-        Rectangle size = getShell().getBounds();
-        size.height = height;
-        size.width = width;
-        getShell().setBounds(getConstrainedShellBounds(size));
-    }
-
-    /**
      * Computes the correct dialog size for the current page and resizes its shell if nessessary. Also causes the
      * container to refresh its layout.
      *
@@ -1149,7 +1138,9 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      */
     protected void updateSize(IWizardPage page) {
         if (page == null || page.getControl() == null) return;
-        updateSizeForPage(page);
+        Shell shell = this.getShell();
+        shell.pack();
+        shell.setBounds(getConstrainedShellBounds(shell.getBounds()));
         pageContainerLayout.layoutPage(page.getControl());
     }
 
@@ -1161,79 +1152,6 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     @Override
     public void updateSize() {
         updateSize(currentPage);
-    }
-
-    /**
-     * Computes the correct dialog size for the given page and resizes its shell if nessessary.
-     *
-     * @param page
-     *            the wizard page
-     */
-    private void updateSizeForPage(IWizardPage page) {
-        // ensure the page container is large enough
-        /*
-        Point delta = calculatePageSizeDelta(page);
-        if (delta.x > 0 || delta.y > 0) {
-            // increase the size of the shell
-            Shell shell = getShell();
-            Point shellSize = shell.getSize();
-            setShellSize(shellSize.x + delta.x, shellSize.y + delta.y);
-            constrainShellSize();
-        }
-        */
-        int shellWidth = Config.DEFAULT_WIZARD_WIDTH;
-        try {
-            shellWidth = config.getInt(Config.WIZARD_WIDTH) - 20;
-        } catch (ParameterLoadException e1) {
-            // ignore
-        }
-        int shellHeight = Config.DEFAULT_WIZARD_HEIGHT;
-        try {
-            shellHeight = config.getInt(Config.WIZARD_HEIGHT) - 20;
-        } catch (ParameterLoadException e1) {
-            // ignore
-        }
-        setShellSize(shellWidth, shellHeight);
-        constrainShellSize();
-    }
-
-    /**
-     * Computes the correct dialog size for the given wizard and resizes its shell if nessessary.
-     *
-     * @param sizingWizard
-     *            the wizard
-     */
-    private void updateSizeForWizard(IWizard sizingWizard) {
-        /*
-        Point delta = new Point(0, 0);
-        IWizardPage[] pages = sizingWizard.getPages();
-        for (int i = 0; i < pages.length; i++) {
-            // ensure the page container is large enough
-            Point pageDelta = calculatePageSizeDelta(pages[i]);
-            delta.x = Math.max(delta.x, pageDelta.x);
-            delta.y = Math.max(delta.y, pageDelta.y);
-        }
-        if (delta.x > 0 || delta.y > 0) {
-            // increase the size of the shell
-            Shell shell = getShell();
-            Point shellSize = shell.getSize();
-            setShellSize(shellSize.x + delta.x, shellSize.y + delta.y);
-        }
-        */
-        int shellWidth = Config.DEFAULT_WIZARD_WIDTH;
-        try {
-            shellWidth = config.getInt(Config.WIZARD_WIDTH) - 20;
-        } catch (ParameterLoadException e1) {
-            // ignore
-        }
-        int shellHeight = Config.DEFAULT_WIZARD_HEIGHT;
-        try {
-            shellHeight = config.getInt(Config.WIZARD_HEIGHT) - 20;
-        } catch (ParameterLoadException e1) {
-            // ignore
-        }
-        setShellSize(shellWidth, shellHeight);
-        constrainShellSize();
     }
 
     /*

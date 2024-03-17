@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -51,8 +52,8 @@ public abstract class OperationPage extends WizardPage {
     */
    protected final Controller controller;
    protected final Logger logger;
-   private static final int SHELL_X_OFFSET = 100;
-   private static final int SHELL_Y_OFFSET = 50;
+   public static final int SHELL_X_OFFSET = 50;
+   public static final int SHELL_Y_OFFSET = 0;
 
    public OperationPage(String name, Controller controller) {
        super(name);
@@ -67,13 +68,8 @@ public abstract class OperationPage extends WizardPage {
        // Set the description
        String description = Labels.getString(this.getClass().getSimpleName() + ".description");
        this.setDescription(description);
-       Composite shellParent = this.getShell().getParent();
-       if (shellParent != null) {
-           Point shellLocation = shellParent.getLocation();
-           shellLocation.x += SHELL_X_OFFSET;
-           shellLocation.y += SHELL_Y_OFFSET;
-           this.getShell().setLocation(shellLocation);
-       }
+       Point shellLocation = new Point(SHELL_X_OFFSET, SHELL_Y_OFFSET);
+       this.getShell().setLocation(shellLocation);
        
        boolean success = true;
        if (this.controller.isLoggedIn()) {
