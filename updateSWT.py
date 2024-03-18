@@ -50,20 +50,6 @@ def exitWithError(errorStr):
     print(errorStr)
     sys.exit(-1)
 
-
-def which(program):
-    fpath = os.path.split(program)
-    if fpath:
-        if is_exe(program):
-            return program
-    else:
-        for path in os.environ["PATH"].split(os.pathsep):
-            exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
-                return exe_file
-
-    return None
-
 ###########################################################
 
 def getSWTDownloadLinkForPlatform(soup, platformString):
@@ -119,7 +105,7 @@ def installInLocalMavenRepo(unzippedSWTDir, mvnArtifactId, gitCloneRootDir):
     swtVersion = unzippedSWTDir.split('-')[1]
 #    print(swtVersion)
 
-    if which("mvn") == None :
+    if shutil.which("mvn") == None :
         exitWithError("did not find mvn command in the execute path")
 
         
