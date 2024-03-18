@@ -323,17 +323,49 @@ class BulkApiVisitorUtil {
 
     private void updateJobStatus() {
         if (updateProgress) {
-            this.monitor.worked(this.jobInfo.getNumberRecordsProcessed() - this.recordsProcessed);
-            this.monitor.setSubTask(this.rateCalc.calculateSubTask(this.jobInfo.getNumberRecordsProcessed(),
-                    this.jobInfo.getNumberRecordsFailed()));
+            this.monitor.worked(getNumRecordsProcessedInJob() - this.recordsProcessed);
+            this.monitor.setSubTask(this.rateCalc.calculateSubTask(
+                    getNumRecordsProcessedInJob(),
+                    getNumRecordsFailedInJob()));
         }
-        this.recordsProcessed = this.jobInfo.getNumberRecordsProcessed();
+        this.recordsProcessed = getNumRecordsProcessedInJob();
         this.lastStatusUpdate = System.currentTimeMillis();
         logger.info(Messages.getMessage(getClass(), "logJobStatus", this.jobInfo.getNumberBatchesQueued(),
-                this.jobInfo.getNumberBatchesInProgress(), this.jobInfo.getNumberBatchesCompleted(),
+                this.jobInfo.getNumberBatchesInProgress(), 
+                this.jobInfo.getNumberBatchesCompleted(),
                 this.jobInfo.getNumberBatchesFailed()));
     }
-
+    
+    // hack because jobInfo is not updated if an entire batch fails
+    private int getNumRecordsProcessedInJob() {
+        int numRecordsProcessedInJob = this.jobInfo.getNumberRecordsProcessed();
+        int numRecordsPerBatch = 0;
+        try {
+            numRecordsPerBatch = this.config.getInt(Config.LOAD_BATCH_SIZE);
+        } catch (ParameterLoadException e) {
+            logger.warn("Incorrectly configured " + Config.LOAD_BATCH_SIZE);
+        }
+        if (numRecordsProcessedInJob == 0 && this.jobInfo.getNumberBatchesCompleted() > 0) {
+            numRecordsProcessedInJob = numRecordsPerBatch 
+                    * this.jobInfo.getNumberBatchesCompleted();
+        }
+        return numRecordsProcessedInJob + getNumRecordsFailedInJob();
+    }
+    
+    // hack because jobInfo is not updated if an entire batch fails
+    private int getNumRecordsFailedInJob() {
+        int numRecordsFailedInJob = this.jobInfo.getNumberRecordsFailed();
+        int numRecordsPerBatch = 0;
+        try {
+            numRecordsPerBatch = this.config.getInt(Config.LOAD_BATCH_SIZE);
+        } catch (ParameterLoadException e) {
+            logger.warn("Incorrectly configured " + Config.LOAD_BATCH_SIZE);
+        }
+        if (numRecordsFailedInJob == 0 && this.jobInfo.getNumberBatchesFailed() > 0) {
+            numRecordsFailedInJob = numRecordsPerBatch * jobInfo.getNumberBatchesFailed();
+        }
+        return numRecordsFailedInJob;
+    }
     BatchInfoList getBatches() throws AsyncApiException {
         BulkConnection connectionClient = this.controller.getBulkV1Client().getConnection();
         return connectionClient.getBatchInfoList(getJobId());
@@ -354,7 +386,7 @@ class BulkApiVisitorUtil {
                 }
             }
         }
-        return this.jobInfo.getNumberRecordsProcessed();
+        return getNumRecordsProcessedInJob();
     }
     
     void getBulkV2LoadSuccessResults(String filename) throws AsyncApiException {
