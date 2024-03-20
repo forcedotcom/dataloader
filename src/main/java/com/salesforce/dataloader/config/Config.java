@@ -421,10 +421,11 @@ public class Config {
     public static final String READ_ONLY_CONFIG_PROPERTIES = "config.properties.readonly";
     public static final String WIZARD_WIDTH = "sfdc.ui.wizard.width";
     public static final String WIZARD_HEIGHT = "sfdc.ui.wizard.height";
+    public static final String ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG = "sfdc.ui.wizard.enforceWidthHeight";
     public static final String WIZARD_CLOSE_ON_FINISH = "sfdc.ui.wizard.closeOnFinish";
     public static final String WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER = "sfdc.ui.wizard.finishStep.prepopulateWithPreviousOpResultsFolder";
-    public static final int DEFAULT_WIZARD_WIDTH = 600;
-    public static final int DEFAULT_WIZARD_HEIGHT = 700;
+    public static final int DEFAULT_WIZARD_WIDTH = 400;
+    public static final int DEFAULT_WIZARD_HEIGHT = 600;
     
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
     // Following properties are read-only, i.e. they are not overridden during save() to config.properties
@@ -615,6 +616,7 @@ public class Config {
         setDefaultValue(PROCESS_KEEP_ACCOUNT_TEAM, false);
         setDefaultValue(WIZARD_WIDTH, DEFAULT_WIZARD_WIDTH);
         setDefaultValue(WIZARD_HEIGHT, DEFAULT_WIZARD_HEIGHT);
+        setDefaultValue(ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG, false);
         setDefaultValue(DAO_READ_PREPROCESSOR_SCRIPT, "");
         setDefaultValue(DAO_WRITE_POSTPROCESSOR_SCRIPT, "");
         setDefaultValue(LIMIT_OUTPUT_TO_QUERY_FIELDS, true);

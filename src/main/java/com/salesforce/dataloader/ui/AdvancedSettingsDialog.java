@@ -90,6 +90,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Text textSandboxPartnerClientID;
     private Text textProductionBulkClientID;
     private Text textSandboxBulkClientID;
+    private Text textWizardWidth;
+    private Text textWizardHeight;
     private final String defaultServer;
 
     private Button buttonHideWelcomeScreen;
@@ -113,7 +115,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonCsvTab;
     private Button buttonLoginFromBrowser;
     private Button buttonCloseWizardOnFinish;
-    private Button buttonPopulateResultsFolderOnFinishStep;
+    private Button buttonEnforceSpecifiedWizardWidthAndHeight;
+    private Button buttonPopulateResultsFolderOnWizardFinishStep;
     private static final String[] LOGGING_LEVEL = { "ALL", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
     private Combo comboLoggingLevelDropdown;
     
@@ -812,12 +815,55 @@ public class AdvancedSettingsDialog extends BaseDialog {
         buttonCloseWizardOnFinish = new Button(restComp, SWT.CHECK);
         buttonCloseWizardOnFinish.setSelection(closeWizardOnFinish);
 
-        Label populateResultsFolderOnFinishStepText = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        populateResultsFolderOnFinishStepText.setText(Labels.getString("AdvancedSettingsDialog.populateResultsFolderOnFinishStep"));
-        populateResultsFolderOnFinishStepText.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+        Label labelWizardWidthAndHeight = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelWizardWidthAndHeight.setText(Labels.getString("AdvancedSettingsDialog.wizardWidthAndHeight"));
+        labelWizardWidthAndHeight.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+        Composite widthAndHeightComp = new Composite(restComp,  SWT.NONE);
+        data = new GridData(GridData.FILL_BOTH);
+        widthAndHeightComp.setLayoutData(data);
+        layout = new GridLayout(3, false);
+        widthAndHeightComp.setLayout(layout);
+        textWizardWidth = new Text(widthAndHeightComp, SWT.BORDER);
+        textWizardWidth.setText(config.getString(Config.WIZARD_WIDTH));
+        data = new GridData();
+        textWizardWidth.setTextLimit(4);
+        data.widthHint = 4 * textSize.x;
+        textWizardWidth.setLayoutData(data);
+        textWizardWidth.addVerifyListener(new VerifyListener() {
+            @Override
+            public void verifyText(VerifyEvent event) {
+                event.doit = Character.isISOControl(event.character) || Character.isDigit(event.character);
+            }
+        });
+        
+        Label labelMultiplySymbol = new Label(widthAndHeightComp, SWT.CENTER);
+        labelMultiplySymbol.setText("x");
+        labelMultiplySymbol.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_CENTER));
+
+        textWizardHeight = new Text(widthAndHeightComp, SWT.BORDER);
+        textWizardHeight.setText(config.getString(Config.WIZARD_HEIGHT));
+        textWizardHeight.setTextLimit(4);
+        data.widthHint = 4 * textSize.x;
+        textWizardHeight.setLayoutData(data);
+        textWizardHeight.addVerifyListener(new VerifyListener() {
+            @Override
+            public void verifyText(VerifyEvent event) {
+                event.doit = Character.isISOControl(event.character) || Character.isDigit(event.character);
+            }
+        });
+        
+        Label labelEnforceSpecifiedWizardWidthAndHeight = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelEnforceSpecifiedWizardWidthAndHeight.setText(Labels.getString("AdvancedSettingsDialog.enforceSpecifiedWizardWidthAndHeight"));
+        labelEnforceSpecifiedWizardWidthAndHeight.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+        buttonEnforceSpecifiedWizardWidthAndHeight = new Button(restComp, SWT.CHECK);
+        buttonEnforceSpecifiedWizardWidthAndHeight.setSelection(config.getBoolean(Config.ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG));
+        
+        Label populateResultsFolderOnWizardFinishStepText = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        populateResultsFolderOnWizardFinishStepText.setText(Labels.getString("AdvancedSettingsDialog.populateResultsFolderOnFinishStepOfWizard"));
+        populateResultsFolderOnWizardFinishStepText.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         boolean populateResultsFolderOnFinishStep = config.getBoolean(Config.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER);
-        buttonPopulateResultsFolderOnFinishStep = new Button(restComp, SWT.CHECK);
-        buttonPopulateResultsFolderOnFinishStep.setSelection(populateResultsFolderOnFinishStep);
+        buttonPopulateResultsFolderOnWizardFinishStep = new Button(restComp, SWT.CHECK);
+        buttonPopulateResultsFolderOnWizardFinishStep.setSelection(populateResultsFolderOnFinishStep);
         
         blankAgain = new Label(restComp, SWT.NONE);
         data = new GridData();
@@ -969,7 +1015,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.BULKV2_API_ENABLED, buttonUseBulkV2Api.getSelection());
                 config.setValue(Config.OAUTH_LOGIN_FROM_BROWSER, buttonLoginFromBrowser.getSelection());
                 config.setValue(Config.WIZARD_CLOSE_ON_FINISH, buttonCloseWizardOnFinish.getSelection());
-                config.setValue(Config.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER, buttonPopulateResultsFolderOnFinishStep.getSelection());
+                config.setValue(Config.WIZARD_WIDTH, textWizardWidth.getText());
+                config.setValue(Config.WIZARD_HEIGHT, textWizardHeight.getText());
+                config.setValue(Config.ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG, buttonEnforceSpecifiedWizardWidthAndHeight.getSelection());
+
+                config.setValue(Config.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER, buttonPopulateResultsFolderOnWizardFinishStep.getSelection());
                 LoggingUtil.setLoggingLevel(LOGGING_LEVEL[comboLoggingLevelDropdown.getSelectionIndex()]);
                 String clientIdVal = textProductionPartnerClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
