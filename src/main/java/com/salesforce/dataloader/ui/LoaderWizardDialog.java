@@ -44,6 +44,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.exception.ParameterLoadException;
 
 /**
  * A dialog to show a wizard to the end user.
@@ -94,9 +95,9 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     private SelectionAdapter cancelListener;
     private boolean isMovingToPreviousPage = false;
     private Composite pageContainer;
-    private PageContainerFillLayout pageContainerLayout = new PageContainerFillLayout(5, 5, 600, 800);
-    private int pageWidth = SWT.DEFAULT;
-    private int pageHeight = SWT.DEFAULT;
+    private PageContainerFillLayout pageContainerLayout = null;
+    private int computedPageWidth = SWT.DEFAULT;
+    private int computedPageHeight = SWT.DEFAULT;
     private static final String FOCUS_CONTROL = "focusControl"; //$NON-NLS-1$
     private boolean lockedUI = false;
     private HashMap<Integer, Button> buttons;
@@ -144,6 +145,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
         }
 
         private Point computedSizePoint = null;
+
         /*
          * (non-Javadoc) Method declared on Layout.
          */
@@ -174,6 +176,8 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
             computedSizePoint.y = Math.max(computedSizePoint.y, minimumHeight);
             if (wHint != SWT.DEFAULT) computedSizePoint.x = wHint;
             if (hHint != SWT.DEFAULT) computedSizePoint.y = hHint;
+            computedPageWidth = computedSizePoint.x;
+            computedPageHeight = computedSizePoint.y;
             return computedSizePoint;
         }
 
@@ -237,6 +241,15 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     public LoaderWizardDialog(Shell parentShell, IWizard newWizard, Config config) {
         super(parentShell);
         this.config = config;
+        try {
+            this.pageContainerLayout = new PageContainerFillLayout(5, 5, 
+                    config.getInt(Config.WIZARD_WIDTH),
+                    config.getInt(Config.WIZARD_HEIGHT));
+        } catch (ParameterLoadException e) {
+            this.pageContainerLayout = new PageContainerFillLayout(5, 5, 
+                    Config.DEFAULT_WIZARD_WIDTH,
+                    Config.DEFAULT_WIZARD_HEIGHT);
+        }
         buttons = new HashMap<>();
         setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL | SWT.RESIZE);
         setWizard(newWizard);
@@ -471,8 +484,8 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
         // Build the Page container
         pageContainer = createPageContainer(composite);
         GridData gd = new GridData(GridData.FILL_BOTH);
-        gd.widthHint = pageWidth;
-        gd.heightHint = pageHeight;
+        gd.widthHint = computedPageWidth;
+        gd.heightHint = computedPageHeight;
         pageContainer.setLayoutData(gd);
         pageContainer.setFont(parent.getFont());
         // Insert a progress monitor
@@ -896,8 +909,8 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      * @see #setPageSize(Point)
      */
     public void setPageSize(int width, int height) {
-        pageWidth = width;
-        pageHeight = height;
+        computedPageWidth = width;
+        computedPageHeight = height;
     }
 
     /**
@@ -1139,8 +1152,23 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     protected void updateSize(IWizardPage page) {
         if (page == null || page.getControl() == null) return;
         Shell shell = this.getShell();
-        shell.pack();
-        shell.setBounds(getConstrainedShellBounds(shell.getBounds()));
+        int width = computedPageWidth - 4 * this.pageContainerLayout.marginWidth;
+        int height = computedPageHeight - 4 * this.pageContainerLayout.marginHeight;
+        if (config.getBoolean(Config.ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG)) {
+            try {
+                width = config.getInt(Config.WIZARD_WIDTH);
+                height = config.getInt(Config.WIZARD_HEIGHT);
+            } catch (ParameterLoadException e) {
+                width = Config.DEFAULT_WIZARD_WIDTH;
+                height = Config.DEFAULT_WIZARD_HEIGHT;
+            }
+        }
+        Rectangle bounds = new Rectangle(
+                OperationPage.SHELL_X_OFFSET,
+                OperationPage.SHELL_Y_OFFSET, 
+                width,
+                height);
+        shell.setBounds(getConstrainedShellBounds(bounds));
         pageContainerLayout.layoutPage(page.getControl());
     }
 
