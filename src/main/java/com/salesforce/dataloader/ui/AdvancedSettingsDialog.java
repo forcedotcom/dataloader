@@ -206,12 +206,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
         GridLayout layout = new GridLayout(1, false);
         layout.verticalSpacing = 10;
         shell.setLayout(layout);
-        data = new GridData(GridData.FILL_HORIZONTAL);
+        data = new GridData(GridData.FILL_BOTH);
         shell.setLayoutData(data);
 
         // Create the ScrolledComposite to scroll horizontally and vertically
         ScrolledComposite sc = new ScrolledComposite(shell, SWT.H_SCROLL | SWT.V_SCROLL);
-        data = new GridData(GridData.FILL_HORIZONTAL);
+        data = new GridData(GridData.FILL_BOTH);
         data.heightHint = 600;
         sc.setLayoutData(data);
         
