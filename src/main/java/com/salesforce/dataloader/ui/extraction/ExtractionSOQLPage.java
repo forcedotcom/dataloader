@@ -147,17 +147,18 @@ public class ExtractionSOQLPage extends ExtractionPage {
         gridLayout = new GridLayout(1, false);
         gridLayout.horizontalSpacing = 25;
         fieldComp.setLayout(gridLayout);
+        data = new GridData(GridData.FILL_BOTH);
+        fieldComp.setLayoutData(data);
 
         Text search = new Text(fieldComp, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH);
         data = new GridData(GridData.FILL_HORIZONTAL);
         search.setLayoutData(data);
-        fieldComp.setLayoutData(data);
 
         fieldViewer = CheckboxTableViewer.newCheckList(fieldComp, SWT.BORDER);
         ColumnViewerToolTipSupport.enableFor(fieldViewer);
         fieldViewer.setLabelProvider(new ExtrFieldLabelProvider());
         fieldViewer.setContentProvider(new ExtrFieldContentProvider());
-        data = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
+        data = new GridData(GridData.FILL_BOTH);
         data.widthHint = 50;
         data.heightHint = 120;
         fieldViewer.getTable().setLayoutData(data);
@@ -198,7 +199,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
         });
 
         whereComp = new Composite(builderComp, SWT.NONE);
-        data = new GridData(GridData.FILL_BOTH);
+        data = new GridData(GridData.FILL_VERTICAL);
         whereComp.setLayoutData(data);
         gridLayout = new GridLayout(2, false);
         whereComp.setLayout(gridLayout);
@@ -307,6 +308,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
         valLabel.setText(Labels.getString("ExtractionSOQLPage.value")); //$NON-NLS-1$
         valLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         valueText = new Text(whereComp, SWT.BORDER);
+        valueText.setTextLimit(70);
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
         valueText.setLayoutData(data);
         valueText.addKeyListener(new KeyListener() {
