@@ -219,6 +219,27 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
         final String[] leadidArr = new String[] { result[0].getId() };
         return leadidArr;
     }
+    
+    /**
+     * Tests the extract operation on Account. Verifies that an extract operation with a soql query is performed
+     * correctly.
+     */
+    @Test
+    public void testExtractSObjectWithJSONFieldType() throws Exception {
+        try {
+            // Test for regression in the fix for bug id: W-8551311
+            // describeSObject for ApiEvent sObject fails if JSON FieldType enum 
+            // does not exist in WSC because 'Records' field is of type JSON.
+            
+            final String soql = "SELECT Id FROM ApiEvent";
+            final Map<String, String> argmap = getExtractionTestConfig(soql, "ApiEvent", false);
+                // run the extract
+                runProcess(argmap, 0);
+        } finally {
+            // noop
+        }
+    }
+    
     /**
      * @param enableLastRunOutput
      */
