@@ -95,11 +95,12 @@ public abstract class OperationPage extends WizardPage {
                    // ctl.setBackground(new Color(200, 0, 0));
                    if (ctl instanceof Composite) {
                        Composite comp = (Composite)ctl;
-                       GridData data = (GridData)comp.getLayoutData();
-
                        Control[] children = comp.getChildren();
                        for (Control child : children) {
-                           data = new GridData();
+                           GridData data = (GridData) child.getLayoutData();
+                           if (data == null) {
+                               data = new GridData();
+                           }
                            data.verticalSpan = GridData.FILL_VERTICAL;
                            data.grabExcessVerticalSpace = true;
                            child.setLayoutData(data);

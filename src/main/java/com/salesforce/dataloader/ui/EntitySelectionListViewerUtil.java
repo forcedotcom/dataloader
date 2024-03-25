@@ -28,11 +28,8 @@ package com.salesforce.dataloader.ui;
 
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -71,24 +68,8 @@ public class EntitySelectionListViewerUtil {
         listViewer.setContentProvider(new EntityContentProvider());
         listViewer.setLabelProvider(new EntityLabelProvider());
         listViewer.setInput(null);
-        data = new GridData(GridData.FILL_HORIZONTAL, GridData.VERTICAL_ALIGN_BEGINNING, true, true);
+        data = new GridData(GridData.FILL_BOTH);
         listViewer.getControl().setLayoutData(data);
-        comp.addControlListener(new ControlListener() {
-
-            @Override
-            public void controlMoved(ControlEvent arg0) {
-                // do nothing
-            }
-
-            @Override
-            public void controlResized(ControlEvent arg0) {
-                GridData gdata = new GridData(GridData.FILL_HORIZONTAL, GridData.VERTICAL_ALIGN_BEGINNING, true, true);
-                Point containerSize = comp.getSize();
-                gdata.widthHint = containerSize.x - 30;
-                listViewer.getControl().setLayoutData(gdata);
-            }
-            
-        });
         listViewer.addFilter(filter);
         listViewer.setComparator(new EntityViewerComparator());
         
