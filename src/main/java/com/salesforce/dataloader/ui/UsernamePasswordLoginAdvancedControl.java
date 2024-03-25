@@ -46,7 +46,7 @@ public class UsernamePasswordLoginAdvancedControl extends Composite {
         super(parent, style);
         this.authenticator = authenticator;
 
-        Grid12 grid = new Grid12(this, 40, 20);
+        Grid12 grid = new Grid12(this, 40, false, true);
 
         grid.createLabel(4, Labels.getString("SettingsPage.username"));
         userName = grid.createText(6, SWT.BORDER | SWT.FILL, authenticator.getConfig().getString(Config.USERNAME));

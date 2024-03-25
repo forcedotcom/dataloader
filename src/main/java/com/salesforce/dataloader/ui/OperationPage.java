@@ -30,7 +30,6 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -80,6 +79,11 @@ public abstract class OperationPage extends WizardPage {
                Control[] controls = this.getShell().getChildren();
                for (Control control : controls) {
                    if (control instanceof Composite) {
+                       GridData data = new GridData();
+                       data.verticalSpan = GridData.FILL_VERTICAL;
+                       data.grabExcessVerticalSpace = true;
+                       control.setLayoutData(data);
+
                        controls = ((Composite)control).getChildren();
                        // get the first Composite among children
                        break;
@@ -95,10 +99,7 @@ public abstract class OperationPage extends WizardPage {
 
                        Control[] children = comp.getChildren();
                        for (Control child : children) {
-                           data = (GridData) child.getLayoutData();
-                           if (data == null) {
-                               data = new GridData();
-                           }
+                           data = new GridData();
                            data.verticalSpan = GridData.FILL_VERTICAL;
                            data.grabExcessVerticalSpace = true;
                            child.setLayoutData(data);

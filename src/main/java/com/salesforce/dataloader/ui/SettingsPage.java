@@ -61,7 +61,7 @@ public class SettingsPage extends OperationPage {
 
         Config config = controller.getConfig();
         control = new Composite(parent, SWT.FILL);
-        grid = new Grid12(control, 40);
+        grid = new Grid12(control, 40, false, true);
         authenticator = new AuthenticationRunner(getShell(), config, controller, this::authenticationCompleted);
 
         Button[] layouts = new Button[3];
