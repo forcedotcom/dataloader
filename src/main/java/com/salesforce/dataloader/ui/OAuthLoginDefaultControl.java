@@ -49,7 +49,7 @@ public class OAuthLoginDefaultControl extends Composite {
         super(parent, style);
         this.authenticator = authenticator;
 
-        Grid12 grid =  new Grid12(this, 40, 20);
+        Grid12 grid =  new Grid12(this, 40, false, true);
 
         grid.createLabel(4, Labels.getString("SettingsPage.environment"));
         ArrayList<String> environments = authenticator.getConfig().getStrings(Config.OAUTH_ENVIRONMENTS);

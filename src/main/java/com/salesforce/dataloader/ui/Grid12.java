@@ -40,28 +40,18 @@ import java.util.ArrayList;
 public class Grid12 {
     private Composite composite;
     private final int columnWidth;
-    private final int cellHeight;
     private final GridLayout root;
     private boolean grabExcessHorizontalSpace;
     private boolean grabExcessVerticalSpace;
 
-    public Grid12(Composite composite, int columnWidth){
-        this(composite, columnWidth, SWT.DEFAULT);
-    }
-    public Grid12(Composite composite, int columnWidth, int cellHeight){
-        this(composite, columnWidth, cellHeight, false, true);
-    }
-    public Grid12(Composite composite, int columnWidth, int cellHeight, boolean grabExcessVerticalSpace, boolean grabExcessHorizontalSpace) {
+    public Grid12(Composite composite, int columnWidth, boolean grabExcessVerticalSpace, boolean grabExcessHorizontalSpace) {
         this.composite = composite;
         this.columnWidth = columnWidth;
-        this.cellHeight = cellHeight;
         this.root = new GridLayout(12, true);
         this.composite.setLayout(root);
         this.grabExcessVerticalSpace = grabExcessVerticalSpace;
         this.grabExcessHorizontalSpace = grabExcessHorizontalSpace;
     }
-
-
 
     public GridLayout getRoot() {
         return root;
@@ -76,7 +66,6 @@ public class Grid12 {
         data.horizontalSpan = columnSpan;
         data.widthHint = columnSpan * this.columnWidth;
         data.horizontalAlignment = horizontalAlignment;
-        data.heightHint = cellHeight;
         data.grabExcessHorizontalSpace = grabExcessHorizontalSpace;
         data.grabExcessVerticalSpace = grabExcessVerticalSpace;
 
@@ -85,10 +74,6 @@ public class Grid12 {
 
     public int getColumnWidth() {
         return columnWidth;
-    }
-
-    public int getCellHeight() {
-        return cellHeight;
     }
 
     public Label createLabel(int columns, String message) {
