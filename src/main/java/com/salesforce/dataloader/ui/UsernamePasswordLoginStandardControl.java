@@ -129,8 +129,11 @@ public class UsernamePasswordLoginStandardControl extends Composite {
         data.widthHint = Labels.getString("SettingsPage.login").length() * 2 * TEXT_SIZE.x;
         loginButton.setLayoutData(data);
         
-        loginLabel = new Label(this, SWT.LEFT);
-        data = new GridData();
+        loginLabel = new Label(this, SWT.LEFT | SWT.WRAP);
+        loginLabel.setText("");
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+        data.widthHint = (MAX_CHARS_IN_TEXT + 10) * TEXT_SIZE.x;
+        data.heightHint = 4 * TEXT_SIZE.y;
         data.horizontalSpan = 2;
         loginLabel.setLayoutData(data);
     }
