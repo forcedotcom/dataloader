@@ -515,10 +515,18 @@ public class LoaderTitleAreaDialog extends Dialog {
      *            the message to use
      */
     private void updateMessage(String newMessage) {
-        //Be sure there are always 2 lines for layout purposes
-        if (newMessage != null && newMessage.indexOf('\n') == -1)
-            newMessage = newMessage + "\n "; //$NON-NLS-1$
+        //Be sure there are always 4 lines for layout purposes
+        if (newMessage == null) {
+            newMessage = "";
+        }
+        String[] parts = newMessage.split("\n");
+        if (parts.length < 4) {
+            for (int i = 0; i < 4 - parts.length; i++) {
+                newMessage = newMessage + "\n "; //$NON-NLS-1$
+            }
+        }
         messageLink.setText(newMessage);
+        messageLink.redraw();
         messageLink.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
