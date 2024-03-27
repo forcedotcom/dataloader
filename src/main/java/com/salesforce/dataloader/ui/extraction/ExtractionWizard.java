@@ -153,8 +153,8 @@ public class ExtractionWizard extends BaseWizard {
     }
 
     @Override
-    protected SettingsPage createSettingsPage() {
-        SettingsPage loginPage = new SettingsPage(getController());
+    protected LoginPage createSettingsPage() {
+        LoginPage loginPage = new LoginPage(getController());
         loginPage.setNextPageName(ExtractionDataSelectionPage.class.getSimpleName());
         return loginPage;
     }
