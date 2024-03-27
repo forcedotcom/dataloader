@@ -51,7 +51,7 @@ public class LoginPage extends OperationPage {
     private String nextPageName = DataSelectionPage.class.getSimpleName();
 
     public LoginPage(Controller controller) {
-        super("SettingsPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
+        super("LoginPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
         setPageComplete();
     }
 
@@ -66,9 +66,9 @@ public class LoginPage extends OperationPage {
 
         Button[] layouts = new Button[3];
         grid.createPadding(2);
-        layouts[0] = grid.createButton(2, SWT.RADIO, Labels.getString("SettingsPage.loginDefault"));
-        layouts[1] = grid.createButton(4, SWT.RADIO, Labels.getString("SettingsPage.loginStandard"));
-        layouts[2] = grid.createButton(2, SWT.RADIO, Labels.getString("SettingsPage.loginAdvanced"));
+        layouts[0] = grid.createButton(2, SWT.RADIO, Labels.getString("LoginPage.loginDefault"));
+        layouts[1] = grid.createButton(4, SWT.RADIO, Labels.getString("LoginPage.loginStandard"));
+        layouts[2] = grid.createButton(2, SWT.RADIO, Labels.getString("LoginPage.loginAdvanced"));
         grid.createPadding(2);
 
         defaultControl = new OAuthLoginDefaultControl(control, SWT.FILL, authenticator);

@@ -65,7 +65,7 @@ public class UsernamePasswordLoginControl extends Composite {
         Label usernameLabel = new Label(this, SWT.RIGHT);
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         usernameLabel.setLayoutData(data);
-        usernameLabel.setText(Labels.getString("SettingsPage.username"));
+        usernameLabel.setText(Labels.getString("LoginPage.username"));
         userName = new Text(this, SWT.LEFT | SWT.BORDER);
         userName.setText(authentication.getConfig().getString(Config.USERNAME));
         userName.setTextLimit(MAX_CHARS_IN_TEXT);
@@ -93,14 +93,14 @@ public class UsernamePasswordLoginControl extends Composite {
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         data.widthHint = MAX_CHARS_IN_TEXT * TEXT_SIZE.x;
         if (isInternal) {
-            pwdOrSessionIdLabel.setText(Labels.getString("SettingsPage.sessionId"));
+            pwdOrSessionIdLabel.setText(Labels.getString("LoginPage.sessionId"));
             sessionId = new Text(this, SWT.LEFT | SWT.BORDER);
             sessionId.setText(authentication.getConfig().getString(Config.SFDC_INTERNAL_SESSION_ID));
             sessionId.setTextLimit(MAX_CHARS_IN_TEXT);
             sessionId.setLayoutData(data);
             password = null;
         } else {
-            pwdOrSessionIdLabel.setText(Labels.getString("SettingsPage.password"));
+            pwdOrSessionIdLabel.setText(Labels.getString("LoginPage.password"));
             password = new Text(this, SWT.PASSWORD | SWT.LEFT | SWT.BORDER);
             password.setText("");
             password.setTextLimit(MAX_CHARS_IN_TEXT);
@@ -124,7 +124,7 @@ public class UsernamePasswordLoginControl extends Composite {
         Label serverURLLabel = new Label(this, SWT.RIGHT | SWT.WRAP);
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         serverURLLabel.setLayoutData(data);
-        serverURLLabel.setText(Labels.getString("SettingsPage.instServerUrl"));
+        serverURLLabel.setText(Labels.getString("LoginPage.instServerUrl"));
         loginUrl = new Text(this, SWT.LEFT | SWT.BORDER);
         loginUrl.setText(authentication.getConfig().getString(Config.ENDPOINT));
         loginUrl.setTextLimit(MAX_CHARS_IN_TEXT);
@@ -136,10 +136,10 @@ public class UsernamePasswordLoginControl extends Composite {
         Label emptyLabel = new Label(this, SWT.RIGHT);
         emptyLabel.setText("");
         loginButton = new Button(this, SWT.PUSH | SWT.CENTER | SWT.FLAT);
-        loginButton.setText(Labels.getString("SettingsPage.login"));
+        loginButton.setText(Labels.getString("LoginPage.login"));
         loginButton.addListener(SWT.Selection, this::loginButton_Clicked);
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        data.widthHint = Labels.getString("SettingsPage.login").length() * 2 * TEXT_SIZE.x;
+        data.widthHint = Labels.getString("LoginPage.login").length() * 2 * TEXT_SIZE.x;
         loginButton.setLayoutData(data);
         
         loginLabel = new Label(this, SWT.LEFT | SWT.WRAP);
@@ -170,7 +170,7 @@ public class UsernamePasswordLoginControl extends Composite {
     }
     
     private void setLoginStatus(String statusStr) {
-        if (Labels.getString("SettingsPage.loginSuccessful").equalsIgnoreCase(statusStr)) {
+        if (Labels.getString("LoginPage.loginSuccessful").equalsIgnoreCase(statusStr)) {
             loginButton.setEnabled(false);
         }
         loginLabel.setText(statusStr);

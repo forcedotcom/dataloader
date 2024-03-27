@@ -51,7 +51,7 @@ public class OAuthLoginDefaultControl extends Composite {
 
         Grid12 grid =  new Grid12(this, 40, false, true);
 
-        grid.createLabel(4, Labels.getString("SettingsPage.environment"));
+        grid.createLabel(4, Labels.getString("LoginPage.environment"));
         ArrayList<String> environments = authenticator.getConfig().getStrings(Config.OAUTH_ENVIRONMENTS);
         environment = grid.createCombo(6, SWT.DROP_DOWN | SWT.BORDER, environments);
         String currentEnvironment = authenticator.getConfig().getString(Config.OAUTH_ENVIRONMENT);
@@ -63,7 +63,7 @@ public class OAuthLoginDefaultControl extends Composite {
 
         @SuppressWarnings("unused")
         Label emptyLabel = grid.createLabel(8, "");
-        loginButton = grid.createButton(2, SWT.PUSH | SWT.FILL | SWT.FLAT, Labels.getString("SettingsPage.login"));
+        loginButton = grid.createButton(2, SWT.PUSH | SWT.FILL | SWT.FLAT, Labels.getString("LoginPage.login"));
         loginButton.addListener(SWT.Selection, this::loginButton_Clicked);
         grid.createPadding(2);
         
@@ -76,7 +76,7 @@ public class OAuthLoginDefaultControl extends Composite {
         authenticator.login(criteria, this::setLoginStatus);
     }
     private void setLoginStatus(String statusStr) {
-        if (Labels.getString("SettingsPage.loginSuccessful").equalsIgnoreCase(statusStr)) {
+        if (Labels.getString("LoginPage.loginSuccessful").equalsIgnoreCase(statusStr)) {
             loginButton.setEnabled(false);
         }
         loginLabel.setText(statusStr);
