@@ -35,6 +35,7 @@ import org.apache.logging.log4j.LogManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -72,11 +73,16 @@ public abstract class OAuthFlow extends Dialog {
         // Create the dialog window
         Display display = getParent().getDisplay();
         Shell shell = new Shell(getParent(), SWT.RESIZE | SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.FILL);
-        Grid12 grid = new Grid12(shell, 32, true, true);
+        GridLayout layout = new GridLayout(1, false);
+        shell.setLayout(layout);
 
         // Create the web browser
         Browser browser = new Browser(shell, SWT.NONE);
-        GridData data = grid.createCell(12);
+        GridData data = new GridData();
+        data.horizontalAlignment = SWT.FILL;
+        data.grabExcessHorizontalSpace = true;
+        data.grabExcessVerticalSpace = true;
+        data.widthHint = 400;
         data.heightHint = 600;
         browser.setLayoutData(data);
 
