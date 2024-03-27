@@ -89,7 +89,7 @@ public class AuthenticationRunner {
 
     private void loginAsync(){
         try {
-            messenger.accept(Labels.getString("SettingsPage.verifyingLogin"));
+            messenger.accept(Labels.getString("LoginPage.verifyingLogin"));
 
             if ((criteria.getMode() == LoginCriteria.OAuthLoginDefault)
             	&& config.getBoolean(Config.OAUTH_LOGIN_FROM_BROWSER)
@@ -107,9 +107,9 @@ public class AuthenticationRunner {
                 boolean hasSecret = !config.getString(Config.OAUTH_CLIENTSECRET).trim().equals("");
                 OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, config) : new OAuthTokenFlow(shell, config);
                 if (!flow.open()){
-                    String message = Labels.getString("SettingsPage.invalidLogin");
+                    String message = Labels.getString("LoginPage.invalidLogin");
                     if (flow.getStatusCode() == DefaultSimplePost.PROXY_AUTHENTICATION_REQUIRED) {
-                        message = Labels.getFormattedString("SettingsPage.proxyError", flow.getReasonPhrase());
+                        message = Labels.getFormattedString("LoginPage.proxyError", flow.getReasonPhrase());
                     }
 
                     if (flow.getReasonPhrase() == null) {
@@ -124,14 +124,14 @@ public class AuthenticationRunner {
             } else if (criteria.getMode() == LoginCriteria.OAuthLoginFromBrowser) {
             	OAuthLoginFromBrowserFlow flow = new OAuthLoginFromBrowserFlow(shell, config);
             	if (!flow.open()) {
-	                String message = Labels.getString("SettingsPage.invalidLogin");
+	                String message = Labels.getString("LoginPage.invalidLogin");
 	                messenger.accept(message);
 	                complete.accept(false);
 	                return;
             	}
             }
             if (controller.login() && controller.getEntityDescribes() != null) {
-                messenger.accept(Labels.getString("SettingsPage.loginSuccessful"));
+                messenger.accept(Labels.getString("LoginPage.loginSuccessful"));
                 controller.saveConfig();
                 controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession();
                 PartnerConnection conn = controller.getPartnerClient().getConnection();
@@ -150,11 +150,11 @@ public class AuthenticationRunner {
                     }
                 complete.accept(true);
             } else {
-                messenger.accept(Labels.getString("SettingsPage.invalidLogin"));
+                messenger.accept(Labels.getString("LoginPage.invalidLogin"));
                 complete.accept(false);
             }
         } catch (LoginFault lf ) {
-            messenger.accept(Labels.getString("SettingsPage.invalidLogin"));
+            messenger.accept(Labels.getString("LoginPage.invalidLogin"));
             complete.accept(false);
         } catch (UnexpectedErrorFault e) {
             handleError(e, e.getExceptionMessage());
@@ -197,7 +197,7 @@ public class AuthenticationRunner {
 
     private void handleError(Throwable e, String message) {
         if (message == null || message.length() < 1) {
-            messenger.accept(Labels.getString("SettingsPage.invalidLogin"));
+            messenger.accept(Labels.getString("LoginPage.invalidLogin"));
         } else {
             int x = message.indexOf(nestedException);
             if (x >= 0) {

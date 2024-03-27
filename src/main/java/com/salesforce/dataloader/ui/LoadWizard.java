@@ -126,7 +126,7 @@ public abstract class LoadWizard extends BaseWizard {
     }
 
     @Override
-    protected LoginPage createSettingsPage() {
+    protected LoginPage createLoginPage() {
         return new LoginPage(getController());
     }
 
