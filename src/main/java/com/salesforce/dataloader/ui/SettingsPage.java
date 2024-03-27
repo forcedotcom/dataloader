@@ -44,8 +44,8 @@ public class SettingsPage extends OperationPage {
 
     private AuthenticationRunner authenticator;
     private OAuthLoginDefaultControl defaultControl;
-    private UsernamePasswordLoginStandardControl standardControl;
-    private UsernamePasswordLoginAdvancedControl advancedControl;
+    private UsernamePasswordLoginControl standardControl;
+    private UsernamePasswordLoginControl advancedControl;
     private Grid12 grid;
     private Composite control;
     private String nextPageName = DataSelectionPage.class.getSimpleName();
@@ -73,9 +73,9 @@ public class SettingsPage extends OperationPage {
 
         defaultControl = new OAuthLoginDefaultControl(control, SWT.FILL, authenticator);
         defaultControl.setLayoutData(grid.createCell(12));
-        standardControl = new UsernamePasswordLoginStandardControl(control, SWT.FILL, authenticator);
+        standardControl = new UsernamePasswordLoginControl(control, SWT.FILL, authenticator, false);
         standardControl.setLayoutData(grid.createCell(12));
-        advancedControl = new UsernamePasswordLoginAdvancedControl(control, SWT.FILL, authenticator);
+        advancedControl = new UsernamePasswordLoginControl(control, SWT.FILL, authenticator, true);
         advancedControl.setLayoutData(grid.createCell(12));
 
         setControl(control);

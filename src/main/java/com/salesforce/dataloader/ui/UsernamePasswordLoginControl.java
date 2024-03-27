@@ -40,17 +40,20 @@ import org.eclipse.swt.widgets.*;
 /**
  * LoginStandardControl is the way to login to the api
  */
-public class UsernamePasswordLoginStandardControl extends Composite {
+public class UsernamePasswordLoginControl extends Composite {
 
     private final Button loginButton;
     private final Text userName;
     private final Text password;
-    private final Text instanceUrl;
+    private final Text loginUrl;
     private final AuthenticationRunner authentication;
     private final Label loginLabel;
+    private final Text sessionId;
+    private final boolean isInternal;
 
-    public UsernamePasswordLoginStandardControl(Composite parent, int style, AuthenticationRunner authentication) {
+    public UsernamePasswordLoginControl(Composite parent, int style, AuthenticationRunner authentication, boolean isInternal) {
         super(parent, style);
+        this.isInternal = isInternal;
         this.authentication = authentication;
         GridData data = new GridData(GridData.HORIZONTAL_ALIGN_CENTER);
         this.setLayoutData(data);
@@ -84,40 +87,50 @@ public class UsernamePasswordLoginStandardControl extends Composite {
             }
         });
 
-        Label passwordLabel = new Label(this, SWT.RIGHT | SWT.WRAP);
+        Label pwdOrSessionIdLabel = new Label(this, SWT.RIGHT | SWT.WRAP);
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        passwordLabel.setLayoutData(data);
-        passwordLabel.setText(Labels.getString("SettingsPage.password"));
-        password = new Text(this, SWT.PASSWORD | SWT.LEFT | SWT.BORDER);
-        password.setText("");
-        password.setTextLimit(MAX_CHARS_IN_TEXT);
+        pwdOrSessionIdLabel.setLayoutData(data);
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         data.widthHint = MAX_CHARS_IN_TEXT * TEXT_SIZE.x;
-        password.setLayoutData(data);
-        password.addKeyListener(new KeyListener() {
-            @Override
-            public void keyReleased(KeyEvent e){}
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (!"".equals(loginLabel.getText())) {
-                    loginLabel.setText(""); // clear the login status text
+        if (isInternal) {
+            pwdOrSessionIdLabel.setText(Labels.getString("SettingsPage.sessionId"));
+            sessionId = new Text(this, SWT.LEFT | SWT.BORDER);
+            sessionId.setText(authentication.getConfig().getString(Config.SFDC_INTERNAL_SESSION_ID));
+            sessionId.setTextLimit(MAX_CHARS_IN_TEXT);
+            sessionId.setLayoutData(data);
+            password = null;
+        } else {
+            pwdOrSessionIdLabel.setText(Labels.getString("SettingsPage.password"));
+            password = new Text(this, SWT.PASSWORD | SWT.LEFT | SWT.BORDER);
+            password.setText("");
+            password.setTextLimit(MAX_CHARS_IN_TEXT);
+            password.setLayoutData(data);
+            password.addKeyListener(new KeyListener() {
+                @Override
+                public void keyReleased(KeyEvent e){}
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (!"".equals(loginLabel.getText())) {
+                        loginLabel.setText(""); // clear the login status text
+                    }
+                    if (e.character == '\r') {
+                        attempt_login();
+                    }
                 }
-                if (e.character == '\r') {
-                    attempt_login();
-                }
-            }
-        });
+            });
+            sessionId = null;
+        }
 
         Label serverURLLabel = new Label(this, SWT.RIGHT | SWT.WRAP);
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         serverURLLabel.setLayoutData(data);
         serverURLLabel.setText(Labels.getString("SettingsPage.instServerUrl"));
-        instanceUrl = new Text(this, SWT.LEFT | SWT.BORDER);
-        instanceUrl.setText(authentication.getConfig().getString(Config.ENDPOINT));
-        instanceUrl.setTextLimit(MAX_CHARS_IN_TEXT);
+        loginUrl = new Text(this, SWT.LEFT | SWT.BORDER);
+        loginUrl.setText(authentication.getConfig().getString(Config.ENDPOINT));
+        loginUrl.setTextLimit(MAX_CHARS_IN_TEXT);
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         data.widthHint = MAX_CHARS_IN_TEXT * TEXT_SIZE.x;
-        instanceUrl.setLayoutData(data);
+        loginUrl.setLayoutData(data);
 
         @SuppressWarnings("unused")
         Label emptyLabel = new Label(this, SWT.RIGHT);
@@ -143,10 +156,16 @@ public class UsernamePasswordLoginStandardControl extends Composite {
     }
     
     private void attempt_login() {
-        LoginCriteria criteria = new LoginCriteria(LoginCriteria.UsernamePasswordLoginStandard);
-        criteria.setInstanceUrl(instanceUrl.getText());
+        LoginCriteria criteria = null;
+        if (isInternal) {
+            criteria = new LoginCriteria(LoginCriteria.UsernamePasswordLoginAdvanced);
+            criteria.setSessionId(sessionId.getText());
+        } else {
+            criteria = new LoginCriteria(LoginCriteria.UsernamePasswordLoginStandard);
+            criteria.setPassword(password.getText());
+        }
+        criteria.setInstanceUrl(loginUrl.getText());
         criteria.setUserName(userName.getText());
-        criteria.setPassword(password.getText());
         authentication.login(criteria, this::setLoginStatus);
     }
     
