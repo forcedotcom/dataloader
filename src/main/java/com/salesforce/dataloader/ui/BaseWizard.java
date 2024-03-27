@@ -47,12 +47,12 @@ public abstract class BaseWizard extends Wizard {
 
     }
 
-    protected abstract SettingsPage createSettingsPage();
+    protected abstract LoginPage createSettingsPage();
 
     protected abstract WizardPage setPages();
 
     private WizardPage setupPages() {
-        if (SettingsPage.isNeeded(getController())) addPage(createSettingsPage());
+        if (LoginPage.isNeeded(getController())) addPage(createSettingsPage());
 
         return setPages();
     }

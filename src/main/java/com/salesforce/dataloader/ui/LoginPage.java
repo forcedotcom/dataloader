@@ -40,7 +40,7 @@ import org.eclipse.swt.widgets.Event;
  * @author Lexi Viripaeff
  * @since 6.0
  */
-public class SettingsPage extends OperationPage {
+public class LoginPage extends OperationPage {
 
     private AuthenticationRunner authenticator;
     private OAuthLoginDefaultControl defaultControl;
@@ -50,7 +50,7 @@ public class SettingsPage extends OperationPage {
     private Composite control;
     private String nextPageName = DataSelectionPage.class.getSimpleName();
 
-    public SettingsPage(Controller controller) {
+    public LoginPage(Controller controller) {
         super("SettingsPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
         setPageComplete();
     }
