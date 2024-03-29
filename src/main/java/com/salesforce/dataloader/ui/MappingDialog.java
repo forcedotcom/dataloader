@@ -83,6 +83,7 @@ public class MappingDialog extends BaseDialog {
     private MappingPage page;
     private HashSet<String> mappedFields;
     private Shell parent;
+    private Text sforceFieldsSearch;
 
     public void setSforceFieldInfo(Field[] sforceFieldInfo) {
         this.sforceFieldInfo = sforceFieldInfo;
@@ -174,7 +175,7 @@ public class MappingDialog extends BaseDialog {
         //top label
         Label label = new Label(shell, SWT.NONE);
         label.setText(Labels.getString("MappingDialog.matchlabel")); //$NON-NLS-1$
-
+        
         //buttons
         Composite comp = new Composite(shell, SWT.NONE);
         comp.setLayout(new GridLayout(2, false));
@@ -200,7 +201,7 @@ public class MappingDialog extends BaseDialog {
             }
         });
         
-        Text sforceFieldsSearch = new Text(shell, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH);
+        sforceFieldsSearch = new Text(shell, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH);
         sforceFieldsSearch.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         sforceFieldsSearch.addListener(SWT.KeyUp, new Listener() {
             public void handleEvent(Event e) {
@@ -379,7 +380,9 @@ public class MappingDialog extends BaseDialog {
 
         // Add the first column - column header in CSV file
         TableColumn csvFieldsCol = new TableColumn(mappingTable, SWT.LEFT);
-        csvFieldsCol.setText(Labels.getString("MappingDialog.fileColumn")); //$NON-NLS-1$
+        String headerStr = Labels.getString("MappingDialog.fileColumn");
+        String fillerStr = UIUtils.getFillerStringForTableCol(this.sforceFieldsSearch, headerStr, shell.getSize().x);
+        csvFieldsCol.setText(headerStr + fillerStr); //$NON-NLS-1$
         csvFieldsCol.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
@@ -393,7 +396,9 @@ public class MappingDialog extends BaseDialog {
 
         //Add the second column - name of Salesforce object field
         TableColumn sforceFieldNamesCol = new TableColumn(mappingTable, SWT.LEFT);
-        sforceFieldNamesCol.setText(Labels.getString("MappingDialog.sforceFieldName")); //$NON-NLS-1$
+        headerStr = Labels.getString("MappingDialog.sforceFieldName");
+        fillerStr = UIUtils.getFillerStringForTableCol(this.sforceFieldsSearch, headerStr, this.getParent().getSize().x);
+        sforceFieldNamesCol.setText(headerStr + fillerStr); //$NON-NLS-1$
         sforceFieldNamesCol.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {

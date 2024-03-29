@@ -28,7 +28,7 @@ package com.salesforce.dataloader.ui;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.*;
 import com.salesforce.dataloader.controller.Controller;
 
@@ -38,9 +38,8 @@ public abstract class BaseDialog extends Dialog {
     private String message;
     protected Logger logger;
 
-    private static final int SHELL_X_OFFSET = 150;
-    private static final int SHELL_Y_OFFSET = 100;
-
+    private static final int SHELL_X_OFFSET = 50;
+    private static final int SHELL_Y_OFFSET = 50;
 
     /**
      * InputDialog constructor
@@ -76,10 +75,10 @@ public abstract class BaseDialog extends Dialog {
         createContents(shell);
         Composite shellParent = getParent();
         if (shellParent != null) {
-            Point shellLocation = shellParent.getLocation();
-            shellLocation.x += SHELL_X_OFFSET;
-            shellLocation.y += SHELL_Y_OFFSET;
-            shell.setLocation(shellLocation);
+            Rectangle shellBounds = shellParent.getBounds();
+            shellBounds.x += SHELL_X_OFFSET;
+            shellBounds.y += SHELL_Y_OFFSET;
+            shell.setBounds(shellBounds);
         }
         shell.pack();
         shell.open();
