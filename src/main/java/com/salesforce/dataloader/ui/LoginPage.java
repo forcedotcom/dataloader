@@ -101,6 +101,7 @@ public class LoginPage extends OperationPage {
             }
         }
         setupPage();
+        setShellSizeAtLogin(this.getShell());
     }
     
     public void setNextPageName(String name) {
