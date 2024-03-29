@@ -33,6 +33,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 
 import com.salesforce.dataloader.controller.Controller;
 
@@ -153,5 +154,15 @@ public abstract class OperationPage extends WizardPage {
    
    protected OperationPage getPreviousPageOverride() {
        return this;
+   }
+   
+   private static Point shellSizeAtLogin = null;
+   protected static synchronized void setShellSizeAtLogin(Shell shell) {
+       Point shellSize = shell.getSize();
+       shellSizeAtLogin = new Point(shellSize.x, shellSize.y);
+   }
+   
+   protected static synchronized Point getShellSizeAtLogin() {
+       return new Point(shellSizeAtLogin.x, shellSizeAtLogin.y);
    }
 }
