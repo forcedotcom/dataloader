@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -143,6 +144,7 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
     protected boolean setupPagePostLogin() {
         if (this.controller.isLoggedIn()) {
             setInput(this.controller.getEntityDescribes());
+            lv.refresh();
         }
         return true;
     }
@@ -164,7 +166,10 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
         lv.setInput(inputDescribes);
         lv.getControl().getParent().pack();
         lv.refresh();
-    }
+        Point shellSize = this.getShell().getSize();
+        shellSize.x += 1;
+        shellSize.y += 1;
+        this.getShell().setSize(shellSize);    }
 
     private boolean checkEntityStatus() {
         IStructuredSelection selection = (IStructuredSelection)lv.getSelection();

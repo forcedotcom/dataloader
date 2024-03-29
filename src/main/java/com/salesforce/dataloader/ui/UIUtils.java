@@ -35,6 +35,9 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Drawable;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
@@ -196,6 +199,28 @@ public class UIUtils {
         catch (Exception e) {
             logger.error(e.getMessage());
         }
+    }
+    
+    public static String getFillerStringForTableCol(Drawable drawable, String colHeaderStr, int parentContainerWidth) {
+        GC gc = new GC(drawable);
+        Point TEXT_SIZE = gc.textExtent(" ");
+        gc.dispose();
+        
+        if (colHeaderStr.length() * TEXT_SIZE.x > parentContainerWidth / 2) {
+            return "";
+        }
+        int gapInPixels = (parentContainerWidth) / 2 - colHeaderStr.length() * TEXT_SIZE.x;
+        if (gapInPixels <= 0) {
+            return "";
+        }
+        int gapInChars = gapInPixels / TEXT_SIZE.x;
+        char[] array = new char[gapInChars];
+        int pos = 0;
+        while (pos < gapInChars) {
+            array[pos] = ' ';
+            pos++;
+        }
+        return new String(array);
     }
 
 }

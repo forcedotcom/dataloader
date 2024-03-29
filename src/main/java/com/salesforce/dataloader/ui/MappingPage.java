@@ -30,7 +30,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.List;
 
-
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -114,6 +113,7 @@ public class MappingPage extends LoadPage {
         data.heightHint = 15;
         blankLabel2.setLayoutData(data);
 
+
         Label sep3 = new Label(comp, SWT.HORIZONTAL | SWT.SEPARATOR);
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.horizontalSpan = 2;
@@ -131,18 +131,16 @@ public class MappingPage extends LoadPage {
 
         //  Set up the mapping table
         Table mappingTable = mappingTblViewer.getTable();
-        data = new GridData(GridData.FILL_HORIZONTAL);
-        data.heightHint = 200;
+        data = new GridData(GridData.FILL_BOTH);
         data.horizontalSpan = 2;
         mappingTable.setLayoutData(data);
 
         // Add the first column - name
-        TableColumn tc = new TableColumn(mappingTable, SWT.LEFT);
-        tc.setText(Labels.getString("MappingPage.fileColumn")); //$NON-NLS-1$
-
+        TableColumn csvFieldColumn = new TableColumn(mappingTable, SWT.LEFT);
+        csvFieldColumn.setText(Labels.getString("MappingPage.fileColumn")); //$NON-NLS-1$
         //Add the second column - label
-        tc = new TableColumn(mappingTable, SWT.LEFT);
-        tc.setText(Labels.getString("MappingPage.fieldName")); //$NON-NLS-1$
+        TableColumn sobjectFieldColumn = new TableColumn(mappingTable, SWT.LEFT);
+        sobjectFieldColumn.setText(Labels.getString("MappingPage.fieldName")); //$NON-NLS-1$
 
         //update the model
         updateMapping();
@@ -233,6 +231,7 @@ public class MappingPage extends LoadPage {
         return relatedFieldList.toArray(fields);
     }
 
+    boolean isTableColWidthInitialized = false;
     /*
      * (non-Javadoc)
      * @see com.salesforce.dataloader.ui.LoadPage#setupPage()
@@ -245,6 +244,19 @@ public class MappingPage extends LoadPage {
 
         updateMapping();
         packMappingColumns();
+        
+        if (!isTableColWidthInitialized) {
+            Table table = this.mappingTblViewer.getTable();
+            TableColumn col = table.getColumn(0);
+            String fillerStr = UIUtils.getFillerStringForTableCol(mappingLabel, col.getText(), table.getSize().x);
+            col.setText(col.getText() + fillerStr);
+            col = table.getColumn(1);
+            fillerStr = UIUtils.getFillerStringForTableCol(mappingLabel, col.getText(), table.getSize().x);
+            col.setText(col.getText() + fillerStr);
+            packMappingColumns();
+            isTableColWidthInitialized = true;
+        }
+        
         return true;
     }
 

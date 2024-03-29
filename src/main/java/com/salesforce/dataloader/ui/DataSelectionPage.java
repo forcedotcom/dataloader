@@ -37,6 +37,7 @@ import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.SWT;
 
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -76,7 +77,7 @@ public class DataSelectionPage extends LoadPage {
 
         Composite comp = new Composite(parent, SWT.NONE);
         comp.setLayout(gridLayout);
-        GridData data = new GridData(GridData.FILL_HORIZONTAL);
+        GridData data = new GridData(GridData.FILL_BOTH);
         comp.setLayoutData(data);
         lv = EntitySelectionListViewerUtil.getEntitySelectionListViewer(comp, this.controller.getConfig());
         lv.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -164,6 +165,10 @@ public class DataSelectionPage extends LoadPage {
         lv.setInput(inputDescribes);
         lv.getControl().getParent().pack();
         lv.refresh();
+        Point shellSize = this.getShell().getSize();
+        shellSize.x += 1;
+        shellSize.y += 1;
+        this.getShell().setSize(shellSize);
     }
 
     private boolean checkEntityStatus() {
