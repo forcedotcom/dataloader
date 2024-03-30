@@ -421,11 +421,15 @@ public class Config {
     public static final String READ_ONLY_CONFIG_PROPERTIES = "config.properties.readonly";
     public static final String WIZARD_WIDTH = "sfdc.ui.wizard.width";
     public static final String WIZARD_HEIGHT = "sfdc.ui.wizard.height";
+    public static final String WIZARD_X_OFFSET = "sfdc.ui.wizard.xoffset";
+    public static final String WIZARD_Y_OFFSET = "sfdc.ui.wizard.yoffset";
     public static final String ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG = "sfdc.ui.wizard.enforceWidthHeight";
     public static final String WIZARD_CLOSE_ON_FINISH = "sfdc.ui.wizard.closeOnFinish";
     public static final String WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER = "sfdc.ui.wizard.finishStep.prepopulateWithPreviousOpResultsFolder";
     public static final int DEFAULT_WIZARD_WIDTH = 400;
     public static final int DEFAULT_WIZARD_HEIGHT = 600;
+    public static final int DEFAULT_WIZARD_X_OFFSET = 50;
+    public static final int DEFAULT_WIZARD_Y_OFFSET = 0;
     
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
     // Following properties are read-only, i.e. they are not overridden during save() to config.properties
@@ -623,6 +627,8 @@ public class Config {
         setDefaultValue(LIMIT_OUTPUT_TO_QUERY_FIELDS, true);
         setDefaultValue(WIZARD_CLOSE_ON_FINISH, true);
         setDefaultValue(WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER, true);
+        setDefaultValue(WIZARD_X_OFFSET, DEFAULT_WIZARD_X_OFFSET);
+        setDefaultValue(WIZARD_Y_OFFSET, DEFAULT_WIZARD_Y_OFFSET);
         setDefaultValue(CACHE_DESCRIBE_GLOBAL_RESULTS, true);
         setDefaultValue(PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE, false);
         setDefaultValue(INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, false);

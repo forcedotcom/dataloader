@@ -30,7 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -54,8 +54,6 @@ public abstract class OperationPage extends WizardPage {
     */
    protected final Controller controller;
    protected final Logger logger;
-   public static final int SHELL_X_OFFSET = 50;
-   public static final int SHELL_Y_OFFSET = 0;
 
    public OperationPage(String name, Controller controller) {
        super(name);
@@ -70,9 +68,8 @@ public abstract class OperationPage extends WizardPage {
        // Set the description
        String description = Labels.getString(this.getClass().getSimpleName() + ".description");
        this.setDescription(description);
-       Point shellLocation = new Point(SHELL_X_OFFSET, SHELL_Y_OFFSET);
-       this.getShell().setLocation(shellLocation);
-       this.getShell().addListener(SWT.Resize, this::shellResized);
+       this.getShell().addListener(SWT.Resize, this::shellBoundsChanged);
+       this.getShell().addListener(SWT.Move, this::shellBoundsChanged);
 
        boolean success = true;
        if (this.controller.isLoggedIn()) {
@@ -159,24 +156,31 @@ public abstract class OperationPage extends WizardPage {
        return this;
    }
 
-   protected synchronized Point getShellSize() {
+   protected synchronized Rectangle getPersistedWizardBounds() {
+       int xOffset = Config.DEFAULT_WIZARD_X_OFFSET;
+       int yOffset = Config.DEFAULT_WIZARD_Y_OFFSET;
        int width = Config.DEFAULT_WIZARD_WIDTH;
        int height = Config.DEFAULT_WIZARD_HEIGHT;
        try {
+           xOffset = controller.getConfig().getInt(Config.WIZARD_X_OFFSET);
+           yOffset = controller.getConfig().getInt(Config.WIZARD_Y_OFFSET);
            width = controller.getConfig().getInt(Config.WIZARD_WIDTH);
            height = controller.getConfig().getInt(Config.WIZARD_HEIGHT);
        } catch (Exception ex) {
            // no op
        }
-       return new Point(width, height);
+       return new Rectangle(xOffset, yOffset, width, height);
    }
    
-    private void shellResized(Event event) {
+    private void shellBoundsChanged(Event event) {
         switch (event.type) {
             case SWT.Resize:
-                Point shellSize = this.getShell().getSize();
-                controller.getConfig().setValue(Config.WIZARD_WIDTH, shellSize.x);
-                controller.getConfig().setValue(Config.WIZARD_HEIGHT, shellSize.y);
+            case SWT.Move:
+                Rectangle shellBounds = this.getShell().getBounds();
+                controller.getConfig().setValue(Config.WIZARD_X_OFFSET, shellBounds.x);
+                controller.getConfig().setValue(Config.WIZARD_Y_OFFSET, shellBounds.y);
+                controller.getConfig().setValue(Config.WIZARD_WIDTH, shellBounds.width);
+                controller.getConfig().setValue(Config.WIZARD_HEIGHT, shellBounds.height);
                 break;
         }
     }
