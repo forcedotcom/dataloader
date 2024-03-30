@@ -1149,12 +1149,12 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     protected void updateSize(IWizardPage page) {
         if (page == null || page.getControl() == null) return;
         Shell shell = this.getShell();
-        Point cachedShellSize = OperationPage.getCachedShellSize();
+        Point shellSize = ((OperationPage)page).getShellSize();
         Rectangle bounds = new Rectangle(
                 OperationPage.SHELL_X_OFFSET,
                 OperationPage.SHELL_Y_OFFSET, 
-                cachedShellSize.x,
-                cachedShellSize.y);
+                shellSize.x,
+                shellSize.y);
         shell.setBounds(getConstrainedShellBounds(bounds));
         pageContainerLayout.layoutPage(page.getControl());
     }

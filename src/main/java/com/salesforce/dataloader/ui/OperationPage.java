@@ -72,7 +72,7 @@ public abstract class OperationPage extends WizardPage {
        this.setDescription(description);
        Point shellLocation = new Point(SHELL_X_OFFSET, SHELL_Y_OFFSET);
        this.getShell().setLocation(shellLocation);
-       initializeCachedShellSize();
+       this.getShell().addListener(SWT.Resize, this::shellResized);
 
        boolean success = true;
        if (this.controller.isLoggedIn()) {
@@ -158,14 +158,8 @@ public abstract class OperationPage extends WizardPage {
    protected OperationPage getPreviousPageOverride() {
        return this;
    }
-   
-   private static Point cachedShellSize = null;
-   
-   private synchronized void initializeCachedShellSize() {
-       this.getShell().addListener(SWT.Resize, this::shellResized);
-       if (cachedShellSize != null) {
-           return;
-       }
+
+   protected synchronized Point getShellSize() {
        int width = Config.DEFAULT_WIZARD_WIDTH;
        int height = Config.DEFAULT_WIZARD_HEIGHT;
        try {
@@ -174,21 +168,15 @@ public abstract class OperationPage extends WizardPage {
        } catch (Exception ex) {
            // no op
        }
-       cachedShellSize = new Point(width, height);
-   }
-
-   protected static synchronized Point getCachedShellSize() {
-       if (cachedShellSize == null) {
-           return null;
-       }
-       return new Point(cachedShellSize.x, cachedShellSize.y);
+       return new Point(width, height);
    }
    
     private void shellResized(Event event) {
         switch (event.type) {
             case SWT.Resize:
                 Point shellSize = this.getShell().getSize();
-                cachedShellSize = new Point(shellSize.x, shellSize.y);
+                controller.getConfig().setValue(Config.WIZARD_WIDTH, shellSize.x);
+                controller.getConfig().setValue(Config.WIZARD_HEIGHT, shellSize.y);
                 break;
         }
     }

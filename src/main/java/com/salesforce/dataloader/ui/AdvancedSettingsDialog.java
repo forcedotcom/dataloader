@@ -115,7 +115,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonCsvTab;
     private Button buttonLoginFromBrowser;
     private Button buttonCloseWizardOnFinish;
-    private Button buttonEnforceSpecifiedWizardWidthAndHeight;
     private Button buttonPopulateResultsFolderOnWizardFinishStep;
     private static final String[] LOGGING_LEVEL = { "ALL", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
     private Combo comboLoggingLevelDropdown;
@@ -851,13 +850,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 event.doit = Character.isISOControl(event.character) || Character.isDigit(event.character);
             }
         });
-        
-        Label labelEnforceSpecifiedWizardWidthAndHeight = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelEnforceSpecifiedWizardWidthAndHeight.setText(Labels.getString("AdvancedSettingsDialog.enforceSpecifiedWizardWidthAndHeight"));
-        labelEnforceSpecifiedWizardWidthAndHeight.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-        buttonEnforceSpecifiedWizardWidthAndHeight = new Button(restComp, SWT.CHECK);
-        buttonEnforceSpecifiedWizardWidthAndHeight.setSelection(config.getBoolean(Config.ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG));
-        
+
         Label populateResultsFolderOnWizardFinishStepText = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         populateResultsFolderOnWizardFinishStepText.setText(Labels.getString("AdvancedSettingsDialog.populateResultsFolderOnFinishStepOfWizard"));
         populateResultsFolderOnWizardFinishStepText.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
@@ -1017,7 +1010,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.WIZARD_CLOSE_ON_FINISH, buttonCloseWizardOnFinish.getSelection());
                 config.setValue(Config.WIZARD_WIDTH, textWizardWidth.getText());
                 config.setValue(Config.WIZARD_HEIGHT, textWizardHeight.getText());
-                config.setValue(Config.ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG, buttonEnforceSpecifiedWizardWidthAndHeight.getSelection());
 
                 config.setValue(Config.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER, buttonPopulateResultsFolderOnWizardFinishStep.getSelection());
                 LoggingUtil.setLoggingLevel(LOGGING_LEVEL[comboLoggingLevelDropdown.getSelectionIndex()]);
