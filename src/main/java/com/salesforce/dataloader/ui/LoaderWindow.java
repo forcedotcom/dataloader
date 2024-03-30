@@ -177,8 +177,8 @@ public class LoaderWindow extends ApplicationWindow {
         updateTitle(null);
         shell.setSize(600, 400);
         Point shellLocation = shell.getLocation();
-        if (shellLocation.x < OperationPage.SHELL_X_OFFSET) {
-            shellLocation.x = OperationPage.SHELL_X_OFFSET;
+        if (shellLocation.x < Config.DEFAULT_WIZARD_X_OFFSET) {
+            shellLocation.x = Config.DEFAULT_WIZARD_X_OFFSET;
             shell.setLocation(shellLocation);
         }
 
