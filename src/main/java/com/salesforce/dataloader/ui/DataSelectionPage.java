@@ -165,7 +165,7 @@ public class DataSelectionPage extends LoadPage {
         lv.setInput(inputDescribes);
         lv.getControl().getParent().pack();
         lv.refresh();
-        Point shellSize = getShellSizeAtLogin();
+        Point shellSize = getCachedShellSize();
         shellSize.x += 1;
         shellSize.y += 1;
         this.getShell().setSize(shellSize);

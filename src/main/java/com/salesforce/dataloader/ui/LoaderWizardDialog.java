@@ -151,9 +151,6 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
          */
         @Override
         public Point computeSize(Composite composite, int wHint, int hHint, boolean force) {
-            if (computedSizePoint != null) {
-                return computedSizePoint;
-            }
             if (wHint != SWT.DEFAULT && hHint != SWT.DEFAULT) {
                 computedSizePoint = new Point(wHint, hHint);
                 return computedSizePoint;
@@ -1152,22 +1149,12 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     protected void updateSize(IWizardPage page) {
         if (page == null || page.getControl() == null) return;
         Shell shell = this.getShell();
-        int width = computedPageWidth - 4 * this.pageContainerLayout.marginWidth;
-        int height = computedPageHeight - 4 * this.pageContainerLayout.marginHeight;
-        if (config.getBoolean(Config.ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG)) {
-            try {
-                width = config.getInt(Config.WIZARD_WIDTH);
-                height = config.getInt(Config.WIZARD_HEIGHT);
-            } catch (ParameterLoadException e) {
-                width = Config.DEFAULT_WIZARD_WIDTH;
-                height = Config.DEFAULT_WIZARD_HEIGHT;
-            }
-        }
+        Point cachedShellSize = OperationPage.getCachedShellSize();
         Rectangle bounds = new Rectangle(
                 OperationPage.SHELL_X_OFFSET,
                 OperationPage.SHELL_Y_OFFSET, 
-                width,
-                height);
+                cachedShellSize.x,
+                cachedShellSize.y);
         shell.setBounds(getConstrainedShellBounds(bounds));
         pageContainerLayout.layoutPage(page.getControl());
     }

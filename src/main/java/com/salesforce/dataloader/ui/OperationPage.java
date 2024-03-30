@@ -29,12 +29,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Event;
 
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 
 /**
@@ -70,7 +72,8 @@ public abstract class OperationPage extends WizardPage {
        this.setDescription(description);
        Point shellLocation = new Point(SHELL_X_OFFSET, SHELL_Y_OFFSET);
        this.getShell().setLocation(shellLocation);
-       
+       initializeCachedShellSize();
+
        boolean success = true;
        if (this.controller.isLoggedIn()) {
            success = setupPagePostLogin();
@@ -156,13 +159,37 @@ public abstract class OperationPage extends WizardPage {
        return this;
    }
    
-   private static Point shellSizeAtLogin = null;
-   protected static synchronized void setShellSizeAtLogin(Shell shell) {
-       Point shellSize = shell.getSize();
-       shellSizeAtLogin = new Point(shellSize.x, shellSize.y);
+   private static Point cachedShellSize = null;
+   
+   private synchronized void initializeCachedShellSize() {
+       this.getShell().addListener(SWT.Resize, this::shellResized);
+       if (cachedShellSize != null) {
+           return;
+       }
+       int width = Config.DEFAULT_WIZARD_WIDTH;
+       int height = Config.DEFAULT_WIZARD_HEIGHT;
+       try {
+           width = controller.getConfig().getInt(Config.WIZARD_WIDTH);
+           height = controller.getConfig().getInt(Config.WIZARD_HEIGHT);
+       } catch (Exception ex) {
+           // no op
+       }
+       cachedShellSize = new Point(width, height);
+   }
+
+   protected static synchronized Point getCachedShellSize() {
+       if (cachedShellSize == null) {
+           return null;
+       }
+       return new Point(cachedShellSize.x, cachedShellSize.y);
    }
    
-   protected static synchronized Point getShellSizeAtLogin() {
-       return new Point(shellSizeAtLogin.x, shellSizeAtLogin.y);
-   }
+    private void shellResized(Event event) {
+        switch (event.type) {
+            case SWT.Resize:
+                Point shellSize = this.getShell().getSize();
+                cachedShellSize = new Point(shellSize.x, shellSize.y);
+                break;
+        }
+    }
 }

@@ -69,7 +69,7 @@ public class EntitySelectionListViewerUtil {
         listViewer.setLabelProvider(new EntityLabelProvider());
         listViewer.setInput(null);
         data = new GridData(GridData.FILL_BOTH);
-        data.heightHint = OperationPage.getShellSizeAtLogin().x / 3;
+        data.heightHint = OperationPage.getCachedShellSize().x / 3;
         listViewer.getControl().setLayoutData(data);
         listViewer.addFilter(filter);
         listViewer.setComparator(new EntityViewerComparator());

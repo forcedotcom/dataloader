@@ -457,7 +457,8 @@ public class Config {
             READ_ONLY_CONFIG_PROPERTIES,
             RICH_TEXT_FIELD_REGEX,
             DAO_READ_PREPROCESSOR_SCRIPT,
-            DAO_WRITE_POSTPROCESSOR_SCRIPT
+            DAO_WRITE_POSTPROCESSOR_SCRIPT,
+            ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG
     };
     
     /**
@@ -616,7 +617,7 @@ public class Config {
         setDefaultValue(PROCESS_KEEP_ACCOUNT_TEAM, false);
         setDefaultValue(WIZARD_WIDTH, DEFAULT_WIZARD_WIDTH);
         setDefaultValue(WIZARD_HEIGHT, DEFAULT_WIZARD_HEIGHT);
-        setDefaultValue(ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG, false);
+        setDefaultValue(ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG, true);
         setDefaultValue(DAO_READ_PREPROCESSOR_SCRIPT, "");
         setDefaultValue(DAO_WRITE_POSTPROCESSOR_SCRIPT, "");
         setDefaultValue(LIMIT_OUTPUT_TO_QUERY_FIELDS, true);
