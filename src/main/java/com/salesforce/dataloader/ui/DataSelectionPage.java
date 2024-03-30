@@ -37,7 +37,6 @@ import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.SWT;
 
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -165,10 +164,6 @@ public class DataSelectionPage extends LoadPage {
         lv.setInput(inputDescribes);
         lv.getControl().getParent().pack();
         lv.refresh();
-        Point shellSize = getShellSizeAtLogin();
-        shellSize.x += 1;
-        shellSize.y += 1;
-        this.getShell().setSize(shellSize);
     }
 
     private boolean checkEntityStatus() {

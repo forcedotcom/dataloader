@@ -166,10 +166,7 @@ public class ExtractionDataSelectionPage extends ExtractionPage {
         lv.setInput(inputDescribes);
         lv.getControl().getParent().pack();
         lv.refresh();
-        Point shellSize = this.getShell().getSize();
-        shellSize.x += 1;
-        shellSize.y += 1;
-        this.getShell().setSize(shellSize);    }
+    }
 
     private boolean checkEntityStatus() {
         IStructuredSelection selection = (IStructuredSelection)lv.getSelection();
