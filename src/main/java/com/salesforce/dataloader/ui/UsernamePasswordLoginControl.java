@@ -28,9 +28,14 @@ package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.model.LoginCriteria;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.graphics.FontMetrics;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -123,9 +128,12 @@ public class UsernamePasswordLoginControl extends Composite {
         Label emptyLabel = new Label(this, SWT.RIGHT);
         emptyLabel.setText("");
         loginButton = new Button(this, SWT.PUSH | SWT.CENTER | SWT.FLAT);
-        loginButton.setText("    " + Labels.getString("LoginPage.login") + "    ");
+        loginButton.setText(Labels.getString("LoginPage.login"));
         loginButton.addListener(SWT.Selection, this::loginButton_Clicked);
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        int widthHint = UIUtils.getControlWidth(loginButton);
+        Point minSize = loginButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+        data.widthHint = Math.max(widthHint, minSize.x);
         loginButton.setLayoutData(data);
         
         loginLabel = new Label(this, SWT.LEFT | SWT.WRAP);
