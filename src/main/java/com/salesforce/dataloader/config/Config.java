@@ -426,7 +426,7 @@ public class Config {
     public static final String ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG = "sfdc.ui.wizard.enforceWidthHeight";
     public static final String WIZARD_CLOSE_ON_FINISH = "sfdc.ui.wizard.closeOnFinish";
     public static final String WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER = "sfdc.ui.wizard.finishStep.prepopulateWithPreviousOpResultsFolder";
-    public static final int DEFAULT_WIZARD_WIDTH = 400;
+    public static final int DEFAULT_WIZARD_WIDTH = 600;
     public static final int DEFAULT_WIZARD_HEIGHT = 600;
     public static final int DEFAULT_WIZARD_X_OFFSET = 50;
     public static final int DEFAULT_WIZARD_Y_OFFSET = 0;
