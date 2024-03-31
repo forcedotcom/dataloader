@@ -31,8 +31,6 @@ import com.salesforce.dataloader.model.LoginCriteria;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -55,25 +53,19 @@ public class UsernamePasswordLoginControl extends Composite {
         super(parent, style);
         this.isInternal = isInternal;
         this.authentication = authentication;
-        GridData data = new GridData(GridData.HORIZONTAL_ALIGN_CENTER);
+        GridData data = new GridData(GridData.FILL_BOTH);
         this.setLayoutData(data);
-        GridLayout layout = new GridLayout(2, false);
+        GridLayout layout = new GridLayout(2, true);
         layout.verticalSpacing = 10;
         this.setLayout(layout);
 
-        final int MAX_CHARS_IN_TEXT = 40;
         Label usernameLabel = new Label(this, SWT.RIGHT);
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         usernameLabel.setLayoutData(data);
         usernameLabel.setText(Labels.getString("LoginPage.username"));
         userName = new Text(this, SWT.LEFT | SWT.BORDER);
         userName.setText(authentication.getConfig().getString(Config.USERNAME));
-        userName.setTextLimit(MAX_CHARS_IN_TEXT);
-        GC gc = new GC(userName);
-        final Point TEXT_SIZE = gc.textExtent("8");
-        gc.dispose();
-        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-        data.widthHint = MAX_CHARS_IN_TEXT * TEXT_SIZE.x;
+       data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
         userName.setLayoutData(data);
 
         userName.addKeyListener(new KeyListener() {
@@ -90,20 +82,17 @@ public class UsernamePasswordLoginControl extends Composite {
         Label pwdOrSessionIdLabel = new Label(this, SWT.RIGHT | SWT.WRAP);
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         pwdOrSessionIdLabel.setLayoutData(data);
-        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-        data.widthHint = MAX_CHARS_IN_TEXT * TEXT_SIZE.x;
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
         if (isInternal) {
             pwdOrSessionIdLabel.setText(Labels.getString("LoginPage.sessionId"));
             sessionId = new Text(this, SWT.LEFT | SWT.BORDER);
             sessionId.setText(authentication.getConfig().getString(Config.SFDC_INTERNAL_SESSION_ID));
-            sessionId.setTextLimit(MAX_CHARS_IN_TEXT);
             sessionId.setLayoutData(data);
             password = null;
         } else {
             pwdOrSessionIdLabel.setText(Labels.getString("LoginPage.password"));
             password = new Text(this, SWT.PASSWORD | SWT.LEFT | SWT.BORDER);
             password.setText("");
-            password.setTextLimit(MAX_CHARS_IN_TEXT);
             password.setLayoutData(data);
             password.addKeyListener(new KeyListener() {
                 @Override
@@ -127,26 +116,21 @@ public class UsernamePasswordLoginControl extends Composite {
         serverURLLabel.setText(Labels.getString("LoginPage.instServerUrl"));
         loginUrl = new Text(this, SWT.LEFT | SWT.BORDER);
         loginUrl.setText(authentication.getConfig().getString(Config.ENDPOINT));
-        loginUrl.setTextLimit(MAX_CHARS_IN_TEXT);
-        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-        data.widthHint = MAX_CHARS_IN_TEXT * TEXT_SIZE.x;
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
         loginUrl.setLayoutData(data);
 
         @SuppressWarnings("unused")
         Label emptyLabel = new Label(this, SWT.RIGHT);
         emptyLabel.setText("");
         loginButton = new Button(this, SWT.PUSH | SWT.CENTER | SWT.FLAT);
-        loginButton.setText(Labels.getString("LoginPage.login"));
+        loginButton.setText("    " + Labels.getString("LoginPage.login") + "    ");
         loginButton.addListener(SWT.Selection, this::loginButton_Clicked);
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        data.widthHint = Labels.getString("LoginPage.login").length() * 2 * TEXT_SIZE.x;
         loginButton.setLayoutData(data);
         
         loginLabel = new Label(this, SWT.LEFT | SWT.WRAP);
         loginLabel.setText("");
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-        data.widthHint = (MAX_CHARS_IN_TEXT + 10) * TEXT_SIZE.x;
-        data.heightHint = 4 * TEXT_SIZE.y;
         data.horizontalSpan = 2;
         loginLabel.setLayoutData(data);
     }

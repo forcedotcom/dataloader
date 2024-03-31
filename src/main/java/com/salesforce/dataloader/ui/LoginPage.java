@@ -74,7 +74,7 @@ public class LoginPage extends OperationPage {
         defaultControl = new OAuthLoginDefaultControl(control, SWT.FILL, authenticator);
         defaultControl.setLayoutData(grid.createCell(12));
         standardControl = new UsernamePasswordLoginControl(control, SWT.FILL, authenticator, false);
-        standardControl.setLayoutData(grid.createCell(12));
+        standardControl.setLayoutData(grid.createCell(10));
         advancedControl = new UsernamePasswordLoginControl(control, SWT.FILL, authenticator, true);
         advancedControl.setLayoutData(grid.createCell(12));
 

@@ -96,12 +96,9 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     private boolean isMovingToPreviousPage = false;
     private Composite pageContainer;
     private PageContainerFillLayout pageContainerLayout = null;
-    private int computedPageWidth = SWT.DEFAULT;
-    private int computedPageHeight = SWT.DEFAULT;
     private static final String FOCUS_CONTROL = "focusControl"; //$NON-NLS-1$
     private boolean lockedUI = false;
     private HashMap<Integer, Button> buttons;
-    private Config config;
 
     /**
      * A layout for a container which includes several pages, like a notebook, wizard, or preference dialog. The size
@@ -144,13 +141,12 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
             minimumHeight = minH;
         }
 
-        private Point computedSizePoint = null;
-
         /*
          * (non-Javadoc) Method declared on Layout.
          */
         @Override
         public Point computeSize(Composite composite, int wHint, int hHint, boolean force) {
+            Point computedSizePoint = new Point(wHint, hHint);
             if (wHint != SWT.DEFAULT && hHint != SWT.DEFAULT) {
                 computedSizePoint = new Point(wHint, hHint);
                 return computedSizePoint;
@@ -173,8 +169,6 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
             computedSizePoint.y = Math.max(computedSizePoint.y, minimumHeight);
             if (wHint != SWT.DEFAULT) computedSizePoint.x = wHint;
             if (hHint != SWT.DEFAULT) computedSizePoint.y = hHint;
-            computedPageWidth = computedSizePoint.x;
-            computedPageHeight = computedSizePoint.y;
             return computedSizePoint;
         }
 
@@ -237,7 +231,6 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      */
     public LoaderWizardDialog(Shell parentShell, IWizard newWizard, Config config) {
         super(parentShell);
-        this.config = config;
         try {
             this.pageContainerLayout = new PageContainerFillLayout(5, 5, 
                     config.getInt(Config.WIZARD_WIDTH),
@@ -481,8 +474,6 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
         // Build the Page container
         pageContainer = createPageContainer(composite);
         GridData gd = new GridData(GridData.FILL_BOTH);
-        gd.widthHint = computedPageWidth;
-        gd.heightHint = computedPageHeight;
         pageContainer.setLayoutData(gd);
         pageContainer.setFont(parent.getFont());
         // Insert a progress monitor
@@ -906,8 +897,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      * @see #setPageSize(Point)
      */
     public void setPageSize(int width, int height) {
-        computedPageWidth = width;
-        computedPageHeight = height;
+        // no op
     }
 
     /**
