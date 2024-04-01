@@ -231,15 +231,10 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      */
     public LoaderWizardDialog(Shell parentShell, IWizard newWizard, Config config) {
         super(parentShell);
-        try {
-            this.pageContainerLayout = new PageContainerFillLayout(5, 5, 
-                    config.getInt(Config.WIZARD_WIDTH),
-                    config.getInt(Config.WIZARD_HEIGHT));
-        } catch (ParameterLoadException e) {
-            this.pageContainerLayout = new PageContainerFillLayout(5, 5, 
-                    Config.DEFAULT_WIZARD_WIDTH,
-                    Config.DEFAULT_WIZARD_HEIGHT);
-        }
+        Rectangle shellBounds = UIUtils.getPersistedWizardBounds(config);
+        this.pageContainerLayout = new PageContainerFillLayout(5, 5, 
+                shellBounds.width,
+                shellBounds.height);
         buttons = new HashMap<>();
         setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL | SWT.RESIZE);
         setWizard(newWizard);
@@ -1139,7 +1134,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     protected void updateSize(IWizardPage page) {
         if (page == null || page.getControl() == null) return;
         Shell shell = this.getShell();
-        Rectangle savedBounds = ((OperationPage)page).getPersistedWizardBounds();
+        Rectangle savedBounds = UIUtils.getPersistedWizardBounds(((OperationPage)page).controller.getConfig());
         shell.setBounds(getConstrainedShellBounds(savedBounds));
         pageContainerLayout.layoutPage(page.getControl());
     }

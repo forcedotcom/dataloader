@@ -155,22 +155,6 @@ public abstract class OperationPage extends WizardPage {
    protected OperationPage getPreviousPageOverride() {
        return this;
    }
-
-   protected synchronized Rectangle getPersistedWizardBounds() {
-       int xOffset = Config.DEFAULT_WIZARD_X_OFFSET;
-       int yOffset = Config.DEFAULT_WIZARD_Y_OFFSET;
-       int width = Config.DEFAULT_WIZARD_WIDTH;
-       int height = Config.DEFAULT_WIZARD_HEIGHT;
-       try {
-           xOffset = controller.getConfig().getInt(Config.WIZARD_X_OFFSET);
-           yOffset = controller.getConfig().getInt(Config.WIZARD_Y_OFFSET);
-           width = controller.getConfig().getInt(Config.WIZARD_WIDTH);
-           height = controller.getConfig().getInt(Config.WIZARD_HEIGHT);
-       } catch (Exception ex) {
-           // no op
-       }
-       return new Rectangle(xOffset, yOffset, width, height);
-   }
    
     private void shellBoundsChanged(Event event) {
         switch (event.type) {
