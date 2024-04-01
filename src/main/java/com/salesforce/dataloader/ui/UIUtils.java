@@ -254,10 +254,11 @@ public class UIUtils {
     }
     
     public static Rectangle getPersistedDialogBounds(String dialogName, Config config) {
-        int xOffset = Config.DEFAULT_WIZARD_X_OFFSET + Config.DIALOG_X_OFFSET;
-        int yOffset = Config.DEFAULT_WIZARD_Y_OFFSET + Config.DIALOG_Y_OFFSET;
-        int width = Config.DEFAULT_WIZARD_WIDTH;
-        int height = Config.DEFAULT_WIZARD_HEIGHT;
+        Rectangle wizardBounds = getPersistedWizardBounds(config);
+        int xOffset = wizardBounds.x + Config.DIALOG_X_OFFSET;
+        int yOffset = wizardBounds.y + Config.DIALOG_Y_OFFSET;
+        int width = wizardBounds.width;
+        int height = wizardBounds.height;
         if (config != null) {
             try {
                 xOffset = config.getInt(Config.WIZARD_X_OFFSET) + Config.DIALOG_X_OFFSET;
@@ -269,10 +270,10 @@ public class UIUtils {
             }
         }
         if (width == 0) {
-            width = Config.DEFAULT_WIZARD_WIDTH;
+            width = wizardBounds.width;
         }
         if (height == 0) {
-            height = Config.DEFAULT_WIZARD_HEIGHT;
+            height = wizardBounds.height;
         }
         return new Rectangle(xOffset, yOffset, width, height);
     }
