@@ -30,6 +30,8 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.*;
+
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 
 public abstract class BaseDialog extends Dialog {
@@ -37,9 +39,6 @@ public abstract class BaseDialog extends Dialog {
     private Controller controller;
     private String message;
     protected Logger logger;
-
-    private static final int SHELL_X_OFFSET = 50;
-    private static final int SHELL_Y_OFFSET = 50;
 
     /**
      * InputDialog constructor
@@ -73,16 +72,17 @@ public abstract class BaseDialog extends Dialog {
         shell.setText(getText());
         shell.setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
         createContents(shell);
-        Composite shellParent = getParent();
-        if (shellParent != null) {
-            Rectangle shellBounds = shellParent.getBounds();
-            shellBounds.x += SHELL_X_OFFSET;
-            shellBounds.y += SHELL_Y_OFFSET;
-            shell.setBounds(shellBounds);
-        }
         shell.pack();
         shell.open();
+        setShellBounds(shell);
         return shell;
+    }
+    
+    protected void setShellBounds(Shell dialogShell) {
+        Rectangle shellBounds = UIUtils.getPersistedWizardBounds(this.controller.getConfig());
+        shellBounds.x += Config.DIALOG_X_OFFSET;
+        shellBounds.y += Config.DIALOG_Y_OFFSET;
+        dialogShell.setBounds(shellBounds);
     }
     
     protected abstract void createContents(Shell shell);

@@ -426,10 +426,15 @@ public class Config {
     public static final String ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG = "sfdc.ui.wizard.enforceWidthHeight";
     public static final String WIZARD_CLOSE_ON_FINISH = "sfdc.ui.wizard.closeOnFinish";
     public static final String WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER = "sfdc.ui.wizard.finishStep.prepopulateWithPreviousOpResultsFolder";
+    public static final String DIALOG_BOUNDS_PREFIX = "sfdc.ui.dialog.";
+    public static final String DIALOG_WIDTH_SUFFIX = ".width";
+    public static final String DIALOG_HEIGHT_SUFFIX = ".height";
     public static final int DEFAULT_WIZARD_WIDTH = 600;
     public static final int DEFAULT_WIZARD_HEIGHT = 600;
     public static final int DEFAULT_WIZARD_X_OFFSET = 50;
     public static final int DEFAULT_WIZARD_Y_OFFSET = 0;
+    public static final int DIALOG_X_OFFSET = 50;
+    public static final int DIALOG_Y_OFFSET = 50;
     
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
     // Following properties are read-only, i.e. they are not overridden during save() to config.properties

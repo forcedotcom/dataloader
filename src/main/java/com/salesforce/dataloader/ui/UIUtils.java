@@ -27,6 +27,7 @@
 package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.action.OperationInfo;
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.util.AppUtil;
 
 import org.apache.logging.log4j.LogManager;
@@ -36,10 +37,10 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Drawable;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -204,15 +205,15 @@ public class UIUtils {
         }
     }
     
-    public static String getFillerStringForTableCol(Drawable drawable, String colHeaderStr, int parentContainerWidth) {
-        GC gc = new GC(drawable);
+    public static String getFillerStringForTableCol(Control control, String colHeaderStr, int desiredWidthInPixels) {
+        GC gc = new GC(control);
         Point TEXT_SIZE = gc.textExtent(" ");
         gc.dispose();
         
-        if (colHeaderStr.length() * TEXT_SIZE.x > parentContainerWidth / 2) {
+        if (colHeaderStr.length() * TEXT_SIZE.x > desiredWidthInPixels) {
             return "";
         }
-        int gapInPixels = (parentContainerWidth) / 2 - colHeaderStr.length() * TEXT_SIZE.x;
+        int gapInPixels = desiredWidthInPixels - colHeaderStr.length() * TEXT_SIZE.x;
         if (gapInPixels <= 0) {
             return "";
         }
@@ -233,5 +234,46 @@ public class UIUtils {
         gc.dispose();
         return org.eclipse.jface.dialogs.Dialog.convertHorizontalDLUsToPixels(fontMetrics, IDialogConstants.BUTTON_WIDTH);
     }
-
+    
+    public static Rectangle getPersistedWizardBounds(Config config) {
+        int xOffset = Config.DEFAULT_WIZARD_X_OFFSET;
+        int yOffset = Config.DEFAULT_WIZARD_Y_OFFSET;
+        int width = Config.DEFAULT_WIZARD_WIDTH;
+        int height = Config.DEFAULT_WIZARD_HEIGHT;
+        if (config != null) {
+            try {
+                xOffset = config.getInt(Config.WIZARD_X_OFFSET);
+                yOffset = config.getInt(Config.WIZARD_Y_OFFSET);
+                width = config.getInt(Config.WIZARD_WIDTH);
+                height = config.getInt(Config.WIZARD_HEIGHT);
+            } catch (Exception ex) {
+                // no op
+            }
+        }
+        return new Rectangle(xOffset, yOffset, width, height);
+    }
+    
+    public static Rectangle getPersistedDialogBounds(String dialogName, Config config) {
+        int xOffset = Config.DEFAULT_WIZARD_X_OFFSET + Config.DIALOG_X_OFFSET;
+        int yOffset = Config.DEFAULT_WIZARD_Y_OFFSET + Config.DIALOG_Y_OFFSET;
+        int width = Config.DEFAULT_WIZARD_WIDTH;
+        int height = Config.DEFAULT_WIZARD_HEIGHT;
+        if (config != null) {
+            try {
+                xOffset = config.getInt(Config.WIZARD_X_OFFSET) + Config.DIALOG_X_OFFSET;
+                yOffset = config.getInt(Config.WIZARD_Y_OFFSET) + Config.DIALOG_Y_OFFSET;
+                width = config.getInt(Config.DIALOG_BOUNDS_PREFIX + dialogName + Config.DIALOG_WIDTH_SUFFIX);
+                height = config.getInt(Config.DIALOG_BOUNDS_PREFIX + dialogName + Config.DIALOG_HEIGHT_SUFFIX);
+            } catch (Exception ex) {
+                // no op
+            }
+        }
+        if (width == 0) {
+            width = Config.DEFAULT_WIZARD_WIDTH;
+        }
+        if (height == 0) {
+            height = Config.DEFAULT_WIZARD_HEIGHT;
+        }
+        return new Rectangle(xOffset, yOffset, width, height);
+    }
 }

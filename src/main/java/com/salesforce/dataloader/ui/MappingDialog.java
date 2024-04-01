@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.*;
 import org.eclipse.swt.events.*;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -82,7 +83,8 @@ public class MappingDialog extends BaseDialog {
     private Field[] sforceFieldInfo;
     private MappingPage page;
     private HashSet<String> mappedFields;
-    private Shell parent;
+    private Shell parentShell;
+    private Shell dialogShell;
     private Text sforceFieldsSearch;
 
     public void setSforceFieldInfo(Field[] sforceFieldInfo) {
@@ -117,11 +119,11 @@ public class MappingDialog extends BaseDialog {
         // Pass the default styles here
         super(parent, controller);
         this.page = page;
-        this.parent = parent;
+        this.parentShell = parent;
     }
     
     public Shell getParent() {
-        return this.parent;
+        return this.parentShell;
     }
 
     /**
@@ -168,6 +170,7 @@ public class MappingDialog extends BaseDialog {
      *            the dialog window
      */
     protected void createContents(final Shell shell) {
+        this.dialogShell = shell;
         shell.setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
         shell.setLayout(new GridLayout(1, false));
         GridData data;
@@ -348,8 +351,11 @@ public class MappingDialog extends BaseDialog {
 
         //  Set up the sforce table
         Table mappingTable = mappingTblViewer.getTable();
+        Rectangle shellBounds = UIUtils.getPersistedDialogBounds(this.getClass().getSimpleName(), this.getController().getConfig());
         data = new GridData(GridData.FILL_BOTH);
-        data.heightHint = 200;
+        data.widthHint = shellBounds.width;
+        data.heightHint = shellBounds.height / 3;
+       // data.heightHint = shellBounds.height;
         mappingTable.setLayoutData(data);
 
         //add key listener to process deletes
@@ -381,7 +387,7 @@ public class MappingDialog extends BaseDialog {
         // Add the first column - column header in CSV file
         TableColumn csvFieldsCol = new TableColumn(mappingTable, SWT.LEFT);
         String headerStr = Labels.getString("MappingDialog.fileColumn");
-        String fillerStr = UIUtils.getFillerStringForTableCol(this.sforceFieldsSearch, headerStr, shell.getSize().x);
+        String fillerStr = UIUtils.getFillerStringForTableCol(mappingTable, headerStr, shellBounds.width / 2);
         csvFieldsCol.setText(headerStr + fillerStr); //$NON-NLS-1$
         csvFieldsCol.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -397,7 +403,7 @@ public class MappingDialog extends BaseDialog {
         //Add the second column - name of Salesforce object field
         TableColumn sforceFieldNamesCol = new TableColumn(mappingTable, SWT.LEFT);
         headerStr = Labels.getString("MappingDialog.sforceFieldName");
-        fillerStr = UIUtils.getFillerStringForTableCol(this.sforceFieldsSearch, headerStr, this.getParent().getSize().x);
+        fillerStr = UIUtils.getFillerStringForTableCol(mappingTable, headerStr, shellBounds.width / 2);
         sforceFieldNamesCol.setText(headerStr + fillerStr); //$NON-NLS-1$
         sforceFieldNamesCol.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -446,7 +452,9 @@ public class MappingDialog extends BaseDialog {
         // Set up the sforce table
         Table sforceTable = sforceTblViewer.getTable();
         data = new GridData(GridData.FILL_BOTH);
-        data.heightHint = 150;
+        Rectangle shellBounds = UIUtils.getPersistedDialogBounds(this.getClass().getSimpleName(), this.getController().getConfig());
+        data.widthHint = shellBounds.width;
+        data.heightHint = shellBounds.height / 3;
         sforceTable.setLayoutData(data);
 
         // Add the first column - name
@@ -497,6 +505,12 @@ public class MappingDialog extends BaseDialog {
             sforceTable.showItem(sforceTable.getItem(0));
         }
 
+    }
+    
+    protected void setShellBounds(Shell dialogShell) {
+        Rectangle shellBounds = UIUtils.getPersistedDialogBounds(this.getClass().getSimpleName(), getController().getConfig());
+        dialogShell.setBounds(shellBounds);
+        dialogShell.addListener(SWT.Resize, this::persistedDialogShellBoundsChanged);
     }
 
     private void autoMatchFields() {
@@ -675,7 +689,17 @@ public class MappingDialog extends BaseDialog {
     public LoadMapper getMapper() {
         return this.mapper;
     }
-
+    
+    private void persistedDialogShellBoundsChanged(Event event) {
+        switch (event.type) {
+            case SWT.Resize:
+            case SWT.Move:
+                Rectangle shellBounds = this.dialogShell.getBounds();
+                this.getController().getConfig().setValue(Config.DIALOG_BOUNDS_PREFIX + this.getClass().getSimpleName() + Config.DIALOG_WIDTH_SUFFIX, shellBounds.width);
+                this.getController().getConfig().setValue(Config.DIALOG_BOUNDS_PREFIX + this.getClass().getSimpleName() + Config.DIALOG_HEIGHT_SUFFIX, shellBounds.height);
+                break;
+        }
+    }
 }
 
 /**
