@@ -695,6 +695,9 @@ public class MappingDialog extends BaseDialog {
         switch (event.type) {
             case SWT.Resize:
             case SWT.Move:
+                if (!this.dialogShell.isVisible()) {
+                    return;
+                }
                 Config config = this.getController().getConfig();
                 Rectangle shellBounds = this.dialogShell.getBounds();
                 config.setValue(Config.DIALOG_BOUNDS_PREFIX + this.getClass().getSimpleName() + Config.DIALOG_WIDTH_SUFFIX, shellBounds.width);
