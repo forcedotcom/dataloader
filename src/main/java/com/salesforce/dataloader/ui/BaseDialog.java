@@ -47,22 +47,9 @@ public abstract class BaseDialog extends Dialog {
      *            the parent
      */
     protected BaseDialog(Shell parent, Controller controller) {
-        this(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
+        super(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
         this.controller = controller;
         this.logger = LogManager.getLogger(this.getClass());
-    }
-
-    /**
-     * InputDialog constructor
-     *
-     * @param parent
-     *            the parent
-     * @param style
-     *            the style
-     */
-    protected BaseDialog(Shell parent, int style) {
-        // Let users override the default styles
-        super(parent, style);
         setText(Labels.getString(this.getClass().getSimpleName() + ".title")); //$NON-NLS-1$
         setMessage(Labels.getString(this.getClass().getSimpleName() + ".message")); //$NON-NLS-1$
     }

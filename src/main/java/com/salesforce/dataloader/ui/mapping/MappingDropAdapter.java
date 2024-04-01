@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.TransferData;
 
+import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.MappingDialog;
 
 /**
@@ -53,10 +54,12 @@ public class MappingDropAdapter extends ViewerDropAdapter {
     private String currentSforceMappings;
     private String sforceFieldToAddOrReplace;
     private Map.Entry<String, String> dropEntry;
+    private Controller controller;
 
-    public MappingDropAdapter(TableViewer arg0, MappingDialog dlg) {
+    public MappingDropAdapter(TableViewer arg0, MappingDialog dlg, Controller controller) {
         super(arg0);
         this.mappingDialog = dlg;
+        this.controller = controller;
     }
 
     @SuppressWarnings("unchecked")
@@ -71,7 +74,7 @@ public class MappingDropAdapter extends ViewerDropAdapter {
             performDropAction(MAPPING_CHOICE.ADD);
         } else {
             // ask user to add, replace, or cancel action if a mapping exists
-            MappingDropActionDialog selectDropActionDlg = new MappingDropActionDialog(this);
+            MappingDropActionDialog selectDropActionDlg = new MappingDropActionDialog(this, controller);
             selectDropActionDlg.open(this.dropEntry.getKey(), 
                     this.currentSforceMappings, this.sforceFieldToAddOrReplace);
         }

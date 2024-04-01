@@ -33,6 +33,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.BaseDialog;
 import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.ui.mapping.MappingDropAdapter.MAPPING_CHOICE;
@@ -51,8 +52,8 @@ public class MappingDropActionDialog extends BaseDialog {
      * @param parent
      *            the parent
      */
-    public MappingDropActionDialog(MappingDropAdapter dropAdapter) {
-        super(dropAdapter.getMappingDialog().getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
+    public MappingDropActionDialog(MappingDropAdapter dropAdapter, Controller controller) {
+        super(dropAdapter.getMappingDialog().getParent(), controller);
         this.dropAdapter = dropAdapter;
     }
 
@@ -69,6 +70,9 @@ public class MappingDropActionDialog extends BaseDialog {
         Display display = getParent().getDisplay();
         // Set the description
         label.getParent().pack();
+        shell.setText(Labels.getFormattedString(this.getClass().getSimpleName() + ".title",
+                new String[] {csvField, newSforceField})); //$NON-NLS-1$
+
 
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch()) {
