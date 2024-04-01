@@ -25,6 +25,9 @@
  */
 package com.salesforce.dataloader.ui;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -160,11 +163,18 @@ public abstract class OperationPage extends WizardPage {
         switch (event.type) {
             case SWT.Resize:
             case SWT.Move:
+                Config config = controller.getConfig();
                 Rectangle shellBounds = this.getShell().getBounds();
-                controller.getConfig().setValue(Config.WIZARD_X_OFFSET, shellBounds.x);
-                controller.getConfig().setValue(Config.WIZARD_Y_OFFSET, shellBounds.y);
-                controller.getConfig().setValue(Config.WIZARD_WIDTH, shellBounds.width);
-                controller.getConfig().setValue(Config.WIZARD_HEIGHT, shellBounds.height);
+                config.setValue(Config.WIZARD_X_OFFSET, shellBounds.x);
+                config.setValue(Config.WIZARD_Y_OFFSET, shellBounds.y);
+                config.setValue(Config.WIZARD_WIDTH, shellBounds.width);
+                config.setValue(Config.WIZARD_HEIGHT, shellBounds.height);
+                try {
+                    config.save();
+                } catch (GeneralSecurityException | IOException e) {
+                    // no-op
+                    e.printStackTrace();
+                }
                 break;
         }
     }
