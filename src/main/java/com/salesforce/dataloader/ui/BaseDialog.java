@@ -31,7 +31,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.*;
 
-import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 
 public abstract class BaseDialog extends Dialog {
@@ -66,9 +65,10 @@ public abstract class BaseDialog extends Dialog {
     }
     
     protected void setShellBounds(Shell dialogShell) {
-        Rectangle shellBounds = UIUtils.getPersistedWizardBounds(this.controller.getConfig());
-        shellBounds.x += Config.DIALOG_X_OFFSET;
-        shellBounds.y += Config.DIALOG_Y_OFFSET;
+        Rectangle shellBounds = dialogShell.getBounds();
+        Rectangle persistedWizardBounds = UIUtils.getPersistedWizardBounds(this.controller.getConfig());
+        shellBounds.x = persistedWizardBounds.x;
+        shellBounds.y = persistedWizardBounds.y;
         dialogShell.setBounds(shellBounds);
     }
     
