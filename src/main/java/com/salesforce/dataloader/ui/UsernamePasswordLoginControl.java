@@ -138,8 +138,12 @@ public class UsernamePasswordLoginControl extends Composite {
         
         loginLabel = new Label(this, SWT.LEFT | SWT.WRAP);
         loginLabel.setText("");
-        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+        data = new GridData(GridData.FILL_BOTH);
         data.horizontalSpan = 2;
+        GC gc = new GC(loginLabel);
+        Point TEXT_SIZE = gc.textExtent("A");
+        gc.dispose();
+        data.heightHint = TEXT_SIZE.y * 3;
         loginLabel.setLayoutData(data);
     }
 
