@@ -29,6 +29,7 @@ package com.salesforce.dataloader.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -694,9 +695,16 @@ public class MappingDialog extends BaseDialog {
         switch (event.type) {
             case SWT.Resize:
             case SWT.Move:
+                Config config = this.getController().getConfig();
                 Rectangle shellBounds = this.dialogShell.getBounds();
-                this.getController().getConfig().setValue(Config.DIALOG_BOUNDS_PREFIX + this.getClass().getSimpleName() + Config.DIALOG_WIDTH_SUFFIX, shellBounds.width);
-                this.getController().getConfig().setValue(Config.DIALOG_BOUNDS_PREFIX + this.getClass().getSimpleName() + Config.DIALOG_HEIGHT_SUFFIX, shellBounds.height);
+                config.setValue(Config.DIALOG_BOUNDS_PREFIX + this.getClass().getSimpleName() + Config.DIALOG_WIDTH_SUFFIX, shellBounds.width);
+                config.setValue(Config.DIALOG_BOUNDS_PREFIX + this.getClass().getSimpleName() + Config.DIALOG_HEIGHT_SUFFIX, shellBounds.height);
+                try {
+                    config.save();
+                } catch (GeneralSecurityException | IOException e) {
+                    // no-op
+                    e.printStackTrace();
+                }
                 break;
         }
     }
