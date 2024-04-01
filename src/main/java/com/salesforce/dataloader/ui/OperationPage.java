@@ -71,8 +71,8 @@ public abstract class OperationPage extends WizardPage {
        // Set the description
        String description = Labels.getString(this.getClass().getSimpleName() + ".description");
        this.setDescription(description);
-       this.getShell().addListener(SWT.Resize, this::shellBoundsChanged);
-       this.getShell().addListener(SWT.Move, this::shellBoundsChanged);
+       this.getShell().addListener(SWT.Resize, this::persistedWizardShellBoundsChanged);
+       this.getShell().addListener(SWT.Move, this::persistedWizardShellBoundsChanged);
 
        boolean success = true;
        if (this.controller.isLoggedIn()) {
@@ -159,10 +159,13 @@ public abstract class OperationPage extends WizardPage {
        return this;
    }
    
-    private void shellBoundsChanged(Event event) {
+    private void persistedWizardShellBoundsChanged(Event event) {
         switch (event.type) {
             case SWT.Resize:
             case SWT.Move:
+                if (!this.getShell().isVisible()) {
+                    return;
+                }
                 Config config = controller.getConfig();
                 Rectangle shellBounds = this.getShell().getBounds();
                 config.setValue(Config.WIZARD_X_OFFSET, shellBounds.x);
