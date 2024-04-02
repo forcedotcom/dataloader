@@ -547,16 +547,7 @@ public class MappingDialog extends BaseDialog {
         }
         mappingTblViewer.refresh();
         mappingTable.redraw();
-
-        Rectangle persistedShellBounds = getPersistedDialogBounds();
-        Point currentShellSize = this.dialogShell.getSize();
-        Rectangle currentClientAreaBounds = mappingTable.getClientArea();
-        int horizontalMargin = currentShellSize.x - currentClientAreaBounds.width;
-        int desiredColWidth = (persistedShellBounds.width - horizontalMargin) / 2;
-        if (desiredColWidth > 0) {
-            mappingTable.getColumn(0).setWidth(desiredColWidth);
-            mappingTable.getColumn(1).setWidth(desiredColWidth);
-        }
+        setTableColWidth(mappingTable);
     }
 
     private void packSforceColumns() {
@@ -567,6 +558,8 @@ public class MappingDialog extends BaseDialog {
         }
         sforceTblViewer.refresh();
         sforceTable.redraw();
+        setTableColWidth(sforceTable);
+
     }
 
     public void replenishMappedSforceFields(String fieldNameList) {
@@ -700,6 +693,30 @@ public class MappingDialog extends BaseDialog {
                     e.printStackTrace();
                 }
                 break;
+        }
+    }
+    
+    private void setTableColWidth(Table table) {
+        int numCols = table.getColumnCount();
+        Rectangle persistedShellBounds = getPersistedDialogBounds();
+        Point currentShellSize = this.dialogShell.getSize();
+        Rectangle currentClientAreaBounds = table.getClientArea();
+        int horizontalMargin = currentShellSize.x - currentClientAreaBounds.width;
+        int desiredColWidth = (persistedShellBounds.width - horizontalMargin) / numCols;
+        if (desiredColWidth > 0) {
+            int currentTotalColWidth = 0;
+            for (int i=0; i < numCols; i++) {
+                currentTotalColWidth += table.getColumn(i).getWidth();
+            }
+            if (currentTotalColWidth > (persistedShellBounds.width - horizontalMargin)) {
+                return; // do not change column width if current dialog width is less than total column width
+            }
+
+            for (int i=0; i < numCols; i++) {
+                if (table.getColumn(i).getWidth() < desiredColWidth) {
+                    table.getColumn(i).setWidth(desiredColWidth);
+                }
+            }
         }
     }
 }
