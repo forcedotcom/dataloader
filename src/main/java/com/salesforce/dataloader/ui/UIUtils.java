@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
 
 import java.awt.Desktop;
 import java.io.IOException;
@@ -228,5 +229,32 @@ public class UIUtils {
             }
         }
         return new Rectangle(xOffset, yOffset, width, height);
+    }
+    
+    public static void setTableColWidth(Table table) {
+        if (table == null) {
+            return;
+        }
+        int numCols = table.getColumnCount();
+        if (numCols == 0) {
+            return;
+        }
+        Rectangle currentClientAreaBounds = table.getClientArea();
+        int desiredColWidth = currentClientAreaBounds.width / numCols;
+        if (desiredColWidth > 0) {
+            int currentTotalColWidth = 0;
+            for (int i=0; i < numCols; i++) {
+                currentTotalColWidth += table.getColumn(i).getWidth();
+            }
+            if (currentTotalColWidth > currentClientAreaBounds.width) {
+                return; // do not change column width if current dialog width is less than total column width
+            }
+
+            for (int i=0; i < numCols; i++) {
+                if (table.getColumn(i).getWidth() < desiredColWidth) {
+                    table.getColumn(i).setWidth(desiredColWidth);
+                }
+            }
+        }
     }
 }

@@ -34,8 +34,6 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -186,18 +184,8 @@ public class MappingPage extends LoadPage {
     private void refreshMapping() {
         if (mappingTblViewer != null) {
             mappingTblViewer.refresh();
-            this.getShell().redraw();
         }
-        Table table = this.mappingTblViewer.getTable();
-        Rectangle persistedShellBounds = UIUtils.getPersistedWizardBounds(controller.getConfig());
-        Point currentShellSize = this.getShell().getSize();
-        Rectangle currentClientAreaBounds = table.getClientArea();
-        int horizontalMargin = currentShellSize.x - currentClientAreaBounds.width;
-        int desiredColWidth = (persistedShellBounds.width - horizontalMargin) / 2;
-        if (desiredColWidth > 0) {
-            table.getColumn(0).setWidth(desiredColWidth);
-            table.getColumn(1).setWidth(desiredColWidth);
-        }
+        UIUtils.setTableColWidth(this.mappingTblViewer.getTable());
     }
 
     public Field[] getFieldTypes() {
