@@ -131,4 +131,30 @@ public abstract class BaseDialog extends Dialog {
     protected void processingWithBusyIndicator(Shell shell) {
         // no op
     }
+    
+    protected Rectangle getPersistedDialogBounds() {
+        Config config = getController().getConfig();
+        Rectangle wizardBounds = UIUtils.getPersistedWizardBounds(config);
+        int xOffset = wizardBounds.x + Config.DIALOG_X_OFFSET;
+        int yOffset = wizardBounds.y + Config.DIALOG_Y_OFFSET;
+        int width = wizardBounds.width;
+        int height = wizardBounds.height;
+        if (config != null) {
+            try {
+                xOffset = config.getInt(Config.WIZARD_X_OFFSET) + Config.DIALOG_X_OFFSET;
+                yOffset = config.getInt(Config.WIZARD_Y_OFFSET) + Config.DIALOG_Y_OFFSET;
+                width = config.getInt(Config.DIALOG_BOUNDS_PREFIX + getClass().getSimpleName() + Config.DIALOG_WIDTH_SUFFIX);
+                height = config.getInt(Config.DIALOG_BOUNDS_PREFIX + getClass().getSimpleName() + Config.DIALOG_HEIGHT_SUFFIX);
+            } catch (Exception ex) {
+                // no op
+            }
+        }
+        if (width == 0) {
+            width = wizardBounds.width;
+        }
+        if (height == 0) {
+            height = wizardBounds.height;
+        }
+        return new Rectangle(xOffset, yOffset, width, height);
+    }
 }
