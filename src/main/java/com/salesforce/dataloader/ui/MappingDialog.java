@@ -52,7 +52,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -547,7 +546,7 @@ public class MappingDialog extends BaseDialog {
         }
         mappingTblViewer.refresh();
         mappingTable.redraw();
-        setTableColWidth(mappingTable);
+        UIUtils.setTableColWidth(mappingTable);
     }
 
     private void packSforceColumns() {
@@ -558,7 +557,7 @@ public class MappingDialog extends BaseDialog {
         }
         sforceTblViewer.refresh();
         sforceTable.redraw();
-        setTableColWidth(sforceTable);
+        UIUtils.setTableColWidth(sforceTable);
 
     }
 
@@ -693,30 +692,6 @@ public class MappingDialog extends BaseDialog {
                     e.printStackTrace();
                 }
                 break;
-        }
-    }
-    
-    private void setTableColWidth(Table table) {
-        int numCols = table.getColumnCount();
-        Rectangle persistedShellBounds = getPersistedDialogBounds();
-        Point currentShellSize = this.dialogShell.getSize();
-        Rectangle currentClientAreaBounds = table.getClientArea();
-        int horizontalMargin = currentShellSize.x - currentClientAreaBounds.width;
-        int desiredColWidth = (persistedShellBounds.width - horizontalMargin) / numCols;
-        if (desiredColWidth > 0) {
-            int currentTotalColWidth = 0;
-            for (int i=0; i < numCols; i++) {
-                currentTotalColWidth += table.getColumn(i).getWidth();
-            }
-            if (currentTotalColWidth > (persistedShellBounds.width - horizontalMargin)) {
-                return; // do not change column width if current dialog width is less than total column width
-            }
-
-            for (int i=0; i < numCols; i++) {
-                if (table.getColumn(i).getWidth() < desiredColWidth) {
-                    table.getColumn(i).setWidth(desiredColWidth);
-                }
-            }
         }
     }
 }
