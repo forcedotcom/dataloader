@@ -74,9 +74,12 @@ public class MappingDropAdapter extends ViewerDropAdapter {
             performDropAction(MAPPING_CHOICE.ADD);
         } else {
             // ask user to add, replace, or cancel action if a mapping exists
-            MappingDropActionDialog selectDropActionDlg = new MappingDropActionDialog(this, controller);
-            selectDropActionDlg.open(this.dropEntry.getKey(), 
-                    this.currentSforceMappings, this.sforceFieldToAddOrReplace);
+            MappingDropActionDialog selectDropActionDlg = new MappingDropActionDialog(
+                    this, controller,
+                    this.dropEntry.getKey(), 
+                    this.currentSforceMappings,
+                    this.sforceFieldToAddOrReplace);
+            selectDropActionDlg.open();
         }
         return true;
     }

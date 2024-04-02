@@ -67,7 +67,6 @@ import java.util.TimeZone;
 import static com.salesforce.dataloader.ui.UIUtils.isValidHttpsUrl;
 
 public class AdvancedSettingsDialog extends BaseDialog {
-    private String input;
     private Text textBatch;
     private Text textQueryBatch;
     private Text textUploadCSVDelimiterValue;
@@ -136,42 +135,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
             logger.error("", e);
         }
         defaultServer = server;
-    }
-
-    /**
-     * Gets the input
-     *
-     * @return String
-     */
-    public String getInput() {
-        return input;
-    }
-
-    /**
-     * Sets the input
-     *
-     * @param input the new input
-     */
-    public void setInput(String input) {
-        this.input = input;
-    }
-
-    /**
-     * Opens the dialog and returns the input
-     *
-     * @return String
-     */
-    public String open() {
-        // Create the dialog window
-        Shell shell = super.openAndGetShell();
-        Display display = shell.getDisplay();
-        while (!shell.isDisposed()) {
-            if (!display.readAndDispatch()) {
-                display.sleep();
-            }
-        }
-        // Return the entered value, or null
-        return input;
     }
 
     private final Map<Button, Boolean> oldBulkAPIDependencies = new HashMap<Button, Boolean>();
@@ -1050,7 +1013,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
                     }
                 }
                 getController().saveConfig();
-                input = Labels.getString("UI.ok"); //$NON-NLS-1$
                 shell.close();
             }
         });
@@ -1065,7 +1027,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
         cancel.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                input = null;
                 shell.close();
             }
         });

@@ -49,7 +49,6 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.util.StringUtils;
 
 public class CSVChooserDialog extends BaseDialog {
-    private String input;
     private Text textRows;
     private Button buttonSelect;
     private Button buttonSuccess;
@@ -64,43 +63,6 @@ public class CSVChooserDialog extends BaseDialog {
     public CSVChooserDialog(Shell parent, Controller controller) {
         // Pass the default styles here
         super(parent, controller);
-    }
-
-    /**
-     * Gets the input
-     *
-     * @return String
-     */
-    public String getInput() {
-        return input;
-    }
-
-    /**
-     * Sets the input
-     *
-     * @param input
-     *            the new input
-     */
-    public void setInput(String input) {
-        this.input = input;
-    }
-
-    /**
-     * Opens the dialog and returns the input
-     *
-     * @return String
-     */
-    public String open() {
-        // Create the dialog window
-        Shell shell = super.openAndGetShell();
-        Display display = shell.getDisplay();
-        while (!shell.isDisposed()) {
-            if (!display.readAndDispatch()) {
-                display.sleep();
-            }
-        }
-        // Return the entered value, or null
-        return input;
     }
 
     /**
@@ -260,8 +222,6 @@ public class CSVChooserDialog extends BaseDialog {
         ok.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-
-                input = "OK"; //$NON-NLS-1$
                 shell.close();
             }
         });

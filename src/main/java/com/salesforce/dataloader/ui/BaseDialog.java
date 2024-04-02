@@ -97,4 +97,20 @@ public abstract class BaseDialog extends Dialog {
         return this.controller;
     }
 
+    /**
+     * Opens the dialog and returns the input
+     *
+     * @return String
+     */
+    public boolean open() {
+        // Create the dialog window
+        Shell shell = openAndGetShell();
+        Display display = shell.getDisplay();
+        while (!shell.isDisposed()) {
+            if (!display.readAndDispatch()) {
+                display.sleep();
+            }
+        }
+        return true;
+    }
 }

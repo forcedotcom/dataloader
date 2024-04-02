@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.dao.DataAccessObjectFactory;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.MappingInitializationException;
@@ -54,6 +55,8 @@ public class DataSelectionDialog extends BaseDialog {
     private Label label;
     private ContentLimitLink contentNoteLimitLink;
     private String delimiterList = "";
+    private String daoNameStr;
+    private String sObjectName;
 
     /**
      * InputDialog constructor
@@ -61,8 +64,10 @@ public class DataSelectionDialog extends BaseDialog {
      * @param parent
      *            the parent
      */
-    public DataSelectionDialog(Shell parent, Controller controller) {
+    public DataSelectionDialog(Shell parent, Controller controller, String daoNameStr, String sObjectName) {
         super(parent, controller);
+        this.daoNameStr = daoNameStr;
+        this.sObjectName = sObjectName;
         if (controller.getConfig().getBoolean(Config.CSV_DELIMITER_COMMA)) {
             this.delimiterList = " ','";
         }
@@ -95,7 +100,7 @@ public class DataSelectionDialog extends BaseDialog {
      *
      * @return String
      */
-    public boolean open(String daoTypeStr, String daoNameStr, String sObjectName) {
+    public boolean open() {
         // Create the dialog window
         final Shell shell = super.openAndGetShell();
         Display display = shell.getDisplay();
@@ -103,7 +108,10 @@ public class DataSelectionDialog extends BaseDialog {
             @Override
             public void run() {
                 try {
-                    getController().initializeOperation(daoTypeStr, daoNameStr, sObjectName);
+                    getController().initializeOperation(
+                            DataAccessObjectFactory.CSV_READ_TYPE,
+                            daoNameStr,
+                            sObjectName);
                 } catch (MappingInitializationException e) {
                     handleCSVReadError(shell, 
                             Labels.getString("DataSelectionDialog.errorRead")

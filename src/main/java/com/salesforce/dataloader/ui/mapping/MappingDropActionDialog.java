@@ -52,33 +52,14 @@ public class MappingDropActionDialog extends BaseDialog {
      * @param parent
      *            the parent
      */
-    public MappingDropActionDialog(MappingDropAdapter dropAdapter, Controller controller) {
+    public MappingDropActionDialog(MappingDropAdapter dropAdapter, Controller controller,
+            String csvField, String currentlyMappedSforceFields, String newSforceField) {
         super(dropAdapter.getMappingDialog().getParent(), controller);
+        this.setText(Labels.getFormattedString(this.getClass().getSimpleName() + ".title",
+                new String[] {csvField, newSforceField})); //$NON-NLS-1$
         this.dropAdapter = dropAdapter;
-    }
-
-    /**
-     * Opens the dialog and returns the input
-     *
-     * @return String
-     */
-    public void open(String csvField, String currentlyMappedSforceFields, String newSforceField) {
         this.csvField = csvField;
         this.currentlyMappedSforceFields = currentlyMappedSforceFields;
-        // Create the dialog window
-        final Shell shell = super.openAndGetShell();
-        Display display = getParent().getDisplay();
-        // Set the description
-        label.getParent().pack();
-        shell.setText(Labels.getFormattedString(this.getClass().getSimpleName() + ".title",
-                new String[] {csvField, newSforceField})); //$NON-NLS-1$
-
-
-        while (!shell.isDisposed()) {
-            if (!display.readAndDispatch()) {
-                display.sleep();
-            }
-        }
     }
 
     /**
