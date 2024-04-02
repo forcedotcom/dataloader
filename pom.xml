@@ -61,6 +61,12 @@
       <groupId>com.force.api</groupId>
       <artifactId>force-partner-api</artifactId>
       <version>60.1.1</version>
+      <exclusions>
+        <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-dbcp2 -->
     <dependency>
