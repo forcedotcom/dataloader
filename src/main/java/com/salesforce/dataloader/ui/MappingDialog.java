@@ -79,8 +79,6 @@ import com.sforce.soap.partner.Field;
  * This class creates the mapping dialog
  */
 public class MappingDialog extends BaseDialog {
-    private String input;
-
     //the two tableViewers
     private TableViewer sforceTblViewer;
     private TableViewer mappingTblViewer;
@@ -147,43 +145,6 @@ public class MappingDialog extends BaseDialog {
     
     public Shell getParent() {
         return this.parentShell;
-    }
-
-    /**
-     * Gets the input
-     *
-     * @return String
-     */
-    public String getInput() {
-        return input;
-    }
-
-    /**
-     * Sets the input
-     *
-     * @param input
-     *            the new input
-     */
-    public void setInput(String input) {
-        this.input = input;
-    }
-
-    /**
-     * Opens the dialog and returns the input
-     *
-     * @return String
-     */
-    public String open() {
-        // Create the dialog window
-        Shell shell = super.openAndGetShell();
-        Display display = shell.getDisplay();
-        while (!shell.isDisposed()) {
-            if (!display.readAndDispatch()) {
-                display.sleep();
-            }
-        }
-        // Return the entered value, or null
-        return input;
     }
 
     /**

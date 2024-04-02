@@ -43,7 +43,6 @@ import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataAccessObjectFactory;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 
 /**
@@ -196,9 +195,12 @@ public class DataSelectionPage extends LoadPage {
         //get entity
         IStructuredSelection selection = (IStructuredSelection)lv.getSelection();
         DescribeGlobalSObjectResult selectedEntity = (DescribeGlobalSObjectResult)selection.getFirstElement();
-        DataSelectionDialog dlg = new DataSelectionDialog(getShell(), controller);
-        if (dlg.open(DataAccessObjectFactory.CSV_READ_TYPE, 
-                csvChooser.getStringValue(), selectedEntity.getName())) {
+        DataSelectionDialog dlg = new DataSelectionDialog(
+                                            getShell(), 
+                                            controller,
+                                            csvChooser.getStringValue(),
+                                            selectedEntity.getName());
+        if (dlg.open()) {
             return super.getNextPage();
         } else {
             return this;

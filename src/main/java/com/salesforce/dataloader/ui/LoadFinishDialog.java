@@ -51,25 +51,6 @@ public class LoadFinishDialog extends BaseDialog {
     }
 
     /**
-     * Opens the dialog and returns the input
-     *
-     * @return String
-     */
-    public boolean open() {
-        // Create the dialog window
-        Shell shell = super.openAndGetShell();
-        Display display = shell.getDisplay();
-
-        while (!shell.isDisposed()) {
-            if (!display.readAndDispatch()) {
-                display.sleep();
-            }
-        }
-        // Return the sucess
-        return true;
-    }
-
-    /**
      * Creates the dialog's contents
      *
      * @param shell
