@@ -28,6 +28,7 @@ package com.salesforce.dataloader.ui;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.*;
 
@@ -38,6 +39,7 @@ public abstract class BaseDialog extends Dialog {
     private Controller controller;
     private String message;
     protected Logger logger;
+    protected boolean success = true;
 
     /**
      * InputDialog constructor
@@ -106,11 +108,26 @@ public abstract class BaseDialog extends Dialog {
         // Create the dialog window
         Shell shell = openAndGetShell();
         Display display = shell.getDisplay();
+        doWork(shell);
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch()) {
                 display.sleep();
             }
         }
-        return true;
+        return success;
+    }
+    
+    private void doWork(Shell shell) {
+        Display display = shell.getDisplay();
+        BusyIndicator.showWhile(display, new Thread() {
+            @Override
+            public void run() {
+                processingWithBusyIndicator(shell);
+            }
+        });
+    }
+    
+    protected void processingWithBusyIndicator(Shell shell) {
+        // no op
     }
 }
