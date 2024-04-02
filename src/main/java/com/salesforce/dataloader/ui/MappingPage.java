@@ -34,15 +34,14 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.MappingInitializationException;
-import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.mapping.LoadMapper;
 import com.salesforce.dataloader.ui.mapping.MappingContentProvider;
 import com.salesforce.dataloader.ui.mapping.MappingLabelProvider;
@@ -88,7 +87,6 @@ public class MappingPage extends LoadPage {
                     try {
                         mapper.putPropertyFileMappings(filename);
                         updateMapping();
-                        packMappingColumns();
                     } catch (MappingInitializationException e) {
                         logger.error(Labels.getString("MappingPage.errorLoading"), e); //$NON-NLS-1$
                         UIUtils.errorMessageBox(getShell(), e);
@@ -141,13 +139,12 @@ public class MappingPage extends LoadPage {
         // Add the first column - name
         TableColumn csvFieldColumn = new TableColumn(mappingTable, SWT.LEFT);
         csvFieldColumn.setText(Labels.getString("MappingPage.fileColumn")); //$NON-NLS-1$
-        //Add the second column - label
+       //Add the second column - label
         TableColumn sobjectFieldColumn = new TableColumn(mappingTable, SWT.LEFT);
         sobjectFieldColumn.setText(Labels.getString("MappingPage.fieldName")); //$NON-NLS-1$
 
         //update the model
         updateMapping();
-
         packMappingColumns();
 
         // Turn on the header and the lines
@@ -183,12 +180,23 @@ public class MappingPage extends LoadPage {
                 table.showItem(table.getItem(0));
             }
         }
+        packMappingColumns();
     }
 
-    public void refreshMapping() {
+    private void refreshMapping() {
         if (mappingTblViewer != null) {
             mappingTblViewer.refresh();
             this.getShell().redraw();
+        }
+        Table table = this.mappingTblViewer.getTable();
+        Rectangle persistedShellBounds = UIUtils.getPersistedWizardBounds(controller.getConfig());
+        Point currentShellSize = this.getShell().getSize();
+        Rectangle currentClientAreaBounds = table.getClientArea();
+        int horizontalMargin = currentShellSize.x - currentClientAreaBounds.width;
+        int desiredColWidth = (persistedShellBounds.width - horizontalMargin) / 2;
+        if (desiredColWidth > 0) {
+            table.getColumn(0).setWidth(desiredColWidth);
+            table.getColumn(1).setWidth(desiredColWidth);
         }
     }
 
@@ -234,7 +242,6 @@ public class MappingPage extends LoadPage {
         return relatedFieldList.toArray(fields);
     }
 
-    boolean isTableColWidthInitialized = false;
     /*
      * (non-Javadoc)
      * @see com.salesforce.dataloader.ui.LoadPage#setupPage()
@@ -244,22 +251,7 @@ public class MappingPage extends LoadPage {
         if (controller.getMapper() == null) {
             return true; // further processing is not possible
         }
-
         updateMapping();
-        packMappingColumns();
-        
-        Table table = this.mappingTblViewer.getTable();
-        Rectangle shellBounds = UIUtils.getPersistedWizardBounds(controller.getConfig());
-
-        TableColumn col = table.getColumn(0);
-        String fillerStr = UIUtils.getFillerStringForTableCol(mappingLabel, Labels.getString("MappingPage.fileColumn"), shellBounds.width / 2);
-        col.setText(col.getText() + fillerStr);
-        col = table.getColumn(1);
-        fillerStr = UIUtils.getFillerStringForTableCol(mappingLabel, Labels.getString("MappingPage.fieldName"), shellBounds.width / 2);
-        col.setText(col.getText() + fillerStr);
-        packMappingColumns();
-        isTableColWidthInitialized = true;
-        
         return true;
     }
 

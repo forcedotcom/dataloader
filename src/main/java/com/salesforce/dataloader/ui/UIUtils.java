@@ -39,7 +39,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
@@ -205,28 +204,6 @@ public class UIUtils {
         }
     }
     
-    public static String getFillerStringForTableCol(Control control, String colHeaderStr, int desiredWidthInPixels) {
-        GC gc = new GC(control);
-        Point TEXT_SIZE = gc.textExtent(" ");
-        gc.dispose();
-        
-        if (colHeaderStr.length() * TEXT_SIZE.x > desiredWidthInPixels) {
-            return "";
-        }
-        int gapInPixels = desiredWidthInPixels - colHeaderStr.length() * TEXT_SIZE.x;
-        if (gapInPixels <= 0) {
-            return "";
-        }
-        int gapInChars = gapInPixels / TEXT_SIZE.x;
-        char[] array = new char[gapInChars];
-        int pos = 0;
-        while (pos < gapInChars) {
-            array[pos] = ' ';
-            pos++;
-        }
-        return new String(array);
-    }
-    
     public static int getControlWidth(Control control) {
         GC gc = new GC(control);
         gc.setFont(control.getFont());
@@ -249,31 +226,6 @@ public class UIUtils {
             } catch (Exception ex) {
                 // no op
             }
-        }
-        return new Rectangle(xOffset, yOffset, width, height);
-    }
-    
-    public static Rectangle getPersistedDialogBounds(String dialogName, Config config) {
-        Rectangle wizardBounds = getPersistedWizardBounds(config);
-        int xOffset = wizardBounds.x + Config.DIALOG_X_OFFSET;
-        int yOffset = wizardBounds.y + Config.DIALOG_Y_OFFSET;
-        int width = wizardBounds.width;
-        int height = wizardBounds.height;
-        if (config != null) {
-            try {
-                xOffset = config.getInt(Config.WIZARD_X_OFFSET) + Config.DIALOG_X_OFFSET;
-                yOffset = config.getInt(Config.WIZARD_Y_OFFSET) + Config.DIALOG_Y_OFFSET;
-                width = config.getInt(Config.DIALOG_BOUNDS_PREFIX + dialogName + Config.DIALOG_WIDTH_SUFFIX);
-                height = config.getInt(Config.DIALOG_BOUNDS_PREFIX + dialogName + Config.DIALOG_HEIGHT_SUFFIX);
-            } catch (Exception ex) {
-                // no op
-            }
-        }
-        if (width == 0) {
-            width = wizardBounds.width;
-        }
-        if (height == 0) {
-            height = wizardBounds.height;
         }
         return new Rectangle(xOffset, yOffset, width, height);
     }

@@ -52,12 +52,12 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -238,7 +238,6 @@ public class MappingDialog extends BaseDialog {
             public void widgetSelected(SelectionEvent event) {
                 //refresh the mapping page view
                 page.updateMapping();
-                page.packMappingColumns();
                 page.setPageComplete();
                 shell.close();
             }
@@ -285,7 +284,6 @@ public class MappingDialog extends BaseDialog {
 
                 //refresh the mapping page view
                 page.updateMapping();
-                page.packMappingColumns();
                 page.setPageComplete();
                 shell.close();
             }
@@ -335,7 +333,7 @@ public class MappingDialog extends BaseDialog {
 
         //  Set up the sforce table
         Table mappingTable = mappingTblViewer.getTable();
-        Rectangle shellBounds = UIUtils.getPersistedDialogBounds(this.getClass().getSimpleName(), this.getController().getConfig());
+        Rectangle shellBounds = getPersistedDialogBounds();
         data = new GridData(GridData.FILL_BOTH);
         data.widthHint = shellBounds.width;
         data.heightHint = shellBounds.height / 3;
@@ -371,8 +369,7 @@ public class MappingDialog extends BaseDialog {
         // Add the first column - column header in CSV file
         TableColumn csvFieldsCol = new TableColumn(mappingTable, SWT.LEFT);
         String headerStr = Labels.getString("MappingDialog.fileColumn");
-        String fillerStr = UIUtils.getFillerStringForTableCol(mappingTable, headerStr, shellBounds.width / 2);
-        csvFieldsCol.setText(headerStr + fillerStr); //$NON-NLS-1$
+        csvFieldsCol.setText(headerStr); //$NON-NLS-1$
         csvFieldsCol.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
@@ -387,8 +384,7 @@ public class MappingDialog extends BaseDialog {
         //Add the second column - name of Salesforce object field
         TableColumn sforceFieldNamesCol = new TableColumn(mappingTable, SWT.LEFT);
         headerStr = Labels.getString("MappingDialog.sforceFieldName");
-        fillerStr = UIUtils.getFillerStringForTableCol(mappingTable, headerStr, shellBounds.width / 2);
-        sforceFieldNamesCol.setText(headerStr + fillerStr); //$NON-NLS-1$
+        sforceFieldNamesCol.setText(headerStr); //$NON-NLS-1$
         sforceFieldNamesCol.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
@@ -436,7 +432,7 @@ public class MappingDialog extends BaseDialog {
         // Set up the sforce table
         Table sforceTable = sforceTblViewer.getTable();
         data = new GridData(GridData.FILL_BOTH);
-        Rectangle shellBounds = UIUtils.getPersistedDialogBounds(this.getClass().getSimpleName(), this.getController().getConfig());
+        Rectangle shellBounds = getPersistedDialogBounds();
         data.widthHint = shellBounds.width;
         data.heightHint = shellBounds.height / 3;
         sforceTable.setLayoutData(data);
@@ -492,9 +488,11 @@ public class MappingDialog extends BaseDialog {
     }
     
     protected void setShellBounds(Shell dialogShell) {
-        Rectangle shellBounds = UIUtils.getPersistedDialogBounds(this.getClass().getSimpleName(), getController().getConfig());
+        Rectangle shellBounds = getPersistedDialogBounds();
         dialogShell.setBounds(shellBounds);
         dialogShell.addListener(SWT.Resize, this::persistedDialogShellBoundsChanged);
+        packMappingColumns();
+        packSforceColumns();
     }
 
     private void autoMatchFields() {
@@ -549,6 +547,16 @@ public class MappingDialog extends BaseDialog {
         }
         mappingTblViewer.refresh();
         mappingTable.redraw();
+
+        Rectangle persistedShellBounds = getPersistedDialogBounds();
+        Point currentShellSize = this.dialogShell.getSize();
+        Rectangle currentClientAreaBounds = mappingTable.getClientArea();
+        int horizontalMargin = currentShellSize.x - currentClientAreaBounds.width;
+        int desiredColWidth = (persistedShellBounds.width - horizontalMargin) / 2;
+        if (desiredColWidth > 0) {
+            mappingTable.getColumn(0).setWidth(desiredColWidth);
+            mappingTable.getColumn(1).setWidth(desiredColWidth);
+        }
     }
 
     private void packSforceColumns() {
