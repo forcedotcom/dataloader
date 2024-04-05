@@ -40,7 +40,7 @@ import com.salesforce.dataloader.config.Config;
  * @author Lexi Viripaeff
  * @since 6.0
  */
-public class LoaderTitleDialog extends LoaderTitleAreaDialog {
+public class WelcomeScreenDialog extends LoaderTitleAreaDialog {
 
     private final Config config;
 
@@ -50,7 +50,7 @@ public class LoaderTitleDialog extends LoaderTitleAreaDialog {
      * @param shell
      *            the parent shell
      */
-    public LoaderTitleDialog(Shell activeShell, Config cfg) {
+    public WelcomeScreenDialog(Shell activeShell, Config cfg) {
         super(activeShell);
         this.config = cfg;
     }
