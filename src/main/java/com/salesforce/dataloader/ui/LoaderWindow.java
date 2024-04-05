@@ -289,7 +289,7 @@ public class LoaderWindow extends ApplicationWindow {
         display.asyncExec(new Thread() {
             @Override
             public void run() {
-                LoaderTitleDialog dlg = new LoaderTitleDialog(display.getActiveShell(), cfg);
+                WelcomeScreenDialog dlg = new WelcomeScreenDialog(display.getActiveShell(), cfg);
                 int result = dlg.open();
 
                 for (Entry<Integer, OperationUIAction> ent : map.entrySet()) {
