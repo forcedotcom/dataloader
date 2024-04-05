@@ -30,6 +30,7 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
@@ -120,6 +121,22 @@ public class LoginPage extends OperationPage {
             if (page != null) {
                 getContainer().showPage(page);
             }
+            // following is a hack to correctly resize the list showing
+            // sObjects in DataSelectionPage on Mac.
+            // --- Start ---
+            Rectangle shellBounds = this.getShell().getBounds();
+            // Make the shell invisible so that change in size does not get
+            // persisted in config.properties
+            this.getShell().setVisible(false);
+            shellBounds.width += 1;
+            shellBounds.height += 1;
+            this.getShell().setBounds(shellBounds);
+            shellBounds.width -= 1;
+            shellBounds.height -= 1;
+            this.getShell().setBounds(shellBounds);
+            // Restore shell visibility
+            this.getShell().setVisible(true);
+            // --- End ----
         }
     }
 
