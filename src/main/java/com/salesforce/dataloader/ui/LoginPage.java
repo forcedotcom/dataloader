@@ -125,17 +125,10 @@ public class LoginPage extends OperationPage {
             // sObjects in DataSelectionPage on Mac.
             // --- Start ---
             Rectangle shellBounds = this.getShell().getBounds();
-            // Make the shell invisible so that change in size does not get
-            // persisted in config.properties
-            this.getShell().setVisible(false);
-            shellBounds.width += 1;
-            shellBounds.height += 1;
+            shellBounds.height++;
             this.getShell().setBounds(shellBounds);
-            shellBounds.width -= 1;
-            shellBounds.height -= 1;
+            shellBounds.height--;
             this.getShell().setBounds(shellBounds);
-            // Restore shell visibility
-            this.getShell().setVisible(true);
             // --- End ----
         }
     }

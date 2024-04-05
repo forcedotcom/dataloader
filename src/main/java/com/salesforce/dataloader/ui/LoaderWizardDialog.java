@@ -44,7 +44,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.exception.ParameterLoadException;
 
 /**
  * A dialog to show a wizard to the end user.

@@ -39,9 +39,13 @@ import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 public class EntityFilter extends ViewerFilter {
     private Text searchText;
     private Button filterAllCheckbox;
-    public EntityFilter(Text search, Button filterButton) {
+    public EntityFilter(Text search) {
         super();
         this.searchText = search;
+        this.filterAllCheckbox = null;
+    }
+    
+    public void setFilterButtion(Button filterButton) {
         this.filterAllCheckbox = filterButton;
     }
     /**

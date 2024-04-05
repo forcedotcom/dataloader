@@ -47,23 +47,18 @@ import com.salesforce.dataloader.ui.entitySelection.EntityViewerComparator;
 public class EntitySelectionListViewerUtil {
     private static final String PROPERTIES_PREFIX_STR = "DataSelectionPage";
     
-    public static ListViewer getEntitySelectionListViewer(Composite comp, Config config) {
+    public static ListViewer getEntitySelectionListViewer(Class<? extends OperationPage> pageClass, Composite comp, Config config) {
         String propertiesPrefixStr = PROPERTIES_PREFIX_STR;
         Label label = new Label(comp, SWT.RIGHT);
-        label.setText(Labels.getString(propertiesPrefixStr + ".selectObject")); //$NON-NLS-1$
+        label.setText(Labels.getString(pageClass.getSimpleName() + ".selectObject")); //$NON-NLS-1$
         GridData data = new GridData();
         label.setLayoutData(data);
-
-        // Add a checkbox to toggle filter
-        Button filterAll = new Button(comp, SWT.CHECK);
-        filterAll.setText(Labels.getString(propertiesPrefixStr + ".showAll")); //$NON-NLS-1$
-        filterAll.setToolTipText(Labels.getString(propertiesPrefixStr + ".showAllToolTip"));
-
+        
         Text search = new Text(comp, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH);
         data = new GridData(GridData.FILL_HORIZONTAL);
         search.setLayoutData(data);
         
-        EntityFilter filter = new EntityFilter(search, filterAll);
+        EntityFilter filter = new EntityFilter(search);
         final ListViewer listViewer = new ListViewer(comp, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
         listViewer.setContentProvider(new EntityContentProvider());
         listViewer.setLabelProvider(new EntityLabelProvider());
@@ -73,7 +68,14 @@ public class EntitySelectionListViewerUtil {
         listViewer.getControl().setLayoutData(data);
         listViewer.addFilter(filter);
         listViewer.setComparator(new EntityViewerComparator());
-        
+
+        // Add a checkbox to toggle filter
+        Button filterAll = new Button(comp, SWT.CHECK);
+        filter.setFilterButtion(filterAll);
+        filterAll.setText(Labels.getString(propertiesPrefixStr + ".showAll")); //$NON-NLS-1$
+        filterAll.setToolTipText(Labels.getString(propertiesPrefixStr + ".showAllToolTip"));
+
+
         filterAll.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
