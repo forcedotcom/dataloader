@@ -29,11 +29,9 @@ package com.salesforce.dataloader.ui;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.model.LoginCriteria;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;

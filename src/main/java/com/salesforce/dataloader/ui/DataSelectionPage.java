@@ -77,19 +77,6 @@ public class DataSelectionPage extends LoadPage {
         comp.setLayout(gridLayout);
         GridData data = new GridData(GridData.FILL_BOTH);
         comp.setLayoutData(data);
-        lv = EntitySelectionListViewerUtil.getEntitySelectionListViewer(comp, this.controller.getConfig());
-        lv.addSelectionChangedListener(new ISelectionChangedListener() {
-            @Override
-            public void selectionChanged(SelectionChangedEvent event) {
-                setPageComplete();
-            }
-
-        });
-
-        setupPage();
-
-        new Label(comp, SWT.NONE);
-
         final String infoMessage = this.controller.getConfig().getOperationInfo().getInfoMessageForDataSelectionPage();
         if (infoMessage != null) {
             Label l = new Label(comp, SWT.RIGHT);
@@ -99,6 +86,17 @@ public class DataSelectionPage extends LoadPage {
             l.setText(infoMessage);
             l.setForeground(new Color(getShell().getDisplay(), 0xff, 0, 0));
         }
+        
+        lv = EntitySelectionListViewerUtil.getEntitySelectionListViewer(this.getClass(), comp, this.controller.getConfig());
+        lv.addSelectionChangedListener(new ISelectionChangedListener() {
+            @Override
+            public void selectionChanged(SelectionChangedEvent event) {
+                setPageComplete();
+            }
+
+        });
+
+        setupPage();
 
         new Label(comp, SWT.NONE);
 
