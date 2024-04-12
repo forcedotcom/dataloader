@@ -64,8 +64,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static com.salesforce.dataloader.ui.UIUtils.isValidHttpsUrl;
-
 public class AdvancedSettingsDialog extends BaseDialog {
     private Text textBatch;
     private Text textQueryBatch;
@@ -907,7 +905,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 Config config = getController().getConfig();
 
                 String currentTextEndpoint = textEndpoint.getText();
-                if (currentTextEndpoint != null && !currentTextEndpoint.isEmpty() && !isValidHttpsUrl(currentTextEndpoint)) {
+                if (currentTextEndpoint != null && !currentTextEndpoint.isEmpty() && !AppUtil.isValidHttpsUrl(currentTextEndpoint)) {
                     MessageDialog alert = new MessageDialog(getParent().getShell(), "Warning", null,
                             Labels.getFormattedString("AdvancedSettingsDialog.serverURLInfo", currentTextEndpoint),
                             MessageDialog.ERROR, new String[]{"OK"}, 0);

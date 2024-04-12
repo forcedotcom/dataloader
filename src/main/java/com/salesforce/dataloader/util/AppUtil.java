@@ -36,6 +36,7 @@ import java.net.HttpURLConnection;
 import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -96,6 +97,10 @@ public class AppUtil {
     public static final String CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
     public static final String CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
     public static final String CLI_OPTION_CONFIG_DIR_PROP = "salesforce.config.dir";
+    public static final String CLI_OPTION_INSTALLATION_FOLDER_PROP = "salesforce.installation.dir";
+    public static final String CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP = "salesforce.installation.shortcut.desktop";
+    public static final String CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP = "salesforce.installation.shortcut.windows.startmenu";
+    public static final String CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP = "salesforce.installation.shortcut.macos.appsfolder";
     public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
     public static final String DATALOADER_DOWNLOAD_URL = "https://developer.salesforce.com/tools/data-loader";
     public static final int EXIT_CODE_NO_ERRORS = 0;
@@ -475,6 +480,24 @@ public class AppUtil {
         } catch (Exception e) {
             logger.info("Unable to check for the latest available data loader version: " + e.getMessage());
             return DATALOADER_VERSION;
+        }
+    }
+    
+
+    public static boolean isValidHttpsUrl(String url) {
+        try {
+            // check if it is a valid url
+            URI uri = new URL(url).toURI();
+            // check if it is https protocol
+            return "https".equalsIgnoreCase(uri.getScheme());
+        }
+        catch (Exception e) {
+            return false;
+        }
+    }
+    public static void validateHttpsUrlAndThrow(String url) {
+        if (!isValidHttpsUrl(url)) {
+            throw new RuntimeException("Dataloader only supports server URL that uses https protocol:" + url);
         }
     }
 }
