@@ -97,7 +97,7 @@ public class DataLoaderRunner extends Thread {
             Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
             /* Run in the UI mode, get the controller instance with batchMode == false */
             logger = LogManager.getLogger(DataLoaderRunner.class);
-            Installer.install(args);
+            Installer.install(argsMap);
             if (argsMap.containsKey(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
                 && "true".equalsIgnoreCase(argsMap.get(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
                 try {
