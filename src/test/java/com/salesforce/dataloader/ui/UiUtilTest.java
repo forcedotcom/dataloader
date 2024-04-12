@@ -28,12 +28,14 @@ package com.salesforce.dataloader.ui;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.salesforce.dataloader.util.AppUtil;
+
 public class UiUtilTest {
     @Test
     public void testHttpsTester() {
-        Assert.assertTrue(UIUtils.isValidHttpsUrl("https://my.com"));
-        Assert.assertFalse(UIUtils.isValidHttpsUrl("http://my.com"));
-        Assert.assertFalse(UIUtils.isValidHttpsUrl("my.com"));
-        Assert.assertFalse(UIUtils.isValidHttpsUrl("ftp://my.com"));
+        Assert.assertTrue(AppUtil.isValidHttpsUrl("https://my.com"));
+        Assert.assertFalse(AppUtil.isValidHttpsUrl("http://my.com"));
+        Assert.assertFalse(AppUtil.isValidHttpsUrl("my.com"));
+        Assert.assertFalse(AppUtil.isValidHttpsUrl("ftp://my.com"));
     }
 }

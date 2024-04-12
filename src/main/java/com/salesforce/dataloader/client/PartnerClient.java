@@ -41,6 +41,7 @@ import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
 import com.salesforce.dataloader.exception.RelationshipFormatException;
+import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.DeleteResult;
 import com.sforce.soap.partner.DescribeGlobalResult;
@@ -75,8 +76,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.salesforce.dataloader.ui.UIUtils.validateHttpsUrlAndThrow;
 
 public class PartnerClient extends ClientBase<PartnerConnection> {
 
@@ -708,7 +707,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     private String getServerUrl(String serverUrl) {
         if (config.getBoolean(Config.RESET_URL_ON_LOGIN)) {
             try {
-                validateHttpsUrlAndThrow(serverUrl);
+                AppUtil.validateHttpsUrlAndThrow(serverUrl);
                 return getServerStringFromUrl(new URL(serverUrl));
             } catch (MalformedURLException e) {
                 logger.fatal("Unexpected error", e);
@@ -861,7 +860,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         if (serverUrl == null || serverUrl.length() == 0) {
             serverUrl = getServerStringFromUrl(DEFAULT_AUTH_ENDPOINT_URL);
         }
-        validateHttpsUrlAndThrow(serverUrl);
+        AppUtil.validateHttpsUrlAndThrow(serverUrl);
         return serverUrl;
     }
 

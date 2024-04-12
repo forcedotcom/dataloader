@@ -50,31 +50,12 @@ import org.eclipse.swt.widgets.Table;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
 public class UIUtils {
     private static ImageRegistry image_registry;
     private static Logger logger = LogManager.getLogger(AppUtil.class);
-
-    public static boolean isValidHttpsUrl(String url) {
-        try {
-            // check if it is a valid url
-            URI uri = new URL(url).toURI();
-            // check if it is https protocol
-            return "https".equalsIgnoreCase(uri.getScheme());
-        }
-        catch (Exception e) {
-            return false;
-        }
-    }
-
-    public static void validateHttpsUrlAndThrow(String url) {
-        if (!isValidHttpsUrl(url)) {
-            throw new RuntimeException("Dataloader only supports server URL that uses https protocol:" + url);
-        }
-    }
 
     public static synchronized ImageRegistry getImageRegistry() {
         if (image_registry == null) {
