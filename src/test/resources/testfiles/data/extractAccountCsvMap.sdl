@@ -1,8 +1,8 @@
 # extract account mapping values for query from salesforce (left) and update to csv file (right)
 # salesforceFieldName=csvFieldName
-Id=account_id
 Oracle_Id__c=account_ext_id
-Name=account_name
 Phone=account_phone
 AnnualRevenue=account_annual_revenue
 AccountNumber__c=account_number
+Name=account_name
+Id=account_id

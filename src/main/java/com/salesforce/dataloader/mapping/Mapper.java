@@ -46,6 +46,7 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.AppUtil;
+import com.salesforce.dataloader.util.OrderedProperties;
 
 /**
  * Base class for field name mappers. Used by data loader operations to map between local field names and sfdc field
@@ -147,7 +148,7 @@ public abstract class Mapper {
     }
 
     private Properties loadProperties(String fileName) throws MappingInitializationException {
-        Properties props = new Properties();
+        OrderedProperties props = new OrderedProperties();
         if (fileName != null && fileName.length() > 0) {
             try {
                 FileInputStream in = new FileInputStream(fileName);
