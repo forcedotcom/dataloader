@@ -47,7 +47,7 @@ import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.util.AppUtil;
 
-public class Installer extends Thread {
+public class Installer {
     private static final String USERHOME=System.getProperty("user.home");
     private static final String PATH_SEPARATOR = System.getProperty("file.separator");
     private static final String CREATE_DEKSTOP_SHORTCUT_ON_WINDOWS = ":createDesktopShortcut";
@@ -55,17 +55,14 @@ public class Installer extends Thread {
 
     private static Logger logger;
     private static String[] OS_SPECIFIC_DL_COMMAND = {"dataloader.bat", "dataloader_console", "dataloader.sh"};
-    
-    public void run() {
-        System.out.println(Messages.getMessage(Installer.class, "exitMessage"));
-    }
 
     public static void install(Map<String, String> argsmap) {
+        int exitCode = AppUtil.EXIT_CODE_NO_ERRORS;
+        boolean interactiveMode = true;
         try {
             String installationFolder = ".";
             installationFolder = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation()
                     .toURI()).getParent();
-            Runtime.getRuntime().addShutdownHook(new Installer());
             setLogger();
 
             for (String dlCmd : OS_SPECIFIC_DL_COMMAND) {
@@ -87,6 +84,8 @@ public class Installer extends Thread {
             if (installationFolderFromCommandLine == null || installationFolderFromCommandLine.isBlank()) {
                 skipCopyArtifacts = promptCurrentInstallationFolder();
                 promptUserToDeleteExistingInstallationFolder = true;
+            } else {
+                interactiveMode = false;
             }
             if (!skipCopyArtifacts) {
                 logger.debug("going to select installation folder");
@@ -126,13 +125,19 @@ public class Installer extends Thread {
                     createAppsFolderShortcut(installationFolder, false); 
                 }
             }
-
-            if (!skipCopyArtifacts) {
-                System.exit(AppUtil.EXIT_CODE_NO_ERRORS);
-            }
         } catch (Exception ex) {
             handleException(ex, Level.FATAL);
-            System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
+            exitCode = AppUtil.EXIT_CODE_CLIENT_ERROR;
+        } finally {
+            if (interactiveMode) {
+                System.out.print(Messages.getMessage(Installer.class, "exitMessage"));
+                try {
+                    System.in.read();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+            System.exit(exitCode);
         }
     }
     
