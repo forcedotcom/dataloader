@@ -84,8 +84,10 @@ public class Installer {
             if (installationFolderFromCommandLine == null || installationFolderFromCommandLine.isBlank()) {
                 skipCopyArtifacts = promptCurrentInstallationFolder();
                 promptUserToDeleteExistingInstallationFolder = true;
+                interactiveMode = true;
             } else {
                 interactiveMode = false;
+                promptUserToDeleteExistingInstallationFolder = false;
             }
             if (!skipCopyArtifacts) {
                 logger.debug("going to select installation folder");
@@ -97,20 +99,22 @@ public class Installer {
             
             String createDesktopShortcutStr = argsmap.get(AppUtil.CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP);
             logger.debug("going to create desktop shortcut");
-            if (createDesktopShortcutStr == null || createDesktopShortcutStr.isBlank()) {
+            if (interactiveMode) {
                 createDesktopShortcut(installationFolder, true); 
-            } else if ("true".equalsIgnoreCase(createDesktopShortcutStr)
-                        || "yes".equalsIgnoreCase(createDesktopShortcutStr)) {
+            } else if (createDesktopShortcutStr != null 
+                    && ("true".equalsIgnoreCase(createDesktopShortcutStr)
+                    || "yes".equalsIgnoreCase(createDesktopShortcutStr))) {
                 createDesktopShortcut(installationFolder, false); 
             }
             
             String createWindowsStartMenuShortcutStr = argsmap.get(AppUtil.CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP);
             logger.debug("going to create start menu shortcut");
             if (AppUtil.isRunningOnWindows()) {
-                if (createWindowsStartMenuShortcutStr == null || createWindowsStartMenuShortcutStr.isBlank()) {
+                if (interactiveMode) {
                     createStartMenuShortcut(installationFolder, true); 
-                } else if ("true".equalsIgnoreCase(createWindowsStartMenuShortcutStr)
-                            || "yes".equalsIgnoreCase(createWindowsStartMenuShortcutStr)) {
+                } else if (createWindowsStartMenuShortcutStr != null
+                        && ("true".equalsIgnoreCase(createWindowsStartMenuShortcutStr)
+                            || "yes".equalsIgnoreCase(createWindowsStartMenuShortcutStr))) {
                     createStartMenuShortcut(installationFolder, false); 
                 }
             }
@@ -118,10 +122,11 @@ public class Installer {
             String createMacOSAppsFolderShortcutStr = argsmap.get(AppUtil.CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP);
             logger.debug("going to create start menu shortcut");
             if (AppUtil.isRunningOnMacOS()) {
-                if (createMacOSAppsFolderShortcutStr == null || createMacOSAppsFolderShortcutStr.isBlank()) {
+                if (interactiveMode) {
                     createAppsFolderShortcut(installationFolder, true); 
-                } else if ("true".equalsIgnoreCase(createMacOSAppsFolderShortcutStr)
-                            || "yes".equalsIgnoreCase(createMacOSAppsFolderShortcutStr)) {
+                } else if (createMacOSAppsFolderShortcutStr != null
+                        && ("true".equalsIgnoreCase(createMacOSAppsFolderShortcutStr)
+                            || "yes".equalsIgnoreCase(createMacOSAppsFolderShortcutStr))) {
                     createAppsFolderShortcut(installationFolder, false); 
                 }
             }
