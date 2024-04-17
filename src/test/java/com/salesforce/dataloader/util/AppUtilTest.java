@@ -23,14 +23,12 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader.ui;
+package com.salesforce.dataloader.util;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.salesforce.dataloader.util.AppUtil;
-
-public class UiUtilTest {
+public class AppUtilTest {
     @Test
     public void testHttpsTester() {
         Assert.assertTrue(AppUtil.isValidHttpsUrl("https://my.com"));

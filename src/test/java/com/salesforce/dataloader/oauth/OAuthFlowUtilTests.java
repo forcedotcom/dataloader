@@ -23,10 +23,11 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader.ui;
+package com.salesforce.dataloader.oauth;
 
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.config.Config;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,7 +40,7 @@ import java.util.ArrayList;
 /**
  * test the oauth token flow as best we can. sadly there is SWT here which isn't very testable for unit tests
  */
-public class OAuthTokenFlowTests extends ConfigTestBase {
+public class OAuthFlowUtilTests extends ConfigTestBase {
 
     private Config config;
     private ArrayList<String> existingOAuthEnvironments;
@@ -74,7 +75,7 @@ public class OAuthTokenFlowTests extends ConfigTestBase {
     public void testGetStartUrl(){
         try {
             String expected = "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?response_type=token&display=popup&client_id=CLIENTID&redirect_uri=REDIRECTURI";
-            String actual = OAuthTokenFlow.getStartUrlImpl(config);
+            String actual = OAuthFlowUtil.getStartUrlImpl(config);
 
             Assert.assertEquals( "OAuth Token Flow returned the wrong url", expected, actual);
         } catch (UnsupportedEncodingException e) {
@@ -85,7 +86,7 @@ public class OAuthTokenFlowTests extends ConfigTestBase {
     @Test
     public void testInvalidReponseUrl(){
         try {
-            Boolean condition = OAuthTokenFlow.OAuthTokenBrowserLister.handleCompletedUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?doit=1", config);
+            Boolean condition = OAuthFlowUtil.handleCompletedUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?doit=1", config);
             Assert.assertFalse("OAuthToken should not have handled this", condition);
 
         } catch (URISyntaxException e) {
@@ -96,7 +97,7 @@ public class OAuthTokenFlowTests extends ConfigTestBase {
     @Test
     public void testValidResponseUrl(){
         try {
-            Boolean condition = OAuthTokenFlow.OAuthTokenBrowserLister.handleCompletedUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN", config);
+            Boolean condition = OAuthFlowUtil.handleCompletedUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN", config);
             Assert.assertTrue("OAuthToken should have handled this", condition);
 
         } catch (URISyntaxException e) {
@@ -107,7 +108,7 @@ public class OAuthTokenFlowTests extends ConfigTestBase {
     @Test
     public void testValidResponseUrlSetsAccessToken(){
         try {
-            OAuthTokenFlow.OAuthTokenBrowserLister.handleCompletedUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN", config);
+            OAuthFlowUtil.handleCompletedUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN", config);
             String expected = "TOKEN";
             String actual = config.getString(Config.OAUTH_ACCESSTOKEN);
 
@@ -120,7 +121,7 @@ public class OAuthTokenFlowTests extends ConfigTestBase {
     @Test
     public void testValidResponseUrlSetsRefreshToken(){
         try {
-            OAuthTokenFlow.OAuthTokenBrowserLister.handleCompletedUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&refresh_token=REFRESHTOKEN", config);
+            OAuthFlowUtil.handleCompletedUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&refresh_token=REFRESHTOKEN", config);
             String expected = "REFRESHTOKEN";
             String actual = config.getString(Config.OAUTH_REFRESHTOKEN);
 
@@ -133,7 +134,7 @@ public class OAuthTokenFlowTests extends ConfigTestBase {
     @Test
     public void testValidResponseUrlSetsEndPoint(){
         try {
-            OAuthTokenFlow.OAuthTokenBrowserLister.handleCompletedUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=INSTANCEURL", config);
+            OAuthFlowUtil.handleCompletedUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=INSTANCEURL", config);
             String expected = "INSTANCEURL";
             String actual = config.getString(Config.ENDPOINT);
 
