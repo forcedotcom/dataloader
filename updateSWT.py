@@ -95,6 +95,12 @@ def downloadAndExtractZip(url):
     response = requests.get(zipURL, stream=True)
     z = zipfile.ZipFile(io.BytesIO(response.content))
     z.extractall(unzippedDirName)
+    subprocess.run(["zip", 
+                    "-d", 
+                    unzippedDirName + "swt.jar",
+                    "META-INF/ECLIPSE_.SF",
+                    "META-INF/ECLIPSE_.DSA",
+                    "META-INF/ECLIPSE_.RSA"])
 
     return unzippedDirName
 
