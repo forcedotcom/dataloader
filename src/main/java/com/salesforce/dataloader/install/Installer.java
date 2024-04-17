@@ -59,6 +59,8 @@ public class Installer {
     public static void install(Map<String, String> argsmap) {
         int exitCode = AppUtil.EXIT_CODE_NO_ERRORS;
         boolean interactiveMode = true;
+        boolean installedInPreviousRun = false;
+        boolean skipCopyArtifacts = false;
         try {
             String installationFolder = ".";
             installationFolder = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation()
@@ -69,11 +71,11 @@ public class Installer {
                 Path installFilePath = Paths.get(installationFolder + PATH_SEPARATOR + dlCmd);
                 if (Files.exists(installFilePath) && AppUtil.getAppRunMode() != AppUtil.APP_RUN_MODE.INSTALL) {
                     // installation completed
+                    installedInPreviousRun = true;
                     return;
                 }
             }
             boolean hideBanner = false;
-            boolean skipCopyArtifacts = false;
             
             if (!hideBanner) {
                 logger.debug("going to show banner");
@@ -134,6 +136,9 @@ public class Installer {
             handleException(ex, Level.FATAL);
             exitCode = AppUtil.EXIT_CODE_CLIENT_ERROR;
         } finally {
+            if (installedInPreviousRun || skipCopyArtifacts) {
+                return;
+            }
             if (interactiveMode) {
                 System.out.print(Messages.getMessage(Installer.class, "exitMessage"));
                 try {
@@ -200,15 +205,9 @@ public class Installer {
         createDir(installationDir);
         logger.debug("going to copy contents of " + installationSourceDir + " to " + installationDir);
         
-        String classpath = System.getProperty("java.class.path");
-        String[] jars = classpath.split(System.getProperty("path.separator"));
-        String dataloaderJar = null;
-        for (String jar : jars) {
-            if (jar.contains("dataloader")) {
-                dataloaderJar = jar;
-                break;
-            }
-        }
+        String dataloaderJarURL = Installer.class.getProtectionDomain().getCodeSource().getLocation().toString();        
+        String[] urlParts = dataloaderJarURL.split(":");
+        String dataloaderJar = urlParts[1];
         if (dataloaderJar == null) {
             logger.fatal("Did not find Data Loader jar in the installation artifacts. Unable to install Data Loader");
             System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
