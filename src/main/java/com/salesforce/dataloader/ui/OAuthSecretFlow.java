@@ -26,12 +26,10 @@
 package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.client.SimplePost;
-import com.salesforce.dataloader.client.SimplePostFactory;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.exception.ParameterLoadException;
-import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
+import com.salesforce.dataloader.oauth.OAuthSecretFlowUtil;
 
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -42,9 +40,6 @@ import org.eclipse.swt.widgets.Shell;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 /**
  * the oauth authorization_code. this is normally reserved for server to server communications as it involves storing
@@ -65,15 +60,7 @@ public class OAuthSecretFlow extends OAuthFlow {
 
     @Override
     public String getStartUrl(Config config) throws UnsupportedEncodingException {
-        return getStartUrlImpl(config);
-    }
-
-    //SWT Components are not testable :(
-    public static String getStartUrlImpl(Config config) throws UnsupportedEncodingException {
-        return config.getString(Config.OAUTH_SERVER) +
-                "/services/oauth2/authorize?response_type=code&display=popup&client_id=" +
-                config.getString(Config.OAUTH_CLIENTID) + "&redirect_uri=" +
-                URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
+        return OAuthSecretFlowUtil.getStartUrlImpl(config);
     }
 
     public static class OAuthSecretBrowserListener extends OAuthBrowserListener {
@@ -92,10 +79,10 @@ public class OAuthSecretFlow extends OAuthFlow {
             super.completed(progressEvent);
             String url = browser.getUrl();
             try {
-                String code = handleInitialUrl(url);
+                String code = OAuthSecretFlowUtil.handleInitialUrl(url);
 
                 if (code != null) {
-                    SimplePost client = handleSecondPost(code, config);
+                    SimplePost client = OAuthSecretFlowUtil.handleSecondPost(code, config);
                     setReasonPhrase(client.getReasonPhrase());
                     setStatusCode(client.getStatusCode());
                     setResult(client.isSuccessful());
@@ -106,27 +93,5 @@ public class OAuthSecretFlow extends OAuthFlow {
                 doSimpleErrorHandling(url, e, logger);
             }
         }
-
-        public static SimplePost handleSecondPost(String code, Config config) throws IOException, ParameterLoadException {
-            String server = config.getString(Config.OAUTH_SERVER) + "/services/oauth2/token";
-            SimplePost client = SimplePostFactory.getInstance(config, server,
-                    new BasicNameValuePair("grant_type", "authorization_code"),
-                    new BasicNameValuePair("code", code),
-                    new BasicNameValuePair("client_id", config.getString(Config.OAUTH_CLIENTID)),
-                    new BasicNameValuePair("client_secret", config.getString(Config.OAUTH_CLIENTSECRET)),
-                    new BasicNameValuePair("redirect_uri", config.getString(Config.OAUTH_REDIRECTURI))
-            );
-            client.post();
-            if (client.isSuccessful()) {
-                OAuthBrowserLoginRunner.processSuccessfulLogin(client.getInput(), config);
-            }
-            return client;
-        }
-
-        public static String handleInitialUrl(String url) throws URISyntaxException {
-            Map<String, String> queryParameters = getQueryParameters(url);
-            return queryParameters.get("code");
-        }
-
     }
 }

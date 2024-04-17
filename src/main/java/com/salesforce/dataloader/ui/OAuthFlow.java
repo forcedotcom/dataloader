@@ -28,7 +28,6 @@ package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.config.Config;
 
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -41,9 +40,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * OAuthFlow is basic instrumentation of delegating authentication to an external web browser using OAuth2
@@ -101,19 +97,9 @@ public abstract class OAuthFlow extends Dialog {
 
         reasonPhrase = listener.getReasonPhrase();
         statusCode = listener.getStatusCode();
-
-
         return listener.getResult();
     }
 
     protected abstract OAuthBrowserListener getOAuthBrowserListener(Shell shell, Browser browser, Config config);
-
     public abstract String getStartUrl(Config config) throws UnsupportedEncodingException;
-
-    public static Map<String, String> getQueryParameters(String url) throws URISyntaxException {
-        url = url.replace("#","?");
-        Map<String, String> params = new HashMap<>();
-        new URIBuilder(url).getQueryParams().stream().forEach(kvp -> params.put(kvp.getName(), kvp.getValue()));
-        return params;
-    }
 }

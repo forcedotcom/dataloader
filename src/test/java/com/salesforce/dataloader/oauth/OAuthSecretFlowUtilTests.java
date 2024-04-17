@@ -23,7 +23,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader.ui;
+package com.salesforce.dataloader.oauth;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -34,6 +34,7 @@ import com.salesforce.dataloader.client.SimplePostFactory;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.model.OAuthToken;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,7 +50,7 @@ import java.util.function.Function;
 /**
  * Created by rmazzeo on 12/9/15.
  */
-public class OAuthSecretFlowTests extends ConfigTestBase {
+public class OAuthSecretFlowUtilTests extends ConfigTestBase {
 
     private SimplePost mockSimplePost;
     private Config config;
@@ -91,7 +92,7 @@ public class OAuthSecretFlowTests extends ConfigTestBase {
     public void testGetStartUrl(){
         try {
             String expected = "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?response_type=code&display=popup&client_id=CLIENTID&redirect_uri=REDIRECTURI";
-            String actual = OAuthSecretFlow.getStartUrlImpl(config);
+            String actual = OAuthSecretFlowUtil.getStartUrlImpl(config);
 
             Assert.assertEquals( "OAuth Token Flow returned the wrong url", expected, actual);
         } catch (UnsupportedEncodingException e) {
@@ -103,7 +104,7 @@ public class OAuthSecretFlowTests extends ConfigTestBase {
     public void testInvalidInitialReponseUrl(){
         try {
             String expected = null;
-            String actual = OAuthSecretFlow.OAuthSecretBrowserListener.handleInitialUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?doit=1");
+            String actual = OAuthSecretFlowUtil.handleInitialUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?doit=1");
             Assert.assertEquals("OAuthToken should not have handled this", expected, actual);
 
         } catch (URISyntaxException e) {
@@ -115,7 +116,7 @@ public class OAuthSecretFlowTests extends ConfigTestBase {
     public void testValidInitialResponseUrl(){
         try {
             String expected = "TOKEN";
-            String actual = OAuthSecretFlow.OAuthSecretBrowserListener.handleInitialUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?code=TOKEN");
+            String actual = OAuthSecretFlowUtil.handleInitialUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?code=TOKEN");
             Assert.assertEquals("OAuthToken should not have handled this", expected, actual);
 
         } catch (URISyntaxException e) {
@@ -138,7 +139,7 @@ public class OAuthSecretFlowTests extends ConfigTestBase {
             when(mockSimplePost.isSuccessful()).thenReturn(true);
 
             @SuppressWarnings("unused")
-            SimplePost simplePost = OAuthSecretFlow.OAuthSecretBrowserListener.handleSecondPost("simplePost", config);
+            SimplePost simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", config);
 
             String expected = "ACCESS";
             String actual = config.getString(Config.OAUTH_ACCESSTOKEN);
@@ -166,7 +167,7 @@ public class OAuthSecretFlowTests extends ConfigTestBase {
             when(mockSimplePost.isSuccessful()).thenReturn(true);
 
             @SuppressWarnings("unused")
-            SimplePost simplePost = OAuthSecretFlow.OAuthSecretBrowserListener.handleSecondPost("simplePost", config);
+            SimplePost simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", config);
 
             String expected = "REFRESHTOKEN";
             String actual = config.getString(Config.OAUTH_REFRESHTOKEN);
@@ -193,7 +194,7 @@ public class OAuthSecretFlowTests extends ConfigTestBase {
             when(mockSimplePost.isSuccessful()).thenReturn(true);
 
             @SuppressWarnings("unused")
-            SimplePost simplePost = OAuthSecretFlow.OAuthSecretBrowserListener.handleSecondPost("simplePost", config);
+            SimplePost simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", config);
 
             String expected = "http://INSTANCEURL";
             String actual = config.getString(Config.ENDPOINT);
