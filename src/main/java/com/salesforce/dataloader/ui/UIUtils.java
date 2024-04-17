@@ -28,10 +28,7 @@ package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.util.AppUtil;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -47,15 +44,11 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 
-import java.awt.Desktop;
-import java.io.IOException;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
 public class UIUtils {
     private static ImageRegistry image_registry;
-    private static Logger logger = LogManager.getLogger(AppUtil.class);
 
     public static synchronized ImageRegistry getImageRegistry() {
         if (image_registry == null) {
@@ -130,61 +123,6 @@ public class UIUtils {
         return itemArray;
     }
     
-    
-    public static void openURL(String url) {
-        if (Desktop.isDesktopSupported()) {
-            Desktop desktop = Desktop.getDesktop();
-            try {
-                logger.debug("trying to use desktop.browse() method");
-                desktop.browse(new URI(url));
-            } catch (Exception e) {
-                logger.debug(e.getMessage());
-                openURLUsingNativeCommand(url);
-            }
-        } else {
-            logger.debug("trying to use native command");
-            openURLUsingNativeCommand(url);
-        }
-    }
-
-    private static void openURLUsingNativeCommand(String url) {
-        Runtime runtime = Runtime.getRuntime();
-        String osName = System.getProperty("os.name");
-        try {
-            if (osName.toLowerCase().indexOf("mac") >= 0) {
-                logger.debug("trying to use open command on mac");
-                runtime.exec("open " + url);
-            }
-            else if (osName.toLowerCase().indexOf("win") >= 0) {
-                logger.debug("trying to use rundll32 command on windows");
-                runtime.exec("rundll32 url.dll,FileProtocolHandler " + url);
-            } else { //assume Unix or Linux
-                try {
-                    logger.debug("trying to use xdg-open command on linux");
-                    runtime.exec("xdg-open " + url);
-                } catch (IOException e) {
-                    logger.debug(e.getMessage());
-                    logger.debug("trying to browser-specific command on linux");
-                    String[] browsers = {
-                            "firefox", "chrome", "opera", "konqueror", "epiphany", "mozilla", "netscape" };
-                    String browser = null;
-                    for (int count = 0; count < browsers.length && browser == null; count++)
-                        if (runtime.exec(
-                                new String[] {"which", browsers[count]}).waitFor() == 0) {
-                            browser = browsers[count];
-                        }
-                    if (browser == null) {
-                        throw new Exception("Could not find web browser");
-                    } else {
-                        runtime.exec(new String[] {browser, url});
-                    }
-                }
-            }
-        }
-        catch (Exception e) {
-            logger.error(e.getMessage());
-        }
-    }
     
     public static int getControlWidth(Control control) {
         GC gc = new GC(control);

@@ -55,7 +55,8 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.exception.OAuthBrowserLoginRunnerException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.model.OAuthToken;
-import com.salesforce.dataloader.ui.UIUtils;
+import com.salesforce.dataloader.ui.URLUtil;
+//import com.salesforce.dataloader.ui.UIUtils;
 
 public class OAuthBrowserLoginRunner {
     public enum LoginStatus { WAIT, FAIL, SUCCESS };
@@ -161,7 +162,7 @@ public class OAuthBrowserLoginRunner {
         if (!client.isSuccessful()) {
             // did not succeed in skipping the page with pre-filled user code, show it
             logger.error(response);
-            UIUtils.openURL(verificationURLStr);
+            URLUtil.openURL(verificationURLStr);
         }
         
         List<BasicNameValuePair> nvPairList = parseTokenPageHTML(response);
@@ -182,10 +183,10 @@ public class OAuthBrowserLoginRunner {
         if (client.getStatusCode() == 302) {
             Header[] locationHeaders = client.getResponseHeaders("Location");
             String redirectURL = locationHeaders[0].getValue();
-            UIUtils.openURL(redirectURL);
+            URLUtil.openURL(redirectURL);
         } else {
             // did not succeed in skipping the page with pre-filled user code, show it
-            UIUtils.openURL(verificationURLStr);
+            URLUtil.openURL(verificationURLStr);
         }
 
     }

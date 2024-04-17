@@ -57,7 +57,7 @@ public class ContentLimitLink extends Link {
         this.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                UIUtils.openURL(e.text);
+                URLUtil.openURL(e.text);
             }
           });
         
