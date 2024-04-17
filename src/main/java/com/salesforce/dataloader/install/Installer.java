@@ -205,9 +205,7 @@ public class Installer {
         createDir(installationDir);
         logger.debug("going to copy contents of " + installationSourceDir + " to " + installationDir);
         
-        String dataloaderJarURL = Installer.class.getProtectionDomain().getCodeSource().getLocation().toString();        
-        String[] urlParts = dataloaderJarURL.split(":");
-        String dataloaderJar = urlParts[1];
+        String dataloaderJar = Installer.class.getProtectionDomain().getCodeSource().getLocation().getFile();
         if (dataloaderJar == null) {
             logger.fatal("Did not find Data Loader jar in the installation artifacts. Unable to install Data Loader");
             System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
