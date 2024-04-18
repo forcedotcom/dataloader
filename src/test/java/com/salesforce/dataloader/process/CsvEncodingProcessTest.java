@@ -121,7 +121,7 @@ public class CsvEncodingProcessTest extends ProcessTestBase {
         FileInputStream fis = new FileInputStream(new File(testConfig.get(Config.DAO_NAME)));
         try {
             CSVReader rdr = new CSVReader(fis, StandardCharsets.UTF_8.name());
-            int nameidx = rdr.nextRecord().indexOf("NAME");
+            int nameidx = rdr.nextRecord().indexOf("Name");
             assertEquals(name, rdr.nextRecord().get(nameidx));
         } finally {
             IOUtils.closeQuietly(fis);
