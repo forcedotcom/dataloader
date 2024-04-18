@@ -115,7 +115,7 @@ public class HyperlinkDialog extends BaseDialog {
         link.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                UIUtils.openURL(e.text);
+                URLUtil.openURL(e.text);
             }
         });
         

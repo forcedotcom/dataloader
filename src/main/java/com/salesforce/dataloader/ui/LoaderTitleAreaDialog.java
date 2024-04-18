@@ -530,7 +530,7 @@ public class LoaderTitleAreaDialog extends Dialog {
         messageLink.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                UIUtils.openURL(e.text);
+                URLUtil.openURL(e.text);
             }
           });
     }

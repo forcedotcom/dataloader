@@ -417,6 +417,20 @@
                 <copy todir="${basedir}/target/classes/linux/"  flatten="true">
                   <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtlinux*/*/*.jar"/>
                 </copy>
+                
+                <apply executable="zip">
+                    <arg value="-d"/>
+                    <srcfile/>
+                    <arg value="META-INF/ECLIPSE_.SF"/>
+                    <arg value="META-INF/ECLIPSE_.DSA"/>
+                    <arg value="META-INF/ECLIPSE_.RSA"/>
+                    <fileset dir="${basedir}/target/classes/">
+                        <patternset>
+                          <include name="**/*.jar"/>
+                        </patternset>
+                    </fileset>
+                </apply>
+
 
                 <mkdir dir="${basedir}/target/zipartifacts"/>
                 <copy file="${basedir}/release/install/install.command" 

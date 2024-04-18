@@ -163,7 +163,7 @@ public class OAuthLoginFromBrowserFlow extends Dialog {
         link.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-            	UIUtils.openURL(e.text);
+                URLUtil.openURL(e.text);
             }
           });
         final Clipboard clipboard = new Clipboard(display);
