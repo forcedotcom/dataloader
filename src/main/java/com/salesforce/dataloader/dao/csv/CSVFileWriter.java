@@ -76,13 +76,12 @@ public class CSVFileWriter implements DataWriter {
     /**
      * If <code>capitalizedHeadings</code> is true, output header row in caps
      */
-    private final boolean capitalizedHeadings;
+    private final boolean capitalizedHeadings = false;
     private final char columnDelimiter;
         
     public CSVFileWriter(String fileName, Config config, String columnDelimiterStr) {
 
         this.fileName = fileName;
-        this.capitalizedHeadings = true;
         encoding = config.getCsvEncoding(true);
         logger.debug(this.getClass().getName(), "encoding used to write to CSV file is " + encoding);
         if (columnDelimiterStr.length() == 0) {
