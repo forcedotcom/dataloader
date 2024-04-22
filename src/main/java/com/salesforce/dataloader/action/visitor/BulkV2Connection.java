@@ -156,6 +156,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
+import com.salesforce.dataloader.util.AppUtil;
+import com.salesforce.dataloader.util.AppUtil.OSType;
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.AsyncExceptionCode;
 import com.sforce.async.BulkConnection;
@@ -374,6 +376,11 @@ public class BulkV2Connection extends BulkConnection {
         	headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
         	requestBodyMap.put("object", job.getObject());
         	requestBodyMap.put("contentType", type.toString());
+        	if (AppUtil.getOSType() == OSType.WINDOWS) {
+                requestBodyMap.put("lineEnding", "CRLF");
+        	} else {
+        	    requestBodyMap.put("lineEnding", "LF");
+        	}
         	if (operation.equals(OperationEnum.upsert)) {
         	    requestBodyMap.put("externalIdFieldName", job.getExternalIdFieldName());
         	}
