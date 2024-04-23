@@ -266,7 +266,7 @@ abstract class TestBase {
         String configEndpoint = getController().getConfig().getString(Config.ENDPOINT);
         if (!configEndpoint.equals("")) { //$NON-NLS-1$
             try {
-                PartnerClient.setAPIVersion(apiVersionStr);
+                PartnerClient.setAPIVersionForTheSession(apiVersionStr);
                 bindingConfig.setAuthEndpoint(configEndpoint + PartnerClient.getServicePath());
                 bindingConfig.setServiceEndpoint(configEndpoint + PartnerClient.getServicePath()); // Partner SOAP service
                 bindingConfig.setRestEndpoint(configEndpoint + BulkV1Client.getServicePath());  // REST service: Bulk v1       

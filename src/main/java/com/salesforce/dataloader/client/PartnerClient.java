@@ -590,11 +590,11 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         disconnect();
         try {
             dologin();
-            logger.debug("able to successfully invoke server APIs of version " + apiVersionForTheSession);
+            logger.debug("able to successfully invoke server APIs of version " + getAPIVersionForTheSession());
         } catch (UnexpectedErrorFault fault) {
             if (fault.getExceptionCode() == ExceptionCode.UNSUPPORTED_API_VERSION) {
-                logger.error("Failed to successfully invoke server APIs of version " + apiVersionForTheSession);
-                apiVersionForTheSession = getPreviousAPIVersionInWSC();
+                logger.error("Failed to successfully invoke server APIs of version " + getAPIVersionForTheSession());
+                setAPIVersionForTheSession(getPreviousAPIVersionInWSC());
                 login();
             } else {
                 logger.error("Failed to get user info using manually configured session id", fault);
@@ -843,8 +843,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
     
     public static String getServicePath() {
-        // Auth endpoint is a SOAP service
-        return ClientBase.getServicePathWithAPIVersion(DEFAULT_AUTH_ENDPOINT_URL.getPath());
+        return "/services/Soap/u/" + getAPIVersionForTheSession() + "/";
     }
 
     private synchronized ConnectorConfig getLoginConnectorConfig() {
