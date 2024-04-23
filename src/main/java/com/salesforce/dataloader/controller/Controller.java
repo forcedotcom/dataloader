@@ -31,7 +31,6 @@ import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.client.BulkV1Client;
 import com.salesforce.dataloader.client.BulkV2Client;
 import com.salesforce.dataloader.client.ClientBase;
-import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
@@ -153,7 +152,7 @@ public class Controller {
         if (this.partnerClient == null) {
             return null;
         }
-        String apiInfoStr = Labels.getFormattedString("Operation.apiVersion", PartnerClient.getAPIVersion());
+        String apiInfoStr = Labels.getFormattedString("Operation.apiVersion", PartnerClient.getAPIVersionForTheSession());
         LimitInfo apiLimitInfo = this.partnerClient.getAPILimitInfo();
         if (apiLimitInfo != null) {
             apiInfoStr = Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
@@ -185,7 +184,7 @@ public class Controller {
     }
     
     public static String getAPIVersion() {
-        return ClientBase.getAPIVersion();
+        return ClientBase.getAPIVersionForTheSession();
     }
 
     public Map<String, DescribeGlobalSObjectResult> getEntityDescribes() {

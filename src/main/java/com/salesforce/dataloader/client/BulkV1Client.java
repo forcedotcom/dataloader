@@ -80,7 +80,7 @@ public class BulkV1Client extends ClientBase<BulkV1Connection> {
     }
     
     public static String getServicePath() {
-        return ClientBase.getServicePathWithAPIVersion(BULKV1_ENDPOINT_PATH);
+        return "/services/async/" + getAPIVersionForTheSession() + "/";
     }
 
 }

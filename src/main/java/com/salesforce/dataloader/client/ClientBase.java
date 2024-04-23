@@ -63,9 +63,7 @@ public abstract class ClientBase<ConnectionType> {
         DEFAULT_AUTH_ENDPOINT_URL = loginUrl;
     }
 
-    public static final String BULKV1_ENDPOINT_PATH = "/services/async/" + getCurrentAPIVersionInWSC();
-    public static final String BULKV2_ENDPOINT_PATH = "/services/data/v" + getCurrentAPIVersionInWSC() + "/jobs/";
-    protected static String apiVersionForTheSession = getCurrentAPIVersionInWSC();
+    private static String apiVersionForTheSession = getCurrentAPIVersionInWSC();
 
     protected final Logger logger;
     protected final Controller controller;
@@ -110,12 +108,17 @@ public abstract class ClientBase<ConnectionType> {
                 .toString(); //$NON-NLS-1$
     }
     
-    public static String getAPIVersion() {
+    public static synchronized String getAPIVersionForTheSession() {
         return apiVersionForTheSession;
     }
     
-    public static synchronized void setAPIVersion(String version) {
+    public static synchronized void setAPIVersionForTheSession(String version) {
         apiVersionForTheSession = version;
+        setEndpointPath();
+    }
+    
+    static protected void setEndpointPath() {
+        
     }
 
     public ConnectorConfig getConnectorConfig() {
@@ -228,17 +231,6 @@ public abstract class ClientBase<ConnectionType> {
         String currentMajorVerStr = versionStrArray[0];
         int currentMajorVer = Integer.parseInt(currentMajorVerStr);
         return Integer.toString(currentMajorVer-1) + ".0";
-    }
-    
-    // used for SOAP and Bulk v1 service endpoints but not for bulk v2 service
-    protected static String getServicePathWithAPIVersion(String path) {
-        String[] pathPartArray = path.split("\\/");
-        pathPartArray[pathPartArray.length-1] = apiVersionForTheSession;
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < pathPartArray.length; i++) {
-            buf.append(pathPartArray[i] + "/");
-        }
-        return buf.toString();
     }
 
     public SessionInfo getSession() {

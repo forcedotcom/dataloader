@@ -220,7 +220,7 @@ public class HttpClientTransport implements HttpTransportInterface {
 	    	currentConfig.setUseChunkedPost(false);
 	    	this.httpMethod.setEntity(entity);
     	}
-        InputStream input;
+        InputStream input = new ByteArrayInputStream(new byte[1]);
         try {
             HttpClientContext context = HttpClientContext.create();
             RequestConfig config = RequestConfig.custom().setExpectContinueEnabled(currentConfig.useChunkedPost()).build();
@@ -242,12 +242,14 @@ public class HttpClientTransport implements HttpTransportInterface {
                 }
                 // copy input stream data into a new input stream because releasing the connection will close the input stream
                 ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+                if (response.getEntity() != null) {
                 try (InputStream inStream = response.getEntity().getContent()) {
                     IOUtils.copy(inStream, bOut);
                     input = new ByteArrayInputStream(bOut.toByteArray());
                     if (response.containsHeader("Content-Encoding") && response.getHeaders("Content-Encoding")[0].getValue().equals("gzip")) {
                         input = new GZIPInputStream(input);
                     }
+                }
                 }
             }
         } finally {

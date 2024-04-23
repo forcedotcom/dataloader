@@ -28,23 +28,23 @@ package com.salesforce.dataloader.client;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.salesforce.dataloader.action.visitor.BulkV2Connection;
+import com.salesforce.dataloader.action.visitor.RESTConnection;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.sforce.async.AsyncApiException;
 import com.sforce.ws.ConnectorConfig;
 
-public class BulkV2Client extends ClientBase<BulkV2Connection> {
+public class RESTClient extends ClientBase<RESTConnection> {
     private static Logger LOG = LogManager.getLogger(BulkV2Client.class);
-    private BulkV2Connection client;
+    private RESTConnection client;
     private ConnectorConfig connectorConfig = null;
 
-    public BulkV2Client(Controller controller) {
+    public RESTClient(Controller controller) {
         super(controller, LOG);
     }
     
-    public BulkV2Connection getConnection() {
+    public RESTConnection getConnection() {
         return client;
     }
     
@@ -52,7 +52,7 @@ public class BulkV2Client extends ClientBase<BulkV2Connection> {
     protected boolean connectPostLogin(ConnectorConfig cc) {
         try {
             // Set up a connection object with the given config
-            this.client = new BulkV2Connection(cc, controller);
+            this.client = new RESTConnection(cc, controller);
 
         } catch (AsyncApiException e) {
             logger.error(Messages.getMessage(getClass(), "loginError", cc.getAuthEndpoint(), e.getExceptionMessage()),
@@ -76,8 +76,8 @@ public class BulkV2Client extends ClientBase<BulkV2Connection> {
         }
         return this.connectorConfig;
     }
-    
+
     protected static String getServicePath() {
-        return  "/services/data/v" + getAPIVersionForTheSession() + "/jobs/";
+        return "/services/data/v" + getAPIVersionForTheSession() + "/";
     }
 }
