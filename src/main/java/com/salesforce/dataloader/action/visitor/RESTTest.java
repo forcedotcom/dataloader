@@ -46,15 +46,15 @@ import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.ws.ConnectorConfig;
 
 
-public class TestREST {
+public class RESTTest {
     private static String insertFilename = "./insertAccountCsv.csv";
     private static String deleteFilename = "./deleteAccountCsv.csv";
     private static String successFilename = "./ingestSuccessResults.csv";
     private static String failureFilename = "./ingestFailureResults.csv";
     private static String unprocessedFilename = "./ingestUnprocessedRecords.csv";
     private static String bulkQueryResultsFilename = "./queryResults.csv";
-    private static String username = "dltest@dl.com";
-    private static String password = "dataloader6";
+    private static String username = "uname";
+    private static String password = "pwd";
     private static String myDomainURLString = "https://ashit-dev-ed.my.salesforce.com";
     private static String restEndpoint = myDomainURLString + "/services/data/v59.0/";
 
