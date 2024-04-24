@@ -23,74 +23,27 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader.action.visitor;
 
+package com.salesforce.dataloader.action.visitor;
 
 import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.client.RESTClient;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
-import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.OperationException;
-import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 
-public abstract class RESTLoadVisitor extends DAOLoadVisitor {
+public class RESTUpdateVisitor extends RESTLoadVisitor {
 
-    public RESTLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+    public RESTUpdateVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
     }
 
-    protected void loadBatch() throws DataAccessObjectException, OperationException {
-        Object[] results = null;
-        setHeaders();
-        try {
-            results = executeClientAction(getController().getRESTClient(), dynaArray);
-        } catch (ApiFault e) {
-            handleException(e);
-        } catch (ConnectionException e) {
-            handleException(e);
-        }
-
-        writeOutputToWriter(results);
-        setLastRunProperties(results);
-
-        // update Monitor
-        getProgressMonitor().worked(results.length);
-        getProgressMonitor().setSubTask(getRateCalculator().calculateSubTask(getNumberOfRows(), getNumberErrors()));
-
-        // now clear the arrays
-        clearArrays();
+    protected Object[] executeClientAction(RESTClient client, List<DynaBean> dynabeans) throws ConnectionException {
+        return client.loadUpdates(dynabeans);
     }
-
-    private void setLastRunProperties(Object[] results) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    private void writeOutputToWriter(Object[] results) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    private void setHeaders() {
-        // TODO Auto-generated method stub
-        
-    }
-    
-    /**
-     * This method performs the actual client action. It must be implemented by all subclasses. It returns an object[]
-     * because of saveResult[] and deleteResult[], while do the exact same thing, are two different classes without
-     * common inheritance. And we're stuck with it for legacy reasons.
-     * 
-     * @throws ConnectionException
-     */
-    protected abstract Object[] executeClientAction(RESTClient client, List<DynaBean> data)
-            throws ConnectionException;
 }

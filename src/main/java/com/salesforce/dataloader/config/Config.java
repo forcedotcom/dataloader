@@ -249,6 +249,7 @@ public class Config {
     public static final String BULK_API_CHECK_STATUS_INTERVAL = "sfdc.bulkApiCheckStatusInterval";
     public static final String BULK_API_ZIP_CONTENT = "sfdc.bulkApiZipContent";
     public static final String BULKV2_API_ENABLED = "sfdc.useBulkV2Api";
+    public static final String REST_API_ENABLED = "sfdc.useRESTApi";
 
     public static final String WIRE_OUTPUT = "sfdc.wireOutput";
     public static final String TIMEZONE = "sfdc.timezone";
@@ -467,6 +468,7 @@ public class Config {
             RICH_TEXT_FIELD_REGEX,
             DAO_READ_PREPROCESSOR_SCRIPT,
             DAO_WRITE_POSTPROCESSOR_SCRIPT,
+            REST_API_ENABLED,
             ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG
     };
     
@@ -618,6 +620,7 @@ public class Config {
         setDefaultValue(DUPLICATE_RULE_RUN_AS_CURRENT_USER, false);
         setDefaultValue(BUFFER_UNPROCESSED_BULK_QUERY_RESULTS, false);
         setDefaultValue(BULKV2_API_ENABLED, false);
+        setDefaultValue(REST_API_ENABLED, false);
         setDefaultValue(OAUTH_LOGIN_FROM_BROWSER, true);
         setDefaultValue(LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
         setDefaultValue(Config.CLI_OPTION_RUN_MODE, Config.RUN_MODE_UI_VAL);
@@ -1390,7 +1393,11 @@ public class Config {
     public boolean isBulkV2APIEnabled() {
         return isBulkAPIEnabled() && getBoolean(BULKV2_API_ENABLED);
     }
-
+    
+    public boolean isRESTAPIEnabled() {
+        return getBoolean(REST_API_ENABLED);
+    }
+    
     private boolean isBulkApiOperation() {
         return getOperationInfo().bulkAPIEnabled();
     }
