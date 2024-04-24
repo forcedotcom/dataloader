@@ -33,6 +33,7 @@ import com.salesforce.dataloader.client.BulkV2Client;
 import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.client.PartnerClient;
+import com.salesforce.dataloader.client.RESTClient;
 import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -101,6 +102,7 @@ public class Controller {
     private BulkV1Client bulkV1Client;
     private BulkV2Client bulkV2Client;
     private PartnerClient partnerClient;
+    private RESTClient restClient;
     private LoaderWindow loaderWindow;
     private boolean lastOperationSuccessful = true;
 
@@ -178,7 +180,7 @@ public class Controller {
         getPartnerClient().setFieldReferenceDescribes();
     }
 
-    private boolean loginIfSessionExists(ClientBase<?> clientToLogin) {
+    private boolean connectIfSessionExists(ClientBase<?> clientToLogin) {
         if (!isLoggedIn()) return false;
         return clientToLogin.connect(getPartnerClient().getSession());
     }
@@ -325,6 +327,8 @@ public class Controller {
             } else {
                 return getBulkV1Client();
             }
+        } else if (this.config.isRESTAPIEnabled()) {
+            return getRESTClient();
         }
         return getPartnerClient();
     }
@@ -332,7 +336,7 @@ public class Controller {
     public BulkV1Client getBulkV1Client() {
         if (this.bulkV1Client == null) {
             this.bulkV1Client = new BulkV1Client(this);
-            loginIfSessionExists(this.bulkV1Client);
+            connectIfSessionExists(this.bulkV1Client);
         }
         return this.bulkV1Client;
     }
@@ -340,12 +344,18 @@ public class Controller {
     public BulkV2Client getBulkV2Client() {
         if (this.bulkV2Client == null) {
             this.bulkV2Client = new BulkV2Client(this);
-            loginIfSessionExists(this.bulkV2Client);
+            connectIfSessionExists(this.bulkV2Client);
         }
         return this.bulkV2Client;
     }
     
-    /**
+    public RESTClient getRESTClient() {
+        if (this.restClient == null) {
+            this.restClient = new RESTClient(this);
+            connectIfSessionExists(this.bulkV2Client);
+        }
+        return this.restClient;
+    }/**
      * @return Instance of configuration
      */
     public Config getConfig() {
@@ -455,6 +465,8 @@ public class Controller {
         if (this.partnerClient != null) this.partnerClient.logout();
         this.bulkV1Client = null;
         this.partnerClient = null;
+        this.bulkV2Client = null;
+        this.restClient = null;
     }
 
     public boolean attachmentsEnabled() {

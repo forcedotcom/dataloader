@@ -30,7 +30,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.action.visitor.BulkV1Connection;
-import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.sforce.async.AsyncApiException;
@@ -72,9 +71,11 @@ public class BulkV1Client extends ClientBase<BulkV1Connection> {
 
     @Override
     public synchronized ConnectorConfig getConnectorConfig() {
-        if (this.connectorConfig == null || !this.config.getBoolean(Config.REUSE_CLIENT_CONNECTION)) {
-            this.connectorConfig = super.getConnectorConfig();
-            this.connectorConfig.setTraceMessage(config.getBoolean(Config.WIRE_OUTPUT));
+        this.connectorConfig = super.getConnectorConfig();
+        // override the restEndpoint value set in the superclass
+        String server = getSession().getServer();
+        if (server != null) {
+            this.connectorConfig.setRestEndpoint(server + getServicePath());
         }
         return this.connectorConfig;
     }

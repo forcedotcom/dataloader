@@ -228,22 +228,8 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     private final Map<String, DescribeGlobalSObjectResult> describeGlobalResultsMap = new HashMap<String, DescribeGlobalSObjectResult>();
     private final Map<String, DescribeSObjectResult> entityFieldDescribesMap = new HashMap<String, DescribeSObjectResult>();
 
-    private final boolean enableRetries;
-    private final int maxRetries;
-
     public PartnerClient(Controller controller) {
         super(controller, LOG);
-        int retries = -1;
-        this.enableRetries = config.getBoolean(Config.ENABLE_RETRIES);
-        if (this.enableRetries) {
-            try {
-                // limit the number of max retries in case limit is exceeded
-                retries = Math.min(Config.MAX_RETRIES_LIMIT, config.getInt(Config.MAX_RETRIES));
-            } catch (ParameterLoadException e) {
-                retries = Config.DEFAULT_MAX_RETRIES;
-            }
-        }
-        this.maxRetries = retries;
     }
 
     public boolean connect() throws ConnectionException {
@@ -366,7 +352,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         if (op != this.LOGIN_OPERATION && !isSessionValid()) {
             connect();
         }
-        int totalAttempts = 1 + (this.enableRetries ? this.maxRetries : 0);
+        int totalAttempts = 1 + (isRetriesEnabled() ? getMaxRetries() : 0);
         ConnectionException connectionException = null;
         for (int tryNum = 0; tryNum < totalAttempts; tryNum++) {
             try {
@@ -894,7 +880,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
      * @return true if retry should be executed for operation. false if there's no retry.
      */
     private boolean checkConnectionException(ConnectionException ex, String operationName, int retryNum) {
-        if (!this.enableRetries) return false;
+        if (!isRetriesEnabled()) return false;
         final String msg = ex.getMessage();
         if (msg != null && msg.toLowerCase().indexOf("connection reset") >= 0) {
             retrySleep(operationName, retryNum);

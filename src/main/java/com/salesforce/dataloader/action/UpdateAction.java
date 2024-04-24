@@ -23,11 +23,11 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 package com.salesforce.dataloader.action;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
+import com.salesforce.dataloader.action.visitor.RESTUpdateVisitor;
 import com.salesforce.dataloader.action.visitor.UpdateVisitor;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -43,7 +43,11 @@ class UpdateAction extends AbstractLoadAction {
 
     @Override
     protected DAOLoadVisitor createVisitor() {
-        return new UpdateVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
+        if (getController().getConfig().isRESTAPIEnabled()) {
+            return new RESTUpdateVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
+        } else {
+            return new UpdateVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
+        }
     }
 
 }
