@@ -97,7 +97,7 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
         return "/services/data/v" + getAPIVersionForTheSession() + "/composite/sobjects/";
     }
 
-    public Object[] loadUpdates(List<DynaBean> dynabeans) throws ConnectionException {
+    public SaveResult[] loadUpdates(List<DynaBean> dynabeans) throws ConnectionException {
         logger.debug(Messages.getFormattedString("Client.beginOperation", "update")); //$NON-NLS-1$
         int totalAttempts = 1 + (isRetriesEnabled() ? getMaxRetries() : 0);
         ConnectionException connectionException = null;
@@ -114,7 +114,6 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
                 throw new ConnectionException(e.getMessage());
             }
             
-
             HashMap<String, String> headers = new HashMap<String, String>();
             headers.put("Content-Type", "application/JSON");
             headers.put("ACCEPT", "application/JSON");
@@ -173,7 +172,7 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
             if (resultList == null)
                 logger.info(Messages.getString("Client.resultNull")); //$NON-NLS-1$
             this.getSession().performedSessionActivity(); // reset session activity timer
-            return resultList.toArray();
+            return resultList.toArray(new SaveResult[0]);
         } catch (ConnectionException ex) {
             logger.error(
                     Messages.getFormattedString(

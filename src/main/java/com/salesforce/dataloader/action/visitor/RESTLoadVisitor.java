@@ -30,13 +30,18 @@ import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
 
+import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.client.CompositeRESTClient;
+import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.LoadException;
 import com.salesforce.dataloader.exception.OperationException;
+import com.salesforce.dataloader.model.Row;
+import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 
@@ -51,6 +56,7 @@ public abstract class RESTLoadVisitor extends DAOLoadVisitor {
         Object[] results = null;
         setHeaders();
         try {
+            // executeClientAction() is implemented by concrete subclasses
             results = executeClientAction(getController().getRESTClient(), dynaArray);
         } catch (ApiFault e) {
             handleException(e);
@@ -69,14 +75,39 @@ public abstract class RESTLoadVisitor extends DAOLoadVisitor {
         clearArrays();
     }
 
-    private void setLastRunProperties(Object[] results) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    private void writeOutputToWriter(Object[] results) {
-        // TODO Auto-generated method stub
-        
+    private void writeOutputToWriter(Object[] results)
+            throws DataAccessObjectException, LoadException {
+        // have to do this because although saveResult and deleteResult
+        // are a) not the same class yet b) not subclassed
+        int batchRowCounter = 0;
+        for (int i = 0; i < this.daoRowList.size(); i++) {
+            Row daoRow = this.daoRowList.get(i);
+            if (!isRowConversionSuccessful()) {
+                continue;
+            }
+            String statusMsg = null;
+            if (results instanceof SaveResult[]) {
+                SaveResult saveRes = (SaveResult)results[batchRowCounter];
+                if (saveRes.getSuccess()) {
+                    if (OperationInfo.insert == getConfig().getOperationInfo()) {
+                        statusMsg = Messages.getString("DAOLoadVisitor.statusItemCreated");
+                    } else {
+                        statusMsg = Messages.getString("DAOLoadVisitor.statusItemUpdated");
+                    }
+                }
+                daoRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
+                processResult(daoRow, saveRes.getSuccess(), saveRes.getId(), saveRes.getErrors());
+            }
+            batchRowCounter++;
+            if (results.length < batchRowCounter) {
+                getLogger().fatal(Messages.getString("Visitor.errorResultsLength")); //$NON-NLS-1$
+                throw new LoadException(Messages.getString("Visitor.errorResultsLength"));
+            }
+        }
+        if (results.length > batchRowCounter) {
+            getLogger().fatal(Messages.getString("Visitor.errorResultsLength")); //$NON-NLS-1$
+            throw new LoadException(Messages.getString("Visitor.errorResultsLength"));
+        }        
     }
 
     private void setHeaders() {
