@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,9 +63,13 @@ import javax.xml.parsers.FactoryConfigurationError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.exception.ConfigInitializationException;
+import com.sforce.ws.bind.CalendarCodec;
 
 
 /**
@@ -113,7 +118,8 @@ public class AppUtil {
     private static Logger logger = null;
     private static String latestDownloadableDataLoaderVersion;
     private static final ArrayList<String> CONTENT_SOBJECT_LIST = new ArrayList<String>();
-    
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     static {
         Properties versionProps = new Properties();
         try {
@@ -128,6 +134,11 @@ public class AppUtil {
         DATALOADER_SHORT_VERSION=versionParts[0];
         MIN_JAVA_VERSION=versionProps.getProperty("java.min.version");
         CONTENT_SOBJECT_LIST.add("ContentNote".toLowerCase());
+        mapper.setDateFormat(CalendarCodec.getDateFormat());
+        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        // By default, ObjectMapper generates Calendar instances with UTC TimeZone.
+        // Here, override that to "GMT" to better match the behavior of the WSC XML parser.
+        mapper.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
     
     public static String[] initializeAppConfig(String[] args) throws FactoryConfigurationError, IOException, ConfigInitializationException {
@@ -499,5 +510,13 @@ public class AppUtil {
         if (!isValidHttpsUrl(url)) {
             throw new RuntimeException("Dataloader only supports server URL that uses https protocol:" + url);
         }
+    }
+    
+    public static String serializeToJson(HashMap<String, Object> nameValueMap) throws JsonProcessingException {
+        return mapper.writeValueAsString(nameValueMap);
+    }
+    
+    public static <T> T deserializeJsonToObject(InputStream in, Class<T> tmpClass) throws IOException {
+        return mapper.readValue(in, tmpClass);
     }
 }
