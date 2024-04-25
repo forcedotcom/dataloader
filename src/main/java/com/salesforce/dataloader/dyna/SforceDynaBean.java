@@ -37,6 +37,7 @@ import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.client.DescribeRefObject;
+import com.salesforce.dataloader.client.SObject4JSON;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
@@ -295,6 +296,26 @@ public class SforceDynaBean {
         }
         return sObjects;
     }
+    
+    static public List<Map<String, Object>> getRESTSObjectArray(Controller controller, List<DynaBean> dynaBeans, String entityName, boolean insertNulls) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, ParameterLoadException {
+        List<Map<String, Object>> restSObjects = new ArrayList <Map<String, Object>>();
+
+        for (int j = 0; j < dynaBeans.size(); j++) {
+            DynaBean dynaBean = dynaBeans.get(j);
+
+            Map<String, Object> sObj = getCompositeRESTSObject(controller, entityName, dynaBean);
+
+            // if we are inserting nulls, build the null array
+            /* TODO
+            if (insertNulls) {
+                insertNullArray(controller, sObj, dynaBean);
+            }
+            */
+
+            restSObjects.add(sObj);
+        }
+        return restSObjects;
+    }
 
     /**
      * @param entityName
@@ -315,13 +336,31 @@ public class SforceDynaBean {
                 Object value = dynaBean.get(fName);
                 if (value instanceof SObjectReference) {
                     SObjectReference sObjRef = (SObjectReference)value;
-                    if (!sObjRef.isNull()) sObjRef.addReferenceToSObject(controller, sObj, fName);
+                    if (!sObjRef.isNull()) sObjRef.addReferenceToSObject(controller, sObj, null, fName);
                 } else {
                     sObj.setField(fName, value);
                 }
             }
         }
         return sObj;
+    }
+    
+    public static Map<String, Object> getCompositeRESTSObject(Controller controller, String entityName, DynaBean dynaBean) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, ParameterLoadException {
+        SObject4JSON restSObj = new SObject4JSON(entityName);
+        Map<String, String> fieldMap = BeanUtils.describe(dynaBean);
+        for (String fName : fieldMap.keySet()) {
+            if (fieldMap.get(fName) != null) {
+                // see if any entity foreign key references are embedded here
+                Object value = dynaBean.get(fName);
+                if (value instanceof SObjectReference) {
+                    SObjectReference sObjRef = (SObjectReference)value;
+                    if (!sObjRef.isNull()) sObjRef.addReferenceToSObject(controller, null, restSObj, fName);
+                } else {
+                    restSObj.setField(fName, value);
+                }
+            }
+        }
+        return restSObj.getRepresentationForCompositeREST();
     }
 
     /**

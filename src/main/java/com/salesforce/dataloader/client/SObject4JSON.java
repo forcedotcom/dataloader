@@ -23,27 +23,41 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package com.salesforce.dataloader.client;
 
-package com.salesforce.dataloader.action.visitor;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.List;
+public class SObject4JSON {
+    private String type;
+    private HashMap<String, Object> fields = new HashMap<String, Object>();
 
-import org.apache.commons.beanutils.DynaBean;
-
-import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.client.CompositeRESTClient;
-import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataWriter;
-import com.sforce.ws.ConnectionException;
-
-public class RESTUpdateVisitor extends RESTLoadVisitor {
-
-    public RESTUpdateVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter) {
-        super(controller, monitor, successWriter, errorWriter);
+    public SObject4JSON(String type) {
+        this.type = type;
     }
 
-    protected Object[] executeClientAction(CompositeRESTClient client, List<DynaBean> dynabeans) throws ConnectionException {
-        return client.loadUpdates(dynabeans);
+    public String getType() {
+        return type;
+    }
+
+    public HashMap<String, Object> getFields() {
+        return fields;
+    }
+
+    public void setField(String fieldName, Object fieldValue) {
+        this.fields.put(fieldName, fieldValue);
+    }
+    
+    public Object getField(String fieldName) {
+        return this.fields.get(fieldName);
+    }
+    
+    public Map<String, Object> getRepresentationForCompositeREST() {
+        HashMap<String, Object> jsonMap = new HashMap<String, Object>();
+        HashMap<String, Object> attributesMap = new HashMap<String, Object>();
+        attributesMap.put("type", this.type);
+        jsonMap.put("attributes", attributesMap);
+        jsonMap.putAll(this.fields);
+        return jsonMap;
     }
 }

@@ -33,7 +33,7 @@ import com.salesforce.dataloader.client.BulkV2Client;
 import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.client.PartnerClient;
-import com.salesforce.dataloader.client.RESTClient;
+import com.salesforce.dataloader.client.CompositeRESTClient;
 import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -102,7 +102,7 @@ public class Controller {
     private BulkV1Client bulkV1Client;
     private BulkV2Client bulkV2Client;
     private PartnerClient partnerClient;
-    private RESTClient restClient;
+    private CompositeRESTClient restClient;
     private LoaderWindow loaderWindow;
     private boolean lastOperationSuccessful = true;
 
@@ -349,9 +349,9 @@ public class Controller {
         return this.bulkV2Client;
     }
     
-    public RESTClient getRESTClient() {
+    public CompositeRESTClient getRESTClient() {
         if (this.restClient == null) {
-            this.restClient = new RESTClient(this);
+            this.restClient = new CompositeRESTClient(this);
             connectIfSessionExists(this.bulkV2Client);
         }
         return this.restClient;

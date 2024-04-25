@@ -30,7 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.DescribeRefObject;
-import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
+import com.salesforce.dataloader.client.SObject4JSON;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.RelationshipFormatException;
@@ -62,7 +62,7 @@ public class SObjectReference {
      * @param refFieldName
      * @throws ParameterLoadException
      */
-    public void addReferenceToSObject(Controller controller, SObject sObj, String refFieldName) throws ParameterLoadException {
+    public void addReferenceToSObject(Controller controller, SObject sObj, SObject4JSON restSObj, String refFieldName) throws ParameterLoadException {
         // break the name into relationship and field name components
         ParentIdLookupFieldFormatter refField;
         try {
@@ -85,7 +85,11 @@ public class SObjectReference {
         Object extIdValue = ConvertUtils.convert(this.referenceExtIdValue.toString(), typeClass);
         sObjRef.setField(parentFieldName, extIdValue);
         // Add the sObject reference as a child elemetn, name set to relationshipName
-        sObj.addField(relationshipName, sObjRef);
+        if (restSObj == null) {
+            sObj.addField(relationshipName, sObjRef);
+        } else {
+            restSObj.setField(relationshipName, sObjRef);
+        }
     }
 
     @Override
