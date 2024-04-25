@@ -145,14 +145,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
@@ -167,7 +163,6 @@ import com.sforce.async.JobStateEnum;
 import com.sforce.async.OperationEnum;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
-import com.sforce.ws.bind.CalendarCodec;
 import com.sforce.ws.parser.PullParserException;
 import com.sforce.ws.parser.XmlInputStream;
 
@@ -236,7 +231,7 @@ public class BulkV2Connection extends BulkConnection {
     public JobInfo setJobState(String jobId, boolean isQuery, JobStateEnum state, String errorMessage) throws AsyncApiException {
         String urlString = constructRequestURL(jobId);
         HashMap<String, String> headers = getHeaders(JSON_CONTENT_TYPE, JSON_CONTENT_TYPE);
-    	HashMap<Object, Object> requestBodyMap = new HashMap<Object, Object>();
+    	HashMap<String, Object> requestBodyMap = new HashMap<String, Object>();
     	requestBodyMap.put("state", state.toString());
 
         return doSendJobRequestToServer(urlString, 
@@ -367,7 +362,7 @@ public class BulkV2Connection extends BulkConnection {
         String urlString = constructRequestURL(job.getId());
         HashMap<String, String>headers = null;
         
-    	HashMap<Object, Object> requestBodyMap = new HashMap<Object, Object>();
+    	HashMap<String, Object> requestBodyMap = new HashMap<String, Object>();
     	requestBodyMap.put("operation", job.getOperation().toString());
         if (operation.equals(OperationEnum.query)) {
         	headers = getHeaders(JSON_CONTENT_TYPE, CSV_CONTENT_TYPE);
@@ -398,7 +393,7 @@ public class BulkV2Connection extends BulkConnection {
     		HashMap<String, String> headers,
     		HttpMethod requestMethod,
     		ContentType responseContentType,
-    		HashMap<Object, Object> requestBodyMap,
+    		HashMap<String, Object> requestBodyMap,
     		boolean processServerResponse,
     		String exceptionMessageString) throws AsyncApiException 
     {
@@ -411,7 +406,7 @@ public class BulkV2Connection extends BulkConnection {
             HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
 	        if (requestMethod == HttpMethod.GET) {
 	        	if (requestBodyMap != null && !requestBodyMap.isEmpty()) {
-	        		Set<Object> paramNameSet = requestBodyMap.keySet();
+	        		Set<String> paramNameSet = requestBodyMap.keySet();
 	        		boolean firstParam = true;
 	        		for (Object paramName : paramNameSet) {
 	        			if (firstParam) {
@@ -438,7 +433,7 @@ public class BulkV2Connection extends BulkConnection {
 		        } else { // assume post method
 		        	out = transport.connect(urlString, headers, true, HttpTransportInterface.SupportedHttpMethodType.POST);
 		        }
-	    		String requestContent = serializeToJson(requestBodyMap);
+	    		String requestContent = AppUtil.serializeToJson(requestBodyMap);
 		        out.write(requestContent.getBytes(UTF_8));
 		        out.close();
 		        in = transport.getContent();
@@ -456,7 +451,7 @@ public class BulkV2Connection extends BulkConnection {
 	                result = new JobInfo();
 	                result.load(xin, typeMapper);
 	            } else {
-	                result = deserializeJsonToObject(in, JobInfo.class);
+	                result = AppUtil.deserializeJsonToObject(in, JobInfo.class);
 	            }
 	        } else {
 	            parseAndThrowException(in, responseContentType);
@@ -488,7 +483,7 @@ public class BulkV2Connection extends BulkConnection {
 	    try {
 	        AsyncApiException exception;
 	        
-	        BulkV2Error[] errorList = deserializeJsonToObject(is, BulkV2Error[].class);
+	        BulkV2Error[] errorList = AppUtil.deserializeJsonToObject(is, BulkV2Error[].class);
 	        if (errorList[0].message.contains("Aggregate Relationships not supported in Bulk Query")) {
 	            exception = new AsyncApiException(errorList[0].message, AsyncExceptionCode.FeatureNotEnabled);
 	        } else {
@@ -512,21 +507,6 @@ public class BulkV2Connection extends BulkConnection {
             newMap.put(entry.getKey(), entry.getValue());
         }
 	    return newMap;
-	}
-	
-	static String serializeToJson(HashMap<Object, Object> nameValueMap) throws JsonProcessingException {
-	    ObjectMapper mapper = new ObjectMapper();
-	    mapper.setDateFormat(CalendarCodec.getDateFormat());
-	    return mapper.writeValueAsString(nameValueMap);
-	}
-	
-	static <T> T deserializeJsonToObject (InputStream in, Class<T> tmpClass) throws IOException {
-	    ObjectMapper mapper = new ObjectMapper();
-	    mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-	    // By default, ObjectMapper generates Calendar instances with UTC TimeZone.
-	    // Here, override that to "GMT" to better match the behavior of the WSC XML parser.
-	    mapper.setTimeZone(TimeZone.getTimeZone("GMT"));
-	    return mapper.readValue(in, tmpClass);
 	}
 	
     /**********************************
