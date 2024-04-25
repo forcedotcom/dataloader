@@ -32,7 +32,7 @@ import org.apache.commons.beanutils.DynaBean;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.client.PartnerClient;
-import com.salesforce.dataloader.client.RESTClient;
+import com.salesforce.dataloader.client.CompositeRESTClient;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -91,6 +91,6 @@ public abstract class RESTLoadVisitor extends DAOLoadVisitor {
      * 
      * @throws ConnectionException
      */
-    protected abstract Object[] executeClientAction(RESTClient client, List<DynaBean> data)
+    protected abstract Object[] executeClientAction(CompositeRESTClient client, List<DynaBean> data)
             throws ConnectionException;
 }

@@ -512,7 +512,7 @@ public class AppUtil {
         }
     }
     
-    public static String serializeToJson(HashMap<String, Object> nameValueMap) throws JsonProcessingException {
+    public static String serializeToJson(Map<String, Object> nameValueMap) throws JsonProcessingException {
         return mapper.writeValueAsString(nameValueMap);
     }
     

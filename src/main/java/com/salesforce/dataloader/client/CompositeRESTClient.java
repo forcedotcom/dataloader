@@ -25,29 +25,41 @@
  */
 package com.salesforce.dataloader.client;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.salesforce.dataloader.action.visitor.RESTConnection;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.async.AsyncApiException;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 
-public class RESTClient extends ClientBase<RESTConnection> {
+public class CompositeRESTClient extends ClientBase<RESTConnection> {
     private static Logger LOG = LogManager.getLogger(BulkV2Client.class);
     private RESTConnection client;
     private ConnectorConfig connectorConfig = null;
 
-    public RESTClient(Controller controller) {
+    public CompositeRESTClient(Controller controller) {
         super(controller, LOG);
     }
     
@@ -82,7 +94,7 @@ public class RESTClient extends ClientBase<RESTConnection> {
     }
 
     protected static String getServicePath() {
-        return "/services/data/v" + getAPIVersionForTheSession() + "/";
+        return "/services/data/v" + getAPIVersionForTheSession() + "/composite/sobjects/";
     }
 
     public Object[] loadUpdates(List<DynaBean> dynabeans) throws ConnectionException {
@@ -91,11 +103,77 @@ public class RESTClient extends ClientBase<RESTConnection> {
         ConnectionException connectionException = null;
         for (int tryNum = 0; tryNum < totalAttempts; tryNum++) {
         try {
-            SaveResult[] result = null;
-            if (result == null)
+            Map<String, Object> batchRecords = this.getSobjectMapForCompositeREST(dynabeans, "update");
+            String json = "";
+            try {
+                json = AppUtil.serializeToJson(batchRecords);
+                logger.debug("JSON for batch update using Composite REST:\n" + json);
+            } catch (JsonProcessingException e) {
+                // TODO Auto-generated catch block
+                logger.error(e.getMessage());
+                throw new ConnectionException(e.getMessage());
+            }
+            
+
+            HashMap<String, String> headers = new HashMap<String, String>();
+            headers.put("Content-Type", "application/JSON");
+            headers.put("ACCEPT", "application/JSON");
+            headers.put("Authorization", "Bearer " + this.getSessionId());
+            HttpClientTransport transport = new HttpClientTransport(this.connectorConfig);
+            try {
+                OutputStream out = transport.connect(
+                        this.getConnectorConfig().getRestEndpoint(),
+                        headers,
+                        true,
+                        HttpTransportInterface.SupportedHttpMethodType.PATCH);
+                out.write(json.getBytes(StandardCharsets.UTF_8.name()));
+                out.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                System.exit(-1);
+            }
+            InputStream in = null;
+            try {
+                in = transport.getContent();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                System.exit(-1);
+            }
+            boolean successfulRequest = transport.isSuccessful();
+            ArrayList<SaveResult> resultList = new ArrayList<SaveResult>();
+            if (successfulRequest) {
+                Object[] jsonResults = null;
+                try {
+                    jsonResults = AppUtil.deserializeJsonToObject(in, Object[].class);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    logger.warn("Composite REST returned no results");
+                    throw new ConnectionException();
+                }
+                for (Object result : jsonResults) {
+                    Map<String, Object> resultMap = (Map<String, Object>)result;
+                    SaveResult resultToSave = new SaveResult();
+                    resultToSave.setId((String)resultMap.get("id"));
+                    resultToSave.setSuccess(((Boolean)resultMap.get("success")).booleanValue());
+                   // resultToSave.setErrors(resultMap.getErrors());
+                    resultList.add(resultToSave);
+                }
+            } else {
+                try {
+                    String resultStr = IOUtils.toString(in, StandardCharsets.UTF_8);
+                    System.out.println(resultStr);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+     
+            if (resultList == null)
                 logger.info(Messages.getString("Client.resultNull")); //$NON-NLS-1$
             this.getSession().performedSessionActivity(); // reset session activity timer
-            throw new ConnectionException();
+            return resultList.toArray();
         } catch (ConnectionException ex) {
             logger.error(
                     Messages.getFormattedString(
@@ -155,4 +233,32 @@ public class RESTClient extends ClientBase<RESTConnection> {
         } catch (InterruptedException e) { // ignore
         }
     }
+    
+    private Map<String, Object> getSobjectMapForCompositeREST(List<DynaBean> dynaBeans, String opName) {
+        try {
+            List<Map<String, Object>> sobjectList = SforceDynaBean.getRESTSObjectArray(controller, dynaBeans, config.getString(Config.ENTITY),
+                    config.getBoolean(Config.INSERT_NULLS));
+            HashMap<String, Object> recordsMap = new HashMap<String, Object>();
+            recordsMap.put("records", sobjectList);
+            recordsMap.put("allOrNone", false);
+            return recordsMap;
+        } catch (IllegalAccessException ex) {
+            logger.error(
+                    Messages.getFormattedString("Client.operationError", new String[]{opName, ex.getMessage()}), ex); //$NON-NLS-1$
+            throw new RuntimeException(ex);
+        } catch (InvocationTargetException ex) {
+            logger.error(
+                    Messages.getFormattedString("Client.operationError", new String[]{opName, ex.getMessage()}), ex); //$NON-NLS-1$
+            throw new RuntimeException(ex);
+        } catch (NoSuchMethodException ex) {
+            logger.error(
+                    Messages.getFormattedString("Client.operationError", new String[]{opName, ex.getMessage()}), ex); //$NON-NLS-1$
+            throw new RuntimeException(ex);
+        } catch (ParameterLoadException ex) {
+            logger.error(
+                    Messages.getFormattedString("Client.operationError", new String[]{opName, ex.getMessage()}), ex); //$NON-NLS-1$
+            throw new RuntimeException(ex);
+        }
+    }
+
 }
