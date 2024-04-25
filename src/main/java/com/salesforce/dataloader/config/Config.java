@@ -183,8 +183,9 @@ public class Config {
     /**
      * The mapping from preference name to preference value (represented as strings).
      */
-    private Properties properties;
-    private Properties readOnlyProperties;
+    private Properties properties = new LinkedProperties();
+    private Properties readOnlyPropertiesFromPropertiesFile = new LinkedProperties();
+
     private Map<String, String> parameterOverridesMap;
 
     /**
@@ -941,7 +942,17 @@ public class Config {
      */
     private void load(InputStream in) throws ConfigInitializationException, IOException {
         try {
-            properties.load(in);
+            Properties propsFromFile = new LinkedProperties();
+            propsFromFile.load(in);
+            properties.putAll(propsFromFile);
+            for (String roprop : READ_ONLY_PROPERTY_NAMES) {
+                if (propsFromFile.containsKey(roprop)) {
+                    this.readOnlyPropertiesFromPropertiesFile.put(
+                                roprop,
+                                propsFromFile.get(roprop));
+                }
+                    
+            }
         } catch (IOException e) {
             logger.fatal(Messages.getFormattedString("Config.errorPropertiesLoad", e.getMessage()));
             throw e;
@@ -951,26 +962,6 @@ public class Config {
 
         dirty = false;
     }
-    
-    private void restoreReadOnlyProperty(String propertyName) {
-        String preservedPropertyValue = (String)this.readOnlyProperties.get(propertyName);
-        if (preservedPropertyValue == null) {
-            this.properties.remove(propertyName);
-            return;
-        }
-        this.properties.put(propertyName, preservedPropertyValue);
-    }
-    
-    private void preserveReadOnlyProperty(Map<?, ?> propMap, String propertyName) {
-        if (this.readOnlyProperties == null) {
-            this.readOnlyProperties = new Properties();
-        }
-        String propertyValueToPreserve = (String) propMap.get(propertyName);
-        if (propertyValueToPreserve == null) {
-            return;
-        }
-        this.readOnlyProperties.put(propertyName, propertyValueToPreserve);
-    }
 
     /**
      * Post process parameters. Right now, only decrypts encrypted values in the map
@@ -979,12 +970,6 @@ public class Config {
      */
     @SuppressWarnings("unchecked")
     private void postLoad(Map<?, ?> propMap, boolean isConfigFilePropsMap) throws ConfigInitializationException {
-
-        if (isConfigFilePropsMap) {
-            for (String propertyName : READ_ONLY_PROPERTY_NAMES) {
-                preserveReadOnlyProperty(propMap, propertyName);
-            }
-        }
         // initialize encryption
         initEncryption((Map<String, String>) propMap);
 
@@ -1154,7 +1139,7 @@ public class Config {
             throw new IOException(Messages.getString("Config.fileMissing")); //$NON-NLS-1$
         }
 
-        Properties inMemoryProperties = new Properties();
+        Properties inMemoryProperties = new LinkedProperties();
         inMemoryProperties.putAll(this.properties);
         
         // do not save properties set through parameter overrides
@@ -1163,9 +1148,13 @@ public class Config {
                 this.properties.remove(propertyName);
             }
         }
-        // keep the property values for the read-only properties as retrieved from config.properties
-        for (String propertyName : READ_ONLY_PROPERTY_NAMES) {
-            this.restoreReadOnlyProperty(propertyName);
+        
+        // do not save read-only properties that were not specified
+        // in properties file
+        for (String roprop : READ_ONLY_PROPERTY_NAMES) {
+            if (!this.readOnlyPropertiesFromPropertiesFile.containsKey(roprop)) {
+                this.properties.remove(roprop);
+            }
         }
         
         removeUnsupportedProperties();
