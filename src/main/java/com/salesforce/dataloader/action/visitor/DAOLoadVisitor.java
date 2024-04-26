@@ -26,6 +26,7 @@
 
 package com.salesforce.dataloader.action.visitor;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
@@ -43,6 +44,7 @@ import java.util.regex.Pattern;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.client.SessionInfo;
 import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.LastRun;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
@@ -52,6 +54,7 @@ import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.mapping.LoadMapper;
 import com.sforce.async.AsyncApiException;
 import com.sforce.soap.partner.DescribeSObjectResult;
+import com.sforce.soap.partner.Error;
 import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.FieldType;
 import com.sforce.soap.partner.fault.ApiFault;
@@ -381,5 +384,38 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             localeStr = sessionInfo.getUserInfoResult().getUserLocale();
         }
         return DAORowUtil.getPhoneFieldValue((String)fieldValue, localeStr);
+    }
+    
+
+    protected void processResult(Row dataRow, boolean isSuccess, String id, Error[] errors)
+            throws DataAccessObjectException {
+        // process success vs. error
+        // extract error message from error result
+        if (isSuccess) {
+            writeSuccess(dataRow, id, null);
+        } else {
+            writeError(dataRow,
+                    errors == null ? Messages.getString("Visitor.noErrorReceivedMsg") : errors[0].getMessage());
+        }
+    }
+    
+    protected void setLastRunProperties(Object[] results) throws LoadException {
+        // set the last processed row number in the config (*_lastRun.properties) file
+        int currentProcessed;
+        try {
+            currentProcessed = getConfig().getInt(LastRun.LAST_LOAD_BATCH_ROW);
+        } catch (ParameterLoadException e) {
+            // if there's a problem getting last batch row, start at the beginning
+            currentProcessed = 0;
+        }
+        currentProcessed += results.length;
+        getConfig().setValue(LastRun.LAST_LOAD_BATCH_ROW, currentProcessed);
+        try {
+            getConfig().saveLastRun();
+        } catch (IOException e) {
+            String errMsg = Messages.getString("LoadAction.errorLastRun");
+            getLogger().error(errMsg, e);
+            handleException(errMsg, e);
+        }
     }
 }

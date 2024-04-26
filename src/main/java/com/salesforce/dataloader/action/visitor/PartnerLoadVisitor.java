@@ -26,7 +26,6 @@
 
 package com.salesforce.dataloader.action.visitor;
 
-import java.io.IOException;
 import java.util.List;
 
 import com.salesforce.dataloader.model.Row;
@@ -39,8 +38,12 @@ import com.salesforce.dataloader.config.*;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.*;
-import com.sforce.soap.partner.*;
-import com.sforce.soap.partner.Error;
+import com.sforce.soap.partner.DeleteResult;
+import com.sforce.soap.partner.OwnerChangeOption;
+import com.sforce.soap.partner.OwnerChangeOptionType;
+import com.sforce.soap.partner.SaveResult;
+import com.sforce.soap.partner.UndeleteResult;
+import com.sforce.soap.partner.UpsertResult;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 
@@ -80,26 +83,6 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
         // now clear the arrays
         clearArrays();
 
-    }
-    
-    private void setLastRunProperties(Object[] results) throws LoadException {
-        // set the last processed row number in the config (*_lastRun.properties) file
-        int currentProcessed;
-        try {
-            currentProcessed = getConfig().getInt(LastRun.LAST_LOAD_BATCH_ROW);
-        } catch (ParameterLoadException e) {
-            // if there's a problem getting last batch row, start at the beginning
-            currentProcessed = 0;
-        }
-        currentProcessed += results.length;
-        getConfig().setValue(LastRun.LAST_LOAD_BATCH_ROW, currentProcessed);
-        try {
-            getConfig().saveLastRun();
-        } catch (IOException e) {
-            String errMsg = Messages.getString("LoadAction.errorLastRun");
-            getLogger().error(errMsg, e);
-            handleException(errMsg, e);
-        }
     }
     
     private void setHeaders() {
@@ -179,18 +162,6 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
         if (results.length > batchRowCounter) {
             getLogger().fatal(Messages.getString("Visitor.errorResultsLength")); //$NON-NLS-1$
             throw new LoadException(Messages.getString("Visitor.errorResultsLength"));
-        }
-    }
-
-    private void processResult(Row dataRow, boolean isSuccess, String id, Error[] errors)
-            throws DataAccessObjectException {
-        // process success vs. error
-        // extract error message from error result
-        if (isSuccess) {
-            writeSuccess(dataRow, id, null);
-        } else {
-            writeError(dataRow,
-                    errors == null ? Messages.getString("Visitor.noErrorReceivedMsg") : errors[0].getMessage());
         }
     }
 
