@@ -50,6 +50,7 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.async.AsyncApiException;
 import com.sforce.soap.partner.SaveResult;
+import com.sforce.soap.partner.StatusCode;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
@@ -97,6 +98,7 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
         return "/services/data/v" + getAPIVersionForTheSession() + "/composite/sobjects/";
     }
 
+    @SuppressWarnings("unchecked")
     public SaveResult[] loadUpdates(List<DynaBean> dynabeans) throws ConnectionException {
         logger.debug(Messages.getFormattedString("Client.beginOperation", "update")); //$NON-NLS-1$
         int totalAttempts = 1 + (isRetriesEnabled() ? getMaxRetries() : 0);
@@ -156,7 +158,21 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
                     SaveResult resultToSave = new SaveResult();
                     resultToSave.setId((String)resultMap.get("id"));
                     resultToSave.setSuccess(((Boolean)resultMap.get("success")).booleanValue());
-                   // resultToSave.setErrors(resultMap.getErrors());
+                    List<Map<String, Object>> errorResultsArray = (List<Map<String, Object>>)resultMap.get("errors");
+                    ArrayList<com.sforce.soap.partner.Error> errorList = new ArrayList<com.sforce.soap.partner.Error>();
+                    if (errorResultsArray != null) {
+                        for (Map<String, Object> errorMap : errorResultsArray) {
+                            com.sforce.soap.partner.Error error = new com.sforce.soap.partner.Error();
+                            String codeStr = StatusCode.valuesToEnums.get((String)errorMap.get("statusCode"));
+                            StatusCode statusCode = StatusCode.valueOf(codeStr);
+                            error.setStatusCode(statusCode);
+                            error.setMessage((String) errorMap.get("message"));
+                            List<String> fieldsList = (List<String>) errorMap.get("fields");
+                            error.setFields(fieldsList.toArray(new String[1]));
+                            errorList.add(error);
+                        }
+                        resultToSave.setErrors(errorList.toArray(new com.sforce.soap.partner.Error[1]));
+                    }
                     resultList.add(resultToSave);
                 }
             } else {
@@ -168,9 +184,6 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
                     e.printStackTrace();
                 }
             }
-     
-            if (resultList == null)
-                logger.info(Messages.getString("Client.resultNull")); //$NON-NLS-1$
             this.getSession().performedSessionActivity(); // reset session activity timer
             return resultList.toArray(new SaveResult[0]);
         } catch (ConnectionException ex) {
