@@ -118,7 +118,6 @@ public class AppUtil {
     private static Logger logger = null;
     private static String latestDownloadableDataLoaderVersion;
     private static final ArrayList<String> CONTENT_SOBJECT_LIST = new ArrayList<String>();
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     static {
         Properties versionProps = new Properties();
@@ -134,11 +133,6 @@ public class AppUtil {
         DATALOADER_SHORT_VERSION=versionParts[0];
         MIN_JAVA_VERSION=versionProps.getProperty("java.min.version");
         CONTENT_SOBJECT_LIST.add("ContentNote".toLowerCase());
-        mapper.setDateFormat(CalendarCodec.getDateFormat());
-        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-        // By default, ObjectMapper generates Calendar instances with UTC TimeZone.
-        // Here, override that to "GMT" to better match the behavior of the WSC XML parser.
-        mapper.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
     
     public static String[] initializeAppConfig(String[] args) throws FactoryConfigurationError, IOException, ConfigInitializationException {
@@ -513,10 +507,17 @@ public class AppUtil {
     }
     
     public static String serializeToJson(Map<String, Object> nameValueMap) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setDateFormat(CalendarCodec.getDateFormat());
         return mapper.writeValueAsString(nameValueMap);
     }
-    
-    public static <T> T deserializeJsonToObject(InputStream in, Class<T> tmpClass) throws IOException {
+
+    public static <T> T deserializeJsonToObject (InputStream in, Class<T> tmpClass) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        // By default, ObjectMapper generates Calendar instances with UTC TimeZone.
+        // Here, override that to "GMT" to better match the behavior of the WSC XML parser.
+        mapper.setTimeZone(TimeZone.getTimeZone("GMT"));
         return mapper.readValue(in, tmpClass);
     }
 }
