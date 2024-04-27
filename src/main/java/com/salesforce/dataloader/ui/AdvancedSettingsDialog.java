@@ -109,6 +109,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonUseBulkV2Api;
     private Button buttonBulkApiSerialMode;
     private Button buttonBulkApiZipContent;
+    Label labelBulkApiSerialMode;
+    Label labelBulkApiZipContent;
     private Button buttonCsvComma;
     private Button buttonCsvTab;
     private Button buttonLoginFromBrowser;
@@ -140,7 +142,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
     private void enableBulkRelatedOptions(boolean isBulkAPIEnabled) {
         setButtonEnabled(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode, isBulkAPIEnabled);
-        setButtonEnabled(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent, isBulkAPIEnabled);
+        setButtonEnabled(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent,
+                            isBulkAPIEnabled && !buttonUseBulkV2Api.getSelection());
         setButtonEnabled(Config.INSERT_NULLS, buttonNulls, !isBulkAPIEnabled);
         setButtonEnabled(Config.TRUNCATE_FIELDS, buttonTruncateFields, !isBulkAPIEnabled);
         buttonUseBulkV1Api.setEnabled(isBulkAPIEnabled);
@@ -599,22 +602,22 @@ public class AdvancedSettingsDialog extends BaseDialog {
         });
         
         // Bulk API serial concurrency mode setting
-        Label labelBulkApiSerialMode = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelBulkApiSerialMode = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelBulkApiSerialMode.setText(Labels.getString("AdvancedSettingsDialog.bulkApiSerialMode")); //$NON-NLS-1$
         labelBulkApiSerialMode.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-
+        labelBulkApiSerialMode.setEnabled(useBulkAPI);
         buttonBulkApiSerialMode = new Button(restComp, SWT.CHECK);
         buttonBulkApiSerialMode.setSelection(config.getBoolean(Config.BULK_API_SERIAL_MODE));
         buttonBulkApiSerialMode.setEnabled(useBulkAPI);
 
         // Bulk API serial concurrency mode setting
-        Label labelBulkApiZipContent = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelBulkApiZipContent = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelBulkApiZipContent.setText(Labels.getString("AdvancedSettingsDialog.bulkApiZipContent")); //$NON-NLS-1$
         labelBulkApiZipContent.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-
+        labelBulkApiZipContent.setEnabled(useBulkAPI && !useBulkV2Api);
         buttonBulkApiZipContent = new Button(restComp, SWT.CHECK);
-        buttonBulkApiZipContent.setSelection(config.getBoolean(Config.BULK_API_SERIAL_MODE));
-        buttonBulkApiZipContent.setEnabled(useBulkAPI);
+        buttonBulkApiZipContent.setSelection(config.getBoolean(Config.BULK_API_ZIP_CONTENT));
+        buttonBulkApiZipContent.setEnabled(useBulkAPI && !useBulkV2Api);
         
         empty = new Label(restComp, SWT.NONE);
         data = new GridData();
