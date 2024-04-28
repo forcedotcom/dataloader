@@ -92,9 +92,9 @@ public class CsvExtractAggregateQueryProcessTest extends ProcessTestBase {
             CSVReader rdr = new CSVReader(fis, StandardCharsets.UTF_8.name());
             int acctNameIndex = 0;
             if (isLimitOutputToQueryFields) {
-                acctNameIndex = rdr.nextRecord().indexOf("ACCOUNT.NAME");
+                acctNameIndex = rdr.nextRecord().indexOf("Account.Name");
             } else {
-                acctNameIndex = rdr.nextRecord().indexOf("NAME");
+                acctNameIndex = rdr.nextRecord().indexOf("Name");
             }
             assertEquals(accountName, rdr.nextRecord().get(acctNameIndex));
         } finally {
