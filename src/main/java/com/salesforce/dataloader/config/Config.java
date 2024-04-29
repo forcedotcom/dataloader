@@ -125,7 +125,7 @@ public class Config {
     /**
      * Default values for specific parameters
      */
-    public static final int DEFAULT_EXTRACT_REQUEST_SIZE = 500;
+    public static final int DEFAULT_EXPORT_BATCH_SIZE = 500;
     public static final int DEFAULT_MIN_RETRY_SECS = 2;
     public static final int DEFAULT_MAX_RETRIES = 3;
     public static final int MAX_RETRIES_LIMIT = 10;
@@ -134,16 +134,16 @@ public class Config {
     public static final int DEFAULT_LOAD_BATCH_SIZE = 200;
     public static final int DEFAULT_DAO_WRITE_BATCH_SIZE = 500;
     public static final int DEFAULT_DAO_READ_BATCH_SIZE = 200;
-    public static final int MAX_LOAD_BATCH_SIZE = 200;
+    public static final int MAX_SOAP_API_IMPORT_BATCH_SIZE = 200;
     public static final int MAX_DAO_READ_BATCH_SIZE = 200;
     public static final int MAX_DAO_WRITE_BATCH_SIZE = 2000;
     
     // Bulk v1 and v2 limits specified at https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_bulkapi.htm
-    public static final int MAX_BULK_API_BATCH_BYTES = 10000000;
-    public static final int MAX_BULK_API_BATCH_SIZE = 10000;
-    public static final int MAX_BULKV2_API_JOB_BYTES = 150000000;
-    public static final int MAX_BULKV2_API_JOB_SIZE = 150000000;
-    public static final int DEFAULT_BULK_API_BATCH_SIZE = 2000;
+    public static final int MAX_BULK_API_IMPORT_BATCH_BYTES = 10000000;
+    public static final int MAX_BULK_API_IMPORT_BATCH_SIZE = 10000;
+    public static final int MAX_BULKV2_API_IMPORT_JOB_BYTES = 150000000;
+    public static final int MAX_BULKV2_API_IMPORT_JOB_SIZE = 150000000;
+    public static final int DEFAULT_BULK_API_IMPORT_BATCH_SIZE = 2000;
     
     public static final long DEFAULT_BULK_API_CHECK_STATUS_INTERVAL = 5000L;
     public static final String DEFAULT_ENDPOINT_URL = "https://login.salesforce.com";
@@ -280,10 +280,10 @@ public class Config {
     // salesforce operation parameters
     public static final String INSERT_NULLS = "sfdc.insertNulls"; //$NON-NLS-1$
     public static final String ENTITY = "sfdc.entity"; //$NON-NLS-1$
-    public static final String LOAD_BATCH_SIZE = "sfdc.loadBatchSize"; //$NON-NLS-1$
+    public static final String IMPORT_BATCH_SIZE = "sfdc.loadBatchSize"; //$NON-NLS-1$
     public static final String ASSIGNMENT_RULE = "sfdc.assignmentRule"; //$NON-NLS-1$
     public static final String EXTERNAL_ID_FIELD = "sfdc.externalIdField"; //$NON-NLS-1$
-    public static final String EXTRACT_REQUEST_SIZE = "sfdc.extractionRequestSize"; //$NON-NLS-1$
+    public static final String EXPORT_BATCH_SIZE = "sfdc.extractionRequestSize"; //$NON-NLS-1$
     public static final String EXTRACT_SOQL = "sfdc.extractionSOQL"; //$NON-NLS-1$
     public static final String SORT_EXTRACT_FIELDS = "sfdc.sortExtractionFields"; //$NON-NLS-1$
     public static final String LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT = "sfdc.load.preserveWhitespaceInRichText";
@@ -560,7 +560,7 @@ public class Config {
         setDefaultValue(CSV_DELIMITER_FOR_QUERY_RESULTS, AppUtil.COMMA);
 
         setDefaultValue(ENDPOINT, DEFAULT_ENDPOINT_URL);
-        setDefaultValue(LOAD_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
+        setDefaultValue(IMPORT_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_IMPORT_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
         setDefaultValue(LOAD_ROW_TO_START_AT, 0);
         setDefaultValue(TIMEOUT_SECS, DEFAULT_TIMEOUT_SECS);
         setDefaultValue(CONNECTION_TIMEOUT_SECS, DEFAULT_CONNECTION_TIMEOUT_SECS);
@@ -572,7 +572,7 @@ public class Config {
         setDefaultValue(ENABLE_EXTRACT_STATUS_OUTPUT, false);
         setDefaultValue(ENABLE_LAST_RUN_OUTPUT, true);
         setDefaultValue(RESET_URL_ON_LOGIN, true);
-        setDefaultValue(EXTRACT_REQUEST_SIZE, DEFAULT_EXTRACT_REQUEST_SIZE);
+        setDefaultValue(EXPORT_BATCH_SIZE, DEFAULT_EXPORT_BATCH_SIZE);
         setDefaultValue(SORT_EXTRACT_FIELDS, true);
         setDefaultValue(DAO_WRITE_BATCH_SIZE, DEFAULT_DAO_WRITE_BATCH_SIZE);
         setDefaultValue(DAO_READ_BATCH_SIZE, DEFAULT_DAO_READ_BATCH_SIZE);
@@ -1347,28 +1347,28 @@ public class Config {
         return (Config.RUN_MODE_BATCH_VAL.equalsIgnoreCase(getString(Config.CLI_OPTION_RUN_MODE)));
     }
 
-    public int getLoadBatchSize() {
+    public int getImportBatchSize() {
         boolean bulkApi = isBulkAPIEnabled();
         boolean bulkV2Api = this.isBulkV2APIEnabled();
         
         if (bulkApi && bulkV2Api) {
-            return MAX_BULKV2_API_JOB_SIZE;
+            return MAX_BULKV2_API_IMPORT_JOB_SIZE;
         }
         
         int bs = -1;
         try {
-            bs = getInt(LOAD_BATCH_SIZE);
+            bs = getInt(IMPORT_BATCH_SIZE);
         } catch (ParameterLoadException e) {
         }
-        int maxBatchSize = bulkApi ? MAX_BULK_API_BATCH_SIZE : MAX_LOAD_BATCH_SIZE;
-        return bs > maxBatchSize ? maxBatchSize : bs > 0 ? bs : getDefaultBatchSize(bulkApi, bulkV2Api);
+        int maxBatchSize = bulkApi ? MAX_BULK_API_IMPORT_BATCH_SIZE : MAX_SOAP_API_IMPORT_BATCH_SIZE;
+        return bs > maxBatchSize ? maxBatchSize : bs > 0 ? bs : getDefaultImportBatchSize(bulkApi, bulkV2Api);
     }
 
-    public int getDefaultBatchSize(boolean bulkApi, boolean bulkV2Api) {
+    public int getDefaultImportBatchSize(boolean bulkApi, boolean bulkV2Api) {
         if (bulkApi && bulkV2Api) {
-            return MAX_BULKV2_API_JOB_SIZE;
+            return MAX_BULKV2_API_IMPORT_JOB_SIZE;
         }
-        return bulkApi ? DEFAULT_BULK_API_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE;
+        return bulkApi ? DEFAULT_BULK_API_IMPORT_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE;
     }
 
     public boolean useBulkAPIForCurrentOperation() {

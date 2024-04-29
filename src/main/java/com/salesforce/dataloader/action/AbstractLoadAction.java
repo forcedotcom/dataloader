@@ -77,7 +77,7 @@ abstract class AbstractLoadAction extends AbstractAction {
     protected boolean visit() throws DataAccessObjectException, ParameterLoadException, OperationException,
     ConnectionException {
 
-        final int loadBatchSize = this.getConfig().getLoadBatchSize();
+        final int loadBatchSize = this.getConfig().getImportBatchSize();
         final int daoRowNumBase = getDao().getCurrentRowNumber();
         final List<Row> daoRowList = getDao().readRowList(loadBatchSize);
         if (daoRowList == null || daoRowList.size() == 0) return false;

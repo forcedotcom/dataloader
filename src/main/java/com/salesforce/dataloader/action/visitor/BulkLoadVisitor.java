@@ -183,7 +183,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         int processedRecordsCount = 0;
         final List<String> userColumns = getController().getDao().getColumnNames();
         List<String> headerColumns = null;
-        int maxBatchBytes = this.getConfig().isBulkV2APIEnabled() ? Config.MAX_BULKV2_API_JOB_BYTES : Config.MAX_BULK_API_BATCH_BYTES;
+        int maxBatchBytes = this.getConfig().isBulkV2APIEnabled() ? Config.MAX_BULKV2_API_IMPORT_JOB_BYTES : Config.MAX_BULK_API_IMPORT_BATCH_BYTES;
         for (int i = 0; i < rows.size(); i++) {
             final DynaBean row = rows.get(i);
 

@@ -341,9 +341,9 @@ class BulkApiVisitorUtil {
         int numRecordsProcessedInJob = this.jobInfo.getNumberRecordsProcessed();
         int numRecordsPerBatch = 0;
         try {
-            numRecordsPerBatch = this.config.getInt(Config.LOAD_BATCH_SIZE);
+            numRecordsPerBatch = this.config.getInt(Config.IMPORT_BATCH_SIZE);
         } catch (ParameterLoadException e) {
-            logger.warn("Incorrectly configured " + Config.LOAD_BATCH_SIZE);
+            logger.warn("Incorrectly configured " + Config.IMPORT_BATCH_SIZE);
         }
         if (numRecordsProcessedInJob == 0 && this.jobInfo.getNumberBatchesCompleted() > 0) {
             numRecordsProcessedInJob = numRecordsPerBatch 
@@ -357,9 +357,9 @@ class BulkApiVisitorUtil {
         int numRecordsFailedInJob = this.jobInfo.getNumberRecordsFailed();
         int numRecordsPerBatch = 0;
         try {
-            numRecordsPerBatch = this.config.getInt(Config.LOAD_BATCH_SIZE);
+            numRecordsPerBatch = this.config.getInt(Config.IMPORT_BATCH_SIZE);
         } catch (ParameterLoadException e) {
-            logger.warn("Incorrectly configured " + Config.LOAD_BATCH_SIZE);
+            logger.warn("Incorrectly configured " + Config.IMPORT_BATCH_SIZE);
         }
         if (numRecordsFailedInJob == 0 && this.jobInfo.getNumberBatchesFailed() > 0) {
             numRecordsFailedInJob = numRecordsPerBatch * jobInfo.getNumberBatchesFailed();

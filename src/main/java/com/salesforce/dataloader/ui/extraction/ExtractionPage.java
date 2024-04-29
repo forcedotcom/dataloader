@@ -49,8 +49,8 @@ public abstract class ExtractionPage extends OperationPage {
     }
         
     public static String getConfigInfo(Config config) {
-        return  Labels.getString("ExtractionInputDialog.querySize")
+        return  Labels.getString("ExtractionInputDialog.exportBatchSize")
                 + " "
-                + config.getString(Config.EXTRACT_REQUEST_SIZE);
+                + config.getString(Config.EXPORT_BATCH_SIZE);
     }
 }

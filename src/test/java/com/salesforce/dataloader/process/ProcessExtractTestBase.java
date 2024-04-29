@@ -126,7 +126,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         argMap.put(Config.EXTRACT_SOQL, soql);
         argMap.put(Config.ENABLE_EXTRACT_STATUS_OUTPUT, Config.TRUE);
         argMap.put(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS, Config.TRUE);
-        argMap.put(Config.EXTRACT_REQUEST_SIZE, "2000");
+        argMap.put(Config.EXPORT_BATCH_SIZE, "2000");
         if (!useMappingFile) {
             argMap.remove(Config.MAPPING_FILE);
         }

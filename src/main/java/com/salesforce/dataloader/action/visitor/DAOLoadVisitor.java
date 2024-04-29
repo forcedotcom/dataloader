@@ -98,7 +98,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
         SforceDynaBean.registerConverters(getConfig());
 
-        this.batchSize = getConfig().getLoadBatchSize();
+        this.batchSize = getConfig().getImportBatchSize();
         rowConversionFailureMap = new HashMap<Integer, Boolean>();
         String newRichTextRegex = getConfig().getString(Config.RICH_TEXT_FIELD_REGEX);
         if (newRichTextRegex != null && !newRichTextRegex.isBlank()) {
