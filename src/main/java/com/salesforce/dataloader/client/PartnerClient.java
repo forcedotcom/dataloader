@@ -245,9 +245,9 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         // query header
         int querySize;
         try {
-            querySize = config.getInt(Config.EXTRACT_REQUEST_SIZE);
+            querySize = config.getInt(Config.EXPORT_BATCH_SIZE);
         } catch (ParameterLoadException e) {
-            querySize = Config.DEFAULT_EXTRACT_REQUEST_SIZE;
+            querySize = Config.DEFAULT_EXPORT_BATCH_SIZE;
         }
         if (querySize > 0) {
             getConnection().setQueryOptions(querySize);

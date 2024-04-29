@@ -114,7 +114,7 @@ public class CsvProcessTest extends ProcessTestBase {
                 ) {
             return;
         }
-        configMap.put(Config.LOAD_BATCH_SIZE, "1");
+        configMap.put(Config.IMPORT_BATCH_SIZE, "1");
         Controller controller = runProcessWithErrors(configMap, 2, 1);
         String successFileName = controller.getConfig().getString(Config.OUTPUT_SUCCESS);
         File successFile = new File(successFileName);

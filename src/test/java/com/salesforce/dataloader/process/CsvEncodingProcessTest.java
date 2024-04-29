@@ -111,7 +111,7 @@ public class CsvEncodingProcessTest extends ProcessTestBase {
         argMap.put(Config.ENTITY, "Account");
         argMap.put(Config.EXTRACT_SOQL, soql);
         argMap.put(Config.ENABLE_EXTRACT_STATUS_OUTPUT, Config.TRUE);
-        argMap.put(Config.EXTRACT_REQUEST_SIZE, "2000");
+        argMap.put(Config.EXPORT_BATCH_SIZE, "2000");
         argMap.putAll(config);
         argMap.remove(Config.MAPPING_FILE);
         return argMap;

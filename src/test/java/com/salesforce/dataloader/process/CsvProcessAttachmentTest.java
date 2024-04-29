@@ -158,7 +158,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         final Map<String, String> argMap = getTestConfig(OperationInfo.insert, fileName, false);
         argMap.put(Config.ENTITY, "Attachment");
         // force multiple batches
-        argMap.put(Config.LOAD_BATCH_SIZE, "1");
+        argMap.put(Config.IMPORT_BATCH_SIZE, "1");
 
         // this feature does not work when bulk api is enabled but the zip content type is not
         final boolean bulkApi = isBulkAPIEnabled(argMap);

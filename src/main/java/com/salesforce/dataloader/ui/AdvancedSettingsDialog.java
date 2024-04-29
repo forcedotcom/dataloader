@@ -254,12 +254,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         //batch size
         Label labelBatch = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelBatch.setText(Labels.getString("AdvancedSettingsDialog.batchSize")); //$NON-NLS-1$
+        labelBatch.setText(Labels.getString("AdvancedSettingsDialog.importBatchSize")); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelBatch.setLayoutData(data);
 
         textBatchSize = new Text(restComp, SWT.BORDER);
-        textBatchSize.setText(Integer.toString(config.getLoadBatchSize()));
+        textBatchSize.setText(Integer.toString(config.getImportBatchSize()));
         textBatchSize.addVerifyListener(new VerifyListener() {
             @Override
             public void verifyText(VerifyEvent event) {
@@ -348,12 +348,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         //extraction batch size
         Label labelQueryBatch = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelQueryBatch.setText(Labels.getString("ExtractionInputDialog.querySize")); //$NON-NLS-1$
+        labelQueryBatch.setText(Labels.getString("ExtractionInputDialog.exportBatchSize")); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelQueryBatch.setLayoutData(data);
 
         textQueryBatch = new Text(restComp, SWT.BORDER);
-        textQueryBatch.setText(config.getString(Config.EXTRACT_REQUEST_SIZE));
+        textQueryBatch.setText(config.getString(Config.EXPORT_BATCH_SIZE));
         textQueryBatch.addVerifyListener(new VerifyListener() {
             @Override
             public void verifyText(VerifyEvent event) {
@@ -541,7 +541,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 enableBulkRelatedOptions(enabledBulk);
                 boolean enabledBulkV2 = buttonUseBulkV2Api.getSelection();
                 // update batch size when this setting changes
-                int newDefaultBatchSize = getController().getConfig().getDefaultBatchSize(enabledBulk, enabledBulkV2);
+                int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(enabledBulk, enabledBulkV2);
                 logger.info("Setting batch size to " + newDefaultBatchSize);
                 textBatchSize.setText(String.valueOf(newDefaultBatchSize));
                 // make sure the appropriate check boxes are enabled or disabled
@@ -564,7 +564,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 boolean enabledBulkV1 = buttonUseBulkV1Api.getSelection();
                 buttonUseBulkV2Api.setSelection(!enabledBulkV1);
                 // update batch size when this setting changes
-                int newDefaultBatchSize = getController().getConfig().getDefaultBatchSize(true, !enabledBulkV1);
+                int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(true, !enabledBulkV1);
                 logger.info("Setting batch size to " + newDefaultBatchSize);
                 textBatchSize.setText(String.valueOf(newDefaultBatchSize));
             }
@@ -595,7 +595,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 buttonUseBulkV1Api.setSelection(!selected);
                 buttonBulkApiZipContent.setEnabled(true);
                 // get default batch size for Bulk v1 and set it
-                int newDefaultBatchSize = getController().getConfig().getDefaultBatchSize(true, selected);
+                int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(true, selected);
                 logger.info("Setting batch size to " + newDefaultBatchSize);
                 textBatchSize.setText(String.valueOf(newDefaultBatchSize));
             }
@@ -937,7 +937,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.HIDE_WELCOME_SCREEN, buttonHideWelcomeScreen.getSelection());
                 config.setValue(Config.SHOW_LOADER_UPGRADE_SCREEN, buttonShowLoaderUpgradeScreen.getSelection());
                 config.setValue(Config.INSERT_NULLS, buttonNulls.getSelection());
-                config.setValue(Config.LOAD_BATCH_SIZE, textBatchSize.getText());
+                config.setValue(Config.IMPORT_BATCH_SIZE, textBatchSize.getText());
                 boolean isOtherDelimiterSpecified = textUploadCSVDelimiterValue.getText() != null
                                                     && textUploadCSVDelimiterValue.getText().length() != 0;
                 if (!buttonCsvComma.getSelection()
@@ -959,7 +959,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.CSV_DELIMITER_TAB, buttonCsvTab.getSelection());
                 config.setValue(Config.CSV_DELIMITER_OTHER, isOtherDelimiterSpecified);
 
-                config.setValue(Config.EXTRACT_REQUEST_SIZE, textQueryBatch.getText());
+                config.setValue(Config.EXPORT_BATCH_SIZE, textQueryBatch.getText());
                 config.setValue(Config.ENDPOINT, currentTextEndpoint);
                 config.setValue(Config.ASSIGNMENT_RULE, textRule.getText());
                 config.setValue(Config.LOAD_ROW_TO_START_AT, textRowToStart.getText());

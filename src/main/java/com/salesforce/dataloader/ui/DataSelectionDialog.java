@@ -166,9 +166,9 @@ public class DataSelectionDialog extends BaseDialog {
         label.setText(Labels.getFormattedString(
                 "DataSelectionDialog.initSuccess", String.valueOf(totalRows))
                 + "\n\n"
-                + Labels.getString("AdvancedSettingsDialog.batchSize")
+                + Labels.getString("AdvancedSettingsDialog.importBatchSize")
                 + " "
-                + getController().getConfig().getString(String.valueOf(getController().getConfig().getLoadBatchSize()))
+                + getController().getConfig().getString(String.valueOf(getController().getConfig().getImportBatchSize()))
                 + "\n"
                 + Labels.getString("AdvancedSettingsDialog.startRow")
                 + " "

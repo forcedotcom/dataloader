@@ -77,7 +77,7 @@ public class BulkV1CsvProcessTest extends ProcessTestBase {
     @Test
     public void testBatchSizes() throws Exception {
         writeCsv(validRow, validRow);
-        argMap.put(Config.LOAD_BATCH_SIZE, "1");
+        argMap.put(Config.IMPORT_BATCH_SIZE, "1");
         ILoaderProgress monitor = runProcess(argMap, 2, 0, 0, false);
         assertEquals("Inserting 2 rows with batch size of 1 should have produced 2 batches", 2, monitor.getNumberBatchesTotal());
     }
@@ -85,7 +85,7 @@ public class BulkV1CsvProcessTest extends ProcessTestBase {
     @Test
     public void testBatchSizesNotAlteredByInvalidData() throws Exception {
         writeCsv(validRow, invalidRow, validRow);
-        argMap.put(Config.LOAD_BATCH_SIZE, "2");
+        argMap.put(Config.IMPORT_BATCH_SIZE, "2");
         ILoaderProgress monitor = runProcess(argMap, 2, 0, 1, false);
         assertEquals("Even though middle row contains invalid data only 1 batch should have been created", 1, monitor.getNumberBatchesTotal());
     }
