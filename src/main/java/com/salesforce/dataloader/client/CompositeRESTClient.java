@@ -123,7 +123,7 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
             HttpClientTransport transport = new HttpClientTransport(this.connectorConfig);
             try {
                 OutputStream out = transport.connect(
-                        this.getConnectorConfig().getRestEndpoint(),
+                        this.getConnectorConfig().getRestEndpoint() + config.getString(Config.ENTITY) + "/id/" ,
                         headers,
                         true,
                         HttpTransportInterface.SupportedHttpMethodType.PATCH);
