@@ -53,6 +53,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -65,8 +66,8 @@ import java.util.Map;
 import java.util.TimeZone;
 
 public class AdvancedSettingsDialog extends BaseDialog {
-    private Text textBatchSize;
-    private Text textQueryBatch;
+    private Text textImportBatchSize;
+    private Text textExportBatchSize;
     private Text textUploadCSVDelimiterValue;
     private Text textQueryResultsDelimiterValue;
     private Button buttonNulls;
@@ -104,7 +105,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonKeepAccountTeam;
     private Button buttonCacheDescribeGlobalResults;
     private Button buttonIncludeRTFBinaryDataInQueryResults;
-    private Button buttonUseBulkApi;
+    private Button buttonUseSOAPApi;
     private Button buttonUseBulkV1Api;
     private Button buttonUseBulkV2Api;
     private Button buttonBulkApiSerialMode;
@@ -118,6 +119,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonPopulateResultsFolderOnWizardFinishStep;
     private static final String[] LOGGING_LEVEL = { "ALL", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
     private Combo comboLoggingLevelDropdown;
+    private Composite soapApiOptionsComposite;
+    private Composite bulkApiOptionsComposite;
+    private Composite bulkV2ApiOptionsComposite;
+    private Composite exportBatchSizeComposite;
+    private Composite importBatchSizeComposite;
     
     /**
      * InputDialog constructor
@@ -138,25 +144,52 @@ public class AdvancedSettingsDialog extends BaseDialog {
         defaultServer = server;
     }
 
-    private final Map<Button, Boolean> oldBulkAPIDependencies = new HashMap<Button, Boolean>();
-
-    private void enableBulkRelatedOptions(boolean isBulkAPIEnabled) {
-        setButtonEnabled(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode, isBulkAPIEnabled);
-        setButtonEnabled(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent,
-                            isBulkAPIEnabled && !buttonUseBulkV2Api.getSelection());
-        setButtonEnabled(Config.INSERT_NULLS, buttonNulls, !isBulkAPIEnabled);
-        setButtonEnabled(Config.TRUNCATE_FIELDS, buttonTruncateFields, !isBulkAPIEnabled);
-        buttonUseBulkV1Api.setEnabled(isBulkAPIEnabled);
-        buttonUseBulkV2Api.setEnabled(isBulkAPIEnabled);
-        // the notion of batch size is not applicable to Bulk 2.0 API
-        textBatchSize.setEnabled(!(isBulkAPIEnabled && buttonUseBulkV2Api.getSelection()));
+    private final Map<Button, Composite> apiOptionsMap = new HashMap<Button, Composite>();
+    boolean useBulkAPI = false;
+    boolean useBulkV2API = false;
+    boolean useSoapAPI = false;
+    
+    private void setAllApiRelatedOptions() {
+        for (Button apiButton : apiOptionsMap.keySet()) {
+            setApiRelatedOptions(apiButton, false);
+        }
+        Button selectedButton = useBulkAPI ? this.buttonUseBulkV1Api : (useBulkV2API ? this.buttonUseBulkV2Api : this.buttonUseSOAPApi);
+        setApiRelatedOptions(selectedButton, true);
+        recursiveSetEnabled(this.exportBatchSizeComposite, useSoapAPI);
+        recursiveSetEnabled(this.importBatchSizeComposite, !useBulkV2API);
     }
+    
+    private void setApiRelatedOptions(Button apiButton, boolean isEnabled) {
+        Composite apiOptionsComposite = apiOptionsMap.get(apiButton);
+        recursiveSetEnabled(apiOptionsComposite, isEnabled);
+    }
+    
+    private void initializeApiRelatedOptions() {
+        apiOptionsMap.put(buttonUseSOAPApi, soapApiOptionsComposite);
+        apiOptionsMap.put(buttonUseBulkV1Api, bulkApiOptionsComposite);
+        apiOptionsMap.put(buttonUseBulkV2Api, bulkV2ApiOptionsComposite);
+        setAllApiRelatedOptions();
+    }
+    
+    private void recursiveSetEnabled(Control ctrl, boolean enabled) {
+        if (ctrl instanceof Composite) {
+           Composite comp = (Composite) ctrl;
+           for (Control c : comp.getChildren())
+              recursiveSetEnabled(c, enabled);
+        } else if (ctrl instanceof Label) {
+            enableLabel((Label)ctrl, enabled);
+        } else { // Button, Checkbox, Dropdown list etc
+            ctrl.setEnabled(enabled);
+        }
+     }
+    
+    private void enableLabel(Label label, boolean isEnabled) {
+        if (isEnabled) {
+            label.setForeground(getParent().getDisplay().getSystemColor(SWT.COLOR_BLACK));
+        } else {
+            label.setForeground(getParent().getDisplay().getSystemColor(SWT.COLOR_GRAY));
+        }
 
-    private void setButtonEnabled(String configKey, Button b, boolean isBulkAPIEnabled) {
-        Boolean previousValue = oldBulkAPIDependencies.put(b, b.getSelection());
-        b.setSelection(isBulkAPIEnabled ? (previousValue != null ? previousValue : getController().getConfig().getBoolean(
-                configKey)) : false);
-        b.setEnabled(isBulkAPIEnabled);
     }
 
     /**
@@ -232,11 +265,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
         Composite restComp = new Composite(container, SWT.NONE);
         data = new GridData(GridData.FILL_BOTH);
         restComp.setLayoutData(data);
-        layout = new GridLayout(2, false);
+        layout = new GridLayout(2, true);
         layout.verticalSpacing = 10;
         restComp.setLayout(layout);
 
-        // Hide welecome screen
+        // Hide welcome screen
         Label labelHideWelcomeScreen = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelHideWelcomeScreen.setText(Labels.getString("AdvancedSettingsDialog.hideWelcomeScreen")); //$NON-NLS-1$
         labelHideWelcomeScreen.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
@@ -244,7 +277,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         buttonHideWelcomeScreen = new Button(restComp, SWT.CHECK);
         buttonHideWelcomeScreen.setSelection(config.getBoolean(Config.HIDE_WELCOME_SCREEN));
 
-        // Hide welecome screen
+        // Hide welcome screen
         Label labelShowLoaderUpgradeScreen = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelShowLoaderUpgradeScreen.setText(Labels.getString("AdvancedSettingsDialog.showLoaderUpgradeScreen")); //$NON-NLS-1$
         labelShowLoaderUpgradeScreen.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
@@ -252,28 +285,231 @@ public class AdvancedSettingsDialog extends BaseDialog {
         buttonShowLoaderUpgradeScreen = new Button(restComp, SWT.CHECK);
         buttonShowLoaderUpgradeScreen.setSelection(config.getBoolean(Config.SHOW_LOADER_UPGRADE_SCREEN));
 
-        //batch size
-        Label labelBatch = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        Composite apiChoiceComposite = new Composite(restComp, SWT.None);
+        layout = new GridLayout(3, true);
+        layout.verticalSpacing = 10;
+        apiChoiceComposite.setLayout(layout);
+        data = new GridData();
+        data.horizontalSpan = 2;
+        data.horizontalAlignment = SWT.FILL;
+        data.grabExcessHorizontalSpace = true;
+        apiChoiceComposite.setLayoutData(data);
+        
+        // Enable Bulk API Setting
+        useBulkAPI = config.getBoolean(Config.BULK_API_ENABLED);
+        useBulkV2API = config.getBoolean(Config.BULK_API_ENABLED) && config.getBoolean(Config.BULKV2_API_ENABLED);
+        useSoapAPI = !useBulkAPI;
+
+        buttonUseSOAPApi = new Button(apiChoiceComposite, SWT.RADIO);
+        buttonUseSOAPApi.setSelection(useSoapAPI);
+        buttonUseSOAPApi.setText(Labels.getString("AdvancedSettingsDialog.useSOAPApi"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        data.grabExcessHorizontalSpace = true;
+        buttonUseSOAPApi.setLayoutData(data);
+        buttonUseSOAPApi.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                super.widgetSelected(e);
+                useSoapAPI = buttonUseSOAPApi.getSelection();
+                if (!useSoapAPI) {
+                    return;
+                }
+                useBulkAPI = false;
+                useBulkV2API = false;
+                setAllApiRelatedOptions();
+                
+                // update batch size when this setting changes
+                int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(false, false);
+                logger.info("Setting batch size to " + newDefaultBatchSize);
+                textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
+            }
+        });
+        
+        buttonUseBulkV1Api = new Button(apiChoiceComposite, SWT.RADIO);
+        buttonUseBulkV1Api.setSelection(useBulkAPI);
+        buttonUseBulkV1Api.setText(Labels.getString("AdvancedSettingsDialog.useBulkV1Api"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_CENTER);
+        data.grabExcessHorizontalSpace = true;
+        buttonUseBulkV1Api.setLayoutData(data);
+        buttonUseBulkV1Api.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                super.widgetSelected(e);
+                useBulkAPI = buttonUseBulkV1Api.getSelection();
+                if (!useBulkAPI) {
+                    return;
+                }
+                useSoapAPI = false;
+                useBulkV2API = false;
+                setAllApiRelatedOptions();
+                
+                // update batch size when this setting changes
+                int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(true, false);
+                logger.info("Setting batch size to " + newDefaultBatchSize);
+                textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
+            }
+        });
+        
+        // Enable Bulk API 2.0 Setting
+        buttonUseBulkV2Api = new Button(apiChoiceComposite, SWT.RADIO);
+        buttonUseBulkV2Api.setSelection(useBulkV2API);
+        buttonUseBulkV2Api.setText(Labels.getString("AdvancedSettingsDialog.useBulkV2Api"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+        data.grabExcessHorizontalSpace = true;
+        buttonUseBulkV2Api.setLayoutData(data);
+        buttonUseBulkV2Api.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                super.widgetSelected(e);
+                useBulkV2API = buttonUseBulkV2Api.getSelection();
+                if (!useBulkV2API) {
+                    return;
+                }
+                useSoapAPI = false;
+                useBulkAPI = false;
+                setAllApiRelatedOptions();
+                
+                // get default batch size for Bulk v1 and set it
+                int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(true, true);
+                logger.info("Setting batch size to " + newDefaultBatchSize);
+                textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
+            }
+        });
+        
+        
+        // SOAP API - Keep Account team setting
+        this.soapApiOptionsComposite = new Composite(restComp, SWT.None);
+        data = new GridData(GridData.FILL_BOTH);
+        data.horizontalSpan = 2;
+        data.grabExcessHorizontalSpace = true;
+        this.soapApiOptionsComposite.setLayoutData(data);
+        layout = new GridLayout(2, true);
+        layout.verticalSpacing = 10;
+        this.soapApiOptionsComposite.setLayout(layout);
+
+        Label labelKeepAccountTeam = new Label(this.soapApiOptionsComposite, SWT.RIGHT | SWT.WRAP);
+        labelKeepAccountTeam.setText(Labels.getString("AdvancedSettingsDialog.keepAccountTeam"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        data.grabExcessHorizontalSpace = true;
+        labelKeepAccountTeam.setLayoutData(data);
+
+        boolean keepAccountTeam = config.getBoolean(Config.PROCESS_KEEP_ACCOUNT_TEAM);
+        buttonKeepAccountTeam = new Button(this.soapApiOptionsComposite, SWT.CHECK);
+        buttonKeepAccountTeam.setSelection(keepAccountTeam);
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+        data.grabExcessHorizontalSpace = true;
+        buttonKeepAccountTeam.setLayoutData(data);
+        buttonKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.keepAccountTeamHelp"));
+        labelKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.keepAccountTeamHelp"));
+        if (useBulkAPI) {
+            buttonKeepAccountTeam.setSelection(false);
+        }
+        // Bulk API serial concurrency mode setting
+        this.bulkApiOptionsComposite = new Composite(restComp, SWT.None);
+        data = new GridData(GridData.FILL_BOTH);
+        data.horizontalSpan = 2;
+        data.grabExcessHorizontalSpace = true;
+        this.bulkApiOptionsComposite.setLayoutData(data);
+        layout = new GridLayout(2, true);
+        layout.verticalSpacing = 10;
+        this.bulkApiOptionsComposite.setLayout(layout);
+
+        labelBulkApiSerialMode = new Label(this.bulkApiOptionsComposite, SWT.RIGHT | SWT.WRAP);
+        labelBulkApiSerialMode.setText(Labels.getString("AdvancedSettingsDialog.bulkApiSerialMode")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        data.grabExcessHorizontalSpace = true;
+        labelBulkApiSerialMode.setLayoutData(data);
+        buttonBulkApiSerialMode = new Button(this.bulkApiOptionsComposite, SWT.CHECK);
+        buttonBulkApiSerialMode.setSelection(config.getBoolean(Config.BULK_API_SERIAL_MODE));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+        data.grabExcessHorizontalSpace = true;
+        buttonBulkApiSerialMode.setLayoutData(data);
+
+        // Bulk API serial concurrency mode setting
+        labelBulkApiZipContent = new Label(this.bulkApiOptionsComposite, SWT.RIGHT | SWT.WRAP);
+        labelBulkApiZipContent.setText(Labels.getString("AdvancedSettingsDialog.bulkApiZipContent")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        data.grabExcessHorizontalSpace = true;
+        labelBulkApiZipContent.setLayoutData(data);
+        buttonBulkApiZipContent = new Button(this.bulkApiOptionsComposite, SWT.CHECK);
+        buttonBulkApiZipContent.setSelection(config.getBoolean(Config.BULK_API_ZIP_CONTENT));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+        data.grabExcessHorizontalSpace = true;
+        buttonBulkApiZipContent.setLayoutData(data);
+        
+        this.bulkV2ApiOptionsComposite = new Composite(restComp, SWT.None);
+        data = new GridData(GridData.FILL_BOTH);
+        data.horizontalSpan = 2;
+        data.grabExcessHorizontalSpace = true;
+        this.bulkV2ApiOptionsComposite.setLayoutData(data);
+        layout = new GridLayout(2, true);
+        layout.verticalSpacing = 10;
+        this.bulkV2ApiOptionsComposite.setLayout(layout);
+        // bulkV2ApiOptionsComposite has no children
+
+        //SOAP and Bulk API - batch size
+        this.importBatchSizeComposite = new Composite(restComp, SWT.None);
+        data = new GridData(GridData.FILL_BOTH);
+        data.horizontalSpan = 2;
+        data.grabExcessHorizontalSpace = true;
+        this.importBatchSizeComposite.setLayoutData(data);
+        layout = new GridLayout(2, true);
+        layout.verticalSpacing = 10;
+        this.importBatchSizeComposite.setLayout(layout);
+
+        Label labelBatch = new Label(importBatchSizeComposite, SWT.RIGHT | SWT.WRAP);
         labelBatch.setText(Labels.getString("AdvancedSettingsDialog.importBatchSize")); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        data.grabExcessHorizontalSpace = true;
         labelBatch.setLayoutData(data);
 
-        textBatchSize = new Text(restComp, SWT.BORDER);
-        textBatchSize.setText(Integer.toString(config.getImportBatchSize()));
-        textBatchSize.addVerifyListener(new VerifyListener() {
+        textImportBatchSize = new Text(importBatchSizeComposite, SWT.BORDER);
+        textImportBatchSize.setText(Integer.toString(config.getImportBatchSize()));
+        textImportBatchSize.setEnabled(!useBulkV2API);
+        textImportBatchSize.addVerifyListener(new VerifyListener() {
             @Override
             public void verifyText(VerifyEvent event) {
                 event.doit = Character.isISOControl(event.character) || Character.isDigit(event.character);
             }
         });
         data = new GridData();
-        GC gc = new GC(textBatchSize);
+        GC gc = new GC(textImportBatchSize);
         Point textSize = gc.textExtent("8");
         gc.dispose();
-        textBatchSize.setTextLimit(8);
+        textImportBatchSize.setTextLimit(8);
         data.widthHint = 8 * textSize.x;
-        textBatchSize.setLayoutData(data);
+        textImportBatchSize.setLayoutData(data);
 
+        //SOAP API - extraction batch size
+        this.exportBatchSizeComposite = new Composite(restComp, SWT.None);
+        data = new GridData(GridData.FILL_BOTH);
+        data.horizontalSpan = 2;
+        data.grabExcessHorizontalSpace = true;
+        this.exportBatchSizeComposite.setLayoutData(data);
+        layout = new GridLayout(2, true);
+        layout.verticalSpacing = 10;
+        this.exportBatchSizeComposite.setLayout(layout);
+        Label labelQueryBatch = new Label(exportBatchSizeComposite, SWT.RIGHT | SWT.WRAP);
+        labelQueryBatch.setText(Labels.getString("ExtractionInputDialog.exportBatchSize")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        data.grabExcessHorizontalSpace = true;
+        labelQueryBatch.setLayoutData(data);
+
+        textExportBatchSize = new Text(exportBatchSizeComposite, SWT.BORDER);
+        textExportBatchSize.setText(config.getString(Config.EXPORT_BATCH_SIZE));
+        textExportBatchSize.addVerifyListener(new VerifyListener() {
+            @Override
+            public void verifyText(VerifyEvent event) {
+                event.doit = Character.isISOControl(event.character) || Character.isDigit(event.character);
+            }
+        });
+        data = new GridData();
+        textExportBatchSize.setTextLimit(4);
+        data.widthHint = 4 * textSize.x;
+        textExportBatchSize.setLayoutData(data);
+
+        initializeApiRelatedOptions();
+        
         //insert Nulls
         Label labelNulls = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelNulls.setText(Labels.getString("AdvancedSettingsDialog.insertNulls")); //$NON-NLS-1$
@@ -345,25 +581,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
         textTimeout.setTextLimit(4);
         data.widthHint = 4 * textSize.x;
         textTimeout.setLayoutData(data);
-
-        //extraction batch size
-        Label labelQueryBatch = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelQueryBatch.setText(Labels.getString("ExtractionInputDialog.exportBatchSize")); //$NON-NLS-1$
-        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        labelQueryBatch.setLayoutData(data);
-
-        textQueryBatch = new Text(restComp, SWT.BORDER);
-        textQueryBatch.setText(config.getString(Config.EXPORT_BATCH_SIZE));
-        textQueryBatch.addVerifyListener(new VerifyListener() {
-            @Override
-            public void verifyText(VerifyEvent event) {
-                event.doit = Character.isISOControl(event.character) || Character.isDigit(event.character);
-            }
-        });
-        data = new GridData();
-        textQueryBatch.setTextLimit(4);
-        data.widthHint = 4 * textSize.x;
-        textQueryBatch.setLayoutData(data);
 
         // enable/disable sort of fields to extract
         Label labelSortExtractFields = new Label(restComp, SWT.RIGHT | SWT.WRAP);
@@ -492,133 +709,13 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         boolean cacheDescribeGlobalResults = config.getBoolean(Config.CACHE_DESCRIBE_GLOBAL_RESULTS);
         buttonCacheDescribeGlobalResults = new Button(restComp, SWT.CHECK);
-        buttonCacheDescribeGlobalResults.setSelection(cacheDescribeGlobalResults);
-        
-        // Keep Account team setting
-        Label labelKeepAccountTeam = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelKeepAccountTeam.setText(Labels.getString("AdvancedSettingsDialog.keepAccountTeam"));
-        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        labelKeepAccountTeam.setLayoutData(data);
-
-        boolean keepAccountTeam = config.getBoolean(Config.PROCESS_KEEP_ACCOUNT_TEAM);
-        buttonKeepAccountTeam = new Button(restComp, SWT.CHECK);
-        buttonKeepAccountTeam.setSelection(keepAccountTeam);
-        buttonKeepAccountTeam.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                super.widgetSelected(e);
-                boolean enabled = buttonKeepAccountTeam.getSelection();
-                // make sure the appropriate check boxes are enabled or disabled
-                if (enabled) {
-                    buttonUseBulkApi.setSelection(false);
-                    enableBulkRelatedOptions(false);
-                }
-            }
-        });
-        buttonKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.keepAccountTeamHelp"));
-        labelKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.keepAccountTeamHelp"));
-        
+        buttonCacheDescribeGlobalResults.setSelection(cacheDescribeGlobalResults);        
         
         Label empty = new Label(restComp, SWT.NONE);
         data = new GridData();
         data.horizontalSpan = 2;
         empty.setLayoutData(data);
 
-        // Enable Bulk API Setting
-        Label labelUseBulkApi = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelUseBulkApi.setText(Labels.getString("AdvancedSettingsDialog.useBulkApi")); //$NON-NLS-1$
-        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        labelUseBulkApi.setLayoutData(data);
-        buttonUseBulkApi = new Button(restComp, SWT.CHECK);
-        boolean useBulkAPI = config.getBoolean(Config.BULK_API_ENABLED);
-        boolean useBulkV2Api = config.getBoolean(Config.BULKV2_API_ENABLED);
-        buttonUseBulkApi.setSelection(useBulkAPI);
-        buttonUseBulkApi.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                super.widgetSelected(e);
-                boolean enabledBulk = buttonUseBulkApi.getSelection();
-                enableBulkRelatedOptions(enabledBulk);
-                boolean enabledBulkV2 = buttonUseBulkV2Api.getSelection();
-                // update batch size when this setting changes
-                int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(enabledBulk, enabledBulkV2);
-                logger.info("Setting batch size to " + newDefaultBatchSize);
-                textBatchSize.setText(String.valueOf(newDefaultBatchSize));
-                // make sure the appropriate check boxes are enabled or disabled
-                if (enabledBulk) {
-                    buttonKeepAccountTeam.setSelection(false);
-                }
-            }
-        });
-        
-        buttonUseBulkV1Api = new Button(restComp, SWT.RADIO);
-        buttonUseBulkV1Api.setSelection(!useBulkV2Api);
-        buttonUseBulkV1Api.setEnabled(useBulkAPI);
-        buttonUseBulkV1Api.setText(Labels.getString("AdvancedSettingsDialog.useBulkV1Api"));
-        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        buttonUseBulkV1Api.setLayoutData(data);
-        buttonUseBulkV1Api.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                super.widgetSelected(e);
-                boolean enabledBulkV1 = buttonUseBulkV1Api.getSelection();
-                buttonUseBulkV2Api.setSelection(!enabledBulkV1);
-                // update batch size when this setting changes
-                int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(true, !enabledBulkV1);
-                logger.info("Setting batch size to " + newDefaultBatchSize);
-                textBatchSize.setText(String.valueOf(newDefaultBatchSize));
-            }
-        });
-        if (useBulkAPI) {
-            buttonKeepAccountTeam.setSelection(false);
-        }
-        
-        // Enable Bulk API 2.0 Setting
-        buttonUseBulkV2Api = new Button(restComp, SWT.RADIO);
-        buttonUseBulkV2Api.setSelection(useBulkV2Api);
-        buttonUseBulkV2Api.setEnabled(useBulkAPI);
-        buttonUseBulkV2Api.setText(Labels.getString("AdvancedSettingsDialog.useBulkV2Api"));
-        textBatchSize.setEnabled(!useBulkV2Api);
-        buttonUseBulkV2Api.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                super.widgetSelected(e);
-                boolean selected = buttonUseBulkV2Api.getSelection();
-                // make sure the appropriate check boxes are enabled or disabled
-                if (selected) {
-                    buttonBulkApiZipContent.setSelection(false);
-                    buttonBulkApiZipContent.setEnabled(false);
-                    textBatchSize.setEnabled(false);
-                } else {
-                    textBatchSize.setEnabled(true);
-                }
-                buttonUseBulkV1Api.setSelection(!selected);
-                buttonBulkApiZipContent.setEnabled(true);
-                // get default batch size for Bulk v1 and set it
-                int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(true, selected);
-                logger.info("Setting batch size to " + newDefaultBatchSize);
-                textBatchSize.setText(String.valueOf(newDefaultBatchSize));
-            }
-        });
-        
-        // Bulk API serial concurrency mode setting
-        labelBulkApiSerialMode = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelBulkApiSerialMode.setText(Labels.getString("AdvancedSettingsDialog.bulkApiSerialMode")); //$NON-NLS-1$
-        labelBulkApiSerialMode.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-        labelBulkApiSerialMode.setEnabled(useBulkAPI);
-        buttonBulkApiSerialMode = new Button(restComp, SWT.CHECK);
-        buttonBulkApiSerialMode.setSelection(config.getBoolean(Config.BULK_API_SERIAL_MODE));
-        buttonBulkApiSerialMode.setEnabled(useBulkAPI);
-
-        // Bulk API serial concurrency mode setting
-        labelBulkApiZipContent = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelBulkApiZipContent.setText(Labels.getString("AdvancedSettingsDialog.bulkApiZipContent")); //$NON-NLS-1$
-        labelBulkApiZipContent.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-        labelBulkApiZipContent.setEnabled(useBulkAPI && !useBulkV2Api);
-        buttonBulkApiZipContent = new Button(restComp, SWT.CHECK);
-        buttonBulkApiZipContent.setSelection(config.getBoolean(Config.BULK_API_ZIP_CONTENT));
-        buttonBulkApiZipContent.setEnabled(useBulkAPI && !useBulkV2Api);
-        
         empty = new Label(restComp, SWT.NONE);
         data = new GridData();
         data.horizontalSpan = 2;
@@ -781,7 +878,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         // now that we've created all the buttons, make sure that buttons dependent on the bulk api
         // setting are enabled or disabled appropriately
-        enableBulkRelatedOptions(useBulkAPI);
+       // enableBulkRelatedOptions(useBulkAPI);
         
         blankAgain = new Label(restComp, SWT.NONE);
         data = new GridData();
@@ -937,7 +1034,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.HIDE_WELCOME_SCREEN, buttonHideWelcomeScreen.getSelection());
                 config.setValue(Config.SHOW_LOADER_UPGRADE_SCREEN, buttonShowLoaderUpgradeScreen.getSelection());
                 config.setValue(Config.INSERT_NULLS, buttonNulls.getSelection());
-                config.setValue(Config.IMPORT_BATCH_SIZE, textBatchSize.getText());
+                config.setValue(Config.IMPORT_BATCH_SIZE, textImportBatchSize.getText());
                 boolean isOtherDelimiterSpecified = textUploadCSVDelimiterValue.getText() != null
                                                     && textUploadCSVDelimiterValue.getText().length() != 0;
                 if (!buttonCsvComma.getSelection()
@@ -959,7 +1056,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.CSV_DELIMITER_TAB, buttonCsvTab.getSelection());
                 config.setValue(Config.CSV_DELIMITER_OTHER, isOtherDelimiterSpecified);
 
-                config.setValue(Config.EXPORT_BATCH_SIZE, textQueryBatch.getText());
+                config.setValue(Config.EXPORT_BATCH_SIZE, textExportBatchSize.getText());
                 config.setValue(Config.ENDPOINT, currentTextEndpoint);
                 config.setValue(Config.ASSIGNMENT_RULE, textRule.getText());
                 config.setValue(Config.LOAD_ROW_TO_START_AT, textRowToStart.getText());
@@ -983,7 +1080,10 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.PROCESS_KEEP_ACCOUNT_TEAM, buttonKeepAccountTeam.getSelection());
                 config.setValue(Config.CACHE_DESCRIBE_GLOBAL_RESULTS, buttonCacheDescribeGlobalResults.getSelection());
                 config.setValue(Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, buttonIncludeRTFBinaryDataInQueryResults.getSelection());
-                config.setValue(Config.BULK_API_ENABLED, buttonUseBulkApi.getSelection());
+
+                // Config requires Bulk API AND Bulk V2 API settings enabled to use Bulk V2 features
+                // This is different from UI. UI shows them as mutually exclusive.
+                config.setValue(Config.BULK_API_ENABLED, buttonUseBulkV1Api.getSelection() || buttonUseBulkV2Api.getSelection());
                 config.setValue(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode.getSelection());
                 config.setValue(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
                 config.setValue(Config.BULKV2_API_ENABLED, buttonUseBulkV2Api.getSelection());
