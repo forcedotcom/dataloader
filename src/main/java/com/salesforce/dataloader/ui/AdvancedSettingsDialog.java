@@ -296,9 +296,9 @@ public class AdvancedSettingsDialog extends BaseDialog {
         apiChoiceComposite.setLayoutData(data);
         
         // Enable Bulk API Setting
-        useBulkAPI = config.getBoolean(Config.BULK_API_ENABLED);
+        useBulkAPI = config.getBoolean(Config.BULK_API_ENABLED) && !config.getBoolean(Config.BULKV2_API_ENABLED);
         useBulkV2API = config.getBoolean(Config.BULK_API_ENABLED) && config.getBoolean(Config.BULKV2_API_ENABLED);
-        useSoapAPI = !useBulkAPI;
+        useSoapAPI = !useBulkAPI && !useBulkV2API;
 
         buttonUseSOAPApi = new Button(apiChoiceComposite, SWT.RADIO);
         buttonUseSOAPApi.setSelection(useSoapAPI);
