@@ -37,7 +37,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.ui.*;
 
-public class ExtractionFinishDialog extends BaseDialog {
+public class ExtractionFinishDialog extends WizardDialog {
     private Label label;
     private Button ok;
 

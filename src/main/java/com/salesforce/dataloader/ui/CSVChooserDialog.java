@@ -48,7 +48,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.util.StringUtils;
 
-public class CSVChooserDialog extends BaseDialog {
+public class CSVChooserDialog extends WizardDialog {
     private Text textRows;
     private Button buttonSelect;
     private Button buttonSuccess;

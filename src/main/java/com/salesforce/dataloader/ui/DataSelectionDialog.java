@@ -47,7 +47,7 @@ import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.util.DAORowUtil;
 
-public class DataSelectionDialog extends BaseDialog {
+public class DataSelectionDialog extends WizardDialog {
     private Button ok;
     private Label label;
     private ContentLimitLink contentNoteLimitLink;

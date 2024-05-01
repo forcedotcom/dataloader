@@ -34,11 +34,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.ui.BaseDialog;
 import com.salesforce.dataloader.ui.Labels;
+import com.salesforce.dataloader.ui.WizardDialog;
 import com.salesforce.dataloader.ui.mapping.MappingDropAdapter.MAPPING_CHOICE;
 
-public class MappingDropActionDialog extends BaseDialog {
+public class MappingDropActionDialog extends WizardDialog {
     private Button replace;
     private Button add;
     private Button cancel;

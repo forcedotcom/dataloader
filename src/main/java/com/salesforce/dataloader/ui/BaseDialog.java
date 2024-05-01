@@ -29,8 +29,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
@@ -65,14 +67,6 @@ public abstract class BaseDialog extends Dialog {
         shell.open();
         setShellBounds(shell);
         return shell;
-    }
-    
-    protected void setShellBounds(Shell dialogShell) {
-        Rectangle shellBounds = dialogShell.getBounds();
-        Rectangle persistedWizardBounds = UIUtils.getPersistedWizardBounds(this.controller.getConfig());
-        shellBounds.x = persistedWizardBounds.x + Config.DIALOG_X_OFFSET;
-        shellBounds.y = persistedWizardBounds.y + Config.DIALOG_Y_OFFSET;
-        dialogShell.setBounds(shellBounds);
     }
     
     protected abstract void createContents(Shell shell);
@@ -118,6 +112,12 @@ public abstract class BaseDialog extends Dialog {
         return success;
     }
     
+    protected void setShellBounds(Shell dialogShell) {
+        Point parentLocation = getParent().getLocation();
+        dialogShell.setLocation(parentLocation.x + Config.DIALOG_X_OFFSET,
+                                parentLocation.y + Config.DIALOG_Y_OFFSET);
+    }
+    
     private void doWork(Shell shell) {
         Display display = shell.getDisplay();
         BusyIndicator.showWhile(display, new Thread() {
@@ -130,31 +130,5 @@ public abstract class BaseDialog extends Dialog {
     
     protected void processingWithBusyIndicator(Shell shell) {
         // no op
-    }
-    
-    protected Rectangle getPersistedDialogBounds() {
-        Config config = getController().getConfig();
-        Rectangle wizardBounds = UIUtils.getPersistedWizardBounds(config);
-        int xOffset = wizardBounds.x + Config.DIALOG_X_OFFSET;
-        int yOffset = wizardBounds.y + Config.DIALOG_Y_OFFSET;
-        int width = wizardBounds.width;
-        int height = wizardBounds.height;
-        if (config != null) {
-            try {
-                xOffset = config.getInt(Config.WIZARD_X_OFFSET) + Config.DIALOG_X_OFFSET;
-                yOffset = config.getInt(Config.WIZARD_Y_OFFSET) + Config.DIALOG_Y_OFFSET;
-                width = config.getInt(Config.DIALOG_BOUNDS_PREFIX + getClass().getSimpleName() + Config.DIALOG_WIDTH_SUFFIX);
-                height = config.getInt(Config.DIALOG_BOUNDS_PREFIX + getClass().getSimpleName() + Config.DIALOG_HEIGHT_SUFFIX);
-            } catch (Exception ex) {
-                // no op
-            }
-        }
-        if (width == 0) {
-            width = wizardBounds.width;
-        }
-        if (height == 0) {
-            height = wizardBounds.height;
-        }
-        return new Rectangle(xOffset, yOffset, width, height);
     }
 }

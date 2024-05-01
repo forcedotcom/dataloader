@@ -77,7 +77,7 @@ import com.sforce.soap.partner.Field;
 /**
  * This class creates the mapping dialog
  */
-public class MappingDialog extends BaseDialog {
+public class MappingDialog extends WizardDialog {
     //the two tableViewers
     private TableViewer sforceTblViewer;
     private TableViewer mappingTblViewer;
