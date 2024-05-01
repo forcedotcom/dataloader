@@ -110,8 +110,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonUseBulkV2Api;
     private Button buttonBulkApiSerialMode;
     private Button buttonBulkApiZipContent;
-    Label labelBulkApiSerialMode;
-    Label labelBulkApiZipContent;
+    private Label labelBulkApiSerialMode;
+    private Label labelBulkApiZipContent;
     private Button buttonCsvComma;
     private Button buttonCsvTab;
     private Button buttonLoginFromBrowser;
@@ -121,7 +121,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Combo comboLoggingLevelDropdown;
     private Composite soapApiOptionsComposite;
     private Composite bulkApiOptionsComposite;
-    private Composite bulkV2ApiOptionsComposite;
     private Composite exportBatchSizeComposite;
     private Composite importBatchSizeComposite;
     
@@ -145,51 +144,47 @@ public class AdvancedSettingsDialog extends BaseDialog {
     }
 
     private final Map<Button, Composite> apiOptionsMap = new HashMap<Button, Composite>();
-    boolean useBulkAPI = false;
-    boolean useBulkV2API = false;
-    boolean useSoapAPI = false;
+    private boolean useBulkAPI = false;
+    private boolean useBulkV2API = false;
+    private boolean useSoapAPI = false;
     
-    private void setAllApiRelatedOptions() {
-        for (Button apiButton : apiOptionsMap.keySet()) {
-            setApiRelatedOptions(apiButton, false);
-        }
-        Button selectedButton = useBulkAPI ? this.buttonUseBulkV1Api : (useBulkV2API ? this.buttonUseBulkV2Api : this.buttonUseSOAPApi);
-        setApiRelatedOptions(selectedButton, true);
-        recursiveSetEnabled(this.exportBatchSizeComposite, useSoapAPI);
-        recursiveSetEnabled(this.importBatchSizeComposite, !useBulkV2API);
+    
+    private void setEnabled(Label label, boolean isEnabled) {
+        int color = isEnabled ? SWT.COLOR_BLACK : SWT.COLOR_GRAY;
+        label.setForeground(getParent().getDisplay().getSystemColor(color));
     }
     
-    private void setApiRelatedOptions(Button apiButton, boolean isEnabled) {
-        Composite apiOptionsComposite = apiOptionsMap.get(apiButton);
-        recursiveSetEnabled(apiOptionsComposite, isEnabled);
-    }
-    
-    private void initializeApiRelatedOptions() {
-        apiOptionsMap.put(buttonUseSOAPApi, soapApiOptionsComposite);
-        apiOptionsMap.put(buttonUseBulkV1Api, bulkApiOptionsComposite);
-        apiOptionsMap.put(buttonUseBulkV2Api, bulkV2ApiOptionsComposite);
-        setAllApiRelatedOptions();
-    }
-    
-    private void recursiveSetEnabled(Control ctrl, boolean enabled) {
+    private void setEnabled(Control ctrl, boolean enabled) {
         if (ctrl instanceof Composite) {
-           Composite comp = (Composite) ctrl;
-           for (Control c : comp.getChildren())
-              recursiveSetEnabled(c, enabled);
+            Composite comp = (Composite) ctrl;
+            for (Control c : comp.getChildren())
+                setEnabled(c, enabled);
         } else if (ctrl instanceof Label) {
-            enableLabel((Label)ctrl, enabled);
+            setEnabled((Label)ctrl, enabled);
         } else { // Button, Checkbox, Dropdown list etc
             ctrl.setEnabled(enabled);
         }
-     }
+    }
     
-    private void enableLabel(Label label, boolean isEnabled) {
-        if (isEnabled) {
-            label.setForeground(getParent().getDisplay().getSystemColor(SWT.COLOR_BLACK));
-        } else {
-            label.setForeground(getParent().getDisplay().getSystemColor(SWT.COLOR_GRAY));
+    private void setAllApiOptions() {
+        for (Button apiButton : apiOptionsMap.keySet()) {
+            enableApiOptions(apiButton, false);
         }
-
+        Button selectedButton = useBulkAPI ? this.buttonUseBulkV1Api : (useBulkV2API ? this.buttonUseBulkV2Api : this.buttonUseSOAPApi);
+        enableApiOptions(selectedButton, true);
+        setEnabled(this.exportBatchSizeComposite, useSoapAPI);
+        setEnabled(this.importBatchSizeComposite, !useBulkV2API);
+    }
+    
+    private void enableApiOptions(Button apiButton, boolean isEnabled) {
+        Composite apiOptionsComposite = apiOptionsMap.get(apiButton);
+        setEnabled(apiOptionsComposite, isEnabled);
+    }
+    
+    private void initializeAllApiOptions() {
+        apiOptionsMap.put(buttonUseSOAPApi, soapApiOptionsComposite);
+        apiOptionsMap.put(buttonUseBulkV1Api, bulkApiOptionsComposite);
+        setAllApiOptions();
     }
 
     /**
@@ -197,8 +192,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
      *
      * @param shell the dialog window
      */
-    protected void createContents(final Shell shell) {
-
+    protected void createContents(final Shell shell) {        
         final Config config = getController().getConfig();
         GridData data;
         
@@ -316,7 +310,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 }
                 useBulkAPI = false;
                 useBulkV2API = false;
-                setAllApiRelatedOptions();
+                setAllApiOptions();
                 
                 // update batch size when this setting changes
                 int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(false, false);
@@ -341,7 +335,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 }
                 useSoapAPI = false;
                 useBulkV2API = false;
-                setAllApiRelatedOptions();
+                setAllApiOptions();
                 
                 // update batch size when this setting changes
                 int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(true, false);
@@ -367,7 +361,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 }
                 useSoapAPI = false;
                 useBulkAPI = false;
-                setAllApiRelatedOptions();
+                setAllApiOptions();
                 
                 // get default batch size for Bulk v1 and set it
                 int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(true, true);
@@ -436,16 +430,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         data.grabExcessHorizontalSpace = true;
         buttonBulkApiZipContent.setLayoutData(data);
-        
-        this.bulkV2ApiOptionsComposite = new Composite(restComp, SWT.None);
-        data = new GridData(GridData.FILL_BOTH);
-        data.horizontalSpan = 2;
-        data.grabExcessHorizontalSpace = true;
-        this.bulkV2ApiOptionsComposite.setLayoutData(data);
-        layout = new GridLayout(2, true);
-        layout.verticalSpacing = 10;
-        this.bulkV2ApiOptionsComposite.setLayout(layout);
-        // bulkV2ApiOptionsComposite has no children
 
         //SOAP and Bulk API - batch size
         this.importBatchSizeComposite = new Composite(restComp, SWT.None);
@@ -508,7 +492,13 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.widthHint = 4 * textSize.x;
         textExportBatchSize.setLayoutData(data);
 
-        initializeApiRelatedOptions();
+        initializeAllApiOptions();
+        
+        blank = new Label(restComp, SWT.NONE);
+        data = new GridData();
+        data.horizontalSpan = 2;
+        data.heightHint = 15;
+        blank.setLayoutData(data);
         
         //insert Nulls
         Label labelNulls = new Label(restComp, SWT.RIGHT | SWT.WRAP);
@@ -1083,10 +1073,10 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
                 // Config requires Bulk API AND Bulk V2 API settings enabled to use Bulk V2 features
                 // This is different from UI. UI shows them as mutually exclusive.
-                config.setValue(Config.BULK_API_ENABLED, buttonUseBulkV1Api.getSelection() || buttonUseBulkV2Api.getSelection());
+                config.setValue(Config.BULK_API_ENABLED, useBulkAPI || useBulkV2API);
                 config.setValue(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode.getSelection());
                 config.setValue(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
-                config.setValue(Config.BULKV2_API_ENABLED, buttonUseBulkV2Api.getSelection());
+                config.setValue(Config.BULKV2_API_ENABLED, useBulkV2API);
                 config.setValue(Config.OAUTH_LOGIN_FROM_BROWSER, buttonLoginFromBrowser.getSelection());
                 config.setValue(Config.WIZARD_CLOSE_ON_FINISH, buttonCloseWizardOnFinish.getSelection());
                 config.setValue(Config.WIZARD_WIDTH, textWizardWidth.getText());
