@@ -178,7 +178,9 @@ public class AdvancedSettingsDialog extends BaseDialog {
     
     private void enableApiOptions(Button apiButton, boolean isEnabled) {
         Composite apiOptionsComposite = apiOptionsMap.get(apiButton);
-        setEnabled(apiOptionsComposite, isEnabled);
+        if (apiOptionsComposite != null) {
+            setEnabled(apiOptionsComposite, isEnabled);
+        }
     }
     
     private void initializeAllApiOptions() {
@@ -363,7 +365,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 useBulkAPI = false;
                 setAllApiOptions();
                 
-                // get default batch size for Bulk v1 and set it
+                // get default batch size for Bulk v2 and set it
                 int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(true, true);
                 logger.info("Setting batch size to " + newDefaultBatchSize);
                 textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
@@ -398,6 +400,26 @@ public class AdvancedSettingsDialog extends BaseDialog {
         if (useBulkAPI) {
             buttonKeepAccountTeam.setSelection(false);
         }
+        
+        //insert Nulls
+        Label labelNulls = new Label(this.soapApiOptionsComposite, SWT.RIGHT | SWT.WRAP);
+        labelNulls.setText(Labels.getString("AdvancedSettingsDialog.insertNulls")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        data.grabExcessHorizontalSpace = true;
+        labelNulls.setLayoutData(data);
+        buttonNulls = new Button(this.soapApiOptionsComposite, SWT.CHECK);
+        buttonNulls.setSelection(config.getBoolean(Config.INSERT_NULLS));
+
+        //Field truncation
+        Label labelTruncateFields = new Label(this.soapApiOptionsComposite, SWT.RIGHT | SWT.WRAP);
+        labelTruncateFields.setText(Labels.getString("AdvancedSettingsDialog.allowFieldTruncation"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        data.grabExcessHorizontalSpace = true;
+        labelTruncateFields.setLayoutData(data);
+
+        buttonTruncateFields = new Button(this.soapApiOptionsComposite, SWT.CHECK);
+        buttonTruncateFields.setSelection(config.getBoolean(Config.TRUNCATE_FIELDS));
+
         // Bulk API serial concurrency mode setting
         this.bulkApiOptionsComposite = new Composite(restComp, SWT.None);
         data = new GridData(GridData.FILL_BOTH);
@@ -500,14 +522,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.heightHint = 15;
         blank.setLayoutData(data);
         
-        //insert Nulls
-        Label labelNulls = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelNulls.setText(Labels.getString("AdvancedSettingsDialog.insertNulls")); //$NON-NLS-1$
-        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        labelNulls.setLayoutData(data);
-        buttonNulls = new Button(restComp, SWT.CHECK);
-        buttonNulls.setSelection(config.getBoolean(Config.INSERT_NULLS));
-
         //assignment rules
         Label labelRule = new Label(restComp, SWT.RIGHT | SWT.WRAP);
         labelRule.setText(Labels.getString("AdvancedSettingsDialog.assignmentRule")); //$NON-NLS-1$
@@ -625,15 +639,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         buttonEuroDates = new Button(restComp, SWT.CHECK);
         buttonEuroDates.setSelection(config.getBoolean(Config.EURO_DATES));
-
-        //Field truncation
-        Label labelTruncateFields = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelTruncateFields.setText(Labels.getString("AdvancedSettingsDialog.allowFieldTruncation"));
-        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        labelTruncateFields.setLayoutData(data);
-
-        buttonTruncateFields = new Button(restComp, SWT.CHECK);
-        buttonTruncateFields.setSelection(config.getBoolean(Config.TRUNCATE_FIELDS));
 
         //format phone fields on the client side
         Label labelFormatPhoneFields = new Label(restComp, SWT.RIGHT | SWT.WRAP);
