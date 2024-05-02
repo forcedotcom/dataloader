@@ -252,6 +252,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         Label labelSeparator = new Label(topComp, SWT.SEPARATOR | SWT.HORIZONTAL);
         data = new GridData(GridData.FILL_HORIZONTAL);
+      //  data.heightHint = 10;
+        labelSeparator.setBackground(getParent().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
         labelSeparator.setLayoutData(data);
 
         // END TOP COMPONENT
@@ -281,6 +283,18 @@ public class AdvancedSettingsDialog extends BaseDialog {
         buttonShowLoaderUpgradeScreen = new Button(restComp, SWT.CHECK);
         buttonShowLoaderUpgradeScreen.setSelection(config.getBoolean(Config.SHOW_LOADER_UPGRADE_SCREEN));
 
+        blank = new Label(restComp, SWT.NONE);
+        data = new GridData();
+        data.horizontalSpan = 2;
+        data.heightHint = 15;
+        blank.setLayoutData(data);
+
+        labelSeparator = new Label(restComp, SWT.SEPARATOR | SWT.HORIZONTAL);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        data.horizontalIndent = 100;
+        data.horizontalSpan = 2;
+        labelSeparator.setLayoutData(data);
+        
         Composite apiChoiceComposite = new Composite(restComp, SWT.None);
         layout = new GridLayout(3, true);
         layout.verticalSpacing = 10;
@@ -290,7 +304,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.horizontalAlignment = SWT.FILL;
         data.grabExcessHorizontalSpace = true;
         apiChoiceComposite.setLayoutData(data);
-        
+
         // Enable Bulk API Setting
         useBulkAPI = config.getBoolean(Config.BULK_API_ENABLED) && !config.getBoolean(Config.BULKV2_API_ENABLED);
         useBulkV2API = config.getBoolean(Config.BULK_API_ENABLED) && config.getBoolean(Config.BULKV2_API_ENABLED);
@@ -516,6 +530,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         initializeAllApiOptions();
         
+        labelSeparator = new Label(restComp, SWT.SEPARATOR | SWT.HORIZONTAL);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        data.horizontalIndent = 100;
+        data.horizontalSpan = 2;
+        labelSeparator.setLayoutData(data);
+
         blank = new Label(restComp, SWT.NONE);
         data = new GridData();
         data.horizontalSpan = 2;
