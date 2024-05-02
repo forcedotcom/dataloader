@@ -36,13 +36,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.events.ShellEvent;
 
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
@@ -147,7 +145,13 @@ public class LoaderWindow extends ApplicationWindow {
      * This runs the Loader Window
      */
     public void run() {
-
+        Config config = controller.getConfig();
+        if (!config.getBoolean(Config.HIDE_WELCOME_SCREEN)) {
+            displayTitleDialog(Display.getDefault(), this.operationActionsByIndex, this.controller.getConfig());
+        }
+        if (config.getBoolean(Config.SHOW_LOADER_UPGRADE_SCREEN)) {
+            displayUpgradeDialog(Display.getDefault());
+        }
         setBlockOnOpen(true);
         open();
 
@@ -198,24 +202,6 @@ public class LoaderWindow extends ApplicationWindow {
         getStatusLineManager().setMessage(Labels.getString("LoaderWindow.chooseAction"));        
         comp.pack();
         parent.pack();
-        addMenuBar();
-        parent.getShell().setFocus();
-        parent.getShell().setActive();
-        parent.getShell().addShellListener(new ShellAdapter() {
-            public void shellActivated(ShellEvent e) {
-                addMenuBar();
-                parent.getShell().setFocus();
-            }
-        });
-
-        Config config = controller.getConfig();
-        if (!config.getBoolean(Config.HIDE_WELCOME_SCREEN)) {
-            displayTitleDialog(Display.getDefault(), this.operationActionsByIndex, this.controller.getConfig());
-        }
-        if (config.getBoolean(Config.SHOW_LOADER_UPGRADE_SCREEN)) {
-            displayUpgradeDialog(Display.getDefault());
-        }
-        
         return parent;
     }
 
@@ -265,7 +251,6 @@ public class LoaderWindow extends ApplicationWindow {
         for (final OperationInfo info : OperationInfo.ALL_OPERATIONS_IN_ORDER) {
             createOperationButton(buttons, info);
         }
-        // buttons.pack();
     }
 
     private void createOperationButton(Composite parent, final OperationInfo info) {
@@ -295,7 +280,6 @@ public class LoaderWindow extends ApplicationWindow {
                 for (Entry<Integer, OperationUIAction> ent : map.entrySet()) {
                     if (result == ent.getKey()) ent.getValue().run();
                 }
-                addMenuBar();
             }
         });
     }
@@ -309,7 +293,6 @@ public class LoaderWindow extends ApplicationWindow {
             public void run() {
                 LoaderUpgradeDialog dlg = new LoaderUpgradeDialog(display.getActiveShell());
                 dlg.open();
-                addMenuBar();
             }
         });
     }
