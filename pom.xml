@@ -60,7 +60,7 @@
     <dependency>
       <groupId>com.force.api</groupId>
       <artifactId>force-partner-api</artifactId>
-      <version>61.0.0</version>
+      <version>61.1.0</version>
       <exclusions>
         <exclusion>
             <groupId>commons-logging</groupId>
