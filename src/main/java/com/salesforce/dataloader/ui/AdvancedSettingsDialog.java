@@ -92,7 +92,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Text textWizardHeight;
     private final String defaultServer;
 
-    private Button buttonHideWelcomeScreen;
+    private Button buttonShowWelcomeScreen;
     private Button buttonShowLoaderUpgradeScreen;
     private Button buttonOutputExtractStatus;
     private Button buttonSortExtractFields;
@@ -268,12 +268,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
         restComp.setLayout(layout);
 
         // Hide welcome screen
-        Label labelHideWelcomeScreen = new Label(restComp, SWT.RIGHT | SWT.WRAP);
-        labelHideWelcomeScreen.setText(Labels.getString("AdvancedSettingsDialog.hideWelcomeScreen")); //$NON-NLS-1$
-        labelHideWelcomeScreen.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+        Label labelShowWelcomeScreen = new Label(restComp, SWT.RIGHT | SWT.WRAP);
+        labelShowWelcomeScreen.setText(Labels.getString("AdvancedSettingsDialog.showWelcomeScreen")); //$NON-NLS-1$
+        labelShowWelcomeScreen.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 
-        buttonHideWelcomeScreen = new Button(restComp, SWT.CHECK);
-        buttonHideWelcomeScreen.setSelection(config.getBoolean(Config.HIDE_WELCOME_SCREEN));
+        buttonShowWelcomeScreen = new Button(restComp, SWT.CHECK);
+        buttonShowWelcomeScreen.setSelection(!config.getBoolean(Config.HIDE_WELCOME_SCREEN));
 
         // Hide welcome screen
         Label labelShowLoaderUpgradeScreen = new Label(restComp, SWT.RIGHT | SWT.WRAP);
@@ -1046,7 +1046,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
                 }
                 //set the configValues
-                config.setValue(Config.HIDE_WELCOME_SCREEN, buttonHideWelcomeScreen.getSelection());
+                config.setValue(Config.HIDE_WELCOME_SCREEN, !buttonShowWelcomeScreen.getSelection());
                 config.setValue(Config.SHOW_LOADER_UPGRADE_SCREEN, buttonShowLoaderUpgradeScreen.getSelection());
                 config.setValue(Config.INSERT_NULLS, buttonNulls.getSelection());
                 config.setValue(Config.IMPORT_BATCH_SIZE, textImportBatchSize.getText());
