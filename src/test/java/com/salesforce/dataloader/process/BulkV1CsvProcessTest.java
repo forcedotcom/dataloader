@@ -70,7 +70,7 @@ public class BulkV1CsvProcessTest extends ProcessTestBase {
     public void createArgMap() {
         argMap = getTestConfig(OperationInfo.insert, CSV_FILE_PATH, getTestDataDir() + File.separator + "NAProcessTest.sdl", false);
         argMap.put(Config.ENTITY, "Task");
-        argMap.remove(Config.EXTERNAL_ID_FIELD);
+        argMap.remove(Config.IDLOOKUP_FIELD);
         argMap.put(Config.BULK_API_ENABLED, Boolean.TRUE.toString());
     }
 

@@ -407,7 +407,7 @@ public class PartnerClientTest extends ProcessTestBase {
     }
 
     private void doUpsertAccount(boolean upsertFk) throws Exception {
-        String origExtIdField = getController().getConfig().getString(Config.EXTERNAL_ID_FIELD);
+        String origExtIdField = getController().getConfig().getString(Config.IDLOOKUP_FIELD);
 
         try {
             // make sure the external id is set
@@ -440,7 +440,7 @@ public class PartnerClientTest extends ProcessTestBase {
     }
 
     private void doUpsertContact(boolean upsertFk) throws Exception {
-        String origExtIdField = getController().getConfig().getString(Config.EXTERNAL_ID_FIELD);
+        String origExtIdField = getController().getConfig().getString(Config.IDLOOKUP_FIELD);
 
         try {
             // make sure the external id is set
@@ -457,7 +457,7 @@ public class PartnerClientTest extends ProcessTestBase {
             // Add upsert on FK -- reference to an account
             if (upsertFk) {
                 // remember original ext id field
-                String oldExtIdField = getController().getConfig().getString(Config.EXTERNAL_ID_FIELD);
+                String oldExtIdField = getController().getConfig().getString(Config.IDLOOKUP_FIELD);
 
                 String acctExtIdField = setExtIdField(DEFAULT_ACCOUNT_EXT_ID_FIELD);
                 Object accountExtIdValue = getRandomExtId("Account", ACCOUNT_WHERE_CLAUSE, null);

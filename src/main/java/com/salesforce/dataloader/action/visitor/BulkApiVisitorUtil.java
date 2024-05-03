@@ -160,7 +160,7 @@ class BulkApiVisitorUtil {
         final OperationEnum op = this.config.getOperationInfo().getBulkOperationEnum();
         job.setOperation(op);
         if (op == OperationEnum.upsert) {
-            job.setExternalIdFieldName(this.config.getString(Config.EXTERNAL_ID_FIELD));
+            job.setExternalIdFieldName(this.config.getString(Config.IDLOOKUP_FIELD));
         }
         job.setObject(this.config.getString(Config.ENTITY));
         job.setContentType(this.config.getBoolean(Config.BULK_API_ZIP_CONTENT) && op != OperationEnum.query ? ContentType.ZIP_CSV

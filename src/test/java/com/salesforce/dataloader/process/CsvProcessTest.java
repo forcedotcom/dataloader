@@ -157,7 +157,7 @@ public class CsvProcessTest extends ProcessTestBase {
         Object extIdValue = getRandomExtId("Contact", CONTACT_WHERE_CLAUSE, null);
         sforceMapping.put(extIdField, extIdValue);
 
-        String oldExtIdField = getController().getConfig().getString(Config.EXTERNAL_ID_FIELD);
+        String oldExtIdField = getController().getConfig().getString(Config.IDLOOKUP_FIELD);
         setExtIdField(extIdField);
         doUpsert("Contact", sforceMapping);
         setExtIdField(oldExtIdField);
