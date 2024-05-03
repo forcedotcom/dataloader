@@ -282,7 +282,7 @@ public class Config {
     public static final String ENTITY = "sfdc.entity"; //$NON-NLS-1$
     public static final String IMPORT_BATCH_SIZE = "sfdc.loadBatchSize"; //$NON-NLS-1$
     public static final String ASSIGNMENT_RULE = "sfdc.assignmentRule"; //$NON-NLS-1$
-    public static final String EXTERNAL_ID_FIELD = "sfdc.externalIdField"; //$NON-NLS-1$
+    public static final String IDLOOKUP_FIELD = "sfdc.externalIdField"; //$NON-NLS-1$
     public static final String EXPORT_BATCH_SIZE = "sfdc.extractionRequestSize"; //$NON-NLS-1$
     public static final String EXTRACT_SOQL = "sfdc.extractionSOQL"; //$NON-NLS-1$
     public static final String SORT_EXTRACT_FIELDS = "sfdc.sortExtractionFields"; //$NON-NLS-1$
@@ -447,7 +447,7 @@ public class Config {
             PROXY_PASSWORD,
             OAUTH_ACCESSTOKEN,
             OAUTH_REFRESHTOKEN,
-            EXTERNAL_ID_FIELD,
+            IDLOOKUP_FIELD,
             MAPPING_FILE,
             EXTRACT_SOQL,
             OUTPUT_SUCCESS,

@@ -43,7 +43,7 @@ public abstract class ConfigTestBase extends TestBase {
     protected static enum TestProperties {
         @Deprecated
         ENTITY_DEFAULT(Config.ENTITY), @Deprecated
-        ACCOUNT_EXTID(Config.EXTERNAL_ID_FIELD);
+        ACCOUNT_EXTID(Config.IDLOOKUP_FIELD);
 
         private final String configName;
 

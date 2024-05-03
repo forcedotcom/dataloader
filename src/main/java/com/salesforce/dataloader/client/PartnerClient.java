@@ -122,7 +122,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public UpsertResult[] run(SObject[] sObjects) throws ConnectionException {
-            return getConnection().upsert(config.getString(Config.EXTERNAL_ID_FIELD), sObjects);
+            return getConnection().upsert(config.getString(Config.IDLOOKUP_FIELD), sObjects);
         }
     };
 

@@ -591,7 +591,7 @@ public class MappingDialog extends WizardDialog {
         Field field;
         Config config = getController().getConfig();
         OperationInfo operation = config.getOperationInfo();
-        String extIdField = config.getString(Config.EXTERNAL_ID_FIELD);
+        String extIdField = config.getString(Config.IDLOOKUP_FIELD);
         if(extIdField == null) {
             extIdField = "";
         } else {

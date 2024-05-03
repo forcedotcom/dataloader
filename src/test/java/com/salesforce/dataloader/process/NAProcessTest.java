@@ -192,7 +192,7 @@ public class NAProcessTest extends ProcessTestBase {
     private Map<String, String> getArgMap(OperationInfo operation) {
         Map<String, String> argMap = getTestConfig(operation, CSV_FILE_PATH, getTestDataDir() + File.separator + "NAProcessTest.sdl", false);
         argMap.put(Config.ENTITY, "Task");
-        argMap.remove(Config.EXTERNAL_ID_FIELD);
+        argMap.remove(Config.IDLOOKUP_FIELD);
         return argMap;
     }
 

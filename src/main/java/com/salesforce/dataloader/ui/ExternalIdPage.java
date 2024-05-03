@@ -179,7 +179,7 @@ public class ExternalIdPage extends LoadPage {
 
         // external id field
         String extIdField = extIdFieldCombo.getText();
-        config.setValue(Config.EXTERNAL_ID_FIELD, extIdField);
+        config.setValue(Config.IDLOOKUP_FIELD, extIdField);
 
         controller.saveConfig();
     }

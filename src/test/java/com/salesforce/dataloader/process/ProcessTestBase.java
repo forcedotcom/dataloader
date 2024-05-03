@@ -336,7 +336,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         try {
             UpsertResult[] results = getBinding().upsert(
                     getController().getConfig().getString(
-                            Config.EXTERNAL_ID_FIELD), records);
+                            Config.IDLOOKUP_FIELD), records);
             String[] ids = new String[results.length];
             for (int i = 0; i < results.length; i++) {
                 UpsertResult result = results[i];
@@ -950,7 +950,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         final File mappingFile = new File(getTestDataDir(), fileNameBase + "Map.sdl");
         final Map<String, String> argMap = getTestConfig(isUpsert ? OperationInfo.upsert : OperationInfo.update,
                 updateFileName, mappingFile.getAbsolutePath(), false);
-        if (hasExtId) argMap.put(Config.EXTERNAL_ID_FIELD, extIdField);
+        if (hasExtId) argMap.put(Config.IDLOOKUP_FIELD, extIdField);
         return argMap;
     }
 
@@ -990,7 +990,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
      * Make sure to set external id field
      */
     protected String setExtIdField(String extIdField) {
-        getController().getConfig().setValue(Config.EXTERNAL_ID_FIELD, extIdField);
+        getController().getConfig().setValue(Config.IDLOOKUP_FIELD, extIdField);
         return extIdField;
     }
 
@@ -1012,7 +1012,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         upsertSfdcRecords(entity, 2);
 
         // get the client and make the query call
-        String extIdField = getController().getConfig().getString(Config.EXTERNAL_ID_FIELD);
+        String extIdField = getController().getConfig().getString(Config.IDLOOKUP_FIELD);
         PartnerClient client = new PartnerClient(getController());
         // only get the records that have external id set, avoid nulls
         String soql = "select " + extIdField + " from " + entity + " where " + whereClause + " and " + extIdField
