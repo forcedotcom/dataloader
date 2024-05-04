@@ -188,6 +188,16 @@ public class Controller {
     public static String getAPIVersion() {
         return ClientBase.getAPIVersionForTheSession();
     }
+    
+    public static int getAPIMajorVersion() {
+        String apiFullVersion = Controller.getAPIVersion();
+        int apiMajorVersion = 0;
+        if (apiFullVersion != null) {
+            String[] apiVersionParts = apiFullVersion.split("\\.");
+            apiMajorVersion = Integer.parseInt(apiVersionParts[0]);
+        }
+        return apiMajorVersion;
+    }
 
     public Map<String, DescribeGlobalSObjectResult> getEntityDescribes() {
         validateSession();

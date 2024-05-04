@@ -185,6 +185,10 @@ public abstract class LoadWizard extends BaseWizard {
         @Override
         protected void hook_additionalLoadWizardPages() {
             super.hook_additionalLoadWizardPages();
+            if (getController().getConfig().isRESTAPIEnabled()
+                && Controller.getAPIMajorVersion() >= 61) {
+                addPage(new ExternalIdPage(getController()));
+            }
             addPage(new ChooseLookupFieldForRelationshipPage(getController()));
         }
     }

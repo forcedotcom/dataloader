@@ -124,6 +124,14 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
             if (lookupFieldName == null || lookupFieldName.isBlank()) {
                 lookupFieldName = "id";
             }
+            if (!"id".equalsIgnoreCase(lookupFieldName) 
+                    && Controller.getAPIMajorVersion() < 61) {
+                String message = "update operation does not support referencing objects using a non-id field such as " 
+                        + lookupFieldName + " for API version 60 or lower. The current API version is " 
+                        + Controller.getAPIVersion();
+                logger.error(message);
+                throw new ConnectionException(message);
+            }
             HttpClientTransport transport = new HttpClientTransport(this.connectorConfig);
             try {
                 OutputStream out = transport.connect(
