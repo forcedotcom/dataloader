@@ -71,6 +71,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Text textUploadCSVDelimiterValue;
     private Text textQueryResultsDelimiterValue;
     private Button buttonNulls;
+    private Label labelNulls;
     private Text textRule;
     private Text textEndpoint;
     private Button buttonCompression;
@@ -103,6 +104,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonTruncateFields;
     private Button buttonFormatPhoneFields;
     private Button buttonKeepAccountTeam;
+    private Button buttonUpdateWithExternalId;
+    private Label  labelUpdateWithExternalId;
     private Button buttonCacheDescribeGlobalResults;
     private Button buttonIncludeRTFBinaryDataInQueryResults;
     private Button buttonUseSOAPApi;
@@ -157,8 +160,19 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private void setEnabled(Control ctrl, boolean enabled) {
         if (ctrl instanceof Composite) {
             Composite comp = (Composite) ctrl;
-            for (Control c : comp.getChildren())
-                setEnabled(c, enabled);
+            for (Control child : comp.getChildren()) {
+                if (enabled && comp == this.soapApiOptionsComposite) {
+                    setEnabled(child, !this.buttonUpdateWithExternalId.getSelection());
+                } else {
+                    setEnabled(child, enabled);
+                }
+            }
+            if (enabled && comp == this.soapApiOptionsComposite) {
+                setEnabled(buttonUpdateWithExternalId, true);
+                setEnabled(labelUpdateWithExternalId, true);
+                setEnabled(buttonNulls, true);
+                setEnabled(labelNulls, true);
+            }
         } else if (ctrl instanceof Label) {
             setEnabled((Label)ctrl, enabled);
         } else { // Button, Checkbox, Dropdown list etc
@@ -411,12 +425,30 @@ public class AdvancedSettingsDialog extends BaseDialog {
         buttonKeepAccountTeam.setLayoutData(data);
         buttonKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.keepAccountTeamHelp"));
         labelKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.keepAccountTeamHelp"));
-        if (useBulkAPI) {
-            buttonKeepAccountTeam.setSelection(false);
-        }
-        
+
+        // update using external id
+        labelUpdateWithExternalId = new Label(this.soapApiOptionsComposite, SWT.RIGHT | SWT.WRAP);
+        labelUpdateWithExternalId.setText(Labels.getString("AdvancedSettingsDialog.updateWithExternalId"));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        data.grabExcessHorizontalSpace = true;
+        labelUpdateWithExternalId.setLayoutData(data);
+
+        boolean updateWithExternalId = config.getBoolean(Config.UPDATE_WITH_EXTERNALID);
+        buttonUpdateWithExternalId = new Button(this.soapApiOptionsComposite, SWT.CHECK);
+        buttonUpdateWithExternalId.setSelection(updateWithExternalId);
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+        data.grabExcessHorizontalSpace = true;
+        buttonUpdateWithExternalId.setLayoutData(data);
+        buttonUpdateWithExternalId.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                super.widgetSelected(e);
+                setEnabled(soapApiOptionsComposite, true);
+           }
+        });
+
         //insert Nulls
-        Label labelNulls = new Label(this.soapApiOptionsComposite, SWT.RIGHT | SWT.WRAP);
+        labelNulls = new Label(this.soapApiOptionsComposite, SWT.RIGHT | SWT.WRAP);
         labelNulls.setText(Labels.getString("AdvancedSettingsDialog.insertNulls")); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         data.grabExcessHorizontalSpace = true;
@@ -1093,6 +1125,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.PROXY_USERNAME, textProxyUsername.getText());
                 config.setValue(Config.PROXY_NTLM_DOMAIN, textProxyNtlmDomain.getText());
                 config.setValue(Config.PROCESS_KEEP_ACCOUNT_TEAM, buttonKeepAccountTeam.getSelection());
+                config.setValue(Config.UPDATE_WITH_EXTERNALID, buttonUpdateWithExternalId.getSelection());
                 config.setValue(Config.CACHE_DESCRIBE_GLOBAL_RESULTS, buttonCacheDescribeGlobalResults.getSelection());
                 config.setValue(Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, buttonIncludeRTFBinaryDataInQueryResults.getSelection());
 
