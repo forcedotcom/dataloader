@@ -199,7 +199,15 @@ public class DataSelectionPage extends LoadPage {
                                             csvChooser.getStringValue(),
                                             selectedEntity.getName());
         if (dlg.open()) {
-            return super.getNextPage();
+            LoadPage nextPage = super.getNextPage();
+            LoadPage nextNextPage = nextPage.getNextPage();
+            if (Controller.getAPIMajorVersion() < 61) {
+                if (nextPage instanceof ExternalIdPage) {
+                    nextPage.dispose();
+                    nextPage = nextNextPage;
+                }
+            }
+            return nextPage;
         } else {
             return this;
         }
