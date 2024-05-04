@@ -28,6 +28,7 @@ package com.salesforce.dataloader.action;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
+import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObject;
@@ -41,9 +42,14 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.mapping.LoadMapper;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.DAORowUtil;
+import com.sforce.soap.partner.DescribeGlobalSObjectResult;
+import com.sforce.soap.partner.DescribeSObjectResult;
+import com.sforce.soap.partner.Field;
+import com.sforce.soap.partner.FieldType;
 import com.sforce.ws.ConnectionException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Lexi Viripaeff

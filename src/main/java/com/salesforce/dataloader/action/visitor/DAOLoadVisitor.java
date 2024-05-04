@@ -42,6 +42,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
+import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.client.SessionInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.LastRun;
@@ -143,6 +144,45 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         }
         // the result are sforce fields mapped to data
         Row sforceDataRow = getMapper().mapData(row);
+        
+        if (this.getConfig().getBoolean(Config.TRUNCATE_FIELDS)
+            && this.getConfig().isRESTAPIEnabled()
+            && "update".equalsIgnoreCase(this.getConfig().getString(Config.OPERATION))) {
+            PartnerClient partnerClient = this.getController().getPartnerClient();
+            DescribeSObjectResult entityDescribe = partnerClient.describeSObject(
+                                this.getConfig().getString(Config.ENTITY));
+            for (Map.Entry<String, Object> field : sforceDataRow.entrySet()) {
+                Field[] fieldDescribeArray = entityDescribe.getFields();
+                for (Field fieldDescribe : fieldDescribeArray) {
+                    // Field truncation is applicable to certain field types only.
+                    // See https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/sforce_api_header_allowfieldtruncation.htm
+                    // for the list of field types that field truncation is applicable to.
+                    FieldType type = fieldDescribe.getType();
+                    if (fieldDescribe.getName().equalsIgnoreCase(field.getKey())
+                            && (type == FieldType.email
+                               || type == FieldType.string
+                               || type == FieldType.picklist
+                               || type == FieldType.phone
+                               || type == FieldType.textarea
+                               || type == FieldType.multipicklist)
+                        ) {
+                        int fieldLength = fieldDescribe.getLength();
+                        if (field.getValue().toString().length() > fieldLength) {
+                            if (type == FieldType.email) {
+                                String[] emailParts = field.getValue().toString().split("@");
+                                if (emailParts.length == 2) {
+                                    String firstPart = emailParts[0].substring(0,
+                                            fieldLength - emailParts[1].length() - 1);
+                                    field.setValue(firstPart + "@" + emailParts[1]);
+                                    continue;
+                                }
+                            }
+                            field.setValue(field.getValue().toString().substring(0, fieldLength));
+                        }
+                    }
+                }
+            }
+        }
         
         // Make sure to initialize dynaClass only after mapping a row.
         // This is to make sure that all polymorphic field mappings specified

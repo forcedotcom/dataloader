@@ -102,6 +102,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonWriteUtf8;
     private Button buttonEuroDates;
     private Button buttonTruncateFields;
+    private Label  labelTruncateFields;
     private Button buttonFormatPhoneFields;
     private Button buttonKeepAccountTeam;
     private Button buttonUpdateWithExternalId;
@@ -172,6 +173,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 setEnabled(labelUpdateWithExternalId, true);
                 setEnabled(buttonNulls, true);
                 setEnabled(labelNulls, true);
+                setEnabled(buttonTruncateFields, true);
+                setEnabled(labelTruncateFields, true);
             }
         } else if (ctrl instanceof Label) {
             setEnabled((Label)ctrl, enabled);
@@ -457,7 +460,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         buttonNulls.setSelection(config.getBoolean(Config.INSERT_NULLS));
 
         //Field truncation
-        Label labelTruncateFields = new Label(this.soapApiOptionsComposite, SWT.RIGHT | SWT.WRAP);
+        labelTruncateFields = new Label(this.soapApiOptionsComposite, SWT.RIGHT | SWT.WRAP);
         labelTruncateFields.setText(Labels.getString("AdvancedSettingsDialog.allowFieldTruncation"));
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         data.grabExcessHorizontalSpace = true;
