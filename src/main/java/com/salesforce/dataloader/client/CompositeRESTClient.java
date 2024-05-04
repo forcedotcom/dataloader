@@ -120,10 +120,17 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
             headers.put("Content-Type", "application/JSON");
             headers.put("ACCEPT", "application/JSON");
             headers.put("Authorization", "Bearer " + this.getSessionId());
+            String lookupFieldName = Config.getCurrentConfig().getString(Config.IDLOOKUP_FIELD);
+            if (lookupFieldName == null || lookupFieldName.isBlank()) {
+                lookupFieldName = "id";
+            }
             HttpClientTransport transport = new HttpClientTransport(this.connectorConfig);
             try {
                 OutputStream out = transport.connect(
-                        this.getConnectorConfig().getRestEndpoint() + config.getString(Config.ENTITY) + "/id/" ,
+                        this.getConnectorConfig().getRestEndpoint() 
+                            + config.getString(Config.ENTITY) 
+                            + "/" + lookupFieldName + "/"
+                            + "?updateOnly=true",
                         headers,
                         true,
                         HttpTransportInterface.SupportedHttpMethodType.PATCH);
