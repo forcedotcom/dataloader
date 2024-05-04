@@ -252,7 +252,19 @@ public class SforceDynaBean {
      * @param sObj
      * @param dynaBean
      */
-    static public void insertNullArray(Controller controller, SObject sObj, DynaBean dynaBean) {
+    static public void insertNullArrayForSOAP(Controller controller, SObject sObj, DynaBean dynaBean) {
+        final List<String> fieldsToNull = getFieldsToNull(controller, dynaBean);
+        if (fieldsToNull.size() > 0) sObj.setFieldsToNull(fieldsToNull.toArray(new String[fieldsToNull.size()]));
+    }
+    
+    static public void insertNullArrayForREST(Controller controller, Map<String, Object> sObj, DynaBean dynaBean) {
+        final List<String> fieldsToNull = getFieldsToNull(controller, dynaBean);
+        for (String field : fieldsToNull) {
+            sObj.put(field, null);
+        }
+    }
+    
+    static public List<String> getFieldsToNull(Controller controller, DynaBean dynaBean) {
         final List<String> fieldsToNull = new LinkedList<String>();
         for (String sfdcField : controller.getMapper().getDestColumns()) {
             handleNull(sfdcField, dynaBean, fieldsToNull, controller);
@@ -260,9 +272,9 @@ public class SforceDynaBean {
         for (Map.Entry<String, String> constantEntry : controller.getMapper().getConstantsMap().entrySet()) {
             handleNull(constantEntry.getKey(), dynaBean, fieldsToNull, controller);
         }
-        if (fieldsToNull.size() > 0) sObj.setFieldsToNull(fieldsToNull.toArray(new String[fieldsToNull.size()]));
+        return fieldsToNull;
     }
-
+    
     private static void handleNull(final String fieldName, final DynaBean dynaBean, final List<String> fieldsToNull,
             final Controller controller) {
         final Object o = dynaBean.get(fieldName);
@@ -285,11 +297,11 @@ public class SforceDynaBean {
         for (int j = 0; j < sObjects.length; j++) {
             DynaBean dynaBean = dynaBeans.get(j);
 
-            SObject sObj = getSObject(controller, entityName, dynaBean);
+            SObject sObj = getSOAPSObject(controller, entityName, dynaBean);
 
             // if we are inserting nulls, build the null array
             if (insertNulls) {
-                insertNullArray(controller, sObj, dynaBean);
+                insertNullArrayForSOAP(controller, sObj, dynaBean);
             }
 
             sObjects[j] = sObj;
@@ -306,11 +318,9 @@ public class SforceDynaBean {
             Map<String, Object> sObj = getCompositeRESTSObject(controller, entityName, dynaBean);
 
             // if we are inserting nulls, build the null array
-            /* TODO
             if (insertNulls) {
-                insertNullArray(controller, sObj, dynaBean);
+                insertNullArrayForREST(controller, sObj, dynaBean);
             }
-            */
 
             restSObjects.add(sObj);
         }
@@ -326,7 +336,7 @@ public class SforceDynaBean {
      * @throws NoSuchMethodException
      * @throws ParameterLoadException
      */
-    public static SObject getSObject(Controller controller, String entityName, DynaBean dynaBean) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, ParameterLoadException {
+    public static SObject getSOAPSObject(Controller controller, String entityName, DynaBean dynaBean) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, ParameterLoadException {
         SObject sObj = new SObject();
         sObj.setType(entityName);
         Map<String, String> fieldMap = BeanUtils.describe(dynaBean);
