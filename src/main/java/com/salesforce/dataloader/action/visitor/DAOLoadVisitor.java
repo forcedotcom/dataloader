@@ -88,6 +88,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     // - https://www.geeksforgeeks.org/how-to-validate-html-tag-using-regular-expression/#
     public static final String DEFAULT_RICHTEXT_REGEX = "<(?=[a-zA-Z/])(\"[^\"]*\"|'[^']*'|[^'\">])*>";
     private String richTextRegex = DEFAULT_RICHTEXT_REGEX;
+    private Field[] cachedFieldAttributesForOperation = null;
     
     protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
@@ -149,11 +150,12 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             && this.getConfig().isRESTAPIEnabled()
             && "update".equalsIgnoreCase(this.getConfig().getString(Config.OPERATION))) {
             PartnerClient partnerClient = this.getController().getPartnerClient();
-            DescribeSObjectResult entityDescribe = partnerClient.describeSObject(
-                                this.getConfig().getString(Config.ENTITY));
+            if (cachedFieldAttributesForOperation == null) {
+                cachedFieldAttributesForOperation = partnerClient.getSObjectFieldAttributesForRow(
+                                this.getConfig().getString(Config.ENTITY), sforceDataRow);
+            }
             for (Map.Entry<String, Object> field : sforceDataRow.entrySet()) {
-                Field[] fieldDescribeArray = entityDescribe.getFields();
-                for (Field fieldDescribe : fieldDescribeArray) {
+                for (Field fieldDescribe : cachedFieldAttributesForOperation) {
                     // Field truncation is applicable to certain field types only.
                     // See https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/sforce_api_header_allowfieldtruncation.htm
                     // for the list of field types that field truncation is applicable to.
@@ -252,6 +254,8 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         if (dynaArray.size() > 0) {
             loadBatch();
         }
+        // clear the caches
+        cachedFieldAttributesForOperation = null;
     }
 
     protected abstract void loadBatch() throws DataAccessObjectException, OperationException;
