@@ -41,6 +41,7 @@ import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
 import com.salesforce.dataloader.exception.RelationshipFormatException;
+import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.DeleteResult;
@@ -73,6 +74,7 @@ import org.apache.logging.log4j.LogManager;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -868,6 +870,20 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             }
         }
         return result;
+    }
+    
+    public Field[] getSObjectFieldAttributesForRow(String sObjectName, Row dataRow) throws ConnectionException {
+        ArrayList<Field> attributesForRow = new ArrayList<Field>();
+        DescribeSObjectResult entityDescribe = describeSObject(sObjectName);
+        for (Map.Entry<String, Object> dataRowField : dataRow.entrySet()) {
+            Field[] fieldAttributesArray = entityDescribe.getFields();
+            for (Field fieldAttributes : fieldAttributesArray) {
+                if (fieldAttributes.getName().equalsIgnoreCase(dataRowField.getKey())) {
+                    attributesForRow.add(fieldAttributes);
+                }
+            }
+        }
+        return attributesForRow.toArray(new Field[1]);
     }
 
     /**
