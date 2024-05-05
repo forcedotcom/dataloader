@@ -469,6 +469,40 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         buttonTruncateFields = new Button(this.soapApiOptionsComposite, SWT.CHECK);
         buttonTruncateFields.setSelection(config.getBoolean(Config.TRUNCATE_FIELDS));
+        
+        //insert compression
+        Text labelCompression = new Text(soapApiOptionsComposite, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
+        labelCompression.setText(Labels.getString("AdvancedSettingsDialog.compression")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelCompression.setLayoutData(data);
+        buttonCompression = new Button(soapApiOptionsComposite, SWT.CHECK);
+        buttonCompression.setSelection(config.getBoolean(Config.NO_COMPRESSION));
+        buttonCompression.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipCompression"));
+        labelCompression.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipCompression"));
+
+        //timeout size
+        Text labelTimeout = new Text(soapApiOptionsComposite, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
+        labelTimeout.setText(Labels.getString("AdvancedSettingsDialog.timeout")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelTimeout.setLayoutData(data);
+
+        textTimeout = new Text(soapApiOptionsComposite, SWT.BORDER);
+        textTimeout.setText(config.getString(Config.TIMEOUT_SECS));
+        textTimeout.addVerifyListener(new VerifyListener() {
+            @Override
+            public void verifyText(VerifyEvent event) {
+                event.doit = Character.isISOControl(event.character) || Character.isDigit(event.character);
+            }
+        });
+        data = new GridData();
+        textTimeout.setTextLimit(4);
+        GC gc = new GC(textTimeout);
+        Point textSize = gc.textExtent("8");
+        gc.dispose();
+        data.widthHint = 4 * textSize.x;
+        textTimeout.setLayoutData(data);
+        textTimeout.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipTimeout"));
+        labelTimeout.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipTimeout"));
 
         // Bulk API serial concurrency mode setting
         this.bulkApiOptionsComposite = new Composite(restComp, SWT.None);
@@ -529,9 +563,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
             }
         });
         data = new GridData();
-        GC gc = new GC(textImportBatchSize);
-        Point textSize = gc.textExtent("8");
-        gc.dispose();
         textImportBatchSize.setTextLimit(8);
         data.widthHint = 8 * textSize.x;
         textImportBatchSize.setLayoutData(data);
@@ -616,35 +647,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
         labelResetUrl.setLayoutData(data);
         buttonResetUrl = new Button(restComp, SWT.CHECK);
         buttonResetUrl.setSelection(config.getBoolean(Config.RESET_URL_ON_LOGIN));
-
-        //insert compression
-        Text labelCompression = new Text(restComp, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
-        labelCompression.setText(Labels.getString("AdvancedSettingsDialog.compression")); //$NON-NLS-1$
-        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        labelCompression.setLayoutData(data);
-        buttonCompression = new Button(restComp, SWT.CHECK);
-        buttonCompression.setSelection(config.getBoolean(Config.NO_COMPRESSION));
-
-        //timeout size
-        Text labelTimeout = new Text(restComp, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
-        labelTimeout.setText(Labels.getString("AdvancedSettingsDialog.timeout")); //$NON-NLS-1$
-        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        labelTimeout.setLayoutData(data);
-
-        textTimeout = new Text(restComp, SWT.BORDER);
-        textTimeout.setText(config.getString(Config.TIMEOUT_SECS));
-        textTimeout.addVerifyListener(new VerifyListener() {
-            @Override
-            public void verifyText(VerifyEvent event) {
-                event.doit = Character.isISOControl(event.character) || Character.isDigit(event.character);
-            }
-        });
-        data = new GridData();
-        textTimeout.setTextLimit(4);
-        data.widthHint = 4 * textSize.x;
-        textTimeout.setLayoutData(data);
-        textTimeout.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipTimeout"));
-        labelTimeout.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipTimeout"));
 
         // enable/disable sort of fields to extract
         Text labelSortExtractFields = new Text(restComp, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
