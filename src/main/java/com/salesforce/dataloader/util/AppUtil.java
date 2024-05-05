@@ -296,16 +296,21 @@ public class AppUtil {
     private static synchronized void setConfigurationsDir(Map<String, String> argsMap) {
         if (argsMap != null && argsMap.containsKey(CLI_OPTION_CONFIG_DIR_PROP)) {
             configurationsDir = argsMap.get(CLI_OPTION_CONFIG_DIR_PROP);
-        } else {
-            if (configurationsDir == null) {
-                // first time invocation and configurationsDir is not set through argsMap
-                configurationsDir = System.getProperty(CLI_OPTION_CONFIG_DIR_PROP);
-            }
-            if (configurationsDir != null && !configurationsDir.isEmpty()) {
+        } else if (configurationsDir != null && !configurationsDir.isEmpty()) {
                 return;
+        } else {
+            // first time invocation and configurationsDir is not set through argsMap
+            configurationsDir = System.getProperty(CLI_OPTION_CONFIG_DIR_PROP);
+            if (configurationsDir == null || configurationsDir.isBlank()) {
+                configurationsDir = getDefaultConfigDir();
             }
-            // first time invocation, configurationsDir is not set through argsMap or through system property
-            configurationsDir = getDefaultConfigDir();
+        }
+        File configDirFile = new File(configurationsDir);
+        try {
+            configurationsDir = configDirFile.getCanonicalPath();
+        } catch (IOException e) {
+            logger.error("Unable to get canonical path for configuration folder " + configurationsDir);
+            configurationsDir = configDirFile.getAbsolutePath();
         }
         System.setProperty(CLI_OPTION_CONFIG_DIR_PROP, configurationsDir);
     }
