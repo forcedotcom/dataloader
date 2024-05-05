@@ -252,20 +252,21 @@ public class AdvancedSettingsDialog extends BaseDialog {
         blank.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 
         // Show the message
-        Label label = new Label(topComp, SWT.NONE);
-        label.setText(getMessage());
+        Text dialogMessage = new Text(topComp, SWT.NONE | SWT.READ_ONLY);
+        dialogMessage.setText(getMessage());
+        dialogMessage.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipMessage"));
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.heightHint = 30;
         data.widthHint = 370;
 
-        Font f = label.getFont();
+        Font f = dialogMessage.getFont();
         FontData[] farr = f.getFontData();
         FontData fd = farr[0];
         fd.setStyle(SWT.BOLD);
-        label.setFont(new Font(Display.getCurrent(), fd));
+        dialogMessage.setFont(new Font(Display.getCurrent(), fd));
 
-        label.setLayoutData(data);
-        label.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+        dialogMessage.setLayoutData(data);
+        dialogMessage.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 
         Label labelSeparator = new Label(topComp, SWT.SEPARATOR | SWT.HORIZONTAL);
         data = new GridData(GridData.FILL_HORIZONTAL);
@@ -642,6 +643,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
         textTimeout.setTextLimit(4);
         data.widthHint = 4 * textSize.x;
         textTimeout.setLayoutData(data);
+        textTimeout.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipTimeout"));
+        labelTimeout.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipTimeout"));
 
         // enable/disable sort of fields to extract
         Text labelSortExtractFields = new Text(restComp, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
@@ -992,7 +995,15 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data = new GridData();
         data.horizontalSpan = 2;
         blankAgain.setLayoutData(data);
-        
+
+        Text labelConfigDir = new Text(restComp, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
+        labelConfigDir.setText(Labels.getString("AdvancedSettingsDialog.configDir")); //$NON-NLS-1$
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        labelConfigDir.setLayoutData(data);
+        Text textConfigDirLocation = new Text(restComp, SWT.LEFT);
+        textConfigDirLocation.setText(AppUtil.getConfigurationsDir()); //$NON-NLS-1$
+        textConfigDirLocation.setEditable(false);
+
         Text labelLoggingConfigFile = new Text(restComp, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
         labelLoggingConfigFile.setText(Labels.getString("AdvancedSettingsDialog.loggingConfigFile")); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
@@ -1027,14 +1038,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
         if (log4j2ConfFile == null || !log4j2ConfFile.endsWith(".properties")) {
             comboLoggingLevelDropdown.setEnabled(false); // Can't modify current setting
         }
-
-        Text labelConfigDir = new Text(restComp, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
-        labelConfigDir.setText(Labels.getString("AdvancedSettingsDialog.configDir")); //$NON-NLS-1$
-        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        labelConfigDir.setLayoutData(data);
-        Text textConfigDirLocation = new Text(restComp, SWT.LEFT);
-        textConfigDirLocation.setText(AppUtil.getConfigurationsDir()); //$NON-NLS-1$
-        textConfigDirLocation.setEditable(false);
 
         Text labelLoggingFile = new Text(restComp, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
         labelLoggingFile.setText(Labels.getString("AdvancedSettingsDialog.latestLoggingFile")); //$NON-NLS-1$
@@ -1236,7 +1239,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     }
 
     private Text createTimezoneTextInput(Composite parent, String labelKey, String configKey, String defaultValue, int widthHint) {
-        createLabel(parent, labelKey);
+        createLabel(parent, labelKey, null);
         
         Composite timezoneComp = new Composite(parent, SWT.RIGHT);
         GridData data = new GridData(GridData.FILL_BOTH);
@@ -1265,9 +1268,13 @@ public class AdvancedSettingsDialog extends BaseDialog {
     }
 
 
-    private void createLabel(Composite parent, String labelKey) {
-        Label l = new Label(parent, SWT.RIGHT | SWT.WRAP);
+    private Text createLabel(Composite parent, String labelKey, String tooltip) {
+        Text l = new Text(parent, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
         l.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         l.setText(Labels.getString(labelKey));
+        if (tooltip != null) {
+            l.setToolTipText(tooltip);
+        }
+        return l;
     }
 }
