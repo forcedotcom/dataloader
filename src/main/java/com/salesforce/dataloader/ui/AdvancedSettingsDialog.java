@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -250,13 +251,10 @@ public class AdvancedSettingsDialog extends BaseDialog {
         blank.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 
         // Show the message
-        Text dialogMessage = new Text(topComp, SWT.NONE | SWT.READ_ONLY);
-        dialogMessage.setText(getMessage());
-        dialogMessage.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipMessage"));
+        Link dialogMessage = createLink(topComp, "message", null);
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.heightHint = 30;
         data.widthHint = 370;
-
         Font f = dialogMessage.getFont();
         FontData[] farr = f.getFontData();
         FontData fd = farr[0];
@@ -268,7 +266,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         Label labelSeparator = new Label(topComp, SWT.SEPARATOR | SWT.HORIZONTAL);
         data = new GridData(GridData.FILL_HORIZONTAL);
-      //  data.heightHint = 10;
         labelSeparator.setBackground(getParent().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
         labelSeparator.setLayoutData(data);
 
@@ -557,7 +554,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         blank.setLayoutData(data);
         
         //assignment rules
-        createLabel(restComp, "assignmentRule", "TooltipAssignmentRule");
+        createLink(restComp, "assignmentRule", null);
         textRule = new Text(restComp, SWT.BORDER);
         data = new GridData();
         textRule.setTextLimit(18);
@@ -1115,6 +1112,24 @@ public class AdvancedSettingsDialog extends BaseDialog {
         if (tooltipKey != null) {
             l.setToolTipText(Labels.getString(AdvancedSettingsDialog.class.getSimpleName() + "." + tooltipKey));
         }
+        return l;
+    }
+    
+    private Link createLink(Composite parent, String labelKey, String tooltipKey) {
+        Link l = new Link(parent, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
+        GridData data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        data.grabExcessHorizontalSpace = true;
+        l.setLayoutData(data);
+        l.setText(Labels.getString(AdvancedSettingsDialog.class.getSimpleName() + "." + labelKey));
+        if (tooltipKey != null) {
+            l.setToolTipText(Labels.getString(AdvancedSettingsDialog.class.getSimpleName() + "." + tooltipKey));
+        }
+        l.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                URLUtil.openURL(e.text);
+            }
+        });
         return l;
     }
 }
