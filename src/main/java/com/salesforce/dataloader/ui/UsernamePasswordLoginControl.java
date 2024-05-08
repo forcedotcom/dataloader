@@ -82,7 +82,7 @@ public class UsernamePasswordLoginControl extends Composite {
             }
         });
 
-        Label pwdOrSessionIdLabel = new Label(this, SWT.RIGHT | SWT.WRAP);
+        Text pwdOrSessionIdLabel = new Text(this, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         pwdOrSessionIdLabel.setLayoutData(data);
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
@@ -94,8 +94,10 @@ public class UsernamePasswordLoginControl extends Composite {
             password = null;
         } else {
             pwdOrSessionIdLabel.setText(Labels.getString("LoginPage.password"));
+            pwdOrSessionIdLabel.setToolTipText(Labels.getString("LoginPage.TooltipPassword"));
             password = new Text(this, SWT.PASSWORD | SWT.LEFT | SWT.BORDER);
             password.setText("");
+            password.setToolTipText(Labels.getString("LoginPage.TooltipPassword"));
             password.setLayoutData(data);
             password.addKeyListener(new KeyListener() {
                 @Override
