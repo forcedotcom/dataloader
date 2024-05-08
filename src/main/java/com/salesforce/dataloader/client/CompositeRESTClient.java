@@ -101,9 +101,7 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
     @SuppressWarnings("unchecked")
     public SaveResult[] loadUpdates(List<DynaBean> dynabeans) throws ConnectionException {
         logger.debug(Messages.getFormattedString("Client.beginOperation", "update")); //$NON-NLS-1$
-        int totalAttempts = 1 + (isRetriesEnabled() ? getMaxRetries() : 0);
         ConnectionException connectionException = null;
-        for (int tryNum = 0; tryNum < totalAttempts; tryNum++) {
         try {
             Map<String, Object> batchRecords = this.getSobjectMapForCompositeREST(dynabeans, "update");
             String json = "";
@@ -213,52 +211,9 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
                                 "Client.operationError", new String[]{"update", faultMessage}), fault); //$NON-NLS-1$
 
             }
-            // check retries
-            if (!checkConnectionException(ex, "update", tryNum)) throw ex;
             connectionException = ex;
         }
-    }
-    throw connectionException;
-    }
-    
-    /**
-     * Checks whether retry makes sense for the given exception and given the number of current vs. max retries. If
-     * retry makes sense, then before returning, this method will put current thread to sleep before allowing another
-     * retry.
-     *
-     * @param ex
-     * @param operationName
-     * @return true if retry should be executed for operation. false if there's no retry.
-     */
-    private boolean checkConnectionException(ConnectionException ex, String operationName, int retryNum) {
-        if (!isRetriesEnabled()) return false;
-        final String msg = ex.getMessage();
-        if (msg != null && msg.toLowerCase().indexOf("connection reset") >= 0) {
-            retrySleep("update", retryNum);
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * @param operationName
-     */
-    private void retrySleep(String operationName, int retryNum) {
-        int sleepSecs;
-        try {
-            sleepSecs = config.getInt(Config.MIN_RETRY_SLEEP_SECS);
-        } catch (ParameterLoadException e1) {
-            sleepSecs = Config.DEFAULT_MIN_RETRY_SECS;
-        }
-        // sleep between retries is based on the retry attempt #. Sleep for longer periods with each retry
-        sleepSecs = sleepSecs + (retryNum * 10); // sleep for MIN_RETRY_SLEEP_SECS + 10, 20, 30, etc.
-
-        logger.info(Messages.getFormattedString("Client.retryOperation", new String[]{Integer.toString(retryNum + 1),
-                operationName, Integer.toString(sleepSecs)}));
-        try {
-            Thread.sleep(sleepSecs * 1000);
-        } catch (InterruptedException e) { // ignore
-        }
+        throw connectionException;
     }
     
     private Map<String, Object> getSobjectMapForCompositeREST(List<DynaBean> dynaBeans, String opName) {

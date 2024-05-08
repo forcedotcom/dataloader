@@ -135,7 +135,7 @@ public class Controller {
         }
         HttpClientTransport.setReuseConnection(config.getBoolean(Config.REUSE_CLIENT_CONNECTION));
     }
-
+    
     public synchronized void executeAction(ILoaderProgress monitor) throws DataAccessObjectException, OperationException {
         OperationInfo operation = this.config.getOperationInfo();
         IAction action = operation.instantiateAction(this, monitor);

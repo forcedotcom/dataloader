@@ -354,31 +354,27 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         if (op != this.LOGIN_OPERATION && !isSessionValid()) {
             connect();
         }
-        int totalAttempts = 1 + (isRetriesEnabled() ? getMaxRetries() : 0);
         ConnectionException connectionException = null;
-        for (int tryNum = 0; tryNum < totalAttempts; tryNum++) {
-            try {
-                R result = op.run(arg);
-                if (result == null)
-                    logger.info(Messages.getString("Client.resultNull")); //$NON-NLS-1$
-                this.getSession().performedSessionActivity(); // reset session activity timer
-                return result;
-            } catch (ConnectionException ex) {
+        try {
+            R result = op.run(arg);
+            if (result == null)
+                logger.info(Messages.getString("Client.resultNull")); //$NON-NLS-1$
+            this.getSession().performedSessionActivity(); // reset session activity timer
+            return result;
+        } catch (ConnectionException ex) {
+            logger.error(
+                    Messages.getFormattedString(
+                            "Client.operationError", new String[]{op.getName(), ex.getMessage()}), ex); //$NON-NLS-1$
+            if (ex instanceof ApiFault) {
+                ApiFault fault = (ApiFault)ex;
+                String faultMessage = fault.getExceptionMessage();
                 logger.error(
                         Messages.getFormattedString(
-                                "Client.operationError", new String[]{op.getName(), ex.getMessage()}), ex); //$NON-NLS-1$
-                if (ex instanceof ApiFault) {
-                    ApiFault fault = (ApiFault)ex;
-                    String faultMessage = fault.getExceptionMessage();
-                    logger.error(
-                            Messages.getFormattedString(
-                                    "Client.operationError", new String[]{op.getName(), faultMessage}), fault); //$NON-NLS-1$
+                                "Client.operationError", new String[]{op.getName(), faultMessage}), fault); //$NON-NLS-1$
 
-                }
-                // check retries
-                if (!checkConnectionException(ex, op.getName(), tryNum)) throw ex;
-                connectionException = ex;
             }
+            // check retries
+            connectionException = ex;
         }
         throw connectionException;
     }
@@ -724,27 +720,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     /**
-     * @param operationName
-     */
-    private void retrySleep(String operationName, int retryNum) {
-        int sleepSecs;
-        try {
-            sleepSecs = config.getInt(Config.MIN_RETRY_SLEEP_SECS);
-        } catch (ParameterLoadException e1) {
-            sleepSecs = Config.DEFAULT_MIN_RETRY_SECS;
-        }
-        // sleep between retries is based on the retry attempt #. Sleep for longer periods with each retry
-        sleepSecs = sleepSecs + (retryNum * 10); // sleep for MIN_RETRY_SLEEP_SECS + 10, 20, 30, etc.
-
-        logger.info(Messages.getFormattedString("Client.retryOperation", new String[]{Integer.toString(retryNum + 1),
-                operationName, Integer.toString(sleepSecs)}));
-        try {
-            Thread.sleep(sleepSecs * 1000);
-        } catch (InterruptedException e) { // ignore
-        }
-    }
-
-    /**
      * Set the map of references to object external id info for current entity
      *
      * @throws ConnectionException
@@ -884,25 +859,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             }
         }
         return attributesForRow.toArray(new Field[1]);
-    }
-
-    /**
-     * Checks whether retry makes sense for the given exception and given the number of current vs. max retries. If
-     * retry makes sense, then before returning, this method will put current thread to sleep before allowing another
-     * retry.
-     *
-     * @param ex
-     * @param operationName
-     * @return true if retry should be executed for operation. false if there's no retry.
-     */
-    private boolean checkConnectionException(ConnectionException ex, String operationName, int retryNum) {
-        if (!isRetriesEnabled()) return false;
-        final String msg = ex.getMessage();
-        if (msg != null && msg.toLowerCase().indexOf("connection reset") >= 0) {
-            retrySleep(operationName, retryNum);
-            return true;
-        }
-        return false;
     }
 
     private final Map<String, Field> fieldsByName = new HashMap<String, Field>();

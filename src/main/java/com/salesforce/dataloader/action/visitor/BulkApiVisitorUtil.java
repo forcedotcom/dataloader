@@ -42,6 +42,7 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ExtractException;
+import com.salesforce.dataloader.exception.ExtractExceptionOnServer;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.util.LoadRateCalculator;
 import com.sforce.async.AsyncApiException;
@@ -382,7 +383,7 @@ class BulkApiVisitorUtil {
             final BatchInfo[] batchInfoArray = getBatches().getBatchInfo();
             for (BatchInfo batchInfo : batchInfoArray) {
                 if (batchInfo.getState() == BatchStateEnum.Failed) {
-                    throw new ExtractException("Batch failed: " + batchInfo.getStateMessage());
+                    throw new ExtractExceptionOnServer("Batch failed: " + batchInfo.getStateMessage());
                 }
             }
         }

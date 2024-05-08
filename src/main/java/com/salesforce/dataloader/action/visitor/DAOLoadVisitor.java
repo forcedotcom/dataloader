@@ -278,7 +278,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
                 msg = ((ApiFault)t).getExceptionMessage();
             }
         }
-        throw new LoadException(msg, t);
+        throw new LoadExceptionOnServer(msg, t);
     }
 
     protected void handleException(Throwable t) throws LoadException {

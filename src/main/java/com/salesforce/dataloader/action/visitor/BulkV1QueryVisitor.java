@@ -39,6 +39,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ExtractException;
+import com.salesforce.dataloader.exception.ExtractExceptionOnServer;
 import com.salesforce.dataloader.exception.OperationException;
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.BatchInfo;
@@ -85,7 +86,7 @@ public class BulkV1QueryVisitor extends AbstractBulkQueryVisitor {
     }
     private void writeExtractionForBatch(BatchInfo batch) throws AsyncApiException, ExtractException, DataAccessObjectException {
         if (batch.getState() == BatchStateEnum.Failed)
-            throw new ExtractException("Batch failed: " + batch.getStateMessage());
+            throw new ExtractExceptionOnServer("Batch failed: " + batch.getStateMessage());
         final QueryResultList results = getController().getBulkV1Client().getConnection()
                 .getQueryResultList(batch.getJobId(), batch.getId());
 
@@ -96,7 +97,7 @@ public class BulkV1QueryVisitor extends AbstractBulkQueryVisitor {
                         .getQueryResultStream(batch.getJobId(), batch.getId(), resultId);
                 writeExtractionForServerStream(serverResultStream);
             }  catch (final IOException e) {
-                throw new ExtractException(e);
+                throw new ExtractExceptionOnServer(e);
             }
         }
     }

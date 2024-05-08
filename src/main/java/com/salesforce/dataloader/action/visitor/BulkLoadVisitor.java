@@ -64,6 +64,7 @@ import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.LoadException;
+import com.salesforce.dataloader.exception.LoadExceptionOnServer;
 import com.salesforce.dataloader.exception.OperationException;
 import com.salesforce.dataloader.exception.RelationshipFormatException;
 import com.salesforce.dataloader.model.NACalendarValue;
@@ -639,7 +640,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     private void sanityCheckError(String id, String errMsg) throws LoadException {
-        throw new LoadException(id + ": " + errMsg);
+        throw new LoadExceptionOnServer(id + ": " + errMsg);
     }
 
     private String parseAsyncApiError(final String errString) {
