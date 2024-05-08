@@ -71,9 +71,6 @@ public abstract class ClientBase<ConnectionType> {
 
     private SessionInfo session = new SessionInfo();
 
-    private final boolean enableRetries;
-    private final int maxRetries;
-
     protected abstract boolean connectPostLogin(ConnectorConfig connectorConfig);
 
     public abstract ConnectionType getConnection();
@@ -86,25 +83,6 @@ public abstract class ClientBase<ConnectionType> {
         if (apiVersionStr != null && !apiVersionStr.isEmpty()) {
             apiVersionForTheSession = apiVersionStr;
         }
-        int retries = -1;
-        this.enableRetries = config.getBoolean(Config.ENABLE_RETRIES);
-        if (this.enableRetries) {
-            try {
-                // limit the number of max retries in case limit is exceeded
-                retries = Math.min(Config.MAX_RETRIES_LIMIT, config.getInt(Config.MAX_RETRIES));
-            } catch (ParameterLoadException e) {
-                retries = Config.DEFAULT_MAX_RETRIES;
-            }
-        }
-        this.maxRetries = retries;
-    }
-    
-    protected int getMaxRetries() {
-        return this.maxRetries;
-    }
-    
-    protected boolean isRetriesEnabled() {
-        return this.enableRetries;
     }
 
     public final boolean connect(SessionInfo sess) {

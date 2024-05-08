@@ -43,7 +43,10 @@ import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.exception.ExtractExceptionOnServer;
+import com.salesforce.dataloader.exception.HttpClientTransportException;
 import com.salesforce.dataloader.exception.LoadException;
+import com.salesforce.dataloader.exception.LoadExceptionOnServer;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.exception.OperationException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
@@ -69,6 +72,8 @@ abstract class AbstractAction implements IAction {
     private final DataAccessObject dao;
 
     private final Logger logger;
+    private boolean enableRetries;
+    private int maxRetries;
 
     protected AbstractAction(Controller controller, ILoaderProgress monitor)
             throws DataAccessObjectInitializationException {
@@ -85,6 +90,17 @@ abstract class AbstractAction implements IAction {
             this.errorWriter = null;
         }
         this.visitor = createVisitor();
+        int retries = -1;
+        this.enableRetries = controller.getConfig().getBoolean(Config.ENABLE_RETRIES);
+        if (this.enableRetries) {
+            try {
+                // limit the number of max retries in case limit is exceeded
+                retries = Math.min(Config.MAX_RETRIES_LIMIT, controller.getConfig().getInt(Config.MAX_RETRIES));
+            } catch (ParameterLoadException e) {
+                retries = Config.DEFAULT_MAX_RETRIES;
+            }
+        }
+        this.maxRetries = retries;
     }
 
     /** This method should throw an error if the data access object is configured incorrectly */
@@ -119,6 +135,28 @@ abstract class AbstractAction implements IAction {
 
     @Override
     public final void execute() {
+        List<Exception> exceptions = null;
+        for (int numAttempts = 0; numAttempts < this.maxRetries; numAttempts++) {
+                exceptions = executeOperation();
+                boolean doAttemptAgain = false;
+                if (exceptions != null && exceptions.size() > 0) {
+                    for (Exception e : exceptions) {
+                        if (shouldRetryOperation(e, numAttempts)) {
+                            doAttemptAgain = true;
+                            break;
+                        }
+                    }
+                }
+                if (!doAttemptAgain) {
+                    break; // stop the loop
+                }
+        }
+        if (exceptions != null && exceptions.size() > 0) {
+            exceptions.forEach(this::handleException);
+        }
+    }
+    
+    private List<Exception> executeOperation() {
         List<Exception> exceptions = new ArrayList<>();
         try {
             getLogger().info(getMessage("loading", getConfig().getString(Config.OPERATION)));
@@ -131,12 +169,11 @@ abstract class AbstractAction implements IAction {
             }
 
             while (!getMonitor().isCanceled() && visit()) {}
-
-
+            
         } catch (final Exception e) {
             exceptions.add(e);
         } finally {
-            try{
+            try {
                 flush(); //make sure we don't early abort here
             } catch (Exception e) {
                 exceptions.add(e);
@@ -165,10 +202,49 @@ abstract class AbstractAction implements IAction {
             } catch (Exception e){
                 exceptions.add(e);
             }
-            //handle each recorded exception
-            if (exceptions.size() > 0){
-                exceptions.forEach(this::handleException);
+        }
+        return exceptions;
+    }
+    
+    private boolean shouldRetryOperation(Exception e, int numAttempts) {
+        if (e instanceof HttpClientTransportException
+                || e instanceof ExtractExceptionOnServer
+                || e instanceof LoadExceptionOnServer
+                || e instanceof ConnectionException) {
+            if (numAttempts < this.maxRetries-1 && this.enableRetries) {
+                // loop only if less than MAX_RETRIES
+                logger.warn("Encountered an error on server when performing "
+                        + controller.getConfig().getString(Config.OPERATION) 
+                        + " on attempt " 
+                        + numAttempts );
+                logger.warn(e.getMessage());
+                retrySleep(numAttempts);
+                return true;
             }
+        }
+        return false;
+    }
+    
+    /**
+     * @param operationName
+     */
+    private void retrySleep(int retryNum) {
+        int sleepSecs;
+        try {
+            sleepSecs = controller.getConfig().getInt(Config.MIN_RETRY_SLEEP_SECS);
+        } catch (ParameterLoadException e1) {
+            sleepSecs = Config.DEFAULT_MIN_RETRY_SECS;
+        }
+        // sleep between retries is based on the retry attempt #. Sleep for longer periods with each retry
+        sleepSecs = sleepSecs + (retryNum * 10); // sleep for MIN_RETRY_SLEEP_SECS + 10, 20, 30, etc.
+
+        logger.info(Messages.getFormattedString("Client.retryOperation", 
+                new String[]{Integer.toString(retryNum + 1),
+                getController().getConfig().getString(Config.OPERATION), 
+                Integer.toString(sleepSecs)}));
+        try {
+            Thread.sleep(sleepSecs * 1000);
+        } catch (InterruptedException e) { // ignore
         }
     }
 
