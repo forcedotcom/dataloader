@@ -706,6 +706,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         if (argMap == null) argMap = getTestConfig();
         argMap.put(Config.PROCESS_THREAD_NAME, this.baseName);
         argMap.put(Config.READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
+        argMap.put(Config.CLI_OPTION_RUN_MODE, Config.RUN_MODE_BATCH_VAL);
 
         // emulate invocation through process.bat script
         String[] args = new String[argMap.size()+1];

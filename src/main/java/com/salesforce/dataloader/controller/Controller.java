@@ -249,12 +249,16 @@ public class Controller {
             throw new MappingInitializationException(e.getMessage());
         }
         config.setValue(Config.ENTITY, sObjectName);
+        initializeMapping(); // initialize mapping before setting reference describes
         try {
             this.setFieldTypes();
             this.setReferenceDescribes();
         } catch (Exception e) {
             throw new MappingInitializationException(e);
         }
+    }
+    
+    private void initializeMapping() throws MappingInitializationException {
         String mappingFile = config.getString(Config.MAPPING_FILE);
         if (mappingFile != null 
                 && !mappingFile.isBlank() && !Files.exists(Path.of(mappingFile))) {
@@ -267,6 +271,7 @@ public class Controller {
         this.mapper = getConfig().getOperationInfo().isExtraction() ? 
                 new SOQLMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) 
               : new LoadMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile);
+
     }
 
     public void createAndShowGUI() throws ControllerInitializationException {

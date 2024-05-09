@@ -46,13 +46,16 @@ public class ParentIdLookupFieldFormatter {
     // Example - "Account:Owner.username"
     public static final String NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR = "-";
     
-    // fieldName param can be in one of the following formats:
+    // formattedFieldName param can be in one of the following formats:
     // format 1: alphanumeric string without any ':' or '-' in it. Represents name of child's non-polymorphic relationship field
     // format 1 => it is name of a non-polymorphic relationship field in child object.
     //
     // format 2: alphanumeric string with a ':' in it
-    // format 2 has 2 (legacy format): 
-    //    <child relationship field name>:<parent idlookup field name>
+    // format 2 has 2 interpretations:
+    // 2a - (legacy format): 
+    //    <child relationship name>:<parent idlookup field name>
+    // 2b - (new format):
+    //    <parent object name>:<relationship name attribute of relationship field>
     //
     // format 3: alphanumeric string with a single ':' and a single '-' in it
     // format 3 => it is name of a field in child object with reference to an idlookup field in parent object
