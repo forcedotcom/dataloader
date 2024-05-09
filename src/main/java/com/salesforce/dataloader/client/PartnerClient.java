@@ -26,6 +26,8 @@
 
 package com.salesforce.dataloader.client;
 
+import com.salesforce.dataloader.action.OperationInfo;
+
 /**
  * The sfdc api client class - implemented using the partner wsdl
  *
@@ -41,6 +43,7 @@ import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
 import com.salesforce.dataloader.exception.RelationshipFormatException;
+import com.salesforce.dataloader.mapping.LoadMapper;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Connector;
@@ -75,6 +78,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -731,6 +735,47 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
         if (getDescribeGlobalResults() != null) {
             Field[] entityFields = getFieldTypes().getFields();
+            
+            Collection<String> mappedSFFields = null;
+            ArrayList<String> relFieldsNeedingRefDescribes = new ArrayList<String>();
+            String operation = config.getString(Config.OPERATION);
+            boolean useMappedLookupRelationshipNamesForRefDescribes = false;
+            if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH
+                    && operation != null
+                    && !operation.isBlank()
+                    && config.getOperationInfo() != OperationInfo.extract
+                    && config.getOperationInfo() != OperationInfo.extract_all) {
+                // import operation in batch mode
+                LoadMapper mapper = (LoadMapper)controller.getMapper();
+                mappedSFFields = mapper.getDestColumns();
+                useMappedLookupRelationshipNamesForRefDescribes = true;
+                for (String mappedFieldList : mappedSFFields) {
+                    String[]mappedFields = mappedFieldList.split(",");
+                    for (String field : mappedFields) {
+                        try {
+                            ParentIdLookupFieldFormatter lookupFieldFormatter = new ParentIdLookupFieldFormatter(field);
+                            if (lookupFieldFormatter.getParent() != null
+                                && lookupFieldFormatter.getParentFieldName() != null) {
+                                String relationshipNameInMappedField = lookupFieldFormatter.getParent().getRelationshipName();
+                                if (relationshipNameInMappedField == null) {
+                                    useMappedLookupRelationshipNamesForRefDescribes = false;
+                                    break;
+                                } else {
+                                    relFieldsNeedingRefDescribes.add(relationshipNameInMappedField);
+                                }
+                            }
+                        } catch (RelationshipFormatException e) {
+                         // do not optimize getting lookup field describes
+                            useMappedLookupRelationshipNamesForRefDescribes = false;
+                            break;
+                        }
+                    }
+                    if (!useMappedLookupRelationshipNamesForRefDescribes) {
+                        relFieldsNeedingRefDescribes.clear();
+                        break;
+                    }
+                }
+            }
 
             for (Field childObjectField : entityFields) {
                 // upsert on references (aka foreign keys) is supported only
@@ -746,7 +791,11 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                     // it is neither modifiable nor updateable.
                     continue;
                 }
-                processParentObjectArrayForLookupReferences(parentObjectNames, childObjectField);
+                if (!useMappedLookupRelationshipNamesForRefDescribes
+                    || relFieldsNeedingRefDescribes.contains(relationshipName)) {
+                    processParentObjectArrayForLookupReferences(parentObjectNames, childObjectField);
+                }
+                
             }
         }
     }

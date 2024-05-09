@@ -159,10 +159,6 @@ public class ProcessRunner implements InitializingBean, IProcess {
                 logger.info(Messages.getString("Process.settingFieldTypes")); //$NON-NLS-1$
                 controller.setFieldTypes();
 
-                // get the object reference info (using the describe call)
-                logger.info(Messages.getString("Process.settingReferenceTypes")); //$NON-NLS-1$
-                controller.setReferenceDescribes();
-
                 // instantiate the map
                 logger.info(Messages.getString("Process.creatingMap")); //$NON-NLS-1$
                 controller.initializeOperation(config.getString(Config.DAO_TYPE), 
