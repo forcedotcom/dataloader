@@ -69,6 +69,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
@@ -178,6 +179,11 @@ public class Controller {
     public void setReferenceDescribes() throws ConnectionException {
         validateSession();
         getPartnerClient().setFieldReferenceDescribes();
+    }
+    
+    public void setReferenceDescribes(Collection<String> sfFields) throws ConnectionException {
+        validateSession();
+        getPartnerClient().setFieldReferenceDescribes(sfFields);
     }
 
     private boolean connectIfSessionExists(ClientBase<?> clientToLogin) {

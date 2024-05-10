@@ -31,6 +31,7 @@ import com.sforce.ws.ConnectionException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
@@ -44,7 +45,6 @@ public class SObjectReferenceConverterTest extends ConfigTestBase {
         SObjectReference ref;
 
         getController().login();
-        getController().setReferenceDescribes();
 
         // null test
         ref = (SObjectReference)refConverter.convert(null, null);
@@ -74,10 +74,13 @@ public class SObjectReferenceConverterTest extends ConfigTestBase {
         testValidSObjectReference("12345", "Bogus", false);
     }
 
-    private void testValidSObjectReference(String refValue, String relationshipName, boolean expectSuccess) {
+    private void testValidSObjectReference(String refValue, String relationshipName, boolean expectSuccess) throws ConnectionException {
         SObjectReference ref = new SObjectReference(refValue);
         SObject sObj = new SObject();
         String fkFieldName = ConfigTestBase.DEFAULT_ACCOUNT_EXT_ID_FIELD;
+        ArrayList<String> lookupFields = new ArrayList<String>();
+        lookupFields.add(relationshipName + ":" + fkFieldName);
+        getController().setReferenceDescribes(lookupFields);
 
         try {
             // legacy formatting

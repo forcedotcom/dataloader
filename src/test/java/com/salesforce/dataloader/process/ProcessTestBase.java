@@ -963,10 +963,11 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     }
     
 
+    @SuppressWarnings("unchecked")
     protected UpsertResult[] doUpsert(String entity, Map<String, Object> sforceMapping) throws Exception {
         // now convert to a dynabean array for the client
         // setup our dynabeans
-        BasicDynaClass dynaClass = setupDynaClass(entity);
+        BasicDynaClass dynaClass = setupDynaClass(entity, (Collection<String>)(Collection<?>)(sforceMapping.values()));
 
         DynaBean sforceObj = dynaClass.newInstance();
 
@@ -1035,7 +1036,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         return records[0].getField(extIdField);
     }
     
-    protected BasicDynaClass setupDynaClass(String entity) throws ConnectionException {
+    protected BasicDynaClass setupDynaClass(String entity, Collection<String> sfFields) throws ConnectionException {
         getController().getConfig().setValue(Config.ENTITY, entity);
         PartnerClient client = getController().getPartnerClient();
         if (!client.isLoggedIn()) {
@@ -1043,7 +1044,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         }
 
         getController().setFieldTypes();
-        getController().setReferenceDescribes();
+        getController().setReferenceDescribes(sfFields);
         DynaProperty[] dynaProps = SforceDynaBean.createDynaProps(getController().getPartnerClient().getFieldTypes(), getController());
         BasicDynaClass dynaClass = SforceDynaBean.getDynaBeanInstance(dynaProps);
         SforceDynaBean.registerConverters(getController().getConfig());
