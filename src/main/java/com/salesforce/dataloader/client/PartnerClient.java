@@ -754,7 +754,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         Field[] entityFields = getFieldTypes().getFields();
         boolean useMappedLookupRelationshipNamesForRefDescribes = false;
         ArrayList<String> relFieldsNeedingRefDescribes = new ArrayList<String>();
-        if (sfFields != null) {
+        if (sfFields != null && !sfFields.isEmpty()) {
             useMappedLookupRelationshipNamesForRefDescribes = true;
             for (String mappedFieldList : sfFields) {
                 String[]mappedFields = mappedFieldList.split(",");
@@ -782,25 +782,23 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                     break;
                 }
             }
+        }
 
-            for (Field childObjectField : entityFields) {
-                // upsert on references (aka foreign keys) is supported only
-                // 1. When field has relationship is set and refers to exactly one object
-                // 2. When field is either createable or updateable. If neither is true, upsert will never work for that
-                // relationship.
-                String[] parentObjectNames = childObjectField.getReferenceTo();
-                String relationshipName = childObjectField.getRelationshipName();
-                if (parentObjectNames == null || parentObjectNames.length == 0 || parentObjectNames[0] == null
-                    || relationshipName == null || relationshipName.length() == 0
-                    || (!childObjectField.isCreateable() && !childObjectField.isUpdateable())) {
-                    // parent-child relationship either does not exist or
-                    // it is neither modifiable nor updateable.
-                    continue;
-                }
-                if (!useMappedLookupRelationshipNamesForRefDescribes
-                    || relFieldsNeedingRefDescribes.contains(relationshipName)) {
-                    processParentObjectArrayForLookupReferences(parentObjectNames, childObjectField);
-                }
+        for (Field childObjectField : entityFields) {
+            // verify that the sobject field represents a relationship field where
+            // the sobject is a child with one or more parent sobjects.
+            String[] parentObjectNames = childObjectField.getReferenceTo();
+            String relationshipName = childObjectField.getRelationshipName();
+            if (parentObjectNames == null || parentObjectNames.length == 0 || parentObjectNames[0] == null
+                || relationshipName == null || relationshipName.length() == 0
+                || (!childObjectField.isCreateable() && !childObjectField.isUpdateable())) {
+                // parent-child relationship either does not exist or
+                // it is neither modifiable nor updateable.
+                continue;
+            }
+            if (!useMappedLookupRelationshipNamesForRefDescribes
+                || relFieldsNeedingRefDescribes.contains(relationshipName)) {
+                processParentObjectArrayForLookupReferences(parentObjectNames, childObjectField);
             }
         }
     }
