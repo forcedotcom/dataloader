@@ -46,6 +46,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -251,17 +252,18 @@ public class PartnerClientTest extends ProcessTestBase {
         assertTrue("Account Name not found ", hasName);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testInsertBasic() throws Exception {
         // setup our dynabeans
-        BasicDynaClass dynaClass = setupDynaClass("Account");
+        BasicDynaClass dynaClass;
 
         Map<String, Object> sforceMapping = new HashMap<String, Object>();
         sforceMapping.put("Name", "name" + System.currentTimeMillis());
         sforceMapping.put("Description", "the description");
         // Account number is set for easier test data cleanup
         sforceMapping.put("AccountNumber", ACCOUNT_NUMBER_PREFIX + System.currentTimeMillis());
-
+        dynaClass = setupDynaClass("Account", (Collection<String>)(Collection<?>)(sforceMapping.values()));
         // now convert to a dynabean array for the client
         DynaBean sforceObj = dynaClass.newInstance();
 
@@ -291,11 +293,12 @@ public class PartnerClientTest extends ProcessTestBase {
         doTestUpdateBasic(true);
     }
         
+    @SuppressWarnings("unchecked")
     private void doTestUpdateBasic(boolean noCompression) throws Exception {
         String id = getRandomAccountId();
 
         // setup our dynabeans
-        BasicDynaClass dynaClass = setupDynaClass("Account");
+        BasicDynaClass dynaClass;
 
         Map<String, Object> sforceMapping = new HashMap<String, Object>();
         sforceMapping.put("Id", id);
@@ -303,6 +306,7 @@ public class PartnerClientTest extends ProcessTestBase {
         sforceMapping.put("Description", "the new description");
         // Account number is set for easier test data cleanup
         sforceMapping.put("AccountNumber", ACCOUNT_NUMBER_PREFIX + System.currentTimeMillis());
+        dynaClass = setupDynaClass("Account", (Collection<String>)(Collection<?>)(sforceMapping.values()));
 
         // now convert to a dynabean array for the client
         DynaBean sforceObj = dynaClass.newInstance();
@@ -328,17 +332,19 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Basic failing - forgetting the id
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void testUpdateFailBasic() throws Exception {
 
         // setup our dynabeans
-        BasicDynaClass dynaClass = setupDynaClass("Account");
+        BasicDynaClass dynaClass;
 
         Map<String, Object> sforceMapping = new HashMap<String, Object>();
         sforceMapping.put("Name", "newname" + System.currentTimeMillis());
         sforceMapping.put("Description", "the new description");
         // Account number is set for easier test data cleanup
         sforceMapping.put("AccountNumber", ACCOUNT_NUMBER_PREFIX + System.currentTimeMillis());
+        dynaClass = setupDynaClass("Account", (Collection<String>)(Collection<?>)(sforceMapping.values()));
 
         // now convert to a dynabean array for the client
         DynaBean sforceObj = dynaClass.newInstance();
@@ -483,10 +489,11 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Basic failing - forgetting the external id or foreign key external id
      */
+    @SuppressWarnings("unchecked")
     private void doUpsertFailBasic(boolean upsertFk) throws Exception {
 
         // setup our dynabeans
-        BasicDynaClass dynaClass = setupDynaClass("Account");
+        BasicDynaClass dynaClass;
 
         Map<String, Object> sforceMapping = new HashMap<String, Object>();
         sforceMapping.put("Name", "newname" + System.currentTimeMillis());
@@ -502,6 +509,7 @@ public class PartnerClientTest extends ProcessTestBase {
             // forget to set the foreign key external id value
             sforceMapping.put(new ParentIdLookupFieldFormatter(null, "Parent", extIdField).toString(), "bogus");
         }
+        dynaClass = setupDynaClass("Account", (Collection<String>)(Collection<?>)(sforceMapping.values()));
 
         // now convert to a dynabean array for the client
         DynaBean sforceObj = dynaClass.newInstance();
@@ -521,12 +529,13 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testDeleteBasic() throws Exception {
         String id = getRandomAccountId();
 
         // setup our dynabeans
-        BasicDynaClass dynaClass = setupDynaClass("Account");
+        BasicDynaClass dynaClass;
 
         Map<String, Object> sforceMapping = new HashMap<String, Object>();
         sforceMapping.put("Id", id);
@@ -534,6 +543,7 @@ public class PartnerClientTest extends ProcessTestBase {
         sforceMapping.put("Description", "the description");
         // Account number is set for easier test data cleanup
         sforceMapping.put("AccountNumber", ACCOUNT_NUMBER_PREFIX + System.currentTimeMillis());
+        dynaClass = setupDynaClass("Account", (Collection<String>)(Collection<?>)(sforceMapping.values()));
 
         // now convert to a dynabean array for the client
         DynaBean sforceObj = dynaClass.newInstance();
@@ -561,13 +571,14 @@ public class PartnerClientTest extends ProcessTestBase {
     public void testDeleteFailBasic() throws Exception {
 
         // setup our dynabeans
-        BasicDynaClass dynaClass = setupDynaClass("Account");
+        BasicDynaClass dynaClass;
 
         Map<String, Object> sforceMapping = new HashMap<String, Object>();
         sforceMapping.put("name", "name" + System.currentTimeMillis());
         sforceMapping.put("description", "the description");
         // Account number is set for easier test data cleanup
         sforceMapping.put("AccountNumber", ACCOUNT_NUMBER_PREFIX + System.currentTimeMillis());
+        dynaClass = setupDynaClass("Account", (Collection<String>)(Collection<?>)(sforceMapping.values()));
 
         // now convert to a dynabean array for the client
         DynaBean sforceObj = dynaClass.newInstance();

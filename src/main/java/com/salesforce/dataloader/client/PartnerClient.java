@@ -729,17 +729,12 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
      * @throws ConnectionException
      */
     public void setFieldReferenceDescribes() throws ConnectionException {
-        referenceEntitiesDescribesMap.clear();
         if (getFieldTypes() == null) {
             setFieldTypes();
         }
+        Collection<String> mappedSFFields = null;
         if (getDescribeGlobalResults() != null) {
-            Field[] entityFields = getFieldTypes().getFields();
-            
-            Collection<String> mappedSFFields = null;
-            ArrayList<String> relFieldsNeedingRefDescribes = new ArrayList<String>();
             String operation = config.getString(Config.OPERATION);
-            boolean useMappedLookupRelationshipNamesForRefDescribes = false;
             if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH
                     && operation != null
                     && !operation.isBlank()
@@ -747,33 +742,44 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                     && config.getOperationInfo() != OperationInfo.extract_all) {
                 // import operation in batch mode
                 LoadMapper mapper = (LoadMapper)controller.getMapper();
+                // call describe only for mapped fields
                 mappedSFFields = mapper.getDestColumns();
-                useMappedLookupRelationshipNamesForRefDescribes = true;
-                for (String mappedFieldList : mappedSFFields) {
-                    String[]mappedFields = mappedFieldList.split(",");
-                    for (String field : mappedFields) {
-                        try {
-                            ParentIdLookupFieldFormatter lookupFieldFormatter = new ParentIdLookupFieldFormatter(field);
-                            if (lookupFieldFormatter.getParent() != null
-                                && lookupFieldFormatter.getParentFieldName() != null) {
-                                String relationshipNameInMappedField = lookupFieldFormatter.getParent().getRelationshipName();
-                                if (relationshipNameInMappedField == null) {
-                                    useMappedLookupRelationshipNamesForRefDescribes = false;
-                                    break;
-                                } else {
-                                    relFieldsNeedingRefDescribes.add(relationshipNameInMappedField);
-                                }
+            } 
+        }
+        setFieldReferenceDescribes(mappedSFFields);
+    }
+    
+    public void setFieldReferenceDescribes(Collection<String> sfFields) throws ConnectionException {
+        referenceEntitiesDescribesMap.clear();
+        Field[] entityFields = getFieldTypes().getFields();
+        boolean useMappedLookupRelationshipNamesForRefDescribes = false;
+        ArrayList<String> relFieldsNeedingRefDescribes = new ArrayList<String>();
+        if (sfFields != null) {
+            useMappedLookupRelationshipNamesForRefDescribes = true;
+            for (String mappedFieldList : sfFields) {
+                String[]mappedFields = mappedFieldList.split(",");
+                for (String field : mappedFields) {
+                    try {
+                        ParentIdLookupFieldFormatter lookupFieldFormatter = new ParentIdLookupFieldFormatter(field);
+                        if (lookupFieldFormatter.getParent() != null
+                            && lookupFieldFormatter.getParentFieldName() != null) {
+                            String relationshipNameInMappedField = lookupFieldFormatter.getParent().getRelationshipName();
+                            if (relationshipNameInMappedField == null) {
+                                useMappedLookupRelationshipNamesForRefDescribes = false;
+                                break;
+                            } else {
+                                relFieldsNeedingRefDescribes.add(relationshipNameInMappedField);
                             }
-                        } catch (RelationshipFormatException e) {
-                         // do not optimize getting lookup field describes
-                            useMappedLookupRelationshipNamesForRefDescribes = false;
-                            break;
                         }
-                    }
-                    if (!useMappedLookupRelationshipNamesForRefDescribes) {
-                        relFieldsNeedingRefDescribes.clear();
+                    } catch (RelationshipFormatException e) {
+                     // do not optimize getting lookup field describes
+                        useMappedLookupRelationshipNamesForRefDescribes = false;
                         break;
                     }
+                }
+                if (!useMappedLookupRelationshipNamesForRefDescribes) {
+                    relFieldsNeedingRefDescribes.clear();
+                    break;
                 }
             }
 
@@ -795,7 +801,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                     || relFieldsNeedingRefDescribes.contains(relationshipName)) {
                     processParentObjectArrayForLookupReferences(parentObjectNames, childObjectField);
                 }
-                
             }
         }
     }
