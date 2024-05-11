@@ -164,11 +164,23 @@ class BulkApiVisitorUtil {
             job.setExternalIdFieldName(this.config.getString(Config.IDLOOKUP_FIELD));
         }
         job.setObject(this.config.getString(Config.ENTITY));
-        job.setContentType(this.config.getBoolean(Config.BULK_API_ZIP_CONTENT) && op != OperationEnum.query ? ContentType.ZIP_CSV
-                : ContentType.CSV);
-        job.setConcurrencyMode(this.config.getBoolean(Config.BULK_API_SERIAL_MODE) ? ConcurrencyMode.Serial
-                : ConcurrencyMode.Parallel);
-
+        ContentType jobContentType = ContentType.CSV;
+        if (this.config.getBoolean(Config.BULK_API_ZIP_CONTENT) 
+                && op != OperationEnum.query
+                && !this.config.isBulkV2APIEnabled()) {
+            // ZIP CSV content is supported only for Bulk V1
+            jobContentType = ContentType.ZIP_CSV;
+        }
+        job.setContentType(jobContentType);
+        
+        ConcurrencyMode jobConcurrencyMode = ConcurrencyMode.Parallel;
+        if (this.config.getBoolean(Config.BULK_API_SERIAL_MODE) 
+                && !this.config.isBulkV2APIEnabled()) {
+            // Serial mode is supported only for Bulk V1
+           jobConcurrencyMode = ConcurrencyMode.Serial;
+        }
+        job.setConcurrencyMode(jobConcurrencyMode);
+        
         if (op == OperationEnum.update || op == OperationEnum.upsert || op == OperationEnum.insert) {
             final String assRule = this.config.getString(Config.ASSIGNMENT_RULE);
             if (assRule != null && (assRule.length() == 15 || assRule.length() == 18)) {
