@@ -230,10 +230,10 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     };
 
     private DescribeGlobalResult describeGlobalResults;
-    private final ReferenceEntitiesDescribeMap referenceEntitiesDescribesMap = new ReferenceEntitiesDescribeMap();
+    private ReferenceEntitiesDescribeMap referenceEntitiesDescribesMap = new ReferenceEntitiesDescribeMap();
     private final Map<String, DescribeGlobalSObjectResult> describeGlobalResultsMap = new HashMap<String, DescribeGlobalSObjectResult>();
     private final Map<String, DescribeSObjectResult> entityFieldDescribesMap = new HashMap<String, DescribeSObjectResult>();
-
+    private final Map<String, ReferenceEntitiesDescribeMap> parentDescribeCache = new HashMap<String, ReferenceEntitiesDescribeMap>();
     public PartnerClient(Controller controller) {
         super(controller, LOG);
     }
@@ -744,13 +744,23 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 LoadMapper mapper = (LoadMapper)controller.getMapper();
                 // call describe only for mapped fields
                 mappedSFFields = mapper.getDestColumns();
-            } 
+            }
+            setFieldReferenceDescribes(mappedSFFields);
         }
-        setFieldReferenceDescribes(mappedSFFields);
     }
     
     public void setFieldReferenceDescribes(Collection<String> sfFields) throws ConnectionException {
-        referenceEntitiesDescribesMap.clear();
+        if (config.getBoolean(Config.CACHE_DESCRIBE_GLOBAL_RESULTS)) {
+            referenceEntitiesDescribesMap = parentDescribeCache.get(config.getString(Config.ENTITY));
+        } else {
+            referenceEntitiesDescribesMap.clear();
+        }
+        if (referenceEntitiesDescribesMap == null) {
+            referenceEntitiesDescribesMap = new ReferenceEntitiesDescribeMap();
+        }
+        if (referenceEntitiesDescribesMap.size() > 0) {
+            return; // use cached value
+        }
         Field[] entityFields = getFieldTypes().getFields();
         boolean useMappedLookupRelationshipNamesForRefDescribes = false;
         ArrayList<String> relFieldsNeedingRefDescribes = new ArrayList<String>();
@@ -800,6 +810,11 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 || relFieldsNeedingRefDescribes.contains(relationshipName)) {
                 processParentObjectArrayForLookupReferences(parentObjectNames, childObjectField);
             }
+        }
+        if (config.getBoolean(Config.CACHE_DESCRIBE_GLOBAL_RESULTS)
+            && sfFields == null) {
+            // got the full list of parents' describes for an sobject
+            parentDescribeCache.put(config.getString(Config.ENTITY), referenceEntitiesDescribesMap);
         }
     }
     
