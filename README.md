@@ -1,3 +1,6 @@
+# Feature requests
+Submit your feature request as an idea on [Salesforce IdeaExchange](https://ideas.salesforce.com/s/). Make sure to use "Platform / Data Import & Integration" as the category for your idea.
+
 # Prerequisites
 
 Java Runtime Environment (JRE) is required to install and run Data Loader. Review the installation instructions of the latest release for the required JRE version.
