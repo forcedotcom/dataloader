@@ -126,6 +126,7 @@ public class Config {
      * Default values for specific parameters
      */
     public static final int DEFAULT_EXPORT_BATCH_SIZE = 500;
+    public static final int MAX_EXPORT_BATCH_SIZE = 2000;
     public static final int DEFAULT_MIN_RETRY_SECS = 2;
     public static final int DEFAULT_MAX_RETRIES = 3;
     public static final int MAX_RETRIES_LIMIT = 10;
@@ -1369,7 +1370,14 @@ public class Config {
         }
         return bulkApi ? DEFAULT_BULK_API_IMPORT_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE;
     }
-
+    
+    public int getMaxImportBatchSize(boolean bulkApi, boolean bulkV2Api) {
+        if (bulkApi && bulkV2Api) {
+            return MAX_BULKV2_API_IMPORT_JOB_SIZE;
+        }
+        return bulkApi ? MAX_BULK_API_IMPORT_BATCH_SIZE : MAX_SOAP_API_IMPORT_BATCH_SIZE;
+    }
+    
     public boolean useBulkAPIForCurrentOperation() {
         return isBulkAPIEnabled() && isBulkApiOperation();
     }
@@ -1597,5 +1605,4 @@ public class Config {
     public static interface ConfigListener {
         void configValueChanged(String key, String oldValue, String newValue);
     }
-
 }

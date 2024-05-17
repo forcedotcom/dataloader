@@ -249,15 +249,19 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         getConnection().setCallOptions(ClientBase.getClientName(this.config), null);
         // query header
-        int querySize;
+        int querySize = Config.DEFAULT_EXPORT_BATCH_SIZE;
         try {
             querySize = config.getInt(Config.EXPORT_BATCH_SIZE);
         } catch (ParameterLoadException e) {
             querySize = Config.DEFAULT_EXPORT_BATCH_SIZE;
         }
-        if (querySize > 0) {
-            getConnection().setQueryOptions(querySize);
+        if (querySize <= 0) {
+            querySize = Config.DEFAULT_EXPORT_BATCH_SIZE;
         }
+        if (querySize > Config.MAX_EXPORT_BATCH_SIZE) {
+            querySize = Config.MAX_EXPORT_BATCH_SIZE;
+        }
+        getConnection().setQueryOptions(querySize);
 
         // assignment rule for update
         if (config.getString(Config.ASSIGNMENT_RULE).length() > 14) {
