@@ -127,6 +127,7 @@ public class Config {
      */
     public static final int DEFAULT_EXPORT_BATCH_SIZE = 500;
     public static final int MAX_EXPORT_BATCH_SIZE = 2000;
+    public static final int MIN_EXPORT_BATCH_SIZE = 200;
     public static final int DEFAULT_MIN_RETRY_SECS = 2;
     public static final int DEFAULT_MAX_RETRIES = 3;
     public static final int MAX_RETRIES_LIMIT = 10;

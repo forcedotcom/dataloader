@@ -537,7 +537,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
         layout.verticalSpacing = 10;
         this.exportBatchSizeComposite.setLayout(layout);
         
-        args = new String[]{Integer.toString(Config.MAX_EXPORT_BATCH_SIZE)};
+        args = new String[]{Integer.toString(Config.MIN_EXPORT_BATCH_SIZE),
+                Integer.toString(Config.MAX_EXPORT_BATCH_SIZE)};
         createLabel(exportBatchSizeComposite, "exportBatchSize", args, null);
         textExportBatchSize = new Text(exportBatchSizeComposite, SWT.BORDER);
         textExportBatchSize.setText(config.getString(Config.EXPORT_BATCH_SIZE));

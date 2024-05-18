@@ -164,6 +164,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public QueryResult run(String queryString) throws ConnectionException {
+            setExportBatchSize();
             return getConnection().query(queryString);
         }
     };
@@ -176,6 +177,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public QueryResult run(String queryString) throws ConnectionException {
+            setExportBatchSize();
             return getConnection().queryAll(queryString);
         }
     };
@@ -188,6 +190,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public QueryResult run(String queryString) throws ConnectionException {
+            setExportBatchSize();
             return getConnection().queryMore(queryString);
         }
     };
@@ -242,12 +245,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         return login();
     }
 
-    @Override
-    protected boolean connectPostLogin(ConnectorConfig cc) {
-        if (getConnection() == null)
-            throw new IllegalStateException("Client should be logged in already");
-
-        getConnection().setCallOptions(ClientBase.getClientName(this.config), null);
+    private void setExportBatchSize() {
         // query header
         int querySize = Config.DEFAULT_EXPORT_BATCH_SIZE;
         try {
@@ -255,14 +253,22 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         } catch (ParameterLoadException e) {
             querySize = Config.DEFAULT_EXPORT_BATCH_SIZE;
         }
-        if (querySize <= 0) {
-            querySize = Config.DEFAULT_EXPORT_BATCH_SIZE;
+        if (querySize <= Config.MIN_EXPORT_BATCH_SIZE) {
+            querySize = Config.MIN_EXPORT_BATCH_SIZE;
         }
         if (querySize > Config.MAX_EXPORT_BATCH_SIZE) {
             querySize = Config.MAX_EXPORT_BATCH_SIZE;
         }
         getConnection().setQueryOptions(querySize);
+    }
+    @Override
+    protected boolean connectPostLogin(ConnectorConfig cc) {
+        if (getConnection() == null)
+            throw new IllegalStateException("Client should be logged in already");
 
+        getConnection().setCallOptions(ClientBase.getClientName(this.config), null);
+        setExportBatchSize();
+        
         // assignment rule for update
         if (config.getString(Config.ASSIGNMENT_RULE).length() > 14) {
             String rule = config.getString(Config.ASSIGNMENT_RULE);
