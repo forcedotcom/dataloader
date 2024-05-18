@@ -91,7 +91,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         DatabaseTestUtil.deleteAllAccountsDb(getController());
     }
 
-    @Ignore
+    @Test
     public void testExtractAccountDb() throws ProcessInitializationException, DataAccessObjectException {
         // upsert accounts into salesforce so there's something to query
         upsertSfdcAccounts(NUM_ROWS);
@@ -103,7 +103,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         doExtractAccountDb(processName, NUM_ROWS, 0, false);
     }
 
-    @Ignore
+    @Test
     public void testExtractAccountDbNegative() throws Exception {
         // upsert accounts into salesforce so there's something to query
         upsertSfdcAccounts(500);
@@ -114,7 +114,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         doExtractAccountDb("extractAccountDbProcess", 400, 100, true);
     }
 
-    @Ignore
+    @Test
     public void testExtractMultipleBadAccounts() throws Exception {
         // upsert many accounts which will fail to be written to the database on extract
         // the sql exceptions should be logged
@@ -153,7 +153,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         runUpsertProcess(args, isInsert ? numRows : 0, isInsert ? 0 : numRows);
     }
 
-    @Ignore
+    @Test
     public void testInsertNullsDB() throws Exception {
         Map<String, String> args = getTestConfig();
         if (isBulkAPIEnabled(args) || isBulkV2APIEnabled(args)) {
