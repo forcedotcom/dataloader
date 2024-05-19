@@ -68,7 +68,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                 // Bulk API
                 , TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_DISABLED)
                 // Bulk V2 Query API
-                , TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED)
+                , TestVariant.forSettings(TestSetting.BULK_V2_API_ENABLED)
                 );
     }
 

@@ -92,15 +92,18 @@ public abstract class ClientBase<ConnectionType> {
 
     private static final String BASE_CLIENT_NAME = "DataLoader";
     private static final String BULK_API_CLIENT_TYPE = "Bulk";
+    private static final String BULK_V2_API_CLIENT_TYPE = "Bulkv2";
     private static final String PARTNER_API_CLIENT_TYPE = "Partner";
     private static final String BATCH_CLIENT_STRING = "Batch";
     private static final String UI_CLIENT_STRING = "UI";
 
     public static String getClientName(Config cfg) {
-        String apiType = cfg.isBulkAPIEnabled() ? BULK_API_CLIENT_TYPE : PARTNER_API_CLIENT_TYPE;
+        String apiType = PARTNER_API_CLIENT_TYPE;
         final String interfaceType = cfg.isBatchMode() ? BATCH_CLIENT_STRING : UI_CLIENT_STRING;
-        if (cfg.isBulkAPIEnabled() && cfg.isBulkV2APIEnabled()) {
-            apiType = apiType + "v2";
+        if (cfg.isBulkAPIEnabled()) {
+            apiType = BULK_API_CLIENT_TYPE;
+        }else if (cfg.isBulkV2APIEnabled()) {
+            apiType = BULK_V2_API_CLIENT_TYPE;
         }
         return new StringBuilder(32).append(BASE_CLIENT_NAME).append(apiType).append(interfaceType)
                 .append("/")

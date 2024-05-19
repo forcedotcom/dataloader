@@ -1352,7 +1352,7 @@ public class Config {
         boolean bulkApi = isBulkAPIEnabled();
         boolean bulkV2Api = this.isBulkV2APIEnabled();
         
-        if (bulkApi && bulkV2Api) {
+        if (bulkV2Api) {
             return MAX_BULKV2_API_IMPORT_JOB_SIZE;
         }
         
@@ -1366,29 +1366,29 @@ public class Config {
     }
 
     public int getDefaultImportBatchSize(boolean bulkApi, boolean bulkV2Api) {
-        if (bulkApi && bulkV2Api) {
+        if (bulkV2Api) {
             return MAX_BULKV2_API_IMPORT_JOB_SIZE;
         }
         return bulkApi ? DEFAULT_BULK_API_IMPORT_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE;
     }
     
     public int getMaxImportBatchSize(boolean bulkApi, boolean bulkV2Api) {
-        if (bulkApi && bulkV2Api) {
+        if (bulkV2Api) {
             return MAX_BULKV2_API_IMPORT_JOB_SIZE;
         }
         return bulkApi ? MAX_BULK_API_IMPORT_BATCH_SIZE : MAX_SOAP_API_IMPORT_BATCH_SIZE;
     }
     
     public boolean useBulkAPIForCurrentOperation() {
-        return isBulkAPIEnabled() && isBulkApiOperation();
+        return (isBulkAPIEnabled() || isBulkV2APIEnabled()) && isBulkApiOperation();
     }
 
     public boolean isBulkAPIEnabled() {
-        return getBoolean(BULK_API_ENABLED);
+        return getBoolean(BULK_API_ENABLED) && !isBulkV2APIEnabled();
     }
     
     public boolean isBulkV2APIEnabled() {
-        return isBulkAPIEnabled() && getBoolean(BULKV2_API_ENABLED);
+        return getBoolean(BULKV2_API_ENABLED);
     }
     
     public boolean isRESTAPIEnabled() {
@@ -1488,7 +1488,7 @@ public class Config {
         if (!isEnvMatch) {
             environment = OAUTH_PROD_ENVIRONMENT_VAL;
         }
-        if (getBoolean(BULK_API_ENABLED)) {
+        if (getBoolean(BULK_API_ENABLED) || getBoolean(BULKV2_API_ENABLED)) {
             clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_BULK_CLIENTID);
         } else {
             clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_PARTNER_CLIENTID);

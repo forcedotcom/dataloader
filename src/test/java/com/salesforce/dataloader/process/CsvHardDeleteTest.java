@@ -69,7 +69,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED),
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED),
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_SERIAL_MODE_ENABLED),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED)
+                TestVariant.forSettings(TestSetting.BULK_V2_API_ENABLED)
             );
     }
 
@@ -142,7 +142,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
     }
 
     /**
-     * Hard Delete - Negative test. Uncheck Bull Api setting in data loader to verify that Hard Delete operation cannot
+     * Hard Delete - Negative test. Uncheck Bulk Api setting in data loader to verify that Hard Delete operation cannot
      * be done.
      */
     @Test
@@ -153,6 +153,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         // set batch process parameters
         Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(1));
         argMap.remove(Config.BULK_API_ENABLED);
+        argMap.remove(Config.BULKV2_API_ENABLED);
         try {
             runProcess(argMap, 889);
             Assert.fail("hard delete should not succeed if bulk api is turned off");
