@@ -315,7 +315,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         // Enable Bulk API Setting
         useBulkAPI = config.getBoolean(Config.BULK_API_ENABLED) && !config.getBoolean(Config.BULKV2_API_ENABLED);
-        useBulkV2API = config.getBoolean(Config.BULK_API_ENABLED) && config.getBoolean(Config.BULKV2_API_ENABLED);
+        useBulkV2API = config.getBoolean(Config.BULKV2_API_ENABLED);
         useSoapAPI = !useBulkAPI && !useBulkV2API;
 
         buttonUseSOAPApi = new Button(apiChoiceComposite, SWT.RADIO);
@@ -987,10 +987,10 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
                 // Config requires Bulk API AND Bulk V2 API settings enabled to use Bulk V2 features
                 // This is different from UI. UI shows them as mutually exclusive.
-                config.setValue(Config.BULK_API_ENABLED, useBulkAPI || useBulkV2API);
+                config.setValue(Config.BULK_API_ENABLED, buttonUseBulkV1Api.getSelection());
                 config.setValue(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode.getSelection());
                 config.setValue(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
-                config.setValue(Config.BULKV2_API_ENABLED, useBulkV2API);
+                config.setValue(Config.BULKV2_API_ENABLED, buttonUseBulkV2Api.getSelection());
                 config.setValue(Config.OAUTH_LOGIN_FROM_BROWSER, buttonLoginFromBrowser.getSelection());
                 config.setValue(Config.WIZARD_CLOSE_ON_FINISH, buttonCloseWizardOnFinish.getSelection());
                 config.setValue(Config.WIZARD_WIDTH, textWizardWidth.getText());

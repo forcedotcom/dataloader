@@ -44,14 +44,14 @@ import com.sforce.async.OperationEnum;
  */
 public enum OperationInfo {
 
-    insert(InsertAction.class, OperationInfoUIHelper.insert),
-    update(UpdateAction.class, OperationInfoUIHelper.update),
-    upsert(UpsertAction.class, OperationInfoUIHelper.upsert),
-    delete(DeleteAction.class, OperationInfoUIHelper.delete),
-    undelete(UndeleteAction.class, null, OperationInfoUIHelper.undelete),
-    hard_delete(null, BulkLoadAction.class, OperationInfoUIHelper.hard_delete),
-    extract(PartnerExtractAction.class, BulkExtractAction.class, OperationInfoUIHelper.extract),
-    extract_all(PartnerExtractAllAction.class, BulkExtractAction.class, OperationInfoUIHelper.extract_all);
+    insert(InsertAction.class, BulkLoadAction.class, BulkLoadAction.class, OperationInfoUIHelper.insert),
+    update(UpdateAction.class, BulkLoadAction.class, BulkLoadAction.class, OperationInfoUIHelper.update),
+    upsert(UpsertAction.class, BulkLoadAction.class, BulkLoadAction.class, OperationInfoUIHelper.upsert),
+    delete(DeleteAction.class, BulkLoadAction.class, BulkLoadAction.class, OperationInfoUIHelper.delete),
+    undelete(UndeleteAction.class, null, null, OperationInfoUIHelper.undelete),
+    hard_delete(null, BulkLoadAction.class, BulkLoadAction.class, OperationInfoUIHelper.hard_delete),
+    extract(PartnerExtractAction.class, BulkExtractAction.class, BulkExtractAction.class, OperationInfoUIHelper.extract),
+    extract_all(PartnerExtractAllAction.class, BulkExtractAction.class, BulkExtractAction.class, OperationInfoUIHelper.extract_all);
 
     /** all operations, in order */
     public static final OperationInfo[] ALL_OPERATIONS_IN_ORDER = 
@@ -61,23 +61,24 @@ public enum OperationInfo {
 
     private final Class<? extends IAction> partnerAPIActionClass;
     private final Class<? extends IAction> bulkAPIActionClass;
+    private final Class<? extends IAction> bulkV2APIActionClass;
     private final OperationInfoUIHelper uiHelper;
 
-    private OperationInfo(Class<? extends IAction> partnerAPIActionClass, Class<? extends IAction> bulkAPIActionClass,
+    private OperationInfo(Class<? extends IAction> partnerAPIActionClass, Class<? extends IAction> bulkAPIActionClass, Class<? extends IAction> bulkV2APIActionClass,
             OperationInfoUIHelper uiHelper) {
 
         this.partnerAPIActionClass = partnerAPIActionClass;
         this.bulkAPIActionClass = bulkAPIActionClass;
+        this.bulkV2APIActionClass = bulkAPIActionClass;
         this.uiHelper = uiHelper;
-    }
-
-    private OperationInfo(Class<? extends IAction> partnerAPIActionClass,
-            OperationInfoUIHelper uiHelper) {
-        this(partnerAPIActionClass, BulkLoadAction.class, uiHelper);
     }
 
     public boolean bulkAPIEnabled() {
         return this.bulkAPIActionClass != null;
+    }
+    
+    public boolean bulkV2APIEnabled() {
+        return this.bulkV2APIActionClass != null;
     }
 
     public boolean partnerAPIEnabled() {
@@ -86,8 +87,12 @@ public enum OperationInfo {
 
     public IAction instantiateAction(Controller ctl, ILoaderProgress loaderProgress) {
         logger.info(Messages.getMessage(getClass(), "createAction", this));
-        final Class<? extends IAction> cls = ctl.getConfig().isBulkAPIEnabled() && bulkAPIEnabled() ? this.bulkAPIActionClass
-                : this.partnerAPIActionClass;
+        Class<? extends IAction> cls = this.partnerAPIActionClass;
+        if (ctl.getConfig().isBulkAPIEnabled() && bulkAPIEnabled()) {
+            cls = this.bulkAPIActionClass;
+        } else if (ctl.getConfig().isBulkV2APIEnabled() && bulkV2APIEnabled()) {
+            cls = this.bulkV2APIActionClass;
+        }
         try {
             return cls.getConstructor(Controller.class, ILoaderProgress.class).newInstance(ctl, loaderProgress);
         } catch (Exception e) {
@@ -160,8 +165,12 @@ public enum OperationInfo {
     }
 
     public boolean isOperationAllowed(Config cfg) {
-        // all operations are always allowed except hard delete, which requires bulk api
-        return this != hard_delete || cfg.isBulkAPIEnabled();
+        if (cfg.isBulkAPIEnabled()) {
+            return this.bulkAPIActionClass != null;
+        } else if (cfg.isBulkV2APIEnabled()) {
+            return this.bulkV2APIActionClass != null;
+        }
+        return this.partnerAPIActionClass != null;
     }
 
     public ImageDescriptor getIconImageDescriptor() {

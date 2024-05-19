@@ -392,7 +392,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 logger.warn("Failed to close job", e);
             }
             try {
-            	if (this.getConfig().isBulkAPIEnabled())
+            	if (this.getConfig().isBulkAPIEnabled() || this.getConfig().isBulkV2APIEnabled())
                 getResults();
             } catch (AsyncApiException e) {
                 throw new LoadException("Failed to get batch results", e);

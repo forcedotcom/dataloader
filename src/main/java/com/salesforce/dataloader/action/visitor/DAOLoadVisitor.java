@@ -138,9 +138,10 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     @Override
     public boolean visit(Row row) throws OperationException, DataAccessObjectException,
     ConnectionException {
-        if (controller.getConfig().getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
-            || !controller.getConfig().getBoolean(Config.BULK_API_ENABLED)) {
-            // either batch mode or cache bulk data uploaded from DAO
+        Config config = controller.getConfig();
+        if (config.getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+            || (!config.isBulkAPIEnabled() && !config.isBulkV2APIEnabled())) {
+            // either bulk mode or cache bulk data uploaded from DAO
             this.daoRowList.add(row);
         }
         // the result are sforce fields mapped to data

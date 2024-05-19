@@ -150,7 +150,8 @@ public class NAProcessTest extends ProcessTestBase {
         generateCsvWithNAField(nullFieldName, taskId);
         Map<String, String> argMap = getArgMap(operation);
         Controller controller;
-        if (!getController().getConfig().getBoolean(Config.BULK_API_ENABLED) && isDateField) {
+        Config config = getController().getConfig();
+        if (!config.isBulkAPIEnabled() && !config.isBulkV2APIEnabled() && isDateField) {
             controller = runProcess(argMap, true, null, 0, 0, 1, false);
             String errorFile = controller.getConfig().getStringRequired(Config.OUTPUT_ERROR);
             String errorMessage = getCsvFieldValue(errorFile, "ERROR");
