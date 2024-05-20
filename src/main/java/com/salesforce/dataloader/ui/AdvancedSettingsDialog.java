@@ -1126,11 +1126,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
     }
     
     private Link createLink(Composite parent, String labelKey, String[] args, String tooltipKey) {
-        Link l = new Link(parent, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
+        Link l = new Link(parent, SWT.RIGHT | SWT.MULTI);
         GridData data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         data.grabExcessHorizontalSpace = true;
         l.setLayoutData(data);
-        l.setText(Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + "." + labelKey, args));
+        l.setText(Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + "." + labelKey, args)
+                );
         if (tooltipKey != null) {
             l.setToolTipText(Labels.getString(AdvancedSettingsDialog.class.getSimpleName() + "." + tooltipKey));
         }
