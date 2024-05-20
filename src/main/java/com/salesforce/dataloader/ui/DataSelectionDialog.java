@@ -166,9 +166,9 @@ public class DataSelectionDialog extends WizardDialog {
         label.setText(Labels.getFormattedString(
                 "DataSelectionDialog.initSuccess", String.valueOf(totalRows))
                 + "\n\n"
-                + Labels.getString("AdvancedSettingsDialog.importBatchSize")
+                + Labels.getString("LoadPage.importBatchSize")
                 + " "
-                + getController().getConfig().getString(String.valueOf(getController().getConfig().getImportBatchSize()))
+                + getController().getConfig().getImportBatchSize()
                 + "\n"
                 + Labels.getString("AdvancedSettingsDialog.startRow")
                 + " "

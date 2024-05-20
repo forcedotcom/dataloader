@@ -49,6 +49,10 @@ public abstract class ExtractionPage extends OperationPage {
     }
         
     public static String getConfigInfo(Config config) {
+        if (config.isBulkAPIEnabled() || config.isBulkV2APIEnabled()) {
+            return "";
+        }
+        // Batch size settings are applicable only for SOAP API
         return  Labels.getString("ExtractionInputDialog.exportBatchSize")
                 + " "
                 + config.getString(Config.EXPORT_BATCH_SIZE);
