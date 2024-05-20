@@ -155,7 +155,15 @@ public class Controller {
         if (this.partnerClient == null) {
             return null;
         }
-        String apiInfoStr = Labels.getFormattedString("Operation.apiVersion", PartnerClient.getAPIVersionForTheSession());
+        String apiTypeStr = "SOAP API";
+        if (config.isBulkAPIEnabled()) {
+            apiTypeStr = "Bulk API";
+        }
+        if (config.isBulkV2APIEnabled()) {
+            apiTypeStr = "Bulk API 2.0";
+        }
+        String[] args =  {apiTypeStr, PartnerClient.getAPIVersionForTheSession()};
+        String apiInfoStr = Labels.getFormattedString("Operation.apiVersion", args);
         LimitInfo apiLimitInfo = this.partnerClient.getAPILimitInfo();
         if (apiLimitInfo != null) {
             apiInfoStr = Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
