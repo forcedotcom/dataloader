@@ -443,7 +443,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         });
 
         //insert Nulls
-        labelNulls = createLink(soapApiOptionsComposite, "insertNulls", null, null);
+        labelNulls = createLink(soapApiOptionsComposite, "insertNulls", null, "TooltipInsertNulls");
         buttonNulls = new Button(this.soapApiOptionsComposite, SWT.CHECK);
         buttonNulls.setSelection(config.getBoolean(Config.INSERT_NULLS));
 
