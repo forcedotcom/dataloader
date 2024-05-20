@@ -51,7 +51,7 @@ public abstract class LoadPage extends OperationPage {
     
     @Override
     protected String getConfigInfo() {
-        return Labels.getString("AdvancedSettingsDialog.importBatchSize")
+        return Labels.getString("LoadPage.importBatchSize")
         + " "
         + controller.getConfig().getImportBatchSize()
         + "    "
