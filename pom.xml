@@ -4,7 +4,7 @@
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
   <packaging>jar</packaging>
-  <version>61.0.0</version>
+  <version>61.1.0</version>
   <name>Salesforce Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
   <organization>
@@ -48,7 +48,7 @@
     <dependency>
       <groupId>local.swt</groupId>
       <artifactId>swtmac_aarch64</artifactId>
-      <version>4.32M1</version>
+      <version>4.32M3</version>
     </dependency>
 <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
     <dependency>
