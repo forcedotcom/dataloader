@@ -73,7 +73,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Text textUploadCSVDelimiterValue;
     private Text textQueryResultsDelimiterValue;
     private Button buttonNulls;
-    private Link labelNulls;
+    private Text labelNulls;
     private Text textRule;
     private Text textEndpoint;
     private Button buttonCompression;
@@ -104,7 +104,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonWriteUtf8;
     private Button buttonEuroDates;
     private Button buttonTruncateFields;
-    private Link   labelTruncateFields;
+    private Text   labelTruncateFields;
     private Button buttonFormatPhoneFields;
     private Button buttonKeepAccountTeam;
     private Button buttonUpdateWithExternalId;
@@ -443,23 +443,23 @@ public class AdvancedSettingsDialog extends BaseDialog {
         });
 
         //insert Nulls
-        labelNulls = createLink(soapApiOptionsComposite, "insertNulls", null, "TooltipInsertNulls");
+        labelNulls = createLabel(soapApiOptionsComposite, "insertNulls", null, "TooltipInsertNulls");
         buttonNulls = new Button(this.soapApiOptionsComposite, SWT.CHECK);
         buttonNulls.setSelection(config.getBoolean(Config.INSERT_NULLS));
 
         //Field truncation
-        labelTruncateFields = createLink(soapApiOptionsComposite, "allowFieldTruncation", null, null);
+        labelTruncateFields = createLabel(soapApiOptionsComposite, "allowFieldTruncation", null, null);
         buttonTruncateFields = new Button(this.soapApiOptionsComposite, SWT.CHECK);
         buttonTruncateFields.setSelection(config.getBoolean(Config.TRUNCATE_FIELDS));
         
         //insert compression
-        createLink(soapApiOptionsComposite, "compression", null, "TooltipCompression");
+        createLabel(soapApiOptionsComposite, "compression", null, "TooltipCompression");
         buttonCompression = new Button(soapApiOptionsComposite, SWT.CHECK);
         buttonCompression.setSelection(config.getBoolean(Config.NO_COMPRESSION));
         buttonCompression.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipCompression"));
 
         //timeout size
-        createLink(soapApiOptionsComposite, "timeout", null, "TooltipTimeout");
+        createLabel(soapApiOptionsComposite, "timeout", null, "TooltipTimeout");
         textTimeout = new Text(soapApiOptionsComposite, SWT.BORDER);
         textTimeout.setText(config.getString(Config.TIMEOUT_SECS));
         textTimeout.addVerifyListener(new VerifyListener() {
@@ -582,7 +582,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         textRule.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipAssignmentRule"));
 
         //endpoint
-        createLink(restComp, "serverURL", null, null);
+        createLabel(restComp, "serverURL", null, null);
         textEndpoint = new Text(restComp, SWT.BORDER);
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.widthHint = 30 * textSize.x;
@@ -594,61 +594,61 @@ public class AdvancedSettingsDialog extends BaseDialog {
         textEndpoint.setText(endpoint);
 
         //reset url on login
-        createLink(restComp, "resetUrlOnLogin", null, null);
+        createLabel(restComp, "resetUrlOnLogin", null, null);
         buttonResetUrl = new Button(restComp, SWT.CHECK);
         buttonResetUrl.setSelection(config.getBoolean(Config.RESET_URL_ON_LOGIN));
 
         // enable/disable sort of fields to extract
-        createLink(restComp, "sortQueryFieldsInExtraction", null, null);
+        createLabel(restComp, "sortQueryFieldsInExtraction", null, null);
         buttonSortExtractFields = new Button(restComp, SWT.CHECK);
         buttonSortExtractFields.setSelection(config.getBoolean(Config.SORT_EXTRACT_FIELDS));
         
         // enable/disable limiting query result columns to fields specified in the SOQL query
-        createLink(restComp, "limitOutputToQueryFields", null, null);
+        createLabel(restComp, "limitOutputToQueryFields", null, null);
         buttonLimitQueryResultColumnsToFieldsInQuery = new Button(restComp, SWT.CHECK);
         buttonLimitQueryResultColumnsToFieldsInQuery.setSelection(config.getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS));
 
         //enable/disable output of success file for extracts
-        createLink(restComp, "outputExtractStatus", null, null);
+        createLabel(restComp, "outputExtractStatus", null, null);
         buttonOutputExtractStatus = new Button(restComp, SWT.CHECK);
         buttonOutputExtractStatus.setSelection(config.getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT));
 
         //utf-8 for loading
-        createLink(restComp, "readUTF8", null, null);
+        createLabel(restComp, "readUTF8", null, null);
         buttonReadUtf8 = new Button(restComp, SWT.CHECK);
         buttonReadUtf8.setSelection(config.getBoolean(Config.READ_UTF8));
 
         //utf-8 for extraction
-        createLink(restComp, "writeUTF8", null, null);
+        createLabel(restComp, "writeUTF8", null, null);
         buttonWriteUtf8 = new Button(restComp, SWT.CHECK);
         buttonWriteUtf8.setSelection(config.getBoolean(Config.WRITE_UTF8));
 
         //European Dates
-        createLink(restComp, "useEuropeanDateFormat", null, null);
+        createLabel(restComp, "useEuropeanDateFormat", null, null);
         buttonEuroDates = new Button(restComp, SWT.CHECK);
         buttonEuroDates.setSelection(config.getBoolean(Config.EURO_DATES));
 
         //format phone fields on the client side
-        createLink(restComp, "formatPhoneFields", null, null);
+        createLabel(restComp, "formatPhoneFields", null, null);
         buttonFormatPhoneFields = new Button(restComp, SWT.CHECK);
         buttonFormatPhoneFields.setSelection(config.getBoolean(Config.FORMAT_PHONE_FIELDS));
 
-        createLink(restComp, "useCommaAsCsvDelimiter", null, null);
+        createLabel(restComp, "useCommaAsCsvDelimiter", null, null);
         buttonCsvComma = new Button(restComp, SWT.CHECK);
         buttonCsvComma.setSelection(config.getBoolean(Config.CSV_DELIMITER_COMMA));
 
-        createLink(restComp, "useTabAsCsvDelimiter", null, null);
+        createLabel(restComp, "useTabAsCsvDelimiter", null, null);
         buttonCsvTab = new Button(restComp, SWT.CHECK);
         buttonCsvTab.setSelection(config.getBoolean(Config.CSV_DELIMITER_TAB));
 
-        createLink(restComp, "csvOtherDelimiterValue", null, null);
+        createLabel(restComp, "csvOtherDelimiterValue", null, null);
         textUploadCSVDelimiterValue = new Text(restComp, SWT.BORDER);
         textUploadCSVDelimiterValue.setText(config.getString(Config.CSV_DELIMITER_OTHER_VALUE));
         data = new GridData();
         data.widthHint = 15 * textSize.x;
         textUploadCSVDelimiterValue.setLayoutData(data);
 
-        createLink(restComp, "queryResultsDelimiterValue", null, null);
+        createLabel(restComp, "queryResultsDelimiterValue", null, null);
         textQueryResultsDelimiterValue = new Text(restComp, SWT.BORDER);
         textQueryResultsDelimiterValue.setText(config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS));
         textQueryResultsDelimiterValue.setTextLimit(1);
@@ -659,13 +659,13 @@ public class AdvancedSettingsDialog extends BaseDialog {
         
         // include image data for Rich Text Fields in query results
         // Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS
-        createLink(restComp, "includeRTFBinaryDataInQueryResults", null, null);
+        createLabel(restComp, "includeRTFBinaryDataInQueryResults", null, null);
         boolean includeRTFBinaryDataInQueryResults = config.getBoolean(Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS);
         buttonIncludeRTFBinaryDataInQueryResults = new Button(restComp, SWT.CHECK);
         buttonIncludeRTFBinaryDataInQueryResults.setSelection(includeRTFBinaryDataInQueryResults);
 
         // Cache DescribeGlobal results across operations
-        createLink(restComp, "cacheDescribeGlobalResults", null, null);
+        createLabel(restComp, "cacheDescribeGlobalResults", null, null);
         boolean cacheDescribeGlobalResults = config.getBoolean(Config.CACHE_DESCRIBE_GLOBAL_RESULTS);
         buttonCacheDescribeGlobalResults = new Button(restComp, SWT.CHECK);
         buttonCacheDescribeGlobalResults.setSelection(cacheDescribeGlobalResults);        
@@ -689,14 +689,14 @@ public class AdvancedSettingsDialog extends BaseDialog {
         empty.setLayoutData(data);
         
         // proxy Host
-        createLink(restComp, "proxyHost", null, null);
+        createLabel(restComp, "proxyHost", null, null);
         textProxyHost = new Text(restComp, SWT.BORDER);
         textProxyHost.setText(config.getString(Config.PROXY_HOST));
         data = new GridData(GridData.FILL_HORIZONTAL);
         textProxyHost.setLayoutData(data);
 
         //Proxy Port
-        createLink(restComp, "proxyPort", null, null);
+        createLabel(restComp, "proxyPort", null, null);
         textProxyPort = new Text(restComp, SWT.BORDER);
         textProxyPort.setText(config.getString(Config.PROXY_PORT));
         textProxyPort.addVerifyListener(new VerifyListener() {
@@ -711,7 +711,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         textProxyPort.setLayoutData(data);
 
         //Proxy Username
-        createLink(restComp, "proxyUser", null, null);
+        createLabel(restComp, "proxyUser", null, null);
         textProxyUsername = new Text(restComp, SWT.BORDER);
         textProxyUsername.setText(config.getString(Config.PROXY_USERNAME));
         data = new GridData();
@@ -719,7 +719,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         textProxyUsername.setLayoutData(data);
 
         //Proxy Password
-        createLink(restComp, "proxyPassword", null, null);
+        createLabel(restComp, "proxyPassword", null, null);
         textProxyPassword = new Text(restComp, SWT.BORDER | SWT.PASSWORD);
         textProxyPassword.setText(config.getString(Config.PROXY_PASSWORD));
         data = new GridData();
@@ -727,7 +727,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         textProxyPassword.setLayoutData(data);
 
         //proxy NTLM domain
-        createLink(restComp, "proxyNtlmDomain", null, null);
+        createLabel(restComp, "proxyNtlmDomain", null, null);
         textProxyNtlmDomain = new Text(restComp, SWT.BORDER);
         textProxyNtlmDomain.setText(config.getString(Config.PROXY_NTLM_DOMAIN));
         data = new GridData(GridData.FILL_HORIZONTAL);
@@ -738,33 +738,33 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.horizontalSpan = 2;
         empty.setLayoutData(data);
         
-        createLink(restComp, "loginFromBrowser", null, null);
+        createLabel(restComp, "loginFromBrowser", null, null);
         boolean doLoginFromBrowser = config.getBoolean(Config.OAUTH_LOGIN_FROM_BROWSER);
         buttonLoginFromBrowser = new Button(restComp, SWT.CHECK);
         buttonLoginFromBrowser.setSelection(doLoginFromBrowser);
         
-        createLink(restComp, "partnerClientIdInProduction", null, null);
+        createLabel(restComp, "partnerClientIdInProduction", null, null);
         this.textProductionPartnerClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
         textProductionPartnerClientID.setLayoutData(data);
     	String clientId = config.getOAuthEnvironmentString(Config.OAUTH_PROD_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_PARTNER_CLIENTID);
     	this.textProductionPartnerClientID.setText(clientId);
         
-        createLink(restComp, "bulkClientIdInProduction", null, null);
+        createLabel(restComp, "bulkClientIdInProduction", null, null);
         this.textProductionBulkClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
         textProductionBulkClientID.setLayoutData(data);
         clientId = config.getOAuthEnvironmentString(Config.OAUTH_PROD_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_BULK_CLIENTID);
         this.textProductionBulkClientID.setText(clientId);
         
-        createLink(restComp, "partnerClientIdInSandbox", null, null);
+        createLabel(restComp, "partnerClientIdInSandbox", null, null);
         this.textSandboxPartnerClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
         textSandboxPartnerClientID.setLayoutData(data);
     	clientId = config.getOAuthEnvironmentString(Config.OAUTH_SB_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_PARTNER_CLIENTID);
     	this.textSandboxPartnerClientID.setText(clientId);
         
-        createLink(restComp, "bulkClientIdInSandbox", null, null);
+    	createLabel(restComp, "bulkClientIdInSandbox", null, null);
         this.textSandboxBulkClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
         textSandboxBulkClientID.setLayoutData(data);
@@ -783,7 +783,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
             lastBatch = "0"; //$NON-NLS-1$
         }
 
-        Text labelRowToStart = new Text(restComp, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
+        Text labelRowToStart = createLabel(restComp, "startRow", null, null);
         labelRowToStart.setText(Labels.getString("AdvancedSettingsDialog.startRow")
                 + "\n("
                 + Labels.getFormattedString("AdvancedSettingsDialog.lastBatch", lastBatch)
@@ -813,12 +813,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.horizontalSpan = 2;
         blankAgain.setLayoutData(data);
         
-        createLink(restComp, "closeWizardOnFinish", null, null);
+        createLabel(restComp, "closeWizardOnFinish", null, null);
         boolean closeWizardOnFinish = config.getBoolean(Config.WIZARD_CLOSE_ON_FINISH);
         buttonCloseWizardOnFinish = new Button(restComp, SWT.CHECK);
         buttonCloseWizardOnFinish.setSelection(closeWizardOnFinish);
 
-        createLink(restComp, "wizardWidthAndHeight", null, null);
+        createLabel(restComp, "wizardWidthAndHeight", null, null);
         Composite widthAndHeightComp = new Composite(restComp,  SWT.NONE);
         data = new GridData(GridData.FILL_BOTH);
         widthAndHeightComp.setLayoutData(data);
@@ -853,7 +853,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
             }
         });
 
-        createLink(restComp, "populateResultsFolderOnFinishStepOfWizard", null, null);
+        createLabel(restComp, "populateResultsFolderOnFinishStepOfWizard", null, null);
         boolean populateResultsFolderOnFinishStep = config.getBoolean(Config.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER);
         buttonPopulateResultsFolderOnWizardFinishStep = new Button(restComp, SWT.CHECK);
         buttonPopulateResultsFolderOnWizardFinishStep.setSelection(populateResultsFolderOnFinishStep);
@@ -863,11 +863,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.horizontalSpan = 2;
         blankAgain.setLayoutData(data);
 
-        createLink(restComp, "configDir", null, null);
+        createLabel(restComp, "configDir", null, null);
         Text textConfigDirLocation = new Text(restComp, SWT.LEFT | SWT.READ_ONLY);
         textConfigDirLocation.setText(AppUtil.getConfigurationsDir()); //$NON-NLS-1$
 
-        createLink(restComp, "loggingConfigFile", null, null);
+        createLabel(restComp, "loggingConfigFile", null, null);
         String log4j2ConfFile = LoggingUtil.getLoggingConfigFile();
         Text textLoggingFileName = new Text(restComp, SWT.LEFT | SWT.READ_ONLY);
         textLoggingFileName.setText(log4j2ConfFile); //$NON-NLS-1$
@@ -894,7 +894,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
             comboLoggingLevelDropdown.setEnabled(false); // Can't modify current setting
         }
 
-        createLink(restComp, "latestLoggingFile", null, null);
+        createLabel(restComp, "latestLoggingFile", null, null);
         Text textLoggingFileLocation = new Text(restComp, SWT.LEFT | SWT.READ_ONLY);
         textLoggingFileLocation.setText(LoggingUtil.getLatestLoggingFile()); //$NON-NLS-1$
 
@@ -1123,6 +1123,25 @@ public class AdvancedSettingsDialog extends BaseDialog {
             }
         });
         return t;
+    }
+    
+    private Text createLabel(Composite parent, String labelKey, String[] args, String tooltipKey) {
+        Text l = new Text(parent, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
+        GridData data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        data.grabExcessHorizontalSpace = true;
+        l.setLayoutData(data);
+        l.setText(Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + "." + labelKey, args)
+                );
+        if (tooltipKey != null) {
+            l.setToolTipText(Labels.getString(AdvancedSettingsDialog.class.getSimpleName() + "." + tooltipKey));
+        }
+        l.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                URLUtil.openURL(e.text);
+            }
+        });
+        return l;
     }
     
     private Link createLink(Composite parent, String labelKey, String[] args, String tooltipKey) {
