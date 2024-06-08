@@ -180,7 +180,16 @@ public class CsvProcessTest extends ProcessTestBase {
         }
         runProcess(configMap, 100);
     }
-
+    
+    @Test
+    public void testUpdateAccountWithExternalIdCsv() throws Exception {
+        Map<String, String> configMap = getUpdateTestConfig(false, null, 5);
+        if (!isSettingEnabled(configMap, Config.UPDATE_WITH_EXTERNALID)) {
+            return;
+        }
+        runProcess(configMap, 5);
+    }
+    
     /**
      * Upsert the records from CSV file
      */
