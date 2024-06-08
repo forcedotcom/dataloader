@@ -175,6 +175,7 @@ public class CsvProcessTest extends ProcessTestBase {
                 || isSettingEnabled(configMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || isSettingEnabled(configMap, Config.BULK_API_SERIAL_MODE)
                 || isSettingEnabled(configMap, Config.NO_COMPRESSION)
+                || isSettingEnabled(configMap, Config.UPDATE_WITH_EXTERNALID)
                 ) {
             return;
         }
@@ -720,6 +721,7 @@ public class CsvProcessTest extends ProcessTestBase {
                 || isSettingEnabled(argumentMap, Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || isSettingEnabled(argumentMap, Config.BULK_API_SERIAL_MODE)
                 || isSettingEnabled(argumentMap, Config.NO_COMPRESSION)
+                || isSettingEnabled(argumentMap, Config.UPDATE_WITH_EXTERNALID)
                 ) {
             return;
         }
