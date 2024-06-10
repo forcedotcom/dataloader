@@ -381,7 +381,7 @@ public class Controller {
     public CompositeRESTClient getRESTClient() {
         if (this.restClient == null) {
             this.restClient = new CompositeRESTClient(this);
-            connectIfSessionExists(this.bulkV2Client);
+            connectIfSessionExists(this.restClient);
         }
         return this.restClient;
     }/**
