@@ -609,6 +609,13 @@ public class MappingDialog extends WizardDialog {
                 }
                 break;
             case delete:
+                if (getController().getConfig().isRESTAPIEnabled()
+                        && Controller.getAPIMajorVersion() >= 61
+                        && getController().getConfig().getBoolean(Config.DELETE_WITH_EXTERNALID) 
+                        && field.isIdLookup()) {
+                    isMappable = true;
+                }
+                // do not break here. Continue to cover id field.
             case undelete:
             case hard_delete:
                 if (field.getType().toString().toLowerCase().equals("id")) {

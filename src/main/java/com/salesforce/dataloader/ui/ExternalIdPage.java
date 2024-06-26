@@ -35,6 +35,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.sforce.soap.partner.DescribeSObjectResult;
@@ -160,7 +161,8 @@ public class ExternalIdPage extends LoadPage {
         // prepare next page
         LoadPage nextPage = null;
         ChooseLookupFieldForRelationshipPage fkExtIdPage = (ChooseLookupFieldForRelationshipPage) getWizard().getPage(ChooseLookupFieldForRelationshipPage.class.getSimpleName()); //$NON-NLS-1$
-        if(controller.getReferenceDescribes().size() > 0) {
+        if(controller.getConfig().getOperationInfo() != OperationInfo.delete
+            && controller.getReferenceDescribes().size() > 0) {
             nextPage = fkExtIdPage;
         } else {
             nextPage = (LoadPage)getWizard().getPage(MappingPage.class.getSimpleName()); //$NON-NLS-1$

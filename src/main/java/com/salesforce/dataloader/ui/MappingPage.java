@@ -38,6 +38,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.mapping.LoadMapper;
@@ -190,21 +191,26 @@ public class MappingPage extends LoadPage {
 
     public Field[] getFieldTypes() {
         Field[] result;
-        if (!controller.getConfig().getOperationInfo().isDelete()) {
-            Field[] fields = controller.getFieldTypes().getFields();
+        Field[] fields = controller.getFieldTypes().getFields();
+        if (controller.getConfig().getOperationInfo().isDelete()) {
+            ArrayList<Field> refFieldList = new ArrayList<Field>();
+            for (Field field : fields) {
+                if (controller.getConfig().isRESTAPIEnabled()
+                && Controller.getAPIMajorVersion() >= 61
+                && controller.getConfig().getBoolean(Config.DELETE_WITH_EXTERNALID) 
+                && field.isIdLookup()) {
+                    refFieldList.add(field);
+                } else if (field.getType().toString().equalsIgnoreCase("id")) {
+                    refFieldList.add(field);
+                }
+            }
+            result = refFieldList.toArray(new Field[1]);
+        } else {
             if(relatedFields != null) {
                 result = addRelatedFields(fields);
             } else {
                 result = fields;
             }
-        } else {
-            Field[] idFields = new Field[1];
-            Field idField = new Field();
-            idField.setName("Id");
-            idField.setLabel("Id");
-            idField.setType(FieldType.id);
-            idFields[0] = idField;
-            result = idFields;
         }
         return result;
     }
