@@ -36,6 +36,7 @@ import org.apache.logging.log4j.LogManager;
 import org.eclipse.swt.SWT;
 
 import com.salesforce.dataloader.action.OperationInfo;
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 
@@ -151,7 +152,17 @@ public abstract class LoadWizard extends BaseWizard {
         public DeleteWizard(Controller controller) {
             super(controller, OperationInfo.delete);
         }
-
+        
+        @Override
+        protected void hook_additionalLoadWizardPages() {
+            super.hook_additionalLoadWizardPages();
+            if (getController().getConfig().isRESTAPIEnabled()
+                && Controller.getAPIMajorVersion() >= 61
+                && getController().getConfig().getBoolean(Config.DELETE_WITH_EXTERNALID)) {
+                addPage(new ExternalIdPage(getController()));
+            }
+        }
+        
         @Override
         public boolean wizardhook_validateFinish() {
             int button = UIUtils.warningConfMessageBox(getShell(), getLabel("validateFirstLine") //$NON-NLS-1$

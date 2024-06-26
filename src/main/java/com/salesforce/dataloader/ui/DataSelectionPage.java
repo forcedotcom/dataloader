@@ -202,7 +202,7 @@ public class DataSelectionPage extends LoadPage {
             LoadPage nextPage = super.getNextPage();
             LoadPage nextNextPage = nextPage.getNextPage();
             if (Controller.getAPIMajorVersion() < 61 
-                && controller.getConfig().getOperationInfo() == OperationInfo.update) {
+                && controller.getConfig().getOperationInfo() != OperationInfo.upsert) {
                 if (nextPage instanceof ExternalIdPage) {
                     nextPage.setPageComplete(true);
                     nextPage.dispose();

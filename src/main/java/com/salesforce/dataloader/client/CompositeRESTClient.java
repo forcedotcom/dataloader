@@ -56,6 +56,7 @@ import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 
 public class CompositeRESTClient extends ClientBase<RESTConnection> {
+    public static enum ACTION_ENUM {UPDATE, DELETE};
     private static Logger LOG = LogManager.getLogger(BulkV2Client.class);
     private RESTConnection client;
     private ConnectorConfig connectorConfig = null;
@@ -99,8 +100,17 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
     }
 
     @SuppressWarnings("unchecked")
-    public SaveResult[] loadUpdates(List<DynaBean> dynabeans) throws ConnectionException {
-        logger.debug(Messages.getFormattedString("Client.beginOperation", "update")); //$NON-NLS-1$
+    public SaveResult[] loadAction(ACTION_ENUM action, List<DynaBean> dynabeans) throws ConnectionException {
+        String actionStr = "update"; // default
+        switch (action) {
+            case DELETE:
+                actionStr = "delete";
+                break;
+            default:
+                actionStr = "update";
+                break;
+        }
+        logger.debug(Messages.getFormattedString("Client.beginOperation", actionStr)); //$NON-NLS-1$
         ConnectionException connectionException = null;
         try {
             Map<String, Object> batchRecords = this.getSobjectMapForCompositeREST(dynabeans, "update");
@@ -131,6 +141,12 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
                 throw new ConnectionException(message);
             }
             HttpClientTransport transport = new HttpClientTransport(this.connectorConfig);
+    
+            // assume update operation by default and set http method value to PATCH
+            HttpTransportInterface.SupportedHttpMethodType httpMethod = HttpTransportInterface.SupportedHttpMethodType.PATCH;
+            if (action == ACTION_ENUM.DELETE) {
+                httpMethod = HttpTransportInterface.SupportedHttpMethodType.DELETE;
+            }
             try {
                 OutputStream out = transport.connect(
                         this.getConnectorConfig().getRestEndpoint() 
@@ -139,21 +155,19 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
                             + "?updateOnly=true",
                         headers,
                         true,
-                        HttpTransportInterface.SupportedHttpMethodType.PATCH);
+                        httpMethod);
                 out.write(json.getBytes(StandardCharsets.UTF_8.name()));
                 out.close();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                System.exit(-1);
+                logger.error(e.getMessage());
+                throw new ConnectionException(e.getMessage());
             }
             InputStream in = null;
             try {
                 in = transport.getContent();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                System.exit(-1);
+                logger.error(e.getMessage());
+                throw new ConnectionException(e.getMessage());
             }
             boolean successfulRequest = transport.isSuccessful();
             ArrayList<SaveResult> resultList = new ArrayList<SaveResult>();
@@ -162,9 +176,8 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
                 try {
                     jsonResults = AppUtil.deserializeJsonToObject(in, Object[].class);
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    logger.warn("Composite REST returned no results");
-                    throw new ConnectionException();
+                    logger.warn("Composite REST returned no results - " + e.getMessage());
+                    throw new ConnectionException(e.getMessage());
                 }
                 for (Object result : jsonResults) {
                     Map<String, Object> resultMap = (Map<String, Object>)result;
@@ -191,10 +204,9 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
             } else {
                 try {
                     String resultStr = IOUtils.toString(in, StandardCharsets.UTF_8);
-                    System.out.println(resultStr);
+                    logger.warn(resultStr);
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    logger.warn(e.getMessage());
                 }
             }
             this.getSession().performedSessionActivity(); // reset session activity timer
@@ -202,14 +214,13 @@ public class CompositeRESTClient extends ClientBase<RESTConnection> {
         } catch (ConnectionException ex) {
             logger.error(
                     Messages.getFormattedString(
-                            "Client.operationError", new String[]{"update", ex.getMessage()}), ex); //$NON-NLS-1$
+                            "Client.operationError", new String[]{actionStr, ex.getMessage()}), ex); //$NON-NLS-1$
             if (ex instanceof ApiFault) {
                 ApiFault fault = (ApiFault)ex;
                 String faultMessage = fault.getExceptionMessage();
                 logger.error(
                         Messages.getFormattedString(
-                                "Client.operationError", new String[]{"update", faultMessage}), fault); //$NON-NLS-1$
-
+                                "Client.operationError", new String[]{actionStr, faultMessage}), fault); //$NON-NLS-1$
             }
             connectionException = ex;
         }

@@ -36,14 +36,14 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.sforce.ws.ConnectionException;
 
-public class RESTUpdateVisitor extends RESTLoadVisitor {
+public class RESTDeleteVisitor extends RESTLoadVisitor {
 
-    public RESTUpdateVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+    public RESTDeleteVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
     }
 
     protected Object[] executeClientAction(CompositeRESTClient client, List<DynaBean> dynabeans) throws ConnectionException {
-        return client.loadAction(CompositeRESTClient.ACTION_ENUM.UPDATE, dynabeans);
+        return client.loadAction(CompositeRESTClient.ACTION_ENUM.DELETE, dynabeans);
     }
 }

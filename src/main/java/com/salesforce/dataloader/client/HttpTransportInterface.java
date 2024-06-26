@@ -50,7 +50,8 @@ public interface HttpTransportInterface extends Transport {
 	enum SupportedHttpMethodType {
 		PUT,
 		POST,
-		PATCH
+		PATCH,
+		DELETE
 	}
     OutputStream connect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression,
     		HttpTransportInterface.SupportedHttpMethodType httpMethod) throws IOException;

@@ -253,6 +253,7 @@ public class Config {
     public static final String BULK_API_ZIP_CONTENT = "sfdc.bulkApiZipContent";
     public static final String BULKV2_API_ENABLED = "sfdc.useBulkV2Api";
     public static final String UPDATE_WITH_EXTERNALID = "sfdc.updateWithExternalId";
+    public static final String DELETE_WITH_EXTERNALID = "sfdc.deleteWithExternalId";
 
     public static final String WIRE_OUTPUT = "sfdc.wireOutput";
     public static final String TIMEZONE = "sfdc.timezone";
@@ -471,7 +472,8 @@ public class Config {
             RICH_TEXT_FIELD_REGEX,
             DAO_READ_PREPROCESSOR_SCRIPT,
             DAO_WRITE_POSTPROCESSOR_SCRIPT,
-            ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG
+            ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG,
+            DELETE_WITH_EXTERNALID
     };
     
     /**
@@ -623,6 +625,7 @@ public class Config {
         setDefaultValue(BUFFER_UNPROCESSED_BULK_QUERY_RESULTS, false);
         setDefaultValue(BULKV2_API_ENABLED, false);
         setDefaultValue(UPDATE_WITH_EXTERNALID, false);
+        setDefaultValue(DELETE_WITH_EXTERNALID, false);
         setDefaultValue(OAUTH_LOGIN_FROM_BROWSER, true);
         setDefaultValue(LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
         setDefaultValue(Config.CLI_OPTION_RUN_MODE, Config.RUN_MODE_UI_VAL);
