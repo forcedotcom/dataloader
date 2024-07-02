@@ -86,7 +86,8 @@ public final class FileByteArrayConverter implements Converter {
             Path pathToValueFile = Path.of(absolutePath);
             String mimeType = Files.probeContentType(pathToValueFile);
             Config config = Config.getCurrentConfig();
-            if (mimeType.equalsIgnoreCase("text/plain")
+            if (mimeType != null
+                    && mimeType.equalsIgnoreCase("text/plain")
                     && config != null
                     && config.getBoolean(Config.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT)
                     && AppUtil.isContentSObject(config.getString(Config.ENTITY))) {
