@@ -364,7 +364,7 @@ public class BulkV2Connection extends BulkConnection {
         
     	HashMap<String, Object> requestBodyMap = new HashMap<String, Object>();
     	requestBodyMap.put("operation", job.getOperation().toString());
-        if (operation.equals(OperationEnum.query)) {
+        if (controller.getConfig().getOperationInfo().isExtraction()) {
         	headers = getHeaders(JSON_CONTENT_TYPE, CSV_CONTENT_TYPE);
         	requestBodyMap.put("query", job.getObject());        	
         } else {
