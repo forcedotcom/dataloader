@@ -478,9 +478,4 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         }
         return ids;
     }
-
-    protected boolean isBulkV2APIEnabled(Map<String, String> argMap) {
-        // bulk v2 api is not used for query all
-        return !isExtractAll() && super.isBulkV2APIEnabled(argMap);
-    }
 }
