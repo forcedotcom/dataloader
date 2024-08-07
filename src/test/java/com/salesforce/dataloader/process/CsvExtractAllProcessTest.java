@@ -54,7 +54,7 @@ public class CsvExtractAllProcessTest extends ProcessExtractTestBase {
                 // partner API
                 TestVariant.forSettings(TestSetting.BULK_API_DISABLED, TestSetting.BULK_V2_API_DISABLED),
                 // Bulk API
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_DISABLED)
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_DISABLED),
                 // Bulk V2 Query API does not support query_all
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED)
             );
