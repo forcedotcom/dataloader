@@ -73,6 +73,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
     // this stores the dynabeans, which convert types correctly
     protected final List<DynaBean> dynaArray;
+    protected int dynaArraySize = 0;
     private HashMap<Integer, Boolean> rowConversionFailureMap;
 
     protected BasicDynaClass dynaClass = null;
@@ -96,7 +97,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
         this.columnNames = ((DataReader)controller.getDao()).getColumnNames();
 
-        dynaArray = new LinkedList<DynaBean>();
+        dynaArray = new ArrayList<DynaBean>();
 
         SforceDynaBean.registerConverters(getConfig());
 
@@ -205,6 +206,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
                     // see if any entity foreign key references are embedded here
                     Object value = this.getFieldValue(fName, dynaBean.get(fName));
                     dynaBean.set(fName, value);
+                    dynaArraySize += fName.length() + value.toString().length();
                 }
             }
             dynaArray.add(dynaBean);
