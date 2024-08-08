@@ -50,7 +50,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,8 +79,8 @@ abstract class AbstractQueryVisitor extends AbstractVisitor implements IQueryVis
         super(controller, monitor, successWriter, errorWriter);
         this.queryWriter = queryWriter;
         this.soql = getConfig().getString(Config.EXTRACT_SOQL);
-        this.batchRows = new LinkedList<Row>();
-        this.batchIds = new LinkedList<String>();
+        this.batchRows = new ArrayList<Row>();
+        this.batchIds = new ArrayList<String>();
         this.batchSize = getWriteBatchSize();
         this.action = action;
     }

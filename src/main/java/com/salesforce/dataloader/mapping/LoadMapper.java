@@ -37,7 +37,7 @@ import org.apache.logging.log4j.LogManager;
 import org.springframework.util.StringUtils;
 
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -120,7 +120,7 @@ public class LoadMapper extends Mapper {
     
     public List<String> getMappedDaoColumns() {
         Map<String, String> possibleMappings = this.getMappingWithUnmappedColumns(true);
-        LinkedList<String> mappedColList = new LinkedList<String>();
+        ArrayList<String> mappedColList = new ArrayList<String>();
         for (String daoCol : possibleMappings.keySet()) {
             String mappedName = this.map.get(daoCol);
             if (mappedName != null) {

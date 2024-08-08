@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -496,7 +496,7 @@ public class MappingDialog extends WizardDialog {
 
     private void autoMatchFields() {
 
-        LinkedList<Field> fieldList = new LinkedList<Field>(Arrays.asList(sforceFields));
+        ArrayList<Field> fieldList = new ArrayList<Field>(Arrays.asList(sforceFields));
         //first match on name, then label
         ListIterator<Field> iterator = fieldList.listIterator();
         Field field;

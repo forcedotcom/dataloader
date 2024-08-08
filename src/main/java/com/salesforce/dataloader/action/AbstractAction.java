@@ -27,7 +27,7 @@
 package com.salesforce.dataloader.action;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
@@ -333,7 +333,7 @@ abstract class AbstractAction implements IAction {
     }
 
     public void openErrorWriter(List<String> headers) throws OperationException {
-        headers = new LinkedList<String>(headers);
+        headers = new ArrayList<String>(headers);
         Config config = this.controller.getConfig();
 
         if (config.isBulkV2APIEnabled()
@@ -355,7 +355,7 @@ abstract class AbstractAction implements IAction {
     }
 
     public void openSuccessWriter(List<String> headers) throws LoadException {
-        headers = new LinkedList<String>(headers);
+        headers = new ArrayList<String>(headers);
         Config config = this.controller.getConfig();
 
         // add the ID column if not there already

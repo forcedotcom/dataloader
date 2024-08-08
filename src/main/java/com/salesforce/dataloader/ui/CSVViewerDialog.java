@@ -30,7 +30,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
@@ -290,7 +290,7 @@ public class CSVViewerDialog extends Dialog {
      */
     private void updateCSVTable(CSVFileReader csvReader) {
 
-        List<List<Object>> rowList = new LinkedList<List<Object>>();
+        List<List<Object>> rowList = new ArrayList<List<Object>>();
         for (int i = 0; i < numberOfRows; i++) {
             Row rowMap;
             try {
