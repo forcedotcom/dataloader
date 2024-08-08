@@ -352,6 +352,10 @@ class BulkApiVisitorUtil {
     // hack because jobInfo is not updated if an entire batch fails
     private int getNumRecordsProcessedInJob() {
         int numRecordsProcessedInJob = this.jobInfo.getNumberRecordsProcessed();
+        if (config.isBulkV2APIEnabled()) {
+            // Bulk v2 counts all processed records in the total
+            numRecordsProcessedInJob -= this.jobInfo.getNumberRecordsFailed();
+        }
         int numRecordsPerBatch = 0;
         try {
             numRecordsPerBatch = this.config.getInt(Config.IMPORT_BATCH_SIZE);

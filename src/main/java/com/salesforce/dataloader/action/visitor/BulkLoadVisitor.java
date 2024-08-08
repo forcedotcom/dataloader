@@ -174,7 +174,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     private void createBatches() throws OperationException, IOException, AsyncApiException {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        final ByteArrayOutputStream os = new ByteArrayOutputStream(dynaArraySize);
         final PrintStream out = new PrintStream(os, true, Config.BULK_API_ENCODING);
         doOneBatch(out, os, this.dynaArray);
     }
@@ -185,19 +185,38 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final List<String> userColumns = getController().getDao().getColumnNames();
         List<String> headerColumns = null;
         int maxBatchBytes = this.getConfig().isBulkV2APIEnabled() ? Config.MAX_BULKV2_API_IMPORT_JOB_BYTES : Config.MAX_BULK_API_IMPORT_BATCH_BYTES;
+        long startTime = System.currentTimeMillis();
+        long measureTime = System.currentTimeMillis();
+        long elapsedTime = measureTime - startTime;
+        long loopStartTime = measureTime;
+        int timeMeasureGap = 10000;
         for (int i = 0; i < rows.size(); i++) {
+            loopStartTime = System.currentTimeMillis();
+            measureTime = loopStartTime;
             final DynaBean row = rows.get(i);
-
+            if (processedRecordsCount % timeMeasureGap == 0) {
+                elapsedTime = System.currentTimeMillis() - measureTime;
+                logger.debug("rows.get() invocation time after processing 10k records is " + elapsedTime + " msec");
+            }
             if (processedRecordsCount == 0) {
                 headerColumns = addBatchRequestHeader(out, row, userColumns);
             }
+            measureTime = System.currentTimeMillis();
             writeRow(row, out, processedRecordsCount, headerColumns);
+            if (processedRecordsCount % timeMeasureGap == 0) {
+                elapsedTime = System.currentTimeMillis() - measureTime;
+                logger.debug("writeRow() invocation time after processing 10k records is " + elapsedTime + " msec");
+            }
             processedRecordsCount++;
 
             if (os.size() > maxBatchBytes) {
             	createBatch(os, processedRecordsCount); // resets outputstream
                 // reset for the next batch
             	processedRecordsCount = 0;
+            }
+            if (processedRecordsCount % timeMeasureGap == 0) {
+                logger.debug("loop processing time after processing 10k records is " + (System.currentTimeMillis() - loopStartTime) + " msec");
+                logger.debug("total processed = " + processedRecordsCount + "\n\n");
             }
         }
         if (processedRecordsCount > 0) createBatch(os, processedRecordsCount);
