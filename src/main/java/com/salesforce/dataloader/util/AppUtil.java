@@ -309,7 +309,7 @@ public class AppUtil {
         try {
             configurationsDir = configDirFile.getCanonicalPath();
         } catch (IOException e) {
-            logger.error("Unable to get canonical path for configuration folder " + configurationsDir);
+            System.err.println("Unable to find configuration folder " + configurationsDir);
             configurationsDir = configDirFile.getAbsolutePath();
         }
         System.setProperty(CLI_OPTION_CONFIG_DIR_PROP, configurationsDir);
