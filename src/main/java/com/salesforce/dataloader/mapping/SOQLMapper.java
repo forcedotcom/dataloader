@@ -47,7 +47,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -236,12 +236,12 @@ public class SOQLMapper extends Mapper {
 
     private void _mapDaoColumns() {
         if (hasDaoColumns()) {
-            List<Map.Entry<String, String>> soqlBasedMappingEntries = new LinkedList<Map.Entry<String, String>>(getMap().entrySet());
+            List<Map.Entry<String, String>> soqlBasedMappingEntries = new ArrayList<Map.Entry<String, String>>(getMap().entrySet());
 
             clearMap();
 
             // FIXME UGLY, NESTED LOOPS
-            List<String> daoColumns = new LinkedList<String>(getDaoColumns());
+            List<String> daoColumns = new ArrayList<String>(getDaoColumns());
             ListIterator<String> daoColumnIter = daoColumns.listIterator();
             while (daoColumnIter.hasNext()) {
                 String daoColName = daoColumnIter.next();

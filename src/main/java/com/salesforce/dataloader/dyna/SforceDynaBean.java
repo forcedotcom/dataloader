@@ -265,7 +265,7 @@ public class SforceDynaBean {
     }
     
     static public List<String> getFieldsToNull(Controller controller, DynaBean dynaBean) {
-        final List<String> fieldsToNull = new LinkedList<String>();
+        final List<String> fieldsToNull = new ArrayList<String>();
         for (String sfdcField : controller.getMapper().getDestColumns()) {
             handleNull(sfdcField, dynaBean, fieldsToNull, controller);
         }

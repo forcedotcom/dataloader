@@ -227,7 +227,7 @@ public class MappingPage extends LoadPage {
      * @param fields
      */
     private Field[] addRelatedFields(Field[] fields) {
-        List<Field> relatedFieldList = new LinkedList<Field>();
+        List<Field> relatedFieldList = new ArrayList<Field>();
         for(Entry<String,Field> relatedFieldInfo : relatedFields.entrySet()) {
             Field lookupField = relatedFieldInfo.getValue();
             relatedFieldList.add(lookupField);
