@@ -97,8 +97,13 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
         this.columnNames = ((DataReader)controller.getDao()).getColumnNames();
 
-        dynaArray = new ArrayList<DynaBean>();
-
+        List<DynaBean> dynaList = null;
+        try {
+            dynaList = new ArrayList<DynaBean>(((DataReader)controller.getDao()).getTotalRows());
+        } catch (DataAccessObjectException e) {
+            dynaList = new ArrayList<DynaBean>();
+        }
+        dynaArray = dynaList;
         SforceDynaBean.registerConverters(getConfig());
 
         this.batchSize = getConfig().getImportBatchSize();
