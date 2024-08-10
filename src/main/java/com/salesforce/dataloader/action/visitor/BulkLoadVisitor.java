@@ -35,6 +35,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,6 +49,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
@@ -463,24 +467,28 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     	// for Config.OUTPUT_UNPROCESSED_RECORDS
     	// String unprocessedRecordsWriterFile = config.getString(Config.OUTPUT_UNPROCESSED_RECORDS);
 
-        File tmpFile = new File(this.jobUtil.getStagingFileInOutputStatusDir("temp", ".csv"));
-        String tmpFileName = tmpFile.getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
-
     	this.jobUtil.getBulkV2LoadSuccessResults(successWriterFile);
-    	CSVFileReader csvReader = new CSVFileReader(new File(successWriterFile), config, true, false);
-    	this.setSuccesses(csvReader.getTotalRows());
-
-    	this.jobUtil.getBulkV2LoadErrorResults(tmpFileName);
-    	// Append error results to the errors found by data loader before uploading and stored
-    	// in errorWriterFile.
-    	long rowCount = transferCSVContent(tmpFileName, errorWriterFile);
-    	this.setErrors(rowCount);
+    	Charset csvCharset = Charset.forName(config.getCsvEncoding(true));
+    	try (Stream<String> lines = Files.lines(Path.of(successWriterFile), csvCharset)) {
+    	    // subtract 1 from number of lines to account for the header row
+            this.setSuccesses(lines.count()-1);
+    	} catch (IOException e) {
+            CSVFileReader csvReader = new CSVFileReader(new File(successWriterFile), config, true, false);
+            this.setSuccesses(csvReader.getTotalRows());
+        }
+    	
+    	this.jobUtil.getBulkV2LoadErrorResults(errorWriterFile);
+        try (Stream<String> lines = Files.lines(Path.of(errorWriterFile), csvCharset)) {
+            // subtract 1 from number of lines to account for the header row
+            this.setErrors(lines.count()-1);
+        } catch (IOException e) {
+            CSVFileReader csvReader = new CSVFileReader(new File(errorWriterFile), config, true, false);
+            this.setErrors(csvReader.getTotalRows());
+        }
 
         // TODO for unprocessed records
     	// this.jobUtil.getBulkV2LoadUnprocessedRecords(tmpFileName);
     	// transferCSVContent(tmpFileName, unprocessedRecordsWriterFile);
-
-    	tmpFile.delete();
     }
 
     private void getResults() throws AsyncApiException, OperationException, DataAccessObjectException {

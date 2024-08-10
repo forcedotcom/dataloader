@@ -76,6 +76,10 @@ public abstract class AbstractVisitor implements IVisitor {
         this.successes++;
     }
     
+    protected void addErrors() {
+        this.errors++;
+    }
+    
     protected void setSuccesses(long num) {
     	this.successes = num;
     }
@@ -149,7 +153,7 @@ public abstract class AbstractVisitor implements IVisitor {
             }
             this.errorWriter.writeRow(row);
         }
-        this.errors++;
+        addErrors();
     }
 
     protected LoadRateCalculator getRateCalculator() {
