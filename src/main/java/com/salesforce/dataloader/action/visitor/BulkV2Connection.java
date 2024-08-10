@@ -307,15 +307,15 @@ public class BulkV2Connection extends BulkConnection {
     }
     
     public void saveIngestSuccessResults(String jobId, String filename) throws AsyncApiException {
-    	doSaveIngestResults(jobId, filename, INGEST_RESULTS_SUCCESSFUL);
+    	doSaveIngestResults(jobId, filename, INGEST_RESULTS_SUCCESSFUL, false);
     }
     
     public void saveIngestFailureResults(String jobId, String filename) throws AsyncApiException {
-    	doSaveIngestResults(jobId, filename, INGEST_RESULTS_UNSUCCESSFUL);
+    	doSaveIngestResults(jobId, filename, INGEST_RESULTS_UNSUCCESSFUL, true);
     }
     
     public void saveIngestUnprocessedRecords(String jobId, String filename) throws AsyncApiException {
-    	doSaveIngestResults(jobId, filename, INGEST_RECORDS_UNPROCESSED);
+    	doSaveIngestResults(jobId, filename, INGEST_RECORDS_UNPROCESSED, false);
     }
     
     public InputStream getIngestSuccessResultsStream(String jobId) throws AsyncApiException {
@@ -551,18 +551,43 @@ public class BulkV2Connection extends BulkConnection {
         return is;
     }
     
-    private void doSaveIngestResults(String jobId, String filename, String resultsType) throws AsyncApiException {
+    private void doSaveIngestResults(String jobId, String filename, String resultsType, boolean append) throws AsyncApiException {
     	BufferedOutputStream bos;
     	try {
-    		bos = new BufferedOutputStream(new FileOutputStream(filename));
+    		bos = new BufferedOutputStream(new FileOutputStream(filename, append));
     	} catch (FileNotFoundException e) {
 	        throw new AsyncApiException("File " + filename + " not found", AsyncExceptionCode.ClientInputError, e);
     	}
     	BufferedInputStream bis = new BufferedInputStream(doGetIngestResultsStream(jobId, resultsType));
         try {
             byte[] buffer = new byte[2048];
+            boolean firstLineSkipped = !append;
 	        for(int len; (len = bis.read(buffer)) > 0;) {
-	            bos.write(buffer, 0, len);
+	            if (!firstLineSkipped) {
+	                String str = new String(buffer);
+	                if (str.contains("\n")) {
+	                    String[] parts = str.split("\n");
+	                    if (parts.length > 1) {
+	                        str = "";
+	                        for (int i = 1; i < parts.length; i++) {
+	                            if (i > 1) {
+	                                str += System.lineSeparator();
+	                            }
+	                            str += parts[i];
+	                        }
+	                        buffer = str.getBytes(controller.getConfig().getCsvEncoding(true));
+	                        int counter = 0;
+	                        while(counter < buffer.length && buffer[counter] != 0) {
+	                            counter++;
+	                        }
+	                        len = counter;
+	                        firstLineSkipped = true;
+	                    }
+	                }
+	            }
+	            if (firstLineSkipped) {
+	                bos.write(buffer, 0, len);
+	            }
 	        }
         	bis.close();
         	bos.flush();
