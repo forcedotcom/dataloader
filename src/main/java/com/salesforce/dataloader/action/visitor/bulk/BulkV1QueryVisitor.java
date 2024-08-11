@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.action.visitor;
+package com.salesforce.dataloader.action.visitor.bulk;
 
 import java.io.ByteArrayInputStream;
 

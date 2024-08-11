@@ -24,32 +24,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.action.visitor;
+package com.salesforce.dataloader.action.visitor.rest;
 
 import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.client.PartnerClient;
+import com.salesforce.dataloader.client.CompositeRESTClient;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.sforce.ws.ConnectionException;
 
-/**
- * @author Alex Warshavsky
- * @since 8.0
- */
-public class PartnerUpsertVisitor extends PartnerLoadVisitor {
+public class RESTDeleteVisitor extends RESTLoadVisitor {
 
-    public PartnerUpsertVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+    public RESTDeleteVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
     }
 
-    @Override
-    protected Object[] executeClientAction(PartnerClient client, List<DynaBean> dynabeans) throws ConnectionException {
-        return client.loadUpserts(dynabeans);
+    protected Object[] executeClientAction(CompositeRESTClient client, List<DynaBean> dynabeans) throws ConnectionException {
+        return client.loadAction(CompositeRESTClient.ACTION_ENUM.DELETE, dynabeans);
     }
-
 }

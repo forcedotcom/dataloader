@@ -28,7 +28,7 @@
 package com.salesforce.dataloader.action;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.action.visitor.PartnerUpsertVisitor;
+import com.salesforce.dataloader.action.visitor.partner.PartnerUpsertVisitor;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 

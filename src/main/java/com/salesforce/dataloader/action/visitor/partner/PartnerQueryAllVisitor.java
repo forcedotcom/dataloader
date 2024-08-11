@@ -24,32 +24,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.action.visitor;
+package com.salesforce.dataloader.action.visitor.partner;
 
-import java.util.List;
-
-import org.apache.commons.beanutils.DynaBean;
-
+import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
+import com.sforce.soap.partner.QueryResult;
 import com.sforce.ws.ConnectionException;
 
 /**
- * @author Lexi Viripaeff
- * @since 6.0
+ * Visitor which does a partner api queryall operation
+ * 
+ * @author Colin Jarvis
+ * @since 21.0
  */
-public class PartnerUpdateVisitor extends PartnerLoadVisitor {
+public class PartnerQueryAllVisitor extends PartnerQueryVisitor {
 
-    public PartnerUpdateVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter) {
-        super(controller, monitor, successWriter, errorWriter);
+    public PartnerQueryAllVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
+            DataWriter successWriter, DataWriter errorWriter) {
+        super(action, controller, monitor, queryWriter, successWriter, errorWriter);
     }
 
     @Override
-    protected Object[] executeClientAction(PartnerClient client, List<DynaBean> dynabeans) throws ConnectionException {
-        return client.loadUpdates(dynabeans);
+    protected QueryResult getQueryResult(String soql) throws ConnectionException {
+        return getController().getPartnerClient().queryAll(soql);
     }
-
 }

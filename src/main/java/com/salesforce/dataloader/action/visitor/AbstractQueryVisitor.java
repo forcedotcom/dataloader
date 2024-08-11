@@ -64,7 +64,7 @@ import org.apache.logging.log4j.Logger;
  * @author Colin Jarvis
  * @since 21.0
  */
-abstract class AbstractQueryVisitor extends AbstractVisitor implements IQueryVisitor {
+public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQueryVisitor {
 
     private final DataWriter queryWriter;
     private final String soql;

@@ -24,30 +24,60 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.action.visitor;
+package com.salesforce.dataloader.action.visitor.bulk;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
-import com.sforce.soap.partner.QueryResult;
-import com.sforce.ws.ConnectionException;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.ExtractException;
+import com.salesforce.dataloader.exception.OperationException;
+import com.sforce.async.AsyncApiException;
+
 
 /**
- * Visitor which does a partner api queryall operation
+ * Query visitor for bulk api extract operations.
  * 
  * @author Colin Jarvis
  * @since 21.0
  */
-public class PartnerQueryAllVisitor extends PartnerQueryVisitor {
+public class BulkV2QueryVisitor extends AbstractBulkQueryVisitor {
 
-    public PartnerQueryAllVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
+    private String jobId;
+
+    public BulkV2QueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {
         super(action, controller, monitor, queryWriter, successWriter, errorWriter);
     }
 
     @Override
-    protected QueryResult getQueryResult(String soql) throws ConnectionException {
-        return getController().getPartnerClient().queryAll(soql);
+    protected int executeQuery(String soql) throws AsyncApiException, OperationException {
+        final BulkApiVisitorUtil jobUtil = new BulkApiVisitorUtil(getController(), getProgressMonitor(),
+                getRateCalculator(), false);
+        jobUtil.createJob();
+        this.jobId = jobUtil.getJobId();
+        jobUtil.awaitCompletionAndCloseJob();
+        return jobUtil.getRecordsProcessed();
+    }
+
+    @Override
+    protected void writeExtraction() throws AsyncApiException, ExtractException, DataAccessObjectException {
+        BulkV2Connection v2Conn = getController().getBulkV2Client().getConnection();
+        try {
+            InputStream serverResultStream = v2Conn.getQueryResultStream(this.jobId, "");
+            writeExtractionForServerStream(serverResultStream);
+            String locator = v2Conn.getQueryLocator();
+            while (!"null".equalsIgnoreCase(locator)) {
+                serverResultStream = v2Conn.getQueryResultStream(this.jobId, locator);
+                writeExtractionForServerStream(serverResultStream);
+                locator = v2Conn.getQueryLocator();
+            }
+        }   catch (final IOException e) {
+            throw new ExtractException(e);
+        }
     }
 }

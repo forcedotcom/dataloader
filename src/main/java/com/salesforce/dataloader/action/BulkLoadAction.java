@@ -29,8 +29,8 @@ package com.salesforce.dataloader.action;
 import java.util.List;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.action.visitor.BulkLoadVisitor;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
+import com.salesforce.dataloader.action.visitor.bulk.BulkLoadVisitor;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.mapping.LoadMapper;

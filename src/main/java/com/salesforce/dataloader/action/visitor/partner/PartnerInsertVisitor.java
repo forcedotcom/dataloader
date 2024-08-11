@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.action.visitor;
+package com.salesforce.dataloader.action.visitor.partner;
 
 import java.util.List;
 
@@ -40,15 +40,16 @@ import com.sforce.ws.ConnectionException;
  * @author Lexi Viripaeff
  * @since 6.0
  */
-public class PartnerDeleteVisitor extends PartnerLoadVisitor {
+public class PartnerInsertVisitor extends PartnerLoadVisitor {
 
-    public PartnerDeleteVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+    public PartnerInsertVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
     }
 
     @Override
     protected Object[] executeClientAction(PartnerClient client, List<DynaBean> dynabeans) throws ConnectionException {
-        return client.loadDeletes(dynabeans);
+        return client.loadInserts(dynabeans);
     }
+
 }
