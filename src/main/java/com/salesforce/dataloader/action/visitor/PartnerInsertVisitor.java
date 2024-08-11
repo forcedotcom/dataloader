@@ -40,15 +40,16 @@ import com.sforce.ws.ConnectionException;
  * @author Lexi Viripaeff
  * @since 6.0
  */
-public class UndeleteVisitor extends PartnerLoadVisitor {
+public class PartnerInsertVisitor extends PartnerLoadVisitor {
 
-    public UndeleteVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+    public PartnerInsertVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
     }
 
     @Override
     protected Object[] executeClientAction(PartnerClient client, List<DynaBean> dynabeans) throws ConnectionException {
-        return client.loadUndeletes(dynabeans);
+        return client.loadInserts(dynabeans);
     }
+
 }

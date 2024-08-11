@@ -37,19 +37,19 @@ import com.salesforce.dataloader.dao.DataWriter;
 import com.sforce.ws.ConnectionException;
 
 /**
- * @author Alex Warshavsky
- * @since 8.0
+ * @author Lexi Viripaeff
+ * @since 6.0
  */
-public class UpsertVisitor extends PartnerLoadVisitor {
+public class PartnerUpdateVisitor extends PartnerLoadVisitor {
 
-    public UpsertVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+    public PartnerUpdateVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
     }
 
     @Override
     protected Object[] executeClientAction(PartnerClient client, List<DynaBean> dynabeans) throws ConnectionException {
-        return client.loadUpserts(dynabeans);
+        return client.loadUpdates(dynabeans);
     }
 
 }

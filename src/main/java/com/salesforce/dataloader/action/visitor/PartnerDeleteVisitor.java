@@ -40,9 +40,9 @@ import com.sforce.ws.ConnectionException;
  * @author Lexi Viripaeff
  * @since 6.0
  */
-public class DeleteVisitor extends PartnerLoadVisitor {
+public class PartnerDeleteVisitor extends PartnerLoadVisitor {
 
-    public DeleteVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+    public PartnerDeleteVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
     }
