@@ -23,35 +23,30 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package com.salesforce.dataloader.action.visitor.bulk;
 
-package com.salesforce.dataloader.action;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import com.salesforce.dataloader.client.ClientBase;
+import com.sforce.async.AsyncApiException;
+import com.sforce.async.BulkConnection;
+import com.sforce.ws.ConnectorConfig;
 
-import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
-import com.salesforce.dataloader.action.visitor.partner.PartnerDeleteVisitor;
-import com.salesforce.dataloader.action.visitor.rest.RESTDeleteVisitor;
-import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.exception.DataAccessObjectException;
+public class BulkV1Connection extends BulkConnection {
+    private static Logger logger = LogManager.getLogger(BulkV1Connection.class);
 
-/**
- * @author Lexi Viripaeff
- */
-class DeleteAction extends AbstractLoadAction {
-
-    public DeleteAction(Controller controller, ILoaderProgress monitor) throws DataAccessObjectException {
-        super(controller, monitor);
+    public BulkV1Connection(ConnectorConfig config) throws AsyncApiException {
+        super(config);
+        
+        // This is needed to set the correct client name in Bulk V1 calls
+        addHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER, config.getRequestHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER));
     }
-
-    @Override
-    protected DAOLoadVisitor createVisitor() {
-        if (getController().getConfig().isRESTAPIEnabled()
-                && getController().getConfig().getBoolean(Config.DELETE_WITH_EXTERNALID)) {
-            return new RESTDeleteVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
-        } else {
-            return new PartnerDeleteVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
+    
+    public void addHeader(String headerName, String headerValue) {
+        super.addHeader(headerName, headerValue);
+        if (ClientBase.SFORCE_CALL_OPTIONS_HEADER.equalsIgnoreCase(headerName)) {
+            logger.debug(ClientBase.SFORCE_CALL_OPTIONS_HEADER + " : " + headerValue);
         }
     }
-
 }

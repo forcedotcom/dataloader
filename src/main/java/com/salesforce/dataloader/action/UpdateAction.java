@@ -27,8 +27,8 @@ package com.salesforce.dataloader.action;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
-import com.salesforce.dataloader.action.visitor.RESTUpdateVisitor;
-import com.salesforce.dataloader.action.visitor.UpdateVisitor;
+import com.salesforce.dataloader.action.visitor.partner.PartnerUpdateVisitor;
+import com.salesforce.dataloader.action.visitor.rest.RESTUpdateVisitor;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 
@@ -46,7 +46,7 @@ class UpdateAction extends AbstractLoadAction {
         if (getController().getConfig().isRESTAPIEnabled()) {
             return new RESTUpdateVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
         } else {
-            return new UpdateVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
+            return new PartnerUpdateVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
         }
     }
 

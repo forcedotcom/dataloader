@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.action.visitor;
+package com.salesforce.dataloader.action.visitor.bulk;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,6 +36,7 @@ import java.util.List;
 
 import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
+import com.salesforce.dataloader.action.visitor.AbstractQueryVisitor;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;

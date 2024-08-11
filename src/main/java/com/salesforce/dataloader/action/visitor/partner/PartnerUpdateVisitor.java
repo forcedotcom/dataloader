@@ -24,26 +24,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.action.visitor;
+package com.salesforce.dataloader.action.visitor.partner;
 
 import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.client.CompositeRESTClient;
+import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.sforce.ws.ConnectionException;
 
-public class RESTUpdateVisitor extends RESTLoadVisitor {
+/**
+ * @author Lexi Viripaeff
+ * @since 6.0
+ */
+public class PartnerUpdateVisitor extends PartnerLoadVisitor {
 
-    public RESTUpdateVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+    public PartnerUpdateVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
     }
 
-    protected Object[] executeClientAction(CompositeRESTClient client, List<DynaBean> dynabeans) throws ConnectionException {
-        return client.loadAction(CompositeRESTClient.ACTION_ENUM.UPDATE, dynabeans);
+    @Override
+    protected Object[] executeClientAction(PartnerClient client, List<DynaBean> dynabeans) throws ConnectionException {
+        return client.loadUpdates(dynabeans);
     }
+
 }

@@ -23,30 +23,32 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader.action.visitor;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+package com.salesforce.dataloader.action.visitor.partner;
 
-import com.salesforce.dataloader.client.ClientBase;
-import com.sforce.async.AsyncApiException;
-import com.sforce.async.BulkConnection;
-import com.sforce.ws.ConnectorConfig;
+import java.util.List;
 
-public class BulkV1Connection extends BulkConnection {
-    private static Logger logger = LogManager.getLogger(BulkV1Connection.class);
+import org.apache.commons.beanutils.DynaBean;
 
-    public BulkV1Connection(ConnectorConfig config) throws AsyncApiException {
-        super(config);
-        
-        // This is needed to set the correct client name in Bulk V1 calls
-        addHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER, config.getRequestHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER));
+import com.salesforce.dataloader.action.progress.ILoaderProgress;
+import com.salesforce.dataloader.client.PartnerClient;
+import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.dao.DataWriter;
+import com.sforce.ws.ConnectionException;
+
+/**
+ * @author Lexi Viripaeff
+ * @since 6.0
+ */
+public class PartnerDeleteVisitor extends PartnerLoadVisitor {
+
+    public PartnerDeleteVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+            DataWriter errorWriter) {
+        super(controller, monitor, successWriter, errorWriter);
     }
-    
-    public void addHeader(String headerName, String headerValue) {
-        super.addHeader(headerName, headerValue);
-        if (ClientBase.SFORCE_CALL_OPTIONS_HEADER.equalsIgnoreCase(headerName)) {
-            logger.debug(ClientBase.SFORCE_CALL_OPTIONS_HEADER + " : " + headerValue);
-        }
+
+    @Override
+    protected Object[] executeClientAction(PartnerClient client, List<DynaBean> dynabeans) throws ConnectionException {
+        return client.loadDeletes(dynabeans);
     }
 }

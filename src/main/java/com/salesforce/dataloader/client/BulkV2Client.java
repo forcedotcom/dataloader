@@ -28,7 +28,7 @@ package com.salesforce.dataloader.client;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.salesforce.dataloader.action.visitor.BulkV2Connection;
+import com.salesforce.dataloader.action.visitor.bulk.BulkV2Connection;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.sforce.async.AsyncApiException;

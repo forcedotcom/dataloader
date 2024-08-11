@@ -29,7 +29,7 @@ package com.salesforce.dataloader.action;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
-import com.salesforce.dataloader.action.visitor.UndeleteVisitor;
+import com.salesforce.dataloader.action.visitor.partner.PartnerUndeleteVisitor;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 
@@ -44,7 +44,7 @@ class UndeleteAction extends AbstractLoadAction {
 
     @Override
     protected DAOLoadVisitor createVisitor() {
-        return new UndeleteVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
+        return new PartnerUndeleteVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
     }
 
 }

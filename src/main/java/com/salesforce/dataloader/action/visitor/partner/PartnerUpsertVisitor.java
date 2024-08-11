@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.action.visitor;
+package com.salesforce.dataloader.action.visitor.partner;
 
 import java.util.List;
 
@@ -37,18 +37,19 @@ import com.salesforce.dataloader.dao.DataWriter;
 import com.sforce.ws.ConnectionException;
 
 /**
- * @author Lexi Viripaeff
- * @since 6.0
+ * @author Alex Warshavsky
+ * @since 8.0
  */
-public class UndeleteVisitor extends PartnerLoadVisitor {
+public class PartnerUpsertVisitor extends PartnerLoadVisitor {
 
-    public UndeleteVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+    public PartnerUpsertVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
     }
 
     @Override
     protected Object[] executeClientAction(PartnerClient client, List<DynaBean> dynabeans) throws ConnectionException {
-        return client.loadUndeletes(dynabeans);
+        return client.loadUpserts(dynabeans);
     }
+
 }

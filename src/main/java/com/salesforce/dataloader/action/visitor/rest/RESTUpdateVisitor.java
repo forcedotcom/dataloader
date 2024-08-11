@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.action.visitor;
+package com.salesforce.dataloader.action.visitor.rest;
 
 import java.util.List;
 
@@ -36,14 +36,14 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.sforce.ws.ConnectionException;
 
-public class RESTDeleteVisitor extends RESTLoadVisitor {
+public class RESTUpdateVisitor extends RESTLoadVisitor {
 
-    public RESTDeleteVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+    public RESTUpdateVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
     }
 
     protected Object[] executeClientAction(CompositeRESTClient client, List<DynaBean> dynabeans) throws ConnectionException {
-        return client.loadAction(CompositeRESTClient.ACTION_ENUM.DELETE, dynabeans);
+        return client.loadAction(CompositeRESTClient.ACTION_ENUM.UPDATE, dynabeans);
     }
 }
