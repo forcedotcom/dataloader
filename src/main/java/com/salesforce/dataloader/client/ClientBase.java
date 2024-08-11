@@ -96,6 +96,7 @@ public abstract class ClientBase<ConnectionType> {
     private static final String PARTNER_API_CLIENT_TYPE = "Partner";
     private static final String BATCH_CLIENT_STRING = "Batch";
     private static final String UI_CLIENT_STRING = "UI";
+    public static final String SFORCE_CALL_OPTIONS_HEADER = "Sforce-Call-Options";
 
     public static String getClientName(Config cfg) {
         String apiType = PARTNER_API_CLIENT_TYPE;
@@ -123,7 +124,7 @@ public abstract class ClientBase<ConnectionType> {
         ConnectorConfig cc = new ConnectorConfig();
         cc.setTransport(HttpClientTransport.class);
         cc.setSessionId(getSessionId());
-        cc.setRequestHeader("Sforce-Call-Options",
+        cc.setRequestHeader(SFORCE_CALL_OPTIONS_HEADER,
                 "client=" + ClientBase.getClientName(this.config));      
         // set authentication credentials
         // blank username is not acceptible
