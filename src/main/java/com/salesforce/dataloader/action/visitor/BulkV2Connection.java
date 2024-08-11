@@ -149,6 +149,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
@@ -179,7 +180,6 @@ public class BulkV2Connection extends BulkConnection {
     private static final String AUTH_HEADER = "Authorization";
     private static final String REQUEST_CONTENT_TYPE_HEADER = "Content-Type";
     private static final String ACCEPT_CONTENT_TYPES_HEADER = "ACCEPT";
-    private static final String SFORCE_CALL_OPTIONS_HEADER = "Sforce-Call-Options";
     private static final String AUTH_HEADER_VALUE_PREFIX = "Bearer ";
     private static final String UTF_8 = StandardCharsets.UTF_8.name();
     private static final String INGEST_RESULTS_SUCCESSFUL = "successfulResults";
@@ -501,8 +501,8 @@ public class BulkV2Connection extends BulkConnection {
 	    newMap.put(REQUEST_CONTENT_TYPE_HEADER, requestContentType);
 	    newMap.put(ACCEPT_CONTENT_TYPES_HEADER, acceptContentType);
 	    newMap.put(AUTH_HEADER, authHeaderValue);
-	    newMap.put(SFORCE_CALL_OPTIONS_HEADER, getConfig().getRequestHeader("Sforce-Call-Options"));
-	    logger.debug("Sforce-Call-Options : " + getConfig().getRequestHeader("Sforce-Call-Options"));
+	    newMap.put(ClientBase.SFORCE_CALL_OPTIONS_HEADER, getConfig().getRequestHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER));
+	    logger.debug(ClientBase.SFORCE_CALL_OPTIONS_HEADER + " : " + getConfig().getRequestHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER));
 	    for (Map.Entry<String, String> entry : headers.entrySet()) {
             newMap.put(entry.getKey(), entry.getValue());
         }

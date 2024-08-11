@@ -28,25 +28,25 @@ package com.salesforce.dataloader.action.visitor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.salesforce.dataloader.client.ClientBase;
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.BulkConnection;
 import com.sforce.ws.ConnectorConfig;
 
 public class BulkV1Connection extends BulkConnection {
-    private static final String SFORCE_CALL_OPTIONS_HEADER = "Sforce-Call-Options";
     private static Logger logger = LogManager.getLogger(BulkV1Connection.class);
 
     public BulkV1Connection(ConnectorConfig config) throws AsyncApiException {
         super(config);
         
         // This is needed to set the correct client name in Bulk V1 calls
-        addHeader(SFORCE_CALL_OPTIONS_HEADER, config.getRequestHeader("Sforce-Call-Options"));
+        addHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER, config.getRequestHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER));
     }
     
     public void addHeader(String headerName, String headerValue) {
         super.addHeader(headerName, headerValue);
-        if ("Sforce-Call-Options".equalsIgnoreCase(headerName)) {
-            logger.debug("Sforce-Call-Options : " + headerValue);
+        if (ClientBase.SFORCE_CALL_OPTIONS_HEADER.equalsIgnoreCase(headerName)) {
+            logger.debug(ClientBase.SFORCE_CALL_OPTIONS_HEADER + " : " + headerValue);
         }
     }
 }
