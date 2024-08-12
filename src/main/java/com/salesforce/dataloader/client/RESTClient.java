@@ -23,44 +23,31 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 package com.salesforce.dataloader.client;
 
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.salesforce.dataloader.action.visitor.bulk.BulkV2Connection;
-import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
-import com.sforce.async.AsyncApiException;
 import com.sforce.ws.ConnectorConfig;
 
-public class BulkV2Client extends RESTClient<BulkV2Connection> {
-    private static Logger LOG = LogManager.getLogger(BulkV2Client.class);
+public abstract class RESTClient<ConnectionType> extends ClientBase<ConnectionType> {
 
-    public BulkV2Client(Controller controller) {
-        super(controller, LOG);
+    public RESTClient(Controller controller, Logger logger) {
+        super(controller, logger);
+        // TODO Auto-generated constructor stub
+    }
+
+    @Override
+    public synchronized ConnectorConfig getConnectorConfig() {
+        ConnectorConfig connectorConfig = super.getConnectorConfig();
+        // override the restEndpoint value set in the superclass
+        String server = getSession().getServer();
+        if (server != null) {
+            connectorConfig.setRestEndpoint(server + getServiceURLPath());
+        }
+        return connectorConfig;
     }
     
-    @Override
-    protected boolean connectPostLogin(ConnectorConfig cc) {
-        try {
-            // Set up a connection object with the given config
-            setConnection(new BulkV2Connection(cc, controller));
-        } catch (AsyncApiException e) {
-            logger.error(Messages.getMessage(getClass(), "loginError", cc.getAuthEndpoint(), e.getExceptionMessage()),
-                    e);
-            // Wrap exception. Otherwise, we'll have to change lots of signatures
-            throw new RuntimeException(e.getExceptionMessage(), e);
-        }
-        return true;
-    }
-
-    public static String getServicePath() {
-        return  "/services/data/v" + getAPIVersionForTheSession() + "/jobs/";
-    }
-
-    @Override
-    public String getServiceURLPath() {
-        return getServicePath();
-    }
+    public abstract String getServiceURLPath();
 }

@@ -87,7 +87,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     private static Logger LOG = LogManager.getLogger(PartnerClient.class);
 
-    PartnerConnection connection;
     private ConnectorConfig connectorConfig = null;
 
     private static interface ClientOperation<RESULT, ARG> {
@@ -518,11 +517,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
     }
 
-    @Override
-    public PartnerConnection getConnection() {
-        return this.connection;
-    }
-
     public Map<String, DescribeGlobalSObjectResult> getDescribeGlobalResults() {
         if (this.describeGlobalResults == null || !config.getBoolean(Config.CACHE_DESCRIBE_GLOBAL_RESULTS)) {
             this.describeGlobalResultsMap.clear();
@@ -694,7 +688,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private void loginSuccess(PartnerConnection conn, String serv, GetUserInfoResult userInfo) {
-        this.connection = conn;
+        setConnection(conn);
         setSession(conn.getSessionHeader().getSessionId(), serv, userInfo);
     }
 
@@ -730,7 +724,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     public void disconnect() {
         clearSession();
-        this.connection = null;
+        setConnection(null);
     }
 
     /**

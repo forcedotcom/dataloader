@@ -68,13 +68,20 @@ public abstract class ClientBase<ConnectionType> {
     protected final Logger logger;
     protected final Controller controller;
     protected final Config config;
+    private ConnectionType connectionType;
 
     private SessionInfo session = new SessionInfo();
 
     protected abstract boolean connectPostLogin(ConnectorConfig connectorConfig);
 
-    public abstract ConnectionType getConnection();
-
+    public ConnectionType getConnection() {
+        return this.connectionType;
+    }
+    
+    protected void setConnection(ConnectionType connType) {
+        this.connectionType = connType;
+    }
+    
     protected ClientBase(Controller controller, Logger logger) {
         this.controller = controller;
         this.config = controller.getConfig();
