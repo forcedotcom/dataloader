@@ -324,6 +324,10 @@ public class Controller {
             this.loaderWindow.updateTitle(null);
         }
     }
+    
+    public LoaderWindow getLoaderWindow() {
+        return this.loaderWindow;
+    }
 
     public static synchronized Controller getInstance(Map<String, String> argsMap) throws ControllerInitializationException, ParameterLoadException, ConfigInitializationException {
         logger = LogManager.getLogger(Controller.class);

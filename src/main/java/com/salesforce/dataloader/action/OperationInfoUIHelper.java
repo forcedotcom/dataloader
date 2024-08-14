@@ -143,7 +143,7 @@ public enum OperationInfoUIHelper {
 
     public boolean isOperationAllowed(Config cfg) {
         // all operations are always allowed except hard delete, which requires bulk api
-        return this != hard_delete || cfg.isBulkAPIEnabled();
+        return this != hard_delete || cfg.isBulkAPIEnabled() || cfg.isBulkV2APIEnabled();
     }
 
     public Image getIconImage() {

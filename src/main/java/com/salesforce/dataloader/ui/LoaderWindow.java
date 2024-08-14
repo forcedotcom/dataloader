@@ -101,28 +101,20 @@ public class LoaderWindow extends ApplicationWindow {
         addMenuBar();
         addStatusLine();
         this.controller = controller;
-
-        final ConfigListener listener = new ConfigListener() {
-            @Override
-            public void configValueChanged(String key, String oldValue, String newValue) {
-                if (Config.BULK_API_ENABLED.equals(key)) {
-                    boolean isBulkApiEnabled = false;
-                    if (newValue != null) isBulkApiEnabled = Boolean.valueOf(newValue);
-                    LoaderWindow.this.operationButtonsByIndex.get(OperationInfo.hard_delete).setEnabled(isBulkApiEnabled);
-                    LoaderWindow.this.operationActionsByIndex.get(OperationInfo.hard_delete.getDialogIdx()).setEnabled(
-                            isBulkApiEnabled);
-                    
-                    // disable Undelete button and action if bulk API is enabled
-                    LoaderWindow.this.operationButtonsByIndex.get(OperationInfo.undelete).setEnabled(!isBulkApiEnabled);
-                    LoaderWindow.this.operationActionsByIndex.get(OperationInfo.undelete.getDialogIdx()).setEnabled(
-                            !isBulkApiEnabled);
-                    getShell().redraw();
-                }
-            }
-        };
-
-        this.controller.getConfig().addListener(listener);
-
+    }
+    
+    public void refresh() {
+        Config config = controller.getConfig();
+        boolean isBulkApiFlavorEnabled = config.isBulkAPIEnabled() || config.isBulkV2APIEnabled();
+        LoaderWindow.this.operationButtonsByIndex.get(OperationInfo.hard_delete).setEnabled(isBulkApiFlavorEnabled);
+        LoaderWindow.this.operationActionsByIndex.get(OperationInfo.hard_delete.getDialogIdx()).setEnabled(
+                isBulkApiFlavorEnabled);
+        
+        // disable Undelete button and action if bulk API is enabled
+        LoaderWindow.this.operationButtonsByIndex.get(OperationInfo.undelete).setEnabled(!isBulkApiFlavorEnabled);
+        LoaderWindow.this.operationActionsByIndex.get(OperationInfo.undelete.getDialogIdx()).setEnabled(
+                !isBulkApiFlavorEnabled);
+        getShell().redraw();
     }
 
     public void dispose() {

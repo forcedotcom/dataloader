@@ -1037,6 +1037,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                     }
                 }
                 getController().saveConfig();
+                getController().getLoaderWindow().refresh();
                 shell.close();
             }
         });
