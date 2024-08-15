@@ -43,6 +43,7 @@ import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
+import com.salesforce.dataloader.dao.DAORowCache;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
@@ -70,6 +71,8 @@ public class CSVFileReader implements DataReader {
     private boolean isOpen;
     private char[] csvDelimiters;
     private Config config;
+    private DAORowCache rowCache = new DAORowCache();
+    private boolean endOfFileReached = false;
 
     // Handles 3 types of CSV files:
     // 1. CSV files provided by the user for upload operations: ignoreDelimiterConfig = false, isQueryOperationResult = false
@@ -122,6 +125,7 @@ public class CSVFileReader implements DataReader {
             close();
         }
         currentRowNumber = 0;
+        rowCache.resetCurrentRowIndex();
 
         initalizeInput(csvDelimiters);
         readHeaderRow();
@@ -167,7 +171,18 @@ public class CSVFileReader implements DataReader {
         if (!isOpen) {
             open();
         }
-
+        
+        Row row = rowCache.getCurrentRow();
+        if (row != null) {
+            currentRowNumber++;
+            return row;
+        }
+        
+        if (config.getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+            && endOfFileReached) {
+            return null;
+        }
+        
         List<String> record;
         synchronized (lock) {
             try {
@@ -178,6 +193,7 @@ public class CSVFileReader implements DataReader {
         }
 
         if (!DAORowUtil.isValidRow(record)) {
+            endOfFileReached = true;
             return null;
         }
 
@@ -191,7 +207,7 @@ public class CSVFileReader implements DataReader {
             throw new DataAccessRowException(errMsg);
         }
 
-        Row row = new Row(record.size());
+        row = new Row(record.size());
 
         for (int i = 0; i < headerRow.size(); i++) {
             String value = record.get(i);
@@ -201,6 +217,7 @@ public class CSVFileReader implements DataReader {
             row.put(headerRow.get(i), value);
         }
         currentRowNumber++;
+        rowCache.addRow(row);
         return row;
     }
 
