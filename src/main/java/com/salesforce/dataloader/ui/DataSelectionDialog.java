@@ -123,7 +123,6 @@ public class DataSelectionDialog extends WizardDialog {
         List<String> header = null;
         int totalRows = 0;
         try {
-            dataReader.checkConnection();
             dataReader.open();
 
             String error = DAORowUtil.validateColumns(dataReader);

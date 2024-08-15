@@ -36,6 +36,7 @@ import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
+import com.salesforce.dataloader.dao.DAORowCache;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.util.DAORowUtil;
@@ -60,6 +61,8 @@ public class DatabaseReader implements DataReader {
     private int currentRowNumber = 0;
     private final SqlConfig sqlConfig;
     private final DatabaseContext dbContext;
+    private boolean endOfDBReached = false;
+    private DAORowCache rowCache = new DAORowCache();
 
     /**
      * Get an instance of database reader for the data access object name from configuration
@@ -98,6 +101,7 @@ public class DatabaseReader implements DataReader {
     @Override
     public void open() throws DataAccessObjectInitializationException {
         open(null);
+        rowCache.resetCurrentRowIndex();
     }
 
     /**
@@ -174,12 +178,20 @@ public class DatabaseReader implements DataReader {
 
     @Override
     public Row readRow() throws DataAccessObjectException {
-        Row row = null;
-
         if (!dbContext.isOpen()) {
             open();
         }
-
+        
+        Row row = rowCache.getCurrentRow();
+        if (row != null) {
+            currentRowNumber++;
+            return row;
+        }
+        if (config.getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+            && endOfDBReached) {
+            return null;
+        }
+            
         String currentColumnName = "";
         try {
             ResultSet rs = dbContext.getDataResultSet();
@@ -191,7 +203,11 @@ public class DatabaseReader implements DataReader {
                     Object value = rs.getObject(columnName);
                     row.put(columnName, value);
                 }
+                rowCache.addRow(row);
                 currentRowNumber++;
+            }
+            if (row == null) {
+                endOfDBReached = true;
             }
             return row;
         } catch (SQLException sqe) {
