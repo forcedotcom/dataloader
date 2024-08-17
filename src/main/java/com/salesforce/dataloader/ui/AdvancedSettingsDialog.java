@@ -107,6 +107,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Text   labelTruncateFields;
     private Button buttonFormatPhoneFields;
     private Button buttonKeepAccountTeam;
+    private Button buttonUndeleteEnabled;
+    private Button buttonHardDeleteEnabled;
     private Button buttonUpdateWithExternalId;
     private Link   labelUpdateWithExternalId;
     private Button buttonCacheDescribeGlobalResults;
@@ -191,6 +193,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
         enableApiOptions(selectedButton, true);
         setEnabled(this.exportBatchSizeComposite, useSoapAPI);
         setEnabled(this.importBatchSizeComposite, !useBulkV2API);
+        this.buttonUndeleteEnabled.setSelection(useSoapAPI);
+        this.buttonHardDeleteEnabled.setSelection(!useSoapAPI);
     }
     
     private void enableApiOptions(Button apiButton, boolean isEnabled) {
@@ -319,6 +323,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         useSoapAPI = !useBulkAPI && !useBulkV2API;
 
         buttonUseSOAPApi = new Button(apiChoiceComposite, SWT.RADIO);
+        buttonUseSOAPApi.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipUseSOAPApi"));
         buttonUseSOAPApi.setSelection(useSoapAPI);
         buttonUseSOAPApi.setText(Labels.getString("AdvancedSettingsDialog.useSOAPApi"));
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
@@ -348,6 +353,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         });
         
         buttonUseBulkV1Api = new Button(apiChoiceComposite, SWT.RADIO);
+        buttonUseBulkV1Api.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipUseBulkV1Api"));
         buttonUseBulkV1Api.setSelection(useBulkAPI);
         buttonUseBulkV1Api.setText(Labels.getString("AdvancedSettingsDialog.useBulkV1Api"));
         data = new GridData(GridData.HORIZONTAL_ALIGN_CENTER);
@@ -378,6 +384,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         
         // Enable Bulk API 2.0 Setting
         buttonUseBulkV2Api = new Button(apiChoiceComposite, SWT.RADIO);
+        buttonUseBulkV2Api.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipUseBulkV2Api"));
         buttonUseBulkV2Api.setSelection(useBulkV2API);
         buttonUseBulkV2Api.setText(Labels.getString("AdvancedSettingsDialog.useBulkV2Api"));
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -416,7 +423,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         layout = new GridLayout(2, true);
         layout.verticalSpacing = 10;
         this.soapApiOptionsComposite.setLayout(layout);
-
+        
         createLink(soapApiOptionsComposite, "keepAccountTeam", null, "TooltipKeepAccountTeam");
         boolean keepAccountTeam = config.getBoolean(Config.PROCESS_KEEP_ACCOUNT_TEAM);
         buttonKeepAccountTeam = new Button(this.soapApiOptionsComposite, SWT.CHECK);
@@ -512,7 +519,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
         layout.verticalSpacing = 10;
         this.importBatchSizeComposite.setLayout(layout);
 
-
         String[] args = {getImportBatchLimitsURL(), 
                 Integer.toString(config.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
         labelImportBatchSize = createLink(importBatchSizeComposite, "importBatchSize", 
@@ -556,6 +562,18 @@ public class AdvancedSettingsDialog extends BaseDialog {
         textExportBatchSize.setTextLimit(4);
         data.widthHint = 4 * textSize.x;
         textExportBatchSize.setLayoutData(data);
+
+        createLink(restComp, "undeleteOperationEnabled", null, "TooltipUndeleteEnabled");
+        buttonUndeleteEnabled = new Button(restComp, SWT.CHECK);
+        // user can't check/uncheck the button
+        buttonUndeleteEnabled.setEnabled(false);
+        buttonUndeleteEnabled.setSelection(useSoapAPI);
+        
+        createLink(restComp, "hardDeleteOperationEnabled", null, "TooltipHardDeleteEnabled");
+        buttonHardDeleteEnabled = new Button(restComp, SWT.CHECK);
+        // user can't check/uncheck the button
+        buttonHardDeleteEnabled.setEnabled(false);
+        buttonHardDeleteEnabled.setSelection(!useSoapAPI);
 
         initializeAllApiOptions();
         
@@ -1150,10 +1168,10 @@ public class AdvancedSettingsDialog extends BaseDialog {
         GridData data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         data.grabExcessHorizontalSpace = true;
         l.setLayoutData(data);
-        l.setText(Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + "." + labelKey, args)
+        l.setText(Labels.getFormattedString(this.getClass().getSimpleName() + "." + labelKey, args)
                 );
         if (tooltipKey != null) {
-            l.setToolTipText(Labels.getString(AdvancedSettingsDialog.class.getSimpleName() + "." + tooltipKey));
+            l.setToolTipText(Labels.getString(this.getClass().getSimpleName() + "." + tooltipKey));
         }
         l.addSelectionListener(new SelectionAdapter() {
             @Override
