@@ -498,6 +498,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
         soqlText.addModifyListener(new ModifyListener() {
             @Override
             public void modifyText(ModifyEvent arg0) {
+                updateWherePart();
                 setPageComplete();
             }
         });
@@ -681,6 +682,19 @@ public class ExtractionSOQLPage extends ExtractionPage {
         }
         setAddWhereButtonState();
         setClearWhereButtonState();
+    }
+    
+    private void updateWherePart() {
+        String soqlStr = soqlText.getText();
+        String whereClause = "";
+        if (soqlStr != null && !soqlStr.isBlank()) {
+            soqlStr = soqlStr.toLowerCase();
+            int idx = soqlStr.indexOf("where");
+            if (idx >= 0) {
+                whereClause = soqlText.getText().substring(idx);
+            }
+        }
+        wherePart = new StringBuffer(whereClause);
     }
 
     public String getSOQL() {
