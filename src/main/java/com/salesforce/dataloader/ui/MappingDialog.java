@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.ArrayList;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -106,6 +105,7 @@ public class MappingDialog extends WizardDialog {
     private Shell parentShell;
     private Shell dialogShell;
     private Text sforceFieldsSearch;
+    private boolean dragNDropCancelled = false;
 
     public void setSforceFieldInfo(Field[] sforceFieldInfo) {
         this.sforceFieldInfo = sforceFieldInfo;
@@ -311,6 +311,14 @@ public class MappingDialog extends WizardDialog {
         // user can type input and press Enter
         // to dismiss
         shell.setDefaultButton(ok);
+    }
+    
+    public void setIsDragNDropCancelled(boolean cancelled) {
+        this.dragNDropCancelled = cancelled;
+    }
+    
+    public boolean isDragActionCancelled() {
+        return this.dragNDropCancelled;
     }
 
     private void initializeMappingViewer(Shell shell) {

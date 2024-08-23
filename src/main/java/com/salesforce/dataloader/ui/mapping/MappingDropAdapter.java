@@ -68,7 +68,8 @@ public class MappingDropAdapter extends ViewerDropAdapter {
         this.dropEntry = (Entry<String, String>)getCurrentTarget();
         this.currentSforceMappings = this.dropEntry.getValue();
         this.sforceFieldToAddOrReplace = (String)arg0;
-        
+        mappingDialog.setIsDragNDropCancelled(false);
+
         if (this.currentSforceMappings == null || this.currentSforceMappings.isBlank()) {
             // if no existing mapping, perform add action
             performDropAction(MAPPING_CHOICE.ADD);
@@ -87,6 +88,7 @@ public class MappingDropAdapter extends ViewerDropAdapter {
     public void performDropAction(MAPPING_CHOICE choice) {
         String newSforceMappings = this.sforceFieldToAddOrReplace;
         if (choice == MAPPING_CHOICE.CANCEL) {
+            mappingDialog.setIsDragNDropCancelled(true);
             return;
         }
         if (this.currentSforceMappings != null && !this.currentSforceMappings.isBlank()) {
