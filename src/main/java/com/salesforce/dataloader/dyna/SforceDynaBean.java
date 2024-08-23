@@ -275,12 +275,17 @@ public class SforceDynaBean {
         return fieldsToNull;
     }
     
-    private static void handleNull(final String fieldName, final DynaBean dynaBean, final List<String> fieldsToNull,
+    private static void handleNull(final String fieldNameList, final DynaBean dynaBean, final List<String> fieldsToNull,
             final Controller controller) {
-        final Object o = dynaBean.get(fieldName);
-        if (o != null && o instanceof SObjectReference && ((SObjectReference)o).isNull())
-            fieldsToNull.add(SObjectReference.getRelationshipField(controller, fieldName));
-        else if (o == null || String.valueOf(o).length() == 0) fieldsToNull.add(fieldName);
+        // fieldNameList can be a list of comma separated fields
+        String[]fieldNameArray = fieldNameList.split(",");
+
+        for (String fieldName : fieldNameArray) {
+            final Object o = dynaBean.get(fieldName.strip());
+            if (o != null && o instanceof SObjectReference && ((SObjectReference)o).isNull())
+                fieldsToNull.add(SObjectReference.getRelationshipField(controller, fieldName));
+            else if (o == null || String.valueOf(o).length() == 0) fieldsToNull.add(fieldName);
+        }
     }
 
     /**
