@@ -712,6 +712,23 @@ public class CsvProcessTest extends ProcessTestBase {
                 assertEquals("Incorrect value for description returned", stateValue, acct.getField("Description"));
             }
         }
+        
+        // test with insert nulls set to true.
+        argumentMap.put(Config.INSERT_NULLS, "true");
+        controller = runProcess(argumentMap, 2);
+        for (SObject acct : retrieveAccounts(controller, "Name", "Description", "BillingState", "ShippingState")) {
+            if ("ABC Corp".equals(acct.getField("Name"))) {
+                final String stateValue = "California";
+                assertEquals("Incorrect value for billing state returned", stateValue, acct.getField("BillingState"));
+                assertEquals("Incorrect value for shipping state returned", stateValue, acct.getField("ShippingState"));
+                assertEquals("Incorrect value for description returned", stateValue, acct.getField("Description"));
+            } else if ("XYZ Corp".equals(acct.getField("Name"))) {
+                final String stateValue = "New York";
+                assertEquals("Incorrect value for billing state returned", stateValue, acct.getField("BillingState"));
+                assertEquals("Incorrect value for shipping state returned", stateValue, acct.getField("ShippingState"));
+                assertEquals("Incorrect value for description returned", stateValue, acct.getField("Description"));
+            }
+        }
     }
     
     @Test
