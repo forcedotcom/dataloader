@@ -76,6 +76,7 @@ import com.salesforce.dataloader.model.NACalendarValue;
 import com.salesforce.dataloader.model.NADateOnlyCalendarValue;
 import com.salesforce.dataloader.model.NATextValue;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DAORowUtil;
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.AsyncExceptionCode;
@@ -273,14 +274,14 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final List<String> cols = new ArrayList<String>();
         final Set<String> addedCols = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         for (final String userColumn : columns) {
-            final String sfdcColList = getMapper().getMapping(userColumn);
+            final String sfdcColList = getMapper().getMapping(userColumn, false, true);
             // if the column is not mapped, don't send it
             if (sfdcColList == null || sfdcColList.length() == 0) {
                 // TODO: we should make it more obvious to users when we omit a column
                 getLogger().warn("Cannot find mapping for column: " + userColumn + ".  Omitting column");
                 continue;
             }
-            String[] sfdcColArray = sfdcColList.split(",");
+            String[] sfdcColArray = sfdcColList.split(AppUtil.COMMA);
             for (String sfdcColumn : sfdcColArray) {
                 sfdcColumn = sfdcColumn.strip();
                 // TODO we don't really need to be this strict about a delete CSV file.. as long as the IDS are there
