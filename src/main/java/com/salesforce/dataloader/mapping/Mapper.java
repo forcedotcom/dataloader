@@ -39,6 +39,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import com.sforce.soap.partner.Field;
+import com.sforce.soap.partner.FieldType;
+
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -81,7 +83,7 @@ public abstract class Mapper {
     private HashMap<String, Integer> compositeColSizeMap = new HashMap<String, Integer>();
     private HashMap<String, Integer> daoColPositionInCompositeColMap = new HashMap<String, Integer>();
     private HashMap<String, String> daoColToCompositeColMap = new HashMap<String, String>();
-    
+    private HashMap<String, Boolean> fieldTypeIsStringMap = new HashMap<String, Boolean>();
     private final CaseInsensitiveMap constants = new CaseInsensitiveMap();
 
     protected final CaseInsensitiveMap map = new CaseInsensitiveMap();
@@ -106,18 +108,27 @@ public abstract class Mapper {
         }
         if (fields != null) {
             for (Field field : fields) {
+                boolean isStringType = true;
                 this.fields.add(field.getName());
+                FieldType fieldType = field.getType();
+                if (fieldType == FieldType.string
+                        || fieldType == FieldType.textarea) {
+                    isStringType = true;
+                } else {
+                    isStringType = false;
+                }
+                this.fieldTypeIsStringMap.put(field.getName(), isStringType);
             }
         }
         this.mappingFileName = mappingFileName;
         putPropertyFileMappings(mappingFileName);
     }
 
-    public final void putMapping(String src, String dest) {
-        String compositeDaoColName = getCompositeDaoColName(src);
+    public final void putMapping(String src, String destList) {
+        String compositeDaoColName = getCompositeDaoColName(src, destList);
 
         // destination can be multiple field names for upload operations
-        StringTokenizer st = new StringTokenizer(dest, AppUtil.COMMA);
+        StringTokenizer st = new StringTokenizer(destList, AppUtil.COMMA);
         String originalDestList = null;
         while(st.hasMoreElements()) {
             String v = st.nextToken();
@@ -132,10 +143,22 @@ public abstract class Mapper {
         this.map.put(compositeDaoColName, originalDestList);
     }
     
-    private String getCompositeDaoColName(String mappingSrcStr) {
+    private String getCompositeDaoColName(String mappingSrcStr, String destFieldList) {
+        boolean isDestinationListStringOnly = true;
+        StringTokenizer st = new StringTokenizer(destFieldList, AppUtil.COMMA);
+        while(st.hasMoreElements()) {
+            String destFieldName = st.nextToken();
+            destFieldName = destFieldName.trim();
+            Boolean destFieldTypeIsString = this.fieldTypeIsStringMap.get(destFieldName);
+            if (destFieldTypeIsString == null || !destFieldTypeIsString) {
+                isDestinationListStringOnly = false;
+                break;
+            }
+        }
+
         String compositeCol = null;
         int daoColCount = 0;
-        StringTokenizer st = new StringTokenizer(mappingSrcStr, AppUtil.COMMA);
+        st = new StringTokenizer(mappingSrcStr, AppUtil.COMMA);
         while(st.hasMoreElements()) {
             String mappingSrcCol = st.nextToken();
             mappingSrcCol = mappingSrcCol.trim();
@@ -147,6 +170,11 @@ public abstract class Mapper {
             }
             getDaoColPositionInCompositeColMap().put(daoCol, daoColCount);
             daoColCount++;
+            if (!isDestinationListStringOnly) {
+                // set up only the first daoCol for mapping if the destination
+                // field list contains a field whose type is not string
+                break; 
+            }
         }
         if (compositeCol == null) {
             compositeCol = mappingSrcStr;
