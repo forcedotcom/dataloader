@@ -528,7 +528,7 @@ public class MappingDialog extends WizardDialog {
 
             if(mappingSource != null) {
                 // don't overwrite the fields that already have been mapped
-                String oldFieldName = mapper.getMapping(mappingSource);
+                String oldFieldName = mapper.getMapping(mappingSource, false, true);
                 if(oldFieldName == null || oldFieldName.length() == 0) {
                     mapper.putMapping(mappingSource, fieldName);
                 }

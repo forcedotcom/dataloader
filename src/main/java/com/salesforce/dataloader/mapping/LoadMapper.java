@@ -73,7 +73,7 @@ public class LoadMapper extends Mapper {
         
         // get mappings in the same order as DAO column order
         for (String daoColumn : getDaoColumns()) {
-            String mapping = getMapping(daoColumn);
+            String mapping = getMapping(daoColumn, false, false);
             if (includeUnmapped || mapping != null) {
                 result.put(daoColumn, mapping);
             }
@@ -139,7 +139,7 @@ public class LoadMapper extends Mapper {
         }
         Row mappedData = new Row();
         for (Map.Entry<String, Object> entry : localCompositeRow.entrySet()) {
-            String sfdcNameList = getMapping(entry.getKey(), true);
+            String sfdcNameList = getMapping(entry.getKey(), true, true);
             if (StringUtils.hasText(sfdcNameList)) {
                 String sfdcNameArray[] = sfdcNameList.split(AppUtil.COMMA);
                 for (String sfdcName : sfdcNameArray) {
@@ -173,8 +173,8 @@ public class LoadMapper extends Mapper {
         for (String daoCol : possibleMappings.keySet()) {
             String mappedName = this.map.get(daoCol);
             if (mappedName != null) {
-                if (mappedName.contains(",")) {
-                    String[] mappedNameList = mappedName.split(",");
+                if (mappedName.contains(AppUtil.COMMA)) {
+                    String[] mappedNameList = mappedName.split(AppUtil.COMMA);
                     for (int i=0; i<mappedNameList.length; i++) {
                         mappedColList.add(mappedNameList[i]);
                     }
@@ -185,5 +185,16 @@ public class LoadMapper extends Mapper {
         }
         return mappedColList;
     }
-
+    
+    public boolean hasDaoColumn(String localNameList) {
+        StringTokenizer st = new StringTokenizer(localNameList, AppUtil.COMMA);
+        while(st.hasMoreElements()) {
+            String v = st.nextToken();
+            v = v.trim();
+            if (!this.daoColumnNames.containsKey(v)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

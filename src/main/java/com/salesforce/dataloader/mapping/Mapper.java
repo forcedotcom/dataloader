@@ -77,7 +77,7 @@ public abstract class Mapper {
         }
     }
 
-    private final CaseInsensitiveSet daoColumnNames = new CaseInsensitiveSet();
+    protected final CaseInsensitiveSet daoColumnNames = new CaseInsensitiveSet();
     
     private CaseInsensitiveSet compositeDAOColumns = new CaseInsensitiveSet();
     private HashMap<String, Integer> compositeColSizeMap = new HashMap<String, Integer>();
@@ -117,7 +117,7 @@ public abstract class Mapper {
                 } else {
                     isStringType = false;
                 }
-                this.fieldTypeIsStringMap.put(field.getName(), isStringType);
+                this.fieldTypeIsStringMap.put(field.getName().toLowerCase(), isStringType);
             }
         }
         this.mappingFileName = mappingFileName;
@@ -125,7 +125,7 @@ public abstract class Mapper {
     }
 
     public final void putMapping(String src, String destList) {
-        String compositeDaoColName = getCompositeDaoColName(src, destList);
+        processCompositeDaoColName(src, destList);
 
         // destination can be multiple field names for upload operations
         StringTokenizer st = new StringTokenizer(destList, AppUtil.COMMA);
@@ -140,35 +140,35 @@ public abstract class Mapper {
                 originalDestList = originalDestList + ", " + originalVal;
             }
         }
-        this.map.put(compositeDaoColName, originalDestList);
+        this.map.put(src, originalDestList);
     }
     
-    private String getCompositeDaoColName(String mappingSrcStr, String destFieldList) {
+    private void processCompositeDaoColName(String mappingSrcStr, String destFieldList) {
         boolean isDestinationListStringOnly = true;
         StringTokenizer st = new StringTokenizer(destFieldList, AppUtil.COMMA);
         while(st.hasMoreElements()) {
             String destFieldName = st.nextToken();
             destFieldName = destFieldName.trim();
-            Boolean destFieldTypeIsString = this.fieldTypeIsStringMap.get(destFieldName);
+            Boolean destFieldTypeIsString = this.fieldTypeIsStringMap.get(destFieldName.toLowerCase());
             if (destFieldTypeIsString == null || !destFieldTypeIsString) {
                 isDestinationListStringOnly = false;
                 break;
             }
         }
 
-        String compositeCol = null;
         int daoColCount = 0;
         st = new StringTokenizer(mappingSrcStr, AppUtil.COMMA);
         while(st.hasMoreElements()) {
             String mappingSrcCol = st.nextToken();
             mappingSrcCol = mappingSrcCol.trim();
             String daoCol = daoColumnNames.getOriginal(mappingSrcCol);
-            if (compositeCol == null) {
-                compositeCol = daoCol;
-            } else {
-                compositeCol += ", " + daoCol;
+            if (daoCol == null) {
+                logger.warn("Did not find DAO column with name " + mappingSrcCol + " specified in the mapping");
+                // unable to map mappingSrcStr to a daoCol
+                continue;
             }
             getDaoColPositionInCompositeColMap().put(daoCol, daoColCount);
+            getDaoColToCompositeColMap().put(daoCol, mappingSrcStr);
             daoColCount++;
             if (!isDestinationListStringOnly) {
                 // set up only the first daoCol for mapping if the destination
@@ -176,30 +176,17 @@ public abstract class Mapper {
                 break; 
             }
         }
-        if (compositeCol == null) {
-            compositeCol = mappingSrcStr;
+        if (daoColCount == 0) {
+            String daoCol = daoColumnNames.getOriginal(mappingSrcStr);
+            if (daoCol == null) {
+                logger.warn("Did not find DAO column with name " + mappingSrcStr + " specified in the mapping");
+                return;
+            }
+            getDaoColToCompositeColMap().put(mappingSrcStr, mappingSrcStr);
             daoColCount = 1;
         }
-        getCompositeColSizeMap().put(compositeCol, daoColCount);
-        getCompositeDAOColumns().add(compositeCol);
-        
-        // need to configure mapping from DAO column to composite column
-        st = new StringTokenizer(mappingSrcStr, AppUtil.COMMA);
-        boolean isDaoColToCompositeColMappingSet = false;
-        while(st.hasMoreTokens()) {
-            String mappingSrcCol = st.nextToken();
-            mappingSrcCol = mappingSrcCol.trim();
-            String daoCol = daoColumnNames.getOriginal(mappingSrcCol);
-            if (daoCol != null) {
-                getDaoColToCompositeColMap().put(daoCol, compositeCol);
-                isDaoColToCompositeColMappingSet = true;
-            }
-        }
-        if (!isDaoColToCompositeColMappingSet) {
-            getDaoColToCompositeColMap().put(mappingSrcStr, compositeCol);
-            isDaoColToCompositeColMappingSet = true;
-        }
-        return compositeCol;
+        getCompositeColSizeMap().put(mappingSrcStr, daoColCount);
+        getCompositeDAOColumns().add(mappingSrcStr);
     }
 
     protected void putConstant(String name, String value) {
@@ -277,12 +264,19 @@ public abstract class Mapper {
         return this.map.values();
     }
 
-    public String getMapping(String srcName) {
-        return getMapping(srcName, false);
+    /*
+    public String getMapping(String srcName, boolean isSrcNameComposite) {
+        return getMapping(srcName, false, isSrcNameComposite);
     }
+    */
 
-    public String getMapping(String srcName, boolean strictMatching) {
-        String compositeColName = this.getDaoColToCompositeColMap().get(srcName);
+    public String getMapping(String srcName, boolean strictMatching, boolean isSrcNameComposite) {
+        String compositeColName = null;
+        if (isSrcNameComposite) {
+            compositeColName = srcName;
+        } else {
+            compositeColName = this.getDaoColToCompositeColMap().get(srcName);
+        }
         if (compositeColName == null) {
             // DAO column is not mapped, ignore
             return null;
