@@ -82,7 +82,7 @@ public class MappingPage extends LoadPage {
                 String filename = dlg.open();
                 if (filename != null && !filename.isBlank()) { //$NON-NLS-1$
                     LoadMapper mapper = (LoadMapper)controller.getMapper();
-                    mapper.clearMap();
+                    mapper.clearMappings();
                     try {
                         mapper.putPropertyFileMappings(filename);
                         updateMapping();
@@ -180,6 +180,7 @@ public class MappingPage extends LoadPage {
             }
         }
         packMappingColumns();
+        mappingTblViewer.getControl().pack();
     }
 
     private void refreshMapping() {

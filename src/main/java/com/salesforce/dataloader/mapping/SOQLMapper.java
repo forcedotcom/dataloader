@@ -237,7 +237,7 @@ public class SOQLMapper extends Mapper {
         if (hasDaoColumns()) {
             List<Map.Entry<String, String>> soqlBasedMappingEntries = new ArrayList<Map.Entry<String, String>>(getMap().entrySet());
 
-            clearMap();
+            clearMappings();
 
             // FIXME UGLY, NESTED LOOPS
             List<String> daoColumns = new ArrayList<String>(getDaoColumns());
@@ -279,8 +279,10 @@ public class SOQLMapper extends Mapper {
         return this.extractionMap.values();
     }
     
-    public void clearMap() {
-        this.extractionMap.clear();
+    public void clearMappings() {
+        if (this.extractionMap != null) {
+            this.extractionMap.clear();
+        }
         this.isInitialized = false;
     }
     
@@ -295,7 +297,9 @@ public class SOQLMapper extends Mapper {
 
     
     private void initializeSoQLMap() {
-        this.extractionMap.clear();
+        if (this.extractionMap != null) {
+            this.extractionMap.clear();
+        }
         
         //add extraction mapping
         this.extractionMap.putAll(this.map);

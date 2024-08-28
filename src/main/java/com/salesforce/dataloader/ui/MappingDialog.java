@@ -300,7 +300,7 @@ public class MappingDialog extends WizardDialog {
             public void widgetSelected(SelectionEvent event) {
 
                 //revert the Mapping back
-                mapper.clearMap();
+                mapper.clearMappings();
                 mapper.putPropertyFileMappings(restore);
 
                 shell.close();
@@ -552,6 +552,7 @@ public class MappingDialog extends WizardDialog {
         for (int i = 0, n = mappingTable.getColumnCount(); i < n; i++) {
             mappingTable.getColumn(i).pack();
         }
+        mappingTblViewer.setInput(this.mapper);
         mappingTblViewer.refresh();
         mappingTable.redraw();
         UIUtils.setTableColWidth(mappingTable);
@@ -667,7 +668,7 @@ public class MappingDialog extends WizardDialog {
      * Clears the mapping
      */
     private void clearMapping() {
-        mapper.clearMap();
+        mapper.clearMappings();
         // restore the fields in sforceTblViewer that were mapped before
         for(String fieldName : mappedFields) {
             replenishMappedSforceFields(fieldName);

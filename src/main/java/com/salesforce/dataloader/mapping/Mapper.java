@@ -167,8 +167,8 @@ public abstract class Mapper {
                 // unable to map mappingSrcStr to a daoCol
                 continue;
             }
-            getDaoColPositionInCompositeColMap().put(daoCol, daoColCount);
-            getDaoColToCompositeColMap().put(daoCol, mappingSrcStr);
+            daoColPositionInCompositeColMap.put(daoCol, daoColCount);
+            daoColToCompositeColMap.put(daoCol, mappingSrcStr);
             daoColCount++;
             if (!isDestinationListStringOnly) {
                 // set up only the first daoCol for mapping if the destination
@@ -185,8 +185,8 @@ public abstract class Mapper {
             getDaoColToCompositeColMap().put(mappingSrcStr, mappingSrcStr);
             daoColCount = 1;
         }
-        getCompositeColSizeMap().put(mappingSrcStr, daoColCount);
-        getCompositeDAOColumns().add(mappingSrcStr);
+        compositeColSizeMap.put(mappingSrcStr, daoColCount);
+        compositeDAOColumns.add(mappingSrcStr);
     }
 
     protected void putConstant(String name, String value) {
@@ -234,6 +234,7 @@ public abstract class Mapper {
     }
 
     public void putPropertyFileMappings(Properties props) {
+        clearMappings();
         for (Entry<Object, Object> entry : props.entrySet()) {
             putPropertyEntry(entry);
         }
@@ -294,12 +295,12 @@ public abstract class Mapper {
         }
         return null;
     }
-    public void clearMap() {
+    public void clearMappings() {
         this.map.clear();
         this.compositeDAOColumns = new CaseInsensitiveSet();
-        this.getCompositeColSizeMap().clear();
-        this.getDaoColPositionInCompositeColMap().clear();
-        this.getDaoColToCompositeColMap().clear();
+        this.compositeColSizeMap.clear();
+        this.daoColPositionInCompositeColMap.clear();
+        this.daoColToCompositeColMap.clear();
     }
 
     public void save(String filename) throws IOException {
@@ -338,8 +339,8 @@ public abstract class Mapper {
         return client;
     }
 
-    protected CaseInsensitiveSet getCompositeDAOColumns() {
-        return compositeDAOColumns;
+    protected Set<String> getCompositeDAOColumns() {
+        return compositeDAOColumns.getOriginalValues();
     }
 
     protected HashMap<String, Integer> getCompositeColSizeMap() {

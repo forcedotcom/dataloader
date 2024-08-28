@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Mapper which maps field names for loading operations. Field names are mapped from dao (local) name to sfdc name.
@@ -70,10 +71,16 @@ public class LoadMapper extends Mapper {
 
     public Map<String, String> getMappingWithUnmappedColumns(boolean includeUnmapped) {
         final CaseInsensitiveMap result = new CaseInsensitiveMap();
-        
+        Set<String> candidateCols = null;
+        if (getCompositeDAOColumns() == null || getCompositeDAOColumns().isEmpty()) {
+            // no compositions yet
+            candidateCols = this.getDaoColumns();
+        } else {
+            candidateCols = this.getCompositeDAOColumns();
+        }
         // get mappings in the same order as DAO column order
-        for (String daoColumn : getDaoColumns()) {
-            String mapping = getMapping(daoColumn, false, false);
+        for (String daoColumn : candidateCols) {
+            String mapping = getMapping(daoColumn, false, true);
             if (includeUnmapped || mapping != null) {
                 result.put(daoColumn, mapping);
             }
@@ -90,10 +97,10 @@ public class LoadMapper extends Mapper {
     }
 
     public Row mapData(Row localRow) {
-        CaseInsensitiveSet compositeDAOCols = this.getCompositeDAOColumns();
+        Set<String> compositeDAOCols = this.getCompositeDAOColumns();
         HashMap<String, Object[]> compositeColValueMap = new HashMap<String, Object[]>();
         HashMap<String, Integer> compositeColSizeMap = this.getCompositeColSizeMap();
-        for (String compositeCol : compositeDAOCols.getOriginalValues()) {
+        for (String compositeCol : compositeDAOCols) {
             Integer compositeColSize = compositeColSizeMap.get(compositeCol);
             if (compositeColSize == null) {
                 logger.warn("Invalid composite column : " + compositeCol);
@@ -129,7 +136,7 @@ public class LoadMapper extends Mapper {
         }
         
         Row localCompositeRow = new Row();
-        for (String compositeCol : compositeDAOCols.getOriginalValues()) {
+        for (String compositeCol : compositeDAOCols) {
             Object[] compositeColValueArray = compositeColValueMap.get(compositeCol);
             Object compositeColValue = compositeColValueArray[0];
             for (int i = 1; i < compositeColValueArray.length; i++) {
