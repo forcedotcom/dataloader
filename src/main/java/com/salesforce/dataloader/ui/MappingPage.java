@@ -79,6 +79,7 @@ public class MappingPage extends LoadPage {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
+                dlg.setFilterExtensions(new String[] { "*.sdl" });
                 String filename = dlg.open();
                 if (filename != null && !filename.isBlank()) { //$NON-NLS-1$
                     LoadMapper mapper = (LoadMapper)controller.getMapper();

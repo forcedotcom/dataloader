@@ -174,7 +174,7 @@ public abstract class Mapper {
             if (!isDestinationListStringOnly) {
                 // set up only the first daoCol for mapping if the destination
                 // field list contains a field whose type is not string
-                logger.debug("Mapping first CSV column '" + daoCol + "' because one of the sobject fields it is mapped to is not a string or a text area");
+                logger.debug("Using only the first CSV column '" + daoCol + "' for mapping because one of the sobject fields it is mapped to is not a string or a text area");
                 break; 
             }
         }
