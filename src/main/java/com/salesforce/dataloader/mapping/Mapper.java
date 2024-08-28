@@ -306,6 +306,12 @@ public abstract class Mapper {
     public void save(String filename) throws IOException {
         if (filename == null) throw new IOException(Messages.getMessage(getClass(), "errorFileName"));
         Properties props = new Properties();
+        for (String key : map.keySet()) {
+            String value = map.get(key);
+            if (value == null) {
+                map.put(key, "");
+            }
+        }
         props.putAll(this.map);
         FileOutputStream out = new FileOutputStream(filename);
         try {
