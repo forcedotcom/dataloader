@@ -580,6 +580,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     private boolean login() throws ConnectionException, ApiFault {
         disconnect();
+        String origEndpoint = new String(config.getAuthEndpoint());
         try {
             dologin();
             logger.debug("able to successfully invoke server APIs of version " + getAPIVersionForTheSession());
@@ -593,22 +594,21 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 throw fault;
             }
         } catch (ConnectionException e) {
-            String authEndpoint = config.getString(Config.ENDPOINT);
             logger.warn(Messages.getMessage(this.getClass(), "failedUsernamePasswordAuth", 
-                                            authEndpoint, Config.ENDPOINT, e.getMessage()));
-            if (authEndpoint.contains(Config.LIGHTNING_ENDPOINT_URL_PART_VAL)) {
-                authEndpoint = authEndpoint.replace(Config.LIGHTNING_ENDPOINT_URL_PART_VAL, Config.MYSF_ENDPOINT_URL_PART_VAL);
-                config.setValue(Config.ENDPOINT, authEndpoint);
-                logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", authEndpoint, Config.ENDPOINT));
-                login();
-            } else if (!authEndpoint.equals(Config.DEFAULT_ENDPOINT_URL)) {
-                config.setValue(Config.ENDPOINT, Config.DEFAULT_ENDPOINT_URL);
+                                            origEndpoint, Config.ENDPOINT, e.getMessage()));
+            if (Config.PROD_ENVIRONMENT_VAL.equals(config.getString(Config.SELECTED_AUTH_ENVIRONMENT))
+                    && !Config.DEFAULT_ENDPOINT_URL.equalsIgnoreCase(origEndpoint)) {
+                // retry with default endpoint URL only if user is attempting production login
+                config.setAuthEndpoint(Config.DEFAULT_ENDPOINT_URL);
                 logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", Config.DEFAULT_ENDPOINT_URL, Config.ENDPOINT));
                 login();
             } else {
                 logger.error("Failed to get user info using manually configured session id", e);
                 throw e;   
             }
+        } finally {
+            // restore original value of Config.ENDPOINT property
+            config.setValue(Config.ENDPOINT, origEndpoint);
         }
         return true; // exception thrown if there is an issue with login
     }
@@ -658,7 +658,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         if (userInfo == null) {
             userInfo = conn.getUserInfo(); // check to make sure we have a good connection
         }
-        loginSuccess(conn, getServerUrl(config.getString(Config.ENDPOINT)), userInfo);
+        loginSuccess(conn, getServerUrl(config.getAuthEndpoint()), userInfo);
         return conn;
     }
 
@@ -889,7 +889,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private String getDefaultServer() {
-        String serverUrl = config.getString(Config.ENDPOINT);
+        String serverUrl = config.getAuthEndpoint();
         if (serverUrl == null || serverUrl.length() == 0) {
             serverUrl = getServerStringFromUrl(DEFAULT_AUTH_ENDPOINT_URL);
         }

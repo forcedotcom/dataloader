@@ -33,10 +33,9 @@ import com.salesforce.dataloader.config.Config;
  */
 public class LoginCriteria {
 
-    public static final int OAuthLoginDefault = 0;
-    public static final int UsernamePasswordLoginStandard = 1;
-    public static final int UsernamePasswordLoginAdvanced = 2;
-    public static final int OAuthLoginFromBrowser = 3;
+    public static final int OAuthLogin = 0;
+    public static final int UsernamePasswordLogin = 1;
+    public static final int SessionIdLogin = 2;
 
     String instanceUrl;
     String userName;
@@ -95,26 +94,18 @@ public class LoginCriteria {
     }
 
     public void updateConfig(Config config) {
-        config.setValue(Config.USERNAME, Config.STRING_DEFAULT);
-        config.setValue(Config.PASSWORD, Config.STRING_DEFAULT);
-        config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
-        config.setValue(Config.SFDC_INTERNAL_SESSION_ID, Config.STRING_DEFAULT);
-        config.setValue(Config.OAUTH_ENVIRONMENT, Config.STRING_DEFAULT);
-
         switch (getMode()){
-            case LoginCriteria.UsernamePasswordLoginStandard:
+            case LoginCriteria.UsernamePasswordLogin:
+                config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
                 config.setValue(Config.USERNAME, getUserName().trim());
                 config.setValue(Config.PASSWORD, getPassword().trim());
-                config.setValue(Config.ENDPOINT, getInstanceUrl().trim());
                 break;
-            case LoginCriteria.UsernamePasswordLoginAdvanced:
-                config.setValue(Config.USERNAME, getUserName().trim());
+            case LoginCriteria.SessionIdLogin:
                 config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
+                config.setValue(Config.USERNAME, getUserName().trim());
                 config.setValue(Config.SFDC_INTERNAL_SESSION_ID, getSessionId().trim());
-                config.setValue(Config.ENDPOINT, getInstanceUrl().trim());
                 break;
-            case LoginCriteria.OAuthLoginDefault:
-            case LoginCriteria.OAuthLoginFromBrowser:
+            case LoginCriteria.OAuthLogin:
                 config.setOAuthEnvironment(getEnvironment());
                 break;
         }

@@ -605,7 +605,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.widthHint = 30 * textSize.x;
         textEndpoint.setLayoutData(data);
-        String endpoint = config.getString(Config.ENDPOINT);
+        String endpoint = config.getAuthEndpoint();
         if ("".equals(endpoint)) { //$NON-NLS-1$
             endpoint = defaultServer;
         }
@@ -765,28 +765,28 @@ public class AdvancedSettingsDialog extends BaseDialog {
         this.textProductionPartnerClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
         textProductionPartnerClientID.setLayoutData(data);
-    	String clientId = config.getOAuthEnvironmentString(Config.OAUTH_PROD_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_PARTNER_CLIENTID);
+    	String clientId = config.getOAuthEnvironmentString(Config.PROD_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_PARTNER_CLIENTID);
     	this.textProductionPartnerClientID.setText(clientId);
         
         createLabel(restComp, "bulkClientIdInProduction", null, null);
         this.textProductionBulkClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
         textProductionBulkClientID.setLayoutData(data);
-        clientId = config.getOAuthEnvironmentString(Config.OAUTH_PROD_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_BULK_CLIENTID);
+        clientId = config.getOAuthEnvironmentString(Config.PROD_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_BULK_CLIENTID);
         this.textProductionBulkClientID.setText(clientId);
         
         createLabel(restComp, "partnerClientIdInSandbox", null, null);
         this.textSandboxPartnerClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
         textSandboxPartnerClientID.setLayoutData(data);
-    	clientId = config.getOAuthEnvironmentString(Config.OAUTH_SB_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_PARTNER_CLIENTID);
+    	clientId = config.getOAuthEnvironmentString(Config.SB_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_PARTNER_CLIENTID);
     	this.textSandboxPartnerClientID.setText(clientId);
         
     	createLabel(restComp, "bulkClientIdInSandbox", null, null);
         this.textSandboxBulkClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
         textSandboxBulkClientID.setLayoutData(data);
-        clientId = config.getOAuthEnvironmentString(Config.OAUTH_SB_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_BULK_CLIENTID);
+        clientId = config.getOAuthEnvironmentString(Config.SB_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_BULK_CLIENTID);
         this.textSandboxBulkClientID.setText(clientId);       
         //////////////////////////////////////////////////
         //Row to start At
@@ -980,7 +980,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.CSV_DELIMITER_OTHER, isOtherDelimiterSpecified);
 
                 config.setValue(Config.EXPORT_BATCH_SIZE, textExportBatchSize.getText());
-                config.setValue(Config.ENDPOINT, currentTextEndpoint);
+                config.setAuthEndpoint(currentTextEndpoint);
                 config.setValue(Config.ASSIGNMENT_RULE, textRule.getText());
                 config.setValue(Config.LOAD_ROW_TO_START_AT, textRowToStart.getText());
                 config.setValue(Config.RESET_URL_ON_LOGIN, buttonResetUrl.getSelection());
@@ -1020,7 +1020,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 LoggingUtil.setLoggingLevel(LOGGING_LEVEL[comboLoggingLevelDropdown.getSelectionIndex()]);
                 String clientIdVal = textProductionPartnerClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
-                    String propName = Config.OAUTH_PREFIX + Config.OAUTH_PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID;
+                    String propName = Config.OAUTH_PREFIX + Config.PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID;
                     String currentClientIdVal = config.getString(propName);
                     if (!clientIdVal.equals(currentClientIdVal)) {
                         config.setValue(propName, clientIdVal);
@@ -1029,7 +1029,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 }
                 clientIdVal = textSandboxPartnerClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
-                    String propName = Config.OAUTH_PREFIX + Config.OAUTH_SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID;
+                    String propName = Config.OAUTH_PREFIX + Config.SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID;
                     String currentClientIdVal = config.getString(propName);
                     if (!clientIdVal.equals(currentClientIdVal)) {
                     	config.setValue(propName, clientIdVal);
@@ -1038,7 +1038,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 }
                 clientIdVal = textProductionBulkClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
-                    String propName = Config.OAUTH_PREFIX + Config.OAUTH_PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID;
+                    String propName = Config.OAUTH_PREFIX + Config.PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID;
                     String currentClientIdVal = config.getString(propName);
                     if (!clientIdVal.equals(currentClientIdVal)) {
                         config.setValue(propName, clientIdVal);
@@ -1047,7 +1047,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 }
                 clientIdVal = textSandboxBulkClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
-                    String propName = Config.OAUTH_PREFIX + Config.OAUTH_SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID;
+                    String propName = Config.OAUTH_PREFIX + Config.SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID;
                     String currentClientIdVal = config.getString(propName);
                     if (!clientIdVal.equals(currentClientIdVal)) {
                         config.setValue(propName, clientIdVal);

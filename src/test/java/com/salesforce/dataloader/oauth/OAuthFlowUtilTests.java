@@ -52,13 +52,13 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
     @Before
     public void testSetup(){
         config = getController().getConfig();
-        existingOAuthEnvironments = config.getStrings(Config.OAUTH_ENVIRONMENTS);
-        existingEndPoint = config.getString(Config.ENDPOINT);
+        existingOAuthEnvironments = config.getStrings(Config.AUTH_ENVIRONMENTS);
+        existingEndPoint = config.getAuthEndpoint();
         oauthServer = "http://OAUTH_PARTIAL_SERVER";
         oauthClientId = "CLIENTID";
         oauthRedirectUri = "REDIRECTURI";
 
-        config.setValue(Config.OAUTH_ENVIRONMENTS, "Testing");
+        config.setValue(Config.AUTH_ENVIRONMENTS, "Testing");
         config.setOAuthEnvironmentString("Testing", Config.OAUTH_PARTIAL_SERVER, oauthServer);
         config.setOAuthEnvironmentString("Testing", Config.OAUTH_PARTIAL_CLIENTID, oauthClientId);
         config.setOAuthEnvironmentString("Testing", Config.OAUTH_PARTIAL_REDIRECTURI, oauthRedirectUri);
@@ -67,8 +67,8 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
 
     @After
     public void testCleanup(){
-        config.setValue(Config.OAUTH_ENVIRONMENTS, existingOAuthEnvironments.toArray(new String[0]));
-        config.setValue(Config.ENDPOINT, existingEndPoint);
+        config.setValue(Config.AUTH_ENVIRONMENTS, existingOAuthEnvironments.toArray(new String[0]));
+        config.setAuthEndpoint(existingEndPoint);
     }
 
     @Test
@@ -136,7 +136,7 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
         try {
             OAuthFlowUtil.handleCompletedUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=INSTANCEURL", config);
             String expected = "INSTANCEURL";
-            String actual = config.getString(Config.ENDPOINT);
+            String actual = config.getAuthEndpoint();
 
             Assert.assertEquals("Incorrect refresh token found in config", expected, actual);
         } catch (URISyntaxException e) {

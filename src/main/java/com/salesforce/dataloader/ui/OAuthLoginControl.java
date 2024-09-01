@@ -39,22 +39,24 @@ import java.util.ArrayList;
 /**
  * Login default control is the oauth login
  */
-public class OAuthLoginDefaultControl extends Composite {
+public class OAuthLoginControl extends Composite {
     private final Button loginButton;
+    private LoginPage loginPage;
     protected final Combo environment;
-    protected final AuthenticationRunner authenticator;
+    protected final AuthenticationRunner authRunner;
     protected final Label loginLabel;
 
-    public OAuthLoginDefaultControl(Composite parent, int style, AuthenticationRunner authenticator) {
+    public OAuthLoginControl(Composite parent, int style, LoginPage loginPage, AuthenticationRunner authRunner) {
         super(parent, style);
-        this.authenticator = authenticator;
+        this.authRunner = authRunner;
+        this.loginPage = loginPage;
 
         Grid12 grid =  new Grid12(this, 40, false, true);
 
         grid.createLabel(4, Labels.getString("LoginPage.environment"));
-        ArrayList<String> environments = authenticator.getConfig().getStrings(Config.OAUTH_ENVIRONMENTS);
+        ArrayList<String> environments = authRunner.getConfig().getStrings(Config.AUTH_ENVIRONMENTS);
         environment = grid.createCombo(6, SWT.DROP_DOWN | SWT.BORDER, environments);
-        String currentEnvironment = authenticator.getConfig().getString(Config.OAUTH_ENVIRONMENT);
+        String currentEnvironment = authRunner.getConfig().getString(Config.SELECTED_AUTH_ENVIRONMENT);
         if (environments.contains(currentEnvironment)) {
             environment.setText(currentEnvironment);
         }
@@ -71,14 +73,15 @@ public class OAuthLoginDefaultControl extends Composite {
     }
 
     protected void loginButton_Clicked(Event event) {
-        LoginCriteria criteria = new LoginCriteria(LoginCriteria.OAuthLoginDefault);
+        LoginCriteria criteria = new LoginCriteria(LoginCriteria.OAuthLogin);
         criteria.setEnvironment(environment.getText());
-        authenticator.login(criteria, this::setLoginStatus);
+        authRunner.login(criteria, this::setLoginStatus);
     }
     private void setLoginStatus(String statusStr) {
-        if (Labels.getString("LoginPage.loginSuccessful").equalsIgnoreCase(statusStr)) {
+        if (this.loginPage.controller.isLoggedIn()) {
             loginButton.setEnabled(false);
         }
         loginLabel.setText(statusStr);
+        loginPage.setPageComplete();
     }
 }

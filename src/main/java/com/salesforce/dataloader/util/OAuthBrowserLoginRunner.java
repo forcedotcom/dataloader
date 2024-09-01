@@ -70,33 +70,26 @@ public class OAuthBrowserLoginRunner {
     Thread checkLoginThread;
 
     public OAuthBrowserLoginRunner(Config config, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
+        String origEndpoint = new String(config.getAuthEndpoint());
         try {
             startBrowserLogin(config, skipUserCodePage);
         } catch (Exception ex) {
-            String oAuthServer = config.getString(Config.OAUTH_SERVER);
-            logger.warn(Messages.getMessage(this.getClass(), "failedAuthStart", oAuthServer, ex.getMessage()));
-            if (oAuthServer.contains(Config.LIGHTNING_ENDPOINT_URL_PART_VAL)) {
-                oAuthServer = oAuthServer.replace(Config.LIGHTNING_ENDPOINT_URL_PART_VAL, Config.MYSF_ENDPOINT_URL_PART_VAL);
-                config.setOAuthEnvironmentString(config.getString(Config.OAUTH_ENVIRONMENT), 
-                                                    Config.OAUTH_PARTIAL_SERVER, oAuthServer);
-                try {
-                    logger.info(Messages.getMessage(this.getClass(), "retryAuthStart", oAuthServer));
-                    startBrowserLogin(config, skipUserCodePage);
-                } catch (Exception e) {
-                    logger.warn(Messages.getMessage(this.getClass(), "failedAuthStart", oAuthServer, ex.getMessage()));
-                    retryBrowserLoginWithDefaultURL(config, skipUserCodePage);
-                }
-            } else {
+            logger.warn(Messages.getMessage(this.getClass(), "failedAuthStart", origEndpoint, ex.getMessage()));
+            if (Config.PROD_ENVIRONMENT_VAL.equals(config.getString(Config.SELECTED_AUTH_ENVIRONMENT))
+                    && !Config.DEFAULT_ENDPOINT_URL.equalsIgnoreCase(origEndpoint)) {
+                // retry with default endpoint URL only if user is attempting production login
                 retryBrowserLoginWithDefaultURL(config, skipUserCodePage);
             }
+        } finally {
+            // restore original value of Config.ENDPOINT property
+            config.setAuthEndpoint(origEndpoint);
         }
     }
     
     private void retryBrowserLoginWithDefaultURL(Config config, boolean skipUserCodePage)  throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
         String oAuthServer = Config.DEFAULT_ENDPOINT_URL;
         logger.info(Messages.getMessage(this.getClass(), "retryAuthStart", oAuthServer));
-        config.setOAuthEnvironmentString(config.getString(Config.OAUTH_ENVIRONMENT), 
-                Config.OAUTH_PARTIAL_SERVER, oAuthServer);
+        config.setAuthEndpoint(oAuthServer);
         startBrowserLogin(config, skipUserCodePage);
     }
     
@@ -104,7 +97,7 @@ public class OAuthBrowserLoginRunner {
     private void startBrowserLogin(Config config, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
         setLoginStatus(LoginStatus.WAIT);
         this.config = config;
-        config.setOAuthEnvironment(config.getString(Config.OAUTH_ENVIRONMENT));
+        config.setOAuthEnvironment(config.getString(Config.SELECTED_AUTH_ENVIRONMENT));
         oAuthTokenURLStr = config.getString(Config.OAUTH_SERVER) + "/services/oauth2/token";
         SimplePost client = SimplePostFactory.getInstance(config, oAuthTokenURLStr,
                new BasicNameValuePair("response_type", "device_code"),
@@ -344,6 +337,6 @@ public class OAuthBrowserLoginRunner {
        OAuthToken token = gson.fromJson(jsonTokenResult, OAuthToken.class);
        config.setValue(Config.OAUTH_ACCESSTOKEN, token.getAccessToken());
        config.setValue(Config.OAUTH_REFRESHTOKEN, token.getRefreshToken());
-       config.setValue(Config.ENDPOINT, token.getInstanceUrl());
+       config.setAuthEndpoint(token.getInstanceUrl());
    }
 }

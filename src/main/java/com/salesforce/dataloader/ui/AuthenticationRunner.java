@@ -58,18 +58,16 @@ public class AuthenticationRunner {
 
     private final Config config;
     private final Controller controller;
-    private final Consumer<Boolean> complete;
     private final String nestedException = "nested exception is:";
     private final Shell shell;
-    private Consumer<String> messenger;
+    private Consumer<String> authStatusChangeConsumer;
     private LoginCriteria criteria;
 
 
-    public AuthenticationRunner(Shell shell, Config config, Controller controller, Consumer<Boolean> complete) {
+    public AuthenticationRunner(Shell shell, Config config, Controller controller) {
         this.shell = shell;
         this.config = config;
         this.controller = controller;
-        this.complete = complete;
     }
 
     public Config getConfig() {
@@ -79,7 +77,7 @@ public class AuthenticationRunner {
 
 
     public void login(LoginCriteria criteria, Consumer<String> messenger) {
-        this.messenger = messenger;
+        this.authStatusChangeConsumer = messenger;
         this.criteria = criteria;
 
         criteria.updateConfig(config);
@@ -89,49 +87,39 @@ public class AuthenticationRunner {
 
     private void loginAsync(){
         try {
-            messenger.accept(Labels.getString("LoginPage.verifyingLogin"));
-
-            if ((criteria.getMode() == LoginCriteria.OAuthLoginDefault)
-            	&& config.getBoolean(Config.OAUTH_LOGIN_FROM_BROWSER)
-            	&& config.getString(Config.OAUTH_CLIENTID) != null
-            	&& !config.getString(Config.OAUTH_CLIENTID).isEmpty()) {
-            	LoginCriteria existingCriteria = criteria;
-            	criteria = new LoginCriteria(LoginCriteria.OAuthLoginFromBrowser);
-            	criteria.setEnvironment(existingCriteria.getEnvironment());
-            	criteria.setInstanceUrl(existingCriteria.getInstanceUrl());
-            	criteria.setUserName(existingCriteria.getUserName());
-            	criteria.setPassword(existingCriteria.getPassword());
-            }
-            if (criteria.getMode() == LoginCriteria.OAuthLoginDefault){
-
-                boolean hasSecret = !config.getString(Config.OAUTH_CLIENTSECRET).trim().equals("");
-                OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, config) : new OAuthTokenFlow(shell, config);
-                if (!flow.open()){
-                    String message = Labels.getString("LoginPage.invalidLogin");
-                    if (flow.getStatusCode() == DefaultSimplePost.PROXY_AUTHENTICATION_REQUIRED) {
-                        message = Labels.getFormattedString("LoginPage.proxyError", flow.getReasonPhrase());
+            authStatusChangeConsumer.accept(Labels.getString("LoginPage.verifyingLogin"));
+            logger.info(Labels.getString("LoginPage.verifyingLogin"));
+            if (criteria.getMode() == LoginCriteria.OAuthLogin){
+                if (config.getBoolean(Config.OAUTH_LOGIN_FROM_BROWSER)) {
+                    OAuthLoginFromBrowserFlow flow = new OAuthLoginFromBrowserFlow(shell, config);
+                    if (!flow.open()) {
+                        String message = Labels.getString("LoginPage.invalidLogin");
+                        authStatusChangeConsumer.accept(message);
+                        return;
                     }
-
-                    if (flow.getReasonPhrase() == null) {
-                        logger.info("OAuth login dialog closed without logging in");
-                    } else {
-                        logger.info("Login failed:" + flow.getReasonPhrase());
+                } else { // OAuth login from Data Loader app
+                    boolean hasSecret = !config.getString(Config.OAUTH_CLIENTSECRET).trim().equals("");
+                    OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, config) : new OAuthTokenFlow(shell, config);
+                    if (!flow.open()) {
+                       String message = Labels.getString("LoginPage.invalidLogin");
+                        if (flow.getStatusCode() == DefaultSimplePost.PROXY_AUTHENTICATION_REQUIRED) {
+                            message = Labels.getFormattedString("LoginPage.proxyError", flow.getReasonPhrase());
+                        }
+    
+                        if (flow.getReasonPhrase() == null) {
+                            logger.info("OAuth login dialog closed without logging in");
+                        } else {
+                            logger.info("Login failed:" + flow.getReasonPhrase());
+                        }
+                        authStatusChangeConsumer.accept(message);
+                        return;
                     }
-                    messenger.accept(message);
-                    complete.accept(false);
-                    return;
                 }
-            } else if (criteria.getMode() == LoginCriteria.OAuthLoginFromBrowser) {
-            	OAuthLoginFromBrowserFlow flow = new OAuthLoginFromBrowserFlow(shell, config);
-            	if (!flow.open()) {
-	                String message = Labels.getString("LoginPage.invalidLogin");
-	                messenger.accept(message);
-	                complete.accept(false);
-	                return;
-            	}
             }
+            
+            // Either OAuth login is successful or 
+            // need to perform username and password or session token based auth
             if (controller.login() && controller.getEntityDescribes() != null) {
-                messenger.accept(Labels.getString("LoginPage.loginSuccessful"));
                 controller.saveConfig();
                 controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession();
                 PartnerConnection conn = controller.getPartnerClient().getConnection();
@@ -147,15 +135,13 @@ public class AuthenticationRunner {
                             "\nOrg Instance Information:",
                             "SELECT InstanceName FROM Organization"
                                     , conn));
-                    }
-                complete.accept(true);
+                }
+                authStatusChangeConsumer.accept(Labels.getString("LoginPage.loginSuccessful"));
             } else {
-                messenger.accept(Labels.getString("LoginPage.invalidLogin"));
-                complete.accept(false);
+                authStatusChangeConsumer.accept(Labels.getString("LoginPage.invalidLogin"));
             }
-        } catch (LoginFault lf ) {
-            messenger.accept(Labels.getString("LoginPage.invalidLogin"));
-            complete.accept(false);
+        } catch (LoginFault lf) {
+            handleError(lf, null);
         } catch (UnexpectedErrorFault e) {
             handleError(e, e.getExceptionMessage());
         } catch (Throwable e) {
@@ -197,17 +183,17 @@ public class AuthenticationRunner {
 
     private void handleError(Throwable e, String message) {
         if (message == null || message.length() < 1) {
-            messenger.accept(Labels.getString("LoginPage.invalidLogin"));
+            authStatusChangeConsumer.accept(Labels.getString("LoginPage.invalidLogin"));
+            logger.error(Labels.getString("LoginPage.invalidLogin"));
         } else {
             int x = message.indexOf(nestedException);
             if (x >= 0) {
                 x += nestedException.length();
                 message = message.substring(x);
             }
-            messenger.accept(message.replace('\n', ' ').trim());
+            authStatusChangeConsumer.accept(message.replace('\n', ' ').trim());
+            logger.error(message);
         }
-        complete.accept(false);
-        logger.error(message);
-        logger.error("\n" + ExceptionUtil.getStackTraceString(e));
+        logger.debug("\n" + ExceptionUtil.getStackTraceString(e));
     }
 }
