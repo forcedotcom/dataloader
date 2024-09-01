@@ -151,8 +151,8 @@ public class Config {
     public static final String DEFAULT_ENDPOINT_URL = "https://login.salesforce.com";
     public static final String LIGHTNING_ENDPOINT_URL_PART_VAL = "lightning.force.com";
     public static final String MYSF_ENDPOINT_URL_PART_VAL = "mysalesforce.com";
-    public static final String OAUTH_PROD_ENVIRONMENT_VAL = "Production";
-    public static final String OAUTH_SB_ENVIRONMENT_VAL = "Sandbox";
+    public static final String PROD_ENVIRONMENT_VAL = "Production";
+    public static final String SB_ENVIRONMENT_VAL = "Sandbox";
 
     public static final String OAUTH_PROD_SERVER_VAL = "https://login.salesforce.com/";
     public static final String OAUTH_SB_SERVER_VAL = "https://test.salesforce.com/";
@@ -268,8 +268,8 @@ public class Config {
     public static final String OAUTH_PARTIAL_BULK_CLIENTID = OAUTH_PARTIAL_BULK + "." + OAUTH_PARTIAL_CLIENTID;
     public static final String OAUTH_PARTIAL_PARTNER_CLIENTID = OAUTH_PARTIAL_PARTNER + "." + OAUTH_PARTIAL_CLIENTID;
 
-    public static final String OAUTH_ENVIRONMENTS = OAUTH_PREFIX + "environments";
-    public static final String OAUTH_ENVIRONMENT = OAUTH_PREFIX + "environment";
+    public static final String AUTH_ENVIRONMENTS = OAUTH_PREFIX + "environments";
+    public static final String SELECTED_AUTH_ENVIRONMENT = OAUTH_PREFIX + "environment";
     public static final String OAUTH_ACCESSTOKEN = OAUTH_PREFIX + "accesstoken";
     public static final String OAUTH_REFRESHTOKEN = OAUTH_PREFIX + "refreshtoken";
     public static final String OAUTH_SERVER = OAUTH_PREFIX + OAUTH_PARTIAL_SERVER;
@@ -277,6 +277,8 @@ public class Config {
     public static final String OAUTH_CLIENTID = OAUTH_PREFIX + OAUTH_PARTIAL_CLIENTID;
     public static final String OAUTH_REDIRECTURI = OAUTH_PREFIX + OAUTH_PARTIAL_REDIRECTURI;
     public static final String OAUTH_LOGIN_FROM_BROWSER = OAUTH_PREFIX + "loginfrombrowser";
+    public static final String OAUTH_REDIRECT_URI_SUFFIX = "services/oauth2/success";
+    private static final String OAUTH_DEFAULT_SERVER_DNS = "test.salesforce.com";
     public static final String REUSE_CLIENT_CONNECTION = "sfdc.reuseClientConnection";
     public static final String RICH_TEXT_FIELD_REGEX = "sfdx.richtext.regex";
     
@@ -509,7 +511,7 @@ public class Config {
         initializeLastRun(getLastRunPrefix());
         
         // Properties initialization completed. Configure OAuth environment next
-        setOAuthEnvironment(getString(OAUTH_ENVIRONMENT));
+        setOAuthEnvironment(getString(SELECTED_AUTH_ENVIRONMENT));
     }
     
     private String getLastRunPrefix() {
@@ -597,22 +599,16 @@ public class Config {
         //oauth settings
         setDefaultValue(OAUTH_SERVER, DEFAULT_ENDPOINT_URL);
         setDefaultValue(OAUTH_REDIRECTURI, DEFAULT_ENDPOINT_URL);
-        setDefaultValue(OAUTH_ENVIRONMENT, OAUTH_PROD_ENVIRONMENT_VAL);
-        setDefaultValue(OAUTH_ENVIRONMENTS, OAUTH_PROD_ENVIRONMENT_VAL + AppUtil.COMMA + OAUTH_SB_ENVIRONMENT_VAL);
+        setDefaultValue(SELECTED_AUTH_ENVIRONMENT, PROD_ENVIRONMENT_VAL);
+        setDefaultValue(AUTH_ENVIRONMENTS, PROD_ENVIRONMENT_VAL + AppUtil.COMMA + SB_ENVIRONMENT_VAL);
 
         /* sfdc.oauth.<env>.<bulk | partner>.clientid = DataLoaderBulkUI | DataLoaderPartnerUI */
-        setDefaultValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
-        setDefaultValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
+        setDefaultValue(OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
+        setDefaultValue(OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
 
-        setDefaultValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
-        setDefaultValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
+        setDefaultValue(OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
+        setDefaultValue(OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
 
-        /* production server and redirecturi, sandbox server and redirecturi */
-        setDefaultValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_SERVER, OAUTH_PROD_SERVER_VAL);
-        setDefaultValue(OAUTH_PREFIX + OAUTH_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI, OAUTH_PROD_REDIRECTURI_VAL);
-
-        setDefaultValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_SERVER, OAUTH_SB_SERVER_VAL);
-        setDefaultValue(OAUTH_PREFIX + OAUTH_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI, OAUTH_SB_REDIRECTURI_VAL);
         setDefaultValue(REUSE_CLIENT_CONNECTION, true);
         /*
         setDefaultValue(ENABLE_BULK_QUERY_PK_CHUNKING, false);
@@ -1179,6 +1175,17 @@ public class Config {
         // save last run statistics
         lastRun.save();
     }
+    
+    public void setAuthEndpoint(String authEndpoint) {
+        // TODO - check current environment and set environment-specific endpoint
+        this.setValue(Config.ENDPOINT, authEndpoint);
+    }
+    
+    public String getAuthEndpoint() {
+        // TODO - return the auth endpoint for current environment
+        String endpoint = getString(Config.ENDPOINT);
+        return endpoint;
+    }
 
     private void removeUnsupportedProperties() {
         // do not save a value for enabling Bulk V2 
@@ -1476,11 +1483,10 @@ public class Config {
     }
 
     public void setOAuthEnvironment(String environment) {
-        String clientId;
         if (environment == null || environment.isBlank()) {
-            environment = OAUTH_PROD_ENVIRONMENT_VAL;
+            environment = PROD_ENVIRONMENT_VAL;
         }
-        String[] envArray = getString(OAUTH_ENVIRONMENTS).split(",");
+        String[] envArray = getString(AUTH_ENVIRONMENTS).split(",");
         boolean isEnvMatch = false;
         for (String env : envArray) {
             env = env.strip();
@@ -1489,8 +1495,11 @@ public class Config {
             }
         }
         if (!isEnvMatch) {
-            environment = OAUTH_PROD_ENVIRONMENT_VAL;
+            environment = PROD_ENVIRONMENT_VAL;
         }
+        setValue(SELECTED_AUTH_ENVIRONMENT, environment);
+
+        String clientId;
         if (getBoolean(BULK_API_ENABLED) || getBoolean(BULKV2_API_ENABLED)) {
             clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_BULK_CLIENTID);
         } else {
@@ -1499,11 +1508,32 @@ public class Config {
         if (clientId == null || clientId.isEmpty()) {
             clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTID);
         }
-        setValue(OAUTH_ENVIRONMENT, environment);
-        setValue(OAUTH_SERVER, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_SERVER));
         setValue(OAUTH_CLIENTID, clientId);
         setValue(OAUTH_CLIENTSECRET, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTSECRET));
-        setValue(OAUTH_REDIRECTURI, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_REDIRECTURI));
+
+        // All URLs are driven from Config.ENDPOINT URL setting
+        String endpointURL = getAuthEndpoint();
+        if (!endpointURL.endsWith("/")) {
+            endpointURL += "/";
+        }
+        String envSpecificOAuthServerURL = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_SERVER);
+        if (envSpecificOAuthServerURL != null
+                && !envSpecificOAuthServerURL.contains(Config.OAUTH_DEFAULT_SERVER_DNS)
+                && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL)) {
+            endpointURL = envSpecificOAuthServerURL;
+        }
+        setValue(OAUTH_SERVER, endpointURL);
+        
+        String envSpecificOAuthRedirectURI = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_REDIRECTURI);
+        String redirectURI = "";
+        if (envSpecificOAuthRedirectURI != null
+                && !envSpecificOAuthServerURL.contains(Config.OAUTH_DEFAULT_SERVER_DNS)
+                && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL)) {
+            redirectURI = envSpecificOAuthRedirectURI;
+        } else {
+            redirectURI = endpointURL + Config.OAUTH_REDIRECT_URI_SUFFIX;
+        }
+        setValue(OAUTH_REDIRECTURI, redirectURI);
     }
     
     /**

@@ -29,6 +29,8 @@ package com.salesforce.dataloader.ui;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.model.LoginCriteria;
 
+import java.util.ArrayList;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -46,16 +48,17 @@ public class UsernamePasswordLoginControl extends Composite {
     private final Button loginButton;
     private final Text userName;
     private final Text password;
-    private final Text loginUrl;
-    private final AuthenticationRunner authentication;
+    private final AuthenticationRunner authRunner;
     private final Label loginLabel;
     private final Text sessionId;
-    private final boolean isInternal;
+    private final boolean authUsingSessionId;
+    private final LoginPage loginPage;
 
-    public UsernamePasswordLoginControl(Composite parent, int style, AuthenticationRunner authentication, boolean isInternal) {
+    public UsernamePasswordLoginControl(Composite parent, int style, LoginPage loginPage, AuthenticationRunner authRunner, boolean authUsingSessionId) {
         super(parent, style);
-        this.isInternal = isInternal;
-        this.authentication = authentication;
+        this.authUsingSessionId = authUsingSessionId;
+        this.authRunner = authRunner;
+        this.loginPage = loginPage;
         GridData data = new GridData(GridData.FILL_BOTH);
         this.setLayoutData(data);
         GridLayout layout = new GridLayout(2, true);
@@ -67,8 +70,8 @@ public class UsernamePasswordLoginControl extends Composite {
         usernameLabel.setLayoutData(data);
         usernameLabel.setText(Labels.getString("LoginPage.username"));
         userName = new Text(this, SWT.LEFT | SWT.BORDER);
-        userName.setText(authentication.getConfig().getString(Config.USERNAME));
-       data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
+        userName.setText(authRunner.getConfig().getString(Config.USERNAME));
+        data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
         userName.setLayoutData(data);
 
         userName.addKeyListener(new KeyListener() {
@@ -86,10 +89,10 @@ public class UsernamePasswordLoginControl extends Composite {
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         pwdOrSessionIdLabel.setLayoutData(data);
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-        if (isInternal) {
+        if (authUsingSessionId) {
             pwdOrSessionIdLabel.setText(Labels.getString("LoginPage.sessionId"));
             sessionId = new Text(this, SWT.LEFT | SWT.BORDER);
-            sessionId.setText(authentication.getConfig().getString(Config.SFDC_INTERNAL_SESSION_ID));
+            sessionId.setText(authRunner.getConfig().getString(Config.SFDC_INTERNAL_SESSION_ID));
             sessionId.setLayoutData(data);
             password = null;
         } else {
@@ -114,15 +117,23 @@ public class UsernamePasswordLoginControl extends Composite {
             });
             sessionId = null;
         }
-
-        Label serverURLLabel = new Label(this, SWT.RIGHT | SWT.WRAP);
+        
+        Label envLabel = new Label(this, SWT.RIGHT | SWT.WRAP);
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        serverURLLabel.setLayoutData(data);
-        serverURLLabel.setText(Labels.getString("LoginPage.instServerUrl"));
-        loginUrl = new Text(this, SWT.LEFT | SWT.BORDER);
-        loginUrl.setText(authentication.getConfig().getString(Config.ENDPOINT));
+        envLabel.setLayoutData(data);
+        envLabel.setText(Labels.getString("LoginPage.environment"));
+        ArrayList<String> environments = authRunner.getConfig().getStrings(Config.AUTH_ENVIRONMENTS);
+
+        Combo envDropdown = new Combo(this, SWT.DROP_DOWN | SWT.BORDER);
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-        loginUrl.setLayoutData(data);
+        envDropdown.setLayoutData(data);
+        for (String label: environments) {
+            envDropdown.add(label);
+        }
+        String currentEnvironment = authRunner.getConfig().getString(Config.SELECTED_AUTH_ENVIRONMENT);
+        if (environments.contains(currentEnvironment)) {
+            envDropdown.setText(currentEnvironment);
+        }
 
         @SuppressWarnings("unused")
         Label emptyLabel = new Label(this, SWT.RIGHT);
@@ -153,22 +164,23 @@ public class UsernamePasswordLoginControl extends Composite {
     
     private void attempt_login() {
         LoginCriteria criteria = null;
-        if (isInternal) {
-            criteria = new LoginCriteria(LoginCriteria.UsernamePasswordLoginAdvanced);
+        if (authUsingSessionId) {
+            criteria = new LoginCriteria(LoginCriteria.SessionIdLogin);
             criteria.setSessionId(sessionId.getText());
         } else {
-            criteria = new LoginCriteria(LoginCriteria.UsernamePasswordLoginStandard);
+            criteria = new LoginCriteria(LoginCriteria.UsernamePasswordLogin);
             criteria.setPassword(password.getText());
         }
-        criteria.setInstanceUrl(loginUrl.getText());
+        criteria.setInstanceUrl(this.authRunner.getConfig().getAuthEndpoint());
         criteria.setUserName(userName.getText());
-        authentication.login(criteria, this::setLoginStatus);
+        authRunner.login(criteria, this::setLoginStatus);
     }
     
     private void setLoginStatus(String statusStr) {
-        if (Labels.getString("LoginPage.loginSuccessful").equalsIgnoreCase(statusStr)) {
+        if (this.loginPage.controller.isLoggedIn()) {
             loginButton.setEnabled(false);
         }
         loginLabel.setText(statusStr);
+        this.loginPage.setPageComplete();
     }
 }

@@ -500,6 +500,7 @@ public class Controller {
         this.partnerClient = null;
         this.bulkV2Client = null;
         this.restClient = null;
+        config.setValue(Config.OAUTH_ACCESSTOKEN, "");
     }
 
     public boolean attachmentsEnabled() {

@@ -101,7 +101,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
         final String origUsername = config.getString(Config.USERNAME);
         final String origPassword = config.getString(Config.PASSWORD);
-        final String origEndpoint = config.getString(Config.ENDPOINT);
+        final String origEndpoint = config.getAuthEndpoint();
 
         //login normally just to get sessionId and endpoint
         PartnerClient setupOnlyClient = new PartnerClient(getController());
@@ -116,7 +116,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
             config.setValue(Config.SFDC_INTERNAL, true);
             config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
-            config.setValue(Config.ENDPOINT, endpoint);
+            config.setAuthEndpoint(endpoint);
             config.setValue(Config.SFDC_INTERNAL_SESSION_ID, sessionId);
 
             PartnerClient client = new PartnerClient(getController());
@@ -124,7 +124,7 @@ public class PartnerClientTest extends ProcessTestBase {
         } finally {
             config.setValue(Config.USERNAME, origUsername);
             config.setValue(Config.PASSWORD, origPassword);
-            config.setValue(Config.ENDPOINT, origEndpoint);
+            config.setAuthEndpoint(origEndpoint);
             config.setValue(Config.SFDC_INTERNAL, false);
             config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
             config.setValue(Config.SFDC_INTERNAL_SESSION_ID, "");
@@ -137,7 +137,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
         final String origUsername = config.getString(Config.USERNAME);
         final String origPassword = config.getString(Config.PASSWORD);
-        final String origEndpoint = config.getString(Config.ENDPOINT);
+        final String origEndpoint = config.getAuthEndpoint();
 
         //login normally just to get sessionId and endpoint
         PartnerClient setupOnlyClient = new PartnerClient(getController());
@@ -152,7 +152,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
             config.setValue(Config.SFDC_INTERNAL, false);
             config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
-            config.setValue(Config.ENDPOINT, endpoint);
+            config.setAuthEndpoint(endpoint);
             config.setValue(Config.SFDC_INTERNAL_SESSION_ID, sessionId);
 
             PartnerClient client = new PartnerClient(getController());
@@ -166,7 +166,7 @@ public class PartnerClientTest extends ProcessTestBase {
         } finally {
             config.setValue(Config.USERNAME, origUsername);
             config.setValue(Config.PASSWORD, origPassword);
-            config.setValue(Config.ENDPOINT, origEndpoint);
+            config.setAuthEndpoint(origEndpoint);
             config.setValue(Config.SFDC_INTERNAL, false);
             config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
             config.setValue(Config.SFDC_INTERNAL_SESSION_ID, "");

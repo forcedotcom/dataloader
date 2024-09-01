@@ -38,6 +38,7 @@ import com.salesforce.dataloader.model.OAuthToken;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
 
@@ -64,14 +65,14 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
     @Before
     public void testSetup(){
         config = getController().getConfig();
-        existingOAuthEnvironments = config.getStrings(Config.OAUTH_ENVIRONMENTS);
-        existingEndPoint = config.getString(Config.ENDPOINT);
+        existingOAuthEnvironments = config.getStrings(Config.AUTH_ENVIRONMENTS);
+        existingEndPoint = config.getAuthEndpoint();
         oauthServer = "http://OAUTH_PARTIAL_SERVER";
         oauthClientId = "CLIENTID";
         oauthRedirectUri = "REDIRECTURI";
         mockSimplePost = mock(SimplePost.class);
 
-        config.setValue(Config.OAUTH_ENVIRONMENTS, "Testing");
+        config.setValue(Config.AUTH_ENVIRONMENTS, "Testing");
         config.setOAuthEnvironmentString("Testing", Config.OAUTH_PARTIAL_SERVER, oauthServer);
         config.setOAuthEnvironmentString("Testing", Config.OAUTH_PARTIAL_CLIENTID, oauthClientId);
         config.setOAuthEnvironmentString("Testing", Config.OAUTH_PARTIAL_REDIRECTURI, oauthRedirectUri);
@@ -83,8 +84,8 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
 
     @After
     public void testCleanup(){
-        config.setValue(Config.OAUTH_ENVIRONMENTS, existingOAuthEnvironments.toArray(new String[0]));
-        config.setValue(Config.ENDPOINT, existingEndPoint);
+        config.setValue(Config.AUTH_ENVIRONMENTS, existingOAuthEnvironments.toArray(new String[0]));
+        config.setAuthEndpoint(existingEndPoint);
         SimplePostFactory.setConstructor(existingConstructor);
     }
 
@@ -197,7 +198,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
             SimplePost simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", config);
 
             String expected = "http://INSTANCEURL";
-            String actual = config.getString(Config.ENDPOINT);
+            String actual = config.getAuthEndpoint();
 
             Assert.assertEquals("Access token was not set", expected, actual);
 

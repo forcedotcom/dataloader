@@ -153,7 +153,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
                 controller.setStatusFiles(config.getString(Config.OUTPUT_STATUS_DIR), true, false);
             }
 
-            logger.info(Messages.getFormattedString("Process.loggingIn", config.getString(Config.ENDPOINT))); //$NON-NLS-1$
+            logger.info(Messages.getFormattedString("Process.loggingIn", config.getAuthEndpoint())); //$NON-NLS-1$
             if (controller.login()) {
                 // get the field info (using the describe call)
                 logger.info(Messages.getString("Process.settingFieldTypes")); //$NON-NLS-1$

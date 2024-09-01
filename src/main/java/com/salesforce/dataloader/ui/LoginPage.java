@@ -44,9 +44,9 @@ import org.eclipse.swt.widgets.Event;
 public class LoginPage extends OperationPage {
 
     private AuthenticationRunner authenticator;
-    private OAuthLoginDefaultControl defaultControl;
-    private UsernamePasswordLoginControl standardControl;
-    private UsernamePasswordLoginControl advancedControl;
+    private OAuthLoginControl oauthControl;
+    private UsernamePasswordLoginControl unamePwdLoginControl;
+    private UsernamePasswordLoginControl sessionIdLoginControl;
     private Grid12 grid;
     private Composite control;
     private String nextPageName = DataSelectionPage.class.getSimpleName();
@@ -63,7 +63,7 @@ public class LoginPage extends OperationPage {
         Config config = controller.getConfig();
         control = new Composite(parent, SWT.FILL);
         grid = new Grid12(control, 40, false, true);
-        authenticator = new AuthenticationRunner(getShell(), config, controller, this::authenticationCompleted);
+        authenticator = new AuthenticationRunner(getShell(), config, controller);
 
         Button[] layouts = new Button[3];
         grid.createPadding(2);
@@ -72,27 +72,27 @@ public class LoginPage extends OperationPage {
         layouts[2] = grid.createButton(2, SWT.RADIO, Labels.getString("LoginPage.loginAdvanced"));
         grid.createPadding(2);
 
-        defaultControl = new OAuthLoginDefaultControl(control, SWT.FILL, authenticator);
-        defaultControl.setLayoutData(grid.createCell(12));
-        standardControl = new UsernamePasswordLoginControl(control, SWT.FILL, authenticator, false);
-        standardControl.setLayoutData(grid.createCell(10));
-        advancedControl = new UsernamePasswordLoginControl(control, SWT.FILL, authenticator, true);
-        advancedControl.setLayoutData(grid.createCell(12));
+        oauthControl = new OAuthLoginControl(control, SWT.FILL, this, authenticator);
+        oauthControl.setLayoutData(grid.createCell(12));
+        unamePwdLoginControl = new UsernamePasswordLoginControl(control, SWT.FILL, this, authenticator, false);
+        unamePwdLoginControl.setLayoutData(grid.createCell(10));
+        sessionIdLoginControl = new UsernamePasswordLoginControl(control, SWT.FILL, this, authenticator, true);
+        sessionIdLoginControl.setLayoutData(grid.createCell(12));
 
         setControl(control);
 
-        layouts[0].addListener(SWT.Selection, this::selectDefault);
-        layouts[1].addListener(SWT.Selection, this::selectStandard);
-        layouts[2].addListener(SWT.Selection, this::selectAdvanced);
+        layouts[0].addListener(SWT.Selection, this::selectOAuth);
+        layouts[1].addListener(SWT.Selection, this::selectUnamePwd);
+        layouts[2].addListener(SWT.Selection, this::selectSessionId);
 
         //turn off oauth options if no configured environments found
-        if (config.getStrings(Config.OAUTH_ENVIRONMENTS).size() > 0) {
+        if (config.getStrings(Config.AUTH_ENVIRONMENTS).size() > 0) {
             layouts[0].setSelection(true);
-            selectDefault(null);
+            selectOAuth(null);
         } else {
             grid.hide(layouts[0]);
             layouts[1].setSelection(true);
-            selectStandard(null);
+            selectUnamePwd(null);
         }
         if (!config.getBoolean(Config.SFDC_INTERNAL)){
             grid.hide(layouts[2]);
@@ -115,7 +115,6 @@ public class LoginPage extends OperationPage {
      */
     private void loadDataSelectionPage(Controller controller) {
         ((OperationPage)getWizard().getPage(this.nextPageName)).setupPage(); //$NON-NLS-1$
-        setPageComplete();
         if (canFlipToNextPage()) {
             IWizardPage page = getNextPage();
             if (page != null) {
@@ -155,31 +154,22 @@ public class LoginPage extends OperationPage {
         return (!controller.isLoggedIn());
     }
 
-    private void authenticationCompleted(Boolean success){
-        if (success){
-            loadDataSelectionPage(controller);
-        }
-        else{
-            setPageComplete(false);
-        }
+    private void selectSessionId(Event event) {
+        show(sessionIdLoginControl);
     }
 
-    private void selectAdvanced(Event event) {
-        show(advancedControl);
+    private void selectUnamePwd(Event event) {
+        show(unamePwdLoginControl);
     }
 
-    private void selectStandard(Event event) {
-        show(standardControl);
-    }
-
-    private void selectDefault(Event event) {
-        show(defaultControl);
+    private void selectOAuth(Event event) {
+        show(oauthControl);
     }
 
     private void show(Composite showControl) {
-        grid.hide(defaultControl);
-        grid.hide(standardControl);
-        grid.hide(advancedControl);
+        grid.hide(oauthControl);
+        grid.hide(unamePwdLoginControl);
+        grid.hide(sessionIdLoginControl);
         grid.show(showControl);
 
         control.layout(false);
@@ -188,6 +178,9 @@ public class LoginPage extends OperationPage {
     @Override
     public void setPageComplete() {
         setPageComplete(controller.isLoggedIn());
+        if (controller.isLoggedIn()){
+            loadDataSelectionPage(controller);
+        }
     }
 
     @Override
