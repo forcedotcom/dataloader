@@ -587,23 +587,23 @@ public class AdvancedSettingsDialog extends BaseDialog {
         textRule.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipAssignmentRule"));
 
         //endpoints
-        createLabel(restComp, "prodServerURL", null, null);
+        createLink(restComp, "prodServerURL", null, null);
         textProdEndpoint = new Text(restComp, SWT.BORDER);
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.widthHint = 30 * textSize.x;
         textProdEndpoint.setLayoutData(data);
-        String endpoint = config.getString(Config.ENDPOINT_PROD);
+        String endpoint = config.getString(Config.AUTH_ENDPOINT_PROD);
         if ("".equals(endpoint)) { //$NON-NLS-1$
             endpoint = Config.DEFAULT_ENDPOINT_URL_PROD;
         }
         textProdEndpoint.setText(endpoint);
 
-        createLabel(restComp, "sandboxServerURL", null, null);
+        createLink(restComp, "sandboxServerURL", null, null);
         textSBEndpoint = new Text(restComp, SWT.BORDER);
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.widthHint = 30 * textSize.x;
         textSBEndpoint.setLayoutData(data);
-        endpoint = config.getString(Config.ENDPOINT_SANDBOX);
+        endpoint = config.getString(Config.AUTH_ENDPOINT_SANDBOX);
         if ("".equals(endpoint)) { //$NON-NLS-1$
             endpoint = Config.DEFAULT_ENDPOINT_URL_SANDBOX;
         }
@@ -943,7 +943,9 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 Config config = getController().getConfig();
 
                 String currentTextProdEndpoint = textProdEndpoint.getText();
-                if (currentTextProdEndpoint != null && !currentTextProdEndpoint.isEmpty() && !AppUtil.isValidHttpsUrl(currentTextProdEndpoint)) {
+                if (currentTextProdEndpoint != null 
+                        && !currentTextProdEndpoint.isEmpty() 
+                        && !AppUtil.isValidHttpsUrl(currentTextProdEndpoint)) {
                     MessageDialog alert = new MessageDialog(getParent().getShell(), "Warning", null,
                             Labels.getFormattedString("AdvancedSettingsDialog.serverURLInfo", currentTextProdEndpoint),
                             MessageDialog.ERROR, new String[]{"OK"}, 0);
@@ -952,7 +954,9 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
                 }
                 String currentTextSBEndpoint = textProdEndpoint.getText();
-                if (currentTextSBEndpoint != null && !currentTextSBEndpoint.isEmpty() && !AppUtil.isValidHttpsUrl(currentTextSBEndpoint)) {
+                if (currentTextSBEndpoint != null 
+                        && !currentTextSBEndpoint.isEmpty() 
+                        && !AppUtil.isValidHttpsUrl(currentTextSBEndpoint)) {
                     MessageDialog alert = new MessageDialog(getParent().getShell(), "Warning", null,
                             Labels.getFormattedString("AdvancedSettingsDialog.serverURLInfo", currentTextSBEndpoint),
                             MessageDialog.ERROR, new String[]{"OK"}, 0);

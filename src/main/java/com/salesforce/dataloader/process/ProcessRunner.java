@@ -100,7 +100,6 @@ public class ProcessRunner implements InitializingBean, IProcess {
     
     private static final String PROP_NAME_ARRAY[] = {
             Config.OPERATION,
-            Config.ENDPOINT,
             Config.USERNAME,
             Config.PASSWORD,
             Config.DAO_TYPE,
