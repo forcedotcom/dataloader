@@ -148,14 +148,12 @@ public class Config {
     public static final int DEFAULT_BULK_API_IMPORT_BATCH_SIZE = 2000;
     
     public static final long DEFAULT_BULK_API_CHECK_STATUS_INTERVAL = 5000L;
-    public static final String DEFAULT_ENDPOINT_URL = "https://login.salesforce.com";
+    public static final String DEFAULT_ENDPOINT_URL_PROD = "https://login.salesforce.com";
+    public static final String DEFAULT_ENDPOINT_URL_SANDBOX = "https://test.salesforce.com";
     public static final String LIGHTNING_ENDPOINT_URL_PART_VAL = "lightning.force.com";
     public static final String MYSF_ENDPOINT_URL_PART_VAL = "mysalesforce.com";
     public static final String PROD_ENVIRONMENT_VAL = "Production";
     public static final String SB_ENVIRONMENT_VAL = "Sandbox";
-
-    public static final String OAUTH_PROD_SERVER_VAL = "https://login.salesforce.com/";
-    public static final String OAUTH_SB_SERVER_VAL = "https://test.salesforce.com/";
 
     public static final String OAUTH_PROD_REDIRECTURI_VAL = "https://login.salesforce.com/services/oauth2/success";
     public static final String OAUTH_SB_REDIRECTURI_VAL = "https://test.salesforce.com/services/oauth2/success";
@@ -230,6 +228,8 @@ public class Config {
     public static final String USERNAME = "sfdc.username"; //$NON-NLS-1$
     public static final String PASSWORD = "sfdc.password"; //$NON-NLS-1$
     public static final String ENDPOINT = "sfdc.endpoint"; //$NON-NLS-1$
+    public static final String ENDPOINT_PROD = "sfdc.endpoint.production"; //$NON-NLS-1$
+    public static final String ENDPOINT_SANDBOX = "sfdc.endpoint.sandbox"; //$NON-NLS-1$
     public static final String PROXY_HOST = "sfdc.proxyHost"; //$NON-NLS-1$
     public static final String PROXY_PORT = "sfdc.proxyPort"; //$NON-NLS-1$
     public static final String PROXY_USERNAME = "sfdc.proxyUsername"; //$NON-NLS-1$
@@ -337,7 +337,7 @@ public class Config {
     public static final String READ_CHARSET = "dataAccess.readCharset";
     
     public static final String API_VERSION_PROP="salesforce.api.version";
-
+    public static final String OAUTH_INSTANCE_URL="salesforce.oauth.instanceURL";
     
     /**
      *  ===============  PILOT config properties ========
@@ -475,7 +475,8 @@ public class Config {
             DAO_READ_PREPROCESSOR_SCRIPT,
             DAO_WRITE_POSTPROCESSOR_SCRIPT,
             ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG,
-            DELETE_WITH_EXTERNALID
+            DELETE_WITH_EXTERNALID,
+            OAUTH_INSTANCE_URL
     };
     
     /**
@@ -512,6 +513,11 @@ public class Config {
         
         // Properties initialization completed. Configure OAuth environment next
         setOAuthEnvironment(getString(SELECTED_AUTH_ENVIRONMENT));
+        String endpoint_prod = getString(Config.ENDPOINT_PROD);
+        if (Config.DEFAULT_ENDPOINT_URL_PROD.equalsIgnoreCase(endpoint_prod)) {
+            endpoint_prod = getString(Config.ENDPOINT);
+            setValue(ENDPOINT_PROD, endpoint_prod);
+        }
     }
     
     private String getLastRunPrefix() {
@@ -564,7 +570,10 @@ public class Config {
         setDefaultValue(CSV_DELIMITER_OTHER_VALUE, "-");
         setDefaultValue(CSV_DELIMITER_FOR_QUERY_RESULTS, AppUtil.COMMA);
 
-        setDefaultValue(ENDPOINT, DEFAULT_ENDPOINT_URL);
+        setDefaultValue(ENDPOINT, DEFAULT_ENDPOINT_URL_PROD);
+        setDefaultValue(ENDPOINT_PROD, getString(ENDPOINT));
+        setDefaultValue(ENDPOINT_SANDBOX, DEFAULT_ENDPOINT_URL_SANDBOX);
+
         setDefaultValue(IMPORT_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_IMPORT_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
         setDefaultValue(LOAD_ROW_TO_START_AT, 0);
         setDefaultValue(TIMEOUT_SECS, DEFAULT_TIMEOUT_SECS);
@@ -597,8 +606,8 @@ public class Config {
         setDefaultValue(SFDC_INTERNAL_SESSION_ID, (String) null);
 
         //oauth settings
-        setDefaultValue(OAUTH_SERVER, DEFAULT_ENDPOINT_URL);
-        setDefaultValue(OAUTH_REDIRECTURI, DEFAULT_ENDPOINT_URL);
+        setDefaultValue(OAUTH_SERVER, DEFAULT_ENDPOINT_URL_PROD);
+        setDefaultValue(OAUTH_REDIRECTURI, DEFAULT_ENDPOINT_URL_PROD);
         setDefaultValue(SELECTED_AUTH_ENVIRONMENT, PROD_ENVIRONMENT_VAL);
         setDefaultValue(AUTH_ENVIRONMENTS, PROD_ENVIRONMENT_VAL + AppUtil.COMMA + SB_ENVIRONMENT_VAL);
 
@@ -641,6 +650,7 @@ public class Config {
         setDefaultValue(CACHE_DESCRIBE_GLOBAL_RESULTS, true);
         setDefaultValue(PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE, false);
         setDefaultValue(INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, false);
+        setDefaultValue(OAUTH_INSTANCE_URL, false);
     }
 
     /**
@@ -1177,14 +1187,50 @@ public class Config {
     }
     
     public void setAuthEndpoint(String authEndpoint) {
-        // TODO - check current environment and set environment-specific endpoint
-        this.setValue(Config.ENDPOINT, authEndpoint);
+        this.setAuthEndpointForEnv(authEndpoint, getString(Config.SELECTED_AUTH_ENVIRONMENT));
+    }
+    
+    public void setAuthEndpointForEnv(String authEndpoint, String env) {
+        if (env != null && env.equalsIgnoreCase(getString(Config.SB_ENVIRONMENT_VAL))) {
+            this.setValue(Config.ENDPOINT_SANDBOX, authEndpoint);
+        } else {
+            this.setValue(Config.ENDPOINT_PROD, authEndpoint);
+        }
     }
     
     public String getAuthEndpoint() {
-        // TODO - return the auth endpoint for current environment
         String endpoint = getString(Config.ENDPOINT);
+        if (Config.SB_ENVIRONMENT_VAL.equals(this.getString(Config.SELECTED_AUTH_ENVIRONMENT))) {
+            endpoint = getString(Config.ENDPOINT_SANDBOX);
+            if (endpoint == null || endpoint.isBlank()) {
+                endpoint = getDefaultAuthEndpoint();
+            }
+        } else {
+            endpoint = getString(Config.ENDPOINT_PROD);
+            if (endpoint == null || endpoint.isBlank()) {
+                endpoint = getDefaultAuthEndpoint();
+            }
+        }
         return endpoint;
+    }
+    
+    public String getDefaultAuthEndpoint() {
+        if (Config.SB_ENVIRONMENT_VAL.equals(this.getString(Config.SELECTED_AUTH_ENVIRONMENT))) {
+            return Config.DEFAULT_ENDPOINT_URL_SANDBOX;
+        } else { // assume production is the only alternate environment
+            return Config.DEFAULT_ENDPOINT_URL_PROD;
+        }
+    }
+    
+    public boolean isDefaultAuthEndpoint(String endpoint) {
+        if (endpoint == null || endpoint.isBlank()) {
+            return false;
+        }
+        if (Config.SB_ENVIRONMENT_VAL.equals(this.getString(Config.SELECTED_AUTH_ENVIRONMENT))) {
+            return Config.DEFAULT_ENDPOINT_URL_SANDBOX.equalsIgnoreCase(endpoint);
+        } else { // assume production is the only alternate environment
+            return Config.DEFAULT_ENDPOINT_URL_PROD.equalsIgnoreCase(endpoint);
+        }
     }
 
     private void removeUnsupportedProperties() {
@@ -1519,7 +1565,7 @@ public class Config {
         String envSpecificOAuthServerURL = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_SERVER);
         if (envSpecificOAuthServerURL != null
                 && !envSpecificOAuthServerURL.contains(Config.OAUTH_DEFAULT_SERVER_DNS)
-                && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL)) {
+                && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_PROD)) {
             endpointURL = envSpecificOAuthServerURL;
         }
         setValue(OAUTH_SERVER, endpointURL);
@@ -1528,7 +1574,7 @@ public class Config {
         String redirectURI = "";
         if (envSpecificOAuthRedirectURI != null
                 && !envSpecificOAuthServerURL.contains(Config.OAUTH_DEFAULT_SERVER_DNS)
-                && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL)) {
+                && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_PROD)) {
             redirectURI = envSpecificOAuthRedirectURI;
         } else {
             redirectURI = endpointURL + Config.OAUTH_REDIRECT_URI_SUFFIX;

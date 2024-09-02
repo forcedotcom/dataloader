@@ -75,8 +75,7 @@ public class OAuthBrowserLoginRunner {
             startBrowserLogin(config, skipUserCodePage);
         } catch (Exception ex) {
             logger.warn(Messages.getMessage(this.getClass(), "failedAuthStart", origEndpoint, ex.getMessage()));
-            if (Config.PROD_ENVIRONMENT_VAL.equals(config.getString(Config.SELECTED_AUTH_ENVIRONMENT))
-                    && !Config.DEFAULT_ENDPOINT_URL.equalsIgnoreCase(origEndpoint)) {
+            if (!config.isDefaultAuthEndpoint(origEndpoint)) {
                 // retry with default endpoint URL only if user is attempting production login
                 retryBrowserLoginWithDefaultURL(config, skipUserCodePage);
             }
@@ -87,9 +86,8 @@ public class OAuthBrowserLoginRunner {
     }
     
     private void retryBrowserLoginWithDefaultURL(Config config, boolean skipUserCodePage)  throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
-        String oAuthServer = Config.DEFAULT_ENDPOINT_URL;
-        logger.info(Messages.getMessage(this.getClass(), "retryAuthStart", oAuthServer));
-        config.setAuthEndpoint(oAuthServer);
+        logger.info(Messages.getMessage(this.getClass(), "retryAuthStart", config.getDefaultAuthEndpoint()));
+        config.setAuthEndpoint(config.getDefaultAuthEndpoint());
         startBrowserLogin(config, skipUserCodePage);
     }
     
@@ -337,6 +335,6 @@ public class OAuthBrowserLoginRunner {
        OAuthToken token = gson.fromJson(jsonTokenResult, OAuthToken.class);
        config.setValue(Config.OAUTH_ACCESSTOKEN, token.getAccessToken());
        config.setValue(Config.OAUTH_REFRESHTOKEN, token.getRefreshToken());
-       config.setAuthEndpoint(token.getInstanceUrl());
+       config.setValue(Config.OAUTH_INSTANCE_URL, token.getInstanceUrl());
    }
 }
