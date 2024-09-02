@@ -32,7 +32,6 @@ import com.salesforce.dataloader.config.LastRun;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.LoggingUtil;
-import com.sforce.soap.partner.Connector;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -60,8 +59,6 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
@@ -75,7 +72,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Button buttonNulls;
     private Text labelNulls;
     private Text textRule;
-    private Text textEndpoint;
+    private Text textProdEndpoint;
+    private Text textSBEndpoint;
     private Button buttonCompression;
     private Button buttonResetUrl;
     private Text textTimeout;
@@ -93,7 +91,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Text textSandboxBulkClientID;
     private Text textWizardWidth;
     private Text textWizardHeight;
-    private final String defaultServer;
 
     private Button buttonShowWelcomeScreen;
     private Button buttonShowLoaderUpgradeScreen;
@@ -137,16 +134,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
      */
     public AdvancedSettingsDialog(Shell parent, Controller controller) {
         super(parent, controller);
-
-        URI uri;
-        String server = "";
-        try {
-            uri = new URI(Connector.END_POINT);
-            server = uri.getScheme() + "://" + uri.getHost(); //$NON-NLS-1$
-        } catch (URISyntaxException e) {
-            logger.error("", e);
-        }
-        defaultServer = server;
     }
 
     private final Map<Button, Composite> apiOptionsMap = new HashMap<Button, Composite>();
@@ -599,17 +586,28 @@ public class AdvancedSettingsDialog extends BaseDialog {
         textRule.setText(config.getString(Config.ASSIGNMENT_RULE));
         textRule.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipAssignmentRule"));
 
-        //endpoint
-        createLabel(restComp, "serverURL", null, null);
-        textEndpoint = new Text(restComp, SWT.BORDER);
+        //endpoints
+        createLabel(restComp, "prodServerURL", null, null);
+        textProdEndpoint = new Text(restComp, SWT.BORDER);
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.widthHint = 30 * textSize.x;
-        textEndpoint.setLayoutData(data);
-        String endpoint = config.getAuthEndpoint();
+        textProdEndpoint.setLayoutData(data);
+        String endpoint = config.getString(Config.ENDPOINT_PROD);
         if ("".equals(endpoint)) { //$NON-NLS-1$
-            endpoint = defaultServer;
+            endpoint = Config.DEFAULT_ENDPOINT_URL_PROD;
         }
-        textEndpoint.setText(endpoint);
+        textProdEndpoint.setText(endpoint);
+
+        createLabel(restComp, "sandboxServerURL", null, null);
+        textSBEndpoint = new Text(restComp, SWT.BORDER);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        data.widthHint = 30 * textSize.x;
+        textSBEndpoint.setLayoutData(data);
+        endpoint = config.getString(Config.ENDPOINT_SANDBOX);
+        if ("".equals(endpoint)) { //$NON-NLS-1$
+            endpoint = Config.DEFAULT_ENDPOINT_URL_SANDBOX;
+        }
+        textSBEndpoint.setText(endpoint);
 
         //reset url on login
         createLabel(restComp, "resetUrlOnLogin", null, null);
@@ -944,10 +942,19 @@ public class AdvancedSettingsDialog extends BaseDialog {
             public void widgetSelected(SelectionEvent event) {
                 Config config = getController().getConfig();
 
-                String currentTextEndpoint = textEndpoint.getText();
-                if (currentTextEndpoint != null && !currentTextEndpoint.isEmpty() && !AppUtil.isValidHttpsUrl(currentTextEndpoint)) {
+                String currentTextProdEndpoint = textProdEndpoint.getText();
+                if (currentTextProdEndpoint != null && !currentTextProdEndpoint.isEmpty() && !AppUtil.isValidHttpsUrl(currentTextProdEndpoint)) {
                     MessageDialog alert = new MessageDialog(getParent().getShell(), "Warning", null,
-                            Labels.getFormattedString("AdvancedSettingsDialog.serverURLInfo", currentTextEndpoint),
+                            Labels.getFormattedString("AdvancedSettingsDialog.serverURLInfo", currentTextProdEndpoint),
+                            MessageDialog.ERROR, new String[]{"OK"}, 0);
+                    alert.open();
+                    return;
+
+                }
+                String currentTextSBEndpoint = textProdEndpoint.getText();
+                if (currentTextSBEndpoint != null && !currentTextSBEndpoint.isEmpty() && !AppUtil.isValidHttpsUrl(currentTextSBEndpoint)) {
+                    MessageDialog alert = new MessageDialog(getParent().getShell(), "Warning", null,
+                            Labels.getFormattedString("AdvancedSettingsDialog.serverURLInfo", currentTextSBEndpoint),
                             MessageDialog.ERROR, new String[]{"OK"}, 0);
                     alert.open();
                     return;
@@ -980,7 +987,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setValue(Config.CSV_DELIMITER_OTHER, isOtherDelimiterSpecified);
 
                 config.setValue(Config.EXPORT_BATCH_SIZE, textExportBatchSize.getText());
-                config.setAuthEndpoint(currentTextEndpoint);
+                config.setAuthEndpointForEnv(currentTextProdEndpoint, Config.PROD_ENVIRONMENT_VAL);
+                config.setAuthEndpointForEnv(currentTextSBEndpoint, Config.SB_ENVIRONMENT_VAL);
                 config.setValue(Config.ASSIGNMENT_RULE, textRule.getText());
                 config.setValue(Config.LOAD_ROW_TO_START_AT, textRowToStart.getText());
                 config.setValue(Config.RESET_URL_ON_LOGIN, buttonResetUrl.getSelection());

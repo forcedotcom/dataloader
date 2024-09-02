@@ -198,7 +198,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
             SimplePost simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", config);
 
             String expected = "http://INSTANCEURL";
-            String actual = config.getAuthEndpoint();
+            String actual = config.getString(Config.OAUTH_INSTANCE_URL);;
 
             Assert.assertEquals("Access token was not set", expected, actual);
 

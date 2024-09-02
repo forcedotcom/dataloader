@@ -93,8 +93,7 @@ public class OAuthFlowUtil {
 
             config.setValue(Config.OAUTH_ACCESSTOKEN, token.getAccessToken());
             config.setValue(Config.OAUTH_REFRESHTOKEN, token.getRefreshToken());
-            config.setAuthEndpoint(token.getInstanceUrl());
-
+            config.setValue(Config.OAUTH_INSTANCE_URL, token.getInstanceUrl());
             return true;
         }
 

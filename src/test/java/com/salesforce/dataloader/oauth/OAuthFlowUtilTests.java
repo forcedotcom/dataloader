@@ -136,7 +136,7 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
         try {
             OAuthFlowUtil.handleCompletedUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=INSTANCEURL", config);
             String expected = "INSTANCEURL";
-            String actual = config.getAuthEndpoint();
+            String actual = config.getString(Config.OAUTH_INSTANCE_URL);
 
             Assert.assertEquals("Incorrect refresh token found in config", expected, actual);
         } catch (URISyntaxException e) {

@@ -596,11 +596,10 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         } catch (ConnectionException e) {
             logger.warn(Messages.getMessage(this.getClass(), "failedUsernamePasswordAuth", 
                                             origEndpoint, Config.ENDPOINT, e.getMessage()));
-            if (Config.PROD_ENVIRONMENT_VAL.equals(config.getString(Config.SELECTED_AUTH_ENVIRONMENT))
-                    && !Config.DEFAULT_ENDPOINT_URL.equalsIgnoreCase(origEndpoint)) {
+            if (!config.isDefaultAuthEndpoint(origEndpoint)) {
                 // retry with default endpoint URL only if user is attempting production login
-                config.setAuthEndpoint(Config.DEFAULT_ENDPOINT_URL);
-                logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", Config.DEFAULT_ENDPOINT_URL, Config.ENDPOINT));
+                config.setAuthEndpoint(config.getDefaultAuthEndpoint());
+                logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", config.getDefaultAuthEndpoint(), Config.ENDPOINT));
                 login();
             } else {
                 logger.error("Failed to get user info using manually configured session id", e);
@@ -616,7 +615,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     private boolean dologin() throws ConnectionException, ApiFault {
         // Attempt the login giving the user feedback
         logger.info(Messages.getString("Client.sforceLogin")); //$NON-NLS-1$
-        final ConnectorConfig cc = getLoginConnectorConfig();
+        ConnectorConfig cc = getLoginConnectorConfig();
         boolean savedIsTraceMessage = cc.isTraceMessage();
         cc.setTraceMessage(false);
         PartnerConnection conn = Connector.newConnection(cc);
@@ -626,6 +625,10 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         String oauthAccessToken = config.getString(Config.OAUTH_ACCESSTOKEN);
         try {
             if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
+                cc = getLoginConnectorConfig(config.getString(Config.OAUTH_INSTANCE_URL));
+                savedIsTraceMessage = cc.isTraceMessage();
+                cc.setTraceMessage(false);
+                conn = Connector.newConnection(cc);
                 conn = setConfiguredSessionId(conn, oauthAccessToken, null);
             } else if (config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
                 conn = setConfiguredSessionId(conn, config.getString(Config.SFDC_INTERNAL_SESSION_ID), null);
@@ -881,13 +884,16 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private synchronized ConnectorConfig getLoginConnectorConfig() {
+        return getLoginConnectorConfig(getDefaultServer());
+    }
+    
+    private synchronized ConnectorConfig getLoginConnectorConfig(String serverURL) {
         this.connectorConfig = getConnectorConfig();
-        String serverUrl = getDefaultServer();
-        this.connectorConfig.setAuthEndpoint(serverUrl + getServicePath());
-        this.connectorConfig.setServiceEndpoint(serverUrl + getServicePath());
+        this.connectorConfig.setAuthEndpoint(serverURL + getServicePath());
+        this.connectorConfig.setServiceEndpoint(serverURL + getServicePath());
         return this.connectorConfig;
     }
-
+    
     private String getDefaultServer() {
         String serverUrl = config.getAuthEndpoint();
         if (serverUrl == null || serverUrl.length() == 0) {
