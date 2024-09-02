@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -79,7 +80,6 @@ public abstract class Mapper {
 
     protected final CaseInsensitiveSet daoColumnNames = new CaseInsensitiveSet();
     
-    private CaseInsensitiveSet compositeDAOColumns = new CaseInsensitiveSet();
     private HashMap<String, Integer> compositeColSizeMap = new HashMap<String, Integer>();
     private HashMap<String, Integer> daoColPositionInCompositeColMap = new HashMap<String, Integer>();
     private HashMap<String, String> daoColToCompositeColMap = new HashMap<String, String>();
@@ -104,6 +104,9 @@ public abstract class Mapper {
                     throw new MappingInitializationException(errorMsg);
                 }
                 daoColumnNames.add(colName);
+                daoColPositionInCompositeColMap.put(colName, 0);
+                daoColToCompositeColMap.put(colName, colName);
+                compositeColSizeMap.put(colName, 1);
             }
         }
         if (fields != null) {
@@ -188,7 +191,6 @@ public abstract class Mapper {
             daoColCount = 1;
         }
         compositeColSizeMap.put(mappingSrcStr, daoColCount);
-        compositeDAOColumns.add(mappingSrcStr);
     }
 
     protected void putConstant(String name, String value) {
@@ -299,10 +301,6 @@ public abstract class Mapper {
     }
     public void clearMappings() {
         this.map.clear();
-        this.compositeDAOColumns = new CaseInsensitiveSet();
-        this.compositeColSizeMap.clear();
-        this.daoColPositionInCompositeColMap.clear();
-        this.daoColToCompositeColMap.clear();
     }
 
     public void save(String filename) throws IOException {
@@ -348,7 +346,9 @@ public abstract class Mapper {
     }
 
     protected Set<String> getCompositeDAOColumns() {
-        return compositeDAOColumns.getOriginalValues();
+        HashSet<String> compositeDAOCols = new HashSet<String>();
+        compositeDAOCols.addAll(this.daoColToCompositeColMap.values());
+        return compositeDAOCols;
     }
 
     protected HashMap<String, Integer> getCompositeColSizeMap() {
