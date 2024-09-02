@@ -227,9 +227,9 @@ public class Config {
     // salesforce client connectivity
     public static final String USERNAME = "sfdc.username"; //$NON-NLS-1$
     public static final String PASSWORD = "sfdc.password"; //$NON-NLS-1$
-    public static final String ENDPOINT = "sfdc.endpoint"; //$NON-NLS-1$
-    public static final String ENDPOINT_PROD = "sfdc.endpoint.production"; //$NON-NLS-1$
-    public static final String ENDPOINT_SANDBOX = "sfdc.endpoint.sandbox"; //$NON-NLS-1$
+    public static final String AUTH_ENDPOINT = "sfdc.endpoint"; //$NON-NLS-1$
+    public static final String AUTH_ENDPOINT_PROD = "sfdc.endpoint.production"; //$NON-NLS-1$
+    public static final String AUTH_ENDPOINT_SANDBOX = "sfdc.endpoint.sandbox"; //$NON-NLS-1$
     public static final String PROXY_HOST = "sfdc.proxyHost"; //$NON-NLS-1$
     public static final String PROXY_PORT = "sfdc.proxyPort"; //$NON-NLS-1$
     public static final String PROXY_USERNAME = "sfdc.proxyUsername"; //$NON-NLS-1$
@@ -513,10 +513,10 @@ public class Config {
         
         // Properties initialization completed. Configure OAuth environment next
         setOAuthEnvironment(getString(SELECTED_AUTH_ENVIRONMENT));
-        String endpoint_prod = getString(Config.ENDPOINT_PROD);
+        String endpoint_prod = getString(Config.AUTH_ENDPOINT_PROD);
         if (Config.DEFAULT_ENDPOINT_URL_PROD.equalsIgnoreCase(endpoint_prod)) {
-            endpoint_prod = getString(Config.ENDPOINT);
-            setValue(ENDPOINT_PROD, endpoint_prod);
+            endpoint_prod = getString(Config.AUTH_ENDPOINT);
+            setValue(AUTH_ENDPOINT_PROD, endpoint_prod);
         }
     }
     
@@ -570,9 +570,9 @@ public class Config {
         setDefaultValue(CSV_DELIMITER_OTHER_VALUE, "-");
         setDefaultValue(CSV_DELIMITER_FOR_QUERY_RESULTS, AppUtil.COMMA);
 
-        setDefaultValue(ENDPOINT, DEFAULT_ENDPOINT_URL_PROD);
-        setDefaultValue(ENDPOINT_PROD, getString(ENDPOINT));
-        setDefaultValue(ENDPOINT_SANDBOX, DEFAULT_ENDPOINT_URL_SANDBOX);
+        setDefaultValue(AUTH_ENDPOINT, DEFAULT_ENDPOINT_URL_PROD);
+        setDefaultValue(AUTH_ENDPOINT_PROD, getString(AUTH_ENDPOINT));
+        setDefaultValue(AUTH_ENDPOINT_SANDBOX, DEFAULT_ENDPOINT_URL_SANDBOX);
 
         setDefaultValue(IMPORT_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_IMPORT_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
         setDefaultValue(LOAD_ROW_TO_START_AT, 0);
@@ -1192,21 +1192,21 @@ public class Config {
     
     public void setAuthEndpointForEnv(String authEndpoint, String env) {
         if (env != null && env.equalsIgnoreCase(getString(Config.SB_ENVIRONMENT_VAL))) {
-            this.setValue(Config.ENDPOINT_SANDBOX, authEndpoint);
+            this.setValue(Config.AUTH_ENDPOINT_SANDBOX, authEndpoint);
         } else {
-            this.setValue(Config.ENDPOINT_PROD, authEndpoint);
+            this.setValue(Config.AUTH_ENDPOINT_PROD, authEndpoint);
         }
     }
     
     public String getAuthEndpoint() {
-        String endpoint = getString(Config.ENDPOINT);
+        String endpoint = getString(Config.AUTH_ENDPOINT);
         if (Config.SB_ENVIRONMENT_VAL.equals(this.getString(Config.SELECTED_AUTH_ENVIRONMENT))) {
-            endpoint = getString(Config.ENDPOINT_SANDBOX);
+            endpoint = getString(Config.AUTH_ENDPOINT_SANDBOX);
             if (endpoint == null || endpoint.isBlank()) {
                 endpoint = getDefaultAuthEndpoint();
             }
         } else {
-            endpoint = getString(Config.ENDPOINT_PROD);
+            endpoint = getString(Config.AUTH_ENDPOINT_PROD);
             if (endpoint == null || endpoint.isBlank()) {
                 endpoint = getDefaultAuthEndpoint();
             }

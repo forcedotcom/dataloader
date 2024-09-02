@@ -595,11 +595,11 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             }
         } catch (ConnectionException e) {
             logger.warn(Messages.getMessage(this.getClass(), "failedUsernamePasswordAuth", 
-                                            origEndpoint, Config.ENDPOINT, e.getMessage()));
+                                            origEndpoint, config.getString(Config.SELECTED_AUTH_ENVIRONMENT), e.getMessage()));
             if (!config.isDefaultAuthEndpoint(origEndpoint)) {
                 // retry with default endpoint URL only if user is attempting production login
                 config.setAuthEndpoint(config.getDefaultAuthEndpoint());
-                logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", config.getDefaultAuthEndpoint(), Config.ENDPOINT));
+                logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", config.getDefaultAuthEndpoint(), config.getString(Config.SELECTED_AUTH_ENVIRONMENT)));
                 login();
             } else {
                 logger.error("Failed to get user info using manually configured session id", e);
@@ -607,7 +607,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             }
         } finally {
             // restore original value of Config.ENDPOINT property
-            config.setValue(Config.ENDPOINT, origEndpoint);
+            config.setAuthEndpoint(origEndpoint);
         }
         return true; // exception thrown if there is an issue with login
     }
