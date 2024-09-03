@@ -75,7 +75,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Text textProdEndpoint;
     private Text textSBEndpoint;
     private Button buttonCompression;
-    private Button buttonResetUrl;
     private Text textTimeout;
     private Text textRowToStart;
     private Text textProxyHost;
@@ -609,11 +608,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
         }
         textSBEndpoint.setText(endpoint);
 
-        //reset url on login
-        createLabel(restComp, "resetUrlOnLogin", null, null);
-        buttonResetUrl = new Button(restComp, SWT.CHECK);
-        buttonResetUrl.setSelection(config.getBoolean(Config.RESET_URL_ON_LOGIN));
-
         // enable/disable sort of fields to extract
         createLabel(restComp, "sortQueryFieldsInExtraction", null, null);
         buttonSortExtractFields = new Button(restComp, SWT.CHECK);
@@ -995,7 +989,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 config.setAuthEndpointForEnv(currentTextSBEndpoint, Config.SB_ENVIRONMENT_VAL);
                 config.setValue(Config.ASSIGNMENT_RULE, textRule.getText());
                 config.setValue(Config.LOAD_ROW_TO_START_AT, textRowToStart.getText());
-                config.setValue(Config.RESET_URL_ON_LOGIN, buttonResetUrl.getSelection());
                 config.setValue(Config.NO_COMPRESSION, buttonCompression.getSelection());
                 config.setValue(Config.TRUNCATE_FIELDS, buttonTruncateFields.getSelection());
                 config.setValue(Config.FORMAT_PHONE_FIELDS, buttonFormatPhoneFields.getSelection());

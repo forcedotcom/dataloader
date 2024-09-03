@@ -486,6 +486,7 @@ public class Config {
             OAUTH_CLIENTSECRET,
             OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
             OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
+            RESET_URL_ON_LOGIN,
     };
     
     /**
