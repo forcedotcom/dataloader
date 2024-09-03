@@ -278,7 +278,6 @@ public class Config {
     public static final String OAUTH_REDIRECTURI = OAUTH_PREFIX + OAUTH_PARTIAL_REDIRECTURI;
     public static final String OAUTH_LOGIN_FROM_BROWSER = OAUTH_PREFIX + "loginfrombrowser";
     public static final String OAUTH_REDIRECT_URI_SUFFIX = "services/oauth2/success";
-    private static final String OAUTH_DEFAULT_SERVER_DNS = "test.salesforce.com";
     public static final String REUSE_CLIENT_CONNECTION = "sfdc.reuseClientConnection";
     public static final String RICH_TEXT_FIELD_REGEX = "sfdx.richtext.regex";
     
@@ -450,8 +449,6 @@ public class Config {
     private static final String[] READ_ONLY_PROPERTY_NAMES = {
             PASSWORD,
             PROXY_PASSWORD,
-            OAUTH_ACCESSTOKEN,
-            OAUTH_REFRESHTOKEN,
             IDLOOKUP_FIELD,
             MAPPING_FILE,
             EXTRACT_SOQL,
@@ -476,7 +473,19 @@ public class Config {
             DAO_WRITE_POSTPROCESSOR_SCRIPT,
             ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG,
             DELETE_WITH_EXTERNALID,
-            OAUTH_INSTANCE_URL
+            OAUTH_ACCESSTOKEN,
+            OAUTH_REFRESHTOKEN,
+            OAUTH_INSTANCE_URL,
+            OAUTH_SERVER,
+            OAUTH_REDIRECTURI,
+            OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_SERVER,
+            OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_SERVER,
+            OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI,
+            OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI,
+            OAUTH_CLIENTID,
+            OAUTH_CLIENTSECRET,
+            OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
+            OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
     };
     
     /**
@@ -1564,7 +1573,7 @@ public class Config {
         }
         String envSpecificOAuthServerURL = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_SERVER);
         if (envSpecificOAuthServerURL != null
-                && !envSpecificOAuthServerURL.contains(Config.OAUTH_DEFAULT_SERVER_DNS)
+                && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_SANDBOX)
                 && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_PROD)) {
             endpointURL = envSpecificOAuthServerURL;
         }
@@ -1573,7 +1582,7 @@ public class Config {
         String envSpecificOAuthRedirectURI = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_REDIRECTURI);
         String redirectURI = "";
         if (envSpecificOAuthRedirectURI != null
-                && !envSpecificOAuthServerURL.contains(Config.OAUTH_DEFAULT_SERVER_DNS)
+                && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_SANDBOX)
                 && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_PROD)) {
             redirectURI = envSpecificOAuthRedirectURI;
         } else {
