@@ -11,7 +11,7 @@ do
       debug="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=y"
       ;;
     b)
-      batchmodeargs="./configs upsertAccounts run.mode=batch"
+      batchmodeargs="./.. upsertAccounts run.mode=batch"
       ;;
     e)
       encryptionargs="run.mode=encrypt"
@@ -27,3 +27,4 @@ jarname="$(find ./target -name 'dataloader-[0-9][0-9].[0-9].[0-9].jar' | tail -1
 
 
 java ${debug} -cp ${jarname} com.salesforce.dataloader.process.DataLoaderRunner ${batchmodeargs} ${configdir} ${encryptionargs} $@
+#java ${debug} -cp ${jarname} com.salesforce.dataloader.action.visitor.RESTTest
