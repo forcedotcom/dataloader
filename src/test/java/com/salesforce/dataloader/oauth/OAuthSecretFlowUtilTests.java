@@ -67,7 +67,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
         config = getController().getConfig();
         existingOAuthEnvironments = config.getStrings(Config.AUTH_ENVIRONMENTS);
         existingEndPoint = config.getAuthEndpoint();
-        oauthServer = "http://OAUTH_PARTIAL_SERVER";
+        oauthServer = "https://OAUTH_PARTIAL_SERVER";
         oauthClientId = "CLIENTID";
         oauthRedirectUri = "REDIRECTURI";
         mockSimplePost = mock(SimplePost.class);
@@ -92,7 +92,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
     @Test
     public void testGetStartUrl(){
         try {
-            String expected = "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?response_type=code&display=popup&client_id=CLIENTID&redirect_uri=REDIRECTURI";
+            String expected = "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?response_type=code&display=popup&client_id=CLIENTID&redirect_uri=REDIRECTURI";
             String actual = OAuthSecretFlowUtil.getStartUrlImpl(config);
 
             Assert.assertEquals( "OAuth Token Flow returned the wrong url", expected, actual);
@@ -105,7 +105,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
     public void testInvalidInitialReponseUrl(){
         try {
             String expected = null;
-            String actual = OAuthSecretFlowUtil.handleInitialUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?doit=1");
+            String actual = OAuthSecretFlowUtil.handleInitialUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?doit=1");
             Assert.assertEquals("OAuthToken should not have handled this", expected, actual);
 
         } catch (URISyntaxException e) {
@@ -117,7 +117,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
     public void testValidInitialResponseUrl(){
         try {
             String expected = "TOKEN";
-            String actual = OAuthSecretFlowUtil.handleInitialUrl( "http://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?code=TOKEN");
+            String actual = OAuthSecretFlowUtil.handleInitialUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?code=TOKEN");
             Assert.assertEquals("OAuthToken should not have handled this", expected, actual);
 
         } catch (URISyntaxException e) {
@@ -188,7 +188,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
                     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                     .create();
             OAuthToken token = new OAuthToken();
-            token.setInstanceUrl("http://INSTANCEURL");
+            token.setInstanceUrl("https://INSTANCEURL");
             String jsonToken = gson.toJson(token);
             InputStream input = new ByteArrayInputStream(jsonToken.getBytes(StandardCharsets.UTF_8));
             when(mockSimplePost.getInput()).thenAnswer(i -> input);
@@ -197,7 +197,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
             @SuppressWarnings("unused")
             SimplePost simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", config);
 
-            String expected = "http://INSTANCEURL";
+            String expected = "https://INSTANCEURL";
             String actual = config.getString(Config.OAUTH_INSTANCE_URL);;
 
             Assert.assertEquals("Access token was not set", expected, actual);

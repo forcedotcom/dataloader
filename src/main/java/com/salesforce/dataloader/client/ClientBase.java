@@ -26,11 +26,8 @@
 package com.salesforce.dataloader.client;
 
 import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.client.SessionInfo.NotLoggedInException;
 import com.salesforce.dataloader.config.Config;
@@ -48,20 +45,6 @@ import com.sforce.ws.ConnectorConfig;
  * @since 17.0
  */
 public abstract class ClientBase<ConnectionType> {
-
-    private static Logger LOG = LogManager.getLogger(PartnerClient.class);
-
-    protected static final URL DEFAULT_AUTH_ENDPOINT_URL;
-    static {
-        URL loginUrl;
-        try {
-            loginUrl = new URL(Connector.END_POINT);
-        } catch (MalformedURLException ex) {
-            LOG.error(ex);
-            throw new RuntimeException(ex);
-        }
-        DEFAULT_AUTH_ENDPOINT_URL = loginUrl;
-    }
 
     private static String apiVersionForTheSession = getCurrentAPIVersionInWSC();
 
