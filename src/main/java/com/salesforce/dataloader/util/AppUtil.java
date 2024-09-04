@@ -505,9 +505,9 @@ public class AppUtil {
             return false;
         }
     }
-    public static void validateHttpsUrlAndThrow(String url) {
+    public static void validateAuthenticationHostDomainUrlAndThrow(String url) {
         if (!isValidHttpsUrl(url)) {
-            throw new RuntimeException("Dataloader only supports server URL that uses https protocol:" + url);
+            throw new RuntimeException("Dataloader only supports Authentication host domain URL that uses https protocol:" + url);
         }
     }
     

@@ -661,7 +661,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         if (userInfo == null) {
             userInfo = conn.getUserInfo(); // check to make sure we have a good connection
         }
-        loginSuccess(conn, getServerUrl(config.getAuthEndpoint()), userInfo);
+        loginSuccess(conn, getAuthenticationHostDomainUrl(config.getAuthEndpoint()), userInfo);
         return conn;
     }
 
@@ -679,7 +679,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             // update session id and service endpoint based on response
             conn.setSessionHeader(loginResult.getSessionId());
             String serverUrl = loginResult.getServerUrl();
-            String server = getServerUrl(serverUrl);
+            String server = getAuthenticationHostDomainUrl(serverUrl);
             if (config.getBoolean(Config.RESET_URL_ON_LOGIN)) {
                 cc.setServiceEndpoint(serverUrl);
             }
@@ -699,17 +699,18 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         return url.getProtocol() + "://" + url.getAuthority();
     }
 
-    private String getServerUrl(String serverUrl) {
+    private String getAuthenticationHostDomainUrl(String serverUrl) {
         if (config.getBoolean(Config.RESET_URL_ON_LOGIN)) {
             try {
-                AppUtil.validateHttpsUrlAndThrow(serverUrl);
                 return getServerStringFromUrl(new URL(serverUrl));
             } catch (MalformedURLException e) {
                 logger.fatal("Unexpected error", e);
                 throw new RuntimeException(e);
             }
         }
-        return getDefaultServer();
+        // Either RESET_URL_ON_LOGIN is false or input param serverURL 
+        // is invalid. Try returning configured Auth endpoint instead.
+        return config.getAuthEndpoint();
     }
 
     public boolean logout() {
@@ -884,7 +885,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private synchronized ConnectorConfig getLoginConnectorConfig() {
-        return getLoginConnectorConfig(getDefaultServer());
+        return getLoginConnectorConfig(config.getAuthEndpoint());
     }
     
     private synchronized ConnectorConfig getLoginConnectorConfig(String serverURL) {
@@ -892,15 +893,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         this.connectorConfig.setAuthEndpoint(serverURL + getServicePath());
         this.connectorConfig.setServiceEndpoint(serverURL + getServicePath());
         return this.connectorConfig;
-    }
-    
-    private String getDefaultServer() {
-        String serverUrl = config.getAuthEndpoint();
-        if (serverUrl == null || serverUrl.length() == 0) {
-            serverUrl = getServerStringFromUrl(DEFAULT_AUTH_ENDPOINT_URL);
-        }
-        AppUtil.validateHttpsUrlAndThrow(serverUrl);
-        return serverUrl;
     }
 
     /**

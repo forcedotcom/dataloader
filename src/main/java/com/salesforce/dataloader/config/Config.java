@@ -1201,6 +1201,7 @@ public class Config {
     }
     
     public void setAuthEndpointForEnv(String authEndpoint, String env) {
+        AppUtil.validateAuthenticationHostDomainUrlAndThrow(authEndpoint);
         if (env != null && env.equalsIgnoreCase(getString(Config.SB_ENVIRONMENT_VAL))) {
             this.setValue(Config.AUTH_ENDPOINT_SANDBOX, authEndpoint);
         } else {
@@ -1209,7 +1210,7 @@ public class Config {
     }
     
     public String getAuthEndpoint() {
-        String endpoint = getString(Config.AUTH_ENDPOINT);
+        String endpoint = null;
         if (Config.SB_ENVIRONMENT_VAL.equals(this.getString(Config.SELECTED_AUTH_ENVIRONMENT))) {
             endpoint = getString(Config.AUTH_ENDPOINT_SANDBOX);
             if (endpoint == null || endpoint.isBlank()) {
@@ -1221,6 +1222,7 @@ public class Config {
                 endpoint = getDefaultAuthEndpoint();
             }
         }
+        AppUtil.validateAuthenticationHostDomainUrlAndThrow(endpoint);
         return endpoint;
     }
     
