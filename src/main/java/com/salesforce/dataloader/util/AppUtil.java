@@ -511,6 +511,16 @@ public class AppUtil {
         }
     }
     
+    public static String getURLStrFromDomainName(String domainName) {
+        if (domainName == null) {
+            return null;
+        }
+        if (domainName.contains("://")) {
+            return domainName;
+        }
+        return "https://" + domainName;
+    }
+    
     public static String serializeToJson(Map<String, Object> nameValueMap) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setDateFormat(CalendarCodec.getDateFormat());

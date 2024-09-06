@@ -937,6 +937,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 Config config = getController().getConfig();
 
                 String currentTextProdEndpoint = textProdEndpoint.getText();
+                currentTextProdEndpoint = AppUtil.getURLStrFromDomainName(currentTextProdEndpoint);
                 if (currentTextProdEndpoint != null 
                         && !currentTextProdEndpoint.isEmpty() 
                         && !AppUtil.isValidHttpsUrl(currentTextProdEndpoint)) {
@@ -948,6 +949,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
                 }
                 String currentTextSBEndpoint = textProdEndpoint.getText();
+                currentTextSBEndpoint = AppUtil.getURLStrFromDomainName(currentTextSBEndpoint);
                 if (currentTextSBEndpoint != null 
                         && !currentTextSBEndpoint.isEmpty() 
                         && !AppUtil.isValidHttpsUrl(currentTextSBEndpoint)) {
