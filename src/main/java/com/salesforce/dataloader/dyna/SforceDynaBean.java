@@ -46,6 +46,7 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.RelationshipFormatException;
 import com.sforce.soap.partner.*;
 import com.sforce.soap.partner.sobject.SObject;
+import com.sforce.ws.ConnectionException;
 
 /**
  * Salesforce DynaBean utilities
@@ -368,8 +369,24 @@ public class SforceDynaBean {
                 // see if any entity foreign key references are embedded here
                 Object value = dynaBean.get(fName);
                 if (value instanceof SObjectReference) {
-                    SObjectReference sObjRef = (SObjectReference)value;
-                    if (!sObjRef.isNull()) sObjRef.addReferenceToSObject(controller, null, restSObj, fName);
+                    try {
+                        ParentIdLookupFieldFormatter idLookupFieldFormatter = new ParentIdLookupFieldFormatter(fName);
+                        DescribeSObjectResult parentSObjectDescribe = controller.getPartnerClient().describeSObject(idLookupFieldFormatter.getParent().getParentObjectName());
+                        DynaProperty[] parentDynaProps = createDynaProps(parentSObjectDescribe, controller);
+                        BasicDynaClass parentDynaClass = getDynaBeanInstance(parentDynaProps);
+                        Row parentDataRow = new Row();
+                        parentDataRow.put(idLookupFieldFormatter.getParentFieldName(), value);
+                        DynaBean parentDynaBean = convertToDynaBean(parentDynaClass, parentDataRow);
+                        Map<String, Object> parentRESTSObject = getCompositeRESTSObject(controller, idLookupFieldFormatter.getParent().getParentObjectName(), parentDynaBean);
+                        SObjectReference sObjRef = (SObjectReference)value;
+                        if (!sObjRef.isNull()) {
+                            restSObj.setField(idLookupFieldFormatter.getParent().getRelationshipName(),
+                                    parentRESTSObject);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logger.error("Unable to convert " + fName + " to parent reference");
+                    }
                 } else {
                     restSObj.setField(fName, value);
                 }
