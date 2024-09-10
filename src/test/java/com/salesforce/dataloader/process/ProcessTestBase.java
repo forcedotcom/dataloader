@@ -557,6 +557,13 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         @Override
         public void updateRow(int idx, Row row) {
             row.put("ID", idx < this.accountIds.length ? this.accountIds[idx] : "");
+            if (row.containsValue("standard@org.com")) {
+                for (String key : row.keySet()) {
+                    if ("standard@org.com".equals(row.get(key))) {
+                        row.put(key, getProperty("test.user.restricted"));
+                    }
+                }
+            }
         }
 
         public String[] getAccountIds() {
