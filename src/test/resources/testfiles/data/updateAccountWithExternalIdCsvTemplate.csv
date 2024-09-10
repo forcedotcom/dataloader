@@ -1,6 +1,6 @@
-NAME,WEBSITE,ANNUALREVENUE,PHONE,ORACLE_ID__C
-account Update #0,http://www.accountUpdate0.com,0,1234567890,1-000000
-account Update #1,http://www.accountUpdate1.com,1000,1234567890,1-000001
-account Update #2,http://www.accountUpdate2.com,2000,1234567890,1-000002
-account Update #3,http://www.accountUpdate3.com,3000,1234567890,1-000003
-account Update #4,http://www.accountUpdate4.com,4000,1234567890,1-000004
+NAME,WEBSITE,ANNUALREVENUE,PHONE,ORACLE_ID__C,OWNER:User-username
+account Update #0,http://www.accountUpdate0.com,0,1234567890,1-000000,standard@org.com
+account Update #1,http://www.accountUpdate1.com,1000,1234567890,1-000001,standard@org.com
+account Update #2,http://www.accountUpdate2.com,2000,1234567890,1-000002,standard@org.com
+account Update #3,http://www.accountUpdate3.com,3000,1234567890,1-000003,standard@org.com
+account Update #4,http://www.accountUpdate4.com,4000,1234567890,1-000004,standard@org.com

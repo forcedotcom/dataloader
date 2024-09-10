@@ -7,3 +7,4 @@ TYPE=Type
 ANNUALREVENUE=AnnualRevenue
 PHONE=Phone
 ORACLE_ID__C=Oracle_Id__c
+OWNER\:User-username=owner\:user-username
