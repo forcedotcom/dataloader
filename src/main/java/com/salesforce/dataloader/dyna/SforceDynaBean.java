@@ -46,7 +46,6 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.RelationshipFormatException;
 import com.sforce.soap.partner.*;
 import com.sforce.soap.partner.sobject.SObject;
-import com.sforce.ws.ConnectionException;
 
 /**
  * Salesforce DynaBean utilities
@@ -233,6 +232,13 @@ public class SforceDynaBean {
             sforceObj = dynaClass.newInstance();
             //This does an automatic conversion of types.
             BeanUtils.copyProperties(sforceObj, sforceDataRow);
+            for (String sforceField : sforceDataRow.keySet()) {
+                if (sforceObj.get(sforceField) == null) {
+                    String errStr = "unable to convert " + sforceField + " to a field on entity " + Config.getCurrentConfig().getString(Config.ENTITY);
+                    logger.error(errStr); //$NON-NLS-1$
+                    throw new LoadException(errStr);
+                }
+            }
             return sforceObj;
         } catch (IllegalAccessException e1) {
 
