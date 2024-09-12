@@ -150,13 +150,13 @@ public abstract class Mapper {
                         ParentIdLookupFieldFormatter specifiedFieldFormatter = new ParentIdLookupFieldFormatter(v);
                         Field relationshipField = client.getFieldFromRelationshipName(specifiedFieldFormatter.getParent().getRelationshipName());
                         String parentSObjectName = specifiedFieldFormatter.getParent().getParentObjectName();
-                        if (parentSObjectName == null) { // legacy format: <relationship name in a relationship field>:<idLookup field in parent sobject>
+                        ReferenceEntitiesDescribeMap refEntitiesMap = client.getReferenceDescribes();
+                        DescribeRefObject refObject = refEntitiesMap.getParentSObject(specifiedFieldFormatter.getParent().toString());
+                        if (refObject == null) { // legacy format: <relationship name in a relationship field>:<idLookup field in parent sobject>
                             if (relationshipField != null) {
                                 parentSObjectName = relationshipField.getReferenceTo()[0];
                             }
                         } else { // new format: <relationship name in a relationship field>:<parent sobject name>-<idLookup field in parent sobject>
-                            ReferenceEntitiesDescribeMap refEntitiesMap = client.getReferenceDescribes();
-                            DescribeRefObject refObject = refEntitiesMap.getParentSObject(v);
                             parentSObjectName = client.describeSObject(refObject.getParentObjectName()).getName();
                         }
                         if (relationshipField != null) {
