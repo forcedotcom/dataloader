@@ -87,7 +87,7 @@ public class SOQLMapper extends Mapper {
     private static final Logger logger = LogManager.getLogger(SOQLMapper.class);
 
     private SOQLInfo soqlInfo;
-    private CaseInsensitiveMap extractionMap = new CaseInsensitiveMap();
+    private CaseInsensitiveStringMap extractionMap = new CaseInsensitiveStringMap();
     private boolean isInitialized = false;
 
     public SOQLMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)

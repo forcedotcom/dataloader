@@ -76,6 +76,10 @@ public class ParentSObjectFormatter {
         }
         initialize(parentObjectName, relationshipName);
     }
+    
+    public void setParentObjectName(String name) {
+        this.parentObjectName = name;
+    }
 
     private void initialize(String parentObjectName, String relationshipName) throws RelationshipFormatException{
         if ((relationshipName == null || relationshipName.isBlank())) {

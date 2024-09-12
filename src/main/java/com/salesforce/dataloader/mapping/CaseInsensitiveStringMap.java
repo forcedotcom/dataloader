@@ -28,7 +28,7 @@ package com.salesforce.dataloader.mapping;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-public class CaseInsensitiveMap extends LinkedHashMap<String, String> {
+public class CaseInsensitiveStringMap extends LinkedHashMap<String, String> {
     /**
      * 
      */

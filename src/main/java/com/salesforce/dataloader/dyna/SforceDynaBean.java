@@ -233,8 +233,12 @@ public class SforceDynaBean {
             //This does an automatic conversion of types.
             BeanUtils.copyProperties(sforceObj, sforceDataRow);
             for (String sforceField : sforceDataRow.keySet()) {
-                if (sforceObj.get(sforceField) == null) {
-                    String errStr = "unable to convert " + sforceField + " to a field on entity " + Config.getCurrentConfig().getString(Config.ENTITY);
+                Object val = sforceDataRow.get(sforceField);
+                if (val != null
+                        && val instanceof String
+                        && !((String)val).isBlank()
+                        && sforceObj.get(sforceField) == null) {
+                    String errStr = "unable to convert a non-null " + sforceField + "value " + (String)val + " to a field on entity " + Config.getCurrentConfig().getString(Config.ENTITY);
                     logger.error(errStr); //$NON-NLS-1$
                     throw new LoadException(errStr);
                 }

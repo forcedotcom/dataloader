@@ -45,12 +45,12 @@ public class ReferenceEntitiesDescribeMap {
 
     private Map<String, DescribeRefObject> referenceEntitiesDescribeMap = new HashMap<String, DescribeRefObject>();
     private static final Logger logger = LogManager.getLogger(ReferenceEntitiesDescribeMap.class);
-
+    private PartnerClient client = null;
     /**
      * 
      */
-    public ReferenceEntitiesDescribeMap() {
-        
+    public ReferenceEntitiesDescribeMap(PartnerClient client) {
+        this.client = client;
     }
     
     public void put(String relationshipFieldName, DescribeRefObject parent) {
@@ -122,12 +122,21 @@ public class ReferenceEntitiesDescribeMap {
         return null;
     }
  
-    private DescribeRefObject getParentSObject(ParentSObjectFormatter parentStr) {
-        if (parentStr == null || parentStr.getRelationshipName() == null) {
+    private DescribeRefObject getParentSObject(ParentSObjectFormatter parentFormatter) {
+        if (parentFormatter == null || parentFormatter.getRelationshipName() == null) {
             return null;
         }
+        String parentObjName = parentFormatter.getParentObjectName();
+        if (parentObjName == null) {
+            Field relationshipField = client.getFieldFromRelationshipName(parentFormatter.getRelationshipName());
+            if (relationshipField == null) {
+                return null;
+            }
+            parentObjName = relationshipField.getReferenceTo()[0];
+            parentFormatter.setParentObjectName(parentObjName);
+        }
         for (Map.Entry<String, DescribeRefObject> ent : referenceEntitiesDescribeMap.entrySet()) {
-            if (parentStr.matches(ent.getKey())) {
+            if (parentFormatter.matches(ent.getKey())) {
                 return ent.getValue();
             }
         }

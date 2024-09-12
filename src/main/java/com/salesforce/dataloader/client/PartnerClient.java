@@ -82,6 +82,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class PartnerClient extends ClientBase<PartnerConnection> {
 
@@ -232,10 +233,10 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     };
 
     private DescribeGlobalResult describeGlobalResults;
-    private ReferenceEntitiesDescribeMap referenceEntitiesDescribesMap = new ReferenceEntitiesDescribeMap();
-    private final Map<String, DescribeGlobalSObjectResult> describeGlobalResultsMap = new HashMap<String, DescribeGlobalSObjectResult>();
-    private final Map<String, DescribeSObjectResult> entityFieldDescribesMap = new HashMap<String, DescribeSObjectResult>();
-    private final Map<String, ReferenceEntitiesDescribeMap> parentDescribeCache = new HashMap<String, ReferenceEntitiesDescribeMap>();
+    private ReferenceEntitiesDescribeMap referenceEntitiesDescribesMap = new ReferenceEntitiesDescribeMap(this);
+    private final Map<String, DescribeGlobalSObjectResult> describeGlobalResultsMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private final Map<String, DescribeSObjectResult> entityFieldDescribesMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private final Map<String, ReferenceEntitiesDescribeMap> parentDescribeCache = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     public PartnerClient(Controller controller) {
         super(controller, LOG);
     }
@@ -764,7 +765,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             referenceEntitiesDescribesMap.clear();
         }
         if (referenceEntitiesDescribesMap == null) {
-            referenceEntitiesDescribesMap = new ReferenceEntitiesDescribeMap();
+            referenceEntitiesDescribesMap = new ReferenceEntitiesDescribeMap(this);
         }
         if (referenceEntitiesDescribesMap.size() > 0) {
             return; // use cached value
@@ -940,18 +941,33 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
         return field;
     }
-
-    private Field lookupField(String sObjectFieldName) {
-        ParentIdLookupFieldFormatter parentLookupFieldFormatter = null;
-        try {
-            parentLookupFieldFormatter = new ParentIdLookupFieldFormatter(sObjectFieldName);
-        } catch (RelationshipFormatException ex) {
-            // ignore
+    
+    public Field getFieldFromRelationshipName(String relationshipName) {
+        for (Field f : getFieldTypes().getFields()) {
+            if (f.getReferenceTo().length > 0) {
+                String relName = f.getRelationshipName();
+                if (relName != null
+                        && !relName.isBlank()
+                        && relName.equalsIgnoreCase(relationshipName)) {
+                    return f;
+                }
+            }
         }
-        // look for field on target object
+        return null;
+    }
+    
+    // sObjectFieldName could be sObject's field name
+    // or a reference to parent sObject's field name in the old or new format.
+    private Field lookupField(String sObjectFieldName) {
         for (Field f : getFieldTypes().getFields()) {
             if (sObjectFieldName.equalsIgnoreCase(f.getName()) || sObjectFieldName.equalsIgnoreCase(f.getLabel())) {
                 return f;
+            }
+            ParentIdLookupFieldFormatter parentLookupFieldFormatter = null;
+            try {
+                parentLookupFieldFormatter = new ParentIdLookupFieldFormatter(sObjectFieldName);
+            } catch (RelationshipFormatException ex) {
+                // ignore
             }
             if (parentLookupFieldFormatter != null) {
                 if (!parentLookupFieldFormatter.getParent().getRelationshipName().equalsIgnoreCase(f.getRelationshipName())) {
@@ -961,9 +977,18 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 if (parentField != null) {
                     return parentField;
                 }
+                String parentSObjectName = parentLookupFieldFormatter.getParent().getParentObjectName();
+                if (parentSObjectName == null || parentSObjectName.isBlank()) {
+                    parentSObjectName = f.getReferenceTo()[0];
+                }
+                if (parentSObjectName == null || parentSObjectName.isBlank()) {
+                    // something is wrong for a relationship field
+                    logger.error("Field " + f.getName() + " does not have a parent sObject");
+                    continue;
+                }
                 // need to add the relationship mapping to referenceEntitiesDescribesMap
                 try {
-                    processParentObjectForLookupReferences(parentLookupFieldFormatter.getParent().getParentObjectName(), f, 0, 1);
+                    processParentObjectForLookupReferences(parentSObjectName, f, 0, 1);
                 } catch (ConnectionException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();

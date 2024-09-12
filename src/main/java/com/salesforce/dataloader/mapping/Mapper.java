@@ -45,8 +45,12 @@ import com.sforce.soap.partner.FieldType;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.client.PartnerClient;
+import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
 import com.salesforce.dataloader.config.Messages;
+import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
+import com.salesforce.dataloader.dyna.ParentSObjectFormatter;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.util.AppUtil;
@@ -84,9 +88,9 @@ public abstract class Mapper {
     private HashMap<String, Integer> daoColPositionInCompositeColMap = new HashMap<String, Integer>();
     private HashMap<String, String> daoColToCompositeColMap = new HashMap<String, String>();
     private HashMap<String, Boolean> fieldTypeIsStringMap = new HashMap<String, Boolean>();
-    private final CaseInsensitiveMap constants = new CaseInsensitiveMap();
+    private final CaseInsensitiveStringMap constants = new CaseInsensitiveStringMap();
 
-    protected final CaseInsensitiveMap map = new CaseInsensitiveMap();
+    protected final CaseInsensitiveStringMap map = new CaseInsensitiveStringMap();
     private final PartnerClient client;
     private final CaseInsensitiveSet fields = new CaseInsensitiveSet();
     protected final String mappingFileName;
@@ -137,6 +141,36 @@ public abstract class Mapper {
             String v = st.nextToken();
             v = v.trim();
             String originalVal = fields.getOriginal(v);
+            if (!fields.containsKey(v)) {
+                // check if it is a lookup relationship field
+                if (v.contains(ParentIdLookupFieldFormatter.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR)
+                        || v.contains(ParentSObjectFormatter.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR)) {
+                    try {
+                        Field lookupFieldInParent = client.getField(v);
+                        ParentIdLookupFieldFormatter specifiedFieldFormatter = new ParentIdLookupFieldFormatter(v);
+                        Field relationshipField = client.getFieldFromRelationshipName(specifiedFieldFormatter.getParent().getRelationshipName());
+                        String parentSObjectName = specifiedFieldFormatter.getParent().getParentObjectName();
+                        if (parentSObjectName == null) { // legacy format: <relationship name in a relationship field>:<idLookup field in parent sobject>
+                            if (relationshipField != null) {
+                                parentSObjectName = relationshipField.getReferenceTo()[0];
+                            }
+                        } else { // new format: <relationship name in a relationship field>:<parent sobject name>-<idLookup field in parent sobject>
+                            ReferenceEntitiesDescribeMap refEntitiesMap = client.getReferenceDescribes();
+                            DescribeRefObject refObject = refEntitiesMap.getParentSObject(v);
+                            parentSObjectName = client.describeSObject(refObject.getParentObjectName()).getName();
+                        }
+                        if (relationshipField != null) {
+                            ParentIdLookupFieldFormatter sfFieldFormatter = new ParentIdLookupFieldFormatter(parentSObjectName,
+                                                                    relationshipField.getRelationshipName(),
+                                                                    lookupFieldInParent.getName());
+                            originalVal = sfFieldFormatter.toString();
+                        }
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            }
             if (originalDestList == null) {
                 originalDestList = originalVal;
             } else {

@@ -29,7 +29,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class CaseInsensitiveSet {
-    private final CaseInsensitiveMap originalMap = new CaseInsensitiveMap();
+    private final CaseInsensitiveStringMap originalMap = new CaseInsensitiveStringMap();
 
     public CaseInsensitiveSet(){
     }
