@@ -39,6 +39,7 @@ import com.sforce.ws.ConnectionException;
 import com.sforce.ws.bind.XmlObject;
 
 import org.apache.logging.log4j.Logger;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.apache.logging.log4j.LogManager;
 
 import java.text.SimpleDateFormat;
@@ -52,6 +53,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
+import java.util.TreeMap;
 
 import javax.xml.namespace.QName;
 
@@ -87,7 +89,7 @@ public class SOQLMapper extends Mapper {
     private static final Logger logger = LogManager.getLogger(SOQLMapper.class);
 
     private SOQLInfo soqlInfo;
-    private CaseInsensitiveStringMap extractionMap = new CaseInsensitiveStringMap();
+    private Map<String, String> extractionMap = new LinkedCaseInsensitiveMap<String>();
     private boolean isInitialized = false;
 
     public SOQLMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)

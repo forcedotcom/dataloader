@@ -43,6 +43,7 @@ import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.FieldType;
 
 import org.apache.logging.log4j.Logger;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.client.DescribeRefObject;
@@ -88,9 +89,9 @@ public abstract class Mapper {
     private HashMap<String, Integer> daoColPositionInCompositeColMap = new HashMap<String, Integer>();
     private HashMap<String, String> daoColToCompositeColMap = new HashMap<String, String>();
     private HashMap<String, Boolean> fieldTypeIsStringMap = new HashMap<String, Boolean>();
-    private final CaseInsensitiveStringMap constants = new CaseInsensitiveStringMap();
+    private final Map<String, String> constants =  new LinkedCaseInsensitiveMap<String>();
 
-    protected final CaseInsensitiveStringMap map = new CaseInsensitiveStringMap();
+    protected final Map<String, String> map = new LinkedCaseInsensitiveMap<String>();
     private final PartnerClient client;
     private final CaseInsensitiveSet fields = new CaseInsensitiveSet();
     protected final String mappingFileName;
