@@ -27,6 +27,7 @@ package com.salesforce.dataloader.model;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -44,6 +45,7 @@ public class Row implements Map<String, Object> {
 
     private static final int DEFAULT_COLUMN_COUNT = 16; // same as HashMap
     private final Map<String, Object> internalMap;
+    private final Map<String, String> keyMap = new HashMap<String, String>();
 
     public Row() {
         this(DEFAULT_COLUMN_COUNT);
@@ -56,6 +58,9 @@ public class Row implements Map<String, Object> {
     public Row(Map<String, Object> internalMap) {
         this(internalMap.size());
         this.internalMap.putAll(internalMap);
+        for (String key : internalMap.keySet()) {
+            this.keyMap.put(key.toLowerCase(), key);
+        }
     }
 
     public static Row emptyRow() {
@@ -78,7 +83,11 @@ public class Row implements Map<String, Object> {
 
     @Override
     public boolean containsKey(Object key) {
-        return internalMap.containsKey(key);
+        String realKey = this.keyMap.get(((String)key).toLowerCase());
+        if (realKey == null) {
+            return false;
+        }
+        return internalMap.containsKey(realKey);
     }
 
     @Override
@@ -88,26 +97,36 @@ public class Row implements Map<String, Object> {
 
     @Override
     public Object get(Object key) {
-        return internalMap.get(key);
+        String realKey = this.keyMap.get(((String)key).toLowerCase());
+        if (realKey == null) {
+            return null;
+        }
+        return internalMap.get(realKey);
     }
 
     @Override
     public Object put(String key, Object value) {
+        this.keyMap.put(key.toLowerCase(), key);
         return internalMap.put(key, value);
     }
 
     @Override
     public Object remove(Object key) {
+        this.keyMap.remove(((String)key).toLowerCase());
         return internalMap.remove(key);
     }
 
     @Override
     public void putAll(Map<? extends String, ?> m) {
+        for (String key : m.keySet()) {
+            this.keyMap.put(key.toLowerCase(), key);
+        }
         internalMap.putAll(m);
     }
 
     @Override
     public void clear() {
+        this.keyMap.clear();
         internalMap.clear();
     }
 

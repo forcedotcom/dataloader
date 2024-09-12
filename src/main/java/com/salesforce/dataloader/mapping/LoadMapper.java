@@ -70,7 +70,7 @@ public class LoadMapper extends Mapper {
     }
 
     public Map<String, String> getMappingWithUnmappedColumns(boolean includeUnmapped) {
-        final CaseInsensitiveMap result = new CaseInsensitiveMap();
+        final CaseInsensitiveStringMap result = new CaseInsensitiveStringMap();
         Set<String> candidateCols = null;
         if (getCompositeDAOColumns() == null || getCompositeDAOColumns().isEmpty()) {
             // no compositions yet
