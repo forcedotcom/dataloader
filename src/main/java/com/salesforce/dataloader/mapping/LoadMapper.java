@@ -34,6 +34,7 @@ import com.sforce.soap.partner.Field;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 
 import java.util.Collection;
@@ -70,7 +71,7 @@ public class LoadMapper extends Mapper {
     }
 
     public Map<String, String> getMappingWithUnmappedColumns(boolean includeUnmapped) {
-        final CaseInsensitiveStringMap result = new CaseInsensitiveStringMap();
+        final Map<String, String> result = new LinkedCaseInsensitiveMap<String>();
         Set<String> candidateCols = null;
         if (getCompositeDAOColumns() == null || getCompositeDAOColumns().isEmpty()) {
             // no compositions yet

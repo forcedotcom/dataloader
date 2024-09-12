@@ -26,10 +26,13 @@
 package com.salesforce.dataloader.mapping;
 
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
+import org.springframework.util.LinkedCaseInsensitiveMap;
+
 public class CaseInsensitiveSet {
-    private final CaseInsensitiveStringMap originalMap = new CaseInsensitiveStringMap();
+    private final Map<String, String> originalMap = new LinkedCaseInsensitiveMap<String>();
 
     public CaseInsensitiveSet(){
     }
