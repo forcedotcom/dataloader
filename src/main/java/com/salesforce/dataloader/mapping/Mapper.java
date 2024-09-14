@@ -83,7 +83,7 @@ public abstract class Mapper {
         }
     }
 
-    protected final CaseInsensitiveSet daoColumnNames = new CaseInsensitiveSet();
+    protected final Map<String, String> daoColumnNames = new LinkedCaseInsensitiveMap<String>();
     
     private HashMap<String, Integer> compositeColSizeMap = new HashMap<String, Integer>();
     private HashMap<String, Integer> daoColPositionInCompositeColMap = new HashMap<String, Integer>();
@@ -93,7 +93,7 @@ public abstract class Mapper {
 
     protected final Map<String, String> map = new LinkedCaseInsensitiveMap<String>();
     private final PartnerClient client;
-    private final CaseInsensitiveSet fields = new CaseInsensitiveSet();
+    private final Map<String, String> fields = new LinkedCaseInsensitiveMap<String>();
     protected final String mappingFileName;
 
     protected Mapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
@@ -108,7 +108,7 @@ public abstract class Mapper {
                     logger.error(errorMsg);
                     throw new MappingInitializationException(errorMsg);
                 }
-                daoColumnNames.add(colName);
+                daoColumnNames.put(colName, colName);
                 daoColPositionInCompositeColMap.put(colName, 0);
                 daoColToCompositeColMap.put(colName, colName);
                 compositeColSizeMap.put(colName, 1);
@@ -117,7 +117,7 @@ public abstract class Mapper {
         if (fields != null) {
             for (Field field : fields) {
                 boolean isStringType = true;
-                this.fields.add(field.getName());
+                this.fields.put(field.getName(), field.getName());
                 FieldType fieldType = field.getType();
                 if (fieldType == FieldType.string
                         || fieldType == FieldType.textarea) {
@@ -141,8 +141,9 @@ public abstract class Mapper {
         while(st.hasMoreElements()) {
             String v = st.nextToken();
             v = v.trim();
-            String originalVal = fields.getOriginal(v);
-            if (!fields.containsKey(v)) {
+            String originalVal = fields.get(v);
+            if (originalVal == null) {
+                originalVal = v;
                 // check if it is a lookup relationship field
                 if (v.contains(ParentIdLookupFieldFormatter.NEW_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR)
                         || v.contains(ParentSObjectFormatter.NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR)) {
@@ -200,11 +201,9 @@ public abstract class Mapper {
         while(st.hasMoreElements()) {
             String mappingSrcCol = st.nextToken();
             mappingSrcCol = mappingSrcCol.trim();
-            String daoCol = daoColumnNames.getOriginal(mappingSrcCol);
+            String daoCol = daoColumnNames.get(mappingSrcCol);
             if (daoCol == null) {
-                logger.warn("Did not find DAO column with name " + mappingSrcCol + " specified in the mapping");
-                // unable to map mappingSrcStr to a daoCol
-                continue;
+                daoCol = mappingSrcCol;
             }
             daoColPositionInCompositeColMap.put(daoCol, daoColCount);
             daoColToCompositeColMap.put(daoCol, mappingSrcStr);
@@ -217,10 +216,9 @@ public abstract class Mapper {
             }
         }
         if (daoColCount == 0) {
-            String daoCol = daoColumnNames.getOriginal(mappingSrcStr);
+            String daoCol = daoColumnNames.get(mappingSrcStr);
             if (daoCol == null) {
-                logger.warn("Did not find DAO column with name " + mappingSrcStr + " specified in the mapping");
-                return;
+                daoCol = mappingSrcStr;
             }
             getDaoColToCompositeColMap().put(mappingSrcStr, mappingSrcStr);
             daoColCount = 1;
@@ -372,8 +370,8 @@ public abstract class Mapper {
         return Collections.unmodifiableMap(this.constants);
     }
 
-    protected Set<String> getDaoColumns() {
-        return this.daoColumnNames.getOriginalValues();
+    protected Collection<String> getDaoColumns() {
+        return this.daoColumnNames.values();
     }
 
     public PartnerClient getClient() {
