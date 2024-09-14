@@ -72,7 +72,7 @@ public class LoadMapper extends Mapper {
 
     public Map<String, String> getMappingWithUnmappedColumns(boolean includeUnmapped) {
         final Map<String, String> result = new LinkedCaseInsensitiveMap<String>();
-        Set<String> candidateCols = null;
+        Collection<String> candidateCols = null;
         if (getCompositeDAOColumns() == null || getCompositeDAOColumns().isEmpty()) {
             // no compositions yet
             candidateCols = this.getDaoColumns();
