@@ -379,6 +379,13 @@ public class BulkV2Connection extends BulkConnection {
         	if (operation.equals(OperationEnum.upsert)) {
         	    requestBodyMap.put("externalIdFieldName", job.getExternalIdFieldName());
         	}
+        	if (operation.equals(OperationEnum.upsert)
+        	   || operation.equals(OperationEnum.insert)
+        	   || operation.equals(OperationEnum.update)) {
+        	    if (job.getAssignmentRuleId() != null && !job.getAssignmentRuleId().isBlank()) {
+        	        requestBodyMap.put("assignmentRuleId", job.getAssignmentRuleId());
+        	    }
+        	}
         }
         return doSendJobRequestToServer(urlString, 
 										headers,
