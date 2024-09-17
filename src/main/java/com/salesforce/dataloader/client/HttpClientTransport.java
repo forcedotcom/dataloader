@@ -59,6 +59,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 
 import com.salesforce.dataloader.exception.HttpClientTransportException;
+import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.async.AsyncApiException;
 import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.MessageHandler;
@@ -70,6 +71,8 @@ import com.sforce.ws.util.FileUtil;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class implements the Transport interface for WSC with HttpClient in order to properly work
@@ -89,6 +92,7 @@ public class HttpClientTransport implements HttpTransportInterface {
     private static CloseableHttpClient currentHttpClient = null;
     private static boolean reuseConnection = true;
     private static long serverInvocationCount = 0;
+    private static Logger logger = LogManager.getLogger(HttpClientTransport.class);
 
     public HttpClientTransport() {
     }
@@ -189,26 +193,37 @@ public class HttpClientTransport implements HttpTransportInterface {
                 String proxyUser = currentConfig.getProxyUsername() == null ? "" : currentConfig.getProxyUsername();
                 String proxyPassword = currentConfig.getProxyPassword() == null ? "" : currentConfig.getProxyPassword();
 
-                Credentials credentials;
-
-                if (currentConfig.getNtlmDomain() != null && !currentConfig.getNtlmDomain().equals("")) {
-                    String computerName = InetAddress.getLocalHost().getCanonicalHostName();
-                    credentials = new NTCredentials(proxyUser, proxyPassword, computerName, currentConfig.getNtlmDomain());
-                } else {
-                    credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
-                }
-
                 InetSocketAddress proxyAddress = (InetSocketAddress) currentConfig.getProxy().address();
                 HttpHost proxyHost = new HttpHost(proxyAddress.getHostName(), proxyAddress.getPort(), "http");
                 httpClientBuilder.setProxy(proxyHost);
 
                 CredentialsProvider credentialsprovider = new BasicCredentialsProvider();
                 AuthScope scope = new AuthScope(proxyAddress.getHostName(), proxyAddress.getPort(), null, null);
-                credentialsprovider.setCredentials(scope, credentials);
                 httpClientBuilder.setDefaultCredentialsProvider(credentialsprovider);
+
+                Credentials credentials;
+                if (AppUtil.getOSType() == AppUtil.OSType.WINDOWS) {
+                    String computerName = InetAddress.getLocalHost().getCanonicalHostName();
+                    credentials = new NTCredentials(proxyUser, proxyPassword, computerName, currentConfig.getNtlmDomain());
+                } else {
+                    credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
+                }
+                credentialsprovider.setCredentials(scope, credentials);
+                currentHttpClient = httpClientBuilder.build();
+                if (AppUtil.getOSType() == AppUtil.OSType.WINDOWS) {
+                    try (CloseableHttpResponse ignored = currentHttpClient.execute(new HttpHead("http://salesforce.com"))) {
+                    } catch (Exception e) {
+                       logger.info("Unable to use NTCredentials for proxy. Switching to UsernamePasswordCredentials");
+                       credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
+                       credentialsprovider.setCredentials(scope, credentials);
+                       currentHttpClient = httpClientBuilder.build();
+                    }
+                }
             }
 
-            currentHttpClient = httpClientBuilder.build();
+            if (currentHttpClient == null) {
+                currentHttpClient = httpClientBuilder.build();
+            }
         }
     }
     
@@ -232,6 +247,9 @@ public class HttpClientTransport implements HttpTransportInterface {
             if (currentConfig.getNtlmDomain() != null && !currentConfig.getNtlmDomain().equals("")) {
                 // need to send a HEAD request to trigger NTLM authentication
                 try (CloseableHttpResponse ignored = currentHttpClient.execute(new HttpHead("http://salesforce.com"))) {
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage());
+                    throw ex;
                 }
             }
     
