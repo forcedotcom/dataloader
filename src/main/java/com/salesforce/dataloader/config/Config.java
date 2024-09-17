@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -448,7 +449,6 @@ public class Config {
     // - Make sure to list all sensitive properties such as password because these properties are not saved.
     private static final String[] READ_ONLY_PROPERTY_NAMES = {
             PASSWORD,
-            PROXY_PASSWORD,
             IDLOOKUP_FIELD,
             MAPPING_FILE,
             EXTRACT_SOQL,
@@ -487,6 +487,13 @@ public class Config {
             OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
             OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
             RESET_URL_ON_LOGIN,
+    };
+    
+    private static final String[] ENCRYPTED_PROPERTY_NAMES = {
+            PASSWORD,
+            PROXY_PASSWORD,
+            OAUTH_ACCESSTOKEN,
+            OAUTH_REFRESHTOKEN
     };
     
     /**
@@ -1074,7 +1081,38 @@ public class Config {
         }
         return propValue;
     }
-
+    
+    /**
+     * Decrypt property with propName using the encrypter. If decryption succeeds, return the
+     * decrypted value
+     *
+     * @return decrypted property value
+     */
+    static private String encryptProperty(EncryptionAesUtil encrypter, Map<String, String> propMap, String propName, boolean isBatch)
+            throws ParameterLoadException {
+        String propValue = propMap.get(propName);
+        if (propValue != null && propValue.length() > 0) {
+            try {
+                return encrypter.encryptMsg(propValue);
+            } catch (GeneralSecurityException e) {
+                // if running in the UI, we can ignore encryption errors
+                if (isBatch) {
+                    String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{propName,
+                            String.class.getName()});
+                    logger.error(errMsg, e);
+                    throw new ParameterLoadException(errMsg, e);
+                } else {
+                    return null;
+                }
+            } catch (Exception e) {
+                String errMsg = Messages.getFormattedString("Config.errorParameterLoad", new String[]{propName,
+                        String.class.getName()});
+                logger.error(errMsg, e);
+                throw new ParameterLoadException(errMsg, e);
+            }
+        }
+        return propValue;
+    }
     /**
      * @throws ConfigInitializationException
      */
@@ -1177,6 +1215,21 @@ public class Config {
             }
         }
         
+        for (String encryptedProp : ENCRYPTED_PROPERTY_NAMES) {
+            if (this.properties.containsKey(encryptedProp)) {
+                Map<?, ?> propMap = (Map<?, ?>)this.properties;
+                try {
+                    @SuppressWarnings("unchecked")
+                    String propValue = encryptProperty(encrypter, 
+                            (Map<String, String>)propMap,
+                            encryptedProp, isBatchMode());
+                    this.properties.put(encryptedProp, propValue);
+                } catch (ParameterLoadException e) {
+                    this.properties.remove(encryptedProp); // Encryption attempt failed. Do not save.
+                }
+            }
+        }
+        
         removeUnsupportedProperties();
         removeDecryptedProperties();
         removeCLIOptionsFromProperties();
@@ -1251,10 +1304,7 @@ public class Config {
     }
     
     private void removeDecryptedProperties() {
-        this.properties.remove(PASSWORD + DECRYPTED_SUFFIX);
-        this.properties.remove(PROXY_PASSWORD + DECRYPTED_SUFFIX);
-        this.properties.remove(OAUTH_ACCESSTOKEN + DECRYPTED_SUFFIX);
-        this.properties.remove(OAUTH_REFRESHTOKEN + DECRYPTED_SUFFIX);
+        this.properties.entrySet().removeIf(entry -> (entry.getKey().toString().endsWith(DECRYPTED_SUFFIX)));
     }
     
     private void removeCLIOptionsFromProperties() {
