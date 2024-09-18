@@ -182,49 +182,44 @@ public class HttpClientTransport implements HttpTransportInterface {
     }
     
     private static synchronized void initializeHttpClient() throws UnknownHostException {
-        if (!isReuseConnection()) {
-            closeConnections();
-            currentHttpClient = null;
+        if (isReuseConnection() && currentHttpClient != null) {
+            // already initialized.
+            return;
         }
-        if (currentHttpClient == null) {
-            HttpClientBuilder httpClientBuilder = HttpClientBuilder.create().useSystemProperties();
-            
-            if (currentConfig.getProxy().address() != null) {
-                String proxyUser = currentConfig.getProxyUsername() == null ? "" : currentConfig.getProxyUsername();
-                String proxyPassword = currentConfig.getProxyPassword() == null ? "" : currentConfig.getProxyPassword();
+        closeConnections();
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create().useSystemProperties();
+        
+        if (currentConfig.getProxy().address() != null) {
+            String proxyUser = currentConfig.getProxyUsername() == null ? "" : currentConfig.getProxyUsername();
+            String proxyPassword = currentConfig.getProxyPassword() == null ? "" : currentConfig.getProxyPassword();
 
-                InetSocketAddress proxyAddress = (InetSocketAddress) currentConfig.getProxy().address();
-                HttpHost proxyHost = new HttpHost(proxyAddress.getHostName(), proxyAddress.getPort(), "http");
-                httpClientBuilder.setProxy(proxyHost);
+            InetSocketAddress proxyAddress = (InetSocketAddress) currentConfig.getProxy().address();
+            HttpHost proxyHost = new HttpHost(proxyAddress.getHostName(), proxyAddress.getPort(), "http");
+            httpClientBuilder.setProxy(proxyHost);
 
-                CredentialsProvider credentialsprovider = new BasicCredentialsProvider();
-                AuthScope scope = new AuthScope(proxyAddress.getHostName(), proxyAddress.getPort(), null, null);
-                httpClientBuilder.setDefaultCredentialsProvider(credentialsprovider);
+            CredentialsProvider credentialsprovider = new BasicCredentialsProvider();
+            AuthScope scope = new AuthScope(proxyAddress.getHostName(), proxyAddress.getPort(), null, null);
+            httpClientBuilder.setDefaultCredentialsProvider(credentialsprovider);
 
-                Credentials credentials;
-                if (AppUtil.getOSType() == AppUtil.OSType.WINDOWS) {
-                    String computerName = InetAddress.getLocalHost().getCanonicalHostName();
-                    credentials = new NTCredentials(proxyUser, proxyPassword, computerName, currentConfig.getNtlmDomain());
-                } else {
-                    credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
-                }
-                credentialsprovider.setCredentials(scope, credentials);
-                currentHttpClient = httpClientBuilder.build();
-                if (AppUtil.getOSType() == AppUtil.OSType.WINDOWS) {
-                    try (CloseableHttpResponse ignored = currentHttpClient.execute(new HttpHead("http://salesforce.com"))) {
-                    } catch (Exception e) {
-                       logger.info("Unable to use NTCredentials for proxy. Switching to UsernamePasswordCredentials");
-                       credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
-                       credentialsprovider.setCredentials(scope, credentials);
-                       currentHttpClient = httpClientBuilder.build();
-                    }
+            Credentials credentials;
+            if (AppUtil.getOSType() == AppUtil.OSType.WINDOWS) {
+                String computerName = InetAddress.getLocalHost().getCanonicalHostName();
+                credentials = new NTCredentials(proxyUser, proxyPassword, computerName, currentConfig.getNtlmDomain());
+            } else {
+                credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
+            }
+            credentialsprovider.setCredentials(scope, credentials);
+            currentHttpClient = httpClientBuilder.build();
+            if (AppUtil.getOSType() == AppUtil.OSType.WINDOWS) {
+                try (CloseableHttpResponse ignored = currentHttpClient.execute(new HttpHead("http://salesforce.com"))) {
+                } catch (Exception e) {
+                   logger.info("Unable to use NTCredentials for proxy. Switching to UsernamePasswordCredentials");
+                   credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
+                   credentialsprovider.setCredentials(scope, credentials);
                 }
             }
-
-            if (currentHttpClient == null) {
-                currentHttpClient = httpClientBuilder.build();
-            }
         }
+        currentHttpClient = httpClientBuilder.build();
     }
     
     @Override
