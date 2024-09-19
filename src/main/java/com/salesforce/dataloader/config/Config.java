@@ -668,6 +668,13 @@ public class Config {
         setDefaultValue(PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE, false);
         setDefaultValue(INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, false);
         setDefaultValue(OAUTH_INSTANCE_URL, false);
+        AppUtil.setSystemProxyValues();
+        String proxyHost = System.getProperty("http.proxyHost");
+        String proxyPort = System.getProperty("http.proxyPort");
+        if (proxyHost != null && !proxyHost.isBlank()) {
+            setDefaultValue(PROXY_HOST, proxyHost);
+            setDefaultValue(PROXY_PORT, proxyPort);
+        }
     }
 
     /**
@@ -971,6 +978,7 @@ public class Config {
         try {
             Properties propsFromFile = new LinkedProperties();
             propsFromFile.load(in);
+            removeEmptyProperties(propsFromFile);
             properties.putAll(propsFromFile);
             for (String roprop : READ_ONLY_PROPERTY_NAMES) {
                 if (propsFromFile.containsKey(roprop)) {
@@ -1233,6 +1241,7 @@ public class Config {
         removeUnsupportedProperties();
         removeDecryptedProperties();
         removeCLIOptionsFromProperties();
+        removeEmptyProperties(this.properties);
 
         FileOutputStream out = null;
         try {
@@ -1332,6 +1341,11 @@ public class Config {
                 }
             }
         }
+    }
+    
+    private void removeEmptyProperties(Properties props) {
+        props.entrySet().removeIf(entry -> 
+        (entry.getValue() == null || entry.getValue().toString().isBlank()));
     }
     
     /**
@@ -1441,7 +1455,7 @@ public class Config {
      */
     private void setProperty(String name, String newValue, boolean skipIfAlreadySet) {
         final String oldValue = getString(name);
-        if (skipIfAlreadySet && oldValue != null && !oldValue.isEmpty()) {
+        if (skipIfAlreadySet && oldValue != null && !oldValue.isBlank()) {
             // do not override the old value
             return;
         }
