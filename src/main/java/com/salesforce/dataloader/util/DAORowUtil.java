@@ -128,13 +128,13 @@ public class DAORowUtil {
             throws LoadException {
 
         try {
-            cfg.setValue(LastRun.LAST_LOAD_BATCH_ROW, 0);
+            cfg.setValue(LastRunProperties.LAST_LOAD_BATCH_ROW, 0);
             rowToStart(cfg, rdr);
             if (updateProgress) {
                 // set the last processed value to the starting row
                 int currentRow = rdr.getCurrentRowNumber();
                 if (mon != null && currentRow > 0) mon.worked(currentRow);
-                cfg.setValue(LastRun.LAST_LOAD_BATCH_ROW, currentRow);
+                cfg.setValue(LastRunProperties.LAST_LOAD_BATCH_ROW, currentRow);
                 cfg.saveLastRun();
             }
         } catch (final DataAccessObjectException e) {

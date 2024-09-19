@@ -37,13 +37,13 @@ import org.apache.logging.log4j.LogManager;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class LastRun extends Properties {
+public class LastRunProperties extends Properties {
     /**
      * Comment for <code>serialVersionUID</code>
      */
     private static final long serialVersionUID = 1L;
 
-    private static Logger logger = LogManager.getLogger(LastRun.class);
+    private static Logger logger = LogManager.getLogger(LastRunProperties.class);
 
     // last run statistics
     public static final String LAST_LOAD_BATCH_ROW = "process.lastLoadBatchRow"; //$NON-NLS-1$
@@ -58,7 +58,7 @@ public class LastRun extends Properties {
     /**
      * Initialize lastRun with filename, this is needed if last run output is not enabled (yet)
      */
-    public LastRun(String filename, String filePath, boolean outputEnabled) {
+    public LastRunProperties(String filename, String filePath, boolean outputEnabled) {
         super(); // init properties
         this.filename = filename;
         this.filePath = filePath;

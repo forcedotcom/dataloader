@@ -28,7 +28,7 @@
 package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.config.LastRun;
+import com.salesforce.dataloader.config.LastRunProperties;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.LoggingUtil;
@@ -788,7 +788,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.horizontalSpan = 2;
         blankAgain.setLayoutData(data);
         
-        String lastBatch = getController().getConfig().getString(LastRun.LAST_LOAD_BATCH_ROW);
+        String lastBatch = getController().getConfig().getString(LastRunProperties.LAST_LOAD_BATCH_ROW);
         if (lastBatch.equals("")) { //$NON-NLS-1$
             lastBatch = "0"; //$NON-NLS-1$
         }

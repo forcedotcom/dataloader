@@ -45,7 +45,7 @@ import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.client.SessionInfo;
 import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.config.LastRun;
+import com.salesforce.dataloader.config.LastRunProperties;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
@@ -455,13 +455,13 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         // set the last processed row number in the config (*_lastRun.properties) file
         int currentProcessed;
         try {
-            currentProcessed = getConfig().getInt(LastRun.LAST_LOAD_BATCH_ROW);
+            currentProcessed = getConfig().getInt(LastRunProperties.LAST_LOAD_BATCH_ROW);
         } catch (ParameterLoadException e) {
             // if there's a problem getting last batch row, start at the beginning
             currentProcessed = 0;
         }
         currentProcessed += results.length;
-        getConfig().setValue(LastRun.LAST_LOAD_BATCH_ROW, currentProcessed);
+        getConfig().setValue(LastRunProperties.LAST_LOAD_BATCH_ROW, currentProcessed);
         try {
             getConfig().saveLastRun();
         } catch (IOException e) {
