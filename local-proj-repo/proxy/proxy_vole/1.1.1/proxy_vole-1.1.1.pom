@@ -1,0 +1,73 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>de.rosstauscher.proxy_vole</groupId>
+  <artifactId>proxy_vole</artifactId>
+  <version>1.1.1</version>
+  <name>proxy-vole</name>
+  <description>A Java library to auto detect the platform network proxy settings. 
+
+The library provides some proxy setting search strategies to read the proxy settings from the system config (Windows, KDE, Gnome, OSX), browser config (Firefox, IE), or environment variables, ... and provides you an ready to use proxy selector. </description>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+  </properties>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <configuration>
+          <!--stylesheetfile>resources/misc/stylesheet.css</stylesheetfile-->
+        </configuration>
+      </plugin>
+      
+      <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
+        <configuration>
+          <includes>
+            <include>**/*.java</include>
+            <include>dll/**/*</include>
+          </includes>
+        </configuration>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <archive>
+            <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+          </archive>
+        </configuration>
+       </plugin>
+      
+    </plugins>
+  </build>
+  
+  <dependencies>
+  	<dependency>
+  		<groupId>org.mozilla</groupId>
+  		<artifactId>rhino</artifactId>
+  		<version>1.7R4</version>
+  		<optional>true</optional>
+  	</dependency>
+  	<dependency>
+  		<groupId>junit</groupId>
+  		<artifactId>junit</artifactId>
+  		<version>4.13.2</version>
+  	</dependency>
+  </dependencies>
+  <organization>
+  	<name>Swiss AviationSoftware</name>
+  	<url>http://swiss-as.com</url>
+  </organization>
+  <url>https://github.com/SwissAS/proxy_vole</url>
+</project>
+
