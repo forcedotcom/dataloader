@@ -42,7 +42,7 @@ import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.config.LastRun;
+import com.salesforce.dataloader.config.LastRunProperties;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.database.DatabaseReader;
 import com.salesforce.dataloader.dao.database.DatabaseTestUtil;
@@ -147,7 +147,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         if (args == null) args = getTestConfig();
         args.put(Config.PROCESS_NAME, processName);
         Config.DATE_FORMATTER.parse(startTime);
-        args.put(LastRun.LAST_RUN_DATE, startTime);
+        args.put(LastRunProperties.LAST_RUN_DATE, startTime);
         args.put(Config.OPERATION, OperationInfo.upsert.name());
 
         runUpsertProcess(args, isInsert ? numRows : 0, isInsert ? 0 : numRows);

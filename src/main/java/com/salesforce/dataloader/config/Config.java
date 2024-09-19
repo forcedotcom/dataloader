@@ -54,12 +54,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -184,7 +182,7 @@ public class Config {
     /**
      * The mapping from preference name to preference value (represented as strings).
      */
-    private Properties properties = new LinkedProperties();
+    private Properties loadedProperties = new LinkedProperties();
     private Properties readOnlyPropertiesFromPropertiesFile = new LinkedProperties();
 
     private Map<String, String> parameterOverridesMap;
@@ -380,7 +378,7 @@ public class Config {
     /**
      * The <code>lastRun</code> is for last run statistics file
      */
-    private LastRun lastRun;
+    private LastRunProperties lastRunProperties;
     /**
      * <code>encrypter</code> is a utility used internally in the config for reading/writing
      * encrypted values. Right now, the list of encrypted values is known to this class only.
@@ -505,7 +503,7 @@ public class Config {
      * @see #save()
      */
     private Config(String filename, Map<String, String> overridesMap) throws ConfigInitializationException, IOException {
-        properties = new LinkedProperties();
+        loadedProperties = new LinkedProperties();
         this.filename = filename;
         
         File configFile = new File(this.filename);
@@ -558,15 +556,15 @@ public class Config {
             lastRunDir = this.configDir;
         }
 
-        this.lastRun = new LastRun(lastRunFileName, lastRunDir, getBoolean(Config.ENABLE_LAST_RUN_OUTPUT));
+        this.lastRunProperties = new LastRunProperties(lastRunFileName, lastRunDir, getBoolean(Config.ENABLE_LAST_RUN_OUTPUT));
         // Need to initialize last run date if it's present neither in config or override
-        lastRun.setDefault(LastRun.LAST_RUN_DATE, getString(INITIAL_LAST_RUN_DATE));
+        lastRunProperties.setDefault(LastRunProperties.LAST_RUN_DATE, getString(INITIAL_LAST_RUN_DATE));
 
         try {
-            this.lastRun.load();
+            this.lastRunProperties.load();
         } catch (IOException e) {
             logger.warn(Messages.getFormattedString("LastRun.errorLoading", new String[]{
-                    this.lastRun.getFullPath(), e.getMessage()}), e);
+                    this.lastRunProperties.getFullPath(), e.getMessage()}), e);
         }        
     }
 
@@ -683,7 +681,7 @@ public class Config {
      * @param name the name of the key
      */
     public boolean contains(String name) {
-        return properties.containsKey(name) || lastRun.hasParameter(name) && lastRun.containsKey(name);
+        return loadedProperties.containsKey(name) || lastRunProperties.hasParameter(name) && lastRunProperties.containsKey(name);
     }
 
     /**
@@ -840,7 +838,7 @@ public class Config {
     }
 
     public String getLastRunFilename() {
-        return this.lastRun == null ? null : this.lastRun.getFullPath();
+        return this.lastRunProperties == null ? null : this.lastRunProperties.getFullPath();
     }
 
 
@@ -904,10 +902,10 @@ public class Config {
     private String getParamValue(String name) {
         String propValue;
 
-        if (lastRun != null && lastRun.hasParameter(name)) {
-            propValue = lastRun.getProperty(name);
+        if (lastRunProperties != null && lastRunProperties.hasParameter(name)) {
+            propValue = lastRunProperties.getProperty(name);
         } else {
-            propValue = properties != null ? properties.getProperty(name) : null;
+            propValue = loadedProperties != null ? loadedProperties.getProperty(name) : null;
         }
         
         // check if a property's value is configured when it used to be a pilot property
@@ -932,8 +930,8 @@ public class Config {
      * @param out the print stream
      */
     public void list(PrintStream out) {
-        properties.list(out);
-        lastRun.list(out);
+        loadedProperties.list(out);
+        lastRunProperties.list(out);
     }
 
     /**
@@ -942,8 +940,8 @@ public class Config {
      * @param out the print writer
      */
     public void list(PrintWriter out) {
-        properties.list(out);
-        lastRun.list(out);
+        loadedProperties.list(out);
+        lastRunProperties.list(out);
     }
 
     /**
@@ -979,7 +977,7 @@ public class Config {
             Properties propsFromFile = new LinkedProperties();
             propsFromFile.load(in);
             removeEmptyProperties(propsFromFile);
-            properties.putAll(propsFromFile);
+            loadedProperties.putAll(propsFromFile);
             for (String roprop : READ_ONLY_PROPERTY_NAMES) {
                 if (propsFromFile.containsKey(roprop)) {
                     this.readOnlyPropertiesFromPropertiesFile.put(
@@ -993,7 +991,7 @@ public class Config {
             throw e;
         }
         // paramter post-processing
-        postLoad(properties, true);
+        postLoad(loadedProperties, true);
 
         dirty = false;
     }
@@ -1009,10 +1007,9 @@ public class Config {
         initEncryption((Map<String, String>) propMap);
 
         // decrypt encrypted values
-        decryptPasswordProperty(propMap, PASSWORD);
-        decryptPasswordProperty(propMap, PROXY_PASSWORD);
-        decryptPasswordProperty(propMap, OAUTH_ACCESSTOKEN);
-        decryptPasswordProperty(propMap, OAUTH_REFRESHTOKEN);
+        for (String encryptedProp : ENCRYPTED_PROPERTY_NAMES) {
+            decryptAndCacheProperty(propMap, encryptedProp);
+        }
         
         // Do not load unsupported properties and CLI options even if they are specified in config.properties file
         if (isConfigFilePropsMap) {
@@ -1021,7 +1018,7 @@ public class Config {
         }
     }
 
-    private void decryptPasswordProperty(Map<?, ?> values, String propertyName) throws ConfigInitializationException {
+    private void decryptAndCacheProperty(Map<?, ?> values, String propertyName) throws ConfigInitializationException {
         @SuppressWarnings("unchecked")
         Map<String, String> propMap = (Map<String, String>)values;
         // initialize encryption
@@ -1153,20 +1150,6 @@ public class Config {
     }
 
     /**
-     * Returns an enumeration of all preferences known to this config
-     *
-     * @return an array of preference names
-     */
-    public String[] preferenceNames() {
-        ArrayList<String> list = new ArrayList<String>();
-        Enumeration<?> en = properties.propertyNames();
-        while (en.hasMoreElements()) {
-            list.add((String) en.nextElement());
-        }
-        return list.toArray(new String[list.size()]);
-    }
-
-    /**
      * Puts a set of values from a map into config
      *
      * @param values Map of overriding values
@@ -1206,12 +1189,12 @@ public class Config {
         }
 
         Properties inMemoryProperties = new LinkedProperties();
-        inMemoryProperties.putAll(this.properties);
+        inMemoryProperties.putAll(this.loadedProperties);
         
         // do not save properties set through parameter overrides
         if (this.parameterOverridesMap != null) {
             for (String propertyName : this.parameterOverridesMap.keySet()) {
-                this.properties.remove(propertyName);
+                this.loadedProperties.remove(propertyName);
             }
         }
         
@@ -1219,21 +1202,21 @@ public class Config {
         // in properties file
         for (String roprop : READ_ONLY_PROPERTY_NAMES) {
             if (!this.readOnlyPropertiesFromPropertiesFile.containsKey(roprop)) {
-                this.properties.remove(roprop);
+                this.loadedProperties.remove(roprop);
             }
         }
         
         for (String encryptedProp : ENCRYPTED_PROPERTY_NAMES) {
-            if (this.properties.containsKey(encryptedProp)) {
-                Map<?, ?> propMap = (Map<?, ?>)this.properties;
+            if (this.loadedProperties.containsKey(encryptedProp)) {
+                Map<?, ?> propMap = (Map<?, ?>)this.loadedProperties;
                 try {
                     @SuppressWarnings("unchecked")
                     String propValue = encryptProperty(encrypter, 
                             (Map<String, String>)propMap,
                             encryptedProp, isBatchMode());
-                    this.properties.put(encryptedProp, propValue);
+                    this.loadedProperties.put(encryptedProp, propValue);
                 } catch (ParameterLoadException e) {
-                    this.properties.remove(encryptedProp); // Encryption attempt failed. Do not save.
+                    this.loadedProperties.remove(encryptedProp); // Encryption attempt failed. Do not save.
                 }
             }
         }
@@ -1241,7 +1224,7 @@ public class Config {
         removeUnsupportedProperties();
         removeDecryptedProperties();
         removeCLIOptionsFromProperties();
-        removeEmptyProperties(this.properties);
+        removeEmptyProperties(this.loadedProperties);
 
         FileOutputStream out = null;
         try {
@@ -1252,10 +1235,10 @@ public class Config {
                 out.close();
             }
             // restore original property values
-            properties = inMemoryProperties;
+            loadedProperties = inMemoryProperties;
         }
         // save last run statistics
-        lastRun.save();
+        lastRunProperties.save();
     }
     
     public void setAuthEndpoint(String authEndpoint) {
@@ -1313,11 +1296,11 @@ public class Config {
     }
     
     private void removeDecryptedProperties() {
-        this.properties.entrySet().removeIf(entry -> (entry.getKey().toString().endsWith(DECRYPTED_SUFFIX)));
+        this.loadedProperties.entrySet().removeIf(entry -> (entry.getKey().toString().endsWith(DECRYPTED_SUFFIX)));
     }
     
     private void removeCLIOptionsFromProperties() {
-        Set<String> keys = this.properties.stringPropertyNames();
+        Set<String> keys = this.loadedProperties.stringPropertyNames();
         Field[] allFields = Config.class.getDeclaredFields();
         for (Field field : allFields) {
             if (field.getName().startsWith("CLI_OPTION_")) {
@@ -1336,7 +1319,7 @@ public class Config {
                 }
                 for (String key : keys) {
                     if (key.equalsIgnoreCase(fieldVal)) {
-                        this.properties.remove(key);
+                        this.loadedProperties.remove(key);
                     }
                 }
             }
@@ -1352,7 +1335,7 @@ public class Config {
      * Save statistics from the last run
      */
     public void saveLastRun() throws IOException {
-        lastRun.save();
+        lastRunProperties.save();
     }
 
     /**
@@ -1364,7 +1347,7 @@ public class Config {
      * @throws java.io.IOException if there is a problem saving this store
      */
     private void save(OutputStream out, String header) throws IOException {
-        properties.store(out, header);
+        loadedProperties.store(out, header);
         dirty = false;
     }
 
@@ -1469,10 +1452,10 @@ public class Config {
     private void doSetPropertyAndUpdateConfig(String name, String oldValue, String newValue) {
         this.dirty = true;
         configChanged(name, oldValue, newValue);
-        if (lastRun != null && lastRun.hasParameter(name)) {
-            lastRun.put(name, newValue);
+        if (lastRunProperties != null && lastRunProperties.hasParameter(name)) {
+            lastRunProperties.put(name, newValue);
         } else {
-            properties.put(name, newValue);
+            loadedProperties.put(name, newValue);
         }
     }
 

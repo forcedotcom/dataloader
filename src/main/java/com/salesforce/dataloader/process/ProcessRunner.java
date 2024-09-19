@@ -58,7 +58,7 @@ package com.salesforce.dataloader.process;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.progress.NihilistProgressAdapter;
 import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.config.LastRun;
+import com.salesforce.dataloader.config.LastRunProperties;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
@@ -168,7 +168,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
 
                 // save last successful run date
                 // FIXME look into a better place so that long runs don't skew this
-                config.setValue(LastRun.LAST_RUN_DATE, Calendar.getInstance().getTime());
+                config.setValue(LastRunProperties.LAST_RUN_DATE, Calendar.getInstance().getTime());
                 config.saveLastRun();
             } else {
                 logger.fatal(Messages.getString("Process.loginError")); //$NON-NLS-1$
