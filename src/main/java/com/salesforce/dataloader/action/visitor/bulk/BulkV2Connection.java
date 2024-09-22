@@ -139,13 +139,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.FileOutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -426,8 +427,7 @@ public class BulkV2Connection extends BulkConnection {
 	        	}
 	        	// make a get request
 	        	try {
-	        	    HttpURLConnection conn = transport.openHttpGetConnection(urlString, headers);
-	        	    in = transport.httpGet(conn, urlString);
+	        	    in = transport.httpGet(urlString);
 	        	} catch (HttpClientTransportException ex) {
 	                parseAndThrowException(ex);
 	        	}
@@ -526,11 +526,19 @@ public class BulkV2Connection extends BulkConnection {
         InputStream is = null;
         try {
             HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
-            HttpURLConnection httpConnection = transport.openHttpGetConnection(resultsURL.toString(), headers);
-            is = transport.httpGet(httpConnection, resultsURL.toString());
-            this.queryLocator = httpConnection.getHeaderField("Sforce-Locator");
-            this.numberOfRecordsInQueryResult = Integer.valueOf(httpConnection.getHeaderField("Sforce-NumberOfRecords"));
-        } catch (HttpClientTransportException ex) {
+            is = transport.httpGet(resultsURL.toString());
+            HttpResponse httpResponse = transport.getHttpResponse();
+            if (httpResponse != null) {
+                Header header = httpResponse.getFirstHeader("Sforce-Locator");
+                if (header != null) {
+                    this.queryLocator = header.getValue();
+                }
+                header = httpResponse.getFirstHeader("Sforce-NumberOfRecords");
+                if (header != null) {
+                    this.numberOfRecordsInQueryResult = Integer.valueOf(header.getValue());
+                }
+            }
+         } catch (HttpClientTransportException ex) {
             parseAndThrowException(ex);
         }
         return is;
@@ -548,8 +556,7 @@ public class BulkV2Connection extends BulkConnection {
         InputStream is = null;
         try {
             HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
-            HttpURLConnection httpConnection = transport.openHttpGetConnection(resultsURLString, headers);
-            is = transport.httpGet(httpConnection, resultsURLString);
+            is = transport.httpGet(resultsURLString);
         } catch (IOException | ConnectionException e) {
             throw new AsyncApiException("Failed to get " + resultsType + " for job id " + jobId, AsyncExceptionCode.ClientInputError, e);
         } catch (HttpClientTransportException e) {

@@ -63,6 +63,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -73,6 +74,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The class that controls dataloader engine (config, salesforce communication, mapping, dao). For
@@ -135,6 +138,36 @@ public class Controller {
             daoFactory = new DataAccessObjectFactory();
         }
         HttpClientTransport.setReuseConnection(config.getBoolean(Config.REUSE_CLIENT_CONNECTION));
+        getLatestDownloadableDataLoaderVersion();
+    }
+    
+    private static String latestDownloadableDataLoaderVersion = null;
+    private static final String DL_DOWNLOADABLE_REGEX = "[0-9]+\\.[0-9]+\\.[0-9]+\\.zip";
+    public synchronized String getLatestDownloadableDataLoaderVersion() {
+        if (latestDownloadableDataLoaderVersion != null) {
+            return latestDownloadableDataLoaderVersion;
+        }
+        try {
+            ConnectorConfig connConfig = new ConnectorConfig();
+            AppUtil.setConnectorConfigProxySettings(config, connConfig);
+            HttpClientTransport clientTransport = new HttpClientTransport(connConfig);
+            InputStream inputStream = clientTransport.httpGet(AppUtil.DATALOADER_DOWNLOAD_URL);
+
+            String responseContent = new String(inputStream.readAllBytes());            
+            Pattern htmlTagInRichTextPattern = Pattern.compile(DL_DOWNLOADABLE_REGEX);
+            Matcher matcher = htmlTagInRichTextPattern.matcher(responseContent);
+            String downloadableVersion = AppUtil.DATALOADER_VERSION;
+            if (matcher.find()) {
+                downloadableVersion = matcher.group();
+                downloadableVersion = downloadableVersion.substring(0, downloadableVersion.lastIndexOf("."));
+            }
+            latestDownloadableDataLoaderVersion = downloadableVersion;
+            return downloadableVersion;
+        } catch (Exception e) {
+            logger.info("Unable to check for the latest available data loader version: " + e.getMessage());
+            latestDownloadableDataLoaderVersion = AppUtil.DATALOADER_VERSION;
+            return AppUtil.DATALOADER_VERSION;
+        }
     }
     
     public synchronized void executeAction(ILoaderProgress monitor) throws DataAccessObjectException, OperationException {

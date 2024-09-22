@@ -278,13 +278,13 @@ public class LoaderWindow extends ApplicationWindow {
     }
     
     private void displayUpgradeDialog(final Display display) {
-        if (AppUtil.DATALOADER_VERSION.equals(AppUtil.getLatestDownloadableDataLoaderVersion())) {
+        if (AppUtil.DATALOADER_VERSION.equals(controller.getLatestDownloadableDataLoaderVersion())) {
             return; // running app's version matches with downloadable version.
         }
         display.asyncExec(new Thread() {
             @Override
             public void run() {
-                LoaderUpgradeDialog dlg = new LoaderUpgradeDialog(display.getActiveShell());
+                LoaderUpgradeDialog dlg = new LoaderUpgradeDialog(display.getActiveShell(), controller);
                 dlg.open();
                 addMenuBar();
             }
