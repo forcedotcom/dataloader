@@ -28,11 +28,11 @@ package com.salesforce.dataloader.util;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.ProxySelector;
@@ -40,11 +40,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpRequest.Builder;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -58,8 +53,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
@@ -73,6 +66,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.exception.ConfigInitializationException;
+import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.bind.CalendarCodec;
 
 
@@ -120,7 +115,6 @@ public class AppUtil {
     
     private static APP_RUN_MODE appRunMode = APP_RUN_MODE.UI;
     private static Logger logger = null;
-    private static String latestDownloadableDataLoaderVersion;
     private static final ArrayList<String> CONTENT_SOBJECT_LIST = new ArrayList<String>();
 
     static {
@@ -145,12 +139,7 @@ public class AppUtil {
         LoggingUtil.initializeLog(argsMap);
         logger = LogManager.getLogger(AppUtil.class);
         setUseGMTForDateFieldValue(argsMap);
-        latestDownloadableDataLoaderVersion = _getLatestAvailableAppVersionFromWebsite();
         return convertCommandArgsMapToArgsArray(argsMap);
-    }
-
-    public static String getLatestDownloadableDataLoaderVersion() {
-        return latestDownloadableDataLoaderVersion;
     }
     
     public static OSType getOSType() throws SecurityException {
@@ -465,38 +454,7 @@ public class AppUtil {
             logger.error(exceptionMessage, e);
         }
         return exitVal;
-    }
-    
-    private static final String DL_DOWNLOADABLE_REGEX = "[0-9]+\\.[0-9]+\\.[0-9]+\\.zip";
-    private static String _getLatestAvailableAppVersionFromWebsite() {
-        try {
-            Builder requestBuilder = HttpRequest.newBuilder(new URI(DATALOADER_DOWNLOAD_URL));
-            HttpRequest request = requestBuilder.GET().build();
-            HttpClient client = HttpClient.newBuilder()
-                    .followRedirects(HttpClient.Redirect.ALWAYS)
-                    .proxy(ProxySelector.getDefault())
-                    .build();
-            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-            if (response.statusCode() != HttpURLConnection.HTTP_OK) {
-                logger.info("Unable to check for the latest available data loader version. Response code = " + response.statusCode());
-                return DATALOADER_VERSION;
-            }
-            String responseContent = response.body();
-            
-            Pattern htmlTagInRichTextPattern = Pattern.compile(DL_DOWNLOADABLE_REGEX);
-            Matcher matcher = htmlTagInRichTextPattern.matcher(responseContent);
-            String downloadableVersion = DATALOADER_VERSION;
-            if (matcher.find()) {
-                downloadableVersion = matcher.group();
-                downloadableVersion = downloadableVersion.substring(0, downloadableVersion.lastIndexOf("."));
-            }
-            return downloadableVersion;
-        } catch (Exception e) {
-            logger.info("Unable to check for the latest available data loader version: " + e.getMessage());
-            return DATALOADER_VERSION;
-        }
-    }
-    
+    }    
 
     public static boolean isValidHttpsUrl(String url) {
         try {
@@ -555,9 +513,11 @@ public class AppUtil {
         logger.debug("detecting proxies");
         List<Proxy> l = null;
         try {
-            l = ProxySelector.getDefault().select(new URI("https://www.salesforce.com"));
-        } 
-        catch (URISyntaxException e) {
+            ProxySelector ps = ProxySelector.getDefault();
+            if (ps != null) {
+                l = ps.select(new URI("https://www.salesforce.com"));
+            }
+        } catch (URISyntaxException e) {
             e.printStackTrace();
         }
         if (l != null) {
@@ -577,5 +537,54 @@ public class AppUtil {
                 }
             }
         }
+    }
+    
+    public static void setConnectorConfigProxySettings(Config config, ConnectorConfig connConfig) {
+        // proxy properties
+        try {
+            String proxyHost = config.getString(Config.PROXY_HOST);
+            int proxyPort = config.getInt(Config.PROXY_PORT);
+            if (proxyHost != null && proxyHost.length() > 0 && proxyPort > 0) {
+                logger.info(Messages.getFormattedString(
+                        "AppUtil.sforceLoginProxyDetail", new String[] { proxyHost, String.valueOf(proxyPort) })); //$NON-NLS-1$
+                connConfig.setProxy(proxyHost, proxyPort);
+
+                String proxyUsername = config.getString(Config.PROXY_USERNAME);
+                if (proxyUsername != null && proxyUsername.length() > 0) {
+                    logger.info(Messages.getFormattedString("AppUtil.sforceLoginProxyUser", proxyUsername)); //$NON-NLS-1$
+                    connConfig.setProxyUsername(proxyUsername);
+
+                    String proxyPassword = config.getString(Config.PROXY_PASSWORD);
+                    if (proxyPassword != null && proxyPassword.length() > 0) {
+                        logger.info(Messages.getString("AppUtil.sforceLoginProxyPassword")); //$NON-NLS-1$
+                        connConfig.setProxyPassword(proxyPassword);
+                    } else {
+                        connConfig.setProxyPassword("");
+                        logger.info("no proxy password");
+                    }
+                }
+
+                String proxyNtlmDomain = config.getString(Config.PROXY_NTLM_DOMAIN);
+                if (proxyNtlmDomain != null && proxyNtlmDomain.length() > 0) {
+                    logger.info(Messages.getFormattedString("AppUtil.sforceLoginProxyNtlm", proxyNtlmDomain)); //$NON-NLS-1$
+                    connConfig.setNtlmDomain(proxyNtlmDomain);
+                }
+            }
+        } catch (ParameterLoadException e) {
+            logger.error(e.getMessage());
+        }
+        if (config.getBoolean(Config.DEBUG_MESSAGES)) {
+            connConfig.setTraceMessage(true);
+            connConfig.setPrettyPrintXml(true);
+            String filename = config.getString(Config.DEBUG_MESSAGES_FILE);
+            if (filename.length() > 0) {
+                try {
+                    connConfig.setTraceFile(filename);
+                } catch (FileNotFoundException e) {
+                    logger.warn(Messages.getFormattedString("Client.errorMsgDebugFilename", filename));
+                }
+            }
+        }
+
     }
 }

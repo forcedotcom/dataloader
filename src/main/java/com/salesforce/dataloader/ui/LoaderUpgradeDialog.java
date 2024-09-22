@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.util.AppUtil;
 
 /**
@@ -39,15 +40,16 @@ import com.salesforce.dataloader.util.AppUtil;
  */
 public class LoaderUpgradeDialog extends LoaderTitleAreaDialog {
 
-
+    private Controller controller;
     /**
      * MyTitleAreaDialog constructor
      * 
      * @param shell
      *            the parent shell
      */
-    public LoaderUpgradeDialog(Shell activeShell) {
+    public LoaderUpgradeDialog(Shell activeShell, Controller controller) {
         super(activeShell);
+        this.controller = controller;
     }
 
     /**
@@ -66,7 +68,7 @@ public class LoaderUpgradeDialog extends LoaderTitleAreaDialog {
 
         // Set the message
         setMessage(Labels.getFormattedString("LoaderDownloadDialog.messageLineOne", 
-                new String[] {AppUtil.getLatestDownloadableDataLoaderVersion(),
+                new String[] {controller.getLatestDownloadableDataLoaderVersion(),
                 AppUtil.DATALOADER_DOWNLOAD_URL})); //$NON-NLS-1$
         
         // Set the image

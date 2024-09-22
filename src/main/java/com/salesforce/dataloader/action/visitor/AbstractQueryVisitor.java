@@ -207,8 +207,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
                     + refId;
             
             HttpTransportInterface transport = (HttpTransportInterface) controller.getClient().getConnectorConfig().createTransport();
-            HttpURLConnection httpConnection = transport.openHttpGetConnection(urlStr, null);
-            InputStream is = transport.httpGet(httpConnection, urlStr);
+            InputStream is = transport.httpGet(urlStr);
             byte[] binaryResponse = is.readAllBytes();
             return Base64.getEncoder().encodeToString(binaryResponse);
         } catch (Exception e) {

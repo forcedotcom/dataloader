@@ -34,6 +34,7 @@ import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.GetUserInfoResult;
 import com.sforce.ws.ConnectorConfig;
@@ -130,40 +131,7 @@ public abstract class ClientBase<ConnectionType> {
         cc.setUsername(username);
         cc.setPassword(config.getString(Config.PASSWORD));
 
-        // proxy properties
-        try {
-            String proxyHost = config.getString(Config.PROXY_HOST);
-            int proxyPort = config.getInt(Config.PROXY_PORT);
-            if (proxyHost != null && proxyHost.length() > 0 && proxyPort > 0) {
-                logger.info(Messages.getFormattedString(
-                        "Client.sforceLoginProxyDetail", new String[] { proxyHost, String.valueOf(proxyPort) })); //$NON-NLS-1$
-                cc.setProxy(proxyHost, proxyPort);
-
-                String proxyUsername = config.getString(Config.PROXY_USERNAME);
-                if (proxyUsername != null && proxyUsername.length() > 0) {
-                    logger.info(Messages.getFormattedString("Client.sforceLoginProxyUser", proxyUsername)); //$NON-NLS-1$
-                    cc.setProxyUsername(proxyUsername);
-
-                    String proxyPassword = config.getString(Config.PROXY_PASSWORD);
-                    if (proxyPassword != null && proxyPassword.length() > 0) {
-                        logger.info(Messages.getString("Client.sforceLoginProxyPassword")); //$NON-NLS-1$
-                        cc.setProxyPassword(proxyPassword);
-                    } else {
-                        cc.setProxyPassword("");
-                    }
-                }
-
-                String proxyNtlmDomain = config.getString(Config.PROXY_NTLM_DOMAIN);
-                if (proxyNtlmDomain != null && proxyNtlmDomain.length() > 0) {
-                    logger.info(Messages.getFormattedString("Client.sforceLoginProxyNtlm", proxyNtlmDomain)); //$NON-NLS-1$
-                    cc.setNtlmDomain(proxyNtlmDomain);
-                }
-            }
-
-        } catch (ParameterLoadException e) {
-            logger.error(e.getMessage());
-        }
-
+        AppUtil.setConnectorConfigProxySettings(config, cc);
         // Time out after 5 seconds for connection
         int connTimeoutSecs;
         try {
@@ -210,7 +178,7 @@ public abstract class ClientBase<ConnectionType> {
 
         return cc;
     }
-    
+        
     public static String getCurrentAPIVersionInWSC() {
         String[] connectURLArray = Connector.END_POINT.split("\\/");
         return connectURLArray[connectURLArray.length-1];

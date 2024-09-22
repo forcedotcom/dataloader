@@ -64,10 +64,10 @@ public class HelpUIAction extends Action {
     
     private String getLoaderUpgradeMessage() {
         String upgradeMsg = Labels.getString("HelpUIAction.latestVersion");
-        if (!AppUtil.DATALOADER_VERSION.equals(AppUtil.getLatestDownloadableDataLoaderVersion())) {
+        if (!AppUtil.DATALOADER_VERSION.equals(controller.getLatestDownloadableDataLoaderVersion())) {
             upgradeMsg = 
                     Labels.getFormattedString("LoaderDownloadDialog.messageLineOne", 
-                                            new String[] {AppUtil.getLatestDownloadableDataLoaderVersion(), 
+                                            new String[] {controller.getLatestDownloadableDataLoaderVersion(), 
                                                           AppUtil.DATALOADER_DOWNLOAD_URL});
         }
         upgradeMsg += System.getProperty("line.separator") + System.getProperty("line.separator");

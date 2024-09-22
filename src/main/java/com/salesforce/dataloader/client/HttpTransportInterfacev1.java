@@ -27,11 +27,11 @@
 package com.salesforce.dataloader.client;
 
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.HashMap;
-
-import org.apache.http.HttpResponse;
+import java.util.Map;
 
 import com.salesforce.dataloader.exception.HttpClientTransportException;
 import com.sforce.async.AsyncApiException;
@@ -44,20 +44,19 @@ import com.sforce.ws.transport.Transport;
  * @version 1.0
  * @since 1.0  Nov 30, 2005
  */
-public interface HttpTransportInterface extends Transport {
+public interface HttpTransportInterfacev1 extends Transport {
 	enum SupportedHttpMethodType {
 		PUT,
 		POST,
 		PATCH,
-		DELETE,
-		GET
+		DELETE
 	}
     OutputStream connect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression,
-    		HttpTransportInterface.SupportedHttpMethodType httpMethod) throws IOException;
+    		HttpTransportInterfacev1.SupportedHttpMethodType httpMethod) throws IOException;
 
     void connect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression,
-    		HttpTransportInterface.SupportedHttpMethodType httpMethod, InputStream contentInputStream, String contentEncoding) throws IOException;
+    		HttpTransportInterfacev1.SupportedHttpMethodType httpMethod, InputStream contentInputStream, String contentEncoding) throws IOException;
     
-    InputStream httpGet(String urlStr) throws IOException, AsyncApiException, HttpClientTransportException;
-    HttpResponse getHttpResponse();
+    HttpURLConnection openHttpGetConnection(String urlStr, Map<String, String> headers) throws IOException;
+    InputStream httpGet(HttpURLConnection connection, String urlStr) throws IOException, AsyncApiException, HttpClientTransportException;
 }
