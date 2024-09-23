@@ -29,15 +29,11 @@ package com.salesforce.dataloader.action.visitor.bulk;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.RandomAccessFile;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,7 +45,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
-import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
@@ -425,39 +420,6 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         }
     }
     
-    private long transferCSVContent(String fromFileName, String toFileName) throws OperationException {
-        RandomAccessFile fromFile, toFile;
-        long contentRowCount = 0;
-		try {
-			fromFile = new RandomAccessFile(fromFileName, "rw");
-			toFile = new RandomAccessFile(toFileName, "rw");
-			//first line is the header row                                  
-			fromFile.readLine();
-			toFile.readLine();
-
-			// go to end of to file
-			while (toFile.readLine() != null) {
-				contentRowCount++;
-			}
-			String contentRow = null;
-			while ((contentRow = fromFile.readLine()) != null) {
-				contentRow += System.lineSeparator();
-				toFile.write(contentRow.getBytes());
-				contentRowCount++;
-			}
-			toFile.close();
-			
-			// truncate the fromFile
-			fromFile.setLength(0);
-			fromFile.close();
-			return contentRowCount;
-		} catch (FileNotFoundException e) {
-			throw new OperationException(e.getMessage());
-		} catch (IOException e) {
-			throw new OperationException(e.getMessage());
-		}          
-    }
-
     private void getBulkV2LoadJobResults() throws AsyncApiException, OperationException, DataAccessObjectException {
     	this.getSuccessWriter().close();
     	this.getErrorWriter().close();
@@ -470,27 +432,12 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     	// String unprocessedRecordsWriterFile = config.getString(Config.OUTPUT_UNPROCESSED_RECORDS);
 
     	this.jobUtil.getBulkV2LoadSuccessResults(successWriterFile);
-    	Charset csvCharset = Charset.forName(config.getCsvEncoding(true));
-    	try (Stream<String> lines = Files.lines(Path.of(successWriterFile), csvCharset)) {
-    	    // subtract 1 from number of lines to account for the header row
-            this.setSuccesses(lines.count()-1);
-    	} catch (IOException e) {
-            CSVFileReader csvReader = new CSVFileReader(new File(successWriterFile), config, true, false);
-            this.setSuccesses(csvReader.getTotalRows());
-        }
+        CSVFileReader csvReader = new CSVFileReader(new File(successWriterFile), config, true, false);
+        this.setSuccesses(csvReader.getTotalRows());
     	
     	this.jobUtil.getBulkV2LoadErrorResults(errorWriterFile);
-        try (Stream<String> lines = Files.lines(Path.of(errorWriterFile), csvCharset)) {
-            // subtract 1 from number of lines to account for the header row
-            this.setErrors(lines.count()-1);
-        } catch (IOException e) {
-            CSVFileReader csvReader = new CSVFileReader(new File(errorWriterFile), config, true, false);
-            this.setErrors(csvReader.getTotalRows());
-        }
-
-        // TODO for unprocessed records
-    	// this.jobUtil.getBulkV2LoadUnprocessedRecords(tmpFileName);
-    	// transferCSVContent(tmpFileName, unprocessedRecordsWriterFile);
+        csvReader = new CSVFileReader(new File(errorWriterFile), config, true, false);
+        this.setErrors(csvReader.getTotalRows());
     }
 
     private void getResults() throws AsyncApiException, OperationException, DataAccessObjectException {
