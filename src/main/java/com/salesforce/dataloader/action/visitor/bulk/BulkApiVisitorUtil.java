@@ -384,12 +384,12 @@ class BulkApiVisitorUtil {
         return numRecordsFailedInJob;
     }
     BatchInfoList getBatches() throws AsyncApiException {
-        BulkConnection connectionClient = this.controller.getBulkV1Client().getConnection();
+        BulkV1Connection connectionClient = this.controller.getBulkV1Client().getConnection();
         return connectionClient.getBatchInfoList(getJobId());
     }
 
     CSVReader getBatchResults(String batchId) throws AsyncApiException {
-        BulkConnection connectionClient = this.controller.getBulkV1Client().getConnection();
+        BulkV1Connection connectionClient = this.controller.getBulkV1Client().getConnection();
         return new CSVReader(connectionClient.getBatchResultStream(getJobId(), batchId));
     }
     
