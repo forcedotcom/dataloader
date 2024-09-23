@@ -424,8 +424,11 @@
                   <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtlinux*/*/*.jar"/>
                 </copy>
                 
-                <apply executable="zip">
-                    <arg value="-d"/>
+                <condition property="zipexec" value="7z" else="zip">
+                    <os family="windows"/>
+                </condition>
+                <apply executable="${zipexec}">
+                   <arg value="-d"/>
                     <srcfile/>
                     <arg value="META-INF/ECLIPSE_.SF"/>
                     <arg value="META-INF/ECLIPSE_.DSA"/>
