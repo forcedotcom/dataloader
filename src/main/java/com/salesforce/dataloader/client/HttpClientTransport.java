@@ -79,11 +79,13 @@ public class HttpClientTransport implements HttpTransportInterface {
 
     
     private static final String AUTH_HEADER_VALUE_PREFIX = "Bearer ";
-    private static final String AUTH_HEADER = "Authorization";
+    private static final String AUTH_HEADER_FOR_JSON = "Authorization";
+    private static final String AUTH_HEADER_FOR_XML = "X-SFDC-Session";
+    private static final String USER_AGENT_HEADER = "User-Agent";
 
     private static ConnectorConfig currentConfig = null;
     private boolean successful;
-    private HttpRequestBase httpMethod;
+    private HttpRequestBase httpMethod = null;
     private OutputStream output;
     private ByteArrayOutputStream entityByteOut;
     private static CloseableHttpClient currentHttpClient = null;
@@ -141,12 +143,26 @@ public class HttpClientTransport implements HttpTransportInterface {
     
     private boolean isHttpClientInitialized = false;
     
+    private void setAuthAndClientHeadersForHttpMethod() {
+        if (this.httpMethod != null 
+                && currentConfig.getSessionId() != null 
+                && !currentConfig.getSessionId().isBlank()) {
+            this.httpMethod.removeHeaders(AUTH_HEADER_FOR_JSON);
+            this.httpMethod.removeHeaders(AUTH_HEADER_FOR_XML);
+            this.httpMethod.removeHeaders(USER_AGENT_HEADER);
+            this.httpMethod.addHeader(AUTH_HEADER_FOR_JSON, AUTH_HEADER_VALUE_PREFIX + currentConfig.getSessionId());
+            this.httpMethod.addHeader(AUTH_HEADER_FOR_XML, AUTH_HEADER_VALUE_PREFIX + currentConfig.getSessionId());
+            this.httpMethod.addHeader(USER_AGENT_HEADER, VersionInfo.info());
+        }
+    }
+    
     private synchronized void initializeHttpClient() throws UnknownHostException {
         if (isHttpClientInitialized) {
             // already initialized.
             return;
         }
         closeConnections();
+        httpMethod = null;
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create().useSystemProperties();
         
         if (currentConfig != null
@@ -196,8 +212,6 @@ public class HttpClientTransport implements HttpTransportInterface {
     public synchronized InputStream getContent() throws IOException {
         serverInvocationCount++;
         initializeHttpClient();
-        this.httpMethod.addHeader(AUTH_HEADER, AUTH_HEADER_VALUE_PREFIX + currentConfig.getSessionId());
-        this.httpMethod.addHeader("User-Agent", VersionInfo.info());
         if (this.httpMethod instanceof HttpEntityEnclosingRequestBase
             && ((HttpEntityEnclosingRequestBase)this.httpMethod).getEntity() == null) {
             byte[] entityBytes = entityByteOut.toByteArray();
@@ -295,6 +309,7 @@ public class HttpClientTransport implements HttpTransportInterface {
                                     SupportedHttpMethodType httpMethodType,
                                     InputStream requestInputStream, 
                                     String contentTypeStr) throws IOException {
+        initializeHttpClient();
         switch (httpMethodType) {
             case GET :
                 this.httpMethod = new HttpGet(endpoint);
@@ -316,9 +331,7 @@ public class HttpClientTransport implements HttpTransportInterface {
                 this.httpMethod.addHeader(name, httpHeaders.get(name));
             }
         }
-        this.httpMethod.addHeader(AUTH_HEADER, AUTH_HEADER_VALUE_PREFIX + currentConfig.getSessionId());
-        this.httpMethod.addHeader("User-Agent", VersionInfo.info());
-        
+        setAuthAndClientHeadersForHttpMethod();
         if (requestInputStream != null) {
             ContentType contentType = ContentType.DEFAULT_TEXT;
             if (contentTypeStr != null) {
