@@ -26,6 +26,8 @@
 package com.salesforce.dataloader.client;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -135,8 +137,48 @@ public class HttpClientTransport implements HttpTransportInterface {
         } else if (config1 == null || config2 == null) {
             // one of the configs is null, other isn't. They can't be equal.
             return false;
-        } else if (!config1.equals(config2)) {
+        } else if (config1.equals(config2)) {
+            return true;
+        }
+        
+        InetSocketAddress socketAddress1 = (InetSocketAddress)config1.getProxy().address();
+        InetSocketAddress socketAddress2 = (InetSocketAddress)config2.getProxy().address();
+
+        if (socketAddress1 == null && socketAddress2 == null) {
+            return true;
+        } else if (socketAddress1 == null || socketAddress2 == null) {
             return false;
+        } else {
+            String field1, field2;
+            field1 = config1.getProxyUsername() == null ? "" : config1.getProxyUsername();
+            field2 = config2.getProxyUsername() == null ? "" : config2.getProxyUsername();      
+            if (field1.compareTo(field2) != 0) {
+                return false;
+            }
+            
+            field1 = config1.getProxyPassword() == null ? "" : config1.getProxyPassword();
+            field2 = config2.getProxyPassword() == null ? "" : config2.getProxyPassword();
+            if (field1.compareTo(field2) != 0) {
+                return false;
+            }
+    
+            field1 = config1.getNtlmDomain() == null ? "" : config1.getNtlmDomain();
+            field2 = config2.getNtlmDomain() == null ? "" : config2.getNtlmDomain();
+            if (field1.compareTo(field2) != 0) {
+                return false;
+            }
+    
+            field1 = socketAddress1.getHostName() == null ? "" : socketAddress1.getHostName();
+            field2 = socketAddress2.getHostName() == null ? "" : socketAddress2.getHostName();
+            if (field1.compareTo(field2) != 0) {
+                return false;
+            }
+            
+            int intField1 = socketAddress1.getPort();
+            int intField2 = socketAddress2.getPort();
+            if (intField1 != intField2) {
+                return false;
+            }
         }
         return true;
     }
@@ -190,17 +232,6 @@ public class HttpClientTransport implements HttpTransportInterface {
             httpClientBuilder.setDefaultCredentialsProvider(credentialsprovider);
             httpClientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
             currentHttpClient = httpClientBuilder.build();
-            if (AppUtil.getOSType() == AppUtil.OSType.WINDOWS) {
-                /*
-                try (CloseableHttpResponse ignored = currentHttpClient.execute(new HttpHead(AppUtil.DATALOADER_DOWNLOAD_URL))) {
-                    logger.debug("able to ping salesforce service");
-                } catch (Exception e) {
-                   logger.info("Unable to use NTCredentials for proxy. Switching to UsernamePasswordCredentials");
-                   credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
-                   credentialsprovider.setCredentials(scope, credentials);
-                }
-                */
-            }
         }
         if (currentHttpClient == null) {
             currentHttpClient = httpClientBuilder.build();
