@@ -8,7 +8,7 @@ while getopts ":dbe:v:" flag
 do
   case "${flag}" in
     d)
-      debug="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=y"
+      debug="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=0.0.0.0:5005,suspend=y"
       ;;
     b)
       batchmodeargs="./.. upsertAccounts run.mode=batch"
