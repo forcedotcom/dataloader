@@ -24,6 +24,7 @@
     <test.encryptionFile></test.encryptionFile>
     <test.redirect>false</test.redirect>
     <test.testfiles.directory>${project.build.testOutputDirectory}/testfiles</test.testfiles.directory>
+    <skip-unit-tests>false</skip-unit-tests>
   </properties>
 
   <repositories>
@@ -524,10 +525,17 @@
             <id>unit-tests</id>
             <phase>package</phase>
             <configuration>
-              <skipTests>false</skipTests>
+              <skipTests>${skip-unit-tests}</skipTests>
               <excludes>
                 <!-- skip integration tests -->
-                <exclude>**/client/**, **/dyna/SObjectReferenceConverterTest.*, **/integration/**, **/mapping/LoadMapperTest.*, **/mapping/SOQLMapperTest.*, **/process/** </exclude>
+                <exclude>
+                    **/client/**,
+                    **/dyna/SObjectReferenceConverterTest.*, 
+                    **/integration/**, 
+                    **/mapping/LoadMapperTest.*, 
+                    **/mapping/SOQLMapperTest.*, 
+                    **/process/** 
+                </exclude>
               </excludes>
             </configuration>
             <goals>
@@ -538,10 +546,16 @@
             <id>integration-tests</id>
             <phase>verify</phase>
             <configuration>
-              <skipTests>false</skipTests>
+              <skipTests>!${skip-unit-tests}</skipTests>
               <excludes>
                 <exclude>
-                  <!-- Specify the list of integration tests to exclude -->
+                    **/action/**, 
+                    **/dao/**, 
+                    **/dyna/BooleanConverterTest.*,
+                    **/dyna/DateConverterTest.*,
+                    **/EncryptionUtil/**,
+                    **/mapping/SOQLMapperTest.*,
+                    **/util/**
                 </exclude>
               </excludes>
             </configuration>

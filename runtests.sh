@@ -32,11 +32,11 @@ do
       ;;
     d)
       debug="-Dmaven.surefire.debug"
-      debugEncryption="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=y"
+      debugEncryption="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=0.0.0.0:5005,suspend=y"
       
       ;;
     t)
-      test="-Dtest=com.salesforce.dataloader.${OPTARG}"
+      test="-Dskip-unit-tests=true -Dtest=com.salesforce.dataloader.${OPTARG}"
       ;;
     f)
       encryptionFile="${OPTARG}"
