@@ -26,8 +26,6 @@
 package com.salesforce.dataloader.client;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -115,24 +113,9 @@ public class HttpClientTransport implements HttpTransportInterface {
         }
         currentConfig = newConfig;
     }
-    
-    @Override
-    public OutputStream connect(String url, String soapAction) throws IOException {
-        if (soapAction == null) {
-            soapAction = "";
-        }
-
-        HashMap<String, String> header = new HashMap<String, String>();
-
-        header.put("SOAPAction", "\"" + soapAction + "\"");
-        header.put("Content-Type", "text/xml; charset=" + StandardCharsets.UTF_8.name());
-        header.put("Accept", "text/xml");
-
-        return connect(url, header);
-    }
         
     private boolean areEquivalentConfigs(ConnectorConfig config1, ConnectorConfig config2) {
-        if (config1 == null && config2 == null) {
+        if (config1 == config2) {
             return true;
         } else if (config1 == null || config2 == null) {
             // one of the configs is null, other isn't. They can't be equal.
@@ -185,19 +168,6 @@ public class HttpClientTransport implements HttpTransportInterface {
     
     private boolean isHttpClientInitialized = false;
     
-    private void setAuthAndClientHeadersForHttpMethod() {
-        if (this.httpMethod != null 
-                && currentConfig.getSessionId() != null 
-                && !currentConfig.getSessionId().isBlank()) {
-            this.httpMethod.removeHeaders(AUTH_HEADER_FOR_JSON);
-            this.httpMethod.removeHeaders(AUTH_HEADER_FOR_XML);
-            this.httpMethod.removeHeaders(USER_AGENT_HEADER);
-            this.httpMethod.addHeader(AUTH_HEADER_FOR_JSON, AUTH_HEADER_VALUE_PREFIX + currentConfig.getSessionId());
-            this.httpMethod.addHeader(AUTH_HEADER_FOR_XML, AUTH_HEADER_VALUE_PREFIX + currentConfig.getSessionId());
-            this.httpMethod.addHeader(USER_AGENT_HEADER, VersionInfo.info());
-        }
-    }
-    
     private synchronized void initializeHttpClient() throws UnknownHostException {
         if (isHttpClientInitialized) {
             // already initialized.
@@ -238,7 +208,7 @@ public class HttpClientTransport implements HttpTransportInterface {
         }
         isHttpClientInitialized = true;
     }
-    
+
     @Override
     public synchronized InputStream getContent() throws IOException {
         serverInvocationCount++;
@@ -302,7 +272,22 @@ public class HttpClientTransport implements HttpTransportInterface {
     public boolean isSuccessful() {
         return successful;
     }
+    
+    @Override
+    public OutputStream connect(String url, String soapAction) throws IOException {
+        if (soapAction == null) {
+            soapAction = "";
+        }
 
+        HashMap<String, String> header = new HashMap<String, String>();
+
+        header.put("SOAPAction", "\"" + soapAction + "\"");
+        header.put("Content-Type", "text/xml; charset=" + StandardCharsets.UTF_8.name());
+        header.put("Accept", "text/xml");
+
+        return connect(url, header);
+    }
+    
     @Override
     public OutputStream connect(String endpoint, HashMap<String, String> httpHeaders) throws IOException {
         return connect(endpoint, httpHeaders, true);
@@ -404,6 +389,31 @@ public class HttpClientTransport implements HttpTransportInterface {
         return output;
     }
     
+    private void setAuthAndClientHeadersForHttpMethod() {
+        if (this.httpMethod != null 
+                && currentConfig.getSessionId() != null 
+                && !currentConfig.getSessionId().isBlank()) {
+            String authSessionId = currentConfig.getSessionId();
+            Header authHeaderValForXML = this.httpMethod.getFirstHeader(AUTH_HEADER_FOR_XML);
+            Header authHeaderValForJSON = this.httpMethod.getFirstHeader(AUTH_HEADER_FOR_XML);
+            
+            if (authHeaderValForXML != null) {
+                authSessionId = authHeaderValForXML.getValue();
+            } else if (authHeaderValForJSON != null) {
+                authSessionId = authHeaderValForJSON.getValue();
+            }
+            if (authHeaderValForXML == null) {
+                this.httpMethod.addHeader(AUTH_HEADER_FOR_XML, AUTH_HEADER_VALUE_PREFIX + authSessionId);
+            }
+            if (authHeaderValForJSON == null) {
+                this.httpMethod.addHeader(AUTH_HEADER_FOR_JSON, AUTH_HEADER_VALUE_PREFIX + authSessionId);
+            }
+        }
+        Header userAgentHeaderVal = this.httpMethod.getFirstHeader(USER_AGENT_HEADER);
+        if (userAgentHeaderVal == null) {
+            this.httpMethod.addHeader(USER_AGENT_HEADER, VersionInfo.info());
+        }
+    }
     public static void closeConnections() {
         if (currentHttpClient != null) {
             try {
