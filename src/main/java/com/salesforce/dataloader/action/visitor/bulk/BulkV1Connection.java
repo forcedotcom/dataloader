@@ -27,6 +27,7 @@ package com.salesforce.dataloader.action.visitor.bulk;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -35,6 +36,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.client.HttpTransportInterface;
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.async.AsyncApiException;
@@ -71,9 +73,13 @@ public class BulkV1Connection extends BulkConnection {
     }
 
     public JobInfo getJobStatus(String jobId, ContentType contentType) throws AsyncApiException {
+        if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
+            return super.getJobStatus(jobId, contentType);
+        } else {
             String endpoint = getBulkEndpoint() + "job/" + jobId;
             InputStream in = invokeBulkV1GET(endpoint);
             return processBulkV1Get(in, contentType, JobInfo.class);
+        }
     }
     
     public BatchInfoList getBatchInfoList(String jobId) throws AsyncApiException {
@@ -81,14 +87,22 @@ public class BulkV1Connection extends BulkConnection {
     }
     
     public BatchInfoList getBatchInfoList(String jobId, ContentType contentType) throws AsyncApiException {
-        String endpoint = getBulkEndpoint() + "job/" + jobId + "/batch/";
-        InputStream in = invokeBulkV1GET(endpoint);
-        return processBulkV1Get(in, contentType, BatchInfoList.class);
+        if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
+            return super.getBatchInfoList(jobId, contentType);
+        } else {
+            String endpoint = getBulkEndpoint() + "job/" + jobId + "/batch/";
+            InputStream in = invokeBulkV1GET(endpoint);
+            return processBulkV1Get(in, contentType, BatchInfoList.class);
+        }
     }
     
     public InputStream getBatchResultStream(String jobId, String batchId) throws AsyncApiException {
-        String endpoint = getBulkEndpoint() + "job/" + jobId + "/batch/" + batchId + "/result";
-        return invokeBulkV1GET(endpoint);
+        if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
+            return super.getBatchResultStream(jobId, batchId);
+        } else {
+            String endpoint = getBulkEndpoint() + "job/" + jobId + "/batch/" + batchId + "/result";
+            return invokeBulkV1GET(endpoint);
+        }
     }
     
     public QueryResultList getQueryResultList(String jobId, String batchId) throws AsyncApiException {
@@ -96,13 +110,21 @@ public class BulkV1Connection extends BulkConnection {
     }
 
     public QueryResultList getQueryResultList(String jobId, String batchId, ContentType contentType) throws AsyncApiException {
-        InputStream in = getBatchResultStream(jobId, batchId);
-        return processBulkV1Get(in, contentType, QueryResultList.class);
+        if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
+            return super.getQueryResultList(jobId, batchId, contentType);
+        } else {
+            InputStream in = getBatchResultStream(jobId, batchId);
+            return processBulkV1Get(in, contentType, QueryResultList.class);
+        }
     }
 
     public InputStream getQueryResultStream(String jobId, String batchId, String resultId) throws AsyncApiException {
+        if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
+            return super.getQueryResultStream(jobId, batchId, resultId);
+        } else {
             String endpoint = getBulkEndpoint() + "job/" + jobId + "/batch/" + batchId + "/result" + "/" + resultId;
             return invokeBulkV1GET(endpoint);
+        }
     }
     
     private String getBulkEndpoint() {
@@ -123,6 +145,7 @@ public class BulkV1Connection extends BulkConnection {
         }
     }
     
+    @SuppressWarnings("unchecked")
     private <T> T processBulkV1Get(InputStream is, ContentType contentType, Class<T> returnClass) throws AsyncApiException {
         try {
             if (contentType == ContentType.JSON || contentType == ContentType.ZIP_JSON) {
@@ -130,13 +153,22 @@ public class BulkV1Connection extends BulkConnection {
             } else {
                 XmlInputStream xin = new XmlInputStream();
                 xin.setInput(is, "UTF-8");
-                @SuppressWarnings("deprecation")
-                T result = returnClass.newInstance();
+                Constructor<?>[] ctors = returnClass.getDeclaredConstructors();
+                Constructor<?> ctor = null;
+                for (int i = 0; i < ctors.length; i++) {
+                    ctor = ctors[i];
+                    if (ctor.getGenericParameterTypes().length == 0)
+                    break;
+                }
+                if (ctor == null) {
+                    throw new AsyncApiException("Failed to get result: " + returnClass + " cannot be instantiated", AsyncExceptionCode.ClientInputError);
+                }
+                T result = (T)ctor.newInstance();
                 Method loadMethod = returnClass.getMethod("load", xin.getClass(), typeMapper.getClass());
                 loadMethod.invoke(result, xin, typeMapper);
                 return result;
             }
-        } catch (IOException | PullParserException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException e) {
+        } catch (IOException | PullParserException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getMessage());
             throw new AsyncApiException("Failed to get result ", AsyncExceptionCode.ClientInputError, e);
         }
