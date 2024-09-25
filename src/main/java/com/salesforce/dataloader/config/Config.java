@@ -336,7 +336,7 @@ public class Config {
     
     public static final String API_VERSION_PROP="salesforce.api.version";
     public static final String OAUTH_INSTANCE_URL="salesforce.oauth.instanceURL";
-    
+    public static final String USE_LEGACY_HTTP_GET="sfdc.useLegacyHttpGet";
     /**
      *  ===============  PILOT config properties ========
      * - These properties are used for the features in pilot phase. These features are
@@ -485,6 +485,7 @@ public class Config {
             OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
             OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
             RESET_URL_ON_LOGIN,
+            USE_LEGACY_HTTP_GET,
     };
     
     private static final String[] ENCRYPTED_PROPERTY_NAMES = {
@@ -673,6 +674,7 @@ public class Config {
             setDefaultValue(PROXY_HOST, proxyHost);
             setDefaultValue(PROXY_PORT, proxyPort);
         }
+        setDefaultValue(USE_LEGACY_HTTP_GET, false);
     }
 
     /**
