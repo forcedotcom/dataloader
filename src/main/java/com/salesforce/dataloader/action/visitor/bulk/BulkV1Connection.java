@@ -76,8 +76,8 @@ public class BulkV1Connection extends BulkConnection {
         if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
             return super.getJobStatus(jobId, contentType);
         } else {
-            String endpoint = getBulkEndpoint() + "job/" + jobId;
-            InputStream in = invokeBulkV1GET(endpoint);
+            String[] urlParts = {"job", jobId};
+            InputStream in = invokeBulkV1GET(urlParts);
             return processBulkV1Get(in, contentType, JobInfo.class);
         }
     }
@@ -90,8 +90,8 @@ public class BulkV1Connection extends BulkConnection {
         if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
             return super.getBatchInfoList(jobId, contentType);
         } else {
-            String endpoint = getBulkEndpoint() + "job/" + jobId + "/batch/";
-            InputStream in = invokeBulkV1GET(endpoint);
+            String[] urlParts = {"job", jobId, "batch"};
+            InputStream in = invokeBulkV1GET(urlParts);
             return processBulkV1Get(in, contentType, BatchInfoList.class);
         }
     }
@@ -100,8 +100,8 @@ public class BulkV1Connection extends BulkConnection {
         if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
             return super.getBatchResultStream(jobId, batchId);
         } else {
-            String endpoint = getBulkEndpoint() + "job/" + jobId + "/batch/" + batchId + "/result";
-            return invokeBulkV1GET(endpoint);
+            String[] urlParts = {"job", jobId, "batch", batchId, "result"};
+            return invokeBulkV1GET(urlParts);
         }
     }
     
@@ -122,20 +122,20 @@ public class BulkV1Connection extends BulkConnection {
         if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
             return super.getQueryResultStream(jobId, batchId, resultId);
         } else {
-            String endpoint = getBulkEndpoint() + "job/" + jobId + "/batch/" + batchId + "/result" + "/" + resultId;
-            return invokeBulkV1GET(endpoint);
+            String[] urlParts = {"job", jobId, "batch", batchId, "result", resultId};
+            return invokeBulkV1GET(urlParts);
         }
     }
     
-    private String getBulkEndpoint() {
+    private InputStream invokeBulkV1GET(String[] urlParts) throws AsyncApiException {
         String endpoint = getConfig().getRestEndpoint();
         endpoint = endpoint.endsWith("/") ? endpoint : endpoint + "/";
-        return endpoint;
-    }
-    
-    private InputStream invokeBulkV1GET(String endpoint) throws AsyncApiException {
+        if (urlParts != null) {
+            for (String urlPart : urlParts) {
+                endpoint += urlPart + "/";
+            }
+        }
         try {
-            endpoint = endpoint.endsWith("/") ? endpoint : endpoint + "/";
             HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
             return transport.httpGet(endpoint);
 
