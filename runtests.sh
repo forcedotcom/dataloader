@@ -2,7 +2,7 @@
 
 usage() {
   echo "Usage: "
-  echo "$0 [-d] [-c] [-i][-t <test class name without the package prefix com.salesforce.dataloader e.g. dyna.DateConverterTest>] <test org URL> <test admin username> <test regular user username> <encrypted test password>"
+  echo "$0 [-d] [-D] [-c] [-i][-t <test class name without the package prefix com.salesforce.dataloader e.g. dyna.DateConverterTest>] <test org URL> <test admin username> <test regular user username> <encrypted test password>"
   echo "Listening on port 5005 for IDE to start the debugging session if -d is specified."
   echo "Run 'mvn clean package' before encrypting password if -c is specified."
   echo "Ignore test failures and continue test run if -i is specified."
@@ -24,16 +24,17 @@ encryptionFile=
 
 failfast="-Dsurefire.skipAfterFailureCount=5"
 
-while getopts ":dicv:t:f:" flag
+while getopts ":dDicv:t:f:" flag
 do
   case "${flag}" in
     c)
       doClean="Yes"
       ;;
     d)
-      debug="-Dmaven.surefire.debug"
-      debugEncryption="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=0.0.0.0:5005,suspend=y"
-      
+      debug="-Dmaven.surefire.debug=-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=0.0.0.0:5005"
+      ;;
+    D)
+     debugEncryption="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=0.0.0.0:5005,suspend=y"   
       ;;
     t)
       test="-Dskip-unit-tests=true -Dtest=com.salesforce.dataloader.${OPTARG}"
