@@ -74,6 +74,12 @@ public abstract class ConfigTestBase extends TestBase {
             prop.putConfigSetting(configBase);
         }
         configBase.put(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, TEST_CONF_DIR);
+        String proxyUsername = System.getProperty(Config.PROXY_USERNAME);
+        String proxyPassword = System.getProperty(Config.PROXY_PASSWORD);
+        if (proxyUsername != null && proxyPassword != null) {
+            configBase.put(Config.PROXY_USERNAME, proxyUsername);
+            configBase.put(Config.PROXY_PASSWORD, proxyPassword);
+        }
         return configBase;
     }
 
