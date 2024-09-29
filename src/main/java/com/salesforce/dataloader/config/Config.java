@@ -1625,6 +1625,7 @@ public class Config {
         }
         String envSpecificOAuthServerURL = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_SERVER);
         if (envSpecificOAuthServerURL != null
+                && !envSpecificOAuthServerURL.isBlank()
                 && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_SANDBOX)
                 && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_PROD)) {
             endpointURL = envSpecificOAuthServerURL;
