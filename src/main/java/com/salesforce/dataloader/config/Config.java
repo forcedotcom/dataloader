@@ -1635,6 +1635,7 @@ public class Config {
         String envSpecificOAuthRedirectURI = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_REDIRECTURI);
         String redirectURI = "";
         if (envSpecificOAuthRedirectURI != null
+                && !envSpecificOAuthRedirectURI.isBlank()
                 && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_SANDBOX)
                 && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_PROD)) {
             redirectURI = envSpecificOAuthRedirectURI;
