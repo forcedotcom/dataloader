@@ -30,6 +30,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.xml.parsers.FactoryConfigurationError;
 
 import org.apache.logging.log4j.LogManager;
@@ -38,6 +41,7 @@ import org.junit.Test;
 
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.exception.ConfigInitializationException;
+import com.salesforce.dataloader.util.AppUtil;
 
 public class ConfigTest extends ConfigTestBase {
     private static Logger logger = LogManager.getLogger(ConfigTest.class);
@@ -102,12 +106,11 @@ public class ConfigTest extends ConfigTestBase {
             Config config = Config.getInstance(getTestConfig());
             config.setOAuthEnvironment(Config.PROD_ENVIRONMENT_VAL);
             String configuredOAuthServer = config.getString(Config.OAUTH_SERVER);
-            String expectedOAuthServer = System.getProperty("test.endpoint");
+            String expectedOAuthServer = getProperty("test.endpoint");
             if (expectedOAuthServer == null || expectedOAuthServer.isBlank()) {
-                config = Config.getInstance(null);
-                expectedOAuthServer = "https://testendpoint";
                 logger.info("Expected prefix is " + expectedOAuthServer);
-                logger.info("Actual prefix is " + configuredOAuthServer);            }
+                logger.info("Actual prefix is " + configuredOAuthServer);
+            }
             assertTrue(configuredOAuthServer.startsWith(expectedOAuthServer));
             
             config.setOAuthEnvironment(Config.SB_ENVIRONMENT_VAL);
@@ -125,12 +128,12 @@ public class ConfigTest extends ConfigTestBase {
     @Test
     public void testProperty_OAUTH_REDIRECTURI() {
         try {
-            Config config = Config.getInstance(getTestConfig());
+            Map<String, String> testConfigMap = getTestConfig();
+            Config config = Config.getInstance(testConfigMap);
             config.setOAuthEnvironment(Config.PROD_ENVIRONMENT_VAL);
             String configuredOAuthRedirectURI = config.getString(Config.OAUTH_REDIRECTURI);
-            String expectedOAuthRedirectURIPrefix = System.getProperty("test.endpoint");
+            String expectedOAuthRedirectURIPrefix = getProperty("test.endpoint");
             if (expectedOAuthRedirectURIPrefix == null || expectedOAuthRedirectURIPrefix.isBlank()) {
-                expectedOAuthRedirectURIPrefix = "https://testendpoint";
                 logger.info("Expected prefix is " + expectedOAuthRedirectURIPrefix);
                 logger.info("Actual prefix is " + configuredOAuthRedirectURI);
             }
