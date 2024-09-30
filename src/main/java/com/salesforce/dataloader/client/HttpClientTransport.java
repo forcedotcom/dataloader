@@ -428,6 +428,12 @@ public class HttpClientTransport implements HttpTransportInterface {
             Config config = Config.getCurrentConfig();
             this.httpMethod.addHeader("client_id", config.getString(Config.OAUTH_CLIENTID));
         }
+        Header clientNameHeaderVal = this.httpMethod.getFirstHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER);
+        if (clientNameHeaderVal == null) {
+            this.httpMethod.addHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER,
+                    "client=" + ClientBase.getClientName(Config.getCurrentConfig()));      
+
+        }
     }
     public static void closeConnections() {
         if (currentHttpClient != null) {
