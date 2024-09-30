@@ -29,6 +29,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -52,6 +53,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 
+import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.async.AsyncApiException;
@@ -347,6 +349,14 @@ public class HttpClientTransport implements HttpTransportInterface {
                 this.httpMethod.addHeader(name, httpHeaders.get(name));
             }
         }
+        Map<String, String> connectorHeaders = currentConfig.getHeaders();
+        if (connectorHeaders != null) {
+            for (String name : connectorHeaders.keySet()) {
+                if (httpHeaders == null || !httpHeaders.containsKey(name)) {
+                    this.httpMethod.addHeader(name, connectorHeaders.get(name));
+                }
+            }
+        }
         setAuthAndClientHeadersForHttpMethod();
         if (requestInputStream != null) {
             ContentType contentType = ContentType.DEFAULT_TEXT;
@@ -412,6 +422,11 @@ public class HttpClientTransport implements HttpTransportInterface {
         Header userAgentHeaderVal = this.httpMethod.getFirstHeader(USER_AGENT_HEADER);
         if (userAgentHeaderVal == null) {
             this.httpMethod.addHeader(USER_AGENT_HEADER, VersionInfo.info());
+        }
+        Header clientIdHeaderVal = this.httpMethod.getFirstHeader("client_id");
+        if (clientIdHeaderVal == null) {
+            Config config = Config.getCurrentConfig();
+            this.httpMethod.addHeader("client_id", config.getString(Config.OAUTH_CLIENTID));
         }
     }
     public static void closeConnections() {
