@@ -283,8 +283,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 if (this.isDelete && (!first || !"id".equalsIgnoreCase(sfdcColumn)))
                     throw new LoadException(Messages.getMessage(getClass(), "deleteCsvError"));
                 addFieldToBatchRequestHeader(serverRequestOutput, sfdcColumn, cols, addedCols, first);
+                if (first) first = false;
             }
-            if (first) first = false;
         }
         
         // Handle constant field mappings in the field mapping file (.sdl)
