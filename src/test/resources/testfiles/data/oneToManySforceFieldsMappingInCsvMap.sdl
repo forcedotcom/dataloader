@@ -1,6 +1,6 @@
 #Mapping values
 #Mon May 16 17:24:40 PDT 2011
-Name=Name
+Name=Name,RICHTEXT__c
 NumEmployees = NumberOfEmployees
 "Aerospace"=Industry
 State=BillingState, ShippingState, Description
