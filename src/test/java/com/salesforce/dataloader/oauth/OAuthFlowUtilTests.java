@@ -97,7 +97,7 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
     @Test
     public void testValidResponseUrl(){
         try {
-            Boolean condition = OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN", config);
+            Boolean condition = OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=https://INSTANCEURL", config);
             Assert.assertTrue("OAuthToken should have handled this", condition);
 
         } catch (URISyntaxException e) {
@@ -108,7 +108,7 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
     @Test
     public void testValidResponseUrlSetsAccessToken(){
         try {
-            OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN", config);
+            OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=https://INSTANCEURL", config);
             String expected = "TOKEN";
             String actual = config.getString(Config.OAUTH_ACCESSTOKEN);
 
@@ -121,7 +121,7 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
     @Test
     public void testValidResponseUrlSetsRefreshToken(){
         try {
-            OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&refresh_token=REFRESHTOKEN", config);
+            OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&refresh_token=REFRESHTOKEN&instance_url=https://INSTANCEURL", config);
             String expected = "REFRESHTOKEN";
             String actual = config.getString(Config.OAUTH_REFRESHTOKEN);
 
@@ -134,8 +134,8 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
     @Test
     public void testValidResponseUrlSetsEndPoint(){
         try {
-            OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=INSTANCEURL", config);
-            String expected = "INSTANCEURL";
+            OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=https://INSTANCEURL", config);
+            String expected = "https://INSTANCEURL";
             String actual = config.getString(Config.OAUTH_INSTANCE_URL);
 
             Assert.assertEquals("Incorrect refresh token found in config", expected, actual);

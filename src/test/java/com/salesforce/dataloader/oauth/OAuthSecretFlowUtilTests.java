@@ -44,6 +44,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.*;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -69,7 +70,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
         existingEndPoint = config.getAuthEndpoint();
         oauthServer = "https://OAUTH_PARTIAL_SERVER";
         oauthClientId = "CLIENTID";
-        oauthRedirectUri = "REDIRECTURI";
+        oauthRedirectUri = "https://REDIRECTURI";
         mockSimplePost = mock(SimplePost.class);
 
         config.setValue(Config.AUTH_ENVIRONMENTS, "Testing");
@@ -92,7 +93,8 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
     @Test
     public void testGetStartUrl(){
         try {
-            String expected = "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?response_type=code&display=popup&client_id=CLIENTID&redirect_uri=REDIRECTURI";
+            String expected = "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?response_type=code&display=popup&client_id=CLIENTID"
+                    + "&" + "redirect_uri=" + URLEncoder.encode("https://REDIRECTURI",  StandardCharsets.UTF_8.name());
             String actual = OAuthSecretFlowUtil.getStartUrlImpl(config);
 
             Assert.assertEquals( "OAuth Token Flow returned the wrong url", expected, actual);
@@ -117,7 +119,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
     public void testValidInitialResponseUrl(){
         try {
             String expected = "TOKEN";
-            String actual = OAuthSecretFlowUtil.handleInitialUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?code=TOKEN");
+            String actual = OAuthSecretFlowUtil.handleInitialUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?code=TOKEN&instance_url=https://INSTANCEURL");
             Assert.assertEquals("OAuthToken should not have handled this", expected, actual);
 
         } catch (URISyntaxException e) {
@@ -134,6 +136,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
                     .create();
             OAuthToken token = new OAuthToken();
             token.setAccessToken("ACCESS");
+            token.setInstanceUrl("https://INSTANCEURL");
             String jsonToken = gson.toJson(token);
             InputStream input = new ByteArrayInputStream(jsonToken.getBytes(StandardCharsets.UTF_8));
             when(mockSimplePost.getInput()).thenAnswer(i -> input);
@@ -162,6 +165,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
                     .create();
             OAuthToken token = new OAuthToken();
             token.setRefreshToken("REFRESHTOKEN");
+            token.setInstanceUrl("https://INSTANCEURL");
             String jsonToken = gson.toJson(token);
             InputStream input = new ByteArrayInputStream(jsonToken.getBytes(StandardCharsets.UTF_8));
             when(mockSimplePost.getInput()).thenAnswer(i -> input);
