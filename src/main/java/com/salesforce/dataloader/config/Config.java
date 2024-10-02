@@ -1364,6 +1364,12 @@ public class Config {
         }
         putValue(name, sb.toString());
     }
+    
+    public static final String CLIENT_ID_HEADER_NAME="client_id";
+    
+    public String getClientIdNameValuePair() {
+        return CLIENT_ID_HEADER_NAME + "=" + this.getString(Config.OAUTH_CLIENTID);
+    }
 
     /**
      * Sets the name of the file used when loading and storing this config

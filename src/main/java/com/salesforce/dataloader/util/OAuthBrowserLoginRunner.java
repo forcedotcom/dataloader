@@ -99,7 +99,7 @@ public class OAuthBrowserLoginRunner {
         oAuthTokenURLStr = config.getString(Config.OAUTH_SERVER) + "/services/oauth2/token";
         SimplePost client = SimplePostFactory.getInstance(config, oAuthTokenURLStr,
                new BasicNameValuePair("response_type", "device_code"),
-               new BasicNameValuePair("client_id", config.getString(Config.OAUTH_CLIENTID)),
+               new BasicNameValuePair(Config.CLIENT_ID_HEADER_NAME, config.getString(Config.OAUTH_CLIENTID)),
                new BasicNameValuePair("scope", "api")
         );
         client.post();
@@ -201,7 +201,7 @@ public class OAuthBrowserLoginRunner {
                    elapsedTimeInSec += pollingIntervalInSec;
                    client = SimplePostFactory.getInstance(config, oAuthTokenURLStr,
                            new BasicNameValuePair("grant_type", "device"),
-                           new BasicNameValuePair("client_id", config.getString(Config.OAUTH_CLIENTID)),
+                           new BasicNameValuePair(Config.CLIENT_ID_HEADER_NAME, config.getString(Config.OAUTH_CLIENTID)),
                            new BasicNameValuePair("code", deviceCode)
                    );
                    try {
