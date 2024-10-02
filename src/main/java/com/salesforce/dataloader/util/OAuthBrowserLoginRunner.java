@@ -333,6 +333,7 @@ public class OAuthBrowserLoginRunner {
                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                .create();
        OAuthToken token = gson.fromJson(jsonTokenResult, OAuthToken.class);
+       config.setAuthEndpoint(token.getInstanceUrl());
        config.setValue(Config.OAUTH_ACCESSTOKEN, token.getAccessToken());
        config.setValue(Config.OAUTH_REFRESHTOKEN, token.getRefreshToken());
        config.setValue(Config.OAUTH_INSTANCE_URL, token.getInstanceUrl());
