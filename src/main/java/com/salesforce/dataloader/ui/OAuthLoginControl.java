@@ -44,7 +44,7 @@ public class OAuthLoginControl extends Composite {
     private LoginPage loginPage;
     protected final Combo environment;
     protected final AuthenticationRunner authRunner;
-    protected final Label loginLabel;
+    protected final Label loginStatusLabel;
 
     public OAuthLoginControl(Composite parent, int style, LoginPage loginPage, AuthenticationRunner authRunner) {
         super(parent, style);
@@ -69,7 +69,7 @@ public class OAuthLoginControl extends Composite {
         loginButton.addListener(SWT.Selection, this::loginButton_Clicked);
         grid.createPadding(2);
         
-        loginLabel = grid.createLabel(10, "");
+        loginStatusLabel = grid.createLeftLabel(10, "\n\n\n");
     }
 
     protected void loginButton_Clicked(Event event) {
@@ -81,7 +81,7 @@ public class OAuthLoginControl extends Composite {
         if (this.loginPage.controller.isLoggedIn()) {
             loginButton.setEnabled(false);
         }
-        loginLabel.setText(statusStr);
+        loginStatusLabel.setText(statusStr);
         loginPage.setPageComplete();
     }
 }

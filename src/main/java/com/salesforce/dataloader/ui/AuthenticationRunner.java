@@ -93,7 +93,7 @@ public class AuthenticationRunner {
                 if (config.getBoolean(Config.OAUTH_LOGIN_FROM_BROWSER)) {
                     OAuthLoginFromBrowserFlow flow = new OAuthLoginFromBrowserFlow(shell, config);
                     if (!flow.open()) {
-                        String message = Labels.getString("LoginPage.invalidLogin");
+                        String message = Labels.getString("LoginPage.invalidLoginOAuthBrowser");
                         authStatusChangeConsumer.accept(message);
                         return;
                     }
@@ -101,7 +101,7 @@ public class AuthenticationRunner {
                     boolean hasSecret = !config.getString(Config.OAUTH_CLIENTSECRET).trim().equals("");
                     OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, config) : new OAuthTokenFlow(shell, config);
                     if (!flow.open()) {
-                       String message = Labels.getString("LoginPage.invalidLogin");
+                       String message = Labels.getString("LoginPage.invalidLoginOAuth");
                         if (flow.getStatusCode() == DefaultSimplePost.PROXY_AUTHENTICATION_REQUIRED) {
                             message = Labels.getFormattedString("LoginPage.proxyError", flow.getReasonPhrase());
                         }
@@ -115,10 +115,13 @@ public class AuthenticationRunner {
                         return;
                     }
                 }
-            }
-            
-            // Either OAuth login is successful or 
-            // need to perform username and password or session token based auth
+            }            
+        } catch (Throwable e) {
+            handleError(e, e.getMessage());
+        }
+        // Either OAuth login is successful or 
+        // need to perform username and password or session token based auth
+        try {
             if (controller.login() && controller.getEntityDescribes() != null) {
                 controller.saveConfig();
                 controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession();
@@ -138,15 +141,17 @@ public class AuthenticationRunner {
                 }
                 authStatusChangeConsumer.accept(Labels.getString("LoginPage.loginSuccessful"));
             } else {
-                authStatusChangeConsumer.accept(Labels.getString("LoginPage.invalidLogin"));
+                authStatusChangeConsumer.accept(Labels.getString("LoginPage.invalidLoginUsernamePassword"));
             }
         } catch (LoginFault lf) {
-            handleError(lf, null);
+            handleError(lf, Labels.getString("LoginPage.invalidLoginUsernamePassword"));
         } catch (UnexpectedErrorFault e) {
             handleError(e, e.getExceptionMessage());
-        } catch (Throwable e) {
+        } catch (ConnectionException e) {
+            // TODO Auto-generated catch block
             handleError(e, e.getMessage());
-        }
+        } 
+
     }
         
     private String getSoqlResultsAsString(String prefix, String soql, PartnerConnection conn) throws ConnectionException {

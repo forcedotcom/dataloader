@@ -49,7 +49,7 @@ public class UsernamePasswordLoginControl extends Composite {
     private final Text userName;
     private final Text password;
     private final AuthenticationRunner authRunner;
-    private final Label loginLabel;
+    private final Label loginStatusLabel;
     private final Text sessionId;
     private final boolean authUsingSessionId;
     private final LoginPage loginPage;
@@ -107,8 +107,8 @@ public class UsernamePasswordLoginControl extends Composite {
                 public void keyReleased(KeyEvent e){}
                 @Override
                 public void keyPressed(KeyEvent e) {
-                    if (!"".equals(loginLabel.getText())) {
-                        loginLabel.setText(""); // clear the login status text
+                    if (!"".equals(loginStatusLabel.getText())) {
+                        loginStatusLabel.setText(""); // clear the login status text
                     }
                     if (e.character == '\r') {
                         attempt_login();
@@ -147,15 +147,15 @@ public class UsernamePasswordLoginControl extends Composite {
         data.widthHint = Math.max(widthHint, minSize.x);
         loginButton.setLayoutData(data);
         
-        loginLabel = new Label(this, SWT.LEFT | SWT.WRAP);
-        loginLabel.setText("");
+        loginStatusLabel = new Label(this, SWT.LEFT | SWT.WRAP);
+        loginStatusLabel.setText("");
         data = new GridData(GridData.FILL_BOTH);
         data.horizontalSpan = 2;
-        GC gc = new GC(loginLabel);
+        GC gc = new GC(loginStatusLabel);
         Point TEXT_SIZE = gc.textExtent("A");
         gc.dispose();
         data.heightHint = TEXT_SIZE.y * 3;
-        loginLabel.setLayoutData(data);
+        loginStatusLabel.setLayoutData(data);
     }
 
     private void loginButton_Clicked(Event event) {
@@ -180,7 +180,7 @@ public class UsernamePasswordLoginControl extends Composite {
         if (this.loginPage.controller.isLoggedIn()) {
             loginButton.setEnabled(false);
         }
-        loginLabel.setText(statusStr);
+        loginStatusLabel.setText(statusStr);
         this.loginPage.setPageComplete();
     }
 }
