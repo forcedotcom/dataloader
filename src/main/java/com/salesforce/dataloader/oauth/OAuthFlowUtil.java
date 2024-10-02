@@ -45,9 +45,12 @@ import com.salesforce.dataloader.model.OAuthToken;
 public class OAuthFlowUtil {
     public static String getStartUrlImpl(Config config) throws UnsupportedEncodingException {
         return config.getString(Config.OAUTH_SERVER) +
-                "/services/oauth2/authorize?response_type=token&display=popup&client_id=" +
-                config.getString(Config.OAUTH_CLIENTID) + "&redirect_uri=" +
-                URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
+                "/services/oauth2/authorize"
+                + "?response_type=token"
+                + "&display=popup"
+                + "&" + config.getClientIdNameValuePair() 
+                + "&redirect_uri="
+                + URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
     }
     
 

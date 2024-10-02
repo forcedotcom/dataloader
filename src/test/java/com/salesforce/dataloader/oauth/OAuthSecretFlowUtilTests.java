@@ -93,7 +93,11 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
     @Test
     public void testGetStartUrl(){
         try {
-            String expected = "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?response_type=code&display=popup&client_id=CLIENTID"
+            config.setValue(Config.OAUTH_CLIENTID, "CLIENTID");
+            String expected = "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize"
+                    + "?response_type=code"
+                    + "&display=popup"
+                    + "&" + config.getClientIdNameValuePair()
                     + "&" + "redirect_uri=" + URLEncoder.encode("https://REDIRECTURI",  StandardCharsets.UTF_8.name());
             String actual = OAuthSecretFlowUtil.getStartUrlImpl(config);
 

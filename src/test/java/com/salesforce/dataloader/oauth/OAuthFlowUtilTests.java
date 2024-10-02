@@ -74,7 +74,12 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
     @Test
     public void testGetStartUrl(){
         try {
-            String expected = "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?response_type=token&display=popup&client_id=CLIENTID&redirect_uri=REDIRECTURI";
+            config.setValue(Config.OAUTH_CLIENTID, "CLIENTID");
+            String expected = "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize"
+                    + "?response_type=token"
+                    + "&display=popup"
+                    + "&" + config.getClientIdNameValuePair()
+                    + "&redirect_uri=REDIRECTURI";
             String actual = OAuthFlowUtil.getStartUrlImpl(config);
 
             Assert.assertEquals( "OAuth Token Flow returned the wrong url", expected, actual);

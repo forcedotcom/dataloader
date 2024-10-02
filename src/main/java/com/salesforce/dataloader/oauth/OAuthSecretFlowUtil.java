@@ -48,9 +48,12 @@ import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
 public class OAuthSecretFlowUtil {
     public static String getStartUrlImpl(Config config) throws UnsupportedEncodingException {
         return config.getString(Config.OAUTH_SERVER) +
-                "/services/oauth2/authorize?response_type=code&display=popup&client_id=" +
-                config.getString(Config.OAUTH_CLIENTID) + "&redirect_uri=" +
-                URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
+                "/services/oauth2/authorize"
+                + "?response_type=code"
+                + "&display=popup"
+                + "&" + config.getClientIdNameValuePair()
+                + "&redirect_uri="
+                + URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
     }
 
     public static SimplePost handleSecondPost(String code, Config config) throws IOException, ParameterLoadException {
@@ -58,7 +61,7 @@ public class OAuthSecretFlowUtil {
         SimplePost client = SimplePostFactory.getInstance(config, server,
                 new BasicNameValuePair("grant_type", "authorization_code"),
                 new BasicNameValuePair("code", code),
-                new BasicNameValuePair("client_id", config.getString(Config.OAUTH_CLIENTID)),
+                new BasicNameValuePair(Config.CLIENT_ID_HEADER_NAME, config.getString(Config.OAUTH_CLIENTID)),
                 new BasicNameValuePair("client_secret", config.getString(Config.OAUTH_CLIENTSECRET)),
                 new BasicNameValuePair("redirect_uri", config.getString(Config.OAUTH_REDIRECTURI))
         );
