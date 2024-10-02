@@ -80,6 +80,10 @@ public class Grid12 {
         return createLabel(columns, message, SWT.RIGHT | SWT.WRAP);
     }
 
+    public Label createLeftLabel(int columns, String message) {
+        return createLabel(columns, message, SWT.LEFT | SWT.WRAP);
+    }
+    
     public Label createLabel(int columns, String message, int style) {
         Label label = new Label(composite, style);
         label.setText(message);
