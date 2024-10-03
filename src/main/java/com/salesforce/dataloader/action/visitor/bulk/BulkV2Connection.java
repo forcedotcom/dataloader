@@ -284,7 +284,7 @@ public class BulkV2Connection extends BulkConnection {
         HashMap<String, String> headers = getHeaders(CSV_CONTENT_TYPE, JSON_CONTENT_TYPE);
         try {
         	HttpTransportInterface transport = (HttpTransportInterface)getConfig().createTransport();
-            transport.connect(urlString, headers, true, HttpTransportInterface.SupportedHttpMethodType.PUT, bulkUploadStream, CSV_CONTENT_TYPE);
+            transport.connect(urlString, headers, false, HttpTransportInterface.SupportedHttpMethodType.PUT, bulkUploadStream, CSV_CONTENT_TYPE);
 
             // Following is needed to actually send the request to the server
             InputStream serverResponseStream = transport.getContent();
