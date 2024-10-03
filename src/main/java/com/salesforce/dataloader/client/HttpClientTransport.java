@@ -28,6 +28,7 @@ package com.salesforce.dataloader.client;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -38,6 +39,7 @@ import org.apache.http.*;
 import org.apache.http.auth.*;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -66,6 +68,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -327,6 +330,44 @@ public class HttpClientTransport implements HttpTransportInterface {
                                     SupportedHttpMethodType httpMethodType,
                                     InputStream requestInputStream, 
                                     String contentTypeStr) throws IOException {
+        configureHttpMethod(endpoint, httpHeaders, enableCompression, httpMethodType,
+                requestInputStream, contentTypeStr);
+        if (requestInputStream != null) {
+            // Request content is in an input stream. 
+            // Caller won't be using an output stream to write request content to.
+            return null;
+        }
+        entityByteOut = new ByteArrayOutputStream();
+        output = entityByteOut;
+
+        if (currentConfig.getMaxRequestSize() > 0) {
+            output = new LimitingOutputStream(currentConfig.getMaxRequestSize(), output);
+        }
+
+        if (enableCompression && currentConfig.isCompression()) {
+            output = new GZIPOutputStream(output);
+        }
+
+        if (currentConfig.isTraceMessage()) {
+            output = currentConfig.teeOutputStream(output);
+        }
+
+        if (currentConfig.hasMessageHandlers()) {
+            URL url = new URL(endpoint);
+            output = new MessageHandlerOutputStream(currentConfig, url, output);
+        }
+
+        return output;
+    }
+    
+    private void configureHttpMethod(
+            String endpoint,
+            HashMap<String, String> httpHeaders, 
+            boolean enableCompression,
+            SupportedHttpMethodType httpMethodType,
+            InputStream requestInputStream, 
+            String contentTypeStr
+            ) throws IOException {
         initializeHttpClient();
         switch (httpMethodType) {
             case GET :
@@ -358,7 +399,12 @@ public class HttpClientTransport implements HttpTransportInterface {
             }
         }
         setAuthAndClientHeadersForHttpMethod();
+        if (enableCompression && currentConfig.isCompression()) {
+            this.httpMethod.addHeader("Content-Encoding", "gzip");
+            this.httpMethod.addHeader("Accept-Encoding", "gzip");
+        }
         if (requestInputStream != null) {
+            // caller has pre-specified input stream
             ContentType contentType = ContentType.DEFAULT_TEXT;
             if (contentTypeStr != null) {
                 contentType = ContentType.create(contentTypeStr);
@@ -368,35 +414,21 @@ public class HttpClientTransport implements HttpTransportInterface {
             if (this.httpMethod instanceof HttpEntityEnclosingRequestBase) {
                 ((HttpEntityEnclosingRequestBase)this.httpMethod).setEntity(entity);
             }
-            return null;
         }
-
-        if (enableCompression && currentConfig.isCompression()) {
-            this.httpMethod.addHeader("Content-Encoding", "gzip");
-            this.httpMethod.addHeader("Accept-Encoding", "gzip");
+    }
+    
+    public InputStream simplePost(
+            String endpoint,
+            HashMap<String, String> httpHeaders, 
+            BasicNameValuePair[] inputs) throws IOException {
+        configureHttpMethod(endpoint, httpHeaders,
+                false, SupportedHttpMethodType.POST, null, null);
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(Arrays.asList(inputs));
+        if (this.httpMethod instanceof HttpPost) {
+            ((HttpPost)this.httpMethod).setEntity(entity);
+            return this.getContent();
         }
-
-        entityByteOut = new ByteArrayOutputStream();
-        output = entityByteOut;
-
-        if (currentConfig.getMaxRequestSize() > 0) {
-            output = new LimitingOutputStream(currentConfig.getMaxRequestSize(), output);
-        }
-
-        if (enableCompression && currentConfig.isCompression()) {
-            output = new GZIPOutputStream(output);
-        }
-
-        if (currentConfig.isTraceMessage()) {
-            output = currentConfig.teeOutputStream(output);
-        }
-
-        if (currentConfig.hasMessageHandlers()) {
-            URL url = new URL(endpoint);
-            output = new MessageHandlerOutputStream(currentConfig, url, output);
-        }
-
-        return output;
+        return null;
     }
     
     private void setAuthAndClientHeadersForHttpMethod() {
