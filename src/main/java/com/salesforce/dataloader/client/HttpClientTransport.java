@@ -423,10 +423,10 @@ public class HttpClientTransport implements HttpTransportInterface {
         if (userAgentHeaderVal == null) {
             this.httpMethod.addHeader(USER_AGENT_HEADER, VersionInfo.info());
         }
-        Header clientIdHeaderVal = this.httpMethod.getFirstHeader("client_id");
+        Header clientIdHeaderVal = this.httpMethod.getFirstHeader(Config.CLIENT_ID_HEADER_NAME);
         if (clientIdHeaderVal == null) {
             Config config = Config.getCurrentConfig();
-            this.httpMethod.addHeader("client_id", config.getString(Config.OAUTH_CLIENTID));
+            this.httpMethod.addHeader(Config.CLIENT_ID_HEADER_NAME, config.getString(Config.OAUTH_CLIENTID));
         }
         Header clientNameHeaderVal = this.httpMethod.getFirstHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER);
         if (clientNameHeaderVal == null) {
