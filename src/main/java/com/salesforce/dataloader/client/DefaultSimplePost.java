@@ -71,7 +71,8 @@ public class DefaultSimplePost implements SimplePost {
     public void post() throws IOException, ParameterLoadException {
         ConnectorConfig connConfig = new ConnectorConfig();
         AppUtil.setConnectorConfigProxySettings(config, connConfig);
-        HttpClientTransport clientTransport = new HttpClientTransport(connConfig);
+        HttpClientTransport clientTransport = HttpClientTransport.getInstance();
+        clientTransport.setConfig(connConfig);
         this.input = clientTransport.simplePost(endpoint, null, pairs);
         successful = clientTransport.isSuccessful();
     }
