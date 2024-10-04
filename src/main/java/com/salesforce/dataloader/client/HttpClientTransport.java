@@ -26,6 +26,8 @@
 package com.salesforce.dataloader.client;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -98,17 +100,25 @@ public class HttpClientTransport implements HttpTransportInterface {
     private static long serverInvocationCount = 0;
     private static Logger logger = LogManager.getLogger(HttpClientTransport.class);
     private HttpResponse httpResponse;
+    private static HttpClientTransport singletonTransportInstance = new HttpClientTransport();
     
-    public HttpClientTransport() {
-    }
-
-    public HttpClientTransport(ConnectorConfig newConfig) {
-        setConfig(newConfig);
+    private HttpClientTransport() {
+        singletonTransportInstance = this;
     }
 
     @Override
     public synchronized void setConfig(ConnectorConfig newConfig) {
-        if (!areEquivalentConfigs(currentConfig, newConfig) && currentHttpClient != null) {
+        if (areEquivalentConfigs(currentConfig, newConfig)) {
+            if (currentConfig != null && currentHttpClient == null) {
+                try {
+                    initializeHttpClient();
+                } catch (UnknownHostException e) {
+                    logger.error("Unable to initialize HttpClient " + e.getMessage());
+                }
+            }
+            return;
+        }
+        if (currentHttpClient != null) {
             try {
                 currentHttpClient.close();
             } catch (IOException ex) {
@@ -117,26 +127,30 @@ public class HttpClientTransport implements HttpTransportInterface {
             currentHttpClient = null;
         }
         currentConfig = newConfig;
+        if (currentConfig != null) {
+            try {
+                initializeHttpClient();
+            } catch (UnknownHostException e) {
+                logger.error("Unable to initialize HttpClient " + e.getMessage());
+            }
+        }
     }
-        
+
     private boolean areEquivalentConfigs(ConnectorConfig config1, ConnectorConfig config2) {
         if (config1 == config2) {
             return true;
         } else if (config1 == null || config2 == null) {
             // one of the configs is null, other isn't. They can't be equal.
             return false;
-        } else if (config1.equals(config2)) {
-            return true;
         }
         
-        InetSocketAddress socketAddress1 = (InetSocketAddress)config1.getProxy().address();
-        InetSocketAddress socketAddress2 = (InetSocketAddress)config2.getProxy().address();
+        InetSocketAddress proxy1Address = (InetSocketAddress)config1.getProxy().address();
+        InetSocketAddress proxy2Address = (InetSocketAddress)config2.getProxy().address();
 
-        if (socketAddress1 == null && socketAddress2 == null) {
-            return true;
-        } else if (socketAddress1 == null || socketAddress2 == null) {
+        if ((proxy1Address == null && proxy2Address != null)
+            || (proxy1Address != null && proxy2Address == null)) {
             return false;
-        } else {
+        } else if (proxy1Address != null && proxy2Address != null) {
             String field1, field2;
             field1 = config1.getProxyUsername() == null ? "" : config1.getProxyUsername();
             field2 = config2.getProxyUsername() == null ? "" : config2.getProxyUsername();      
@@ -156,28 +170,42 @@ public class HttpClientTransport implements HttpTransportInterface {
                 return false;
             }
     
-            field1 = socketAddress1.getHostName() == null ? "" : socketAddress1.getHostName();
-            field2 = socketAddress2.getHostName() == null ? "" : socketAddress2.getHostName();
+            field1 = proxy1Address.getHostName() == null ? "" : proxy1Address.getHostName();
+            field2 = proxy2Address.getHostName() == null ? "" : proxy2Address.getHostName();
             if (field1.compareTo(field2) != 0) {
                 return false;
             }
             
-            int intField1 = socketAddress1.getPort();
-            int intField2 = socketAddress2.getPort();
+            int intField1 = proxy1Address.getPort();
+            int intField2 = proxy2Address.getPort();
             if (intField1 != intField2) {
                 return false;
             }
         }
+        Method[] configMethods = ConnectorConfig.class.getMethods();
+        for (Method configMethod : configMethods) {
+            if (configMethod.getName().startsWith("get")
+                    && configMethod.getParameterCount() == 0
+                    && configMethod.getReturnType() == String.class) {
+                try {
+                    String field1 = (String) configMethod.invoke(config1);
+                    String field2 = (String) configMethod.invoke(config2);
+                    if (field1 != field2) {
+                        return false;
+                    }
+                    if (field1 != null && field2 != null && !field1.equalsIgnoreCase(field2)) {
+                        return false;
+                    }
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    logger.warn("unable to compare field " + configMethod.getName() + " in ConnectorConfig");
+                }
+            }
+        }
+        
         return true;
     }
-    
-    private boolean isHttpClientInitialized = false;
-    
+        
     private synchronized void initializeHttpClient() throws UnknownHostException {
-        if (isHttpClientInitialized) {
-            // already initialized.
-            return;
-        }
         closeConnections();
         httpMethod = null;
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create().useSystemProperties();
@@ -211,13 +239,11 @@ public class HttpClientTransport implements HttpTransportInterface {
         if (currentHttpClient == null) {
             currentHttpClient = httpClientBuilder.build();
         }
-        isHttpClientInitialized = true;
     }
 
     @Override
     public synchronized InputStream getContent() throws IOException {
         serverInvocationCount++;
-        initializeHttpClient();
         if (this.httpMethod instanceof HttpEntityEnclosingRequestBase
             && ((HttpEntityEnclosingRequestBase)this.httpMethod).getEntity() == null) {
             byte[] entityBytes = entityByteOut.toByteArray();
@@ -262,7 +288,7 @@ public class HttpClientTransport implements HttpTransportInterface {
                 }
             }
         } finally {
-            if (isReuseConnection()) {
+            if (!isReuseConnection()) {
                 closeConnections();
             }
         }
@@ -368,7 +394,6 @@ public class HttpClientTransport implements HttpTransportInterface {
             InputStream requestInputStream, 
             String contentTypeStr
             ) throws IOException {
-        initializeHttpClient();
         switch (httpMethodType) {
             case GET :
                 this.httpMethod = new HttpGet(endpoint);
@@ -488,9 +513,12 @@ public class HttpClientTransport implements HttpTransportInterface {
     
     public InputStream httpGet(String urlStr) throws IOException, AsyncApiException, HttpClientTransportException {
         InputStream in = null;
-        initializeHttpClient();
         connect(urlStr, null, false, SupportedHttpMethodType.GET, null, null);
         in = getContent();
         return in;
+    }
+    
+    public static HttpClientTransport getInstance() {
+        return singletonTransportInstance;
     }
 }

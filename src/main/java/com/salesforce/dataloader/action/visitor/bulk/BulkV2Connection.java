@@ -151,6 +151,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.ClientBase;
+import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
@@ -283,15 +284,16 @@ public class BulkV2Connection extends BulkConnection {
         String urlString = constructRequestURL(jobId) + "batches/";
         HashMap<String, String> headers = getHeaders(CSV_CONTENT_TYPE, JSON_CONTENT_TYPE);
         try {
-        	HttpTransportInterface transport = (HttpTransportInterface)getConfig().createTransport();
-            transport.connect(urlString, headers, false, HttpTransportInterface.SupportedHttpMethodType.PUT, bulkUploadStream, CSV_CONTENT_TYPE);
+        	HttpClientTransport clientTransport = HttpClientTransport.getInstance();
+        	clientTransport.setConfig(getConfig());
+        	clientTransport.connect(urlString, headers, false, HttpTransportInterface.SupportedHttpMethodType.PUT, bulkUploadStream, CSV_CONTENT_TYPE);
 
             // Following is needed to actually send the request to the server
-            InputStream serverResponseStream = transport.getContent();
-            if (!transport.isSuccessful()) {
+            InputStream serverResponseStream = clientTransport.getContent();
+            if (!clientTransport.isSuccessful()) {
 	            parseAndThrowException(serverResponseStream, ContentType.JSON);
             }
-        }catch (IOException | ConnectionException e) {
+        }catch (IOException e) {
             throw new AsyncApiException("Failed to upload to server for job " + jobId, AsyncExceptionCode.ClientInputError, e);
         }
         
@@ -411,7 +413,8 @@ public class BulkV2Connection extends BulkConnection {
 		try {
 	        InputStream in = null;
 	        boolean successfulRequest = true;
-            HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
+            HttpClientTransport transport = HttpClientTransport.getInstance();
+            transport.setConfig(getConfig());
 	        if (requestMethod == HttpMethod.GET) {
 	        	if (requestBodyMap != null && !requestBodyMap.isEmpty()) {
 	        		Set<String> paramNameSet = requestBodyMap.keySet();
@@ -525,7 +528,8 @@ public class BulkV2Connection extends BulkConnection {
     private InputStream doGetQueryResultStream(URL resultsURL, HashMap<String, String> headers) throws IOException, AsyncApiException, ConnectionException {
         InputStream is = null;
         try {
-            HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
+            HttpClientTransport transport = HttpClientTransport.getInstance();
+            transport.setConfig(getConfig());
             is = transport.httpGet(resultsURL.toString());
             HttpResponse httpResponse = transport.getHttpResponse();
             if (httpResponse != null) {
@@ -555,9 +559,10 @@ public class BulkV2Connection extends BulkConnection {
         String resultsURLString = constructRequestURL(jobId) + resultsType;
         InputStream is = null;
         try {
-            HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
+            HttpClientTransport transport = HttpClientTransport.getInstance();
+            transport.setConfig(getConfig());
             is = transport.httpGet(resultsURLString);
-        } catch (IOException | ConnectionException e) {
+        } catch (IOException e) {
             throw new AsyncApiException("Failed to get " + resultsType + " for job id " + jobId, AsyncExceptionCode.ClientInputError, e);
         } catch (HttpClientTransportException e) {
             parseAndThrowException(e);

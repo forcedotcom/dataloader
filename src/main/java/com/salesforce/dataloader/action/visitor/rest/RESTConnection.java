@@ -110,8 +110,9 @@ public class RESTConnection {
                 logger.error(message);
                 throw new ConnectionException(message);
             }
-            HttpClientTransport transport = new HttpClientTransport(this.connectorConfig);
-    
+            HttpClientTransport transport = HttpClientTransport.getInstance();
+            transport.setConfig(connectorConfig);
+            
             // assume update operation by default and set http method value to PATCH
             HttpTransportInterface.SupportedHttpMethodType httpMethod = HttpTransportInterface.SupportedHttpMethodType.PATCH;
             if (action == ACTION_ENUM.DELETE) {

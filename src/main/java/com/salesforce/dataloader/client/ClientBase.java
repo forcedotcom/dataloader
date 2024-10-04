@@ -113,7 +113,7 @@ public abstract class ClientBase<ConnectionType> {
 
     public ConnectorConfig getConnectorConfig() {
         ConnectorConfig cc = new ConnectorConfig();
-        cc.setTransport(HttpClientTransport.class);
+        cc.setTransportFactory(new TransportFactoryImpl());
         cc.setSessionId(getSessionId());
         cc.setRequestHeader(SFORCE_CALL_OPTIONS_HEADER,
                 "client=" + ClientBase.getClientName(this.config));      

@@ -28,6 +28,7 @@ package com.salesforce.dataloader.action.visitor;
 
 import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
+import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.config.Messages;
@@ -206,7 +207,8 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
                     + "/"
                     + refId;
             
-            HttpTransportInterface transport = (HttpTransportInterface) controller.getClient().getConnectorConfig().createTransport();
+            HttpClientTransport transport = HttpClientTransport.getInstance();
+            transport.setConfig(controller.getClient().getConnectorConfig());
             InputStream is = transport.httpGet(urlStr);
             byte[] binaryResponse = is.readAllBytes();
             return Base64.getEncoder().encodeToString(binaryResponse);

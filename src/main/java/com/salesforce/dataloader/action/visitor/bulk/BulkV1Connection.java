@@ -35,6 +35,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.ClientBase;
+import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
@@ -136,10 +137,10 @@ public class BulkV1Connection extends BulkConnection {
             }
         }
         try {
-            HttpTransportInterface transport = (HttpTransportInterface) getConfig().createTransport();
+            HttpTransportInterface transport = HttpClientTransport.getInstance();
+            transport.setConfig(getConfig());
             return transport.httpGet(endpoint);
-
-        } catch (IOException | HttpClientTransportException | ConnectionException e) {
+        } catch (IOException | HttpClientTransportException e) {
             logger.error(e.getMessage());
             throw new AsyncApiException("Failed to get result ", AsyncExceptionCode.ClientInputError, e);
         }
