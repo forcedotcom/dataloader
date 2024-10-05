@@ -26,8 +26,6 @@
 package com.salesforce.dataloader.client;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -90,35 +88,21 @@ public class HttpClientTransport implements HttpTransportInterface {
     private static final String AUTH_HEADER_FOR_XML = "X-SFDC-Session";
     private static final String USER_AGENT_HEADER = "User-Agent";
 
-    private static ConnectorConfig currentConfig = null;
+    private static ConnectorConfig currentConnectorConfig = null;
     private boolean successful;
     private HttpRequestBase httpMethod = null;
     private OutputStream output;
     private ByteArrayOutputStream entityByteOut;
     private static CloseableHttpClient currentHttpClient = null;
-    private static boolean reuseConnection = true;
     private static long serverInvocationCount = 0;
     private static Logger logger = LogManager.getLogger(HttpClientTransport.class);
     private HttpResponse httpResponse;
-    private static HttpClientTransport singletonTransportInstance = new HttpClientTransport();
-    
-    private HttpClientTransport() {
-        singletonTransportInstance = this;
-    }
+    private static final HttpClientTransport singletonTransportInstance = new HttpClientTransport();
 
     @Override
     public synchronized void setConfig(ConnectorConfig newConfig) {
-        if (areEquivalentConfigs(currentConfig, newConfig)) {
-            if (currentConfig != null && currentHttpClient == null) {
-                try {
-                    initializeHttpClient();
-                } catch (UnknownHostException e) {
-                    logger.error("Unable to initialize HttpClient " + e.getMessage());
-                }
-            }
-            return;
-        }
-        if (currentHttpClient != null) {
+        if (!canReuseHttpClient(currentConnectorConfig, newConfig)
+                && currentHttpClient != null) {
             try {
                 currentHttpClient.close();
             } catch (IOException ex) {
@@ -126,8 +110,8 @@ public class HttpClientTransport implements HttpTransportInterface {
             }
             currentHttpClient = null;
         }
-        currentConfig = newConfig;
-        if (currentConfig != null) {
+        currentConnectorConfig = newConfig;
+        if (currentConnectorConfig != null && currentHttpClient == null) {
             try {
                 initializeHttpClient();
             } catch (UnknownHostException e) {
@@ -136,7 +120,10 @@ public class HttpClientTransport implements HttpTransportInterface {
         }
     }
 
-    private boolean areEquivalentConfigs(ConnectorConfig config1, ConnectorConfig config2) {
+    private boolean canReuseHttpClient(ConnectorConfig config1, ConnectorConfig config2) {
+        if (!isReuseHttpClient()) {
+            return false;
+        }
         if (config1 == config2) {
             return true;
         } else if (config1 == null || config2 == null) {
@@ -182,41 +169,21 @@ public class HttpClientTransport implements HttpTransportInterface {
                 return false;
             }
         }
-        Method[] configMethods = ConnectorConfig.class.getMethods();
-        for (Method configMethod : configMethods) {
-            if (configMethod.getName().startsWith("get")
-                    && configMethod.getParameterCount() == 0
-                    && configMethod.getReturnType() == String.class) {
-                try {
-                    String field1 = (String) configMethod.invoke(config1);
-                    String field2 = (String) configMethod.invoke(config2);
-                    if (field1 != field2) {
-                        return false;
-                    }
-                    if (field1 != null && field2 != null && !field1.equalsIgnoreCase(field2)) {
-                        return false;
-                    }
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    logger.warn("unable to compare field " + configMethod.getName() + " in ConnectorConfig");
-                }
-            }
-        }
-        
         return true;
     }
         
     private synchronized void initializeHttpClient() throws UnknownHostException {
-        closeConnections();
+        closeHttpClient();
         httpMethod = null;
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create().useSystemProperties();
         
-        if (currentConfig != null
-                && currentConfig.getProxy() != null
-                && currentConfig.getProxy().address() != null) {
-            String proxyUser = currentConfig.getProxyUsername() == null ? "" : currentConfig.getProxyUsername();
-            String proxyPassword = currentConfig.getProxyPassword() == null ? "" : currentConfig.getProxyPassword();
+        if (currentConnectorConfig != null
+                && currentConnectorConfig.getProxy() != null
+                && currentConnectorConfig.getProxy().address() != null) {
+            String proxyUser = currentConnectorConfig.getProxyUsername() == null ? "" : currentConnectorConfig.getProxyUsername();
+            String proxyPassword = currentConnectorConfig.getProxyPassword() == null ? "" : currentConnectorConfig.getProxyPassword();
 
-            InetSocketAddress proxyAddress = (InetSocketAddress) currentConfig.getProxy().address();
+            InetSocketAddress proxyAddress = (InetSocketAddress) currentConnectorConfig.getProxy().address();
             HttpHost proxyHost = new HttpHost(proxyAddress.getHostName(), proxyAddress.getPort(), "http");
             httpClientBuilder.setProxy(proxyHost);
 
@@ -226,7 +193,7 @@ public class HttpClientTransport implements HttpTransportInterface {
             Credentials credentials;
             if (AppUtil.getOSType() == AppUtil.OSType.WINDOWS) {
                 String computerName = InetAddress.getLocalHost().getCanonicalHostName();
-                credentials = new NTCredentials(proxyUser, proxyPassword, computerName, currentConfig.getNtlmDomain());
+                credentials = new NTCredentials(proxyUser, proxyPassword, computerName, currentConnectorConfig.getNtlmDomain());
             } else {
                 credentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
             }
@@ -248,48 +215,42 @@ public class HttpClientTransport implements HttpTransportInterface {
             && ((HttpEntityEnclosingRequestBase)this.httpMethod).getEntity() == null) {
             byte[] entityBytes = entityByteOut.toByteArray();
             HttpEntity entity = new ByteArrayEntity(entityBytes);
-            currentConfig.setUseChunkedPost(false);
+            currentConnectorConfig.setUseChunkedPost(false);
             ((HttpEntityEnclosingRequestBase)this.httpMethod).setEntity(entity);
         }
         InputStream input = new ByteArrayInputStream(new byte[1]);
-        try {
-            HttpClientContext context = HttpClientContext.create();
-            RequestConfig config = RequestConfig.custom().setExpectContinueEnabled(currentConfig.useChunkedPost()).build();
-            context.setRequestConfig(config);
-    
-            if (currentConfig.getNtlmDomain() != null && !currentConfig.getNtlmDomain().equals("")) {
-                // need to send a HEAD request to trigger NTLM authentication
-                try (CloseableHttpResponse ignored = currentHttpClient.execute(new HttpHead("http://salesforce.com"))) {
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage());
-                    throw ex;
+        HttpClientContext context = HttpClientContext.create();
+        RequestConfig config = RequestConfig.custom().setExpectContinueEnabled(currentConnectorConfig.useChunkedPost()).build();
+        context.setRequestConfig(config);
+
+        if (currentConnectorConfig.getNtlmDomain() != null && !currentConnectorConfig.getNtlmDomain().equals("")) {
+            // need to send a HEAD request to trigger NTLM authentication
+            try (CloseableHttpResponse ignored = currentHttpClient.execute(new HttpHead("http://salesforce.com"))) {
+            } catch (Exception ex) {
+                logger.error(ex.getMessage());
+                throw ex;
+            }
+        }
+
+        try (CloseableHttpResponse response = currentHttpClient.execute(this.httpMethod, context)) {
+            successful = true;
+            httpResponse = response;
+            if (response.getStatusLine().getStatusCode() > 399) {
+                successful = false;
+                if (response.getStatusLine().getStatusCode() == 407) {
+                    throw new RuntimeException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
                 }
             }
-    
-            try (CloseableHttpResponse response = currentHttpClient.execute(this.httpMethod, context)) {
-                successful = true;
-                httpResponse = response;
-                if (response.getStatusLine().getStatusCode() > 399) {
-                    successful = false;
-                    if (response.getStatusLine().getStatusCode() == 407) {
-                        throw new RuntimeException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+            // copy input stream data into a new input stream because releasing the connection will close the input stream
+            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+            if (response.getEntity() != null) {
+                try (InputStream inStream = response.getEntity().getContent()) {
+                    IOUtils.copy(inStream, bOut);
+                    input = new ByteArrayInputStream(bOut.toByteArray());
+                    if (response.containsHeader("Content-Encoding") && response.getHeaders("Content-Encoding")[0].getValue().equals("gzip")) {
+                        input = new GZIPInputStream(input);
                     }
                 }
-                // copy input stream data into a new input stream because releasing the connection will close the input stream
-                ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-                if (response.getEntity() != null) {
-                    try (InputStream inStream = response.getEntity().getContent()) {
-                        IOUtils.copy(inStream, bOut);
-                        input = new ByteArrayInputStream(bOut.toByteArray());
-                        if (response.containsHeader("Content-Encoding") && response.getHeaders("Content-Encoding")[0].getValue().equals("gzip")) {
-                            input = new GZIPInputStream(input);
-                        }
-                    }
-                }
-            }
-        } finally {
-            if (!isReuseConnection()) {
-                closeConnections();
             }
         }
         return input;
@@ -366,21 +327,21 @@ public class HttpClientTransport implements HttpTransportInterface {
         entityByteOut = new ByteArrayOutputStream();
         output = entityByteOut;
 
-        if (currentConfig.getMaxRequestSize() > 0) {
-            output = new LimitingOutputStream(currentConfig.getMaxRequestSize(), output);
+        if (currentConnectorConfig.getMaxRequestSize() > 0) {
+            output = new LimitingOutputStream(currentConnectorConfig.getMaxRequestSize(), output);
         }
 
-        if (enableCompression && currentConfig.isCompression()) {
+        if (enableCompression && currentConnectorConfig.isCompression()) {
             output = new GZIPOutputStream(output);
         }
 
-        if (currentConfig.isTraceMessage()) {
-            output = currentConfig.teeOutputStream(output);
+        if (currentConnectorConfig.isTraceMessage()) {
+            output = currentConnectorConfig.teeOutputStream(output);
         }
 
-        if (currentConfig.hasMessageHandlers()) {
+        if (currentConnectorConfig.hasMessageHandlers()) {
             URL url = new URL(endpoint);
-            output = new MessageHandlerOutputStream(currentConfig, url, output);
+            output = new MessageHandlerOutputStream(currentConnectorConfig, url, output);
         }
 
         return output;
@@ -415,7 +376,7 @@ public class HttpClientTransport implements HttpTransportInterface {
                 this.httpMethod.addHeader(name, httpHeaders.get(name));
             }
         }
-        Map<String, String> connectorHeaders = currentConfig.getHeaders();
+        Map<String, String> connectorHeaders = currentConnectorConfig.getHeaders();
         if (connectorHeaders != null) {
             for (String name : connectorHeaders.keySet()) {
                 if (httpHeaders == null || !httpHeaders.containsKey(name)) {
@@ -424,7 +385,7 @@ public class HttpClientTransport implements HttpTransportInterface {
             }
         }
         setAuthAndClientHeadersForHttpMethod();
-        if (enableCompression && currentConfig.isCompression()) {
+        if (enableCompression && currentConnectorConfig.isCompression()) {
             this.httpMethod.addHeader("Content-Encoding", "gzip");
             this.httpMethod.addHeader("Accept-Encoding", "gzip");
         }
@@ -435,7 +396,7 @@ public class HttpClientTransport implements HttpTransportInterface {
                 contentType = ContentType.create(contentTypeStr);
             }
             BufferedHttpEntity entity = new BufferedHttpEntity(new InputStreamEntity(requestInputStream, contentType));
-            currentConfig.setUseChunkedPost(true);
+            currentConnectorConfig.setUseChunkedPost(true);
             if (this.httpMethod instanceof HttpEntityEnclosingRequestBase) {
                 ((HttpEntityEnclosingRequestBase)this.httpMethod).setEntity(entity);
             }
@@ -458,9 +419,9 @@ public class HttpClientTransport implements HttpTransportInterface {
     
     private void setAuthAndClientHeadersForHttpMethod() {
         if (this.httpMethod != null 
-                && currentConfig.getSessionId() != null 
-                && !currentConfig.getSessionId().isBlank()) {
-            String authSessionId = currentConfig.getSessionId();
+                && currentConnectorConfig.getSessionId() != null 
+                && !currentConnectorConfig.getSessionId().isBlank()) {
+            String authSessionId = currentConnectorConfig.getSessionId();
             Header authHeaderValForXML = this.httpMethod.getFirstHeader(AUTH_HEADER_FOR_XML);
             Header authHeaderValForJSON = this.httpMethod.getFirstHeader(AUTH_HEADER_FOR_XML);
             
@@ -492,7 +453,7 @@ public class HttpClientTransport implements HttpTransportInterface {
 
         }
     }
-    public static void closeConnections() {
+    public static void closeHttpClient() {
         if (currentHttpClient != null) {
             try {
                 currentHttpClient.close();
@@ -502,13 +463,16 @@ public class HttpClientTransport implements HttpTransportInterface {
             currentHttpClient = null;
         }
     }
-    
-    public static void setReuseConnection(boolean reuse) {
-        reuseConnection = reuse;
-    }
-    
-    public static boolean isReuseConnection() {
-        return reuseConnection;
+
+    public static boolean isReuseHttpClient() {
+        Config appConfig = Config.getCurrentConfig();
+        if (appConfig.isBulkV2APIEnabled()) {
+            // Bulk v2 is unable to check status of the job on 
+            // the same HttpClient as the one where job data was
+            // uploaded.
+            return false;
+        }
+        return appConfig.getBoolean(Config.REUSE_CLIENT_CONNECTION);
     }
     
     public InputStream httpGet(String urlStr) throws IOException, AsyncApiException, HttpClientTransportException {
