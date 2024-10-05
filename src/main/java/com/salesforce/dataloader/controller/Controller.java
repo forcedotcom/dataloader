@@ -138,7 +138,6 @@ public class Controller {
         if (daoFactory == null) {
             daoFactory = new DataAccessObjectFactory();
         }
-        HttpClientTransport.setReuseConnection(config.getBoolean(Config.REUSE_CLIENT_CONNECTION));
         getLatestDownloadableDataLoaderVersion();
     }
     
