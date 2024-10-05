@@ -32,7 +32,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -85,10 +86,10 @@ public abstract class Mapper {
 
     protected final Map<String, String> daoColumnNames = new LinkedCaseInsensitiveMap<String>();
     
-    private HashMap<String, Integer> compositeColSizeMap = new HashMap<String, Integer>();
-    private HashMap<String, Integer> daoColPositionInCompositeColMap = new HashMap<String, Integer>();
-    private HashMap<String, String> daoColToCompositeColMap = new HashMap<String, String>();
-    private HashMap<String, Boolean> fieldTypeIsStringMap = new HashMap<String, Boolean>();
+    private LinkedHashMap<String, Integer> compositeColSizeMap = new LinkedHashMap<String, Integer>();
+    private LinkedHashMap<String, Integer> daoColPositionInCompositeColMap = new LinkedHashMap<String, Integer>();
+    private LinkedHashMap<String, String> daoColToCompositeColMap = new LinkedHashMap<String, String>();
+    private LinkedHashMap<String, Boolean> fieldTypeIsStringMap = new LinkedHashMap<String, Boolean>();
     private final Map<String, String> constants =  new LinkedCaseInsensitiveMap<String>();
 
     protected final Map<String, String> map = new LinkedCaseInsensitiveMap<String>();
@@ -206,7 +207,12 @@ public abstract class Mapper {
                 daoCol = mappingSrcCol;
             }
             daoColPositionInCompositeColMap.put(daoCol, daoColCount);
-            daoColToCompositeColMap.put(daoCol, mappingSrcStr);
+            if (st.countTokens() == 0 && daoCol.equalsIgnoreCase(mappingSrcCol)) {
+                // keep dao column's label if possible
+                daoColToCompositeColMap.put(daoCol, daoCol);
+            } else {
+                daoColToCompositeColMap.put(daoCol, mappingSrcStr);
+            }
             daoColCount++;
             if (!isDestinationListStringOnly) {
                 // set up only the first daoCol for mapping if the destination
@@ -379,7 +385,7 @@ public abstract class Mapper {
     }
 
     protected Set<String> getCompositeDAOColumns() {
-        HashSet<String> compositeDAOCols = new HashSet<String>();
+        LinkedHashSet<String> compositeDAOCols = new LinkedHashSet<String>();
         compositeDAOCols.addAll(this.daoColToCompositeColMap.values());
         return compositeDAOCols;
     }
