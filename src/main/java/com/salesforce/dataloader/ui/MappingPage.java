@@ -38,6 +38,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.MappingInitializationException;
@@ -45,7 +46,6 @@ import com.salesforce.dataloader.mapping.LoadMapper;
 import com.salesforce.dataloader.ui.mapping.MappingContentProvider;
 import com.salesforce.dataloader.ui.mapping.MappingLabelProvider;
 import com.sforce.soap.partner.Field;
-import com.sforce.soap.partner.FieldType;
 
 /**
  * Describe your class here.
@@ -86,7 +86,7 @@ public class MappingPage extends LoadPage {
                     mapper.clearMappings();
                     try {
                         mapper.putPropertyFileMappings(filename);
-                        updateMapping();
+                        updateMappingTblViewer();
                     } catch (MappingInitializationException e) {
                         logger.error(Labels.getString("MappingPage.errorLoading"), e); //$NON-NLS-1$
                         UIUtils.errorMessageBox(getShell(), e);
@@ -103,7 +103,7 @@ public class MappingPage extends LoadPage {
             public void widgetSelected(SelectionEvent event) {
                 MappingDialog dlg = new MappingDialog(getShell(), controller, thisPage);
                 dlg.setMapper((LoadMapper)controller.getMapper());
-                dlg.setSforceFieldInfo(getFieldTypes());
+                dlg.setUnmappedSobjectFields(autoMatchFieldsAndGetUnmappedFields());
                 dlg.open();
             }
         });
@@ -144,7 +144,7 @@ public class MappingPage extends LoadPage {
         sobjectFieldColumn.setText(Labels.getString("MappingPage.fieldName")); //$NON-NLS-1$
 
         //update the model
-        updateMapping();
+        updateMappingTblViewer();
         packMappingColumns();
 
         // Turn on the header and the lines
@@ -169,7 +169,7 @@ public class MappingPage extends LoadPage {
     /**
      * Responsible for updating the mapping model
      */
-    public void updateMapping() {
+    public void updateMappingTblViewer() {
         // Set the table viewer's input
         if (mappingTblViewer != null) {
             mappingTblViewer.setInput(controller.getMapper());
@@ -182,6 +182,97 @@ public class MappingPage extends LoadPage {
         }
         packMappingColumns();
         mappingTblViewer.getControl().pack();
+    }
+    
+    public Field[] autoMatchFieldsAndGetUnmappedFields() {
+        Field[] sforceFields = getMappableSalesforceFields();
+        if (sforceFields == null || sforceFields.length == 0) {
+            return sforceFields;
+        }
+        ArrayList<Field> fieldList = new ArrayList<Field>(Arrays.asList(sforceFields));
+        //first match on name, then label
+        ListIterator<Field> iterator = fieldList.listIterator();
+        Field sobjectField;
+        LoadMapper mapper = (LoadMapper)controller.getMapper();
+        while (iterator.hasNext()) {
+            sobjectField = iterator.next();
+            String sobjectFieldName = sobjectField.getName();
+            String sobjectFieldLabel = sobjectField.getLabel();
+            String daoColName = null;
+
+            if (mapper.hasDaoColumn(sobjectFieldName)) {
+                daoColName = sobjectFieldName;
+            } else if (mapper.hasDaoColumn(sobjectFieldLabel)) {
+                daoColName = sobjectFieldLabel;
+            }
+
+            if(daoColName != null) {
+                // don't overwrite the fields that already have been mapped
+                String prevMappedFieldName = mapper.getMapping(daoColName, false, true);
+                if(prevMappedFieldName == null || prevMappedFieldName.length() == 0) {
+                    mapper.putMapping(daoColName, sobjectFieldName);
+                }
+                iterator.remove();
+            }
+        }
+        return fieldList.toArray(new Field[fieldList.size()]);
+    }
+    
+    Field[] getMappableSalesforceFields() {
+        ArrayList<Field> mappableFieldList = new ArrayList<Field>();
+        Config config = controller.getConfig();
+        OperationInfo operation = config.getOperationInfo();
+        String extIdField = config.getString(Config.IDLOOKUP_FIELD);
+        if(extIdField == null) {
+            extIdField = "";
+        } else {
+            extIdField = extIdField.toLowerCase();
+        }
+
+        for (Field field : getFieldTypes()) {
+            boolean isMappable = false;
+            switch (operation) {
+            case insert:
+                if (field.isCreateable()) {
+                    isMappable = true;
+                }
+                break;
+            case delete:
+                if (controller.getConfig().isRESTAPIEnabled()
+                        && Controller.getAPIMajorVersion() >= 61
+                        && controller.getConfig().getBoolean(Config.DELETE_WITH_EXTERNALID) 
+                        && field.isIdLookup()) {
+                    isMappable = true;
+                }
+                // do not break here. Continue to cover id field.
+            case undelete:
+            case hard_delete:
+                if (field.getType().toString().toLowerCase().equals("id")) {
+                    isMappable = true;
+                }
+                break;
+            case upsert:
+                if (field.isUpdateable() || field.isCreateable()
+                        // also add idLookup-Fields (such as Id, Name) IF they are used as extIdField in this upsert
+                        // (no need to add them otherwise, if they are not updateable/createable)
+                        || (field.isIdLookup() && extIdField.equals(field.getName().toLowerCase()))) {
+                    isMappable = true;
+                }
+                break;
+            case update:
+                if (field.isUpdateable() || field.getType().toString().toLowerCase().equals("id")) {
+                    isMappable = true;
+                }
+                break;
+            default:
+                throw new UnsupportedOperationException();
+            }
+            if(isMappable) {
+                mappableFieldList.add(field);
+            }
+        }
+
+        return mappableFieldList.toArray(new Field[mappableFieldList.size()]);
     }
 
     private void refreshMapping() {
@@ -247,7 +338,8 @@ public class MappingPage extends LoadPage {
         if (controller.getMapper() == null) {
             return true; // further processing is not possible
         }
-        updateMapping();
+        autoMatchFieldsAndGetUnmappedFields();
+        updateMappingTblViewer();
         return true;
     }
 

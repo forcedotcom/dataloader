@@ -68,10 +68,10 @@ public class MappingDragListener extends DragSourceAdapter {
                     fieldList.remove(eventField);
                 }
 
-                Field[] newFields = fieldList.toArray(new Field[fieldList.size()]);
-                dlg.setSforceFields(newFields);
+                Field[] unmappedSobjectFields = fieldList.toArray(new Field[fieldList.size()]);
+                dlg.setUnmappedSobjectFields(unmappedSobjectFields);
 
-                viewer.setInput(newFields);
+                viewer.setInput(unmappedSobjectFields);
                 viewer.refresh();
             }
         } catch (Exception e) {
