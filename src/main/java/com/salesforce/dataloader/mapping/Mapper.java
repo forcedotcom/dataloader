@@ -207,7 +207,7 @@ public abstract class Mapper {
                 daoCol = mappingSrcCol;
             }
             daoColPositionInCompositeColMap.put(daoCol, daoColCount);
-            if (st.countTokens() == 0 && daoCol.equalsIgnoreCase(mappingSrcCol)) {
+            if (daoColCount == 0 && st.countTokens() == 0 && daoCol.equalsIgnoreCase(mappingSrcCol)) {
                 // keep dao column's label if possible
                 daoColToCompositeColMap.put(daoCol, daoCol);
             } else {
