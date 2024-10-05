@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -65,7 +64,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
-import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.Config;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.mapping.LoadMapper;
@@ -89,32 +87,27 @@ public class MappingDialog extends WizardDialog {
     public static final int MAPPING_DAO = 0;
     public static final int MAPPING_SFORCE = 1;
 
-    //the current list of fields
-    private Field[] sforceFields;
+    //unmapped sobject fields of the selected sobject
+    private Field[] unmappedSobjectFields;
 
-    //all the fields
-    private Field[] allFields;
+    //all sobject fields of the selected sobject
+    private final Field[] allSobjectFields;
 
     //restore for the old values on cancel
     private Properties restore;
 
     private LoadMapper mapper;
-    private Field[] sforceFieldInfo;
     private MappingPage page;
     private HashSet<String> mappedFields;
     private Shell parentShell;
     private Shell dialogShell;
     private Text sforceFieldsSearch;
     private boolean dragNDropCancelled = false;
-
-    public void setSforceFieldInfo(Field[] sforceFieldInfo) {
-        this.sforceFieldInfo = sforceFieldInfo;
+    
+    public void setUnmappedSobjectFields(Field[] fields) {
+        this.unmappedSobjectFields = fields;
     }
-
-    public void setSforceFields(Field[] newFields) {
-        this.sforceFields = newFields;
-    }
-
+    
     public void setMapper(LoadMapper mapper) {
         this.mapper = mapper;
         this.restore = new Properties();
@@ -140,6 +133,7 @@ public class MappingDialog extends WizardDialog {
         super(parent, controller);
         this.page = page;
         this.parentShell = parent;
+        this.allSobjectFields = page.getMappableSalesforceFields();
     }
     
     public Shell getParent() {
@@ -236,7 +230,7 @@ public class MappingDialog extends WizardDialog {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 //refresh the mapping page view
-                page.updateMapping();
+                page.updateMappingTblViewer();
                 page.setPageComplete();
                 shell.close();
             }
@@ -282,7 +276,7 @@ public class MappingDialog extends WizardDialog {
                 }
 
                 //refresh the mapping page view
-                page.updateMapping();
+                page.updateMappingTblViewer();
                 page.setPageComplete();
                 shell.close();
             }
@@ -503,42 +497,8 @@ public class MappingDialog extends WizardDialog {
     }
 
     private void autoMatchFields() {
-
-        ArrayList<Field> fieldList = new ArrayList<Field>(Arrays.asList(sforceFields));
-        //first match on name, then label
-        ListIterator<Field> iterator = fieldList.listIterator();
-        Field field;
-        while (iterator.hasNext()) {
-            field = iterator.next();
-            String fieldName = field.getName();
-            String fieldLabel = field.getLabel();
-            String mappingSource = null;
-
-            // field is already mapped
-            // TODO: check with lexi if this is intended use of automatch
-            if(mappedFields.contains(fieldName)) {
-                continue;
-            }
-
-            if (mapper.hasDaoColumn(fieldName)) {
-                mappingSource = fieldName;
-            } else if (mapper.hasDaoColumn(fieldLabel)) {
-                mappingSource = fieldLabel;
-            }
-
-            if(mappingSource != null) {
-                // don't overwrite the fields that already have been mapped
-                String oldFieldName = mapper.getMapping(mappingSource, false, true);
-                if(oldFieldName == null || oldFieldName.length() == 0) {
-                    mapper.putMapping(mappingSource, fieldName);
-                }
-                iterator.remove();
-            }
-        }
-
-        this.sforceFields = fieldList.toArray(new Field[fieldList.size()]);
-
-        sforceTblViewer.setInput(this.sforceFields);
+        this.unmappedSobjectFields = this.page.autoMatchFieldsAndGetUnmappedFields();
+        sforceTblViewer.setInput(this.unmappedSobjectFields);
         updateMapping();
         //pack the columns
         packMappingColumns();
@@ -572,20 +532,20 @@ public class MappingDialog extends WizardDialog {
 
     public void replenishMappedSforceFields(String fieldNameList) {
         String[] fieldNameListArray = fieldNameList.split(AppUtil.COMMA);
-        ArrayList<Field> fieldList = new ArrayList<Field>(Arrays.asList(this.sforceFields));
+        ArrayList<Field> fieldList = new ArrayList<Field>(Arrays.asList(this.unmappedSobjectFields));
         for (String fieldNameToReplenish : fieldNameListArray) {
             fieldNameToReplenish = fieldNameToReplenish.strip();
             //find the Field object to add to the current list.
             Field field;
-            for (int i = 0; i < allFields.length; i++) {
-                field = allFields[i];
+            for (int i = 0; i < allSobjectFields.length; i++) {
+                field = allSobjectFields[i];
                 if (field.getName().equals(fieldNameToReplenish)) {
                     fieldList.add(field);
                 }
             }
         }
-        this.sforceFields = fieldList.toArray(new Field[fieldList.size()]);
-        sforceTblViewer.setInput(this.sforceFields);
+        this.unmappedSobjectFields = fieldList.toArray(new Field[fieldList.size()]);
+        sforceTblViewer.setInput(this.unmappedSobjectFields);
         packSforceColumns();
         return;
     }
@@ -595,73 +555,23 @@ public class MappingDialog extends WizardDialog {
      */
     private void updateSforce() {
 
-        ArrayList<Field> mappableFieldList = new ArrayList<Field>();
-        ArrayList<Field> allFieldList = new ArrayList<Field>();
-        Field field;
+        ArrayList<Field> unmappedSobjectFieldList = new ArrayList<Field>();
         Config config = getController().getConfig();
-        OperationInfo operation = config.getOperationInfo();
         String extIdField = config.getString(Config.IDLOOKUP_FIELD);
         if(extIdField == null) {
             extIdField = "";
         } else {
             extIdField = extIdField.toLowerCase();
         }
-
-        for (int i = 0; i < sforceFieldInfo.length; i++) {
-
-            field = sforceFieldInfo[i];
-            boolean isMappable = false;
-            switch (operation) {
-            case insert:
-                if (field.isCreateable()) {
-                    isMappable = true;
-                }
-                break;
-            case delete:
-                if (getController().getConfig().isRESTAPIEnabled()
-                        && Controller.getAPIMajorVersion() >= 61
-                        && getController().getConfig().getBoolean(Config.DELETE_WITH_EXTERNALID) 
-                        && field.isIdLookup()) {
-                    isMappable = true;
-                }
-                // do not break here. Continue to cover id field.
-            case undelete:
-            case hard_delete:
-                if (field.getType().toString().toLowerCase().equals("id")) {
-                    isMappable = true;
-                }
-                break;
-            case upsert:
-                if (field.isUpdateable() || field.isCreateable()
-                        // also add idLookup-Fields (such as Id, Name) IF they are used as extIdField in this upsert
-                        // (no need to add them otherwise, if they are not updateable/createable)
-                        || (field.isIdLookup() && extIdField.equals(field.getName().toLowerCase()))) {
-                    isMappable = true;
-                }
-                break;
-            case update:
-                if (field.isUpdateable() || field.getType().toString().toLowerCase().equals("id")) {
-                    isMappable = true;
-                }
-                break;
-            default:
-                throw new UnsupportedOperationException();
-            }
-            // only add the field to mappings if it's not already used in mapping
-            if(isMappable) {
-                if(!mappedFields.contains(field.getName())) {
-                    mappableFieldList.add(field);
-                }
-                // this list is for all fields in case map is reset
-                allFieldList.add(field);
+        for (Field sobjectField : allSobjectFields) {
+            if(!mappedFields.contains(sobjectField.getName())) {
+                unmappedSobjectFieldList.add(sobjectField);
             }
         }
-
-        this.sforceFields = mappableFieldList.toArray(new Field[mappableFieldList.size()]);
-        allFields = allFieldList.toArray(new Field[allFieldList.size()]);
+        this.unmappedSobjectFields = unmappedSobjectFieldList.toArray(new Field[unmappedSobjectFieldList.size()]);
 
         // Set the table viewer's input
-        sforceTblViewer.setInput(this.sforceFields);
+        sforceTblViewer.setInput(this.unmappedSobjectFields);
     }
 
     /**
@@ -681,7 +591,6 @@ public class MappingDialog extends WizardDialog {
      * Responsible for updating the mapping model
      */
     private void updateMapping() {
-
         // Set the table viewer's input
         mappingTblViewer.setInput(mapper);
     }
