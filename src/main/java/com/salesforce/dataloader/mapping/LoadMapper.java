@@ -72,12 +72,10 @@ public class LoadMapper extends Mapper {
 
     public Map<String, String> getMappingWithUnmappedColumns(boolean includeUnmapped) {
         final Map<String, String> result = new LinkedCaseInsensitiveMap<String>();
-        Collection<String> candidateCols = null;
-        if (getCompositeDAOColumns() == null || getCompositeDAOColumns().isEmpty()) {
+        Collection<String> candidateCols = getCompositeDAOColumns();
+        if (candidateCols == null || candidateCols.isEmpty()) {
             // no compositions yet
             candidateCols = this.getDaoColumns();
-        } else {
-            candidateCols = this.getCompositeDAOColumns();
         }
         // get mappings in the same order as DAO column order
         for (String daoColumn : candidateCols) {
