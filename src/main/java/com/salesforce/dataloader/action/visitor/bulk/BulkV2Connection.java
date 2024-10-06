@@ -390,6 +390,7 @@ public class BulkV2Connection extends BulkConnection {
         	    }
         	}
         }
+        HttpClientTransport.closeHttpClient();
         return doSendJobRequestToServer(urlString, 
 										headers,
 										HttpMethod.POST,

@@ -103,12 +103,7 @@ public class HttpClientTransport implements HttpTransportInterface {
     public synchronized void setConfig(ConnectorConfig newConfig) {
         if (!canReuseHttpClient(currentConnectorConfig, newConfig)
                 && currentHttpClient != null) {
-            try {
-                currentHttpClient.close();
-            } catch (IOException ex) {
-                // do nothing
-            }
-            currentHttpClient = null;
+            closeHttpClient();
         }
         currentConnectorConfig = newConfig;
         if (currentConnectorConfig != null && currentHttpClient == null) {
@@ -453,6 +448,7 @@ public class HttpClientTransport implements HttpTransportInterface {
 
         }
     }
+    
     public static void closeHttpClient() {
         if (currentHttpClient != null) {
             try {
@@ -466,12 +462,6 @@ public class HttpClientTransport implements HttpTransportInterface {
 
     public static boolean isReuseHttpClient() {
         Config appConfig = Config.getCurrentConfig();
-        if (appConfig.isBulkV2APIEnabled()) {
-            // Bulk v2 is unable to check status of the job on 
-            // the same HttpClient as the one where job data was
-            // uploaded.
-            return false;
-        }
         return appConfig.getBoolean(Config.REUSE_CLIENT_CONNECTION);
     }
     
