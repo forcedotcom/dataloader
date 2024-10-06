@@ -170,7 +170,10 @@ public class HttpClientTransport implements HttpTransportInterface {
     private synchronized void initializeHttpClient() throws UnknownHostException {
         closeHttpClient();
         httpMethod = null;
-        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create().useSystemProperties();
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        if (Config.getCurrentConfig().getBoolean(Config.USE_SYSTEM_PROPS_FOR_HTTP_CLIENT)) {
+            httpClientBuilder = httpClientBuilder.useSystemProperties();
+        }
         
         if (currentConnectorConfig != null
                 && currentConnectorConfig.getProxy() != null
