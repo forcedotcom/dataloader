@@ -669,7 +669,6 @@ public class AppConfig {
         setDefaultValue(PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE, false);
         setDefaultValue(INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, false);
         setDefaultValue(OAUTH_INSTANCE_URL, false);
-        AppUtil.setSystemProxyValues();
         String proxyHost = System.getProperty("http.proxyHost");
         String proxyPort = System.getProperty("http.proxyPort");
         if (proxyHost != null && !proxyHost.isBlank()) {
