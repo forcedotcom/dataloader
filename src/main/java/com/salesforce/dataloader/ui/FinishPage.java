@@ -35,7 +35,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.mapping.LoadMapper;
@@ -78,7 +78,7 @@ public class FinishPage extends LoadPage {
         dirComp.setLayoutData(data);
 
         dirFE = new DirectoryFieldEditor(Labels.getString("FinishPage.output"), Labels.getString("FinishPage.chooseDir"), dirComp); //$NON-NLS-1$ //$NON-NLS-2$
-        dirFE.setStringValue(controller.getConfig().getString(Config.OUTPUT_STATUS_DIR));
+        dirFE.setStringValue(controller.getAppConfig().getString(AppConfig.OUTPUT_STATUS_DIR));
 
         Text textField = dirFE.getTextControl(dirComp);
         textField.addModifyListener(new ModifyListener() {
@@ -116,7 +116,7 @@ public class FinishPage extends LoadPage {
     protected boolean setupPagePostLogin() {
         try {
             verifySettings();
-            if (!controller.getConfig().getBoolean(Config.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER)) {
+            if (!controller.getAppConfig().getBoolean(AppConfig.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER)) {
                 dirFE.setStringValue(null); // clear previous selection
             }
         } catch (final MappingInitializationException e) {
@@ -141,7 +141,7 @@ public class FinishPage extends LoadPage {
     }
 
     private void verifySettings() throws MappingInitializationException {
-        if (!getController().getConfig().getOperationInfo().isExtraction()) {
+        if (!getController().getAppConfig().getOperationInfo().isExtraction()) {
             Mapper mapper = (LoadMapper)getController().getMapper();
             if (mapper != null) {
                 ((LoadMapper)getController().getMapper()).verifyMappingsAreValid();

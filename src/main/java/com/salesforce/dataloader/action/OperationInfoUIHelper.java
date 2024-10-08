@@ -33,7 +33,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.graphics.Image;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.*;
@@ -141,7 +141,7 @@ public enum OperationInfoUIHelper {
         return IDialogConstants.CLIENT_ID + ordinal() + 1;
     }
 
-    public boolean isOperationAllowed(Config cfg) {
+    public boolean isOperationAllowed(AppConfig cfg) {
         // all operations are always allowed except hard delete, which requires bulk api
         return this != hard_delete || cfg.isBulkAPIEnabled() || cfg.isBulkV2APIEnabled();
     }

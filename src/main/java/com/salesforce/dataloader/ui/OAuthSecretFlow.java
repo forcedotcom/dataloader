@@ -26,7 +26,7 @@
 package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.client.SimplePost;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.oauth.OAuthSecretFlowUtil;
 
@@ -49,24 +49,24 @@ import java.net.URISyntaxException;
 public class OAuthSecretFlow extends OAuthFlow {
     protected static Logger logger = LogManager.getLogger(OAuthSecretFlow.class);
 
-    public OAuthSecretFlow(Shell parent, Config config) {
-        super(parent, config);
+    public OAuthSecretFlow(Shell parent, AppConfig appConfig) {
+        super(parent, appConfig);
     }
 
     @Override
-    protected OAuthBrowserListener getOAuthBrowserListener(Shell shell, Browser browser, Config config) {
-        return new OAuthSecretBrowserListener(browser, shell, config);
+    protected OAuthBrowserListener getOAuthBrowserListener(Shell shell, Browser browser, AppConfig appConfig) {
+        return new OAuthSecretBrowserListener(browser, shell, appConfig);
     }
 
     @Override
-    public String getStartUrl(Config config) throws UnsupportedEncodingException {
-        return OAuthSecretFlowUtil.getStartUrlImpl(config);
+    public String getStartUrl(AppConfig appConfig) throws UnsupportedEncodingException {
+        return OAuthSecretFlowUtil.getStartUrlImpl(appConfig);
     }
 
     public static class OAuthSecretBrowserListener extends OAuthBrowserListener {
 
-        public OAuthSecretBrowserListener(Browser browser, Shell shell, Config config) {
-            super(browser, shell, config);
+        public OAuthSecretBrowserListener(Browser browser, Shell shell, AppConfig appConfig) {
+            super(browser, shell, appConfig);
         }
 
         @Override
@@ -82,7 +82,7 @@ public class OAuthSecretFlow extends OAuthFlow {
                 String code = OAuthSecretFlowUtil.handleInitialUrl(url);
 
                 if (code != null) {
-                    SimplePost client = OAuthSecretFlowUtil.handleSecondPost(code, config);
+                    SimplePost client = OAuthSecretFlowUtil.handleSecondPost(code, appConfig);
                     setReasonPhrase(client.getReasonPhrase());
                     setStatusCode(client.getStatusCode());
                     setResult(client.isSuccessful());

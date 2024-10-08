@@ -37,7 +37,7 @@ import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.client.HttpTransportInterface;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.async.AsyncApiException;
@@ -74,7 +74,7 @@ public class BulkV1Connection extends BulkConnection {
     }
 
     public JobInfo getJobStatus(String jobId, ContentType contentType) throws AsyncApiException {
-        if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
+        if (AppConfig.getCurrentConfig().getBoolean(AppConfig.USE_LEGACY_HTTP_GET)) {
             return super.getJobStatus(jobId, contentType);
         } else {
             String[] urlParts = {"job", jobId};
@@ -88,7 +88,7 @@ public class BulkV1Connection extends BulkConnection {
     }
     
     public BatchInfoList getBatchInfoList(String jobId, ContentType contentType) throws AsyncApiException {
-        if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
+        if (AppConfig.getCurrentConfig().getBoolean(AppConfig.USE_LEGACY_HTTP_GET)) {
             return super.getBatchInfoList(jobId, contentType);
         } else {
             String[] urlParts = {"job", jobId, "batch"};
@@ -98,7 +98,7 @@ public class BulkV1Connection extends BulkConnection {
     }
     
     public InputStream getBatchResultStream(String jobId, String batchId) throws AsyncApiException {
-        if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
+        if (AppConfig.getCurrentConfig().getBoolean(AppConfig.USE_LEGACY_HTTP_GET)) {
             return super.getBatchResultStream(jobId, batchId);
         } else {
             String[] urlParts = {"job", jobId, "batch", batchId, "result"};
@@ -111,7 +111,7 @@ public class BulkV1Connection extends BulkConnection {
     }
 
     public QueryResultList getQueryResultList(String jobId, String batchId, ContentType contentType) throws AsyncApiException {
-        if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
+        if (AppConfig.getCurrentConfig().getBoolean(AppConfig.USE_LEGACY_HTTP_GET)) {
             return super.getQueryResultList(jobId, batchId, contentType);
         } else {
             InputStream in = getBatchResultStream(jobId, batchId);
@@ -120,7 +120,7 @@ public class BulkV1Connection extends BulkConnection {
     }
 
     public InputStream getQueryResultStream(String jobId, String batchId, String resultId) throws AsyncApiException {
-        if (Config.getCurrentConfig().getBoolean(Config.USE_LEGACY_HTTP_GET)) {
+        if (AppConfig.getCurrentConfig().getBoolean(AppConfig.USE_LEGACY_HTTP_GET)) {
             return super.getQueryResultStream(jobId, batchId, resultId);
         } else {
             String[] urlParts = {"job", jobId, "batch", batchId, "result", resultId};

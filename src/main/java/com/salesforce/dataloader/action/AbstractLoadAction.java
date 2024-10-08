@@ -29,7 +29,7 @@ package com.salesforce.dataloader.action;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.client.PartnerClient;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObject;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
@@ -68,9 +68,9 @@ abstract class AbstractLoadAction extends AbstractAction {
     @Override
     protected void checkDao(DataAccessObject dao) throws DataAccessObjectInitializationException {
         if (!(dao instanceof DataReader)) {
-            final String errMsg = getMessage("errorWrongDao", getConfig().getString(Config.DAO_TYPE),
+            final String errMsg = getMessage("errorWrongDao", getConfig().getString(AppConfig.DAO_TYPE),
                     DataAccessObjectFactory.CSV_READ_TYPE + " or " + DataAccessObjectFactory.DATABASE_READ_TYPE,
-                    getConfig().getString(Config.OPERATION));
+                    getConfig().getString(AppConfig.OPERATION));
             getLogger().fatal(errMsg);
             throw new DataAccessObjectInitializationException(errMsg);
         }
@@ -111,7 +111,7 @@ abstract class AbstractLoadAction extends AbstractAction {
         // ensure all field mappings are valid before data load
         ((LoadMapper)this.getController().getMapper()).verifyMappingsAreValid();
         // start the Progress Monitor
-        getMonitor().beginTask(getMessage("loading", getConfig().getString(Config.OPERATION)), getDao().getTotalRows());
+        getMonitor().beginTask(getMessage("loading", getConfig().getString(AppConfig.OPERATION)), getDao().getTotalRows());
         // set the starting row
         DAORowUtil.get().skipRowToStartOffset(getConfig(), getDao(), getMonitor(), !getConfig().isBulkAPIEnabled());
     }

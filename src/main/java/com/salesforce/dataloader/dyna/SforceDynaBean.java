@@ -38,7 +38,7 @@ import org.apache.logging.log4j.LogManager;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.client.SObject4JSON;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.LoadException;
@@ -238,7 +238,7 @@ public class SforceDynaBean {
                         && val instanceof String
                         && !((String)val).isBlank()
                         && sforceObj.get(sforceField) == null) {
-                    String errStr = "unable to convert a non-null " + sforceField + "value " + (String)val + " to a field on entity " + Config.getCurrentConfig().getString(Config.ENTITY);
+                    String errStr = "unable to convert a non-null " + sforceField + "value " + (String)val + " to a field on entity " + AppConfig.getCurrentConfig().getString(AppConfig.ENTITY);
                     logger.error(errStr); //$NON-NLS-1$
                     throw new LoadException(errStr);
                 }
@@ -409,8 +409,8 @@ public class SforceDynaBean {
      * Register dynabean data type converters for common java data types
      * @param useEuroDates if true, european date format will be used
      */
-    synchronized static public void registerConverters(Config cfg) {
-        final boolean useEuroDates = cfg.getBoolean(Config.EURO_DATES);
+    synchronized static public void registerConverters(AppConfig cfg) {
+        final boolean useEuroDates = cfg.getBoolean(AppConfig.EURO_DATES);
         final TimeZone tz = cfg.getTimeZone();
         // Register DynaBean type conversions
         ConvertUtils.register(new DateTimeConverter(tz, useEuroDates), Calendar.class);

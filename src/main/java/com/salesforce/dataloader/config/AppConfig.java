@@ -117,7 +117,7 @@ import org.apache.logging.log4j.Logger;
  *   value specified in config.properties is not overridden when save() method is invoked.
  *
  */
-public class Config {
+public class AppConfig {
     private static Logger logger;
     private static final String DECRYPTED_SUFFIX = ".decrypted";
 
@@ -505,7 +505,7 @@ public class Config {
      * @see #load()
      * @see #save()
      */
-    private Config(String filename, Map<String, String> overridesMap) throws ConfigInitializationException, IOException {
+    private AppConfig(String filename, Map<String, String> overridesMap) throws ConfigInitializationException, IOException {
         loadedProperties = new LinkedProperties();
         this.filename = filename;
         
@@ -531,17 +531,17 @@ public class Config {
         
         // Properties initialization completed. Configure OAuth environment next
         setOAuthEnvironment(getString(SELECTED_AUTH_ENVIRONMENT));
-        String endpoint_prod = getString(Config.AUTH_ENDPOINT_PROD);
-        if (Config.DEFAULT_ENDPOINT_URL_PROD.equalsIgnoreCase(endpoint_prod)) {
-            endpoint_prod = getString(Config.AUTH_ENDPOINT);
+        String endpoint_prod = getString(AppConfig.AUTH_ENDPOINT_PROD);
+        if (AppConfig.DEFAULT_ENDPOINT_URL_PROD.equalsIgnoreCase(endpoint_prod)) {
+            endpoint_prod = getString(AppConfig.AUTH_ENDPOINT);
             setValue(AUTH_ENDPOINT_PROD, endpoint_prod);
         }
     }
     
     private String getLastRunPrefix() {
-        String lastRunFilePrefix = getString(Config.PROCESS_NAME);
+        String lastRunFilePrefix = getString(AppConfig.PROCESS_NAME);
         if (lastRunFilePrefix == null || lastRunFilePrefix.isBlank()) {
-            lastRunFilePrefix = getString(Config.ENTITY) + getString(Config.OPERATION);
+            lastRunFilePrefix = getString(AppConfig.ENTITY) + getString(AppConfig.OPERATION);
         }
         if (lastRunFilePrefix == null || lastRunFilePrefix.isBlank()) {
             lastRunFilePrefix = RUN_MODE_UI_VAL;
@@ -551,15 +551,15 @@ public class Config {
     
     private void initializeLastRun(String lastRunFileNamePrefix) {
         if (lastRunFileNamePrefix == null || lastRunFileNamePrefix.isBlank()) {
-            lastRunFileNamePrefix = getString(Config.CLI_OPTION_RUN_MODE);
+            lastRunFileNamePrefix = getString(AppConfig.CLI_OPTION_RUN_MODE);
         }
         String lastRunFileName = lastRunFileNamePrefix + LAST_RUN_FILE_SUFFIX;
-        String lastRunDir = getString(Config.LAST_RUN_OUTPUT_DIR);
+        String lastRunDir = getString(AppConfig.LAST_RUN_OUTPUT_DIR);
         if (lastRunDir == null || lastRunDir.length() == 0) {
             lastRunDir = this.configDir;
         }
 
-        this.lastRunProperties = new LastRunProperties(lastRunFileName, lastRunDir, getBoolean(Config.ENABLE_LAST_RUN_OUTPUT));
+        this.lastRunProperties = new LastRunProperties(lastRunFileName, lastRunDir, getBoolean(AppConfig.ENABLE_LAST_RUN_OUTPUT));
         // Need to initialize last run date if it's present neither in config or override
         lastRunProperties.setDefault(LastRunProperties.LAST_RUN_DATE, getString(INITIAL_LAST_RUN_DATE));
 
@@ -651,7 +651,7 @@ public class Config {
         setDefaultValue(DELETE_WITH_EXTERNALID, false);
         setDefaultValue(OAUTH_LOGIN_FROM_BROWSER, true);
         setDefaultValue(LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
-        setDefaultValue(Config.CLI_OPTION_RUN_MODE, Config.RUN_MODE_UI_VAL);
+        setDefaultValue(AppConfig.CLI_OPTION_RUN_MODE, AppConfig.RUN_MODE_UI_VAL);
         setDefaultValue(SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV, false);
         setDefaultValue(PROCESS_BULK_CACHE_DATA_FROM_DAO, true);
         setDefaultValue(PROCESS_KEEP_ACCOUNT_TEAM, false);
@@ -697,7 +697,7 @@ public class Config {
     public boolean getBoolean(String name) {
         String value = getParamValue(name);
         if (value == null || value.length() == 0) return BOOLEAN_DEFAULT;
-        if (value.equals(Config.TRUE)) return true;
+        if (value.equals(AppConfig.TRUE)) return true;
         return false;
     }
 
@@ -1185,7 +1185,7 @@ public class Config {
      * @throws java.io.IOException if there is a problem saving this store
      */
     public void save() throws IOException, GeneralSecurityException {
-        if (getString(Config.CLI_OPTION_RUN_MODE).equalsIgnoreCase(Config.RUN_MODE_BATCH_VAL)
+        if (getString(AppConfig.CLI_OPTION_RUN_MODE).equalsIgnoreCase(AppConfig.RUN_MODE_BATCH_VAL)
            || getBoolean(READ_ONLY_CONFIG_PROPERTIES)) {
             return; // do not save any updates to config.properties file
         }
@@ -1247,27 +1247,27 @@ public class Config {
     }
     
     public void setAuthEndpoint(String authEndpoint) {
-        this.setAuthEndpointForEnv(authEndpoint, getString(Config.SELECTED_AUTH_ENVIRONMENT));
+        this.setAuthEndpointForEnv(authEndpoint, getString(AppConfig.SELECTED_AUTH_ENVIRONMENT));
     }
     
     public void setAuthEndpointForEnv(String authEndpoint, String env) {
         AppUtil.validateAuthenticationHostDomainUrlAndThrow(authEndpoint);
-        if (env != null && env.equalsIgnoreCase(getString(Config.SB_ENVIRONMENT_VAL))) {
-            this.setValue(Config.AUTH_ENDPOINT_SANDBOX, authEndpoint);
+        if (env != null && env.equalsIgnoreCase(getString(AppConfig.SB_ENVIRONMENT_VAL))) {
+            this.setValue(AppConfig.AUTH_ENDPOINT_SANDBOX, authEndpoint);
         } else {
-            this.setValue(Config.AUTH_ENDPOINT_PROD, authEndpoint);
+            this.setValue(AppConfig.AUTH_ENDPOINT_PROD, authEndpoint);
         }
     }
     
     public String getAuthEndpoint() {
         String endpoint = null;
-        if (Config.SB_ENVIRONMENT_VAL.equals(this.getString(Config.SELECTED_AUTH_ENVIRONMENT))) {
-            endpoint = getString(Config.AUTH_ENDPOINT_SANDBOX);
+        if (AppConfig.SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT))) {
+            endpoint = getString(AppConfig.AUTH_ENDPOINT_SANDBOX);
             if (endpoint == null || endpoint.isBlank()) {
                 endpoint = getDefaultAuthEndpoint();
             }
         } else {
-            endpoint = getString(Config.AUTH_ENDPOINT_PROD);
+            endpoint = getString(AppConfig.AUTH_ENDPOINT_PROD);
             if (endpoint == null || endpoint.isBlank()) {
                 endpoint = getDefaultAuthEndpoint();
             }
@@ -1277,10 +1277,10 @@ public class Config {
     }
     
     public String getDefaultAuthEndpoint() {
-        if (Config.SB_ENVIRONMENT_VAL.equals(this.getString(Config.SELECTED_AUTH_ENVIRONMENT))) {
-            return Config.DEFAULT_ENDPOINT_URL_SANDBOX;
+        if (AppConfig.SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT))) {
+            return AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX;
         } else { // assume production is the only alternate environment
-            return Config.DEFAULT_ENDPOINT_URL_PROD;
+            return AppConfig.DEFAULT_ENDPOINT_URL_PROD;
         }
     }
     
@@ -1288,10 +1288,10 @@ public class Config {
         if (endpoint == null || endpoint.isBlank()) {
             return false;
         }
-        if (Config.SB_ENVIRONMENT_VAL.equals(this.getString(Config.SELECTED_AUTH_ENVIRONMENT))) {
-            return Config.DEFAULT_ENDPOINT_URL_SANDBOX.equalsIgnoreCase(endpoint);
+        if (AppConfig.SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT))) {
+            return AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX.equalsIgnoreCase(endpoint);
         } else { // assume production is the only alternate environment
-            return Config.DEFAULT_ENDPOINT_URL_PROD.equalsIgnoreCase(endpoint);
+            return AppConfig.DEFAULT_ENDPOINT_URL_PROD.equalsIgnoreCase(endpoint);
         }
     }
 
@@ -1306,7 +1306,7 @@ public class Config {
     
     private void removeCLIOptionsFromProperties() {
         Set<String> keys = this.loadedProperties.stringPropertyNames();
-        Field[] allFields = Config.class.getDeclaredFields();
+        Field[] allFields = AppConfig.class.getDeclaredFields();
         for (Field field : allFields) {
             if (field.getName().startsWith("CLI_OPTION_")) {
                 String fieldVal = null;
@@ -1371,7 +1371,7 @@ public class Config {
     public static final String CLIENT_ID_HEADER_NAME="client_id";
     
     public String getClientIdNameValuePair() {
-        return CLIENT_ID_HEADER_NAME + "=" + this.getString(Config.OAUTH_CLIENTID);
+        return CLIENT_ID_HEADER_NAME + "=" + this.getString(AppConfig.OAUTH_CLIENTID);
     }
 
     /**
@@ -1471,7 +1471,7 @@ public class Config {
     }
 
     public boolean isBatchMode() {
-        return (Config.RUN_MODE_BATCH_VAL.equalsIgnoreCase(getString(Config.CLI_OPTION_RUN_MODE)));
+        return (AppConfig.RUN_MODE_BATCH_VAL.equalsIgnoreCase(getString(AppConfig.CLI_OPTION_RUN_MODE)));
     }
 
     public int getImportBatchSize() {
@@ -1635,8 +1635,8 @@ public class Config {
         String envSpecificOAuthServerURL = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_SERVER);
         if (envSpecificOAuthServerURL != null
                 && !envSpecificOAuthServerURL.isBlank()
-                && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_SANDBOX)
-                && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_PROD)) {
+                && !envSpecificOAuthServerURL.contains(AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX)
+                && !envSpecificOAuthServerURL.contains(AppConfig.DEFAULT_ENDPOINT_URL_PROD)) {
             endpointURL = envSpecificOAuthServerURL;
         }
         setValue(OAUTH_SERVER, endpointURL);
@@ -1645,11 +1645,11 @@ public class Config {
         String redirectURI = "";
         if (envSpecificOAuthRedirectURI != null
                 && !envSpecificOAuthRedirectURI.isBlank()
-                && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_SANDBOX)
-                && !envSpecificOAuthServerURL.contains(Config.DEFAULT_ENDPOINT_URL_PROD)) {
+                && !envSpecificOAuthServerURL.contains(AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX)
+                && !envSpecificOAuthServerURL.contains(AppConfig.DEFAULT_ENDPOINT_URL_PROD)) {
             redirectURI = envSpecificOAuthRedirectURI;
         } else {
-            redirectURI = endpointURL + Config.OAUTH_REDIRECT_URI_SUFFIX;
+            redirectURI = endpointURL + AppConfig.OAUTH_REDIRECT_URI_SUFFIX;
         }
         setValue(OAUTH_REDIRECTURI, redirectURI);
     }
@@ -1682,9 +1682,9 @@ public class Config {
      * @throws IOException 
      * @throws FactoryConfigurationError 
      */
-    public static synchronized Config getInstance(Map<String, String> argMap) throws ConfigInitializationException, FactoryConfigurationError, IOException { 
+    public static synchronized AppConfig getInstance(Map<String, String> argMap) throws ConfigInitializationException, FactoryConfigurationError, IOException { 
         AppUtil.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argMap));
-        logger = LogManager.getLogger(Config.class);
+        logger = LogManager.getLogger(AppConfig.class);
 
         String configurationsDirPath = AppUtil.getConfigurationsDir();
         File configurationsDir;
@@ -1695,7 +1695,7 @@ public class Config {
         // Create dir if it doesn't exist
         boolean isMkdirSuccessfulOrExisting = createDir(configurationsDir);
         if (!isMkdirSuccessfulOrExisting) {
-            String errorMsg = Messages.getMessage(Config.class, "errorCreatingOutputDir", configurationsDirPath);
+            String errorMsg = Messages.getMessage(AppConfig.class, "errorCreatingOutputDir", configurationsDirPath);
             logger.error(errorMsg);
             throw new ConfigInitializationException(errorMsg);
         }
@@ -1738,19 +1738,19 @@ public class Config {
             logger.info("User config is found in " + configFile.getAbsolutePath());
         }
 
-        Config config = null;
+        AppConfig appConfig = null;
         try {
-            config = new Config(configFilePath, argMap);
-            currentConfig = config;
-            logger.info(Messages.getMessage(Config.class, "configInit")); //$NON-NLS-1$
+            appConfig = new AppConfig(configFilePath, argMap);
+            currentConfig = appConfig;
+            logger.info(Messages.getMessage(AppConfig.class, "configInit")); //$NON-NLS-1$
         } catch (IOException | ProcessInitializationException e) {
-            throw new ConfigInitializationException(Messages.getMessage(Config.class, "errorConfigLoad", configFilePath), e);
+            throw new ConfigInitializationException(Messages.getMessage(AppConfig.class, "errorConfigLoad", configFilePath), e);
         }
-        return config;
+        return appConfig;
     }
     
-    private static Config currentConfig = null;
-    public static Config getCurrentConfig() {
+    private static AppConfig currentConfig = null;
+    public static AppConfig getCurrentConfig() {
         return currentConfig;
     }
     

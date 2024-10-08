@@ -37,7 +37,7 @@ import org.apache.http.message.BasicNameValuePair;
 
 import com.salesforce.dataloader.client.SimplePost;
 import com.salesforce.dataloader.client.SimplePostFactory;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
 
@@ -46,28 +46,28 @@ import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
  * It decouples OAuth UI related classes from OAuth protocol handling.
  */
 public class OAuthSecretFlowUtil {
-    public static String getStartUrlImpl(Config config) throws UnsupportedEncodingException {
-        return config.getString(Config.OAUTH_SERVER) +
+    public static String getStartUrlImpl(AppConfig appConfig) throws UnsupportedEncodingException {
+        return appConfig.getString(AppConfig.OAUTH_SERVER) +
                 "/services/oauth2/authorize"
                 + "?response_type=code"
                 + "&display=popup"
-                + "&" + config.getClientIdNameValuePair()
+                + "&" + appConfig.getClientIdNameValuePair()
                 + "&redirect_uri="
-                + URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
+                + URLEncoder.encode(appConfig.getString(AppConfig.OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
     }
 
-    public static SimplePost handleSecondPost(String code, Config config) throws IOException, ParameterLoadException {
-        String server = config.getString(Config.OAUTH_SERVER) + "/services/oauth2/token";
-        SimplePost client = SimplePostFactory.getInstance(config, server,
+    public static SimplePost handleSecondPost(String code, AppConfig appConfig) throws IOException, ParameterLoadException {
+        String server = appConfig.getString(AppConfig.OAUTH_SERVER) + "/services/oauth2/token";
+        SimplePost client = SimplePostFactory.getInstance(appConfig, server,
                 new BasicNameValuePair("grant_type", "authorization_code"),
                 new BasicNameValuePair("code", code),
-                new BasicNameValuePair(Config.CLIENT_ID_HEADER_NAME, config.getString(Config.OAUTH_CLIENTID)),
-                new BasicNameValuePair("client_secret", config.getString(Config.OAUTH_CLIENTSECRET)),
-                new BasicNameValuePair("redirect_uri", config.getString(Config.OAUTH_REDIRECTURI))
+                new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.OAUTH_CLIENTID)),
+                new BasicNameValuePair("client_secret", appConfig.getString(AppConfig.OAUTH_CLIENTSECRET)),
+                new BasicNameValuePair("redirect_uri", appConfig.getString(AppConfig.OAUTH_REDIRECTURI))
         );
         client.post();
         if (client.isSuccessful()) {
-            OAuthBrowserLoginRunner.processSuccessfulLogin(client.getInput(), config);
+            OAuthBrowserLoginRunner.processSuccessfulLogin(client.getInput(), appConfig);
         }
         return client;
     }

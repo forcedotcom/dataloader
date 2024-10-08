@@ -37,7 +37,7 @@ import org.junit.runners.Parameterized;
 
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -141,14 +141,14 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
                 expectedUpdates);
 
         // now check offset specs
-        String rowOffset = ctl.getConfig().getString(Config.LOAD_ROW_TO_START_AT);
+        String rowOffset = ctl.getAppConfig().getString(AppConfig.LOAD_ROW_TO_START_AT);
 
         if (rowOffset != null) {
-            verifyOffsetFromInputAndOutputFiles(iOffset, ctl.getConfig());
+            verifyOffsetFromInputAndOutputFiles(iOffset, ctl.getAppConfig());
         }
     }
 
-    private void verifyOffsetFromInputAndOutputFiles(int numberOfOffsetRows, Config cfg) throws Exception {
+    private void verifyOffsetFromInputAndOutputFiles(int numberOfOffsetRows, AppConfig cfg) throws Exception {
 
         // Find out how many rows each file has
         int numberOfSuccessRows = 0;
@@ -157,15 +157,15 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
 
         // finding rows in input file and opening it
 
-        numberOfInputRows = getNumCsvRows(cfg, Config.DAO_NAME);
+        numberOfInputRows = getNumCsvRows(cfg, AppConfig.DAO_NAME);
 
         // finding rows in success file and opening it
-        CSVFileReader successFileReader = openConfiguredPath(cfg, Config.OUTPUT_SUCCESS);
-        numberOfSuccessRows = getNumCsvRows(cfg, Config.OUTPUT_SUCCESS);
+        CSVFileReader successFileReader = openConfiguredPath(cfg, AppConfig.OUTPUT_SUCCESS);
+        numberOfSuccessRows = getNumCsvRows(cfg, AppConfig.OUTPUT_SUCCESS);
 
         // finding rows in error file and opening it
-        CSVFileReader errorFileReader = openConfiguredPath(cfg, Config.OUTPUT_ERROR);
-        numberOfErrorRows = getNumCsvRows(cfg, Config.OUTPUT_ERROR);
+        CSVFileReader errorFileReader = openConfiguredPath(cfg, AppConfig.OUTPUT_ERROR);
+        numberOfErrorRows = getNumCsvRows(cfg, AppConfig.OUTPUT_ERROR);
 
         if (numberOfOffsetRows <= numberOfInputRows) {
             assertEquals("Number of lines between input and output do not match", numberOfInputRows,
@@ -193,7 +193,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
         }
 
         if (numberOfInputRows > 0) {
-            final CSVFileReader inputFileReader = openConfiguredPath(cfg, Config.DAO_NAME);
+            final CSVFileReader inputFileReader = openConfiguredPath(cfg, AppConfig.DAO_NAME);
 
             getFirstRow(firstInputOffsetAdjustedRow, inputFileReader, false, numberOfOffsetRows);
             getLastRow(lastInputRow, inputFileReader, false);
@@ -210,7 +210,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
         } //otherwise vacuously true
     }
 
-    private int getNumCsvRows(Config cfg, String setting) throws DataAccessObjectException {
+    private int getNumCsvRows(AppConfig cfg, String setting) throws DataAccessObjectException {
         final CSVFileReader rdr = openConfiguredPath(cfg, setting);
         try {
             return rdr.getTotalRows();
@@ -219,7 +219,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
         }
     }
 
-    private CSVFileReader openConfiguredPath(Config cfg, String configSetting)
+    private CSVFileReader openConfiguredPath(AppConfig cfg, String configSetting)
             throws DataAccessObjectInitializationException {
         final CSVFileReader rdr = new CSVFileReader(new File(cfg.getString(configSetting)), cfg, false, false);
         rdr.open();
@@ -264,7 +264,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
 
     private Map<String, String> getRowOffsetTestConfig(Object offset, int numInserts) throws DataAccessObjectException {
         final Map<String, String> argMap = getUpdateTestConfig(FILE_NAME_BASE, true, DEFAULT_ACCOUNT_EXT_ID_FIELD, numInserts);
-        argMap.put(Config.LOAD_ROW_TO_START_AT, offset.toString());
+        argMap.put(AppConfig.LOAD_ROW_TO_START_AT, offset.toString());
         return argMap;
     }
 }

@@ -30,7 +30,7 @@ import java.io.FileNotFoundException;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.SessionInfo.NotLoggedInException;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ParameterLoadException;
@@ -51,7 +51,7 @@ public abstract class ClientBase<ConnectionType> {
 
     protected final Logger logger;
     protected final Controller controller;
-    protected final Config config;
+    protected final AppConfig appConfig;
     private ConnectionType connectionType;
 
     private SessionInfo session = new SessionInfo();
@@ -68,9 +68,9 @@ public abstract class ClientBase<ConnectionType> {
     
     protected ClientBase(Controller controller, Logger logger) {
         this.controller = controller;
-        this.config = controller.getConfig();
+        this.appConfig = controller.getAppConfig();
         this.logger = logger;
-        String apiVersionStr = config.getString(Config.API_VERSION_PROP);
+        String apiVersionStr = appConfig.getString(AppConfig.API_VERSION_PROP);
         if (apiVersionStr != null && !apiVersionStr.isEmpty()) {
             apiVersionForTheSession = apiVersionStr;
         }
@@ -89,7 +89,7 @@ public abstract class ClientBase<ConnectionType> {
     private static final String UI_CLIENT_STRING = "UI";
     public static final String SFORCE_CALL_OPTIONS_HEADER = "Sforce-Call-Options";
 
-    public static String getClientName(Config cfg) {
+    public static String getClientName(AppConfig cfg) {
         String apiType = PARTNER_API_CLIENT_TYPE;
         final String interfaceType = cfg.isBatchMode() ? BATCH_CLIENT_STRING : UI_CLIENT_STRING;
         if (cfg.isBulkAPIEnabled()) {
@@ -116,28 +116,28 @@ public abstract class ClientBase<ConnectionType> {
         cc.setTransportFactory(new TransportFactoryImpl());
         cc.setSessionId(getSessionId());
         cc.setRequestHeader(SFORCE_CALL_OPTIONS_HEADER,
-                "client=" + ClientBase.getClientName(this.config));      
+                "client=" + ClientBase.getClientName(this.appConfig));      
         // set authentication credentials
         // blank username is not acceptible
-        String username = config.getString(Config.USERNAME);
-        boolean isManualSession = config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN);
-        boolean isOAuthSession = config.getString(Config.OAUTH_ACCESSTOKEN) != null && config.getString(Config.OAUTH_ACCESSTOKEN).trim().length() > 0;
+        String username = appConfig.getString(AppConfig.USERNAME);
+        boolean isManualSession = appConfig.getBoolean(AppConfig.SFDC_INTERNAL) && appConfig.getBoolean(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN);
+        boolean isOAuthSession = appConfig.getString(AppConfig.OAUTH_ACCESSTOKEN) != null && appConfig.getString(AppConfig.OAUTH_ACCESSTOKEN).trim().length() > 0;
         if (!isManualSession && !isOAuthSession && (username == null || username.length() == 0)) {
-            String errMsg = Messages.getMessage(getClass(), "emptyUsername", Config.USERNAME);
+            String errMsg = Messages.getMessage(getClass(), "emptyUsername", AppConfig.USERNAME);
             logger.error(errMsg);
             throw new IllegalStateException(errMsg);
         }
 
         cc.setUsername(username);
-        cc.setPassword(config.getString(Config.PASSWORD));
+        cc.setPassword(appConfig.getString(AppConfig.PASSWORD));
 
-        AppUtil.setConnectorConfigProxySettings(config, cc);
+        AppUtil.setConnectorConfigProxySettings(appConfig, cc);
         // Time out after 5 seconds for connection
         int connTimeoutSecs;
         try {
-            connTimeoutSecs = config.getInt(Config.CONNECTION_TIMEOUT_SECS);
+            connTimeoutSecs = appConfig.getInt(AppConfig.CONNECTION_TIMEOUT_SECS);
         } catch (ParameterLoadException e1) {
-            connTimeoutSecs = Config.DEFAULT_CONNECTION_TIMEOUT_SECS;
+            connTimeoutSecs = AppConfig.DEFAULT_CONNECTION_TIMEOUT_SECS;
         }
         cc.setConnectionTimeout(connTimeoutSecs * 1000);
 
@@ -145,21 +145,21 @@ public abstract class ClientBase<ConnectionType> {
         // set timeout for operations based on config
         int timeoutSecs;
         try {
-            timeoutSecs = config.getInt(Config.TIMEOUT_SECS);
+            timeoutSecs = appConfig.getInt(AppConfig.TIMEOUT_SECS);
         } catch (ParameterLoadException e) {
-            timeoutSecs = Config.DEFAULT_TIMEOUT_SECS;
+            timeoutSecs = AppConfig.DEFAULT_TIMEOUT_SECS;
         }
         cc.setReadTimeout((timeoutSecs * 1000));
 
         // use compression or turn it off
-        if (config.contains(Config.NO_COMPRESSION)) {
-            cc.setCompression(!config.getBoolean(Config.NO_COMPRESSION));
+        if (appConfig.contains(AppConfig.NO_COMPRESSION)) {
+            cc.setCompression(!appConfig.getBoolean(AppConfig.NO_COMPRESSION));
         }
 
-        if (config.getBoolean(Config.DEBUG_MESSAGES)) {
+        if (appConfig.getBoolean(AppConfig.DEBUG_MESSAGES)) {
             cc.setTraceMessage(true);
             cc.setPrettyPrintXml(true);
-            String filename = config.getString(Config.DEBUG_MESSAGES_FILE);
+            String filename = appConfig.getString(AppConfig.DEBUG_MESSAGES_FILE);
             if (filename.length() > 0) {
                 try {
                     cc.setTraceFile(filename);
@@ -174,7 +174,7 @@ public abstract class ClientBase<ConnectionType> {
             cc.setServiceEndpoint(server + PartnerClient.getServicePath()); // Partner SOAP service
             cc.setRestEndpoint(server + BulkV1Client.getServicePath());  // REST service: Bulk v1
         }
-        cc.setTraceMessage(config.getBoolean(Config.WIRE_OUTPUT));
+        cc.setTraceMessage(appConfig.getBoolean(AppConfig.WIRE_OUTPUT));
 
         return cc;
     }

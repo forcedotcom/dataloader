@@ -41,7 +41,7 @@ import org.eclipse.swt.widgets.*;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
 import com.salesforce.dataloader.dyna.ParentSObjectFormatter;
@@ -141,7 +141,7 @@ public class ChooseLookupFieldForRelationshipPage extends LoadPage {
             List<String> sortedRelationshipList = new ArrayList<>(parentSObjectDescribeMap.keySet());
             Collections.sort(sortedRelationshipList);
             for(String relationshipName : sortedRelationshipList) {
-                OperationInfo operation = controller.getConfig().getOperationInfo();
+                OperationInfo operation = controller.getAppConfig().getOperationInfo();
                 Field childField = parentSObjectDescribeMap.getParentSObject(relationshipName).getChildField();
                 boolean isCreateableOrUpdateable = true;
                 if (childField != null) {
@@ -381,7 +381,7 @@ public class ChooseLookupFieldForRelationshipPage extends LoadPage {
     public boolean setupPage() {
         boolean success = super.setupPage();
         if (this.controller != null && this.controller.isLoggedIn()) {
-            String message = Labels.getFormattedString(this.getClass().getSimpleName() + ".pageMessage", this.controller.getConfig().getString(Config.ENTITY));
+            String message = Labels.getFormattedString(this.getClass().getSimpleName() + ".pageMessage", this.controller.getAppConfig().getString(AppConfig.ENTITY));
             this.setMessage(message);
         }
         return success;

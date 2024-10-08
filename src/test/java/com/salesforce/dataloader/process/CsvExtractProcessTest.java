@@ -29,7 +29,7 @@ package com.salesforce.dataloader.process;
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -178,7 +178,7 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
                 GetUserInfoResult userInfo = getBinding().getUserInfo();
                 
                 // open the results of the extraction
-                final CSVFileReader rdr = new CSVFileReader(new File(argmap.get(Config.DAO_NAME)), getController().getConfig(), true, false);
+                final CSVFileReader rdr = new CSVFileReader(new File(argmap.get(AppConfig.DAO_NAME)), getController().getAppConfig(), true, false);
                 rdr.open();
                 Row row = rdr.readRow();
                 assertNotNull(row);
@@ -247,27 +247,27 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
             throws DataAccessObjectException, ProcessInitializationException {
         final String soql = "Select ID FROM ACCOUNT WHERE " + ACCOUNT_WHERE_CLAUSE + " limit 1";
         Map<String, String> argMap = getExtractionTestConfig(soql, "Account", false);
-        argMap.remove(Config.LAST_RUN_OUTPUT_DIR);
+        argMap.remove(AppConfig.LAST_RUN_OUTPUT_DIR);
 
         // set last run output paramerers
         if (!useDefault) {
-            argMap.put(Config.ENABLE_LAST_RUN_OUTPUT, String.valueOf(enableOutput));
-            argMap.put(Config.LAST_RUN_OUTPUT_DIR, outputDir);
+            argMap.put(AppConfig.ENABLE_LAST_RUN_OUTPUT, String.valueOf(enableOutput));
+            argMap.put(AppConfig.LAST_RUN_OUTPUT_DIR, outputDir);
         }
 
         this.baseName = baseProcessName;
         Controller theController = runProcess(argMap, 1);
 
-        Config config = theController.getConfig();
-        String lastRunFilePath = config.getLastRunFilename();
+        AppConfig appConfig = theController.getAppConfig();
+        String lastRunFilePath = appConfig.getLastRunFilename();
         File lastRunFile = new File(lastRunFilePath);
         try {
-            String lastrunFileNamePrefix = config.getString(Config.PROCESS_NAME);
+            String lastrunFileNamePrefix = appConfig.getString(AppConfig.PROCESS_NAME);
             if (lastrunFileNamePrefix == null || lastrunFileNamePrefix.isBlank()) {
-                lastrunFileNamePrefix = config.getString(Config.ENTITY) + config.getString(Config.OPERATION);
+                lastrunFileNamePrefix = appConfig.getString(AppConfig.ENTITY) + appConfig.getString(AppConfig.OPERATION);
             }
             String defaultFileName =  lastrunFileNamePrefix + "_lastRun.properties";
-            File expectedFile = useDefault ? new File(config.constructConfigFilePath(defaultFileName)) : new File(
+            File expectedFile = useDefault ? new File(appConfig.constructConfigFilePath(defaultFileName)) : new File(
                     outputDir, defaultFileName);
             if (enableOutput) {
                 assertTrue("Could not find last run file: " + lastRunFilePath, lastRunFile.exists());
@@ -318,8 +318,8 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
                 getTestDataDir() + "/acctsWithBinaryDataInRTF.csv", false);
         Controller controller = runProcess(insertArgMap, 1);
         List<String> ids = new ArrayList<String>();
-        String fileName = controller.getConfig().getString(Config.OUTPUT_SUCCESS);
-        final CSVFileReader successRdr = new CSVFileReader(new File(fileName), getController().getConfig(), true, false);
+        String fileName = controller.getAppConfig().getString(AppConfig.OUTPUT_SUCCESS);
+        final CSVFileReader successRdr = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
         String idFieldName = this.isBulkV2APIEnabled(insertArgMap)?"sf__Id":"ID";
         try {
             for (Row row : successRdr.readRowList(Integer.MAX_VALUE)) {
@@ -335,22 +335,22 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
         // set config property loader.query.includeBinaryData to true
         String soql = "Select ID,RICHTEXT__C FROM Account where id='" + ids.get(0) + "'";
         Map<String, String> queryArgMap = getExtractionTestConfig(soql, "Account", false);
-        queryArgMap.put(Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, inclueRTFBinaryData);
+        queryArgMap.put(AppConfig.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, inclueRTFBinaryData);
 
         // query the account and verify results
         controller = runProcess(queryArgMap, 1);
-        CSVFileReader queryResultsReader = new CSVFileReader(new File(queryArgMap.get(Config.DAO_NAME)), getController().getConfig(), true, false);
+        CSVFileReader queryResultsReader = new CSVFileReader(new File(queryArgMap.get(AppConfig.DAO_NAME)), getController().getAppConfig(), true, false);
         queryResultsReader.open();
         Row queryResultsRow = queryResultsReader.readRow();
         String queryResultsRTVal = (String)queryResultsRow.get("RICHTEXT__c");
 
         if ("true".equalsIgnoreCase(inclueRTFBinaryData)) {
-            CSVFileReader uploadedCSVReader = new CSVFileReader(new File(getTestDataDir() + "/acctsWithBinaryDataInRTF.csv"), getController().getConfig(), true, false);
+            CSVFileReader uploadedCSVReader = new CSVFileReader(new File(getTestDataDir() + "/acctsWithBinaryDataInRTF.csv"), getController().getAppConfig(), true, false);
             uploadedCSVReader.open();
             Row uploadedRow = uploadedCSVReader.readRow();
             String uploadedRTVal = (String)queryResultsRow.get("RICHTEXT__c");
             assertEquals("Binary data in query result file does not match uploaded data: " 
-            + queryArgMap.get(Config.DAO_NAME), queryResultsRTVal, uploadedRTVal);
+            + queryArgMap.get(AppConfig.DAO_NAME), queryResultsRTVal, uploadedRTVal);
         } else {
             assertTrue(queryResultsRTVal.contains(".file.force.com/servlet/rtaImage?"));
         }

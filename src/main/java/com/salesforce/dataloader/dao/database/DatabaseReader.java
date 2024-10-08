@@ -34,7 +34,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dao.DAORowCache;
 import com.salesforce.dataloader.dao.DataReader;
@@ -55,7 +55,7 @@ public class DatabaseReader implements DataReader {
     private static Logger logger = LogManager.getLogger(DatabaseReader.class);
 
     private final BasicDataSource dataSource;
-    private final Config config;
+    private final AppConfig appConfig;
     private List<String> columnNames = new ArrayList<String>();
     private int totalRows = 0;
     private int currentRowNumber = 0;
@@ -66,11 +66,11 @@ public class DatabaseReader implements DataReader {
 
     /**
      * Get an instance of database reader for the data access object name from configuration
-     * @param config
+     * @param appConfig
      * @throws DataAccessObjectInitializationException
      */
-    public DatabaseReader(Config config) throws DataAccessObjectInitializationException {
-        this(config, config.getString(Config.DAO_NAME));
+    public DatabaseReader(AppConfig appConfig) throws DataAccessObjectInitializationException {
+        this(appConfig, appConfig.getString(AppConfig.DAO_NAME));
     }
 
     /**
@@ -78,9 +78,9 @@ public class DatabaseReader implements DataReader {
      * @param dbConfigName
      * @throws DataAccessObjectInitializationException
      */
-    public DatabaseReader(Config config, String dbConfigName) throws DataAccessObjectInitializationException {
-        this.config = config;
-        String dbConfigFilename = config.constructConfigFilePath(DatabaseContext.DEFAULT_CONFIG_FILENAME);
+    public DatabaseReader(AppConfig appConfig, String dbConfigName) throws DataAccessObjectInitializationException {
+        this.appConfig = appConfig;
+        String dbConfigFilename = appConfig.constructConfigFilePath(DatabaseContext.DEFAULT_CONFIG_FILENAME);
         if(! (new File(dbConfigFilename).exists())) {
             throw new DataAccessObjectInitializationException(Messages.getFormattedString("DatabaseDAO.errorConfigFileExists", dbConfigFilename)); //$NON-NLS-1$
         }
@@ -129,20 +129,20 @@ public class DatabaseReader implements DataReader {
             PreparedStatement statement = dbContext.prepareStatement();
             // right now, query doesn't support data input -- all the parameters are static vs. update which takes data
             // for every put call
-            dbContext.setSqlParamValues(sqlConfig, config, params);
+            dbContext.setSqlParamValues(sqlConfig, appConfig, params);
 
             // set the query fetch size
             int fetchSize;
             try {
-                fetchSize = config.getInt(Config.DAO_READ_BATCH_SIZE);
-                if(fetchSize > Config.MAX_DAO_READ_BATCH_SIZE) {
-                    fetchSize = Config.MAX_DAO_READ_BATCH_SIZE;
+                fetchSize = appConfig.getInt(AppConfig.DAO_READ_BATCH_SIZE);
+                if(fetchSize > AppConfig.MAX_DAO_READ_BATCH_SIZE) {
+                    fetchSize = AppConfig.MAX_DAO_READ_BATCH_SIZE;
                 }
             } catch (ParameterLoadException e) {
                 // warn about getting batch size parameter, otherwise continue w/ default
                 logger.warn(Messages.getFormattedString("DatabaseDAO.errorGettingBatchSize", new String[] {
-                        String.valueOf(Config.DEFAULT_DAO_READ_BATCH_SIZE), e.getMessage() }));
-                fetchSize = Config.DEFAULT_DAO_READ_BATCH_SIZE;
+                        String.valueOf(AppConfig.DEFAULT_DAO_READ_BATCH_SIZE), e.getMessage() }));
+                fetchSize = AppConfig.DEFAULT_DAO_READ_BATCH_SIZE;
             }
             statement.setFetchSize(fetchSize);
 
@@ -187,7 +187,7 @@ public class DatabaseReader implements DataReader {
             currentRowNumber++;
             return row;
         }
-        if (config.getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+        if (appConfig.getBoolean(AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
             && endOfDBReached) {
             return null;
         }
@@ -227,10 +227,10 @@ public class DatabaseReader implements DataReader {
 
     @Override
     public int getTotalRows() throws DataAccessObjectException {
-    	boolean skipRowCount = Config.DEFAULT_SKIP_TOTAL_COUNT;
+    	boolean skipRowCount = AppConfig.DEFAULT_SKIP_TOTAL_COUNT;
     	
-    	if (config.contains(Config.DAO_SKIP_TOTAL_COUNT))
-    		skipRowCount = config.getBoolean(Config.DAO_SKIP_TOTAL_COUNT);
+    	if (appConfig.contains(AppConfig.DAO_SKIP_TOTAL_COUNT))
+    		skipRowCount = appConfig.getBoolean(AppConfig.DAO_SKIP_TOTAL_COUNT);
     	
     	if (skipRowCount == true)
     		return 0;

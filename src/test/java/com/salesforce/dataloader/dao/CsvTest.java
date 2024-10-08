@@ -33,7 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.salesforce.dataloader.ConfigTestBase;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.model.Row;
@@ -80,16 +80,16 @@ public class CsvTest extends ConfigTestBase {
     
     @Test
     public void testCSVReadUTF16BEBOMBasic() throws Exception{
-        getController().getConfig().setValue(Config.READ_CHARSET, "UTF-16BE");
+        getController().getAppConfig().setValue(AppConfig.READ_CHARSET, "UTF-16BE");
         testCSVReadBasic("csvtext_BOM_UTF16BE.csv");
-        getController().getConfig().setValue(Config.READ_CHARSET, "");
+        getController().getAppConfig().setValue(AppConfig.READ_CHARSET, "");
     }
     
     @Test
     public void testCSVReadUTF16LEBOMBasic() throws Exception{
-        getController().getConfig().setValue(Config.READ_CHARSET, "UTF-16LE");
+        getController().getAppConfig().setValue(AppConfig.READ_CHARSET, "UTF-16LE");
         testCSVReadBasic("csvtext_BOM_UTF16LE.csv");
-        getController().getConfig().setValue(Config.READ_CHARSET, "");
+        getController().getAppConfig().setValue(AppConfig.READ_CHARSET, "");
     }
 
     private void testCSVReadBasic(String csvFile) throws Exception {
@@ -97,7 +97,7 @@ public class CsvTest extends ConfigTestBase {
         assertTrue(f.exists());
         assertTrue(f.canRead());
 
-        CSVFileReader csv = new CSVFileReader(f, getController().getConfig(), false, false);
+        CSVFileReader csv = new CSVFileReader(f, getController().getAppConfig(), false, false);
         csv.open();
 
         List<String> headerRow = csv.getColumnNames();
@@ -141,7 +141,7 @@ public class CsvTest extends ConfigTestBase {
     private void doTestCSVWriteBasic(String delimiter) throws Exception {
         File f = new File(getTestDataDir(), "csvtestTemp.csv");
         String path = f.getAbsolutePath();
-        CSVFileWriter writer = new CSVFileWriter(path, getController().getConfig(), delimiter);
+        CSVFileWriter writer = new CSVFileWriter(path, getController().getAppConfig(), delimiter);
         List<Row> rowList = new ArrayList<Row>();
 
         rowList.add(row1);
@@ -165,10 +165,10 @@ public class CsvTest extends ConfigTestBase {
         File f = new File(getTestDataDir(), "csvSeparator.csv");
         assertTrue(f.exists());
         assertTrue(f.canRead());
-        getController().getConfig().setValue("loader.csvOther", true);
-        getController().getConfig().setValue("loader.csvOtherValue", "!");
+        getController().getAppConfig().setValue("loader.csvOther", true);
+        getController().getAppConfig().setValue("loader.csvOtherValue", "!");
 
-        CSVFileReader csv = new CSVFileReader(f, getController().getConfig(), false, false);
+        CSVFileReader csv = new CSVFileReader(f, getController().getAppConfig(), false, false);
         csv.open();
         Row firstRow = csv.readRow();
         assertEquals("somev1", firstRow.get("some"));
@@ -177,8 +177,8 @@ public class CsvTest extends ConfigTestBase {
         assertEquals("somev2", secondRow.get("some"));
         csv.close();
 
-        getController().getConfig().setValue("loader.csvOther", false);
-        csv = new CSVFileReader(f, getController().getConfig(), false, false);
+        getController().getAppConfig().setValue("loader.csvOther", false);
+        csv = new CSVFileReader(f, getController().getAppConfig(), false, false);
         csv.open();
         firstRow = csv.readRow();
         assertEquals("col12!somev1", firstRow.get("column2!some"));
@@ -192,7 +192,7 @@ public class CsvTest extends ConfigTestBase {
         assertTrue(f.exists());
         assertTrue(f.canRead());
 
-        CSVFileReader csv = new CSVFileReader(f, getController().getConfig(), false, false);
+        CSVFileReader csv = new CSVFileReader(f, getController().getAppConfig(), false, false);
         csv.open();
 
         Row firstRow = csv.readRow();
@@ -206,7 +206,7 @@ public class CsvTest extends ConfigTestBase {
 
     @Test
     public void testCsvWithManyRowsCanBeParsed() throws Exception {
-        CSVFileReader csvFileReader = new CSVFileReader(new File(getTestDataDir(), "20kRows.csv"), getController().getConfig(), false, false);
+        CSVFileReader csvFileReader = new CSVFileReader(new File(getTestDataDir(), "20kRows.csv"), getController().getAppConfig(), false, false);
         csvFileReader.open();
         assertEquals(20000, csvFileReader.getTotalRows());
         int count = 0;
@@ -221,33 +221,33 @@ public class CsvTest extends ConfigTestBase {
      */
 
     private void compareWriterFile(String filePath, String delimiterStr, boolean ignoreDelimiterConfig, boolean isQueryResultsCSV) throws Exception {
-        Config config = getController().getConfig();
+        AppConfig appConfig = getController().getAppConfig();
         String storedDelimiter;
         boolean storedCsvDelimiterComma = false, storedCsvDelimiterTab = false, storedCsvDelimiterOther = false;
         if (isQueryResultsCSV) {
-            storedDelimiter = config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS);
-            config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
+            storedDelimiter = appConfig.getString(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS);
+            appConfig.setValue(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
         } else {
-            storedDelimiter = config.getString(Config.CSV_DELIMITER_OTHER_VALUE);
-            storedCsvDelimiterComma = config.getBoolean(Config.CSV_DELIMITER_COMMA);
-            storedCsvDelimiterTab = config.getBoolean(Config.CSV_DELIMITER_TAB);
-            storedCsvDelimiterOther = config.getBoolean(Config.CSV_DELIMITER_OTHER);
-            config.setValue(Config.CSV_DELIMITER_COMMA, false);
-            config.setValue(Config.CSV_DELIMITER_TAB, false);
-            config.setValue(Config.CSV_DELIMITER_OTHER, false);
-            config.setValue(Config.CSV_DELIMITER_OTHER_VALUE, delimiterStr);
+            storedDelimiter = appConfig.getString(AppConfig.CSV_DELIMITER_OTHER_VALUE);
+            storedCsvDelimiterComma = appConfig.getBoolean(AppConfig.CSV_DELIMITER_COMMA);
+            storedCsvDelimiterTab = appConfig.getBoolean(AppConfig.CSV_DELIMITER_TAB);
+            storedCsvDelimiterOther = appConfig.getBoolean(AppConfig.CSV_DELIMITER_OTHER);
+            appConfig.setValue(AppConfig.CSV_DELIMITER_COMMA, false);
+            appConfig.setValue(AppConfig.CSV_DELIMITER_TAB, false);
+            appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER, false);
+            appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER_VALUE, delimiterStr);
             if (AppUtil.COMMA.equals(delimiterStr)) {
-                config.setValue(Config.CSV_DELIMITER_COMMA, true);
+                appConfig.setValue(AppConfig.CSV_DELIMITER_COMMA, true);
             } else if ("    ".equals(delimiterStr)) {
-                config.setValue(Config.CSV_DELIMITER_TAB, true);
+                appConfig.setValue(AppConfig.CSV_DELIMITER_TAB, true);
             } else {
-                config.setValue(Config.CSV_DELIMITER_OTHER, true);
-                storedDelimiter = config.getString(Config.CSV_DELIMITER_OTHER_VALUE);
-                config.setValue(Config.CSV_DELIMITER_OTHER_VALUE, delimiterStr);
+                appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER, true);
+                storedDelimiter = appConfig.getString(AppConfig.CSV_DELIMITER_OTHER_VALUE);
+                appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER_VALUE, delimiterStr);
             }
         }
-        config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
-        CSVFileReader csv = new CSVFileReader(new File(filePath), config, ignoreDelimiterConfig, isQueryResultsCSV);
+        appConfig.setValue(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
+        CSVFileReader csv = new CSVFileReader(new File(filePath), appConfig, ignoreDelimiterConfig, isQueryResultsCSV);
         try {
             csv.open();
         } catch (Exception e) {
@@ -274,12 +274,12 @@ public class CsvTest extends ConfigTestBase {
         }
         csv.close();
         if (isQueryResultsCSV) {
-            config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, storedDelimiter);
+            appConfig.setValue(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS, storedDelimiter);
         } else {
-            config.setValue(Config.CSV_DELIMITER_OTHER_VALUE, storedDelimiter);
-            config.setValue(Config.CSV_DELIMITER_COMMA, storedCsvDelimiterComma);
-            config.setValue(Config.CSV_DELIMITER_TAB, storedCsvDelimiterTab);
-            config.setValue(Config.CSV_DELIMITER_OTHER, storedCsvDelimiterOther);
+            appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER_VALUE, storedDelimiter);
+            appConfig.setValue(AppConfig.CSV_DELIMITER_COMMA, storedCsvDelimiterComma);
+            appConfig.setValue(AppConfig.CSV_DELIMITER_TAB, storedCsvDelimiterTab);
+            appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER, storedCsvDelimiterOther);
         }
     }
 }

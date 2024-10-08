@@ -35,7 +35,7 @@ import com.salesforce.dataloader.action.OperationInfo;
  * @since 6.0
  */
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
@@ -128,7 +128,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
         @Override
         public UpsertResult[] run(SObject[] sObjects) throws ConnectionException {
-            return getConnection().upsert(config.getString(Config.IDLOOKUP_FIELD), sObjects);
+            return getConnection().upsert(appConfig.getString(AppConfig.IDLOOKUP_FIELD), sObjects);
         }
     };
 
@@ -247,17 +247,17 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     private void setExportBatchSize() {
         // query header
-        int querySize = Config.DEFAULT_EXPORT_BATCH_SIZE;
+        int querySize = AppConfig.DEFAULT_EXPORT_BATCH_SIZE;
         try {
-            querySize = config.getInt(Config.EXPORT_BATCH_SIZE);
+            querySize = appConfig.getInt(AppConfig.EXPORT_BATCH_SIZE);
         } catch (ParameterLoadException e) {
-            querySize = Config.DEFAULT_EXPORT_BATCH_SIZE;
+            querySize = AppConfig.DEFAULT_EXPORT_BATCH_SIZE;
         }
-        if (querySize <= Config.MIN_EXPORT_BATCH_SIZE) {
-            querySize = Config.MIN_EXPORT_BATCH_SIZE;
+        if (querySize <= AppConfig.MIN_EXPORT_BATCH_SIZE) {
+            querySize = AppConfig.MIN_EXPORT_BATCH_SIZE;
         }
-        if (querySize > Config.MAX_EXPORT_BATCH_SIZE) {
-            querySize = Config.MAX_EXPORT_BATCH_SIZE;
+        if (querySize > AppConfig.MAX_EXPORT_BATCH_SIZE) {
+            querySize = AppConfig.MAX_EXPORT_BATCH_SIZE;
         }
         getConnection().setQueryOptions(querySize);
     }
@@ -266,12 +266,12 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         if (getConnection() == null)
             throw new IllegalStateException("Client should be logged in already");
 
-        getConnection().setCallOptions(ClientBase.getClientName(this.config), null);
+        getConnection().setCallOptions(ClientBase.getClientName(this.appConfig), null);
         setExportBatchSize();
         
         // assignment rule for update
-        if (config.getString(Config.ASSIGNMENT_RULE).length() > 14) {
-            String rule = config.getString(Config.ASSIGNMENT_RULE);
+        if (appConfig.getString(AppConfig.ASSIGNMENT_RULE).length() > 14) {
+            String rule = appConfig.getString(AppConfig.ASSIGNMENT_RULE);
             if (rule.length() > 15) {
                 rule = rule.substring(0, 15);
             }
@@ -279,15 +279,15 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
 
         // field truncation
-        getConnection().setAllowFieldTruncationHeader(config.getBoolean(Config.TRUNCATE_FIELDS));
+        getConnection().setAllowFieldTruncationHeader(appConfig.getBoolean(AppConfig.TRUNCATE_FIELDS));
 
         // TODO: make this configurable
         getConnection().setDisableFeedTrackingHeader(true);
 
         getConnection().setDuplicateRuleHeader(
-            config.getBoolean(Config.DUPLICATE_RULE_ALLOW_SAVE),
-            config.getBoolean(Config.DUPLICATE_RULE_INCLUDE_RECORD_DETAILS),
-            config.getBoolean(Config.DUPLICATE_RULE_RUN_AS_CURRENT_USER)
+            appConfig.getBoolean(AppConfig.DUPLICATE_RULE_ALLOW_SAVE),
+            appConfig.getBoolean(AppConfig.DUPLICATE_RULE_INCLUDE_RECORD_DETAILS),
+            appConfig.getBoolean(AppConfig.DUPLICATE_RULE_RUN_AS_CURRENT_USER)
         );
 
         return true;
@@ -340,8 +340,8 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     private SObject[] getSobjects(List<DynaBean> dynaBeans, String opName) {
         try {
-            SObject[] sobjects = SforceDynaBean.getSObjectArray(controller, dynaBeans, config.getString(Config.ENTITY),
-                    config.getBoolean(Config.INSERT_NULLS));
+            SObject[] sobjects = SforceDynaBean.getSObjectArray(controller, dynaBeans, appConfig.getString(AppConfig.ENTITY),
+                    appConfig.getBoolean(AppConfig.INSERT_NULLS));
             logger.debug(Messages.getString("Client.arraySize") + sobjects.length); //$NON-NLS-1$
             return sobjects;
         } catch (IllegalAccessException ex) {
@@ -506,7 +506,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             for (Error err : errors) {
                 int startRow;
                 try {
-                    startRow = config.getInt(Config.LOAD_ROW_TO_START_AT);
+                    startRow = appConfig.getInt(AppConfig.LOAD_ROW_TO_START_AT);
                 } catch (ParameterLoadException e) {
                     startRow = 0;
                 }
@@ -519,7 +519,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     public Map<String, DescribeGlobalSObjectResult> getDescribeGlobalResults() {
-        if (this.describeGlobalResults == null || !config.getBoolean(Config.CACHE_DESCRIBE_GLOBAL_RESULTS)) {
+        if (this.describeGlobalResults == null || !appConfig.getBoolean(AppConfig.CACHE_DESCRIBE_GLOBAL_RESULTS)) {
             this.describeGlobalResultsMap.clear();
             try {
                 this.describeGlobalResults = runOperation(DESCRIBE_GLOBAL_OPERATION, null);
@@ -547,7 +547,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     public DescribeSObjectResult getFieldTypes() {
-        String entity = this.config.getString(Config.ENTITY);
+        String entity = this.appConfig.getString(AppConfig.ENTITY);
         try {
             return describeSObject(entity);
         } catch (ConnectionException e) {
@@ -570,10 +570,10 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     boolean isSessionValid() {
-        if (config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
+        if (appConfig.getBoolean(AppConfig.SFDC_INTERNAL) && appConfig.getBoolean(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
             return true;
         }
-        if (config.getString(Config.OAUTH_ACCESSTOKEN) != null && config.getString(Config.OAUTH_ACCESSTOKEN).trim().length() > 0) {
+        if (appConfig.getString(AppConfig.OAUTH_ACCESSTOKEN) != null && appConfig.getString(AppConfig.OAUTH_ACCESSTOKEN).trim().length() > 0) {
             return true;
         }
         return isLoggedIn();
@@ -581,7 +581,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     private boolean login() throws ConnectionException, ApiFault {
         disconnect();
-        String origEndpoint = new String(config.getAuthEndpoint());
+        String origEndpoint = new String(appConfig.getAuthEndpoint());
         try {
             dologin();
             logger.debug("able to successfully invoke server APIs of version " + getAPIVersionForTheSession());
@@ -596,11 +596,11 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             }
         } catch (ConnectionException e) {
             logger.warn(Messages.getMessage(this.getClass(), "failedUsernamePasswordAuth", 
-                                            origEndpoint, config.getString(Config.SELECTED_AUTH_ENVIRONMENT), e.getMessage()));
-            if (!config.isDefaultAuthEndpoint(origEndpoint)) {
+                                            origEndpoint, appConfig.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT), e.getMessage()));
+            if (!appConfig.isDefaultAuthEndpoint(origEndpoint)) {
                 // retry with default endpoint URL only if user is attempting production login
-                config.setAuthEndpoint(config.getDefaultAuthEndpoint());
-                logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", config.getDefaultAuthEndpoint(), config.getString(Config.SELECTED_AUTH_ENVIRONMENT)));
+                appConfig.setAuthEndpoint(appConfig.getDefaultAuthEndpoint());
+                logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", appConfig.getDefaultAuthEndpoint(), appConfig.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT)));
                 login();
             } else {
                 logger.error("Failed to get user info using manually configured session id", e);
@@ -608,7 +608,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             }
         } finally {
             // restore original value of Config.ENDPOINT property
-            config.setAuthEndpoint(origEndpoint);
+            appConfig.setAuthEndpoint(origEndpoint);
         }
         return true; // exception thrown if there is an issue with login
     }
@@ -621,18 +621,18 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         cc.setTraceMessage(false);
         PartnerConnection conn = Connector.newConnection(cc);
         // identify the client as dataloader
-        conn.setCallOptions(ClientBase.getClientName(this.config), null);
+        conn.setCallOptions(ClientBase.getClientName(this.appConfig), null);
 
-        String oauthAccessToken = config.getString(Config.OAUTH_ACCESSTOKEN);
+        String oauthAccessToken = appConfig.getString(AppConfig.OAUTH_ACCESSTOKEN);
         try {
             if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
-                cc = getLoginConnectorConfig(config.getString(Config.OAUTH_INSTANCE_URL));
+                cc = getLoginConnectorConfig(appConfig.getString(AppConfig.OAUTH_INSTANCE_URL));
                 savedIsTraceMessage = cc.isTraceMessage();
                 cc.setTraceMessage(false);
                 conn = Connector.newConnection(cc);
                 conn = setConfiguredSessionId(conn, oauthAccessToken, null);
-            } else if (config.getBoolean(Config.SFDC_INTERNAL) && config.getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
-                conn = setConfiguredSessionId(conn, config.getString(Config.SFDC_INTERNAL_SESSION_ID), null);
+            } else if (appConfig.getBoolean(AppConfig.SFDC_INTERNAL) && appConfig.getBoolean(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
+                conn = setConfiguredSessionId(conn, appConfig.getString(AppConfig.SFDC_INTERNAL_SESSION_ID), null);
             } else {
                 setSessionRenewer(conn);
                 loginInternal(conn);
@@ -662,13 +662,13 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         if (userInfo == null) {
             userInfo = conn.getUserInfo(); // check to make sure we have a good connection
         }
-        loginSuccess(conn, getAuthenticationHostDomainUrl(config.getAuthEndpoint()), userInfo);
+        loginSuccess(conn, getAuthenticationHostDomainUrl(appConfig.getAuthEndpoint()), userInfo);
         return conn;
     }
 
     private void loginInternal(final PartnerConnection conn) throws ConnectionException, PasswordExpiredException {
         final ConnectorConfig cc = conn.getConfig();
-        cc.setRequestHeader(Config.CLIENT_ID_HEADER_NAME, config.getString(Config.OAUTH_CLIENTID));
+        cc.setRequestHeader(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.OAUTH_CLIENTID));
         try {
             logger.info(Messages.getMessage(getClass(), "sforceLoginDetail", cc.getAuthEndpoint(), cc.getUsername()));
             LoginResult loginResult = runOperation(LOGIN_OPERATION, conn);
@@ -681,7 +681,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             conn.setSessionHeader(loginResult.getSessionId());
             String serverUrl = loginResult.getServerUrl();
             String server = getAuthenticationHostDomainUrl(serverUrl);
-            if (config.getBoolean(Config.RESET_URL_ON_LOGIN)) {
+            if (appConfig.getBoolean(AppConfig.RESET_URL_ON_LOGIN)) {
                 cc.setServiceEndpoint(serverUrl);
             }
             loginSuccess(conn, server, loginResult.getUserInfo());
@@ -701,7 +701,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private String getAuthenticationHostDomainUrl(String serverUrl) {
-        if (config.getBoolean(Config.RESET_URL_ON_LOGIN)) {
+        if (appConfig.getBoolean(AppConfig.RESET_URL_ON_LOGIN)) {
             try {
                 return getServerStringFromUrl(new URL(serverUrl));
             } catch (MalformedURLException e) {
@@ -711,7 +711,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
         // Either RESET_URL_ON_LOGIN is false or input param serverURL 
         // is invalid. Try returning configured Auth endpoint instead.
-        return config.getAuthEndpoint();
+        return appConfig.getAuthEndpoint();
     }
 
     public boolean logout() {
@@ -743,12 +743,12 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
         Collection<String> mappedSFFields = null;
         if (getDescribeGlobalResults() != null) {
-            String operation = config.getString(Config.OPERATION);
+            String operation = appConfig.getString(AppConfig.OPERATION);
             if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH
                     && operation != null
                     && !operation.isBlank()
-                    && config.getOperationInfo() != OperationInfo.extract
-                    && config.getOperationInfo() != OperationInfo.extract_all) {
+                    && appConfig.getOperationInfo() != OperationInfo.extract
+                    && appConfig.getOperationInfo() != OperationInfo.extract_all) {
                 // import operation in batch mode
                 LoadMapper mapper = (LoadMapper)controller.getMapper();
                 // call describe only for mapped fields
@@ -759,8 +759,8 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
     
     public void setFieldReferenceDescribes(Collection<String> sfFields) throws ConnectionException {
-        if (config.getBoolean(Config.CACHE_DESCRIBE_GLOBAL_RESULTS)) {
-            referenceEntitiesDescribesMap = parentDescribeCache.get(config.getString(Config.ENTITY));
+        if (appConfig.getBoolean(AppConfig.CACHE_DESCRIBE_GLOBAL_RESULTS)) {
+            referenceEntitiesDescribesMap = parentDescribeCache.get(appConfig.getString(AppConfig.ENTITY));
         } else {
             referenceEntitiesDescribesMap.clear();
         }
@@ -820,10 +820,10 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 processParentObjectArrayForLookupReferences(parentObjectNames, childObjectField);
             }
         }
-        if (config.getBoolean(Config.CACHE_DESCRIBE_GLOBAL_RESULTS)
+        if (appConfig.getBoolean(AppConfig.CACHE_DESCRIBE_GLOBAL_RESULTS)
             && sfFields == null) {
             // got the full list of parents' describes for an sobject
-            parentDescribeCache.put(config.getString(Config.ENTITY), referenceEntitiesDescribesMap);
+            parentDescribeCache.put(appConfig.getString(AppConfig.ENTITY), referenceEntitiesDescribesMap);
         }
     }
     
@@ -860,7 +860,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
      * @throws ConnectionException
      */
     public void setFieldTypes() throws ConnectionException {
-        describeSObject(config.getString(Config.ENTITY));
+        describeSObject(appConfig.getString(AppConfig.ENTITY));
     }
 
     /**
@@ -886,7 +886,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private synchronized ConnectorConfig getLoginConnectorConfig() {
-        return getLoginConnectorConfig(config.getAuthEndpoint());
+        return getLoginConnectorConfig(appConfig.getAuthEndpoint());
     }
     
     private synchronized ConnectorConfig getLoginConnectorConfig(String serverURL) {
@@ -905,7 +905,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     public DescribeSObjectResult describeSObject(String entity) throws ConnectionException {
         DescribeSObjectResult result = null;
-        if (config.getBoolean(Config.CACHE_DESCRIBE_GLOBAL_RESULTS)) {
+        if (appConfig.getBoolean(AppConfig.CACHE_DESCRIBE_GLOBAL_RESULTS)) {
             result = getCachedEntityDescribeMap().get(entity);
         }
         if (result == null) {

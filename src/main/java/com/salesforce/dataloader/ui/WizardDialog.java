@@ -28,7 +28,7 @@ package com.salesforce.dataloader.ui;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Shell;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 
 public abstract class WizardDialog extends BaseDialog {
@@ -45,25 +45,25 @@ public abstract class WizardDialog extends BaseDialog {
     
     protected void setShellBounds(Shell dialogShell) {
         Rectangle shellBounds = dialogShell.getBounds();
-        Rectangle persistedWizardBounds = UIUtils.getPersistedWizardBounds(getController().getConfig());
-        shellBounds.x = persistedWizardBounds.x + Config.DIALOG_X_OFFSET;
-        shellBounds.y = persistedWizardBounds.y + Config.DIALOG_Y_OFFSET;
+        Rectangle persistedWizardBounds = UIUtils.getPersistedWizardBounds(getController().getAppConfig());
+        shellBounds.x = persistedWizardBounds.x + AppConfig.DIALOG_X_OFFSET;
+        shellBounds.y = persistedWizardBounds.y + AppConfig.DIALOG_Y_OFFSET;
         dialogShell.setBounds(shellBounds);
     }
     
     protected Rectangle getPersistedDialogBounds() {
-        Config config = getController().getConfig();
-        Rectangle wizardBounds = UIUtils.getPersistedWizardBounds(config);
-        int xOffset = wizardBounds.x + Config.DIALOG_X_OFFSET;
-        int yOffset = wizardBounds.y + Config.DIALOG_Y_OFFSET;
+        AppConfig appConfig = getController().getAppConfig();
+        Rectangle wizardBounds = UIUtils.getPersistedWizardBounds(appConfig);
+        int xOffset = wizardBounds.x + AppConfig.DIALOG_X_OFFSET;
+        int yOffset = wizardBounds.y + AppConfig.DIALOG_Y_OFFSET;
         int width = wizardBounds.width;
         int height = wizardBounds.height;
-        if (config != null) {
+        if (appConfig != null) {
             try {
-                xOffset = config.getInt(Config.WIZARD_X_OFFSET) + Config.DIALOG_X_OFFSET;
-                yOffset = config.getInt(Config.WIZARD_Y_OFFSET) + Config.DIALOG_Y_OFFSET;
-                width = config.getInt(Config.DIALOG_BOUNDS_PREFIX + getClass().getSimpleName() + Config.DIALOG_WIDTH_SUFFIX);
-                height = config.getInt(Config.DIALOG_BOUNDS_PREFIX + getClass().getSimpleName() + Config.DIALOG_HEIGHT_SUFFIX);
+                xOffset = appConfig.getInt(AppConfig.WIZARD_X_OFFSET) + AppConfig.DIALOG_X_OFFSET;
+                yOffset = appConfig.getInt(AppConfig.WIZARD_Y_OFFSET) + AppConfig.DIALOG_Y_OFFSET;
+                width = appConfig.getInt(AppConfig.DIALOG_BOUNDS_PREFIX + getClass().getSimpleName() + AppConfig.DIALOG_WIDTH_SUFFIX);
+                height = appConfig.getInt(AppConfig.DIALOG_BOUNDS_PREFIX + getClass().getSimpleName() + AppConfig.DIALOG_HEIGHT_SUFFIX);
             } catch (Exception ex) {
                 // no op
             }

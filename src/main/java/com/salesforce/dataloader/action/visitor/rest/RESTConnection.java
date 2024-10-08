@@ -45,7 +45,7 @@ import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.client.SessionInfo;
 import com.salesforce.dataloader.client.CompositeRESTClient.ACTION_ENUM;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
@@ -98,7 +98,7 @@ public class RESTConnection {
             headers.put("Content-Type", "application/JSON");
             headers.put("ACCEPT", "application/JSON");
             headers.put("Authorization", "Bearer " + session.getSessionId());
-            String lookupFieldName = Config.getCurrentConfig().getString(Config.IDLOOKUP_FIELD);
+            String lookupFieldName = AppConfig.getCurrentConfig().getString(AppConfig.IDLOOKUP_FIELD);
             if (lookupFieldName == null || lookupFieldName.isBlank()) {
                 lookupFieldName = "id";
             }
@@ -121,7 +121,7 @@ public class RESTConnection {
             try {
                 OutputStream out = transport.connect(
                         connectorConfig.getRestEndpoint() 
-                            + controller.getConfig().getString(Config.ENTITY) 
+                            + controller.getAppConfig().getString(AppConfig.ENTITY) 
                             + "/" + lookupFieldName + "/"
                             + "?updateOnly=true",
                         headers,
@@ -200,8 +200,8 @@ public class RESTConnection {
     
     private Map<String, Object> getSobjectMapForCompositeREST(List<DynaBean> dynaBeans, String opName) {
         try {
-            List<Map<String, Object>> sobjectList = SforceDynaBean.getRESTSObjectArray(controller, dynaBeans, controller.getConfig().getString(Config.ENTITY),
-                    controller.getConfig().getBoolean(Config.INSERT_NULLS));
+            List<Map<String, Object>> sobjectList = SforceDynaBean.getRESTSObjectArray(controller, dynaBeans, controller.getAppConfig().getString(AppConfig.ENTITY),
+                    controller.getAppConfig().getBoolean(AppConfig.INSERT_NULLS));
             HashMap<String, Object> recordsMap = new HashMap<String, Object>();
             recordsMap.put("records", sobjectList);
             recordsMap.put("allOrNone", false);

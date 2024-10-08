@@ -35,7 +35,7 @@ import java.util.Map;
 
 import org.apache.http.client.utils.URIBuilder;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.model.OAuthToken;
 
 /*
@@ -43,14 +43,14 @@ import com.salesforce.dataloader.model.OAuthToken;
  * It decouples OAuth UI related classes from OAuth protocol handling.
  */
 public class OAuthFlowUtil {
-    public static String getStartUrlImpl(Config config) throws UnsupportedEncodingException {
-        return config.getString(Config.OAUTH_SERVER) +
+    public static String getStartUrlImpl(AppConfig appConfig) throws UnsupportedEncodingException {
+        return appConfig.getString(AppConfig.OAUTH_SERVER) +
                 "/services/oauth2/authorize"
                 + "?response_type=token"
                 + "&display=popup"
-                + "&" + config.getClientIdNameValuePair() 
+                + "&" + appConfig.getClientIdNameValuePair() 
                 + "&redirect_uri="
-                + URLEncoder.encode(config.getString(Config.OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
+                + URLEncoder.encode(appConfig.getString(AppConfig.OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
     }
     
 
@@ -61,7 +61,7 @@ public class OAuthFlowUtil {
         return params;
     }
     
-    public static boolean handleCompletedUrl(String url, Config config) throws URISyntaxException {
+    public static boolean handleCompletedUrl(String url, AppConfig appConfig) throws URISyntaxException {
         Map<String, String> params = getQueryParameters(url);
 
         if (params.containsKey("access_token")){
@@ -93,10 +93,10 @@ public class OAuthFlowUtil {
                 }
             }
 
-            config.setAuthEndpoint(token.getInstanceUrl());
-            config.setValue(Config.OAUTH_ACCESSTOKEN, token.getAccessToken());
-            config.setValue(Config.OAUTH_REFRESHTOKEN, token.getRefreshToken());
-            config.setValue(Config.OAUTH_INSTANCE_URL, token.getInstanceUrl());
+            appConfig.setAuthEndpoint(token.getInstanceUrl());
+            appConfig.setValue(AppConfig.OAUTH_ACCESSTOKEN, token.getAccessToken());
+            appConfig.setValue(AppConfig.OAUTH_REFRESHTOKEN, token.getRefreshToken());
+            appConfig.setValue(AppConfig.OAUTH_INSTANCE_URL, token.getInstanceUrl());
             return true;
         }
 

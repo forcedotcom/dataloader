@@ -30,7 +30,7 @@ import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
@@ -91,12 +91,12 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
                 new AttachmentTemplateListener());
 
         final Map<String, String> argMap = getTestConfig(OperationInfo.insert, fileName, false);
-        argMap.put(Config.ENTITY, "Attachment");
+        argMap.put(AppConfig.ENTITY, "Attachment");
 
         // this feature does not work when bulk api is enabled but the zip content type is not
         final boolean bulkApi = isBulkAPIEnabled(argMap);
         final boolean bulkV2Api = isBulkV2APIEnabled(argMap);
-        final boolean zipContent = isSettingEnabled(argMap, Config.BULK_API_ZIP_CONTENT);
+        final boolean zipContent = isSettingEnabled(argMap, AppConfig.BULK_API_ZIP_CONTENT);
         if ((bulkApi || bulkV2Api) && !zipContent) {
             final String failureMessage = "Data Loader cannot map \"Body\" field using Bulk API and CSV content type.  Please enable the ZIP_CSV content type for Bulk API.";
             runProcessNegative(argMap, failureMessage);
@@ -116,7 +116,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         // this feature does not work when bulk api is enabled but the zip content type is not
         final boolean bulkApi = isBulkAPIEnabled(configMap);
         final boolean bulkV2Api = isBulkV2APIEnabled(configMap);
-        final boolean zipContent = isSettingEnabled(configMap, Config.BULK_API_ZIP_CONTENT);
+        final boolean zipContent = isSettingEnabled(configMap, AppConfig.BULK_API_ZIP_CONTENT);
         if (bulkApi && !zipContent) {
             // attachment is supported only if content is zipped
             return;
@@ -138,7 +138,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         results = getBinding().create(parentContacts);
         parentContacts[0].addField("id", results[0]);
 
-        configMap.put(Config.ENTITY, "Attachment");
+        configMap.put(AppConfig.ENTITY, "Attachment");
         runProcess(configMap, 2);
     }
 
@@ -156,14 +156,14 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
                 myAttachmentTemplateListener);
 
         final Map<String, String> argMap = getTestConfig(OperationInfo.insert, fileName, false);
-        argMap.put(Config.ENTITY, "Attachment");
+        argMap.put(AppConfig.ENTITY, "Attachment");
         // force multiple batches
-        argMap.put(Config.IMPORT_BATCH_SIZE, "1");
+        argMap.put(AppConfig.IMPORT_BATCH_SIZE, "1");
 
         // this feature does not work when bulk api is enabled but the zip content type is not
         final boolean bulkApi = isBulkAPIEnabled(argMap);
         final boolean bulkV2Api = isBulkV2APIEnabled(argMap);
-        final boolean zipContent = isSettingEnabled(argMap, Config.BULK_API_ZIP_CONTENT);
+        final boolean zipContent = isSettingEnabled(argMap, AppConfig.BULK_API_ZIP_CONTENT);
         if ((bulkApi || bulkV2Api) && !zipContent) {
             final String failureMessage = "Data Loader cannot map \"Body\" field using Bulk API and CSV content type.  Please enable the ZIP_CSV content type for Bulk API.";
             runProcessNegative(argMap, failureMessage);
@@ -237,7 +237,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         int numInserts = 0;
         int numUpdates = 0;
 
-        OperationInfo op = OperationInfo.valueOf(argMap.get(Config.OPERATION));
+        OperationInfo op = OperationInfo.valueOf(argMap.get(AppConfig.OPERATION));
         if (op == OperationInfo.insert)
             numInserts = numSuccesses;
         else if (op != null && op != OperationInfo.upsert)

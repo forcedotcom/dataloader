@@ -37,7 +37,7 @@ import java.util.List;
 import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.AbstractQueryVisitor;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -62,7 +62,7 @@ abstract public class AbstractBulkQueryVisitor extends AbstractQueryVisitor {
     
     protected void writeExtractionForServerStream(InputStream serverResultStream) throws IOException, DataAccessObjectException {
         File bufferingFile = null;
-        final boolean bufferResults = getConfig().getBoolean(Config.BUFFER_UNPROCESSED_BULK_QUERY_RESULTS);
+        final boolean bufferResults = getConfig().getBoolean(AppConfig.BUFFER_UNPROCESSED_BULK_QUERY_RESULTS);
         OutputStream bufferingFileWriter = null;
 
         InputStream resultStream = serverResultStream; //read directly from server by default
@@ -87,7 +87,7 @@ abstract public class AbstractBulkQueryVisitor extends AbstractQueryVisitor {
                 resultStream = new FileInputStream(new File(bufferingFilePath));
             }
             try {
-                final CSVReader rdr = new CSVReader(resultStream, Config.BULK_API_ENCODING);
+                final CSVReader rdr = new CSVReader(resultStream, AppConfig.BULK_API_ENCODING);
                 rdr.setMaxCharsInFile(Integer.MAX_VALUE);
                 rdr.setMaxRowsInFile(Integer.MAX_VALUE);
                 List<String> headers;
@@ -113,11 +113,11 @@ abstract public class AbstractBulkQueryVisitor extends AbstractQueryVisitor {
     private Row getDaoRow(List<String> queryResultHeaders, List<String> csvRow, 
             StringBuilder id, boolean isFirstRowInBatch) throws DataAccessObjectInitializationException {
         if (isFirstRowInBatch 
-            && !getConfig().getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
+            && !getConfig().getBoolean(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
             SOQLMapper mapper = (SOQLMapper)this.controller.getMapper();
             mapper.initSoqlMappingFromResultFields(queryResultHeaders);
             final List<String> daoColumns = mapper.getDaoColumnsForSoql();
-            if (getConfig().getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT)) {
+            if (getConfig().getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT)) {
                 try {
                     if (this.getErrorWriter() == null) {
                         this.setErrorWriter(this.action.createErrorWriter());

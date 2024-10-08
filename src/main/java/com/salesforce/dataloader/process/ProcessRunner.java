@@ -57,7 +57,7 @@ package com.salesforce.dataloader.process;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.progress.NihilistProgressAdapter;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.LastRunProperties;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
@@ -99,12 +99,12 @@ public class ProcessRunner implements InitializingBean, IProcess {
     private ILoaderProgress monitor;
     
     private static final String PROP_NAME_ARRAY[] = {
-            Config.OPERATION,
-            Config.USERNAME,
-            Config.PASSWORD,
-            Config.DAO_TYPE,
-            Config.DAO_NAME,
-            Config.ENTITY,
+            AppConfig.OPERATION,
+            AppConfig.USERNAME,
+            AppConfig.PASSWORD,
+            AppConfig.DAO_TYPE,
+            AppConfig.DAO_NAME,
+            AppConfig.ENTITY,
     };
     
     /**
@@ -133,26 +133,26 @@ public class ProcessRunner implements InitializingBean, IProcess {
 
         try {
             logger.info(Messages.getString("Process.initializingEngine")); //$NON-NLS-1$
-            Config config = controller.getConfig();
-            if (!(config.contains(Config.USERNAME) && config.contains(Config.PASSWORD))
-                    && config.getBoolean(Config.OAUTH_LOGIN_FROM_BROWSER)) {
-                doLoginFromBrowser(config);
+            AppConfig appConfig = controller.getAppConfig();
+            if (!(appConfig.contains(AppConfig.USERNAME) && appConfig.contains(AppConfig.PASSWORD))
+                    && appConfig.getBoolean(AppConfig.OAUTH_LOGIN_FROM_BROWSER)) {
+                doLoginFromBrowser(appConfig);
             }
             // Make sure that the required properties are specified.
-            validateConfigProperties(config);
+            validateConfigProperties(appConfig);
             if (name == null || name.isBlank()) {
                 // this can occur only if "process.name" is not specified as a  command line option
-                name = config.getString(Config.OPERATION);
+                name = appConfig.getString(AppConfig.OPERATION);
                 this.setName(name);
                 setThreadName(name);
             };
 
             // create files for status output unless it's an extract and status output is disabled
-            if (!config.getOperationInfo().isExtraction() || config.getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT)) {
-                controller.setStatusFiles(config.getString(Config.OUTPUT_STATUS_DIR), true, false);
+            if (!appConfig.getOperationInfo().isExtraction() || appConfig.getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT)) {
+                controller.setStatusFiles(appConfig.getString(AppConfig.OUTPUT_STATUS_DIR), true, false);
             }
 
-            logger.info(Messages.getFormattedString("Process.loggingIn", config.getAuthEndpoint())); //$NON-NLS-1$
+            logger.info(Messages.getFormattedString("Process.loggingIn", appConfig.getAuthEndpoint())); //$NON-NLS-1$
             if (controller.login()) {
                 // get the field info (using the describe call)
                 logger.info(Messages.getString("Process.settingFieldTypes")); //$NON-NLS-1$
@@ -160,16 +160,16 @@ public class ProcessRunner implements InitializingBean, IProcess {
 
                 // instantiate the map
                 logger.info(Messages.getString("Process.creatingMap")); //$NON-NLS-1$
-                controller.initializeOperation(config.getString(Config.DAO_TYPE), 
-                        config.getString(Config.DAO_NAME), config.getString(Config.ENTITY));
+                controller.initializeOperation(appConfig.getString(AppConfig.DAO_TYPE), 
+                        appConfig.getString(AppConfig.DAO_NAME), appConfig.getString(AppConfig.ENTITY));
 
                 // execute the requested operation
                 controller.executeAction(monitor);
 
                 // save last successful run date
                 // FIXME look into a better place so that long runs don't skew this
-                config.setValue(LastRunProperties.LAST_RUN_DATE, Calendar.getInstance().getTime());
-                config.saveLastRun();
+                appConfig.setValue(LastRunProperties.LAST_RUN_DATE, Calendar.getInstance().getTime());
+                appConfig.saveLastRun();
             } else {
                 logger.fatal(Messages.getString("Process.loginError")); //$NON-NLS-1$
             }
@@ -208,7 +208,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
         if (this.configOverrideMap.isEmpty()) {
             this.configOverrideMap.putAll(configOverrideMap);
             if (getName() != null && !getName().isBlank()) {
-                this.configOverrideMap.put(Config.PROCESS_NAME, getName());
+                this.configOverrideMap.put(AppConfig.PROCESS_NAME, getName());
             }
         } else {
             throw new IllegalStateException("Attempting to set configOverrideMap but there are already "
@@ -273,8 +273,8 @@ public class ProcessRunner implements InitializingBean, IProcess {
                     logErrorAndExitProcess(progressMonitor.getMessage(), null, AppUtil.EXIT_CODE_CLIENT_ERROR);
                 } else if (!progressMonitor.isSuccess()) {
                     logErrorAndExitProcess(progressMonitor.getMessage(), null, AppUtil.EXIT_CODE_SERVER_ERROR);
-                } else if (Config.getCurrentConfig() != null
-                        && Config.getCurrentConfig().getBoolean(Config.PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE)
+                } else if (AppConfig.getCurrentConfig() != null
+                        && AppConfig.getCurrentConfig().getBoolean(AppConfig.PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE)
                         && progressMonitor.getNumberRowsWithError() > 0) {
                     DataLoaderRunner.setExitCode(AppUtil.EXIT_CODE_RESULTS_ERROR);
                 }
@@ -307,21 +307,21 @@ public class ProcessRunner implements InitializingBean, IProcess {
      */
     private static synchronized ProcessRunner getInstance(Map<String, String> argMap) throws ProcessInitializationException {
         logger.info(Messages.getString("Process.initializingEngine")); //$NON-NLS-1$
-        String dynaBeanID = argMap.get(Config.PROCESS_NAME);
+        String dynaBeanID = argMap.get(AppConfig.PROCESS_NAME);
         ProcessRunner runner;
         if (dynaBeanID == null || dynaBeanID.isEmpty()) {
             // operation and other process params are specified in config.properties
-            logger.info(Config.PROCESS_NAME 
+            logger.info(AppConfig.PROCESS_NAME 
                     + "is not specified in the command line. Loading the process properties from config.properties.");
             runner = new ProcessRunner();
             
-            if (argMap.containsKey(Config.PROCESS_THREAD_NAME)) {
-                runner.setName(argMap.get(Config.PROCESS_THREAD_NAME));
+            if (argMap.containsKey(AppConfig.PROCESS_THREAD_NAME)) {
+                runner.setName(argMap.get(AppConfig.PROCESS_THREAD_NAME));
             }
         } else {
             // process name specified in the command line arg. 
             // Load its DynaBean through process-conf.xml
-            logger.info(Config.PROCESS_NAME 
+            logger.info(AppConfig.PROCESS_NAME 
                         + "is specified in the command line. Loading DynaBean with id " 
                         + dynaBeanID 
                         + " from process-conf.xml located in folder "
@@ -346,16 +346,16 @@ public class ProcessRunner implements InitializingBean, IProcess {
         return controller;
     }
     
-    private static void validateConfigProperties(Config config) throws ProcessInitializationException {
-        if (config == null) {
+    private static void validateConfigProperties(AppConfig appConfig) throws ProcessInitializationException {
+        if (appConfig == null) {
             throw new ProcessInitializationException("Configuration not initialized");
         }
 
         for (String propName : PROP_NAME_ARRAY) {
-            String propVal = config.getString(propName);
-            if (propName.equals(Config.PASSWORD) && (propVal == null || propVal.isBlank())) {
+            String propVal = appConfig.getString(propName);
+            if (propName.equals(AppConfig.PASSWORD) && (propVal == null || propVal.isBlank())) {
                 // OAuth access token must be specified if password is not specified
-                propVal = config.getString(Config.OAUTH_ACCESSTOKEN);
+                propVal = appConfig.getString(AppConfig.OAUTH_ACCESSTOKEN);
             }
             if (propVal == null || propVal.isBlank()) {
                 logger.fatal(Messages.getFormattedString("Config.errorNoRequiredParameter", propName));
@@ -364,11 +364,11 @@ public class ProcessRunner implements InitializingBean, IProcess {
         }
     }
     
-    private void doLoginFromBrowser(Config config) throws OAuthBrowserLoginRunnerException {
+    private void doLoginFromBrowser(AppConfig appConfig) throws OAuthBrowserLoginRunnerException {
         final String verificationURLStr;
         final OAuthBrowserLoginRunner loginRunner;
         try {
-            loginRunner = new OAuthBrowserLoginRunner(config, true);
+            loginRunner = new OAuthBrowserLoginRunner(appConfig, true);
             verificationURLStr = loginRunner.getVerificationURLStr();
             System.out.println(Labels.getString("OAuthInBrowser.batchModeMessage1"));
             System.out.println(Labels.getString("OAuthInBrowser.batchModeURL") + verificationURLStr);

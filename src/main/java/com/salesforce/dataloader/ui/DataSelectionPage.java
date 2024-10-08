@@ -77,7 +77,7 @@ public class DataSelectionPage extends LoadPage {
         comp.setLayout(gridLayout);
         GridData data = new GridData(GridData.FILL_BOTH);
         comp.setLayoutData(data);
-        final String infoMessage = this.controller.getConfig().getOperationInfo().getInfoMessageForDataSelectionPage();
+        final String infoMessage = this.controller.getAppConfig().getOperationInfo().getInfoMessageForDataSelectionPage();
         if (infoMessage != null) {
             Label l = new Label(comp, SWT.RIGHT);
             GridData gd = new GridData();
@@ -87,7 +87,7 @@ public class DataSelectionPage extends LoadPage {
             l.setForeground(new Color(getShell().getDisplay(), 0xff, 0, 0));
         }
         
-        lv = EntitySelectionListViewerUtil.getEntitySelectionListViewer(this.getClass(), comp, this.controller.getConfig());
+        lv = EntitySelectionListViewerUtil.getEntitySelectionListViewer(this.getClass(), comp, this.controller.getAppConfig());
         lv.addSelectionChangedListener(new ISelectionChangedListener() {
             @Override
             public void selectionChanged(SelectionChangedEvent event) {
@@ -138,7 +138,7 @@ public class DataSelectionPage extends LoadPage {
      * Function to dynamically set the entity list
      */
     private void setInput(Map<String, DescribeGlobalSObjectResult> entityDescribes) {        
-        OperationInfo operation = controller.getConfig().getOperationInfo();
+        OperationInfo operation = controller.getAppConfig().getOperationInfo();
         Map<String, DescribeGlobalSObjectResult> inputDescribes = new HashMap<String, DescribeGlobalSObjectResult>();
 
         // for each object, check whether the object is valid for the current
@@ -202,7 +202,7 @@ public class DataSelectionPage extends LoadPage {
             LoadPage nextPage = super.getNextPage();
             LoadPage nextNextPage = nextPage.getNextPage();
             if (Controller.getAPIMajorVersion() < 61 
-                && controller.getConfig().getOperationInfo() != OperationInfo.upsert) {
+                && controller.getAppConfig().getOperationInfo() != OperationInfo.upsert) {
                 if (nextPage instanceof ExternalIdPage) {
                     nextPage.setPageComplete(true);
                     nextPage.dispose();

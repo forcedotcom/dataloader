@@ -26,7 +26,7 @@
 
 package com.salesforce.dataloader.ui;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.oauth.OAuthFlowUtil;
 
 import org.eclipse.swt.browser.Browser;
@@ -43,23 +43,23 @@ import java.net.URISyntaxException;
  * it prompts for authentication and authorization everytime.
  */
 public class OAuthTokenFlow extends OAuthFlow {
-    public OAuthTokenFlow(Shell parent, Config config) {
-        super(parent, config);
+    public OAuthTokenFlow(Shell parent, AppConfig appConfig) {
+        super(parent, appConfig);
     }
 
     @Override
-    protected OAuthBrowserListener getOAuthBrowserListener(Shell shell, Browser browser, Config config) {
-        return new OAuthTokenBrowserLister(shell, browser, config);
+    protected OAuthBrowserListener getOAuthBrowserListener(Shell shell, Browser browser, AppConfig appConfig) {
+        return new OAuthTokenBrowserLister(shell, browser, appConfig);
     }
 
     @Override
-    public String getStartUrl(Config config) throws UnsupportedEncodingException {
-        return OAuthFlowUtil.getStartUrlImpl(config);
+    public String getStartUrl(AppConfig appConfig) throws UnsupportedEncodingException {
+        return OAuthFlowUtil.getStartUrlImpl(appConfig);
     }
 
     public static class OAuthTokenBrowserLister extends OAuthBrowserListener {
-        public OAuthTokenBrowserLister(Shell shell, Browser browser, Config config) {
-            super(browser, shell, config);
+        public OAuthTokenBrowserLister(Shell shell, Browser browser, AppConfig appConfig) {
+            super(browser, shell, appConfig);
         }
 
         @Override
@@ -71,7 +71,7 @@ public class OAuthTokenFlow extends OAuthFlow {
         public void completed(ProgressEvent progressEvent) {
             super.completed(progressEvent);
             try {
-                boolean handled = OAuthFlowUtil.handleCompletedUrl(browser.getUrl(), config);
+                boolean handled = OAuthFlowUtil.handleCompletedUrl(browser.getUrl(), appConfig);
                 if (handled) {
                     setResult(true);
                     shell.close();

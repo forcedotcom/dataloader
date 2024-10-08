@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader.ui;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.model.LoginCriteria;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
@@ -54,9 +54,9 @@ public class OAuthLoginControl extends Composite {
         Grid12 grid =  new Grid12(this, 40, false, true);
 
         grid.createLabel(4, Labels.getString("LoginPage.environment"));
-        ArrayList<String> environments = authRunner.getConfig().getStrings(Config.AUTH_ENVIRONMENTS);
+        ArrayList<String> environments = authRunner.getConfig().getStrings(AppConfig.AUTH_ENVIRONMENTS);
         environment = grid.createCombo(6, SWT.DROP_DOWN | SWT.BORDER, environments);
-        String currentEnvironment = authRunner.getConfig().getString(Config.SELECTED_AUTH_ENVIRONMENT);
+        String currentEnvironment = authRunner.getConfig().getString(AppConfig.SELECTED_AUTH_ENVIRONMENT);
         if (environments.contains(currentEnvironment)) {
             environment.setText(currentEnvironment);
         }

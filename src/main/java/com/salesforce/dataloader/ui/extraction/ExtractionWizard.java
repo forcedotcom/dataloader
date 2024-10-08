@@ -37,7 +37,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.*;
 
@@ -66,7 +66,7 @@ public class ExtractionWizard extends BaseWizard {
         ExtractionPage soqlPage = new ExtractionSOQLPage(controller);
         addPage(soqlPage);
         WizardPage finishPage = soqlPage;
-        if (getConfig().getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT)) {
+        if (getConfig().getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT)) {
             //need to reference the finish page for performFinish()
             finishPage = new ExtractionFinishPage(controller);
             addPage(finishPage);
@@ -121,7 +121,7 @@ public class ExtractionWizard extends BaseWizard {
 
     @Override
     public boolean performFinish() {
-        if (!validateExtractionPath(getConfig().getString(Config.DAO_NAME))) {
+        if (!validateExtractionPath(getConfig().getString(AppConfig.DAO_NAME))) {
             return false;
         }
 

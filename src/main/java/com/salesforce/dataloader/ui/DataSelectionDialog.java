@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
 import com.salesforce.dataloader.dao.DataReader;
@@ -65,14 +65,14 @@ public class DataSelectionDialog extends WizardDialog {
         super(parent, controller);
         this.daoNameStr = daoNameStr;
         this.sObjectName = sObjectName;
-        if (controller.getConfig().getBoolean(Config.CSV_DELIMITER_COMMA)) {
+        if (controller.getAppConfig().getBoolean(AppConfig.CSV_DELIMITER_COMMA)) {
             this.delimiterList = " ','";
         }
-        if (controller.getConfig().getBoolean(Config.CSV_DELIMITER_TAB)) {
+        if (controller.getAppConfig().getBoolean(AppConfig.CSV_DELIMITER_TAB)) {
             this.delimiterList += " '<tab>'";
         }
-        if (controller.getConfig().getBoolean(Config.CSV_DELIMITER_OTHER)) {
-            String otherDelimiters = controller.getConfig().getString(Config.CSV_DELIMITER_OTHER_VALUE);
+        if (controller.getAppConfig().getBoolean(AppConfig.CSV_DELIMITER_OTHER)) {
+            String otherDelimiters = controller.getAppConfig().getString(AppConfig.CSV_DELIMITER_OTHER_VALUE);
             for (char c : otherDelimiters.toCharArray()) {
                 this.delimiterList += " '" + c + "'";
             }
@@ -108,7 +108,7 @@ public class DataSelectionDialog extends WizardDialog {
             return;
         }
 
-        String daoPath = getController().getConfig().getString(Config.DAO_NAME);
+        String daoPath = getController().getAppConfig().getString(AppConfig.DAO_NAME);
         File file = new File(daoPath);
 
         if (!file.exists() || !file.canRead()) {
@@ -167,11 +167,11 @@ public class DataSelectionDialog extends WizardDialog {
                 + "\n\n"
                 + Labels.getString("LoadPage.importBatchSize")
                 + " "
-                + getController().getConfig().getImportBatchSize()
+                + getController().getAppConfig().getImportBatchSize()
                 + "\n"
                 + Labels.getString("AdvancedSettingsDialog.startRow")
                 + " "
-                + getController().getConfig().getString(Config.LOAD_ROW_TO_START_AT)
+                + getController().getAppConfig().getString(AppConfig.LOAD_ROW_TO_START_AT)
                 + "\n"
                 + apiInfoStr
             ); //$NON-NLS-1$

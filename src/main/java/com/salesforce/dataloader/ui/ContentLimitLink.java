@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.util.AppUtil;
 
@@ -70,10 +70,10 @@ public class ContentLimitLink extends Link {
     }
     
     public void setVisible() {
-        Config config = controller.getConfig();
-        String operation = config.getString(Config.OPERATION);
+        AppConfig appConfig = controller.getAppConfig();
+        String operation = appConfig.getString(AppConfig.OPERATION);
         boolean isVisible = AppUtil.isContentSObject(
-                config.getString(Config.ENTITY))
+                appConfig.getString(AppConfig.ENTITY))
                 && operation != null
                 && ("insert".equalsIgnoreCase(operation)
                     || "update".equalsIgnoreCase(operation)

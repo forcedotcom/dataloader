@@ -29,7 +29,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 
 public abstract class BaseWizard extends Wizard {
@@ -40,7 +40,7 @@ public abstract class BaseWizard extends Wizard {
     protected BaseWizard(Controller ctl, OperationInfo info) {
         this.controller = ctl;
 
-        getConfig().setValue(Config.OPERATION, info.name());
+        getConfig().setValue(AppConfig.OPERATION, info.name());
         this.finishPage = setupPages();
         // Set the dialog window title
         setWindowTitle(getLabel("windowTitle"));
@@ -61,8 +61,8 @@ public abstract class BaseWizard extends Wizard {
         return this.controller;
     }
 
-    protected Config getConfig() {
-        return getController().getConfig();
+    protected AppConfig getConfig() {
+        return getController().getAppConfig();
     }
 
     protected String getLabel(String name) {
@@ -78,7 +78,7 @@ public abstract class BaseWizard extends Wizard {
     }
     
     protected boolean closeWizardPagePostSuccessfulFinish() {
-        return getConfig().getBoolean(Config.WIZARD_CLOSE_ON_FINISH);
+        return getConfig().getBoolean(AppConfig.WIZARD_CLOSE_ON_FINISH);
     }
 
 }

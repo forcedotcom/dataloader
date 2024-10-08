@@ -54,7 +54,7 @@ public class HardDeleteFinishPage extends FinishPage {
     @Override
     protected void hook_createControl(Composite comp) {
         super.hook_createControl(comp);
-        if (getController().getConfig().getOperationInfo() == OperationInfo.hard_delete) {
+        if (getController().getAppConfig().getOperationInfo() == OperationInfo.hard_delete) {
             Composite terms = new Composite(comp, SWT.NONE);
             GridLayout layout = new GridLayout(1, false);
             terms.setLayout(layout);

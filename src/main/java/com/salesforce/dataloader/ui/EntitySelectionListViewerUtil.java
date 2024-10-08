@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.ui.entitySelection.EntityContentProvider;
 import com.salesforce.dataloader.ui.entitySelection.EntityFilter;
 import com.salesforce.dataloader.ui.entitySelection.EntityLabelProvider;
@@ -47,7 +47,7 @@ import com.salesforce.dataloader.ui.entitySelection.EntityViewerComparator;
 public class EntitySelectionListViewerUtil {
     private static final String PROPERTIES_PREFIX_STR = "DataSelectionPage";
     
-    public static ListViewer getEntitySelectionListViewer(Class<? extends OperationPage> pageClass, Composite comp, Config config) {
+    public static ListViewer getEntitySelectionListViewer(Class<? extends OperationPage> pageClass, Composite comp, AppConfig appConfig) {
         String propertiesPrefixStr = PROPERTIES_PREFIX_STR;
         Label label = new Label(comp, SWT.RIGHT);
         label.setText(Labels.getString(pageClass.getSimpleName() + ".selectObject")); //$NON-NLS-1$
@@ -64,7 +64,7 @@ public class EntitySelectionListViewerUtil {
         listViewer.setLabelProvider(new EntityLabelProvider());
         listViewer.setInput(null);
         data = new GridData(GridData.FILL_BOTH);
-        data.heightHint = Config.DEFAULT_WIZARD_HEIGHT;
+        data.heightHint = AppConfig.DEFAULT_WIZARD_HEIGHT;
         listViewer.getControl().setLayoutData(data);
         listViewer.addFilter(filter);
         listViewer.setComparator(new EntityViewerComparator());

@@ -43,8 +43,8 @@ import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
-import com.salesforce.dataloader.config.Config.ConfigListener;
+import com.salesforce.dataloader.config.AppConfig;
+import com.salesforce.dataloader.config.AppConfig.ConfigListener;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.uiActions.*;
 import com.salesforce.dataloader.util.AppUtil;
@@ -104,8 +104,8 @@ public class LoaderWindow extends ApplicationWindow {
     }
     
     public void refresh() {
-        Config config = controller.getConfig();
-        boolean isBulkApiFlavorEnabled = config.isBulkAPIEnabled() || config.isBulkV2APIEnabled();
+        AppConfig appConfig = controller.getAppConfig();
+        boolean isBulkApiFlavorEnabled = appConfig.isBulkAPIEnabled() || appConfig.isBulkV2APIEnabled();
         LoaderWindow.this.operationButtonsByIndex.get(OperationInfo.hard_delete).setEnabled(isBulkApiFlavorEnabled);
         LoaderWindow.this.operationActionsByIndex.get(OperationInfo.hard_delete.getDialogIdx()).setEnabled(
                 isBulkApiFlavorEnabled);
@@ -137,11 +137,11 @@ public class LoaderWindow extends ApplicationWindow {
      * This runs the Loader Window
      */
     public void run() {
-        Config config = controller.getConfig();
-        if (!config.getBoolean(Config.HIDE_WELCOME_SCREEN)) {
-            displayTitleDialog(Display.getDefault(), this.operationActionsByIndex, this.controller.getConfig());
+        AppConfig appConfig = controller.getAppConfig();
+        if (!appConfig.getBoolean(AppConfig.HIDE_WELCOME_SCREEN)) {
+            displayTitleDialog(Display.getDefault(), this.operationActionsByIndex, this.controller.getAppConfig());
         }
-        if (config.getBoolean(Config.SHOW_LOADER_UPGRADE_SCREEN)) {
+        if (appConfig.getBoolean(AppConfig.SHOW_LOADER_UPGRADE_SCREEN)) {
             displayUpgradeDialog(Display.getDefault());
         }
         setBlockOnOpen(true);
@@ -173,8 +173,8 @@ public class LoaderWindow extends ApplicationWindow {
         updateTitle(null);
         shell.setSize(600, 400);
         Point shellLocation = shell.getLocation();
-        if (shellLocation.x < Config.DEFAULT_WIZARD_X_OFFSET) {
-            shellLocation.x = Config.DEFAULT_WIZARD_X_OFFSET;
+        if (shellLocation.x < AppConfig.DEFAULT_WIZARD_X_OFFSET) {
+            shellLocation.x = AppConfig.DEFAULT_WIZARD_X_OFFSET;
             shell.setLocation(shellLocation);
         }
 
@@ -249,7 +249,7 @@ public class LoaderWindow extends ApplicationWindow {
 
         final Button butt = new Button(parent, SWT.PUSH | SWT.FLAT);
         butt.setText(info.getLabel());
-        butt.setEnabled(info.isOperationAllowed(this.controller.getConfig()));
+        butt.setEnabled(info.isOperationAllowed(this.controller.getAppConfig()));
         butt.setImage(info.getUIHelper().getIconImage());
         butt.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -261,7 +261,7 @@ public class LoaderWindow extends ApplicationWindow {
     }
 
     private void displayTitleDialog(final Display display, final TreeMap<Integer, OperationUIAction> map,
-            final Config cfg) {
+            final AppConfig cfg) {
 
         display.asyncExec(new Thread() {
             @Override

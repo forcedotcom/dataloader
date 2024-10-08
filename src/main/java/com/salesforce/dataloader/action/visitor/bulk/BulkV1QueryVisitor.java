@@ -34,7 +34,7 @@ import java.io.UnsupportedEncodingException;
 
 import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -67,7 +67,7 @@ public class BulkV1QueryVisitor extends AbstractBulkQueryVisitor {
                 getRateCalculator(), false);
         jobUtil.createJob();
         try {
-            jobUtil.createBatch(new ByteArrayInputStream(soql.getBytes(Config.BULK_API_ENCODING)));
+            jobUtil.createBatch(new ByteArrayInputStream(soql.getBytes(AppConfig.BULK_API_ENCODING)));
         } catch (final UnsupportedEncodingException e) {
             throw new ExtractException(e);
         }

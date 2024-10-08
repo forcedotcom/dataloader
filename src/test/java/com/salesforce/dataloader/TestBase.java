@@ -27,7 +27,7 @@ package com.salesforce.dataloader;
 
 import com.salesforce.dataloader.client.BulkV1Client;
 import com.salesforce.dataloader.client.PartnerClient;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
@@ -195,7 +195,7 @@ abstract class TestBase {
 
     protected void setupController(Map<String, String> configOverrideMap) {
         // configure the Controller to point to our testing config
-        configOverrideMap.put(Config.READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
+        configOverrideMap.put(AppConfig.READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
         if (!System.getProperties().contains(AppUtil.CLI_OPTION_CONFIG_DIR_PROP))
             System.setProperty(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
 
@@ -261,9 +261,9 @@ abstract class TestBase {
 
     protected ConnectorConfig getWSCConfig(String apiVersionStr) {
         ConnectorConfig bindingConfig = new ConnectorConfig();
-        bindingConfig.setUsername(getController().getConfig().getString(Config.USERNAME));
-        bindingConfig.setPassword(getController().getConfig().getString(Config.PASSWORD));
-        String configEndpoint = getController().getConfig().getAuthEndpoint();
+        bindingConfig.setUsername(getController().getAppConfig().getString(AppConfig.USERNAME));
+        bindingConfig.setPassword(getController().getAppConfig().getString(AppConfig.PASSWORD));
+        String configEndpoint = getController().getAppConfig().getAuthEndpoint();
         if (!configEndpoint.equals("")) { //$NON-NLS-1$
             try {
                 PartnerClient.setAPIVersionForTheSession(apiVersionStr);
@@ -273,10 +273,10 @@ abstract class TestBase {
                 bindingConfig.setManualLogin(true);
                 // set long timeout for tests with larger data sets
                 bindingConfig.setReadTimeout(5 * 60 * 1000);
-                if (getController().getConfig().getBoolean(Config.DEBUG_MESSAGES)) {
+                if (getController().getAppConfig().getBoolean(AppConfig.DEBUG_MESSAGES)) {
                     bindingConfig.setTraceMessage(true);
                     bindingConfig.setPrettyPrintXml(true);
-                    String filename = getController().getConfig().getString(Config.DEBUG_MESSAGES_FILE);
+                    String filename = getController().getAppConfig().getString(AppConfig.DEBUG_MESSAGES_FILE);
                     if (!filename.isEmpty()) {
                         try {
                             bindingConfig.setTraceFile(filename);

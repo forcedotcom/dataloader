@@ -27,7 +27,7 @@
 package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -132,17 +132,17 @@ public class UIUtils {
         return org.eclipse.jface.dialogs.Dialog.convertHorizontalDLUsToPixels(fontMetrics, IDialogConstants.BUTTON_WIDTH);
     }
     
-    public static Rectangle getPersistedWizardBounds(Config config) {
-        int xOffset = Config.DEFAULT_WIZARD_X_OFFSET;
-        int yOffset = Config.DEFAULT_WIZARD_Y_OFFSET;
-        int width = Config.DEFAULT_WIZARD_WIDTH;
-        int height = Config.DEFAULT_WIZARD_HEIGHT;
-        if (config != null) {
+    public static Rectangle getPersistedWizardBounds(AppConfig appConfig) {
+        int xOffset = AppConfig.DEFAULT_WIZARD_X_OFFSET;
+        int yOffset = AppConfig.DEFAULT_WIZARD_Y_OFFSET;
+        int width = AppConfig.DEFAULT_WIZARD_WIDTH;
+        int height = AppConfig.DEFAULT_WIZARD_HEIGHT;
+        if (appConfig != null) {
             try {
-                xOffset = config.getInt(Config.WIZARD_X_OFFSET);
-                yOffset = config.getInt(Config.WIZARD_Y_OFFSET);
-                width = config.getInt(Config.WIZARD_WIDTH);
-                height = config.getInt(Config.WIZARD_HEIGHT);
+                xOffset = appConfig.getInt(AppConfig.WIZARD_X_OFFSET);
+                yOffset = appConfig.getInt(AppConfig.WIZARD_Y_OFFSET);
+                width = appConfig.getInt(AppConfig.WIZARD_WIDTH);
+                height = appConfig.getInt(AppConfig.WIZARD_HEIGHT);
             } catch (Exception ex) {
                 // no op
             }

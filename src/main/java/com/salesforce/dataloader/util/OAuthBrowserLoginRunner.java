@@ -50,7 +50,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.salesforce.dataloader.client.SimplePost;
 import com.salesforce.dataloader.client.SimplePostFactory;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.exception.OAuthBrowserLoginRunnerException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
@@ -66,40 +66,40 @@ public class OAuthBrowserLoginRunner {
     String userCodeStr;
     String deviceCode;
     String oAuthTokenURLStr;
-    Config config;
+    AppConfig appConfig;
     Thread checkLoginThread;
 
-    public OAuthBrowserLoginRunner(Config config, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
-        String origEndpoint = new String(config.getAuthEndpoint());
+    public OAuthBrowserLoginRunner(AppConfig appConfig, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
+        String origEndpoint = new String(appConfig.getAuthEndpoint());
         try {
-            startBrowserLogin(config, skipUserCodePage);
+            startBrowserLogin(appConfig, skipUserCodePage);
         } catch (Exception ex) {
             logger.warn(Messages.getMessage(this.getClass(), "failedAuthStart", origEndpoint, ex.getMessage()));
-            if (!config.isDefaultAuthEndpoint(origEndpoint)) {
+            if (!appConfig.isDefaultAuthEndpoint(origEndpoint)) {
                 // retry with default endpoint URL only if user is attempting production login
-                retryBrowserLoginWithDefaultURL(config, skipUserCodePage);
+                retryBrowserLoginWithDefaultURL(appConfig, skipUserCodePage);
             }
         } finally {
             // restore original value of Config.ENDPOINT property
-            config.setAuthEndpoint(origEndpoint);
+            appConfig.setAuthEndpoint(origEndpoint);
         }
     }
     
-    private void retryBrowserLoginWithDefaultURL(Config config, boolean skipUserCodePage)  throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
-        logger.info(Messages.getMessage(this.getClass(), "retryAuthStart", config.getDefaultAuthEndpoint()));
-        config.setAuthEndpoint(config.getDefaultAuthEndpoint());
-        startBrowserLogin(config, skipUserCodePage);
+    private void retryBrowserLoginWithDefaultURL(AppConfig appConfig, boolean skipUserCodePage)  throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
+        logger.info(Messages.getMessage(this.getClass(), "retryAuthStart", appConfig.getDefaultAuthEndpoint()));
+        appConfig.setAuthEndpoint(appConfig.getDefaultAuthEndpoint());
+        startBrowserLogin(appConfig, skipUserCodePage);
     }
     
     // Browser login uses OAuth 2.0 Device Flow - https://help.salesforce.com/s/articleView?id=sf.remoteaccess_oauth_device_flow.htm&type=5
-    private void startBrowserLogin(Config config, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
+    private void startBrowserLogin(AppConfig appConfig, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
         setLoginStatus(LoginStatus.WAIT);
-        this.config = config;
-        config.setOAuthEnvironment(config.getString(Config.SELECTED_AUTH_ENVIRONMENT));
-        oAuthTokenURLStr = config.getString(Config.OAUTH_SERVER) + "/services/oauth2/token";
-        SimplePost client = SimplePostFactory.getInstance(config, oAuthTokenURLStr,
+        this.appConfig = appConfig;
+        appConfig.setOAuthEnvironment(appConfig.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT));
+        oAuthTokenURLStr = appConfig.getString(AppConfig.OAUTH_SERVER) + "/services/oauth2/token";
+        SimplePost client = SimplePostFactory.getInstance(appConfig, oAuthTokenURLStr,
                new BasicNameValuePair("response_type", "device_code"),
-               new BasicNameValuePair(Config.CLIENT_ID_HEADER_NAME, config.getString(Config.OAUTH_CLIENTID)),
+               new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.OAUTH_CLIENTID)),
                new BasicNameValuePair("scope", "api")
         );
         client.post();
@@ -138,7 +138,7 @@ public class OAuthBrowserLoginRunner {
         }
 
         // try to skip the page with pre-filled user code.
-        client = SimplePostFactory.getInstance(config, verificationURLStr,
+        client = SimplePostFactory.getInstance(appConfig, verificationURLStr,
                 new BasicNameValuePair("", "")
         );
         client.post();
@@ -158,7 +158,7 @@ public class OAuthBrowserLoginRunner {
         
         List<BasicNameValuePair> nvPairList = parseTokenPageHTML(response);
         
-        client = SimplePostFactory.getInstance(config, responseMap.get("verification_uri").toString(),
+        client = SimplePostFactory.getInstance(appConfig, responseMap.get("verification_uri").toString(),
                 new BasicNameValuePair("save", "Connect")
         );
         for (BasicNameValuePair pair : nvPairList) {
@@ -199,9 +199,9 @@ public class OAuthBrowserLoginRunner {
                        // do nothing
                    }
                    elapsedTimeInSec += pollingIntervalInSec;
-                   client = SimplePostFactory.getInstance(config, oAuthTokenURLStr,
+                   client = SimplePostFactory.getInstance(appConfig, oAuthTokenURLStr,
                            new BasicNameValuePair("grant_type", "device"),
-                           new BasicNameValuePair(Config.CLIENT_ID_HEADER_NAME, config.getString(Config.OAUTH_CLIENTID)),
+                           new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.OAUTH_CLIENTID)),
                            new BasicNameValuePair("code", deviceCode)
                    );
                    try {
@@ -218,7 +218,7 @@ public class OAuthBrowserLoginRunner {
                    in = client.getInput();
                    if (client.isSuccessful()) {
                        try {
-                           processSuccessfulLogin(client.getInput(), config);
+                           processSuccessfulLogin(client.getInput(), appConfig);
                        } catch (IOException e) {
                            logger.error(e.getMessage());
                            setLoginStatus(LoginStatus.FAIL);
@@ -320,7 +320,7 @@ public class OAuthBrowserLoginRunner {
    }
    
    
-   public static void processSuccessfulLogin(InputStream httpResponseInputStream, Config config) throws IOException {
+   public static void processSuccessfulLogin(InputStream httpResponseInputStream, AppConfig appConfig) throws IOException {
 
        StringBuilder builder = new StringBuilder();
        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpResponseInputStream, StandardCharsets.UTF_8.name()));
@@ -333,9 +333,9 @@ public class OAuthBrowserLoginRunner {
                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                .create();
        OAuthToken token = gson.fromJson(jsonTokenResult, OAuthToken.class);
-       config.setAuthEndpoint(token.getInstanceUrl());
-       config.setValue(Config.OAUTH_ACCESSTOKEN, token.getAccessToken());
-       config.setValue(Config.OAUTH_REFRESHTOKEN, token.getRefreshToken());
-       config.setValue(Config.OAUTH_INSTANCE_URL, token.getInstanceUrl());
+       appConfig.setAuthEndpoint(token.getInstanceUrl());
+       appConfig.setValue(AppConfig.OAUTH_ACCESSTOKEN, token.getAccessToken());
+       appConfig.setValue(AppConfig.OAUTH_REFRESHTOKEN, token.getRefreshToken());
+       appConfig.setValue(AppConfig.OAUTH_INSTANCE_URL, token.getInstanceUrl());
    }
 }

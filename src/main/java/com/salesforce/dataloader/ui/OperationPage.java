@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 
 /**
@@ -166,14 +166,14 @@ public abstract class OperationPage extends WizardPage {
                 if (!this.getShell().isVisible()) {
                     return;
                 }
-                Config config = controller.getConfig();
+                AppConfig appConfig = controller.getAppConfig();
                 Rectangle shellBounds = this.getShell().getBounds();
-                config.setValue(Config.WIZARD_X_OFFSET, shellBounds.x);
-                config.setValue(Config.WIZARD_Y_OFFSET, shellBounds.y);
-                config.setValue(Config.WIZARD_WIDTH, shellBounds.width);
-                config.setValue(Config.WIZARD_HEIGHT, shellBounds.height);
+                appConfig.setValue(AppConfig.WIZARD_X_OFFSET, shellBounds.x);
+                appConfig.setValue(AppConfig.WIZARD_Y_OFFSET, shellBounds.y);
+                appConfig.setValue(AppConfig.WIZARD_WIDTH, shellBounds.width);
+                appConfig.setValue(AppConfig.WIZARD_HEIGHT, shellBounds.height);
                 try {
-                    config.save();
+                    appConfig.save();
                 } catch (GeneralSecurityException | IOException e) {
                     // no-op
                     e.printStackTrace();

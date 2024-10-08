@@ -26,7 +26,7 @@
 package com.salesforce.dataloader.ui;
 
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -48,13 +48,13 @@ import java.io.UnsupportedEncodingException;
  */
 public abstract class OAuthFlow extends Dialog {
     protected static Logger logger = LogManager.getLogger(OAuthFlow.class);
-    protected final Config config;
+    protected final AppConfig appConfig;
     private String reasonPhrase;
     private int statusCode;
 
-    public OAuthFlow(Shell parent, Config config) {
+    public OAuthFlow(Shell parent, AppConfig appConfig) {
         super(parent);
-        this.config = config;
+        this.appConfig = appConfig;
     }
 
     public String getReasonPhrase() {
@@ -82,9 +82,9 @@ public abstract class OAuthFlow extends Dialog {
         data.heightHint = 600;
         browser.setLayoutData(data);
 
-        OAuthBrowserListener listener = getOAuthBrowserListener(shell, browser, config);
+        OAuthBrowserListener listener = getOAuthBrowserListener(shell, browser, appConfig);
         browser.addProgressListener(listener);
-        browser.setUrl(getStartUrl(config));
+        browser.setUrl(getStartUrl(appConfig));
 
         shell.pack();
         shell.open();
@@ -100,6 +100,6 @@ public abstract class OAuthFlow extends Dialog {
         return listener.getResult();
     }
 
-    protected abstract OAuthBrowserListener getOAuthBrowserListener(Shell shell, Browser browser, Config config);
-    public abstract String getStartUrl(Config config) throws UnsupportedEncodingException;
+    protected abstract OAuthBrowserListener getOAuthBrowserListener(Shell shell, Browser browser, AppConfig appConfig);
+    public abstract String getStartUrl(AppConfig appConfig) throws UnsupportedEncodingException;
 }

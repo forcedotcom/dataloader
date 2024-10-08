@@ -35,7 +35,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.AbstractQueryVisitor;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
@@ -100,7 +100,7 @@ public class PartnerQueryVisitor extends AbstractQueryVisitor {
 
     private Row getDaoRow(SObject sob, boolean firstRowInBatch) {
         if (firstRowInBatch 
-            && !this.controller.getConfig().getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
+            && !this.controller.getAppConfig().getBoolean(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
             // header field is not set in the mapper
             Row row = getMapper().mapPartnerSObjectSfdcToLocal(sob);
             try {
@@ -111,7 +111,7 @@ public class PartnerQueryVisitor extends AbstractQueryVisitor {
                 final List<String> daoColumns = mapper.getDaoColumnsForSoql();
                 // setting DAO's column names forces output to be restricted to the provided field names
                 ((DataWriter)controller.getDao()).setColumnNames(daoColumns);
-                if (getConfig().getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT)) {
+                if (getConfig().getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT)) {
                     try {
                         if (this.getErrorWriter() == null) {
                             this.setErrorWriter(this.action.createErrorWriter());

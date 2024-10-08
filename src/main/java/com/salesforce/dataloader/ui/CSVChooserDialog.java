@@ -26,7 +26,7 @@
 
 package com.salesforce.dataloader.ui;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
@@ -172,7 +172,7 @@ public class CSVChooserDialog extends WizardDialog {
         buttonSuccess.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                String successFilePath = getController().getConfig().getString(Config.OUTPUT_SUCCESS);
+                String successFilePath = getController().getAppConfig().getString(AppConfig.OUTPUT_SUCCESS);
                 if(StringUtils.hasText(successFilePath)) {
                     openViewer(successFilePath, true, false);
                 } else {
@@ -191,7 +191,7 @@ public class CSVChooserDialog extends WizardDialog {
         buttonError.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                String errorFilePath = getController().getConfig().getString(Config.OUTPUT_ERROR);
+                String errorFilePath = getController().getAppConfig().getString(AppConfig.OUTPUT_ERROR);
                 if(StringUtils.hasText(errorFilePath)) {
                     openViewer(errorFilePath, true, false);
                 } else {

@@ -32,7 +32,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.ui.*;
@@ -89,7 +89,7 @@ public class ExtractionFinishDialog extends WizardDialog {
         buttonComp.setLayoutData(data);
 
         // error status output is optional
-        boolean enableStatusOutput = getController().getConfig().getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT);
+        boolean enableStatusOutput = getController().getAppConfig().getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT);
         if (enableStatusOutput) {
             layout = new GridLayout(3, false);
         } else {
@@ -104,7 +104,7 @@ public class ExtractionFinishDialog extends WizardDialog {
         viewExtraction.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                openViewer(getController().getConfig().getString(Config.DAO_NAME), false);
+                openViewer(getController().getAppConfig().getString(AppConfig.DAO_NAME), false);
             }
 
             @Override
@@ -121,7 +121,7 @@ public class ExtractionFinishDialog extends WizardDialog {
             viewErrors.addSelectionListener(new SelectionListener() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    openViewer(getController().getConfig().getString(Config.OUTPUT_ERROR), true);
+                    openViewer(getController().getAppConfig().getString(AppConfig.OUTPUT_ERROR), true);
                 }
 
                 @Override

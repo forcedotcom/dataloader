@@ -27,7 +27,7 @@
 
 package com.salesforce.dataloader.ui;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.LastRunProperties;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.util.AppUtil;
@@ -202,7 +202,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
      * @param shell the dialog window
      */
     protected void createContents(final Shell shell) {        
-        final Config config = getController().getConfig();
+        final AppConfig appConfig = getController().getAppConfig();
         GridData data;
         
         GridLayout layout = new GridLayout(1, false);
@@ -274,12 +274,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
         // Hide welcome screen
         createLink(restComp, "showWelcomeScreen", null, null);
         buttonShowWelcomeScreen = new Button(restComp, SWT.CHECK);
-        buttonShowWelcomeScreen.setSelection(!config.getBoolean(Config.HIDE_WELCOME_SCREEN));
+        buttonShowWelcomeScreen.setSelection(!appConfig.getBoolean(AppConfig.HIDE_WELCOME_SCREEN));
 
         // Hide welcome screen
         createLink(restComp, "showLoaderUpgradeScreen", null, null);
         buttonShowLoaderUpgradeScreen = new Button(restComp, SWT.CHECK);
-        buttonShowLoaderUpgradeScreen.setSelection(config.getBoolean(Config.SHOW_LOADER_UPGRADE_SCREEN));
+        buttonShowLoaderUpgradeScreen.setSelection(appConfig.getBoolean(AppConfig.SHOW_LOADER_UPGRADE_SCREEN));
 
         blank = new Label(restComp, SWT.NONE);
         data = new GridData();
@@ -304,8 +304,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
         apiChoiceComposite.setLayoutData(data);
 
         // Enable Bulk API Setting
-        useBulkAPI = config.getBoolean(Config.BULK_API_ENABLED) && !config.getBoolean(Config.BULKV2_API_ENABLED);
-        useBulkV2API = config.getBoolean(Config.BULKV2_API_ENABLED);
+        useBulkAPI = appConfig.getBoolean(AppConfig.BULK_API_ENABLED) && !appConfig.getBoolean(AppConfig.BULKV2_API_ENABLED);
+        useBulkV2API = appConfig.getBoolean(AppConfig.BULKV2_API_ENABLED);
         useSoapAPI = !useBulkAPI && !useBulkV2API;
 
         buttonUseSOAPApi = new Button(apiChoiceComposite, SWT.RADIO);
@@ -328,11 +328,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 setAllApiOptions();
                 
                 // update batch size when this setting changes
-                int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(false, false);
+                int newDefaultBatchSize = getController().getAppConfig().getDefaultImportBatchSize(false, false);
                 logger.info("Setting batch size to " + newDefaultBatchSize);
                 textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
                 String[] args = {getImportBatchLimitsURL(), 
-                        Integer.toString(config.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
+                        Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
                 labelImportBatchSize.setText(
                         Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".importBatchSize", args));
             }
@@ -358,11 +358,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 setAllApiOptions();
                 
                 // update batch size when this setting changes
-                int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(true, false);
+                int newDefaultBatchSize = getController().getAppConfig().getDefaultImportBatchSize(true, false);
                 logger.info("Setting batch size to " + newDefaultBatchSize);
                 textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
                 String[] args = {getImportBatchLimitsURL(), 
-                        Integer.toString(config.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
+                        Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
                 labelImportBatchSize.setText(
                         Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".importBatchSize", args));
             }
@@ -389,11 +389,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 setAllApiOptions();
                 
                 // get default batch size for Bulk v2 and set it
-                int newDefaultBatchSize = getController().getConfig().getDefaultImportBatchSize(true, true);
+                int newDefaultBatchSize = getController().getAppConfig().getDefaultImportBatchSize(true, true);
                 logger.info("Setting batch size to " + newDefaultBatchSize);
                 textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
                 String[] args = {getImportBatchLimitsURL(), 
-                        getImportBatchLimitsURL(), Integer.toString(config.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
+                        getImportBatchLimitsURL(), Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
                 labelImportBatchSize.setText(
                         Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".importBatchSize", args));
             }
@@ -411,7 +411,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         this.soapApiOptionsComposite.setLayout(layout);
         
         createLink(soapApiOptionsComposite, "keepAccountTeam", null, "TooltipKeepAccountTeam");
-        boolean keepAccountTeam = config.getBoolean(Config.PROCESS_KEEP_ACCOUNT_TEAM);
+        boolean keepAccountTeam = appConfig.getBoolean(AppConfig.PROCESS_KEEP_ACCOUNT_TEAM);
         buttonKeepAccountTeam = new Button(this.soapApiOptionsComposite, SWT.CHECK);
         buttonKeepAccountTeam.setSelection(keepAccountTeam);
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -421,7 +421,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         // update using external id
         labelUpdateWithExternalId = createLink(soapApiOptionsComposite, "updateWithExternalId", null, null);
-        boolean updateWithExternalId = config.getBoolean(Config.UPDATE_WITH_EXTERNALID);
+        boolean updateWithExternalId = appConfig.getBoolean(AppConfig.UPDATE_WITH_EXTERNALID);
         buttonUpdateWithExternalId = new Button(this.soapApiOptionsComposite, SWT.CHECK);
         buttonUpdateWithExternalId.setSelection(updateWithExternalId);
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -438,23 +438,23 @@ public class AdvancedSettingsDialog extends BaseDialog {
         //insert Nulls
         labelNulls = createLabel(soapApiOptionsComposite, "insertNulls", null, "TooltipInsertNulls");
         buttonNulls = new Button(this.soapApiOptionsComposite, SWT.CHECK);
-        buttonNulls.setSelection(config.getBoolean(Config.INSERT_NULLS));
+        buttonNulls.setSelection(appConfig.getBoolean(AppConfig.INSERT_NULLS));
 
         //Field truncation
         labelTruncateFields = createLabel(soapApiOptionsComposite, "allowFieldTruncation", null, null);
         buttonTruncateFields = new Button(this.soapApiOptionsComposite, SWT.CHECK);
-        buttonTruncateFields.setSelection(config.getBoolean(Config.TRUNCATE_FIELDS));
+        buttonTruncateFields.setSelection(appConfig.getBoolean(AppConfig.TRUNCATE_FIELDS));
         
         //insert compression
         createLabel(soapApiOptionsComposite, "compression", null, "TooltipCompression");
         buttonCompression = new Button(soapApiOptionsComposite, SWT.CHECK);
-        buttonCompression.setSelection(config.getBoolean(Config.NO_COMPRESSION));
+        buttonCompression.setSelection(appConfig.getBoolean(AppConfig.NO_COMPRESSION));
         buttonCompression.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipCompression"));
 
         //timeout size
         createLabel(soapApiOptionsComposite, "timeout", null, "TooltipTimeout");
         textTimeout = new Text(soapApiOptionsComposite, SWT.BORDER);
-        textTimeout.setText(config.getString(Config.TIMEOUT_SECS));
+        textTimeout.setText(appConfig.getString(AppConfig.TIMEOUT_SECS));
         textTimeout.addVerifyListener(new VerifyListener() {
             @Override
             public void verifyText(VerifyEvent event) {
@@ -482,7 +482,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         createLink(bulkApiOptionsComposite, "bulkApiSerialMode", null, null);
         buttonBulkApiSerialMode = new Button(this.bulkApiOptionsComposite, SWT.CHECK);
-        buttonBulkApiSerialMode.setSelection(config.getBoolean(Config.BULK_API_SERIAL_MODE));
+        buttonBulkApiSerialMode.setSelection(appConfig.getBoolean(AppConfig.BULK_API_SERIAL_MODE));
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         data.grabExcessHorizontalSpace = true;
         buttonBulkApiSerialMode.setLayoutData(data);
@@ -490,7 +490,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         // Bulk API serial concurrency mode setting
         createLink(bulkApiOptionsComposite, "bulkApiZipContent", null, null);
         buttonBulkApiZipContent = new Button(this.bulkApiOptionsComposite, SWT.CHECK);
-        buttonBulkApiZipContent.setSelection(config.getBoolean(Config.BULK_API_ZIP_CONTENT));
+        buttonBulkApiZipContent.setSelection(appConfig.getBoolean(AppConfig.BULK_API_ZIP_CONTENT));
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         data.grabExcessHorizontalSpace = true;
         buttonBulkApiZipContent.setLayoutData(data);
@@ -506,11 +506,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
         this.importBatchSizeComposite.setLayout(layout);
 
         String[] args = {getImportBatchLimitsURL(), 
-                Integer.toString(config.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
+                Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
         labelImportBatchSize = createLink(importBatchSizeComposite, "importBatchSize", 
                 args, null);
         textImportBatchSize = new Text(importBatchSizeComposite, SWT.BORDER);
-        textImportBatchSize.setText(Integer.toString(config.getImportBatchSize()));
+        textImportBatchSize.setText(Integer.toString(appConfig.getImportBatchSize()));
         textImportBatchSize.setEnabled(!useBulkV2API);
         textImportBatchSize.addVerifyListener(new VerifyListener() {
             @Override
@@ -533,11 +533,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
         layout.verticalSpacing = 10;
         this.exportBatchSizeComposite.setLayout(layout);
         
-        args = new String[]{Integer.toString(Config.MIN_EXPORT_BATCH_SIZE),
-                Integer.toString(Config.MAX_EXPORT_BATCH_SIZE)};
+        args = new String[]{Integer.toString(AppConfig.MIN_EXPORT_BATCH_SIZE),
+                Integer.toString(AppConfig.MAX_EXPORT_BATCH_SIZE)};
         createLink(exportBatchSizeComposite, "exportBatchSize", args, null);
         textExportBatchSize = new Text(exportBatchSizeComposite, SWT.BORDER);
-        textExportBatchSize.setText(config.getString(Config.EXPORT_BATCH_SIZE));
+        textExportBatchSize.setText(appConfig.getString(AppConfig.EXPORT_BATCH_SIZE));
         textExportBatchSize.addVerifyListener(new VerifyListener() {
             @Override
             public void verifyText(VerifyEvent event) {
@@ -582,7 +582,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         textRule.setTextLimit(18);
         data.widthHint = 18 * textSize.x;
         textRule.setLayoutData(data);
-        textRule.setText(config.getString(Config.ASSIGNMENT_RULE));
+        textRule.setText(appConfig.getString(AppConfig.ASSIGNMENT_RULE));
         textRule.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipAssignmentRule"));
 
         //endpoints
@@ -591,9 +591,9 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.widthHint = 30 * textSize.x;
         textProdEndpoint.setLayoutData(data);
-        String endpoint = config.getString(Config.AUTH_ENDPOINT_PROD);
+        String endpoint = appConfig.getString(AppConfig.AUTH_ENDPOINT_PROD);
         if ("".equals(endpoint)) { //$NON-NLS-1$
-            endpoint = Config.DEFAULT_ENDPOINT_URL_PROD;
+            endpoint = AppConfig.DEFAULT_ENDPOINT_URL_PROD;
         }
         textProdEndpoint.setText(endpoint);
 
@@ -602,65 +602,65 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.widthHint = 30 * textSize.x;
         textSBEndpoint.setLayoutData(data);
-        endpoint = config.getString(Config.AUTH_ENDPOINT_SANDBOX);
+        endpoint = appConfig.getString(AppConfig.AUTH_ENDPOINT_SANDBOX);
         if ("".equals(endpoint)) { //$NON-NLS-1$
-            endpoint = Config.DEFAULT_ENDPOINT_URL_SANDBOX;
+            endpoint = AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX;
         }
         textSBEndpoint.setText(endpoint);
 
         // enable/disable sort of fields to extract
         createLabel(restComp, "sortQueryFieldsInExtraction", null, null);
         buttonSortExtractFields = new Button(restComp, SWT.CHECK);
-        buttonSortExtractFields.setSelection(config.getBoolean(Config.SORT_EXTRACT_FIELDS));
+        buttonSortExtractFields.setSelection(appConfig.getBoolean(AppConfig.SORT_EXTRACT_FIELDS));
         
         // enable/disable limiting query result columns to fields specified in the SOQL query
         createLabel(restComp, "limitOutputToQueryFields", null, null);
         buttonLimitQueryResultColumnsToFieldsInQuery = new Button(restComp, SWT.CHECK);
-        buttonLimitQueryResultColumnsToFieldsInQuery.setSelection(config.getBoolean(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS));
+        buttonLimitQueryResultColumnsToFieldsInQuery.setSelection(appConfig.getBoolean(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS));
 
         //enable/disable output of success file for extracts
         createLabel(restComp, "outputExtractStatus", null, null);
         buttonOutputExtractStatus = new Button(restComp, SWT.CHECK);
-        buttonOutputExtractStatus.setSelection(config.getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT));
+        buttonOutputExtractStatus.setSelection(appConfig.getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT));
 
         //utf-8 for loading
         createLabel(restComp, "readUTF8", null, null);
         buttonReadUtf8 = new Button(restComp, SWT.CHECK);
-        buttonReadUtf8.setSelection(config.getBoolean(Config.READ_UTF8));
+        buttonReadUtf8.setSelection(appConfig.getBoolean(AppConfig.READ_UTF8));
 
         //utf-8 for extraction
         createLabel(restComp, "writeUTF8", null, null);
         buttonWriteUtf8 = new Button(restComp, SWT.CHECK);
-        buttonWriteUtf8.setSelection(config.getBoolean(Config.WRITE_UTF8));
+        buttonWriteUtf8.setSelection(appConfig.getBoolean(AppConfig.WRITE_UTF8));
 
         //European Dates
         createLabel(restComp, "useEuropeanDateFormat", null, null);
         buttonEuroDates = new Button(restComp, SWT.CHECK);
-        buttonEuroDates.setSelection(config.getBoolean(Config.EURO_DATES));
+        buttonEuroDates.setSelection(appConfig.getBoolean(AppConfig.EURO_DATES));
 
         //format phone fields on the client side
         createLabel(restComp, "formatPhoneFields", null, null);
         buttonFormatPhoneFields = new Button(restComp, SWT.CHECK);
-        buttonFormatPhoneFields.setSelection(config.getBoolean(Config.FORMAT_PHONE_FIELDS));
+        buttonFormatPhoneFields.setSelection(appConfig.getBoolean(AppConfig.FORMAT_PHONE_FIELDS));
 
         createLabel(restComp, "useCommaAsCsvDelimiter", null, null);
         buttonCsvComma = new Button(restComp, SWT.CHECK);
-        buttonCsvComma.setSelection(config.getBoolean(Config.CSV_DELIMITER_COMMA));
+        buttonCsvComma.setSelection(appConfig.getBoolean(AppConfig.CSV_DELIMITER_COMMA));
 
         createLabel(restComp, "useTabAsCsvDelimiter", null, null);
         buttonCsvTab = new Button(restComp, SWT.CHECK);
-        buttonCsvTab.setSelection(config.getBoolean(Config.CSV_DELIMITER_TAB));
+        buttonCsvTab.setSelection(appConfig.getBoolean(AppConfig.CSV_DELIMITER_TAB));
 
         createLabel(restComp, "csvOtherDelimiterValue", null, null);
         textUploadCSVDelimiterValue = new Text(restComp, SWT.BORDER);
-        textUploadCSVDelimiterValue.setText(config.getString(Config.CSV_DELIMITER_OTHER_VALUE));
+        textUploadCSVDelimiterValue.setText(appConfig.getString(AppConfig.CSV_DELIMITER_OTHER_VALUE));
         data = new GridData();
         data.widthHint = 15 * textSize.x;
         textUploadCSVDelimiterValue.setLayoutData(data);
 
         createLabel(restComp, "queryResultsDelimiterValue", null, null);
         textQueryResultsDelimiterValue = new Text(restComp, SWT.BORDER);
-        textQueryResultsDelimiterValue.setText(config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS));
+        textQueryResultsDelimiterValue.setText(appConfig.getString(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS));
         textQueryResultsDelimiterValue.setTextLimit(1);
         data = new GridData();
         data.widthHint = 5 * textSize.x;
@@ -670,13 +670,13 @@ public class AdvancedSettingsDialog extends BaseDialog {
         // include image data for Rich Text Fields in query results
         // Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS
         createLabel(restComp, "includeRTFBinaryDataInQueryResults", null, null);
-        boolean includeRTFBinaryDataInQueryResults = config.getBoolean(Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS);
+        boolean includeRTFBinaryDataInQueryResults = appConfig.getBoolean(AppConfig.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS);
         buttonIncludeRTFBinaryDataInQueryResults = new Button(restComp, SWT.CHECK);
         buttonIncludeRTFBinaryDataInQueryResults.setSelection(includeRTFBinaryDataInQueryResults);
 
         // Cache DescribeGlobal results across operations
         createLabel(restComp, "cacheDescribeGlobalResults", null, null);
-        boolean cacheDescribeGlobalResults = config.getBoolean(Config.CACHE_DESCRIBE_GLOBAL_RESULTS);
+        boolean cacheDescribeGlobalResults = appConfig.getBoolean(AppConfig.CACHE_DESCRIBE_GLOBAL_RESULTS);
         buttonCacheDescribeGlobalResults = new Button(restComp, SWT.CHECK);
         buttonCacheDescribeGlobalResults.setSelection(cacheDescribeGlobalResults);        
         
@@ -691,7 +691,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         empty.setLayoutData(data);
 
         // timezone
-        textTimezone = createTimezoneTextInput(restComp, "timezone", Config.TIMEZONE, TimeZone.getDefault().getID(), 30 * textSize.x);
+        textTimezone = createTimezoneTextInput(restComp, "timezone", AppConfig.TIMEZONE, TimeZone.getDefault().getID(), 30 * textSize.x);
         
         empty = new Label(restComp, SWT.NONE);
         data = new GridData();
@@ -701,14 +701,14 @@ public class AdvancedSettingsDialog extends BaseDialog {
         // proxy Host
         createLabel(restComp, "proxyHost", null, null);
         textProxyHost = new Text(restComp, SWT.BORDER);
-        textProxyHost.setText(config.getString(Config.PROXY_HOST));
+        textProxyHost.setText(appConfig.getString(AppConfig.PROXY_HOST));
         data = new GridData(GridData.FILL_HORIZONTAL);
         textProxyHost.setLayoutData(data);
 
         //Proxy Port
         createLabel(restComp, "proxyPort", null, null);
         textProxyPort = new Text(restComp, SWT.BORDER);
-        textProxyPort.setText(config.getString(Config.PROXY_PORT));
+        textProxyPort.setText(appConfig.getString(AppConfig.PROXY_PORT));
         textProxyPort.addVerifyListener(new VerifyListener() {
             @Override
             public void verifyText(VerifyEvent event) {
@@ -723,7 +723,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         //Proxy Username
         createLabel(restComp, "proxyUser", null, null);
         textProxyUsername = new Text(restComp, SWT.BORDER);
-        textProxyUsername.setText(config.getString(Config.PROXY_USERNAME));
+        textProxyUsername.setText(appConfig.getString(AppConfig.PROXY_USERNAME));
         data = new GridData();
         data.widthHint = 20 * textSize.x;
         textProxyUsername.setLayoutData(data);
@@ -731,7 +731,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         //Proxy Password
         createLabel(restComp, "proxyPassword", null, null);
         textProxyPassword = new Text(restComp, SWT.BORDER | SWT.PASSWORD);
-        textProxyPassword.setText(config.getString(Config.PROXY_PASSWORD));
+        textProxyPassword.setText(appConfig.getString(AppConfig.PROXY_PASSWORD));
         data = new GridData();
         data.widthHint = 20 * textSize.x;
         textProxyPassword.setLayoutData(data);
@@ -739,7 +739,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         //proxy NTLM domain
         createLabel(restComp, "proxyNtlmDomain", null, null);
         textProxyNtlmDomain = new Text(restComp, SWT.BORDER);
-        textProxyNtlmDomain.setText(config.getString(Config.PROXY_NTLM_DOMAIN));
+        textProxyNtlmDomain.setText(appConfig.getString(AppConfig.PROXY_NTLM_DOMAIN));
         data = new GridData(GridData.FILL_HORIZONTAL);
         textProxyNtlmDomain.setLayoutData(data);
         
@@ -749,7 +749,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         empty.setLayoutData(data);
         
         createLabel(restComp, "loginFromBrowser", null, null);
-        boolean doLoginFromBrowser = config.getBoolean(Config.OAUTH_LOGIN_FROM_BROWSER);
+        boolean doLoginFromBrowser = appConfig.getBoolean(AppConfig.OAUTH_LOGIN_FROM_BROWSER);
         buttonLoginFromBrowser = new Button(restComp, SWT.CHECK);
         buttonLoginFromBrowser.setSelection(doLoginFromBrowser);
         
@@ -757,28 +757,28 @@ public class AdvancedSettingsDialog extends BaseDialog {
         this.textProductionPartnerClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
         textProductionPartnerClientID.setLayoutData(data);
-    	String clientId = config.getOAuthEnvironmentString(Config.PROD_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_PARTNER_CLIENTID);
+    	String clientId = appConfig.getOAuthEnvironmentString(AppConfig.PROD_ENVIRONMENT_VAL, AppConfig.OAUTH_PARTIAL_PARTNER_CLIENTID);
     	this.textProductionPartnerClientID.setText(clientId);
         
         createLabel(restComp, "bulkClientIdInProduction", null, null);
         this.textProductionBulkClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
         textProductionBulkClientID.setLayoutData(data);
-        clientId = config.getOAuthEnvironmentString(Config.PROD_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_BULK_CLIENTID);
+        clientId = appConfig.getOAuthEnvironmentString(AppConfig.PROD_ENVIRONMENT_VAL, AppConfig.OAUTH_PARTIAL_BULK_CLIENTID);
         this.textProductionBulkClientID.setText(clientId);
         
         createLabel(restComp, "partnerClientIdInSandbox", null, null);
         this.textSandboxPartnerClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
         textSandboxPartnerClientID.setLayoutData(data);
-    	clientId = config.getOAuthEnvironmentString(Config.SB_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_PARTNER_CLIENTID);
+    	clientId = appConfig.getOAuthEnvironmentString(AppConfig.SB_ENVIRONMENT_VAL, AppConfig.OAUTH_PARTIAL_PARTNER_CLIENTID);
     	this.textSandboxPartnerClientID.setText(clientId);
         
     	createLabel(restComp, "bulkClientIdInSandbox", null, null);
         this.textSandboxBulkClientID = new Text(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
         textSandboxBulkClientID.setLayoutData(data);
-        clientId = config.getOAuthEnvironmentString(Config.SB_ENVIRONMENT_VAL, Config.OAUTH_PARTIAL_BULK_CLIENTID);
+        clientId = appConfig.getOAuthEnvironmentString(AppConfig.SB_ENVIRONMENT_VAL, AppConfig.OAUTH_PARTIAL_BULK_CLIENTID);
         this.textSandboxBulkClientID.setText(clientId);       
         //////////////////////////////////////////////////
         //Row to start At
@@ -788,7 +788,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.horizontalSpan = 2;
         blankAgain.setLayoutData(data);
         
-        String lastBatch = getController().getConfig().getString(LastRunProperties.LAST_LOAD_BATCH_ROW);
+        String lastBatch = getController().getAppConfig().getString(LastRunProperties.LAST_LOAD_BATCH_ROW);
         if (lastBatch.equals("")) { //$NON-NLS-1$
             lastBatch = "0"; //$NON-NLS-1$
         }
@@ -802,7 +802,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         labelRowToStart.setLayoutData(data);
 
         textRowToStart = new Text(restComp, SWT.BORDER);
-        textRowToStart.setText(config.getString(Config.LOAD_ROW_TO_START_AT));
+        textRowToStart.setText(appConfig.getString(AppConfig.LOAD_ROW_TO_START_AT));
         data = new GridData();
         textRowToStart.setTextLimit(15);
         data.widthHint = 15 * textSize.x;
@@ -824,7 +824,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         blankAgain.setLayoutData(data);
         
         createLabel(restComp, "closeWizardOnFinish", null, null);
-        boolean closeWizardOnFinish = config.getBoolean(Config.WIZARD_CLOSE_ON_FINISH);
+        boolean closeWizardOnFinish = appConfig.getBoolean(AppConfig.WIZARD_CLOSE_ON_FINISH);
         buttonCloseWizardOnFinish = new Button(restComp, SWT.CHECK);
         buttonCloseWizardOnFinish.setSelection(closeWizardOnFinish);
 
@@ -835,7 +835,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         layout = new GridLayout(3, false);
         widthAndHeightComp.setLayout(layout);
         textWizardWidth = new Text(widthAndHeightComp, SWT.BORDER);
-        textWizardWidth.setText(config.getString(Config.WIZARD_WIDTH));
+        textWizardWidth.setText(appConfig.getString(AppConfig.WIZARD_WIDTH));
         data = new GridData();
         textWizardWidth.setTextLimit(4);
         data.widthHint = 4 * textSize.x;
@@ -852,7 +852,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         labelMultiplySymbol.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_CENTER));
 
         textWizardHeight = new Text(widthAndHeightComp, SWT.BORDER);
-        textWizardHeight.setText(config.getString(Config.WIZARD_HEIGHT));
+        textWizardHeight.setText(appConfig.getString(AppConfig.WIZARD_HEIGHT));
         textWizardHeight.setTextLimit(4);
         data.widthHint = 4 * textSize.x;
         textWizardHeight.setLayoutData(data);
@@ -864,7 +864,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         });
 
         createLabel(restComp, "populateResultsFolderOnFinishStepOfWizard", null, null);
-        boolean populateResultsFolderOnFinishStep = config.getBoolean(Config.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER);
+        boolean populateResultsFolderOnFinishStep = appConfig.getBoolean(AppConfig.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER);
         buttonPopulateResultsFolderOnWizardFinishStep = new Button(restComp, SWT.CHECK);
         buttonPopulateResultsFolderOnWizardFinishStep.setSelection(populateResultsFolderOnFinishStep);
         
@@ -934,7 +934,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         ok.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                Config config = getController().getConfig();
+                AppConfig appConfig = getController().getAppConfig();
 
                 String currentTextProdEndpoint = textProdEndpoint.getText();
                 currentTextProdEndpoint = AppUtil.getURLStrFromDomainName(currentTextProdEndpoint);
@@ -961,10 +961,10 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
                 }
                 //set the configValues
-                config.setValue(Config.HIDE_WELCOME_SCREEN, !buttonShowWelcomeScreen.getSelection());
-                config.setValue(Config.SHOW_LOADER_UPGRADE_SCREEN, buttonShowLoaderUpgradeScreen.getSelection());
-                config.setValue(Config.INSERT_NULLS, buttonNulls.getSelection());
-                config.setValue(Config.IMPORT_BATCH_SIZE, textImportBatchSize.getText());
+                appConfig.setValue(AppConfig.HIDE_WELCOME_SCREEN, !buttonShowWelcomeScreen.getSelection());
+                appConfig.setValue(AppConfig.SHOW_LOADER_UPGRADE_SCREEN, buttonShowLoaderUpgradeScreen.getSelection());
+                appConfig.setValue(AppConfig.INSERT_NULLS, buttonNulls.getSelection());
+                appConfig.setValue(AppConfig.IMPORT_BATCH_SIZE, textImportBatchSize.getText());
                 boolean isOtherDelimiterSpecified = textUploadCSVDelimiterValue.getText() != null
                                                     && textUploadCSVDelimiterValue.getText().length() != 0;
                 if (!buttonCsvComma.getSelection()
@@ -976,88 +976,88 @@ public class AdvancedSettingsDialog extends BaseDialog {
                     alert.open();
                     return;
                 }
-                config.setValue(Config.CSV_DELIMITER_OTHER_VALUE, textUploadCSVDelimiterValue.getText());
+                appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER_VALUE, textUploadCSVDelimiterValue.getText());
                 String queryResultsDelimiterStr = textQueryResultsDelimiterValue.getText();
                 if (queryResultsDelimiterStr.length() == 0) {
                     queryResultsDelimiterStr = AppUtil.COMMA; // set to default
                 }
-                config.setValue(Config.CSV_DELIMITER_FOR_QUERY_RESULTS, queryResultsDelimiterStr);
-                config.setValue(Config.CSV_DELIMITER_COMMA, buttonCsvComma.getSelection());
-                config.setValue(Config.CSV_DELIMITER_TAB, buttonCsvTab.getSelection());
-                config.setValue(Config.CSV_DELIMITER_OTHER, isOtherDelimiterSpecified);
+                appConfig.setValue(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS, queryResultsDelimiterStr);
+                appConfig.setValue(AppConfig.CSV_DELIMITER_COMMA, buttonCsvComma.getSelection());
+                appConfig.setValue(AppConfig.CSV_DELIMITER_TAB, buttonCsvTab.getSelection());
+                appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER, isOtherDelimiterSpecified);
 
-                config.setValue(Config.EXPORT_BATCH_SIZE, textExportBatchSize.getText());
-                config.setAuthEndpointForEnv(currentTextProdEndpoint, Config.PROD_ENVIRONMENT_VAL);
-                config.setAuthEndpointForEnv(currentTextSBEndpoint, Config.SB_ENVIRONMENT_VAL);
-                config.setValue(Config.ASSIGNMENT_RULE, textRule.getText());
-                config.setValue(Config.LOAD_ROW_TO_START_AT, textRowToStart.getText());
-                config.setValue(Config.NO_COMPRESSION, buttonCompression.getSelection());
-                config.setValue(Config.TRUNCATE_FIELDS, buttonTruncateFields.getSelection());
-                config.setValue(Config.FORMAT_PHONE_FIELDS, buttonFormatPhoneFields.getSelection());
-                config.setValue(Config.TIMEOUT_SECS, textTimeout.getText());
-                config.setValue(Config.SORT_EXTRACT_FIELDS, buttonSortExtractFields.getSelection());
-                config.setValue(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS, buttonLimitQueryResultColumnsToFieldsInQuery.getSelection());
-                config.setValue(Config.ENABLE_EXTRACT_STATUS_OUTPUT, buttonOutputExtractStatus.getSelection());
-                config.setValue(Config.READ_UTF8, buttonReadUtf8.getSelection());
-                config.setValue(Config.WRITE_UTF8, buttonWriteUtf8.getSelection());
-                config.setValue(Config.EURO_DATES, buttonEuroDates.getSelection());
-                config.setValue(Config.TIMEZONE, textTimezone.getText());
-                config.setValue(Config.PROXY_HOST, textProxyHost.getText());
-                config.setValue(Config.PROXY_PASSWORD, textProxyPassword.getText());
-                config.setValue(Config.PROXY_PORT, textProxyPort.getText());
-                config.setValue(Config.PROXY_USERNAME, textProxyUsername.getText());
-                config.setValue(Config.PROXY_NTLM_DOMAIN, textProxyNtlmDomain.getText());
-                config.setValue(Config.PROCESS_KEEP_ACCOUNT_TEAM, buttonKeepAccountTeam.getSelection());
-                config.setValue(Config.UPDATE_WITH_EXTERNALID, buttonUpdateWithExternalId.getSelection());
-                config.setValue(Config.CACHE_DESCRIBE_GLOBAL_RESULTS, buttonCacheDescribeGlobalResults.getSelection());
-                config.setValue(Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, buttonIncludeRTFBinaryDataInQueryResults.getSelection());
+                appConfig.setValue(AppConfig.EXPORT_BATCH_SIZE, textExportBatchSize.getText());
+                appConfig.setAuthEndpointForEnv(currentTextProdEndpoint, AppConfig.PROD_ENVIRONMENT_VAL);
+                appConfig.setAuthEndpointForEnv(currentTextSBEndpoint, AppConfig.SB_ENVIRONMENT_VAL);
+                appConfig.setValue(AppConfig.ASSIGNMENT_RULE, textRule.getText());
+                appConfig.setValue(AppConfig.LOAD_ROW_TO_START_AT, textRowToStart.getText());
+                appConfig.setValue(AppConfig.NO_COMPRESSION, buttonCompression.getSelection());
+                appConfig.setValue(AppConfig.TRUNCATE_FIELDS, buttonTruncateFields.getSelection());
+                appConfig.setValue(AppConfig.FORMAT_PHONE_FIELDS, buttonFormatPhoneFields.getSelection());
+                appConfig.setValue(AppConfig.TIMEOUT_SECS, textTimeout.getText());
+                appConfig.setValue(AppConfig.SORT_EXTRACT_FIELDS, buttonSortExtractFields.getSelection());
+                appConfig.setValue(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS, buttonLimitQueryResultColumnsToFieldsInQuery.getSelection());
+                appConfig.setValue(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT, buttonOutputExtractStatus.getSelection());
+                appConfig.setValue(AppConfig.READ_UTF8, buttonReadUtf8.getSelection());
+                appConfig.setValue(AppConfig.WRITE_UTF8, buttonWriteUtf8.getSelection());
+                appConfig.setValue(AppConfig.EURO_DATES, buttonEuroDates.getSelection());
+                appConfig.setValue(AppConfig.TIMEZONE, textTimezone.getText());
+                appConfig.setValue(AppConfig.PROXY_HOST, textProxyHost.getText());
+                appConfig.setValue(AppConfig.PROXY_PASSWORD, textProxyPassword.getText());
+                appConfig.setValue(AppConfig.PROXY_PORT, textProxyPort.getText());
+                appConfig.setValue(AppConfig.PROXY_USERNAME, textProxyUsername.getText());
+                appConfig.setValue(AppConfig.PROXY_NTLM_DOMAIN, textProxyNtlmDomain.getText());
+                appConfig.setValue(AppConfig.PROCESS_KEEP_ACCOUNT_TEAM, buttonKeepAccountTeam.getSelection());
+                appConfig.setValue(AppConfig.UPDATE_WITH_EXTERNALID, buttonUpdateWithExternalId.getSelection());
+                appConfig.setValue(AppConfig.CACHE_DESCRIBE_GLOBAL_RESULTS, buttonCacheDescribeGlobalResults.getSelection());
+                appConfig.setValue(AppConfig.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, buttonIncludeRTFBinaryDataInQueryResults.getSelection());
 
                 // Config requires Bulk API AND Bulk V2 API settings enabled to use Bulk V2 features
                 // This is different from UI. UI shows them as mutually exclusive.
-                config.setValue(Config.BULK_API_ENABLED, buttonUseBulkV1Api.getSelection());
-                config.setValue(Config.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode.getSelection());
-                config.setValue(Config.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
-                config.setValue(Config.BULKV2_API_ENABLED, buttonUseBulkV2Api.getSelection());
-                config.setValue(Config.OAUTH_LOGIN_FROM_BROWSER, buttonLoginFromBrowser.getSelection());
-                config.setValue(Config.WIZARD_CLOSE_ON_FINISH, buttonCloseWizardOnFinish.getSelection());
-                config.setValue(Config.WIZARD_WIDTH, textWizardWidth.getText());
-                config.setValue(Config.WIZARD_HEIGHT, textWizardHeight.getText());
+                appConfig.setValue(AppConfig.BULK_API_ENABLED, buttonUseBulkV1Api.getSelection());
+                appConfig.setValue(AppConfig.BULK_API_SERIAL_MODE, buttonBulkApiSerialMode.getSelection());
+                appConfig.setValue(AppConfig.BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
+                appConfig.setValue(AppConfig.BULKV2_API_ENABLED, buttonUseBulkV2Api.getSelection());
+                appConfig.setValue(AppConfig.OAUTH_LOGIN_FROM_BROWSER, buttonLoginFromBrowser.getSelection());
+                appConfig.setValue(AppConfig.WIZARD_CLOSE_ON_FINISH, buttonCloseWizardOnFinish.getSelection());
+                appConfig.setValue(AppConfig.WIZARD_WIDTH, textWizardWidth.getText());
+                appConfig.setValue(AppConfig.WIZARD_HEIGHT, textWizardHeight.getText());
 
-                config.setValue(Config.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER, buttonPopulateResultsFolderOnWizardFinishStep.getSelection());
+                appConfig.setValue(AppConfig.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER, buttonPopulateResultsFolderOnWizardFinishStep.getSelection());
                 LoggingUtil.setLoggingLevel(LOGGING_LEVEL[comboLoggingLevelDropdown.getSelectionIndex()]);
                 String clientIdVal = textProductionPartnerClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
-                    String propName = Config.OAUTH_PREFIX + Config.PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID;
-                    String currentClientIdVal = config.getString(propName);
+                    String propName = AppConfig.OAUTH_PREFIX + AppConfig.PROD_ENVIRONMENT_VAL + "." + AppConfig.OAUTH_PARTIAL_PARTNER_CLIENTID;
+                    String currentClientIdVal = appConfig.getString(propName);
                     if (!clientIdVal.equals(currentClientIdVal)) {
-                        config.setValue(propName, clientIdVal);
+                        appConfig.setValue(propName, clientIdVal);
                         getController().logout();
                     }
                 }
                 clientIdVal = textSandboxPartnerClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
-                    String propName = Config.OAUTH_PREFIX + Config.SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_PARTNER_CLIENTID;
-                    String currentClientIdVal = config.getString(propName);
+                    String propName = AppConfig.OAUTH_PREFIX + AppConfig.SB_ENVIRONMENT_VAL + "." + AppConfig.OAUTH_PARTIAL_PARTNER_CLIENTID;
+                    String currentClientIdVal = appConfig.getString(propName);
                     if (!clientIdVal.equals(currentClientIdVal)) {
-                    	config.setValue(propName, clientIdVal);
+                    	appConfig.setValue(propName, clientIdVal);
                         getController().logout();
                     }
                 }
                 clientIdVal = textProductionBulkClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
-                    String propName = Config.OAUTH_PREFIX + Config.PROD_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID;
-                    String currentClientIdVal = config.getString(propName);
+                    String propName = AppConfig.OAUTH_PREFIX + AppConfig.PROD_ENVIRONMENT_VAL + "." + AppConfig.OAUTH_PARTIAL_BULK_CLIENTID;
+                    String currentClientIdVal = appConfig.getString(propName);
                     if (!clientIdVal.equals(currentClientIdVal)) {
-                        config.setValue(propName, clientIdVal);
+                        appConfig.setValue(propName, clientIdVal);
                         getController().logout();
                     }
                 }
                 clientIdVal = textSandboxBulkClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {
-                    String propName = Config.OAUTH_PREFIX + Config.SB_ENVIRONMENT_VAL + "." + Config.OAUTH_PARTIAL_BULK_CLIENTID;
-                    String currentClientIdVal = config.getString(propName);
+                    String propName = AppConfig.OAUTH_PREFIX + AppConfig.SB_ENVIRONMENT_VAL + "." + AppConfig.OAUTH_PARTIAL_BULK_CLIENTID;
+                    String currentClientIdVal = appConfig.getString(propName);
                     if (!clientIdVal.equals(currentClientIdVal)) {
-                        config.setValue(propName, clientIdVal);
+                        appConfig.setValue(propName, clientIdVal);
                         getController().logout();
                     }
                 }
@@ -1136,7 +1136,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         final GridData gd = new GridData();
         if (widthHint > 0) gd.widthHint = widthHint;
         t.setLayoutData(gd);
-        String val = getController().getConfig().getString(configKey);
+        String val = getController().getAppConfig().getString(configKey);
         if ("".equals(val) && defaultValue != null) val = defaultValue;
         t.setText(String.valueOf(val));
         

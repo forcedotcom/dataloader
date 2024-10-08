@@ -27,7 +27,7 @@
 package com.salesforce.dataloader.action.visitor;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -115,8 +115,8 @@ public abstract class AbstractVisitor implements IVisitor {
         return this.monitor;
     }
 
-    protected Config getConfig() {
-        return getController().getConfig();
+    protected AppConfig getConfig() {
+        return getController().getAppConfig();
     }
 
     protected Mapper getMapper() {
@@ -134,10 +134,10 @@ public abstract class AbstractVisitor implements IVisitor {
     protected void writeSuccess(Row row, String id, String message) throws DataAccessObjectException {
         if (writeStatus()) {
             if (id != null && id.length() > 0) {
-                row.put(Config.ID_COLUMN_NAME, id);
+                row.put(AppConfig.ID_COLUMN_NAME, id);
             }
             if (message != null && message.length() > 0) {
-                row.put(Config.STATUS_COLUMN_NAME, message);
+                row.put(AppConfig.STATUS_COLUMN_NAME, message);
             }
             this.successWriter.writeRow(row);
         }
@@ -147,9 +147,9 @@ public abstract class AbstractVisitor implements IVisitor {
     protected void writeError(Row row, String errorMessage) throws DataAccessObjectException {
         if (writeStatus()) {
             if (row == null) {
-                row = Row.singleEntryImmutableRow(Config.ERROR_COLUMN_NAME, errorMessage);
+                row = Row.singleEntryImmutableRow(AppConfig.ERROR_COLUMN_NAME, errorMessage);
             } else {
-                row.put(Config.ERROR_COLUMN_NAME, errorMessage);
+                row.put(AppConfig.ERROR_COLUMN_NAME, errorMessage);
             }
             this.errorWriter.writeRow(row);
         }

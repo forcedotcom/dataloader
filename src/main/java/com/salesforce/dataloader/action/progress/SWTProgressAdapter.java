@@ -72,7 +72,7 @@ public class SWTProgressAdapter extends NihilistProgressAdapter {
             public void run() {
 
                 //if extraction pop open an extraction finished dialog
-                if (controller.getConfig().getOperationInfo().isExtraction()) {
+                if (controller.getAppConfig().getOperationInfo().isExtraction()) {
                     ExtractionFinishDialog dlg = new ExtractionFinishDialog(LoaderWindow.getApp().getShell(), controller);
                     dlg.setMessage(getMessage());
                     dlg.open();

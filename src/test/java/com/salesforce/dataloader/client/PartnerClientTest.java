@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader.client;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.process.ProcessTestBase;
@@ -69,7 +69,7 @@ public class PartnerClientTest extends ProcessTestBase {
     @Test
     public void testPartnerClientConnect() throws Exception {
         PartnerClient client = new PartnerClient(getController());
-        assertFalse(getController().getConfig().getBoolean(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN));
+        assertFalse(getController().getAppConfig().getBoolean(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN));
         boolean connect = client.connect();
         assertTrue(connect);
         assertNotNull(client.getConnection());
@@ -80,28 +80,28 @@ public class PartnerClientTest extends ProcessTestBase {
 
     @Test
     public void testPartnerClientNoUserName() throws ConnectionException {
-        Config config = getController().getConfig();
-        String origUserName = config.getString(Config.USERNAME);
+        AppConfig appConfig = getController().getAppConfig();
+        String origUserName = appConfig.getString(AppConfig.USERNAME);
         try {
-            config.setValue(Config.USERNAME, "");
+            appConfig.setValue(AppConfig.USERNAME, "");
             PartnerClient client = new PartnerClient(getController());
             boolean connect = client.connect();
             assertFalse("Should not connect with empty username", connect);
         } catch (RuntimeException e) {
             //make sure we get the right error message that mentions the username
-            assertTrue(e.getMessage().contains(Config.USERNAME));
+            assertTrue(e.getMessage().contains(AppConfig.USERNAME));
         } finally {
-            config.setValue(Config.USERNAME, origUserName);
+            appConfig.setValue(AppConfig.USERNAME, origUserName);
         }
     }
 
     @Test
     public void testPartnerClientSfdcInternalSessionIdConnect() throws Exception {
-        Config config = getController().getConfig();
+        AppConfig appConfig = getController().getAppConfig();
 
-        final String origUsername = config.getString(Config.USERNAME);
-        final String origPassword = config.getString(Config.PASSWORD);
-        final String origEndpoint = config.getAuthEndpoint();
+        final String origUsername = appConfig.getString(AppConfig.USERNAME);
+        final String origPassword = appConfig.getString(AppConfig.PASSWORD);
+        final String origEndpoint = appConfig.getAuthEndpoint();
 
         //login normally just to get sessionId and endpoint
         PartnerClient setupOnlyClient = new PartnerClient(getController());
@@ -111,32 +111,32 @@ public class PartnerClientTest extends ProcessTestBase {
         setupOnlyClient.disconnect();
 
         try {
-            config.setValue(Config.USERNAME, "");
-            config.setValue(Config.PASSWORD, "");
+            appConfig.setValue(AppConfig.USERNAME, "");
+            appConfig.setValue(AppConfig.PASSWORD, "");
 
-            config.setValue(Config.SFDC_INTERNAL, true);
-            config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
-            config.setAuthEndpoint(endpoint);
-            config.setValue(Config.SFDC_INTERNAL_SESSION_ID, sessionId);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL, true);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
+            appConfig.setAuthEndpoint(endpoint);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL_SESSION_ID, sessionId);
 
             PartnerClient client = new PartnerClient(getController());
             assertTrue(client.connect());
         } finally {
-            config.setValue(Config.USERNAME, origUsername);
-            config.setValue(Config.PASSWORD, origPassword);
-            config.setAuthEndpoint(origEndpoint);
-            config.setValue(Config.SFDC_INTERNAL, false);
-            config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
-            config.setValue(Config.SFDC_INTERNAL_SESSION_ID, "");
+            appConfig.setValue(AppConfig.USERNAME, origUsername);
+            appConfig.setValue(AppConfig.PASSWORD, origPassword);
+            appConfig.setAuthEndpoint(origEndpoint);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL, false);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL_SESSION_ID, "");
         }
     }
 
     @Test
     public void testPartnerClientSfdcInternalSessionIdWithoutSfdcInternalConnect() throws Exception {
-        Config config = getController().getConfig();
+        AppConfig config = getController().getAppConfig();
 
-        final String origUsername = config.getString(Config.USERNAME);
-        final String origPassword = config.getString(Config.PASSWORD);
+        final String origUsername = config.getString(AppConfig.USERNAME);
+        final String origPassword = config.getString(AppConfig.PASSWORD);
         final String origEndpoint = config.getAuthEndpoint();
 
         //login normally just to get sessionId and endpoint
@@ -147,13 +147,13 @@ public class PartnerClientTest extends ProcessTestBase {
         setupOnlyClient.disconnect();
 
         try {
-            config.setValue(Config.USERNAME, "");
-            config.setValue(Config.PASSWORD, "");
+            config.setValue(AppConfig.USERNAME, "");
+            config.setValue(AppConfig.PASSWORD, "");
 
-            config.setValue(Config.SFDC_INTERNAL, false);
-            config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
+            config.setValue(AppConfig.SFDC_INTERNAL, false);
+            config.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
             config.setAuthEndpoint(endpoint);
-            config.setValue(Config.SFDC_INTERNAL_SESSION_ID, sessionId);
+            config.setValue(AppConfig.SFDC_INTERNAL_SESSION_ID, sessionId);
 
             PartnerClient client = new PartnerClient(getController());
             client.connect();
@@ -164,28 +164,28 @@ public class PartnerClientTest extends ProcessTestBase {
                     "Empty salesforce.com username specified.  Please make sure that parameter sfdc.username is set to correct username.",
                     e.getMessage());
         } finally {
-            config.setValue(Config.USERNAME, origUsername);
-            config.setValue(Config.PASSWORD, origPassword);
+            config.setValue(AppConfig.USERNAME, origUsername);
+            config.setValue(AppConfig.PASSWORD, origPassword);
             config.setAuthEndpoint(origEndpoint);
-            config.setValue(Config.SFDC_INTERNAL, false);
-            config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
-            config.setValue(Config.SFDC_INTERNAL_SESSION_ID, "");
+            config.setValue(AppConfig.SFDC_INTERNAL, false);
+            config.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
+            config.setValue(AppConfig.SFDC_INTERNAL_SESSION_ID, "");
         }
     }
 
     @Test
     public void testIsSessionValidAlwaysTrueForSessionIdLogin() throws Exception {
-        Config config = getController().getConfig();
+        AppConfig config = getController().getAppConfig();
 
         try {
-            config.setValue(Config.SFDC_INTERNAL, true);
-            config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
+            config.setValue(AppConfig.SFDC_INTERNAL, true);
+            config.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
 
             PartnerClient client = new PartnerClient(getController());
             assertTrue(client.isSessionValid());
         } finally {
-            config.setValue(Config.SFDC_INTERNAL, false);
-            config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
+            config.setValue(AppConfig.SFDC_INTERNAL, false);
+            config.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
         }
     }
 
@@ -317,7 +317,7 @@ public class PartnerClientTest extends ProcessTestBase {
         List<DynaBean> beanList = new ArrayList<DynaBean>();
         beanList.add(sforceObj);
         
-        getController().getConfig().setValue(Config.NO_COMPRESSION, noCompression);
+        getController().getAppConfig().setValue(AppConfig.NO_COMPRESSION, noCompression);
 
         // get the client and make the insert call
         PartnerClient client = new PartnerClient(getController());
@@ -413,7 +413,7 @@ public class PartnerClientTest extends ProcessTestBase {
     }
 
     private void doUpsertAccount(boolean upsertFk) throws Exception {
-        String origExtIdField = getController().getConfig().getString(Config.IDLOOKUP_FIELD);
+        String origExtIdField = getController().getAppConfig().getString(AppConfig.IDLOOKUP_FIELD);
 
         try {
             // make sure the external id is set
@@ -446,7 +446,7 @@ public class PartnerClientTest extends ProcessTestBase {
     }
 
     private void doUpsertContact(boolean upsertFk) throws Exception {
-        String origExtIdField = getController().getConfig().getString(Config.IDLOOKUP_FIELD);
+        String origExtIdField = getController().getAppConfig().getString(AppConfig.IDLOOKUP_FIELD);
 
         try {
             // make sure the external id is set
@@ -463,7 +463,7 @@ public class PartnerClientTest extends ProcessTestBase {
             // Add upsert on FK -- reference to an account
             if (upsertFk) {
                 // remember original ext id field
-                String oldExtIdField = getController().getConfig().getString(Config.IDLOOKUP_FIELD);
+                String oldExtIdField = getController().getAppConfig().getString(AppConfig.IDLOOKUP_FIELD);
 
                 String acctExtIdField = setExtIdField(DEFAULT_ACCOUNT_EXT_ID_FIELD);
                 Object accountExtIdValue = getRandomExtId("Account", ACCOUNT_WHERE_CLAUSE, null);

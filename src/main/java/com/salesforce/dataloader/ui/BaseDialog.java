@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 
 public abstract class BaseDialog extends Dialog {
@@ -114,8 +114,8 @@ public abstract class BaseDialog extends Dialog {
     
     protected void setShellBounds(Shell dialogShell) {
         Point parentLocation = getParent().getLocation();
-        dialogShell.setLocation(parentLocation.x + Config.DIALOG_X_OFFSET,
-                                parentLocation.y + Config.DIALOG_Y_OFFSET);
+        dialogShell.setLocation(parentLocation.x + AppConfig.DIALOG_X_OFFSET,
+                                parentLocation.y + AppConfig.DIALOG_Y_OFFSET);
     }
     
     private void doWork(Shell shell) {

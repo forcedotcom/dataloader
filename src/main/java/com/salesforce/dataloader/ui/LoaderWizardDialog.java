@@ -43,7 +43,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 
 /**
  * A dialog to show a wizard to the end user.
@@ -228,9 +228,9 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
      * @param newWizard
      *            the wizard this dialog is working on
      */
-    public LoaderWizardDialog(Shell parentShell, IWizard newWizard, Config config) {
+    public LoaderWizardDialog(Shell parentShell, IWizard newWizard, AppConfig appConfig) {
         super(parentShell);
-        Rectangle shellBounds = UIUtils.getPersistedWizardBounds(config);
+        Rectangle shellBounds = UIUtils.getPersistedWizardBounds(appConfig);
         this.pageContainerLayout = new PageContainerFillLayout(5, 5, 
                 shellBounds.width,
                 shellBounds.height);
@@ -1133,7 +1133,7 @@ public class LoaderWizardDialog extends LoaderTitleAreaDialog implements IWizard
     protected void updateSize(IWizardPage page) {
         if (page == null || page.getControl() == null) return;
         Shell shell = this.getShell();
-        Rectangle savedBounds = UIUtils.getPersistedWizardBounds(((OperationPage)page).controller.getConfig());
+        Rectangle savedBounds = UIUtils.getPersistedWizardBounds(((OperationPage)page).controller.getAppConfig());
         shell.setBounds(getConstrainedShellBounds(savedBounds));
         pageContainerLayout.layoutPage(page.getControl());
     }

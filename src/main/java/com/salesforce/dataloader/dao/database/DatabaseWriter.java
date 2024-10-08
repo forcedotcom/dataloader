@@ -34,7 +34,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.*;
@@ -51,25 +51,25 @@ public class DatabaseWriter implements DataWriter {
     private static Logger logger = LogManager.getLogger(DatabaseReader.class);
 
     private final BasicDataSource dataSource;
-    private final Config config;
+    private final AppConfig appConfig;
     private int currentRowNumber = 0;
     private final SqlConfig sqlConfig;
     private final DatabaseContext dbContext;
 
-    public DatabaseWriter(Config config) throws DataAccessObjectInitializationException {
-        this(config, config.getString(Config.DAO_NAME));
+    public DatabaseWriter(AppConfig appConfig) throws DataAccessObjectInitializationException {
+        this(appConfig, appConfig.getString(AppConfig.DAO_NAME));
     }
 
     /**
      * Create database writer based on configuration
      * 
-     * @param config
+     * @param appConfig
      * @param dbConfigName
      * @throws DataAccessObjectInitializationException
      */
-    DatabaseWriter(Config config, String dbConfigName) throws DataAccessObjectInitializationException {
-        this.config = config;
-        String dbConfigFilename = config.constructConfigFilePath(DatabaseContext.DEFAULT_CONFIG_FILENAME);
+    DatabaseWriter(AppConfig appConfig, String dbConfigName) throws DataAccessObjectInitializationException {
+        this.appConfig = appConfig;
+        String dbConfigFilename = appConfig.constructConfigFilePath(DatabaseContext.DEFAULT_CONFIG_FILENAME);
         if (!(new File(dbConfigFilename).exists())) { throw new DataAccessObjectInitializationException(
                 Messages.getFormattedString("DatabaseDAO.errorConfigFileExists", dbConfigFilename)); //$NON-NLS-1$
         }
@@ -79,8 +79,8 @@ public class DatabaseWriter implements DataWriter {
         dbContext = new DatabaseContext(dbConfigName);
     }
 
-    DatabaseWriter(Config config, String dbConfigName, BasicDataSource dataSource, SqlConfig sqlConfig) {
-        this.config = config;
+    DatabaseWriter(AppConfig appConfig, String dbConfigName, BasicDataSource dataSource, SqlConfig sqlConfig) {
+        this.appConfig = appConfig;
         this.dataSource = dataSource;
         this.sqlConfig = sqlConfig;
         this.dbContext = new DatabaseContext(dbConfigName);
@@ -137,13 +137,13 @@ public class DatabaseWriter implements DataWriter {
         try {
             //for batchsize = 1, don't do batching, this provides much better error output
             if(inputRowList.size() == 1) {
-                dbContext.setSqlParamValues(sqlConfig, config, inputRowList.get(0));
+                dbContext.setSqlParamValues(sqlConfig, appConfig, inputRowList.get(0));
                 currentRowNumber++;
             } else {
                 // for each row set the Sql params in the prepared statement
                 dbContext.getDataStatement().clearBatch();
                 for (Row inputRow : inputRowList) {
-                    dbContext.setSqlParamValues(sqlConfig, config, inputRow);
+                    dbContext.setSqlParamValues(sqlConfig, appConfig, inputRow);
                     dbContext.getDataStatement().addBatch();
                     currentRowNumber++;
                 }

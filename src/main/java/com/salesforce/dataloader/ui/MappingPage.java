@@ -39,7 +39,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.mapping.LoadMapper;
@@ -220,9 +220,9 @@ public class MappingPage extends LoadPage {
     
     Field[] getMappableSalesforceFields() {
         ArrayList<Field> mappableFieldList = new ArrayList<Field>();
-        Config config = controller.getConfig();
-        OperationInfo operation = config.getOperationInfo();
-        String extIdField = config.getString(Config.IDLOOKUP_FIELD);
+        AppConfig appConfig = controller.getAppConfig();
+        OperationInfo operation = appConfig.getOperationInfo();
+        String extIdField = appConfig.getString(AppConfig.IDLOOKUP_FIELD);
         if(extIdField == null) {
             extIdField = "";
         } else {
@@ -238,9 +238,9 @@ public class MappingPage extends LoadPage {
                 }
                 break;
             case delete:
-                if (controller.getConfig().isRESTAPIEnabled()
+                if (controller.getAppConfig().isRESTAPIEnabled()
                         && Controller.getAPIMajorVersion() >= 61
-                        && controller.getConfig().getBoolean(Config.DELETE_WITH_EXTERNALID) 
+                        && controller.getAppConfig().getBoolean(AppConfig.DELETE_WITH_EXTERNALID) 
                         && field.isIdLookup()) {
                     isMappable = true;
                 }
@@ -285,12 +285,12 @@ public class MappingPage extends LoadPage {
     public Field[] getFieldTypes() {
         Field[] result;
         Field[] fields = controller.getFieldTypes().getFields();
-        if (controller.getConfig().getOperationInfo().isDelete()) {
+        if (controller.getAppConfig().getOperationInfo().isDelete()) {
             ArrayList<Field> refFieldList = new ArrayList<Field>();
             for (Field field : fields) {
-                if (controller.getConfig().isRESTAPIEnabled()
+                if (controller.getAppConfig().isRESTAPIEnabled()
                 && Controller.getAPIMajorVersion() >= 61
-                && controller.getConfig().getBoolean(Config.DELETE_WITH_EXTERNALID) 
+                && controller.getAppConfig().getBoolean(AppConfig.DELETE_WITH_EXTERNALID) 
                 && field.isIdLookup()) {
                     refFieldList.add(field);
                 } else if (field.getType().toString().equalsIgnoreCase("id")) {

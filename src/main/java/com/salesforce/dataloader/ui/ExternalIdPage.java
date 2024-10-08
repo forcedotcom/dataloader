@@ -36,7 +36,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Field;
@@ -117,7 +117,7 @@ public class ExternalIdPage extends LoadPage {
         extIdFieldCombo.setEnabled(true);
 
         // entity is known at this time, set the correct combo label
-        labelExtId.setText(Labels.getFormattedString("ExternalIdPage.externalIdComboText", controller.getConfig().getString(Config.ENTITY))); //$NON-NLS-1$
+        labelExtId.setText(Labels.getFormattedString("ExternalIdPage.externalIdComboText", controller.getAppConfig().getString(AppConfig.ENTITY))); //$NON-NLS-1$
 
         DescribeSObjectResult fieldTypes = controller.getFieldTypes();
         Field[] fields = fieldTypes.getFields();
@@ -135,9 +135,9 @@ public class ExternalIdPage extends LoadPage {
         if(extIdFieldCombo.getItemCount() == 1) {
             extIdFieldCombo.setEnabled(false);
             extIdFieldCombo.setText(extIdNames[0]);
-            labelExtIdInfo.setText(Labels.getFormattedString("ExternalIdPage.externalIdInfoNoExtId", controller.getConfig().getString(Config.ENTITY))); //$NON-NLS-1$
+            labelExtIdInfo.setText(Labels.getFormattedString("ExternalIdPage.externalIdInfoNoExtId", controller.getAppConfig().getString(AppConfig.ENTITY))); //$NON-NLS-1$
         } else {
-            labelExtIdInfo.setText(Labels.getFormattedString("ExternalIdPage.externalIdInfoExtIdExists", controller.getConfig().getString(Config.ENTITY))); //$NON-NLS-1$
+            labelExtIdInfo.setText(Labels.getFormattedString("ExternalIdPage.externalIdInfoExtIdExists", controller.getAppConfig().getString(AppConfig.ENTITY))); //$NON-NLS-1$
         }
         setPageComplete();
         comp.layout();
@@ -161,7 +161,7 @@ public class ExternalIdPage extends LoadPage {
         // prepare next page
         LoadPage nextPage = null;
         ChooseLookupFieldForRelationshipPage fkExtIdPage = (ChooseLookupFieldForRelationshipPage) getWizard().getPage(ChooseLookupFieldForRelationshipPage.class.getSimpleName()); //$NON-NLS-1$
-        if(controller.getConfig().getOperationInfo() != OperationInfo.delete
+        if(controller.getAppConfig().getOperationInfo() != OperationInfo.delete
             && controller.getReferenceDescribes().size() > 0) {
             nextPage = fkExtIdPage;
         } else {
@@ -177,11 +177,11 @@ public class ExternalIdPage extends LoadPage {
      * @param selectedObjects
      */
     private void saveExtIdData() {
-        Config config = controller.getConfig();
+        AppConfig appConfig = controller.getAppConfig();
 
         // external id field
         String extIdField = extIdFieldCombo.getText();
-        config.setValue(Config.IDLOOKUP_FIELD, extIdField);
+        appConfig.setValue(AppConfig.IDLOOKUP_FIELD, extIdField);
 
         controller.saveConfig();
     }

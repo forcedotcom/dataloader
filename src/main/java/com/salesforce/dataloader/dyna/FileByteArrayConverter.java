@@ -36,7 +36,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.ws.util.FileUtil;
@@ -85,12 +85,12 @@ public final class FileByteArrayConverter implements Converter {
             FileUtil.copy(new FileInputStream(absolutePath), byteStream);
             Path pathToValueFile = Path.of(absolutePath);
             String mimeType = Files.probeContentType(pathToValueFile);
-            Config config = Config.getCurrentConfig();
+            AppConfig appConfig = AppConfig.getCurrentConfig();
             if (mimeType != null
                     && mimeType.equalsIgnoreCase("text/plain")
-                    && config != null
-                    && config.getBoolean(Config.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT)
-                    && AppUtil.isContentSObject(config.getString(Config.ENTITY))) {
+                    && appConfig != null
+                    && appConfig.getBoolean(AppConfig.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT)
+                    && AppUtil.isContentSObject(appConfig.getString(AppConfig.ENTITY))) {
                 // Preserve the formatting only if the content is of type plain text
                 // AND the flag to preserve whitespace characters in RichText fields is enabled
                 // AND the content is for ContentNote sobject. 

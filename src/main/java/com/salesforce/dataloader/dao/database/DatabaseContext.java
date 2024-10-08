@@ -34,7 +34,7 @@ import javax.sql.DataSource;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dyna.DateTimeConverter;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
@@ -148,7 +148,7 @@ public class DatabaseContext {
      *            Values for the parameter replacement
      * @throws ParameterLoadException
      */
-    public void setSqlParamValues(SqlConfig sqlConfig, Config config, Map<String, Object> paramValues)
+    public void setSqlParamValues(SqlConfig sqlConfig, AppConfig appConfig, Map<String, Object> paramValues)
             throws ParameterLoadException {
         // detect if there're no parameters to set
         if (sqlConfig.getSqlParams() == null) { return; }
@@ -160,13 +160,13 @@ public class DatabaseContext {
         for (String paramName : sqlConfig.getSqlParams().keySet()) {
             String type = sqlConfig.getSqlParams().get(paramName);
             if (paramValues.containsKey(paramName)) {
-                Object sqlValue = mapParamToDbType(config, paramValues.get(paramName), type);
+                Object sqlValue = mapParamToDbType(appConfig, paramValues.get(paramName), type);
                 paramValues.put(paramName, sqlValue);
             } else {
                 // look in the config if the parameter value is not passed in
-                if (config.contains(paramName)) {
-                    Object configValue = getConfigValue(config, paramName, type);
-                    Object sqlValue = mapParamToDbType(config, configValue, type);
+                if (appConfig.contains(paramName)) {
+                    Object configValue = getConfigValue(appConfig, paramName, type);
+                    Object sqlValue = mapParamToDbType(appConfig, configValue, type);
                     logger.info(Messages.getFormattedString("DatabaseDAO.sqlParamInfo", new String[] { paramName,
                             sqlValue.toString() }));
                     paramValues.put(paramName, sqlValue);
@@ -220,24 +220,24 @@ public class DatabaseContext {
         throw new UnsupportedOperationException("Type not supported: " + type);
     }
 
-    private Object getConfigValue(Config config, String paramName, String type) throws ParameterLoadException {
+    private Object getConfigValue(AppConfig appConfig, String paramName, String type) throws ParameterLoadException {
         Object value;
         try {
             if (type.equals(java.sql.Date.class.getName()) || type.equals(Timestamp.class.getName())
                     || type.equals(Time.class.getName())) {
-                value = config.getDate(paramName);
+                value = appConfig.getDate(paramName);
             } else if (type.equals(boolean.class.getName())) {
-                value = config.getBoolean(paramName);
+                value = appConfig.getBoolean(paramName);
             } else if (type.equals(int.class.getName())) {
-                value = config.getInt(paramName);
+                value = appConfig.getInt(paramName);
             } else if (type.equals(long.class.getName())) {
-                value = config.getLong(paramName);
+                value = appConfig.getLong(paramName);
             } else if (type.equals(float.class.getName())) {
-                value = config.getFloat(paramName);
+                value = appConfig.getFloat(paramName);
             } else if (type.equals(double.class.getName())) {
-                value = config.getDouble(paramName);
+                value = appConfig.getDouble(paramName);
             } else {
-                value = config.getString(paramName);
+                value = appConfig.getString(paramName);
             }
         } catch (ParameterLoadException e) {
             String errMsg = Messages.getFormattedString("DatabaseDAO.errorSqlParamReplace", new String[] { paramName,
@@ -251,13 +251,13 @@ public class DatabaseContext {
     /**
      * Map Sql replacement parameters from config file values to an object usable as a replacement in a Sql statement
      * 
-     * @param config
+     * @param appConfig
      * @param paramName
      * @param type
      * @return An object of type usable as a replacement in a Sql statement
      * @throws ParameterLoadException
      */
-    private Object mapParamToDbType(Config cfg, Object paramValue, String type) throws ParameterLoadException {
+    private Object mapParamToDbType(AppConfig cfg, Object paramValue, String type) throws ParameterLoadException {
         Object sqlValue;
         if(paramValue == null) {
             return paramValue;

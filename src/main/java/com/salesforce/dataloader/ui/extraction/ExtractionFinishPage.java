@@ -74,6 +74,6 @@ public class ExtractionFinishPage extends FinishPage {
     
     @Override
     public String getConfigInfo() {
-        return ExtractionPage.getConfigInfo(controller.getConfig());
+        return ExtractionPage.getConfigInfo(controller.getAppConfig());
     }
 }

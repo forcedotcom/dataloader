@@ -28,7 +28,7 @@ package com.salesforce.dataloader.process;
 
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -69,7 +69,7 @@ public class CsvUpsertProcessTest extends ProcessTestBase {
         Map<String, String> argMap = getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 10);
 
         // start at 3, not 0!!
-        argMap.put(Config.LOAD_ROW_TO_START_AT, "3");
+        argMap.put(AppConfig.LOAD_ROW_TO_START_AT, "3");
 
         // perform the upsert
         runUpsertProcess(argMap, 0, 7);
