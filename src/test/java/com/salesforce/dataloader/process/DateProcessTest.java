@@ -29,7 +29,7 @@ package com.salesforce.dataloader.process;
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.sforce.soap.partner.QueryResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,8 +79,8 @@ public class DateProcessTest extends ProcessTestBase {
     @Override
     protected Map<String, String> getTestConfig() {
         Map<String, String> cfg = super.getTestConfig();
-        cfg.put(Config.TIMEZONE, "PDT");
-        cfg.put(Config.ENTITY, "Account");
+        cfg.put(AppConfig.TIMEZONE, "PDT");
+        cfg.put(AppConfig.ENTITY, "Account");
         return cfg;
     }
 

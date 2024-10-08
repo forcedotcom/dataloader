@@ -26,11 +26,9 @@
 package com.salesforce.dataloader.config;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -41,7 +39,6 @@ import org.junit.Test;
 
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.exception.ConfigInitializationException;
-import com.salesforce.dataloader.util.AppUtil;
 
 public class ConfigTest extends ConfigTestBase {
     private static Logger logger = LogManager.getLogger(ConfigTest.class);
@@ -53,10 +50,10 @@ public class ConfigTest extends ConfigTestBase {
     @Test
     public void testProperty_SELECTED_AUTH_ENVIRONMENT() {
         try {
-            Config config = Config.getInstance(getTestConfig());
-            config.setOAuthEnvironment(Config.PROD_ENVIRONMENT_VAL);
-            String selectedAuthEnv = config.getString(Config.SELECTED_AUTH_ENVIRONMENT);
-            assertEquals(selectedAuthEnv, Config.PROD_ENVIRONMENT_VAL);
+            AppConfig appConfig = AppConfig.getInstance(getTestConfig());
+            appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
+            String selectedAuthEnv = appConfig.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT);
+            assertEquals(selectedAuthEnv, AppConfig.PROD_ENVIRONMENT_VAL);
         } catch (ConfigInitializationException 
                 | FactoryConfigurationError
                 | IOException e) {
@@ -68,11 +65,11 @@ public class ConfigTest extends ConfigTestBase {
     @Test
     public void testProperty_OAUTH_CLIENTID() {
         try {
-            Config config = Config.getInstance(getTestConfig());
-            config.setOAuthEnvironment(Config.PROD_ENVIRONMENT_VAL);
-            String configuredClientId = config.getString(Config.OAUTH_CLIENTID);
-            if (config.getBoolean(Config.BULK_API_ENABLED) 
-                    || config.getBoolean(Config.BULKV2_API_ENABLED)) {
+            AppConfig appConfig = AppConfig.getInstance(getTestConfig());
+            appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
+            String configuredClientId = appConfig.getString(AppConfig.OAUTH_CLIENTID);
+            if (appConfig.getBoolean(AppConfig.BULK_API_ENABLED) 
+                    || appConfig.getBoolean(AppConfig.BULKV2_API_ENABLED)) {
                 assertTrue(configuredClientId != null && configuredClientId.startsWith("DataLoaderBulkUI"));
             } else {
                 assertTrue(configuredClientId != null && configuredClientId.startsWith("DataLoaderPartnerUI"));
@@ -88,9 +85,9 @@ public class ConfigTest extends ConfigTestBase {
     @Test
     public void testProperty_OAUTH_CLIENTSECRET() {
         try {
-            Config config = Config.getInstance(getTestConfig());
-            config.setOAuthEnvironment(Config.PROD_ENVIRONMENT_VAL);
-            String configuredClientSecret = config.getString(Config.OAUTH_CLIENTSECRET);
+            AppConfig appConfig = AppConfig.getInstance(getTestConfig());
+            appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
+            String configuredClientSecret = appConfig.getString(AppConfig.OAUTH_CLIENTSECRET);
             assertTrue(configuredClientSecret == null || configuredClientSecret.isBlank());
         } catch (ConfigInitializationException 
                 | FactoryConfigurationError
@@ -103,9 +100,9 @@ public class ConfigTest extends ConfigTestBase {
     @Test
     public void testProperty_OAUTH_SERVER() {
         try {
-            Config config = Config.getInstance(getTestConfig());
-            config.setOAuthEnvironment(Config.PROD_ENVIRONMENT_VAL);
-            String configuredOAuthServer = config.getString(Config.OAUTH_SERVER);
+            AppConfig appConfig = AppConfig.getInstance(getTestConfig());
+            appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
+            String configuredOAuthServer = appConfig.getString(AppConfig.OAUTH_SERVER);
             String expectedOAuthServer = getProperty("test.endpoint");
             if (expectedOAuthServer == null || expectedOAuthServer.isBlank()) {
                 logger.info("Expected prefix is " + expectedOAuthServer);
@@ -113,9 +110,9 @@ public class ConfigTest extends ConfigTestBase {
             }
             assertTrue(configuredOAuthServer.startsWith(expectedOAuthServer));
             
-            config.setOAuthEnvironment(Config.SB_ENVIRONMENT_VAL);
-            configuredOAuthServer = config.getString(Config.OAUTH_SERVER);
-            assertTrue(configuredOAuthServer.startsWith(Config.DEFAULT_ENDPOINT_URL_SANDBOX));
+            appConfig.setOAuthEnvironment(AppConfig.SB_ENVIRONMENT_VAL);
+            configuredOAuthServer = appConfig.getString(AppConfig.OAUTH_SERVER);
+            assertTrue(configuredOAuthServer.startsWith(AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX));
         } catch (ConfigInitializationException 
                 | FactoryConfigurationError
                 | IOException e) {
@@ -129,16 +126,16 @@ public class ConfigTest extends ConfigTestBase {
     public void testProperty_OAUTH_REDIRECTURI() {
         try {
             Map<String, String> testConfigMap = getTestConfig();
-            Config config = Config.getInstance(testConfigMap);
-            config.setOAuthEnvironment(Config.PROD_ENVIRONMENT_VAL);
-            String configuredOAuthRedirectURI = config.getString(Config.OAUTH_REDIRECTURI);
+            AppConfig appConfig = AppConfig.getInstance(testConfigMap);
+            appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
+            String configuredOAuthRedirectURI = appConfig.getString(AppConfig.OAUTH_REDIRECTURI);
             String expectedOAuthRedirectURIPrefix = getProperty("test.endpoint");
             if (expectedOAuthRedirectURIPrefix == null || expectedOAuthRedirectURIPrefix.isBlank()) {
                 logger.info("Expected prefix is " + expectedOAuthRedirectURIPrefix);
                 logger.info("Actual prefix is " + configuredOAuthRedirectURI);
             }
             assertTrue(configuredOAuthRedirectURI.startsWith(expectedOAuthRedirectURIPrefix));
-            assertTrue(configuredOAuthRedirectURI.endsWith(Config.OAUTH_REDIRECT_URI_SUFFIX));
+            assertTrue(configuredOAuthRedirectURI.endsWith(AppConfig.OAUTH_REDIRECT_URI_SUFFIX));
         } catch (ConfigInitializationException 
                 | FactoryConfigurationError
                 | IOException e) {

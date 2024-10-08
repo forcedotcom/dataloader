@@ -44,7 +44,7 @@ import org.junit.runners.Parameterized;
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.sforce.async.CSVReader;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
@@ -108,17 +108,17 @@ public class CsvEncodingProcessTest extends ProcessTestBase {
 
     private Map<String, String> getBulkUnicodeExtractConfig(String soql) {
         final Map<String, String> argMap = getTestConfig(OperationInfo.extract, true);
-        argMap.put(Config.ENTITY, "Account");
-        argMap.put(Config.EXTRACT_SOQL, soql);
-        argMap.put(Config.ENABLE_EXTRACT_STATUS_OUTPUT, Config.TRUE);
-        argMap.put(Config.EXPORT_BATCH_SIZE, "2000");
+        argMap.put(AppConfig.ENTITY, "Account");
+        argMap.put(AppConfig.EXTRACT_SOQL, soql);
+        argMap.put(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT, AppConfig.TRUE);
+        argMap.put(AppConfig.EXPORT_BATCH_SIZE, "2000");
         argMap.putAll(config);
-        argMap.remove(Config.MAPPING_FILE);
+        argMap.remove(AppConfig.MAPPING_FILE);
         return argMap;
     }
 
     private void validateExtraction(final String name, final Map<String, String> testConfig) throws IOException {
-        FileInputStream fis = new FileInputStream(new File(testConfig.get(Config.DAO_NAME)));
+        FileInputStream fis = new FileInputStream(new File(testConfig.get(AppConfig.DAO_NAME)));
         try {
             CSVReader rdr = new CSVReader(fis, StandardCharsets.UTF_8.name());
             int nameidx = rdr.nextRecord().indexOf("Name");

@@ -41,7 +41,7 @@ import org.junit.runners.Parameterized;
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.LastRunProperties;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.database.DatabaseReader;
@@ -129,7 +129,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
 	// This test happens to configure its own encryption file and encrypted password
         // so we need to remove the default test password from the config
         final Map<String, String> argMap = getTestConfig();
-        argMap.remove(Config.PASSWORD);
+        argMap.remove(AppConfig.PASSWORD);
         // insert
         testUpsertAccountsDb(argMap, NUM_ROWS, true, false);
         // update
@@ -145,10 +145,10 @@ public class DatabaseProcessTest extends ProcessTestBase {
 
         // specify the name of the configured process and select appropriate database access type
         if (args == null) args = getTestConfig();
-        args.put(Config.PROCESS_NAME, processName);
-        Config.DATE_FORMATTER.parse(startTime);
+        args.put(AppConfig.PROCESS_NAME, processName);
+        AppConfig.DATE_FORMATTER.parse(startTime);
         args.put(LastRunProperties.LAST_RUN_DATE, startTime);
-        args.put(Config.OPERATION, OperationInfo.upsert.name());
+        args.put(AppConfig.OPERATION, OperationInfo.upsert.name());
 
         runUpsertProcess(args, isInsert ? numRows : 0, isInsert ? 0 : numRows);
     }
@@ -162,12 +162,12 @@ public class DatabaseProcessTest extends ProcessTestBase {
         }
         // TODO: we need to get the accounts from sfdc and check that field values were updated correctly
         // create some rows with non-null values in them
-        args.put(Config.INSERT_NULLS, Boolean.toString(false));
+        args.put(AppConfig.INSERT_NULLS, Boolean.toString(false));
         testUpsertAccountsDb(args, 10, true, false);
         // update the rows with some null values, but with insert nulls disabled
         testUpsertAccountsDb(args, 10, false, true);
         // update the rows with some null values, but with insert nulls enabled
-        args.put(Config.INSERT_NULLS, Boolean.toString(true));
+        args.put(AppConfig.INSERT_NULLS, Boolean.toString(true));
         testUpsertAccountsDb(args, 10, false, true);
     }
 
@@ -177,15 +177,15 @@ public class DatabaseProcessTest extends ProcessTestBase {
         // specify the name of the configured process and select appropriate database access type
         OperationInfo op = isInsert ? OperationInfo.insert : OperationInfo.update;
         Map<String, String> argMap = getTestConfig();
-        argMap.put(Config.OPERATION, OperationInfo.extract.name());
-        argMap.put(Config.PROCESS_NAME, processName);
-        argMap.put(Config.DAO_NAME, op.name() + "Account");
-        argMap.put(Config.OUTPUT_SUCCESS, new File(getTestStatusDir(), baseName + op.name() + "Success.csv")
+        argMap.put(AppConfig.OPERATION, OperationInfo.extract.name());
+        argMap.put(AppConfig.PROCESS_NAME, processName);
+        argMap.put(AppConfig.DAO_NAME, op.name() + "Account");
+        argMap.put(AppConfig.OUTPUT_SUCCESS, new File(getTestStatusDir(), baseName + op.name() + "Success.csv")
         .getAbsolutePath());
-        argMap.put(Config.OUTPUT_ERROR, new File(getTestStatusDir(), baseName + op.name() + "Error.csv")
+        argMap.put(AppConfig.OUTPUT_ERROR, new File(getTestStatusDir(), baseName + op.name() + "Error.csv")
         .getAbsolutePath());
-        argMap.put(Config.ENABLE_EXTRACT_STATUS_OUTPUT, Config.TRUE);
-        argMap.put(Config.DAO_WRITE_BATCH_SIZE, String.valueOf(BATCH_SIZE));
+        argMap.put(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT, AppConfig.TRUE);
+        argMap.put(AppConfig.DAO_WRITE_BATCH_SIZE, String.valueOf(BATCH_SIZE));
 
         Date startTime = new Date();
 
@@ -201,9 +201,9 @@ public class DatabaseProcessTest extends ProcessTestBase {
         DatabaseReader reader = null;
         logger.info("Verifying database success for database configuration: " + dbConfigName);
         try {
-            reader = new DatabaseReader(theController.getConfig(), dbConfigName);
+            reader = new DatabaseReader(theController.getAppConfig(), dbConfigName);
             reader.open();
-            int readBatchSize = theController.getConfig().getInt(Config.DAO_READ_BATCH_SIZE);
+            int readBatchSize = theController.getAppConfig().getInt(AppConfig.DAO_READ_BATCH_SIZE);
             List<Row> successRows = reader.readRowList(readBatchSize);
             int rowsProcessed = 0;
             assertNotNull("Error reading " + readBatchSize + " rows", successRows);

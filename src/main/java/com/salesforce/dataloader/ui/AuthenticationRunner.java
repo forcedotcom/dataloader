@@ -27,7 +27,7 @@
 package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.client.DefaultSimplePost;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.model.LoginCriteria;
 import com.salesforce.dataloader.util.ExceptionUtil;
@@ -56,7 +56,7 @@ import java.util.function.Consumer;
 public class AuthenticationRunner {
     private static Logger logger = LogManager.getLogger(AuthenticationRunner.class);
 
-    private final Config config;
+    private final AppConfig config;
     private final Controller controller;
     private final String nestedException = "nested exception is:";
     private final Shell shell;
@@ -64,13 +64,13 @@ public class AuthenticationRunner {
     private LoginCriteria criteria;
 
 
-    public AuthenticationRunner(Shell shell, Config config, Controller controller) {
+    public AuthenticationRunner(Shell shell, AppConfig config, Controller controller) {
         this.shell = shell;
         this.config = config;
         this.controller = controller;
     }
 
-    public Config getConfig() {
+    public AppConfig getConfig() {
         return config;
     }
 
@@ -90,7 +90,7 @@ public class AuthenticationRunner {
             authStatusChangeConsumer.accept(Labels.getString("LoginPage.verifyingLogin"));
             logger.info(Labels.getString("LoginPage.verifyingLogin"));
             if (criteria.getMode() == LoginCriteria.OAuthLogin){
-                if (config.getBoolean(Config.OAUTH_LOGIN_FROM_BROWSER)) {
+                if (config.getBoolean(AppConfig.OAUTH_LOGIN_FROM_BROWSER)) {
                     OAuthLoginFromBrowserFlow flow = new OAuthLoginFromBrowserFlow(shell, config);
                     if (!flow.open()) {
                         String message = Labels.getString("LoginPage.invalidLoginOAuthBrowser");
@@ -98,7 +98,7 @@ public class AuthenticationRunner {
                         return;
                     }
                 } else { // OAuth login from Data Loader app
-                    boolean hasSecret = !config.getString(Config.OAUTH_CLIENTSECRET).trim().equals("");
+                    boolean hasSecret = !config.getString(AppConfig.OAUTH_CLIENTSECRET).trim().equals("");
                     OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, config) : new OAuthTokenFlow(shell, config);
                     if (!flow.open()) {
                        String message = Labels.getString("LoginPage.invalidLoginOAuth");

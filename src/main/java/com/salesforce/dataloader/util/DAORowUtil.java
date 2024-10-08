@@ -124,7 +124,7 @@ public class DAORowUtil {
         return error;
     }
 
-    public void skipRowToStartOffset(Config cfg, DataReader rdr, ILoaderProgress mon, boolean updateProgress)
+    public void skipRowToStartOffset(AppConfig cfg, DataReader rdr, ILoaderProgress mon, boolean updateProgress)
             throws LoadException {
 
         try {
@@ -193,11 +193,11 @@ public class DAORowUtil {
     /**
      * Set the dataReader to point to the row where load has to be started
      */
-    private void rowToStart(Config cfg, DataReader daoReader) throws DataAccessObjectException {
+    private void rowToStart(AppConfig cfg, DataReader daoReader) throws DataAccessObjectException {
         // start at the correct row
         final int rowToStart;
         try {
-            rowToStart = cfg.getInt(Config.LOAD_ROW_TO_START_AT);
+            rowToStart = cfg.getInt(AppConfig.LOAD_ROW_TO_START_AT);
         } catch (final ParameterLoadException e) {
             return;
         }

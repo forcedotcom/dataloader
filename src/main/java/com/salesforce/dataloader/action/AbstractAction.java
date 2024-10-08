@@ -27,7 +27,6 @@
 package com.salesforce.dataloader.action;
 
 import java.util.ArrayList;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
@@ -35,7 +34,7 @@ import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.IVisitor;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObject;
@@ -91,13 +90,13 @@ abstract class AbstractAction implements IAction {
         }
         this.visitor = createVisitor();
         int retries = -1;
-        this.enableRetries = controller.getConfig().getBoolean(Config.ENABLE_RETRIES);
+        this.enableRetries = controller.getAppConfig().getBoolean(AppConfig.ENABLE_RETRIES);
         if (this.enableRetries) {
             try {
                 // limit the number of max retries in case limit is exceeded
-                retries = Math.min(Config.MAX_RETRIES_LIMIT, controller.getConfig().getInt(Config.MAX_RETRIES));
+                retries = Math.min(AppConfig.MAX_RETRIES_LIMIT, controller.getAppConfig().getInt(AppConfig.MAX_RETRIES));
             } catch (ParameterLoadException e) {
-                retries = Config.DEFAULT_MAX_RETRIES;
+                retries = AppConfig.DEFAULT_MAX_RETRIES;
             }
         }
         this.maxRetries = retries;
@@ -159,7 +158,7 @@ abstract class AbstractAction implements IAction {
     private List<Exception> executeOperation() {
         List<Exception> exceptions = new ArrayList<>();
         try {
-            getLogger().info(getMessage("loading", getConfig().getString(Config.OPERATION)));
+            getLogger().info(getMessage("loading", getConfig().getString(AppConfig.OPERATION)));
             getDao().open();
             initOperation();
             if (writeStatus()) {
@@ -190,7 +189,7 @@ abstract class AbstractAction implements IAction {
                 //if no exceptions occurred then display success/error
                 if (exceptions.size() == 0) {
                     final Object[] args = {String.valueOf(getVisitor().getNumberSuccesses()),
-                            getConfig().getString(Config.OPERATION), String.valueOf(getVisitor().getNumberErrors())};
+                            getConfig().getString(AppConfig.OPERATION), String.valueOf(getVisitor().getNumberErrors())};
 
                     // set the monitor to done
                     if (getMonitor().isCanceled()) {
@@ -214,7 +213,7 @@ abstract class AbstractAction implements IAction {
             if (numAttempts < this.maxRetries-1 && this.enableRetries) {
                 // loop only if less than MAX_RETRIES
                 logger.warn("Encountered an error on server when performing "
-                        + controller.getConfig().getString(Config.OPERATION) 
+                        + controller.getAppConfig().getString(AppConfig.OPERATION) 
                         + " on attempt " 
                         + numAttempts );
                 logger.warn(e.getMessage());
@@ -231,16 +230,16 @@ abstract class AbstractAction implements IAction {
     private void retrySleep(int retryNum) {
         int sleepSecs;
         try {
-            sleepSecs = controller.getConfig().getInt(Config.MIN_RETRY_SLEEP_SECS);
+            sleepSecs = controller.getAppConfig().getInt(AppConfig.MIN_RETRY_SLEEP_SECS);
         } catch (ParameterLoadException e1) {
-            sleepSecs = Config.DEFAULT_MIN_RETRY_SECS;
+            sleepSecs = AppConfig.DEFAULT_MIN_RETRY_SECS;
         }
         // sleep between retries is based on the retry attempt #. Sleep for longer periods with each retry
         sleepSecs = sleepSecs + (retryNum * 10); // sleep for MIN_RETRY_SLEEP_SECS + 10, 20, 30, etc.
 
         logger.info(Messages.getFormattedString("Client.retryOperation", 
                 new String[]{Integer.toString(retryNum + 1),
-                getController().getConfig().getString(Config.OPERATION), 
+                getController().getAppConfig().getString(AppConfig.OPERATION), 
                 Integer.toString(sleepSecs)}));
         try {
             Thread.sleep(sleepSecs * 1000);
@@ -258,8 +257,8 @@ abstract class AbstractAction implements IAction {
         }
     }
 
-    protected Config getConfig() {
-        return getController().getConfig();
+    protected AppConfig getConfig() {
+        return getController().getAppConfig();
     }
 
     protected Controller getController() {
@@ -311,7 +310,7 @@ abstract class AbstractAction implements IAction {
      * @throws DataAccessObjectInitializationException
      */
     public DataWriter createErrorWriter() throws DataAccessObjectInitializationException {
-        final String filename = getConfig().getString(Config.OUTPUT_ERROR);
+        final String filename = getConfig().getString(AppConfig.OUTPUT_ERROR);
         if (filename == null || filename.length() == 0)
             throw new DataAccessObjectInitializationException(getMessage("errorMissingErrorFile"));
         // TODO: Make sure that specific DAO is not mentioned: use DataReader, DataWriter, or DataAccessObject
@@ -324,7 +323,7 @@ abstract class AbstractAction implements IAction {
      * @throws DataAccessObjectInitializationException
      */
     public DataWriter createSuccesWriter() throws DataAccessObjectInitializationException {
-        final String filename = getConfig().getString(Config.OUTPUT_SUCCESS);
+        final String filename = getConfig().getString(AppConfig.OUTPUT_SUCCESS);
         if (filename == null || filename.length() == 0)
             throw new DataAccessObjectInitializationException(getMessage("errorMissingSuccessFile"));
         // TODO: Make sure that specific DAO is not mentioned: use DataReader, DataWriter, or DataAccessObject
@@ -334,50 +333,50 @@ abstract class AbstractAction implements IAction {
 
     public void openErrorWriter(List<String> headers) throws OperationException {
         headers = new ArrayList<String>(headers);
-        Config config = this.controller.getConfig();
+        AppConfig appConfig = this.controller.getAppConfig();
 
-        if (config.isBulkV2APIEnabled()
-        	&& !config.getString(Config.OPERATION).equals(OperationInfo.extract.name())
-        	&& !config.getString(Config.OPERATION).equals(OperationInfo.extract_all.name())) {
-            headers.add(0, Config.ID_COLUMN_NAME);
-        	headers.add(1, Config.ERROR_COLUMN_NAME);
+        if (appConfig.isBulkV2APIEnabled()
+        	&& !appConfig.getString(AppConfig.OPERATION).equals(OperationInfo.extract.name())
+        	&& !appConfig.getString(AppConfig.OPERATION).equals(OperationInfo.extract_all.name())) {
+            headers.add(0, AppConfig.ID_COLUMN_NAME);
+        	headers.add(1, AppConfig.ERROR_COLUMN_NAME);
         } else {
 	        // add the ERROR column
-	        headers.add(Config.ERROR_COLUMN_NAME);
+	        headers.add(AppConfig.ERROR_COLUMN_NAME);
         }
         try {
             getErrorWriter().open();
             getErrorWriter().setColumnNames(headers);
         } catch (final DataAccessObjectInitializationException e) {
             throw new OperationException(
-                    getMessage("errorOpeningErrorFile", getConfig().getString(Config.OUTPUT_ERROR)), e);
+                    getMessage("errorOpeningErrorFile", getConfig().getString(AppConfig.OUTPUT_ERROR)), e);
         }
     }
 
     public void openSuccessWriter(List<String> headers) throws LoadException {
         headers = new ArrayList<String>(headers);
-        Config config = this.controller.getConfig();
+        AppConfig appConfig = this.controller.getAppConfig();
 
         // add the ID column if not there already
-        if (config.isBulkV2APIEnabled()
-        	&& !config.getString(Config.OPERATION).equals(OperationInfo.extract.name())
-        	&& !config.getString(Config.OPERATION).equals(OperationInfo.extract_all.name())) {
-            if (headers.size() == 0 || !Config.ID_COLUMN_NAME.equals(headers.get(0))) {
-                headers.add(0, Config.ID_COLUMN_NAME);
+        if (appConfig.isBulkV2APIEnabled()
+        	&& !appConfig.getString(AppConfig.OPERATION).equals(OperationInfo.extract.name())
+        	&& !appConfig.getString(AppConfig.OPERATION).equals(OperationInfo.extract_all.name())) {
+            if (headers.size() == 0 || !AppConfig.ID_COLUMN_NAME.equals(headers.get(0))) {
+                headers.add(0, AppConfig.ID_COLUMN_NAME);
             }
-            headers.add(1, Config.STATUS_COLUMN_NAME_IN_BULKV2);
+            headers.add(1, AppConfig.STATUS_COLUMN_NAME_IN_BULKV2);
         } else {
-	        if (!Config.ID_COLUMN_NAME.equals(headers.get(0))) {
-	            headers.add(0, Config.ID_COLUMN_NAME);
+	        if (!AppConfig.ID_COLUMN_NAME.equals(headers.get(0))) {
+	            headers.add(0, AppConfig.ID_COLUMN_NAME);
 	        }
-	        headers.add(Config.STATUS_COLUMN_NAME);
+	        headers.add(AppConfig.STATUS_COLUMN_NAME);
         }
         try {
             getSuccessWriter().open();
             getSuccessWriter().setColumnNames(headers);
         } catch (final DataAccessObjectInitializationException e) {
             throw new LoadException(
-                    getMessage("errorOpeningSuccessFile", getConfig().getString(Config.OUTPUT_SUCCESS)), e);
+                    getMessage("errorOpeningSuccessFile", getConfig().getString(AppConfig.OUTPUT_SUCCESS)), e);
         }
     }
 

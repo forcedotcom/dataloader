@@ -34,7 +34,7 @@ import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.client.CompositeRESTClient;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
@@ -96,7 +96,7 @@ public abstract class RESTLoadVisitor extends DAOLoadVisitor {
                         statusMsg = Messages.getString("DAOLoadVisitor.statusItemUpdated");
                     }
                 }
-                daoRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
+                daoRow.put(AppConfig.STATUS_COLUMN_NAME, statusMsg);
                 processResult(daoRow, saveRes.getSuccess(), saveRes.getId(), saveRes.getErrors());
             }
             batchRowCounter++;

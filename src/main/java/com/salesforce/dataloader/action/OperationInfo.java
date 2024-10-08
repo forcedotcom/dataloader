@@ -31,7 +31,7 @@ import org.apache.logging.log4j.LogManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.uiActions.OperationUIAction;
@@ -88,9 +88,9 @@ public enum OperationInfo {
     public IAction instantiateAction(Controller ctl, ILoaderProgress loaderProgress) {
         logger.info(Messages.getMessage(getClass(), "createAction", this));
         Class<? extends IAction> cls = this.partnerAPIActionClass;
-        if (ctl.getConfig().isBulkAPIEnabled() && bulkAPIEnabled()) {
+        if (ctl.getAppConfig().isBulkAPIEnabled() && bulkAPIEnabled()) {
             cls = this.bulkAPIActionClass;
-        } else if (ctl.getConfig().isBulkV2APIEnabled() && bulkV2APIEnabled()) {
+        } else if (ctl.getAppConfig().isBulkV2APIEnabled() && bulkV2APIEnabled()) {
             cls = this.bulkV2APIActionClass;
         }
         try {
@@ -164,7 +164,7 @@ public enum OperationInfo {
         return this.uiHelper.getDialogIdx();
     }
 
-    public boolean isOperationAllowed(Config cfg) {
+    public boolean isOperationAllowed(AppConfig cfg) {
         if (cfg.isBulkAPIEnabled()) {
             return this.bulkAPIActionClass != null;
         } else if (cfg.isBulkV2APIEnabled()) {

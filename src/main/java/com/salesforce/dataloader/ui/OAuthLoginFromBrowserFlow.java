@@ -26,7 +26,7 @@
 
 package com.salesforce.dataloader.ui;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
 
 import org.apache.logging.log4j.LogManager;
@@ -61,18 +61,18 @@ import java.io.UnsupportedEncodingException;
  */
 public class OAuthLoginFromBrowserFlow extends Dialog {
     protected static Logger logger = LogManager.getLogger(OAuthLoginFromBrowserFlow.class);
-    protected final Config config;
+    protected final AppConfig appConfig;
 
-    public OAuthLoginFromBrowserFlow(Shell parent, Config config) {
+    public OAuthLoginFromBrowserFlow(Shell parent, AppConfig appConfig) {
         super(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.FILL);
-        this.config = config;
+        this.appConfig = appConfig;
     }
     
     public boolean open() throws UnsupportedEncodingException {    	
     	final String verificationURLStr;
     	final OAuthBrowserLoginRunner loginRunner;
     	try {
-    	    loginRunner = new OAuthBrowserLoginRunner(config, true);
+    	    loginRunner = new OAuthBrowserLoginRunner(appConfig, true);
     	    verificationURLStr = loginRunner.getVerificationURLStr();
     	} catch (Exception ex) {
     	    logger.error(ex.getMessage());

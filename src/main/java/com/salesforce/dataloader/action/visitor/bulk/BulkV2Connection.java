@@ -347,7 +347,7 @@ public class BulkV2Connection extends BulkConnection {
         if (jobId == null) {
         	jobId = "";
         }
-        boolean isExtraction = controller.getConfig().getOperationInfo().isExtraction();
+        boolean isExtraction = controller.getAppConfig().getOperationInfo().isExtraction();
         if (isExtraction) {
         	urlString += URI_STEM_QUERY + jobId + "/";
         } else {
@@ -367,7 +367,7 @@ public class BulkV2Connection extends BulkConnection {
         
     	HashMap<String, Object> requestBodyMap = new HashMap<String, Object>();
     	requestBodyMap.put("operation", job.getOperation().toString());
-        if (controller.getConfig().getOperationInfo().isExtraction()) {
+        if (controller.getAppConfig().getOperationInfo().isExtraction()) {
         	headers = getHeaders(JSON_CONTENT_TYPE, CSV_CONTENT_TYPE);
         	requestBodyMap.put("query", job.getObject());        	
         } else {
@@ -594,7 +594,7 @@ public class BulkV2Connection extends BulkConnection {
 	                            }
 	                            str += parts[i];
 	                        }
-	                        buffer = str.getBytes(controller.getConfig().getCsvEncoding(true));
+	                        buffer = str.getBytes(controller.getAppConfig().getCsvEncoding(true));
 	                        int counter = 0;
 	                        while(counter < buffer.length && buffer[counter] != 0) {
 	                            counter++;

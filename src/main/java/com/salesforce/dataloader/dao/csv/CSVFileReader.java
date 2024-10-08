@@ -41,7 +41,7 @@ import org.apache.commons.io.input.BOMInputStream;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dao.DAORowCache;
 import com.salesforce.dataloader.dao.DataReader;
@@ -70,7 +70,7 @@ public class CSVFileReader implements DataReader {
     private List<String> headerRow;
     private boolean isOpen;
     private char[] csvDelimiters;
-    private Config config;
+    private AppConfig appConfig;
     private DAORowCache rowCache = new DAORowCache();
     private boolean endOfFileReached = false;
 
@@ -79,27 +79,27 @@ public class CSVFileReader implements DataReader {
     // 2. CSV files that are results of query operations: ignoreDelimiterConfig = false, isQueryOperationResult = true
     // 3. CSV files that capture successes/failures when performing an upload operation: ignoreDelimiterConfig = true, isQueryOperationResult = <value ignored>
     //    isQueryOperationsResult value is ignored if ignoreDelimiterConfig is 'true'. 
-    public CSVFileReader(File file, Config config, boolean ignoreDelimiterConfig, boolean isQueryOperationResult) {
+    public CSVFileReader(File file, AppConfig appConfig, boolean ignoreDelimiterConfig, boolean isQueryOperationResult) {
         this.file = file;
-        this.config = config;
+        this.appConfig = appConfig;
         StringBuilder separator = new StringBuilder();
         if (ignoreDelimiterConfig) {
             separator.append(AppUtil.COMMA);
             LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageCommaSeparator"));            
         } else {
             if (isQueryOperationResult) {
-                separator.append(config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS));
+                separator.append(appConfig.getString(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS));
             } else { // reading CSV for a load operation
-                if (config.getBoolean(Config.CSV_DELIMITER_COMMA)) {
+                if (appConfig.getBoolean(AppConfig.CSV_DELIMITER_COMMA)) {
                     separator.append(AppUtil.COMMA);
                     LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageCommaSeparator"));
                 }
-                if (config.getBoolean(Config.CSV_DELIMITER_TAB)) {
+                if (appConfig.getBoolean(AppConfig.CSV_DELIMITER_TAB)) {
                     separator.append(AppUtil.TAB);
                     LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageTabSeparator"));
                 }
-                if (config.getBoolean(Config.CSV_DELIMITER_OTHER)) {
-                    separator.append(config.getString(Config.CSV_DELIMITER_OTHER_VALUE));
+                if (appConfig.getBoolean(AppConfig.CSV_DELIMITER_OTHER)) {
+                    separator.append(appConfig.getString(AppConfig.CSV_DELIMITER_OTHER_VALUE));
                     LOGGER.debug(Messages.getFormattedString("CSVFileDAO.debugMessageSeparatorChar", separator));
                 }
             }
@@ -178,7 +178,7 @@ public class CSVFileReader implements DataReader {
             return row;
         }
         
-        if (config.getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+        if (appConfig.getBoolean(AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
             && endOfFileReached) {
             return null;
         }
@@ -280,7 +280,7 @@ public class CSVFileReader implements DataReader {
 
         try {
             input = new FileInputStream(file);
-            String encoding = this.config.getCsvEncoding(false);
+            String encoding = this.appConfig.getCsvEncoding(false);
             if (StandardCharsets.UTF_8.name().equals(encoding)
                 || StandardCharsets.UTF_16BE.name().equals(encoding)
                 || StandardCharsets.UTF_16LE.name().equals(encoding)

@@ -28,7 +28,7 @@ package com.salesforce.dataloader.mapping;
 
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.client.PartnerClient;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.sforce.ws.ConnectionException;
 import org.junit.Before;
@@ -60,7 +60,7 @@ public class SOQLMapperTest extends ConfigTestBase {
 
     @Test
     public void testRelationshipQuery() throws Exception {
-        getController().getConfig().setValue(Config.ENTITY, "User");
+        getController().getAppConfig().setValue(AppConfig.ENTITY, "User");
         soqlMapper.initSoqlMapping("select Id, Contact.Accountid from User");
 
         List<String> daoColumnsForSoql = soqlMapper.getDaoColumnsForSoql();

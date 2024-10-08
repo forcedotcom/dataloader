@@ -38,7 +38,7 @@ import java.util.Set;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -79,10 +79,10 @@ public class CSVFileWriter implements DataWriter {
     private final boolean capitalizedHeadings = false;
     private final char columnDelimiter;
         
-    public CSVFileWriter(String fileName, Config config, String columnDelimiterStr) {
+    public CSVFileWriter(String fileName, AppConfig appConfig, String columnDelimiterStr) {
 
         this.fileName = fileName;
-        encoding = config.getCsvEncoding(true);
+        encoding = appConfig.getCsvEncoding(true);
         logger.debug(this.getClass().getName(), "encoding used to write to CSV file is " + encoding);
         if (columnDelimiterStr.length() == 0) {
             columnDelimiterStr = AppUtil.COMMA;

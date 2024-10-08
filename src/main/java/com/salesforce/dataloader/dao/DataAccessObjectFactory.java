@@ -31,7 +31,7 @@ import java.io.File;
 
 import org.apache.logging.log4j.LogManager;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
@@ -48,20 +48,20 @@ public class DataAccessObjectFactory {
     static public final String DATABASE_READ_TYPE = "databaseRead";
     static public final String DATABASE_WRITE_TYPE = "databaseWrite";
 
-    public DataAccessObject getDaoInstance(String daoType, Config config)
+    public DataAccessObject getDaoInstance(String daoType, AppConfig appConfig)
             throws DataAccessObjectInitializationException {
         DataAccessObject dao = null;
 
-        logger.info(Messages.getFormattedString("DataAccessObjectFactory.creatingDao", new String[] {config.getString(Config.DAO_NAME), daoType}));
+        logger.info(Messages.getFormattedString("DataAccessObjectFactory.creatingDao", new String[] {appConfig.getString(AppConfig.DAO_NAME), daoType}));
 
         if (CSV_READ_TYPE.equalsIgnoreCase(daoType)) {
-            dao = new CSVFileReader(new File(config.getString(Config.DAO_NAME)), config, false, false);
+            dao = new CSVFileReader(new File(appConfig.getString(AppConfig.DAO_NAME)), appConfig, false, false);
         } else if (CSV_WRITE_TYPE.equalsIgnoreCase(daoType)) {
-            dao = new CSVFileWriter(config.getString(Config.DAO_NAME), config, config.getString(Config.CSV_DELIMITER_FOR_QUERY_RESULTS));
+            dao = new CSVFileWriter(appConfig.getString(AppConfig.DAO_NAME), appConfig, appConfig.getString(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS));
         } else if (DATABASE_READ_TYPE.equalsIgnoreCase(daoType)) {
-            dao = new DatabaseReader(config);
+            dao = new DatabaseReader(appConfig);
         } else if (DATABASE_WRITE_TYPE.equalsIgnoreCase(daoType)) {
-            dao = new DatabaseWriter(config);
+            dao = new DatabaseWriter(appConfig);
         } else {
             String errMsg = Messages.getFormattedString("DataAccessObjectFactory.daoTypeNotSupported", daoType);
             logger.error(errMsg);

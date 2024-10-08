@@ -55,7 +55,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.async.AsyncApiException;
@@ -171,7 +171,7 @@ public class HttpClientTransport implements HttpTransportInterface {
         closeHttpClient();
         httpMethod = null;
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-        if (Config.getCurrentConfig().getBoolean(Config.USE_SYSTEM_PROPS_FOR_HTTP_CLIENT)) {
+        if (AppConfig.getCurrentConfig().getBoolean(AppConfig.USE_SYSTEM_PROPS_FOR_HTTP_CLIENT)) {
             httpClientBuilder = httpClientBuilder.useSystemProperties();
         }
         
@@ -439,15 +439,15 @@ public class HttpClientTransport implements HttpTransportInterface {
         if (userAgentHeaderVal == null) {
             this.httpMethod.addHeader(USER_AGENT_HEADER, VersionInfo.info());
         }
-        Header clientIdHeaderVal = this.httpMethod.getFirstHeader(Config.CLIENT_ID_HEADER_NAME);
+        Header clientIdHeaderVal = this.httpMethod.getFirstHeader(AppConfig.CLIENT_ID_HEADER_NAME);
         if (clientIdHeaderVal == null) {
-            Config config = Config.getCurrentConfig();
-            this.httpMethod.addHeader(Config.CLIENT_ID_HEADER_NAME, config.getString(Config.OAUTH_CLIENTID));
+            AppConfig appConfig = AppConfig.getCurrentConfig();
+            this.httpMethod.addHeader(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.OAUTH_CLIENTID));
         }
         Header clientNameHeaderVal = this.httpMethod.getFirstHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER);
         if (clientNameHeaderVal == null) {
             this.httpMethod.addHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER,
-                    "client=" + ClientBase.getClientName(Config.getCurrentConfig()));      
+                    "client=" + ClientBase.getClientName(AppConfig.getCurrentConfig()));      
 
         }
     }
@@ -464,8 +464,8 @@ public class HttpClientTransport implements HttpTransportInterface {
     }
 
     public static boolean isReuseHttpClient() {
-        Config appConfig = Config.getCurrentConfig();
-        return appConfig.getBoolean(Config.REUSE_CLIENT_CONNECTION);
+        AppConfig appConfig = AppConfig.getCurrentConfig();
+        return appConfig.getBoolean(AppConfig.REUSE_CLIENT_CONNECTION);
     }
     
     public InputStream httpGet(String urlStr) throws IOException, AsyncApiException, HttpClientTransportException {

@@ -137,7 +137,7 @@ public class DatabaseTest extends ConfigTestBase {
         logger.info("Verifying database success for '" + (isInsert ? "insert" : "update") + "' operation");
         try {
             // sort order is reverse between insert and update
-            reader = new DatabaseReader(theController.getConfig(), "queryAccountAll");
+            reader = new DatabaseReader(theController.getAppConfig(), "queryAccountAll");
             reader.open();
             int readBatchSize = 1000;
             List<Row> readRowList = reader.readRowList(readBatchSize);

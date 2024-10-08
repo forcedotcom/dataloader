@@ -36,7 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.sforce.async.CSVReader;
@@ -59,9 +59,9 @@ public class CsvExtractAggregateQueryProcessTest extends ProcessTestBase {
     @Before
     public void setUpTestConfig() {
         testConfig = getTestConfig(OperationInfo.extract, true);
-        testConfig.put(Config.ENTITY, "Contact");
-        testConfig.put(Config.ENABLE_EXTRACT_STATUS_OUTPUT, Config.TRUE);
-        testConfig.remove(Config.MAPPING_FILE);
+        testConfig.put(AppConfig.ENTITY, "Contact");
+        testConfig.put(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT, AppConfig.TRUE);
+        testConfig.remove(AppConfig.MAPPING_FILE);
     }
 
     @Test
@@ -75,19 +75,19 @@ public class CsvExtractAggregateQueryProcessTest extends ProcessTestBase {
     }
 
     private void runExtraction(String extractionQuery) throws ProcessInitializationException, DataAccessObjectException {
-        testConfig.put(Config.EXTRACT_SOQL, extractionQuery);
-        testConfig.put(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS, Config.TRUE);
+        testConfig.put(AppConfig.EXTRACT_SOQL, extractionQuery);
+        testConfig.put(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS, AppConfig.TRUE);
         runProcess(testConfig, 1, true);
     }
 
     private void runExtractionDoNotLimitOutputToQueryFields(String extractionQuery) throws ProcessInitializationException, DataAccessObjectException {
-        testConfig.put(Config.EXTRACT_SOQL, extractionQuery);
-        testConfig.put(Config.LIMIT_OUTPUT_TO_QUERY_FIELDS, Config.FALSE);
+        testConfig.put(AppConfig.EXTRACT_SOQL, extractionQuery);
+        testConfig.put(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS, AppConfig.FALSE);
         runProcess(testConfig, 1, true);
     }
 
     private void validateAccountNameInOutputFile(final String accountName, boolean isLimitOutputToQueryFields) throws IOException {
-        FileInputStream fis = new FileInputStream(new File(testConfig.get(Config.DAO_NAME)));
+        FileInputStream fis = new FileInputStream(new File(testConfig.get(AppConfig.DAO_NAME)));
         try {
             CSVReader rdr = new CSVReader(fis, StandardCharsets.UTF_8.name());
             int acctNameIndex = 0;

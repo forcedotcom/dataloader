@@ -36,7 +36,7 @@ import org.apache.logging.log4j.LogManager;
 import org.eclipse.swt.SWT;
 
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 
@@ -156,9 +156,9 @@ public abstract class LoadWizard extends BaseWizard {
         @Override
         protected void hook_additionalLoadWizardPages() {
             super.hook_additionalLoadWizardPages();
-            if (getController().getConfig().isRESTAPIEnabled()
+            if (getController().getAppConfig().isRESTAPIEnabled()
                 && Controller.getAPIMajorVersion() >= 61
-                && getController().getConfig().getBoolean(Config.DELETE_WITH_EXTERNALID)) {
+                && getController().getAppConfig().getBoolean(AppConfig.DELETE_WITH_EXTERNALID)) {
                 addPage(new ExternalIdPage(getController()));
             }
         }
@@ -196,7 +196,7 @@ public abstract class LoadWizard extends BaseWizard {
         @Override
         protected void hook_additionalLoadWizardPages() {
             super.hook_additionalLoadWizardPages();
-            if (getController().getConfig().isRESTAPIEnabled()
+            if (getController().getAppConfig().isRESTAPIEnabled()
                 && Controller.getAPIMajorVersion() >= 61) {
                 addPage(new ExternalIdPage(getController()));
             }

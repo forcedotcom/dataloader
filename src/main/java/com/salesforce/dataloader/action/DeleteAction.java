@@ -31,7 +31,7 @@ import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.action.visitor.partner.PartnerDeleteVisitor;
 import com.salesforce.dataloader.action.visitor.rest.RESTDeleteVisitor;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 
@@ -46,8 +46,8 @@ class DeleteAction extends AbstractLoadAction {
 
     @Override
     protected DAOLoadVisitor createVisitor() {
-        if (getController().getConfig().isRESTAPIEnabled()
-                && getController().getConfig().getBoolean(Config.DELETE_WITH_EXTERNALID)) {
+        if (getController().getAppConfig().isRESTAPIEnabled()
+                && getController().getAppConfig().getBoolean(AppConfig.DELETE_WITH_EXTERNALID)) {
             return new RESTDeleteVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
         } else {
             return new PartnerDeleteVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());

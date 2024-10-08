@@ -232,7 +232,7 @@ public class CSVViewerDialog extends Dialog {
         
         // use delimiter settings for load operations by specifying 'false' for isQueryOperationResult param
         CSVFileReader csvReader = new CSVFileReader(new File(filename),
-                                        controller.getConfig(), ignoreDelimiterConfig, isQueryOperationResult);
+                                        controller.getAppConfig(), ignoreDelimiterConfig, isQueryOperationResult);
         try {
             List<String> header = new ArrayList<String>();
             header.add("");

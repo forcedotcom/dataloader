@@ -26,7 +26,7 @@
 
 package com.salesforce.dataloader.model;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 
 /**
  * all possible criteria for login into the api
@@ -93,20 +93,20 @@ public class LoginCriteria {
         this.sessionId = sessionId;
     }
 
-    public void updateConfig(Config config) {
+    public void updateConfig(AppConfig appConfig) {
         switch (getMode()){
             case LoginCriteria.UsernamePasswordLogin:
-                config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
-                config.setValue(Config.USERNAME, getUserName().trim());
-                config.setValue(Config.PASSWORD, getPassword().trim());
+                appConfig.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
+                appConfig.setValue(AppConfig.USERNAME, getUserName().trim());
+                appConfig.setValue(AppConfig.PASSWORD, getPassword().trim());
                 break;
             case LoginCriteria.SessionIdLogin:
-                config.setValue(Config.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
-                config.setValue(Config.USERNAME, getUserName().trim());
-                config.setValue(Config.SFDC_INTERNAL_SESSION_ID, getSessionId().trim());
+                appConfig.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
+                appConfig.setValue(AppConfig.USERNAME, getUserName().trim());
+                appConfig.setValue(AppConfig.SFDC_INTERNAL_SESSION_ID, getSessionId().trim());
                 break;
             case LoginCriteria.OAuthLogin:
-                config.setOAuthEnvironment(getEnvironment());
+                appConfig.setOAuthEnvironment(getEnvironment());
                 break;
         }
     }

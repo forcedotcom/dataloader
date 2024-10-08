@@ -27,7 +27,7 @@ package com.salesforce.dataloader.dao;
 
 import java.util.ArrayList;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.model.Row;
 
 public class DAORowCache {
@@ -43,9 +43,9 @@ public class DAORowCache {
     }
     
     public Row getCurrentRow() {
-        Config config = Config.getCurrentConfig();
+        AppConfig appConfig = AppConfig.getCurrentConfig();
         if (currentRowIndex >= totalRows
-            || !config.getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
+            || !appConfig.getBoolean(AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
             return null;
         }
         return rowList.get(currentRowIndex++);

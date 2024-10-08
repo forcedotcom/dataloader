@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 
 /**
  * A test setting is used to modify the behavior of dataloader during test execution.
@@ -35,21 +35,21 @@ import com.salesforce.dataloader.config.Config;
  */
 public enum TestSetting {
 
-    BULK_API_ENABLED(Config.BULK_API_ENABLED, Boolean.TRUE),
-    BULK_API_DISABLED(Config.BULK_API_ENABLED, Boolean.FALSE),
-    BULK_API_ZIP_CONTENT_ENABLED(Config.BULK_API_ZIP_CONTENT, Boolean.TRUE),
-    BULK_API_SERIAL_MODE_ENABLED(Config.BULK_API_SERIAL_MODE, Boolean.TRUE),
-    BULK_API_CACHE_DAO_UPLOAD_ENABLED(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO, Boolean.TRUE),
-    BULK_V2_API_ENABLED(Config.BULKV2_API_ENABLED, Boolean.TRUE),
-    BULK_V2_API_DISABLED(Config.BULKV2_API_ENABLED, Boolean.FALSE),
-    COMPOSITE_REST_API_DISABLED(Config.UPDATE_WITH_EXTERNALID, Boolean.FALSE),
-    COMPOSITE_REST_API_ENABLED(Config.UPDATE_WITH_EXTERNALID, Boolean.TRUE),
-    WRITE_UTF8_ENABLED(Config.WRITE_UTF8, Boolean.TRUE),
-    WRITE_UTF8_DISABLED(Config.WRITE_UTF8, Boolean.FALSE),
-    READ_UTF8_ENABLED(Config.READ_UTF8, Boolean.TRUE),
-    READ_UTF8_DISABLED(Config.READ_UTF8, Boolean.FALSE),
-    COMPRESSION_ENABLED(Config.NO_COMPRESSION, Boolean.FALSE),
-    COMPRESSION_DISABLED(Config.NO_COMPRESSION, Boolean.TRUE)
+    BULK_API_ENABLED(AppConfig.BULK_API_ENABLED, Boolean.TRUE),
+    BULK_API_DISABLED(AppConfig.BULK_API_ENABLED, Boolean.FALSE),
+    BULK_API_ZIP_CONTENT_ENABLED(AppConfig.BULK_API_ZIP_CONTENT, Boolean.TRUE),
+    BULK_API_SERIAL_MODE_ENABLED(AppConfig.BULK_API_SERIAL_MODE, Boolean.TRUE),
+    BULK_API_CACHE_DAO_UPLOAD_ENABLED(AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO, Boolean.TRUE),
+    BULK_V2_API_ENABLED(AppConfig.BULKV2_API_ENABLED, Boolean.TRUE),
+    BULK_V2_API_DISABLED(AppConfig.BULKV2_API_ENABLED, Boolean.FALSE),
+    COMPOSITE_REST_API_DISABLED(AppConfig.UPDATE_WITH_EXTERNALID, Boolean.FALSE),
+    COMPOSITE_REST_API_ENABLED(AppConfig.UPDATE_WITH_EXTERNALID, Boolean.TRUE),
+    WRITE_UTF8_ENABLED(AppConfig.WRITE_UTF8, Boolean.TRUE),
+    WRITE_UTF8_DISABLED(AppConfig.WRITE_UTF8, Boolean.FALSE),
+    READ_UTF8_ENABLED(AppConfig.READ_UTF8, Boolean.TRUE),
+    READ_UTF8_DISABLED(AppConfig.READ_UTF8, Boolean.FALSE),
+    COMPRESSION_ENABLED(AppConfig.NO_COMPRESSION, Boolean.FALSE),
+    COMPRESSION_DISABLED(AppConfig.NO_COMPRESSION, Boolean.TRUE)
     ;
 
     private final String parameter;

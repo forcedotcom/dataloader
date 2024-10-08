@@ -32,7 +32,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 
@@ -96,7 +96,7 @@ public class LoadFinishDialog extends WizardDialog {
         viewSuccess.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                openViewer(getController().getConfig().getString(Config.OUTPUT_SUCCESS));
+                openViewer(getController().getAppConfig().getString(AppConfig.OUTPUT_SUCCESS));
             }
 
             @Override
@@ -109,7 +109,7 @@ public class LoadFinishDialog extends WizardDialog {
         viewErrors.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                openViewer(getController().getConfig().getString(Config.OUTPUT_ERROR));
+                openViewer(getController().getAppConfig().getString(AppConfig.OUTPUT_ERROR));
             }
 
             @Override

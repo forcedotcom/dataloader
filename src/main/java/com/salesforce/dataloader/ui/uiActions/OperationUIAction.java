@@ -43,14 +43,14 @@ public class OperationUIAction extends Action {
         this.controller = controller;
         this.opInfo = info;
 
-        setEnabled(info.isOperationAllowed(controller.getConfig()));
+        setEnabled(info.isOperationAllowed(controller.getAppConfig()));
     }
 
     @Override
     public void run() {
         this.controller.clearMapper();
         LoaderWizardDialog dlg = new LoaderWizardDialog(LoaderWindow.getApp().getShell(), 
-                this.opInfo.getUIHelper().instantiateWizard(this.controller), this.controller.getConfig());
+                this.opInfo.getUIHelper().instantiateWizard(this.controller), this.controller.getAppConfig());
         dlg.open();
     }
 

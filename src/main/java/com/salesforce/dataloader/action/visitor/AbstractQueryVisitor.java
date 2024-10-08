@@ -30,7 +30,7 @@ import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.client.HttpTransportInterface;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
@@ -79,7 +79,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
             DataWriter successWriter, DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
         this.queryWriter = queryWriter;
-        this.soql = getConfig().getString(Config.EXTRACT_SOQL);
+        this.soql = getConfig().getString(AppConfig.EXTRACT_SOQL);
         this.batchRows = new ArrayList<Row>();
         this.batchIds = new ArrayList<String>();
         this.batchSize = getWriteBatchSize();
@@ -115,7 +115,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
 
     @Override
     protected boolean writeStatus() {
-        return getConfig().getBoolean(Config.ENABLE_EXTRACT_STATUS_OUTPUT);
+        return getConfig().getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT);
     }
 
     private String getSoql() {
@@ -127,7 +127,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
     }
 
     protected void addResultRow(Row row, String id) throws DataAccessObjectException {
-        if (controller.getConfig().getBoolean(Config.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS)) {
+        if (controller.getAppConfig().getBoolean(AppConfig.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS)) {
             getRTFDataForRow(row);
         }
         this.batchRows.add(row);
@@ -199,7 +199,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
                     + "/services/data/v"
                     + Controller.getAPIVersion()
                     + "/sobjects/"
-                    + controller.getConfig().getString(Config.ENTITY)
+                    + controller.getAppConfig().getString(AppConfig.ENTITY)
                     + "/"
                     + sobjectId
                     + "/richTextImageFields/"
@@ -231,7 +231,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
                 writeSuccesses();
             } else {
                 writeErrors(Messages.getMessage(getClass(), "statusErrorNotWritten",
-                        getConfig().getString(Config.DAO_NAME)));
+                        getConfig().getString(AppConfig.DAO_NAME)));
             }
             getProgressMonitor().worked(this.batchRows.size());
             getProgressMonitor().setSubTask(getRateCalculator().calculateSubTask(getNumberOfRows(), getNumberErrors()));
@@ -239,7 +239,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
             throw ex;
         } catch (final DataAccessObjectException ex) {
             writeErrors(Messages.getMessage(getClass(), "statusErrorNotWrittenException",
-                    getConfig().getString(Config.DAO_NAME), ex.getMessage()));
+                    getConfig().getString(AppConfig.DAO_NAME), ex.getMessage()));
         } finally {
             this.batchRows.clear();
             this.batchIds.clear();
@@ -263,16 +263,16 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
     protected int getWriteBatchSize() {
         int daoBatchSize;
         try {
-            daoBatchSize = getConfig().getInt(Config.DAO_WRITE_BATCH_SIZE);
-            if (daoBatchSize > Config.MAX_DAO_WRITE_BATCH_SIZE) {
-                daoBatchSize = Config.MAX_DAO_WRITE_BATCH_SIZE;
+            daoBatchSize = getConfig().getInt(AppConfig.DAO_WRITE_BATCH_SIZE);
+            if (daoBatchSize > AppConfig.MAX_DAO_WRITE_BATCH_SIZE) {
+                daoBatchSize = AppConfig.MAX_DAO_WRITE_BATCH_SIZE;
             }
         } catch (final ParameterLoadException e) {
             // warn about getting batch size parameter, otherwise continue w/ default
             getLogger().warn(
                     Messages.getMessage(getClass(), "errorGettingBatchSize",
-                            String.valueOf(Config.DEFAULT_DAO_WRITE_BATCH_SIZE), e.getMessage()));
-            daoBatchSize = Config.DEFAULT_DAO_WRITE_BATCH_SIZE;
+                            String.valueOf(AppConfig.DEFAULT_DAO_WRITE_BATCH_SIZE), e.getMessage()));
+            daoBatchSize = AppConfig.DEFAULT_DAO_WRITE_BATCH_SIZE;
         }
         return daoBatchSize;
     }

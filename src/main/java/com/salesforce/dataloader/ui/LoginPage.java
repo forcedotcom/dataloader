@@ -26,7 +26,7 @@
 
 package com.salesforce.dataloader.ui;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
@@ -60,10 +60,10 @@ public class LoginPage extends OperationPage {
     public void createControl(Composite parent) {
         getShell().setImage(UIUtils.getImageRegistry().get("sfdc_icon")); //$NON-NLS-1$
 
-        Config config = controller.getConfig();
+        AppConfig appConfig = controller.getAppConfig();
         control = new Composite(parent, SWT.FILL);
         grid = new Grid12(control, 40, false, true);
-        authenticator = new AuthenticationRunner(getShell(), config, controller);
+        authenticator = new AuthenticationRunner(getShell(), appConfig, controller);
 
         Button[] layouts = new Button[3];
         grid.createPadding(2);
@@ -86,7 +86,7 @@ public class LoginPage extends OperationPage {
         layouts[2].addListener(SWT.Selection, this::selectSessionId);
 
         //turn off oauth options if no configured environments found
-        if (config.getStrings(Config.AUTH_ENVIRONMENTS).size() > 0) {
+        if (appConfig.getStrings(AppConfig.AUTH_ENVIRONMENTS).size() > 0) {
             layouts[0].setSelection(true);
             selectOAuth(null);
         } else {
@@ -94,7 +94,7 @@ public class LoginPage extends OperationPage {
             layouts[1].setSelection(true);
             selectUnamePwd(null);
         }
-        if (!config.getBoolean(Config.SFDC_INTERNAL)){
+        if (!appConfig.getBoolean(AppConfig.SFDC_INTERNAL)){
             grid.hide(layouts[2]);
             if (!layouts[0].getVisible()){
                 //no options other than standard so don't present them

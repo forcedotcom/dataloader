@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader.ui.extraction;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.ui.OperationPage;
@@ -45,16 +45,16 @@ public abstract class ExtractionPage extends OperationPage {
 
     @Override
     protected String getConfigInfo() {
-        return getConfigInfo(controller.getConfig());
+        return getConfigInfo(controller.getAppConfig());
     }
         
-    public static String getConfigInfo(Config config) {
-        if (config.isBulkAPIEnabled() || config.isBulkV2APIEnabled()) {
+    public static String getConfigInfo(AppConfig appConfig) {
+        if (appConfig.isBulkAPIEnabled() || appConfig.isBulkV2APIEnabled()) {
             return "";
         }
         // Batch size settings are applicable only for SOAP API
         return  Labels.getString("ExtractionInputDialog.exportBatchSize")
                 + " "
-                + config.getString(Config.EXPORT_BATCH_SIZE);
+                + appConfig.getString(AppConfig.EXPORT_BATCH_SIZE);
     }
 }

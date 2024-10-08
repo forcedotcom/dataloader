@@ -32,7 +32,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
 
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 
 /**
  * Splash screen for the loader.
@@ -42,7 +42,7 @@ import com.salesforce.dataloader.config.Config;
  */
 public class WelcomeScreenDialog extends LoaderTitleAreaDialog {
 
-    private final Config config;
+    private final AppConfig appConfig;
 
     /**
      * MyTitleAreaDialog constructor
@@ -50,9 +50,9 @@ public class WelcomeScreenDialog extends LoaderTitleAreaDialog {
      * @param shell
      *            the parent shell
      */
-    public WelcomeScreenDialog(Shell activeShell, Config cfg) {
+    public WelcomeScreenDialog(Shell activeShell, AppConfig cfg) {
         super(activeShell);
-        this.config = cfg;
+        this.appConfig = cfg;
     }
 
     /**
@@ -104,7 +104,7 @@ public class WelcomeScreenDialog extends LoaderTitleAreaDialog {
         // create all the buttons, in order
         for (OperationInfo info : OperationInfo.ALL_OPERATIONS_IN_ORDER) {
             final Button butt = createButton(parent, info.getDialogIdx(), info.getLabel(), false);
-            butt.setEnabled(info.isOperationAllowed(this.config));
+            butt.setEnabled(info.isOperationAllowed(this.appConfig));
             Image img = info.getUIHelper().getIconImage();
             butt.setImage(img);
             GridData gd = (GridData)butt.getLayoutData();

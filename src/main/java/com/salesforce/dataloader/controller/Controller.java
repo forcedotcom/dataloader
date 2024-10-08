@@ -35,8 +35,7 @@ import com.salesforce.dataloader.client.HttpClientTransport;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.client.CompositeRESTClient;
 import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
-import com.salesforce.dataloader.client.TransportFactoryImpl;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dao.DataAccessObject;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
@@ -99,7 +98,7 @@ public class Controller {
      * <code>config</code> is an instance of configuration that's tied to this instance of
      * controller in a multithreaded environment
      */
-    private Config config;
+    private AppConfig appConfig;
     private Mapper mapper;
 
     private DataAccessObjectFactory daoFactory;
@@ -129,7 +128,7 @@ public class Controller {
     private Controller(Map<String, String> argsMap) throws ControllerInitializationException {
         // if name is passed to controller, use it to create a unique run file name
         try {
-            this.config = Config.getInstance(argsMap);
+            this.appConfig = AppConfig.getInstance(argsMap);
         } catch (Exception e) {
             logger.error("Exception happened in initConfig:", e);
             throw new ControllerInitializationException(e.getMessage());
@@ -149,7 +148,7 @@ public class Controller {
         }
         try {
             ConnectorConfig connConfig = new ConnectorConfig();
-            AppUtil.setConnectorConfigProxySettings(config, connConfig);
+            AppUtil.setConnectorConfigProxySettings(appConfig, connConfig);
             HttpClientTransport clientTransport = HttpClientTransport.getInstance();
             clientTransport.setConfig(connConfig);
             InputStream inputStream = clientTransport.httpGet(AppUtil.DATALOADER_DOWNLOAD_URL);
@@ -172,7 +171,7 @@ public class Controller {
     }
     
     public synchronized void executeAction(ILoaderProgress monitor) throws DataAccessObjectException, OperationException {
-        OperationInfo operation = this.config.getOperationInfo();
+        OperationInfo operation = this.appConfig.getOperationInfo();
         IAction action = operation.instantiateAction(this, monitor);
         logger.info(Messages.getFormattedString("Controller.executeStart", operation)); //$NON-NLS-1$
         logger.debug("API info for the operation:" + getAPIInfo());
@@ -190,10 +189,10 @@ public class Controller {
             return null;
         }
         String apiTypeStr = "SOAP API";
-        if (config.isBulkAPIEnabled()) {
+        if (appConfig.isBulkAPIEnabled()) {
             apiTypeStr = "Bulk API";
         }
-        if (config.isBulkV2APIEnabled()) {
+        if (appConfig.isBulkV2APIEnabled()) {
             apiTypeStr = "Bulk API 2.0";
         }
         String[] args =  {apiTypeStr, PartnerClient.getAPIVersionForTheSession()};
@@ -277,11 +276,11 @@ public class Controller {
     }
 
     private void createDao(String daoTypeStr, String daoNameStr) throws DataAccessObjectInitializationException {
-        config.setValue(Config.DAO_NAME, daoNameStr);
-        config.setValue(Config.DAO_TYPE, daoTypeStr);
+        appConfig.setValue(AppConfig.DAO_NAME, daoNameStr);
+        appConfig.setValue(AppConfig.DAO_TYPE, daoTypeStr);
         try {
-            config.getStringRequired(Config.DAO_NAME); // verify required param exists: dao name
-            dao = daoFactory.getDaoInstance(config.getStringRequired(Config.DAO_TYPE), config);
+            appConfig.getStringRequired(AppConfig.DAO_NAME); // verify required param exists: dao name
+            dao = daoFactory.getDaoInstance(appConfig.getStringRequired(AppConfig.DAO_TYPE), appConfig);
             logger.info(Messages.getString("Process.checkingDao")); //$NON-NLS-1$
             dao.checkConnection();
         } catch (Exception e) {
@@ -296,7 +295,7 @@ public class Controller {
         } catch (DataAccessObjectInitializationException e) {
             throw new MappingInitializationException(e.getMessage());
         }
-        config.setValue(Config.ENTITY, sObjectName);
+        appConfig.setValue(AppConfig.ENTITY, sObjectName);
         initializeMapping(); // initialize mapping before setting reference describes
         try {
             this.setFieldTypes();
@@ -307,7 +306,7 @@ public class Controller {
     }
     
     private void initializeMapping() throws MappingInitializationException {
-        String mappingFile = config.getString(Config.MAPPING_FILE);
+        String mappingFile = appConfig.getString(AppConfig.MAPPING_FILE);
         if (mappingFile != null 
                 && !mappingFile.isBlank() && !Files.exists(Path.of(mappingFile))) {
             throw new MappingInitializationException("Mapping file " + mappingFile + " does not exist");
@@ -316,7 +315,7 @@ public class Controller {
             mappingFile = null;  // Do not use mapping file value set in config.properties in the interactive (UI) mode
         }
         // Initialize mapping
-        this.mapper = getConfig().getOperationInfo().isExtraction() ? 
+        this.mapper = getAppConfig().getOperationInfo().isExtraction() ? 
                 new SOQLMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) 
               : new LoadMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile);
 
@@ -324,9 +323,9 @@ public class Controller {
 
     public void createAndShowGUI() throws ControllerInitializationException {
         // check config access for saving settings -- required in UI
-        File configFile = new File(config.getFilename());
+        File configFile = new File(appConfig.getFilename());
         if (!configFile.canWrite()) {
-            String errMsg = Messages.getFormattedString("Controller.errorConfigWritable", config.getFilename());
+            String errMsg = Messages.getFormattedString("Controller.errorConfigWritable", appConfig.getFilename());
 
             String currentWorkingDir = System.getProperty("user.dir");
             if (currentWorkingDir.startsWith("/Volumes")) {
@@ -370,12 +369,12 @@ public class Controller {
     
     public synchronized boolean saveConfig() {
         try {
-            config.save();
+            appConfig.save();
         } catch (IOException e) {
-            logger.fatal(Messages.getFormattedString("Controller.errorConfigSave", config.getFilename()), e); //$NON-NLS-1$
+            logger.fatal(Messages.getFormattedString("Controller.errorConfigSave", appConfig.getFilename()), e); //$NON-NLS-1$
             return false;
         } catch (GeneralSecurityException e) {
-            logger.fatal(Messages.getFormattedString("Controller.errorConfigSave", config.getFilename()), e); //$NON-NLS-1$
+            logger.fatal(Messages.getFormattedString("Controller.errorConfigSave", appConfig.getFilename()), e); //$NON-NLS-1$
             return false;
         }
         return true;
@@ -388,13 +387,13 @@ public class Controller {
     }
 
     public ClientBase<?> getClient() {
-        if (this.config.useBulkAPIForCurrentOperation()) {
-            if (this.config.isBulkV2APIEnabled()) {
+        if (this.appConfig.useBulkAPIForCurrentOperation()) {
+            if (this.appConfig.isBulkV2APIEnabled()) {
                 return getBulkV2Client();
             } else {
                 return getBulkV1Client();
             }
-        } else if (this.config.isRESTAPIEnabled()) {
+        } else if (this.appConfig.isRESTAPIEnabled()) {
             return getRESTClient();
         }
         return getPartnerClient();
@@ -425,16 +424,12 @@ public class Controller {
     }/**
      * @return Instance of configuration
      */
-    public Config getConfig() {
-        return config;
+    public AppConfig getAppConfig() {
+        return appConfig;
     }
 
     public DataAccessObject getDao() {
         return dao;
-    }
-
-    public void setLoaderConfig(Config config_) {
-        config = config_;
     }
 
     public Mapper getMapper() {
@@ -466,11 +461,11 @@ public class Controller {
             }
         }
         // if status files are not specified, generate the files automatically
-        String successPath = config.getString(Config.OUTPUT_SUCCESS);
+        String successPath = appConfig.getString(AppConfig.OUTPUT_SUCCESS);
         if (generateFiles || successPath == null || successPath.length() == 0) {
             successPath = new File(statusDir, "success" + getFormattedCurrentTimestamp() + ".csv").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        String errorPath = config.getString(Config.OUTPUT_ERROR);
+        String errorPath = appConfig.getString(AppConfig.OUTPUT_ERROR);
         if (generateFiles || errorPath == null || errorPath.length() == 0) {
             errorPath = new File(statusDir, "error" + getFormattedCurrentTimestamp() + ".csv").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
         }
@@ -493,9 +488,9 @@ public class Controller {
             throw new ProcessInitializationException(e.getMessage(), e);
         }
 
-        config.setValue(Config.OUTPUT_STATUS_DIR, statusDirName);
-        config.setValue(Config.OUTPUT_SUCCESS, successPath);
-        config.setValue(Config.OUTPUT_ERROR, errorPath);
+        appConfig.setValue(AppConfig.OUTPUT_STATUS_DIR, statusDirName);
+        appConfig.setValue(AppConfig.OUTPUT_SUCCESS, successPath);
+        appConfig.setValue(AppConfig.OUTPUT_ERROR, errorPath);
         // TODO for unprocessed records
         // config.setValue(Config.OUTPUT_UNPROCESSED_RECORDS, unprocessedRecordsPath);
     }
@@ -509,7 +504,7 @@ public class Controller {
     private void validateFile(String filePath) throws IOException {
         File file = new File(filePath);
         // finally make sure the output isn't the data access file
-        String daoName = config.getString(Config.DAO_NAME);
+        String daoName = appConfig.getString(AppConfig.DAO_NAME);
 
         // if it doesn't exist and we can create it, its valid
         if (!file.exists()) {
@@ -534,11 +529,11 @@ public class Controller {
         this.partnerClient = null;
         this.bulkV2Client = null;
         this.restClient = null;
-        config.setValue(Config.OAUTH_ACCESSTOKEN, "");
+        appConfig.setValue(AppConfig.OAUTH_ACCESSTOKEN, "");
     }
 
     public boolean attachmentsEnabled() {
-        return !getConfig().useBulkAPIForCurrentOperation() || getConfig().getBoolean(Config.BULK_API_ZIP_CONTENT);
+        return !getAppConfig().useBulkAPIForCurrentOperation() || getAppConfig().getBoolean(AppConfig.BULK_API_ZIP_CONTENT);
     }
 
     public void clearMapper() {

@@ -26,7 +26,7 @@
 package com.salesforce.dataloader.oauth;
 
 import com.salesforce.dataloader.ConfigTestBase;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -42,7 +42,7 @@ import java.util.ArrayList;
  */
 public class OAuthFlowUtilTests extends ConfigTestBase {
 
-    private Config config;
+    private AppConfig appConfig;
     private ArrayList<String> existingOAuthEnvironments;
     private String oauthServer;
     private String oauthClientId;
@@ -51,36 +51,36 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
 
     @Before
     public void testSetup(){
-        config = getController().getConfig();
-        existingOAuthEnvironments = config.getStrings(Config.AUTH_ENVIRONMENTS);
-        existingEndPoint = config.getAuthEndpoint();
+        appConfig = getController().getAppConfig();
+        existingOAuthEnvironments = appConfig.getStrings(AppConfig.AUTH_ENVIRONMENTS);
+        existingEndPoint = appConfig.getAuthEndpoint();
         oauthServer = "https://OAUTH_PARTIAL_SERVER";
         oauthClientId = "CLIENTID";
         oauthRedirectUri = "REDIRECTURI";
 
-        config.setValue(Config.AUTH_ENVIRONMENTS, "Testing");
-        config.setOAuthEnvironmentString("Testing", Config.OAUTH_PARTIAL_SERVER, oauthServer);
-        config.setOAuthEnvironmentString("Testing", Config.OAUTH_PARTIAL_CLIENTID, oauthClientId);
-        config.setOAuthEnvironmentString("Testing", Config.OAUTH_PARTIAL_REDIRECTURI, oauthRedirectUri);
-        config.setOAuthEnvironment("Testing");
+        appConfig.setValue(AppConfig.AUTH_ENVIRONMENTS, "Testing");
+        appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_SERVER, oauthServer);
+        appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_CLIENTID, oauthClientId);
+        appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_REDIRECTURI, oauthRedirectUri);
+        appConfig.setOAuthEnvironment("Testing");
     }
 
     @After
     public void testCleanup(){
-        config.setValue(Config.AUTH_ENVIRONMENTS, existingOAuthEnvironments.toArray(new String[0]));
-        config.setAuthEndpoint(existingEndPoint);
+        appConfig.setValue(AppConfig.AUTH_ENVIRONMENTS, existingOAuthEnvironments.toArray(new String[0]));
+        appConfig.setAuthEndpoint(existingEndPoint);
     }
 
     @Test
     public void testGetStartUrl(){
         try {
-            config.setValue(Config.OAUTH_CLIENTID, "CLIENTID");
+            appConfig.setValue(AppConfig.OAUTH_CLIENTID, "CLIENTID");
             String expected = "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize"
                     + "?response_type=token"
                     + "&display=popup"
-                    + "&" + config.getClientIdNameValuePair()
+                    + "&" + appConfig.getClientIdNameValuePair()
                     + "&redirect_uri=REDIRECTURI";
-            String actual = OAuthFlowUtil.getStartUrlImpl(config);
+            String actual = OAuthFlowUtil.getStartUrlImpl(appConfig);
 
             Assert.assertEquals( "OAuth Token Flow returned the wrong url", expected, actual);
         } catch (UnsupportedEncodingException e) {
@@ -91,7 +91,7 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
     @Test
     public void testInvalidReponseUrl(){
         try {
-            Boolean condition = OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?doit=1", config);
+            Boolean condition = OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize?doit=1", appConfig);
             Assert.assertFalse("OAuthToken should not have handled this", condition);
 
         } catch (URISyntaxException e) {
@@ -102,7 +102,7 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
     @Test
     public void testValidResponseUrl(){
         try {
-            Boolean condition = OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=https://INSTANCEURL", config);
+            Boolean condition = OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=https://INSTANCEURL", appConfig);
             Assert.assertTrue("OAuthToken should have handled this", condition);
 
         } catch (URISyntaxException e) {
@@ -113,9 +113,9 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
     @Test
     public void testValidResponseUrlSetsAccessToken(){
         try {
-            OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=https://INSTANCEURL", config);
+            OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=https://INSTANCEURL", appConfig);
             String expected = "TOKEN";
-            String actual = config.getString(Config.OAUTH_ACCESSTOKEN);
+            String actual = appConfig.getString(AppConfig.OAUTH_ACCESSTOKEN);
 
             Assert.assertEquals("Incorrect access token found in config", expected, actual);
         } catch (URISyntaxException e) {
@@ -126,9 +126,9 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
     @Test
     public void testValidResponseUrlSetsRefreshToken(){
         try {
-            OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&refresh_token=REFRESHTOKEN&instance_url=https://INSTANCEURL", config);
+            OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&refresh_token=REFRESHTOKEN&instance_url=https://INSTANCEURL", appConfig);
             String expected = "REFRESHTOKEN";
-            String actual = config.getString(Config.OAUTH_REFRESHTOKEN);
+            String actual = appConfig.getString(AppConfig.OAUTH_REFRESHTOKEN);
 
             Assert.assertEquals("Incorrect refresh token found in config", expected, actual);
         } catch (URISyntaxException e) {
@@ -139,9 +139,9 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
     @Test
     public void testValidResponseUrlSetsEndPoint(){
         try {
-            OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=https://INSTANCEURL", config);
+            OAuthFlowUtil.handleCompletedUrl( "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize#access_token=TOKEN&instance_url=https://INSTANCEURL", appConfig);
             String expected = "https://INSTANCEURL";
-            String actual = config.getString(Config.OAUTH_INSTANCE_URL);
+            String actual = appConfig.getString(AppConfig.OAUTH_INSTANCE_URL);
 
             Assert.assertEquals("Incorrect refresh token found in config", expected, actual);
         } catch (URISyntaxException e) {

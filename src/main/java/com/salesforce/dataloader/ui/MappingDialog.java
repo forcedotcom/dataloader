@@ -64,7 +64,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.mapping.LoadMapper;
 import com.salesforce.dataloader.ui.mapping.*;
@@ -556,8 +556,8 @@ public class MappingDialog extends WizardDialog {
     private void updateSforce() {
 
         ArrayList<Field> unmappedSobjectFieldList = new ArrayList<Field>();
-        Config config = getController().getConfig();
-        String extIdField = config.getString(Config.IDLOOKUP_FIELD);
+        AppConfig appConfig = getController().getAppConfig();
+        String extIdField = appConfig.getString(AppConfig.IDLOOKUP_FIELD);
         if(extIdField == null) {
             extIdField = "";
         } else {
@@ -606,12 +606,12 @@ public class MappingDialog extends WizardDialog {
                 if (!this.dialogShell.isVisible()) {
                     return;
                 }
-                Config config = this.getController().getConfig();
+                AppConfig appConfig = this.getController().getAppConfig();
                 Rectangle shellBounds = this.dialogShell.getBounds();
-                config.setValue(Config.DIALOG_BOUNDS_PREFIX + this.getClass().getSimpleName() + Config.DIALOG_WIDTH_SUFFIX, shellBounds.width);
-                config.setValue(Config.DIALOG_BOUNDS_PREFIX + this.getClass().getSimpleName() + Config.DIALOG_HEIGHT_SUFFIX, shellBounds.height);
+                appConfig.setValue(AppConfig.DIALOG_BOUNDS_PREFIX + this.getClass().getSimpleName() + AppConfig.DIALOG_WIDTH_SUFFIX, shellBounds.width);
+                appConfig.setValue(AppConfig.DIALOG_BOUNDS_PREFIX + this.getClass().getSimpleName() + AppConfig.DIALOG_HEIGHT_SUFFIX, shellBounds.height);
                 try {
-                    config.save();
+                    appConfig.save();
                 } catch (GeneralSecurityException | IOException e) {
                     // no-op
                     e.printStackTrace();

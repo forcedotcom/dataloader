@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader.ui;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 
 /**
@@ -53,11 +53,11 @@ public abstract class LoadPage extends OperationPage {
     protected String getConfigInfo() {
         return Labels.getString("LoadPage.importBatchSize")
         + " "
-        + controller.getConfig().getImportBatchSize()
+        + controller.getAppConfig().getImportBatchSize()
         + "    "
         + Labels.getString("AdvancedSettingsDialog.startRow")
         + " "
-        + controller.getConfig().getString(Config.LOAD_ROW_TO_START_AT); //$NON-NLS-1$
+        + controller.getAppConfig().getString(AppConfig.LOAD_ROW_TO_START_AT); //$NON-NLS-1$
     }
 
     /*

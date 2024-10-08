@@ -54,7 +54,7 @@ import org.apache.logging.log4j.LogManager;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.client.DescribeRefObject;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
@@ -136,7 +136,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     public BulkLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
-        this.isDelete = getController().getConfig().getOperationInfo().isDelete();
+        this.isDelete = getController().getAppConfig().getOperationInfo().isDelete();
         this.jobUtil = new BulkApiVisitorUtil(getController(), getProgressMonitor(), getRateCalculator());
     }
 
@@ -176,7 +176,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
     private void createBatches() throws OperationException, IOException, AsyncApiException {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(dynaArraySize);
-        final PrintStream out = new PrintStream(os, true, Config.BULK_API_ENCODING);
+        final PrintStream out = new PrintStream(os, true, AppConfig.BULK_API_ENCODING);
         doOneBatch(out, os, this.dynaArray);
     }
 
@@ -185,7 +185,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         int processedRecordsCount = 0;
         final List<String> userColumns = getController().getDao().getColumnNames();
         List<String> headerColumns = null;
-        int maxBatchBytes = this.getConfig().isBulkV2APIEnabled() ? Config.MAX_BULKV2_API_IMPORT_JOB_BYTES : Config.MAX_BULK_API_IMPORT_BATCH_BYTES;
+        int maxBatchBytes = this.getConfig().isBulkV2APIEnabled() ? AppConfig.MAX_BULKV2_API_IMPORT_JOB_BYTES : AppConfig.MAX_BULK_API_IMPORT_BATCH_BYTES;
         long startTime = System.currentTimeMillis();
         long measureTime = System.currentTimeMillis();
         long elapsedTime = measureTime - startTime;
@@ -380,7 +380,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
     
     private String generateBatchCSVFilename(String prefix, int batchNum) {
-        String successResultsFilename = controller.getConfig().getString(Config.OUTPUT_SUCCESS);
+        String successResultsFilename = controller.getAppConfig().getString(AppConfig.OUTPUT_SUCCESS);
         int parentDirLocation = successResultsFilename.lastIndexOf(System.getProperty("file.separator"));
         String resultsDir = successResultsFilename.substring(0, parentDirLocation);
         return resultsDir 
@@ -393,7 +393,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private void createBatch(ByteArrayOutputStream os, int numRecords) throws AsyncApiException {
         if (numRecords <= 0) return;
         final byte[] request = os.toByteArray();
-        if (controller.getConfig().getBoolean(Config.SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV)) {
+        if (controller.getAppConfig().getBoolean(AppConfig.SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV)) {
             this.batchCountForJob++;
             writeServerLoadBatchDataToCSV(os);
         }
@@ -424,19 +424,19 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     	this.getSuccessWriter().close();
     	this.getErrorWriter().close();
     	
-    	Config config = this.getConfig();
-    	String successWriterFile = config.getString(Config.OUTPUT_SUCCESS);
-    	String errorWriterFile = config.getString(Config.OUTPUT_ERROR);
+    	AppConfig appConfig = this.getConfig();
+    	String successWriterFile = appConfig.getString(AppConfig.OUTPUT_SUCCESS);
+    	String errorWriterFile = appConfig.getString(AppConfig.OUTPUT_ERROR);
     	// TODO for unprocessed records. Also uncomment in Controller.java to set the right value
     	// for Config.OUTPUT_UNPROCESSED_RECORDS
     	// String unprocessedRecordsWriterFile = config.getString(Config.OUTPUT_UNPROCESSED_RECORDS);
 
     	this.jobUtil.getBulkV2LoadSuccessResults(successWriterFile);
-        CSVFileReader csvReader = new CSVFileReader(new File(successWriterFile), config, true, false);
+        CSVFileReader csvReader = new CSVFileReader(new File(successWriterFile), appConfig, true, false);
         this.setSuccesses(csvReader.getTotalRows());
     	
     	this.jobUtil.getBulkV2LoadErrorResults(errorWriterFile);
-        csvReader = new CSVFileReader(new File(errorWriterFile), config, true, false);
+        csvReader = new CSVFileReader(new File(errorWriterFile), appConfig, true, false);
         this.setErrors(csvReader.getTotalRows());
     }
 
@@ -449,7 +449,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         	return;
         }
         DataReader dataReader = null;
-        if (!controller.getConfig().getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
+        if (!controller.getAppConfig().getBoolean(AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
             dataReader = resetDAO();
         }
         // create a map of batch infos by batch id. Each batchinfo has the final processing state of the batch
@@ -490,7 +490,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         
         final int totalRowsInDAOInCurrentBatch = lastDAORowForCurrentBatch - this.firstDAORowForCurrentBatch + 1;
         List<Row> rows;
-        if (controller.getConfig().getBoolean(Config.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
+        if (controller.getAppConfig().getBoolean(AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
             rows = new ArrayList<Row>();
             for (int i=0; i<totalRowsInDAOInCurrentBatch; i++) {
                 rows.add(i, this.daoRowList.get(i + this.firstDAORowForCurrentBatch));
@@ -519,7 +519,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         // get the batch csv result stream from sfdc
         final CSVReader resultRdr = this.jobUtil.getBatchResults(batch.getId());
 
-        if (controller.getConfig().getBoolean(Config.SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV)) {
+        if (controller.getAppConfig().getBoolean(AppConfig.SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV)) {
             this.batchCountForJob++;
             writeRawResultsToCSV(this.jobUtil.getBatchResults(batch.getId()), this.batchCountForJob);
         }

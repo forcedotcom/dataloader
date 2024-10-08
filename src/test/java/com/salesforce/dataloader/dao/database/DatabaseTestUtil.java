@@ -96,7 +96,7 @@ public class DatabaseTestUtil {
             SqlConfig sqlConfig = dbConfig.getSqlConfig();
             // override the configured sqltype for the last_update column
             sqlConfig.getSqlParams().put(LAST_UPDATED_COL, dateClass.getName());
-            writer = new DatabaseWriter(theController.getConfig(), dbConfigName, dataSource, sqlConfig);
+            writer = new DatabaseWriter(theController.getAppConfig(), dbConfigName, dataSource, sqlConfig);
             writer.open();
             List<Row> accountRowList = new ArrayList<Row>();
             int rowsProcessed = 0;
@@ -125,7 +125,7 @@ public class DatabaseTestUtil {
     }
 
     public static DatabaseConfig getDatabaseConfig(Controller controller, String dbConfigName) {
-        String dbConfigFilename = controller.getConfig().constructConfigFilePath(
+        String dbConfigFilename = controller.getAppConfig().constructConfigFilePath(
                 DatabaseContext.DEFAULT_CONFIG_FILENAME);
         return DatabaseConfig.getInstance(dbConfigFilename, dbConfigName);
     }
@@ -199,7 +199,7 @@ public class DatabaseTestUtil {
     public static void deleteAllAccountsDb(Controller theController) throws Exception {
         DatabaseWriter writer = null;
         try {
-            writer = new DatabaseWriter(theController.getConfig(), "deleteAccountAll");
+            writer = new DatabaseWriter(theController.getAppConfig(), "deleteAccountAll");
             writer.open();
             logger.info("Deleting all Accounts from database, using configuration: " + "deleteAccountAll");
             writer.writeRow(null);

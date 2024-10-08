@@ -91,11 +91,11 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
     }
     
     private void setKeepAccountTeamHeader() {
-        Config config = this.controller.getConfig();
+        AppConfig appConfig = this.controller.getAppConfig();
         OwnerChangeOption keepAccountTeamOption = new OwnerChangeOption();
         OwnerChangeOption[] ownerChangeOptionArray;
-        if (config.getBoolean(Config.PROCESS_KEEP_ACCOUNT_TEAM) 
-                && "Account".equalsIgnoreCase(config.getString(Config.ENTITY))) {
+        if (appConfig.getBoolean(AppConfig.PROCESS_KEEP_ACCOUNT_TEAM) 
+                && "Account".equalsIgnoreCase(appConfig.getString(AppConfig.ENTITY))) {
             // Support for Keeping Account keepAccountTeam during Account ownership change
             // More details at https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_header_ownerchangeoptions.htm
             keepAccountTeamOption.setExecute(true);
@@ -129,21 +129,21 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
                         statusMsg = Messages.getString("DAOLoadVisitor.statusItemUpdated");
                     }
                 }
-                daoRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
+                daoRow.put(AppConfig.STATUS_COLUMN_NAME, statusMsg);
                 processResult(daoRow, saveRes.getSuccess(), saveRes.getId(), saveRes.getErrors());
             } else if (results instanceof DeleteResult[]) {
                 DeleteResult deleteRes = (DeleteResult)results[batchRowCounter];
                 if (deleteRes.getSuccess()) {
                     statusMsg = Messages.getString("DAOLoadVisitor.statusItemDeleted");
                 }
-                daoRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
+                daoRow.put(AppConfig.STATUS_COLUMN_NAME, statusMsg);
                 processResult(daoRow, deleteRes.getSuccess(), deleteRes.getId(), deleteRes.getErrors());
             } else if (results instanceof UndeleteResult[]) {
                 UndeleteResult undeleteRes = (UndeleteResult)results[batchRowCounter];
                 if (undeleteRes.getSuccess()) {
                     statusMsg = Messages.getString("DAOLoadVisitor.statusItemUndeleted");
                 }
-                daoRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
+                daoRow.put(AppConfig.STATUS_COLUMN_NAME, statusMsg);
                 processResult(daoRow, undeleteRes.getSuccess(), undeleteRes.getId(), undeleteRes.getErrors());
             } else if (results instanceof UpsertResult[]) {
                 UpsertResult upsertRes = (UpsertResult)results[batchRowCounter];
@@ -151,7 +151,7 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
                     statusMsg = upsertRes.getCreated() ? Messages.getString("DAOLoadVisitor.statusItemCreated")
                             : Messages.getString("DAOLoadVisitor.statusItemUpdated");
                 }
-                daoRow.put(Config.STATUS_COLUMN_NAME, statusMsg);
+                daoRow.put(AppConfig.STATUS_COLUMN_NAME, statusMsg);
                 processResult(daoRow, upsertRes.getSuccess(), upsertRes.getId(), upsertRes.getErrors());
             }
             batchRowCounter++;

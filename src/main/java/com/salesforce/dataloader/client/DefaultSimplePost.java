@@ -26,7 +26,7 @@
 
 package com.salesforce.dataloader.client;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.ws.ConnectorConfig;
@@ -44,7 +44,7 @@ public class DefaultSimplePost implements SimplePost {
     public static final int PROXY_AUTHENTICATION_REQUIRED = 407;
 
     private boolean successful;
-    private Config config;
+    private AppConfig appConfig;
     private String endpoint;
     private BasicNameValuePair[] pairs;
     private InputStream input;
@@ -52,8 +52,8 @@ public class DefaultSimplePost implements SimplePost {
     private String reasonPhrase;
     private CloseableHttpResponse response;
 
-    DefaultSimplePost(Config config, String endpoint, BasicNameValuePair... pairs) {
-        this.config = config;
+    DefaultSimplePost(AppConfig appConfig, String endpoint, BasicNameValuePair... pairs) {
+        this.appConfig = appConfig;
         this.endpoint = endpoint;
         this.pairs = pairs;
     }
@@ -70,7 +70,7 @@ public class DefaultSimplePost implements SimplePost {
     @Override
     public void post() throws IOException, ParameterLoadException {
         ConnectorConfig connConfig = new ConnectorConfig();
-        AppUtil.setConnectorConfigProxySettings(config, connConfig);
+        AppUtil.setConnectorConfigProxySettings(appConfig, connConfig);
         HttpClientTransport clientTransport = HttpClientTransport.getInstance();
         clientTransport.setConfig(connConfig);
         this.input = clientTransport.simplePost(endpoint, null, pairs);

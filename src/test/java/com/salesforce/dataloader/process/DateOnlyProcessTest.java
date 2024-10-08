@@ -27,7 +27,7 @@
 package com.salesforce.dataloader.process;
 
 import com.salesforce.dataloader.action.OperationInfo;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.sforce.soap.partner.QueryResult;
 
@@ -58,7 +58,7 @@ public class DateOnlyProcessTest extends ProcessTestBase {
     @Override
     protected Map<String, String> getTestConfig() {
         Map<String, String> cfg = super.getTestConfig();
-        cfg.put(Config.ENTITY, "Account");
+        cfg.put(AppConfig.ENTITY, "Account");
         return cfg;
     }
 
@@ -67,13 +67,13 @@ public class DateOnlyProcessTest extends ProcessTestBase {
         Map<String, String> testConfig = getTestConfig(OperationInfo.insert, false);
         
      // need to do this before calling runProcess to avoid incorrect timezone setting for DateOnlyConverter
-        testConfig.put(Config.TIMEZONE, "IST");
+        testConfig.put(AppConfig.TIMEZONE, "IST");
 
         System.out.println("===== DateOnlyProcessTest.testDateWithTimeZone: going to call runProcess with timezone=IST");
 
      // need to do this before calling runProcess to avoid incorrect timezone setting for DateOnlyConverter
         Controller controller = runProcess(testConfig, 2);
-        String tz = controller.getConfig().getString(Config.TIMEZONE);
+        String tz = controller.getAppConfig().getString(AppConfig.TIMEZONE);
         System.out.println("===== DateOnlyProcessTest.testDateWithTimeZone: configured timezone before first query is " + tz);
         QueryResult qr = getBinding().query("select CustomDateOnly__c from Account where AccountNumber__c='ACCT_0'");
         assertEquals(1, qr.getSize());
@@ -86,7 +86,7 @@ public class DateOnlyProcessTest extends ProcessTestBase {
         assertEquals(1, qr.getSize());
 
         // 2nd entry specifies the date-only field without 'Z'
-        tz = controller.getConfig().getString(Config.TIMEZONE);
+        tz = controller.getAppConfig().getString(AppConfig.TIMEZONE);
         System.out.println("===== DateOnlyProcessTest.testDateWithTimeZone: configured timezone before 2nd query is " + tz);
         assertEquals("2010-10-14", (String)qr.getRecords()[0].getField("CustomDateOnly__c"));
 

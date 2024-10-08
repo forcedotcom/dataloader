@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader.client;
 
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.util.function.Function;
@@ -35,10 +35,10 @@ import java.util.function.Function;
  */
 public class SimplePostFactory {
 
-    private static Function<Criteria, SimplePost> constructor = c -> new DefaultSimplePost(c.config, c.endpoint, c.pairs);;
+    private static Function<Criteria, SimplePost> constructor = c -> new DefaultSimplePost(c.appConfig, c.endpoint, c.pairs);;
 
     public static class Criteria{
-        public Config config;
+        public AppConfig appConfig;
         public String endpoint;
         public BasicNameValuePair[] pairs;
     }
@@ -53,9 +53,9 @@ public class SimplePostFactory {
         SimplePostFactory.constructor = constructor;
     }
 
-    public static SimplePost getInstance(Config config, String endpoint, BasicNameValuePair... pairs){
+    public static SimplePost getInstance(AppConfig appConfig, String endpoint, BasicNameValuePair... pairs){
         Criteria criteria = new Criteria();
-        criteria.config = config;
+        criteria.appConfig = appConfig;
         criteria.endpoint = endpoint;
         criteria.pairs = pairs;
 

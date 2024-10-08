@@ -38,7 +38,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.config.Config;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ExtractException;
@@ -80,12 +80,12 @@ class BulkApiVisitorUtil {
     private boolean enablePKchunking = false;
     private int queryChunkSize;
     private String queryChunkStartRow = "";
-    private Config config = null;
+    private AppConfig appConfig = null;
     private Controller controller;
     private int bulkV2LoadBatchCount = 0;
 
     BulkApiVisitorUtil(Controller ctl, ILoaderProgress monitor, LoadRateCalculator rateCalc, boolean updateProgress) {
-        this.config = ctl.getConfig();
+        this.appConfig = ctl.getAppConfig();
         this.controller = ctl;
         if (isBulkV2QueryJob() || isBulkV2LoadJob()) {
             this.connection = ctl.getBulkV2Client().getConnection();
@@ -95,9 +95,9 @@ class BulkApiVisitorUtil {
 
         try {
             // getLong will return 0 if no value is provided
-            long checkStatusInt = ctl.getConfig().getLong(Config.BULK_API_CHECK_STATUS_INTERVAL);
+            long checkStatusInt = ctl.getAppConfig().getLong(AppConfig.BULK_API_CHECK_STATUS_INTERVAL);
             this.checkStatusInterval = checkStatusInt > 0 ? checkStatusInt
-                    : Config.DEFAULT_BULK_API_CHECK_STATUS_INTERVAL;
+                    : AppConfig.DEFAULT_BULK_API_CHECK_STATUS_INTERVAL;
         } catch (ParameterLoadException e) {
             throw new RuntimeException("Failed to initialize check status interval", e);
         }
@@ -141,7 +141,7 @@ class BulkApiVisitorUtil {
         Date currentTime = new Date();
         SimpleDateFormat format = new SimpleDateFormat("MMddyyhhmmssSSS"); //$NON-NLS-1$
         String timestamp = format.format(currentTime);
-    	String statusOutputDir = config.getString(Config.OUTPUT_STATUS_DIR);
+    	String statusOutputDir = appConfig.getString(AppConfig.OUTPUT_STATUS_DIR);
 
         File stagingFile = new File(statusOutputDir, prefix + timestamp + suffix);
         return stagingFile.getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
@@ -158,31 +158,31 @@ class BulkApiVisitorUtil {
 
     void createJob() throws AsyncApiException {
         JobInfo job = new JobInfo();
-        final OperationEnum op = this.config.getOperationInfo().getBulkOperationEnum();
+        final OperationEnum op = this.appConfig.getOperationInfo().getBulkOperationEnum();
         job.setOperation(op);
         if (op == OperationEnum.upsert) {
-            job.setExternalIdFieldName(this.config.getString(Config.IDLOOKUP_FIELD));
+            job.setExternalIdFieldName(this.appConfig.getString(AppConfig.IDLOOKUP_FIELD));
         }
-        job.setObject(this.config.getString(Config.ENTITY));
+        job.setObject(this.appConfig.getString(AppConfig.ENTITY));
         ContentType jobContentType = ContentType.CSV;
-        if (this.config.getBoolean(Config.BULK_API_ZIP_CONTENT) 
+        if (this.appConfig.getBoolean(AppConfig.BULK_API_ZIP_CONTENT) 
                 && op != OperationEnum.query
-                && !this.config.isBulkV2APIEnabled()) {
+                && !this.appConfig.isBulkV2APIEnabled()) {
             // ZIP CSV content is supported only for Bulk V1
             jobContentType = ContentType.ZIP_CSV;
         }
         job.setContentType(jobContentType);
         
         ConcurrencyMode jobConcurrencyMode = ConcurrencyMode.Parallel;
-        if (this.config.getBoolean(Config.BULK_API_SERIAL_MODE) 
-                && !this.config.isBulkV2APIEnabled()) {
+        if (this.appConfig.getBoolean(AppConfig.BULK_API_SERIAL_MODE) 
+                && !this.appConfig.isBulkV2APIEnabled()) {
             // Serial mode is supported only for Bulk V1
            jobConcurrencyMode = ConcurrencyMode.Serial;
         }
         job.setConcurrencyMode(jobConcurrencyMode);
         
         if (op == OperationEnum.update || op == OperationEnum.upsert || op == OperationEnum.insert) {
-            final String assRule = this.config.getString(Config.ASSIGNMENT_RULE);
+            final String assRule = this.appConfig.getString(AppConfig.ASSIGNMENT_RULE);
             if (assRule != null && (assRule.length() == 15 || assRule.length() == 18)) {
                 job.setAssignmentRuleId(assRule);
             }
@@ -200,7 +200,7 @@ class BulkApiVisitorUtil {
             }
         }
         if (isBulkV2QueryJob()) {
-            job.setObject(this.config.getString(Config.EXTRACT_SOQL));
+            job.setObject(this.appConfig.getString(AppConfig.EXTRACT_SOQL));
             logger.info("going to create BulkV2 query job");
         }
         job = this.connection.createJob(job);
@@ -263,9 +263,9 @@ class BulkApiVisitorUtil {
         
         try {
             // limit the number of max retries in case limit is exceeded
-            maxAttemptsCount = 1 + Math.min(Config.MAX_RETRIES_LIMIT, this.config.getInt(Config.MAX_RETRIES));
+            maxAttemptsCount = 1 + Math.min(AppConfig.MAX_RETRIES_LIMIT, this.appConfig.getInt(AppConfig.MAX_RETRIES));
         } catch (ParameterLoadException e) {
-            maxAttemptsCount = 1 + Config.DEFAULT_MAX_RETRIES;
+            maxAttemptsCount = 1 + AppConfig.DEFAULT_MAX_RETRIES;
         }
         if (timeRemaining <= 0) {
             while (retryCount++ < maxAttemptsCount) {
@@ -301,15 +301,15 @@ class BulkApiVisitorUtil {
     }
     
     private boolean isBulkV2QueryJob() {
-        final OperationEnum op = this.config.getOperationInfo().getBulkOperationEnum();
+        final OperationEnum op = this.appConfig.getOperationInfo().getBulkOperationEnum();
         return (op == OperationEnum.query || op == OperationEnum.queryAll)
-        && this.config.isBulkV2APIEnabled();
+        && this.appConfig.isBulkV2APIEnabled();
     }
     
     private boolean isBulkV2LoadJob() {
-        final OperationEnum op = this.config.getOperationInfo().getBulkOperationEnum();
+        final OperationEnum op = this.appConfig.getOperationInfo().getBulkOperationEnum();
         return op != OperationEnum.query && op != OperationEnum.queryAll
-        && this.config.isBulkV2APIEnabled();
+        && this.appConfig.isBulkV2APIEnabled();
     }
 
     private boolean isJobCompleted() {
@@ -352,15 +352,15 @@ class BulkApiVisitorUtil {
     // hack because jobInfo is not updated if an entire batch fails
     private int getNumRecordsProcessedInJob() {
         int numRecordsProcessedInJob = this.jobInfo.getNumberRecordsProcessed();
-        if (config.isBulkAPIEnabled() || config.isBulkV2APIEnabled()) {
+        if (appConfig.isBulkAPIEnabled() || appConfig.isBulkV2APIEnabled()) {
             // Bulk v2 counts all processed records in the total
             numRecordsProcessedInJob -= this.jobInfo.getNumberRecordsFailed();
         }
         int numRecordsPerBatch = 0;
         try {
-            numRecordsPerBatch = this.config.getInt(Config.IMPORT_BATCH_SIZE);
+            numRecordsPerBatch = this.appConfig.getInt(AppConfig.IMPORT_BATCH_SIZE);
         } catch (ParameterLoadException e) {
-            logger.warn("Incorrectly configured " + Config.IMPORT_BATCH_SIZE);
+            logger.warn("Incorrectly configured " + AppConfig.IMPORT_BATCH_SIZE);
         }
         if (numRecordsProcessedInJob == 0 && this.jobInfo.getNumberBatchesCompleted() > 0) {
             numRecordsProcessedInJob = numRecordsPerBatch 
@@ -374,9 +374,9 @@ class BulkApiVisitorUtil {
         int numRecordsFailedInJob = this.jobInfo.getNumberRecordsFailed();
         int numRecordsPerBatch = 0;
         try {
-            numRecordsPerBatch = this.config.getInt(Config.IMPORT_BATCH_SIZE);
+            numRecordsPerBatch = this.appConfig.getInt(AppConfig.IMPORT_BATCH_SIZE);
         } catch (ParameterLoadException e) {
-            logger.warn("Incorrectly configured " + Config.IMPORT_BATCH_SIZE);
+            logger.warn("Incorrectly configured " + AppConfig.IMPORT_BATCH_SIZE);
         }
         if (numRecordsFailedInJob == 0 && this.jobInfo.getNumberBatchesFailed() > 0) {
             numRecordsFailedInJob = numRecordsPerBatch * jobInfo.getNumberBatchesFailed();
