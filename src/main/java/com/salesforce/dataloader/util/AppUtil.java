@@ -33,9 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -48,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -59,7 +55,6 @@ import javax.xml.parsers.FactoryConfigurationError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.btr.proxy.search.ProxySearch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -133,7 +128,7 @@ public class AppUtil {
         CONTENT_SOBJECT_LIST.add("ContentNote".toLowerCase());
     }
     
-    public static String[] initializeAppConfig(String[] args) throws FactoryConfigurationError, IOException, ConfigInitializationException {
+    public static synchronized String[] initializeAppConfig(String[] args) throws FactoryConfigurationError, IOException, ConfigInitializationException {
         Map<String, String> argsMap = convertCommandArgsArrayToArgMap(args);
         setConfigurationsDir(argsMap);
         LoggingUtil.initializeLog(argsMap);
@@ -496,47 +491,6 @@ public class AppUtil {
         // Here, override that to "GMT" to better match the behavior of the WSC XML parser.
         mapper.setTimeZone(TimeZone.getTimeZone("GMT"));
         return mapper.readValue(in, tmpClass);
-    }
-    
-    public static void setSystemProxyValues() {
-        // Use the static factory method getDefaultProxySearch to create a proxy search instance 
-        // configured with the default proxy search strategies for the current environment.
-        ProxySearch proxySearch = ProxySearch.getDefaultProxySearch();
-
-        // Invoke the proxy search. This will create a ProxySelector with the detected proxy settings.
-        ProxySelector proxySelector = proxySearch.getProxySelector();
-
-        // Install this ProxySelector as default ProxySelector for all connections.
-        ProxySelector.setDefault(proxySelector);
-     
-        System.setProperty("java.net.useSystemProxies", "true");
-        logger.debug("detecting proxies");
-        List<Proxy> l = null;
-        try {
-            ProxySelector ps = ProxySelector.getDefault();
-            if (ps != null) {
-                l = ps.select(new URI("https://www.salesforce.com"));
-            }
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        if (l != null) {
-            for (Iterator<Proxy> iter = l.iterator(); iter.hasNext();) {
-                java.net.Proxy proxy = (java.net.Proxy) iter.next();
-                logger.debug("System proxy type: " + proxy.type());
-
-                InetSocketAddress addr = (InetSocketAddress) proxy.address();
-
-                if (addr == null) {
-                    logger.debug("No system proxy");
-                } else {
-                    logger.info("System proxy hostname: " + addr.getHostName());
-                    System.setProperty("http.proxyHost", addr.getHostName());
-                    logger.info("System proxy port: " + addr.getPort());
-                    System.setProperty("http.proxyPort", Integer.toString(addr.getPort()));
-                }
-            }
-        }
     }
     
     public static void setConnectorConfigProxySettings(AppConfig appConfig, ConnectorConfig connConfig) {
