@@ -56,7 +56,7 @@ import java.util.function.Consumer;
 public class AuthenticationRunner {
     private static Logger logger = LogManager.getLogger(AuthenticationRunner.class);
 
-    private final AppConfig config;
+    private final AppConfig appConfig;
     private final Controller controller;
     private final String nestedException = "nested exception is:";
     private final Shell shell;
@@ -64,14 +64,14 @@ public class AuthenticationRunner {
     private LoginCriteria criteria;
 
 
-    public AuthenticationRunner(Shell shell, AppConfig config, Controller controller) {
+    public AuthenticationRunner(Shell shell, AppConfig appConfig, Controller controller) {
         this.shell = shell;
-        this.config = config;
+        this.appConfig = appConfig;
         this.controller = controller;
     }
 
     public AppConfig getConfig() {
-        return config;
+        return appConfig;
     }
 
 
@@ -80,7 +80,7 @@ public class AuthenticationRunner {
         this.authStatusChangeConsumer = messenger;
         this.criteria = criteria;
 
-        criteria.updateConfig(config);
+        criteria.updateConfig(appConfig);
 
         BusyIndicator.showWhile(Display.getDefault(), new Thread(this::loginAsync));
     }
@@ -90,16 +90,16 @@ public class AuthenticationRunner {
             authStatusChangeConsumer.accept(Labels.getString("LoginPage.verifyingLogin"));
             logger.info(Labels.getString("LoginPage.verifyingLogin"));
             if (criteria.getMode() == LoginCriteria.OAuthLogin){
-                if (config.getBoolean(AppConfig.OAUTH_LOGIN_FROM_BROWSER)) {
-                    OAuthLoginFromBrowserFlow flow = new OAuthLoginFromBrowserFlow(shell, config);
+                if (appConfig.getBoolean(AppConfig.OAUTH_LOGIN_FROM_BROWSER)) {
+                    OAuthLoginFromBrowserFlow flow = new OAuthLoginFromBrowserFlow(shell, appConfig);
                     if (!flow.open()) {
                         String message = Labels.getString("LoginPage.invalidLoginOAuthBrowser");
                         authStatusChangeConsumer.accept(message);
                         return;
                     }
                 } else { // OAuth login from Data Loader app
-                    boolean hasSecret = !config.getString(AppConfig.OAUTH_CLIENTSECRET).trim().equals("");
-                    OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, config) : new OAuthTokenFlow(shell, config);
+                    boolean hasSecret = !appConfig.getString(AppConfig.OAUTH_CLIENTSECRET).trim().equals("");
+                    OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, appConfig) : new OAuthTokenFlow(shell, appConfig);
                     if (!flow.open()) {
                        String message = Labels.getString("LoginPage.invalidLoginOAuth");
                         if (flow.getStatusCode() == DefaultSimplePost.PROXY_AUTHENTICATION_REQUIRED) {
