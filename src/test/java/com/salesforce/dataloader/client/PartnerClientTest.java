@@ -133,11 +133,11 @@ public class PartnerClientTest extends ProcessTestBase {
 
     @Test
     public void testPartnerClientSfdcInternalSessionIdWithoutSfdcInternalConnect() throws Exception {
-        AppConfig config = getController().getAppConfig();
+        AppConfig appConfig = getController().getAppConfig();
 
-        final String origUsername = config.getString(AppConfig.USERNAME);
-        final String origPassword = config.getString(AppConfig.PASSWORD);
-        final String origEndpoint = config.getAuthEndpoint();
+        final String origUsername = appConfig.getString(AppConfig.USERNAME);
+        final String origPassword = appConfig.getString(AppConfig.PASSWORD);
+        final String origEndpoint = appConfig.getAuthEndpoint();
 
         //login normally just to get sessionId and endpoint
         PartnerClient setupOnlyClient = new PartnerClient(getController());
@@ -147,13 +147,13 @@ public class PartnerClientTest extends ProcessTestBase {
         setupOnlyClient.disconnect();
 
         try {
-            config.setValue(AppConfig.USERNAME, "");
-            config.setValue(AppConfig.PASSWORD, "");
+            appConfig.setValue(AppConfig.USERNAME, "");
+            appConfig.setValue(AppConfig.PASSWORD, "");
 
-            config.setValue(AppConfig.SFDC_INTERNAL, false);
-            config.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
-            config.setAuthEndpoint(endpoint);
-            config.setValue(AppConfig.SFDC_INTERNAL_SESSION_ID, sessionId);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL, false);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
+            appConfig.setAuthEndpoint(endpoint);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL_SESSION_ID, sessionId);
 
             PartnerClient client = new PartnerClient(getController());
             client.connect();
@@ -164,28 +164,28 @@ public class PartnerClientTest extends ProcessTestBase {
                     "Empty salesforce.com username specified.  Please make sure that parameter sfdc.username is set to correct username.",
                     e.getMessage());
         } finally {
-            config.setValue(AppConfig.USERNAME, origUsername);
-            config.setValue(AppConfig.PASSWORD, origPassword);
-            config.setAuthEndpoint(origEndpoint);
-            config.setValue(AppConfig.SFDC_INTERNAL, false);
-            config.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
-            config.setValue(AppConfig.SFDC_INTERNAL_SESSION_ID, "");
+            appConfig.setValue(AppConfig.USERNAME, origUsername);
+            appConfig.setValue(AppConfig.PASSWORD, origPassword);
+            appConfig.setAuthEndpoint(origEndpoint);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL, false);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL_SESSION_ID, "");
         }
     }
 
     @Test
     public void testIsSessionValidAlwaysTrueForSessionIdLogin() throws Exception {
-        AppConfig config = getController().getAppConfig();
+        AppConfig appConfig = getController().getAppConfig();
 
         try {
-            config.setValue(AppConfig.SFDC_INTERNAL, true);
-            config.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL, true);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
 
             PartnerClient client = new PartnerClient(getController());
             assertTrue(client.isSessionValid());
         } finally {
-            config.setValue(AppConfig.SFDC_INTERNAL, false);
-            config.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL, false);
+            appConfig.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
         }
     }
 
