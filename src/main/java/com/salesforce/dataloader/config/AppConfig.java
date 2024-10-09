@@ -505,7 +505,7 @@ public class AppConfig {
      * @see #load()
      * @see #save()
      */
-    private AppConfig(String filename, Map<String, String> overridesMap) throws ConfigInitializationException, IOException {
+    private AppConfig(String filename, Map<String, String> cliOptionsMap) throws ConfigInitializationException, IOException {
         loadedProperties = new LinkedProperties();
         this.filename = filename;
         
@@ -514,7 +514,7 @@ public class AppConfig {
         
         // initialize with defaults 
         // 
-        this.setDefaults();
+        this.setDefaults(cliOptionsMap);
         
         // load from config.properties file
         this.load();
@@ -523,7 +523,7 @@ public class AppConfig {
         // parameter overrides are from two places:
         // 1. process-conf.properties for CLI mode
         // 2. command line options for both CLI and UI modes
-        this.loadParameterOverrides(overridesMap);
+        this.loadParameterOverrides(cliOptionsMap);
         
         // last run gets initialized after loading config and overrides
         // since config params are needed for initializing last run.
@@ -578,7 +578,7 @@ public class AppConfig {
     /**
      * This sets the current defaults.
      */
-    private void setDefaults() {
+    private void setDefaults(Map<String, String> cliOptionsMap) {
         setDefaultValue(HIDE_WELCOME_SCREEN, true);
         setDefaultValue(SHOW_LOADER_UPGRADE_SCREEN, true);
 
@@ -669,11 +669,11 @@ public class AppConfig {
         setDefaultValue(PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE, false);
         setDefaultValue(INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, false);
         setDefaultValue(OAUTH_INSTANCE_URL, false);
-        String proxyHost = System.getProperty("http.proxyHost");
-        String proxyPort = System.getProperty("http.proxyPort");
-        if (proxyHost != null && !proxyHost.isBlank()) {
-            setDefaultValue(PROXY_HOST, proxyHost);
-            setDefaultValue(PROXY_PORT, proxyPort);
+        String systemProxyHost = cliOptionsMap.get(AppUtil.CLI_OPTION_SYSTEM_PROXY_HOST);
+        String systemProxyPort = cliOptionsMap.get(AppUtil.CLI_OPTION_SYSTEM_PROXY_PORT);
+        if (systemProxyHost != null && !systemProxyHost.isBlank()) {
+            setDefaultValue(PROXY_HOST, systemProxyHost);
+            setDefaultValue(PROXY_PORT, systemProxyPort);
         }
         setDefaultValue(USE_LEGACY_HTTP_GET, false);
         setDefaultValue(USE_SYSTEM_PROPS_FOR_HTTP_CLIENT, true);

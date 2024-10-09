@@ -42,6 +42,8 @@ import java.io.FileFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -188,6 +190,21 @@ public class DataLoaderRunner extends Thread {
         // add the argument to indicate that JAVA_LIB_PATH has the folder containing SWT native libraries
         jvmArgs.add(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
         logger.debug("    " + AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
+        
+        // set System proxy info as proxy server defaults
+        String proxyHost = null;
+        int proxyPort = 0;
+        Proxy systemProxy = AppUtil.getSystemHttpsProxy();
+        if (systemProxy != null) {
+            InetSocketAddress addr = (InetSocketAddress) systemProxy.address();
+    
+            if (addr != null) {
+                proxyHost = addr.getHostName();
+                proxyPort = addr.getPort();
+                jvmArgs.add(AppUtil.CLI_OPTION_SYSTEM_PROXY_HOST + "=" + proxyHost);
+                jvmArgs.add(AppUtil.CLI_OPTION_SYSTEM_PROXY_PORT + "=" + proxyPort);
+            }
+        }
         AppUtil.exec(jvmArgs, null);
     }
     

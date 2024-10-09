@@ -33,6 +33,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.Proxy.Type;
+import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -45,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -100,6 +105,8 @@ public class AppUtil {
     public static final String CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP = "salesforce.installation.shortcut.desktop";
     public static final String CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP = "salesforce.installation.shortcut.windows.startmenu";
     public static final String CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP = "salesforce.installation.shortcut.macos.appsfolder";
+    public static final String CLI_OPTION_SYSTEM_PROXY_HOST = "sfdc.system.proxyHost";
+    public static final String CLI_OPTION_SYSTEM_PROXY_PORT = "sfdc.system.proxyPort";
     public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
     public static final String DATALOADER_DOWNLOAD_URL = "https://developer.salesforce.com/tools/data-loader";
     public static final int EXIT_CODE_NO_ERRORS = 0;
@@ -491,6 +498,43 @@ public class AppUtil {
         // Here, override that to "GMT" to better match the behavior of the WSC XML parser.
         mapper.setTimeZone(TimeZone.getTimeZone("GMT"));
         return mapper.readValue(in, tmpClass);
+    }
+    
+    private static final String SYSPROP_USE_SYSTEM_PROXIES = "java.net.useSystemProxies";
+    public static Proxy getSystemHttpsProxy() {
+        System.setProperty(SYSPROP_USE_SYSTEM_PROXIES, "true");
+        logger.info("detecting proxies");
+        List<Proxy> proxyList = null;
+        java.net.Proxy proxy = null;
+                
+        try {
+            ProxySelector ps = ProxySelector.getDefault();
+            if (ps != null) {
+                proxyList = ps.select(new URI("https://www.salesforce.com"));
+            }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        if (proxyList != null) {
+            for (Iterator<Proxy> iter = proxyList.iterator(); iter.hasNext();) {
+                proxy = (java.net.Proxy) iter.next();
+                logger.info("System proxy type: " + proxy.type());
+                if (proxy.type() != Type.HTTP) {
+                    continue;
+                }
+
+                InetSocketAddress addr = (InetSocketAddress) proxy.address();
+
+                if (addr == null) {
+                    logger.debug("No system proxy");
+                } else {
+                    logger.info("System proxy hostname: " + addr.getHostName());
+                    logger.info("System proxy port: " + addr.getPort());
+                    break;
+                }
+            }
+        }
+        return proxy;
     }
     
     public static void setConnectorConfigProxySettings(AppConfig appConfig, ConnectorConfig connConfig) {
