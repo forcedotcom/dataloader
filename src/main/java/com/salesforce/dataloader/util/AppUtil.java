@@ -503,7 +503,7 @@ public class AppUtil {
     private static final String SYSPROP_USE_SYSTEM_PROXIES = "java.net.useSystemProxies";
     public static Proxy getSystemHttpsProxy() {
         System.setProperty(SYSPROP_USE_SYSTEM_PROXIES, "true");
-        logger.info("detecting proxies");
+        logger.debug("detecting proxies");
         List<Proxy> proxyList = null;
         java.net.Proxy proxy = null;
                 
@@ -518,7 +518,7 @@ public class AppUtil {
         if (proxyList != null) {
             for (Iterator<Proxy> iter = proxyList.iterator(); iter.hasNext();) {
                 proxy = (java.net.Proxy) iter.next();
-                logger.info("System proxy type: " + proxy.type());
+                logger.debug("System proxy type: " + proxy.type());
                 if (proxy.type() != Type.HTTP) {
                     continue;
                 }
@@ -528,8 +528,8 @@ public class AppUtil {
                 if (addr == null) {
                     logger.debug("No system proxy");
                 } else {
-                    logger.info("System proxy hostname: " + addr.getHostName());
-                    logger.info("System proxy port: " + addr.getPort());
+                    logger.debug("System proxy hostname: " + addr.getHostName());
+                    logger.debug("System proxy port: " + addr.getPort());
                     break;
                 }
             }
