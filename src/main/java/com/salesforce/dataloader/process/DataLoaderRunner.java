@@ -194,7 +194,7 @@ public class DataLoaderRunner extends Thread {
         // set System proxy info as proxy server defaults
         String proxyHost = null;
         int proxyPort = 0;
-        Proxy systemProxy = AppUtil.getSystemHttpsProxy();
+        Proxy systemProxy = AppUtil.getSystemHttpsProxy(args);
         if (systemProxy != null) {
             InetSocketAddress addr = (InetSocketAddress) systemProxy.address();
     
