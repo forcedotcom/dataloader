@@ -395,7 +395,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 logger.info("Setting batch size to " + newDefaultBatchSize);
                 textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
                 String[] args = {getImportBatchLimitsURL(), 
-                        getImportBatchLimitsURL(), Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
+                        Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
                 labelImportBatchSize.setText(
                         Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".importBatchSize", args));
             }
