@@ -959,7 +959,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                     return;
 
                 }
-                String currentTextSBEndpoint = textProdEndpoint.getText();
+                String currentTextSBEndpoint = textSBEndpoint.getText();
                 currentTextSBEndpoint = AppUtil.getURLStrFromDomainName(currentTextSBEndpoint);
                 if (currentTextSBEndpoint != null 
                         && !currentTextSBEndpoint.isEmpty() 
