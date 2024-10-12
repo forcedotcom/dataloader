@@ -568,7 +568,7 @@ public class AppConfig {
         } catch (IOException e) {
             logger.warn(Messages.getFormattedString("LastRun.errorLoading", new String[]{
                     this.lastRunProperties.getFullPath(), e.getMessage()}), e);
-        }        
+        }
     }
 
     private boolean useBulkApiByDefault() {
@@ -585,7 +585,7 @@ public class AppConfig {
         setDefaultValue(CSV_DELIMITER_COMMA, true);
         setDefaultValue(CSV_DELIMITER_TAB, true);
         setDefaultValue(CSV_DELIMITER_OTHER, false);
-        setDefaultValue(CSV_DELIMITER_OTHER_VALUE, "-");
+        setDefaultValue(CSV_DELIMITER_OTHER_VALUE, "");
         setDefaultValue(CSV_DELIMITER_FOR_QUERY_RESULTS, AppUtil.COMMA);
 
         setDefaultValue(AUTH_ENDPOINT, DEFAULT_ENDPOINT_URL_PROD);
@@ -636,6 +636,7 @@ public class AppConfig {
         setDefaultValue(OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
         setDefaultValue(OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
 
+        setDefaultValue(OPERATION, "insert");
         setDefaultValue(REUSE_CLIENT_CONNECTION, true);
         /*
         setDefaultValue(ENABLE_BULK_QUERY_PK_CHUNKING, false);
@@ -1195,21 +1196,8 @@ public class AppConfig {
         Properties inMemoryProperties = new LinkedProperties();
         inMemoryProperties.putAll(this.loadedProperties);
         
-        // do not save properties set through parameter overrides
-        if (this.parameterOverridesMap != null) {
-            for (String propertyName : this.parameterOverridesMap.keySet()) {
-                this.loadedProperties.remove(propertyName);
-            }
-        }
-        
-        // do not save read-only properties that were not specified
-        // in properties file
-        for (String roprop : READ_ONLY_PROPERTY_NAMES) {
-            if (!this.readOnlyPropertiesFromPropertiesFile.containsKey(roprop)) {
-                this.loadedProperties.remove(roprop);
-            }
-        }
-        
+        // property additions section - all property additions occur before removals
+        // add encrypted property name, value pairs for saving
         for (String encryptedProp : ENCRYPTED_PROPERTY_NAMES) {
             if (this.loadedProperties.containsKey(encryptedProp)) {
                 Map<?, ?> propMap = (Map<?, ?>)this.loadedProperties;
@@ -1224,7 +1212,23 @@ public class AppConfig {
                 }
             }
         }
+
+        // property removals section - all property additions occur before this
+
+        // do not save properties set through parameter overrides
+        if (this.parameterOverridesMap != null) {
+            for (String propertyName : this.parameterOverridesMap.keySet()) {
+                this.loadedProperties.remove(propertyName);
+            }
+        }
         
+        // do not save read-only properties that were not specified
+        // in properties file
+        for (String roprop : READ_ONLY_PROPERTY_NAMES) {
+            if (!this.readOnlyPropertiesFromPropertiesFile.containsKey(roprop)) {
+                this.loadedProperties.remove(roprop);
+            }
+        }        
         removeUnsupportedProperties();
         removeDecryptedProperties();
         removeCLIOptionsFromProperties();
@@ -1233,7 +1237,7 @@ public class AppConfig {
         FileOutputStream out = null;
         try {
             out = new FileOutputStream(filename);
-            save(out, "Loader Config"); //$NON-NLS-1$
+            save(out, "Salesforce Data Loader Config"); //$NON-NLS-1$
         } finally {
             if (out != null) {
                 out.close();
