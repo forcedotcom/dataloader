@@ -64,6 +64,7 @@ import com.sforce.soap.partner.UndeleteResult;
 import com.sforce.soap.partner.UpsertResult;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.soap.partner.fault.ExceptionCode;
+import com.sforce.soap.partner.fault.LoginFault;
 import com.sforce.soap.partner.fault.UnexpectedErrorFault;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
@@ -376,9 +377,15 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             this.getSession().performedSessionActivity(); // reset session activity timer
             return result;
         } catch (ConnectionException ex) {
+            String exceptionMessage = ex.getMessage();
+            if (ex instanceof LoginFault) {
+                LoginFault lf = (LoginFault)ex;
+                exceptionMessage = lf.getExceptionMessage();
+            }
+
             logger.error(
                     Messages.getFormattedString(
-                            "Client.operationError", new String[]{op.getName(), ex.getMessage()}), ex); //$NON-NLS-1$
+                            "Client.operationError", new String[]{op.getName(), exceptionMessage}), ex); //$NON-NLS-1$
             if (ex instanceof ApiFault) {
                 ApiFault fault = (ApiFault)ex;
                 String faultMessage = fault.getExceptionMessage();
@@ -595,8 +602,13 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 throw fault;
             }
         } catch (ConnectionException e) {
+            String exceptionMessage = e.getMessage();
+            if (e instanceof LoginFault) {
+                LoginFault lf = (LoginFault)e;
+                exceptionMessage = lf.getExceptionMessage();
+            }
             logger.warn(Messages.getMessage(this.getClass(), "failedUsernamePasswordAuth", 
-                                            origEndpoint, appConfig.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT), e.getMessage()));
+                                            origEndpoint, appConfig.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT), exceptionMessage));
             if (!appConfig.isDefaultAuthEndpoint(origEndpoint)) {
                 // retry with default endpoint URL only if user is attempting production login
                 appConfig.setAuthEndpoint(appConfig.getDefaultAuthEndpoint());
@@ -686,7 +698,12 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             }
             loginSuccess(conn, server, loginResult.getUserInfo());
         } catch (ConnectionException ex) {
-            logger.error(Messages.getMessage(getClass(), "loginError", cc.getAuthEndpoint(), ex.getMessage()), ex);
+            String exceptionMessage = ex.getMessage();
+            if (ex instanceof LoginFault) {
+                LoginFault lf = (LoginFault)ex;
+                exceptionMessage = lf.getExceptionMessage();
+            }
+            logger.error(Messages.getMessage(getClass(), "loginError", cc.getAuthEndpoint(), exceptionMessage), ex);
             throw ex;
         }
     }
