@@ -184,7 +184,9 @@ public class AppConfig {
      */
     private Properties loadedProperties = new LinkedProperties();
     private Properties readOnlyPropertiesFromPropertiesFile = new LinkedProperties();
-
+    private final Properties defaultProperties;
+    private final boolean saveAllProps;
+    
     private Map<String, String> parameterOverridesMap;
 
     /**
@@ -204,6 +206,9 @@ public class AppConfig {
     //
     // salesforce constants
 
+    // =======================
+    // Property name constants (Settings specified in config.properties file or as command line options) 
+    // =======================
     // Loader Preferences
     public static final String HIDE_WELCOME_SCREEN = "loader.hideWelcome";
     public static final String SHOW_LOADER_UPGRADE_SCREEN = "loader.ui.showUpgrade";
@@ -514,6 +519,8 @@ public class AppConfig {
         // initialize with defaults 
         // 
         this.setDefaults(cliOptionsMap);
+        this.defaultProperties = new LinkedProperties();
+        this.defaultProperties.putAll(this.loadedProperties);
         
         // load from config.properties file
         this.load();
@@ -523,6 +530,7 @@ public class AppConfig {
         // 1. process-conf.properties for CLI mode
         // 2. command line options for both CLI and UI modes
         this.loadParameterOverrides(cliOptionsMap);
+        saveAllProps = getBoolean(AppUtil.CLI_OPTION_SAVE_ALL_PROPS);
         
         // last run gets initialized after loading config and overrides
         // since config params are needed for initializing last run.
@@ -671,6 +679,10 @@ public class AppConfig {
         }
         setDefaultValue(USE_LEGACY_HTTP_GET, false);
         setDefaultValue(USE_SYSTEM_PROPS_FOR_HTTP_CLIENT, true);
+        setDefaultValue(EURO_DATES, false);
+        setDefaultValue(NO_COMPRESSION, false);
+        setDefaultValue(READ_UTF8, false);
+        setDefaultValue(WRITE_UTF8, false);
     }
 
     /**
@@ -1200,6 +1212,7 @@ public class AppConfig {
         removeDecryptedPropertiesBeforeSave();
         removeCLIOnlyOptionsFromProperties();
         removeEmptyProperties(this.loadedProperties);
+        removeDefaultPropertiesBeforeSave();
 
         FileOutputStream out = null;
         try {
@@ -1301,6 +1314,16 @@ public class AppConfig {
     private void removeUnsupportedProperties() {
         // do not save a value for enabling Bulk V2 
         //this.properties.remove(BULKV2_API_ENABLED);
+    }
+    
+    private void removeDefaultPropertiesBeforeSave() {
+        if (saveAllProps) {
+            // do not remove default values
+            return;
+        }
+        this.loadedProperties.entrySet().removeIf(
+                entry -> (this.defaultProperties.get(entry.getKey().toString()) != null
+                        && this.defaultProperties.get(entry.getKey().toString()).equals(entry.getValue())));
     }
     
     private void removeDecryptedPropertiesBeforeSave() {

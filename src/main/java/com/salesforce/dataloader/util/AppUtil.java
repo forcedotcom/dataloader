@@ -101,6 +101,7 @@ public class AppUtil {
     public static final String CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
     public static final String CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
     public static final String CLI_OPTION_CONFIG_DIR_PROP = "salesforce.config.dir";
+    public static final String CLI_OPTION_SAVE_ALL_PROPS = "salesforce.saveAllSettings";
     public static final String CLI_OPTION_INSTALLATION_FOLDER_PROP = "salesforce.installation.dir";
     public static final String CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP = "salesforce.installation.shortcut.desktop";
     public static final String CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP = "salesforce.installation.shortcut.windows.startmenu";
