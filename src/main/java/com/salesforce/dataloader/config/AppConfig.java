@@ -1011,7 +1011,7 @@ public class AppConfig {
         
         // Do not load unsupported properties and CLI options even if they are specified in config.properties file
         if (isConfigFilePropsMap) {
-            removeCLIOptionsFromProperties();
+            removeCLIOnlyOptionsFromProperties();
             removeUnsupportedProperties();
         }
     }
@@ -1191,40 +1191,14 @@ public class AppConfig {
         
         // property additions section - all property additions occur before removals
         // add encrypted property name, value pairs for saving
-        for (String encryptedProp : ENCRYPTED_PROPERTY_NAMES) {
-            if (this.loadedProperties.containsKey(encryptedProp)) {
-                Map<?, ?> propMap = (Map<?, ?>)this.loadedProperties;
-                try {
-                    @SuppressWarnings("unchecked")
-                    String propValue = encryptProperty(encrypter, 
-                            (Map<String, String>)propMap,
-                            encryptedProp, isBatchMode());
-                    this.loadedProperties.put(encryptedProp, propValue);
-                } catch (ParameterLoadException e) {
-                    this.loadedProperties.remove(encryptedProp); // Encryption attempt failed. Do not save.
-                }
-            }
-        }
+        encryptPropertiesBeforeSave();
 
         // property removals section - all property additions occur before this
-
-        // do not save properties set through parameter overrides
-        if (this.parameterOverridesMap != null) {
-            for (String propertyName : this.parameterOverridesMap.keySet()) {
-                this.loadedProperties.remove(propertyName);
-            }
-        }
-        
-        // do not save read-only properties that were not specified
-        // in properties file
-        for (String roprop : READ_ONLY_PROPERTY_NAMES) {
-            if (!this.readOnlyPropertiesFromPropertiesFile.containsKey(roprop)) {
-                this.loadedProperties.remove(roprop);
-            }
-        }        
+        removeCommandLineOptionsBeforeSave();
+        removeReadOnlyPropertiesBeforeSave();
         removeUnsupportedProperties();
-        removeDecryptedProperties();
-        removeCLIOptionsFromProperties();
+        removeDecryptedPropertiesBeforeSave();
+        removeCLIOnlyOptionsFromProperties();
         removeEmptyProperties(this.loadedProperties);
 
         FileOutputStream out = null;
@@ -1291,16 +1265,49 @@ public class AppConfig {
         }
     }
 
+    private void encryptPropertiesBeforeSave() {
+        for (String encryptedProp : ENCRYPTED_PROPERTY_NAMES) {
+            if (this.loadedProperties.containsKey(encryptedProp)) {
+                Map<?, ?> propMap = (Map<?, ?>)this.loadedProperties;
+                try {
+                    @SuppressWarnings("unchecked")
+                    String propValue = encryptProperty(encrypter, 
+                            (Map<String, String>)propMap,
+                            encryptedProp, isBatchMode());
+                    this.loadedProperties.put(encryptedProp, propValue);
+                } catch (ParameterLoadException e) {
+                    this.loadedProperties.remove(encryptedProp); // Encryption attempt failed. Do not save.
+                }
+            }
+        }
+    }
+    
+    private void removeCommandLineOptionsBeforeSave() {
+        if (this.parameterOverridesMap != null) {
+            for (String propertyName : this.parameterOverridesMap.keySet()) {
+                this.loadedProperties.remove(propertyName);
+            }
+        }
+    }
+    
+    private void removeReadOnlyPropertiesBeforeSave() {
+        for (String roprop : READ_ONLY_PROPERTY_NAMES) {
+            if (!this.readOnlyPropertiesFromPropertiesFile.containsKey(roprop)) {
+                this.loadedProperties.remove(roprop);
+            }
+        }
+    }
+    
     private void removeUnsupportedProperties() {
         // do not save a value for enabling Bulk V2 
         //this.properties.remove(BULKV2_API_ENABLED);
     }
     
-    private void removeDecryptedProperties() {
+    private void removeDecryptedPropertiesBeforeSave() {
         this.loadedProperties.entrySet().removeIf(entry -> (entry.getKey().toString().endsWith(DECRYPTED_SUFFIX)));
     }
     
-    private void removeCLIOptionsFromProperties() {
+    private void removeCLIOnlyOptionsFromProperties() {
         Set<String> keys = this.loadedProperties.stringPropertyNames();
         Field[] allFields = AppConfig.class.getDeclaredFields();
         for (Field field : allFields) {
