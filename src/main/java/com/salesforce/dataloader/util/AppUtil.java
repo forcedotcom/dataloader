@@ -501,7 +501,18 @@ public class AppUtil {
     }
     
     private static final String SYSPROP_USE_SYSTEM_PROXIES = "java.net.useSystemProxies";
-    public static Proxy getSystemHttpsProxy() {
+    public static Proxy getSystemHttpsProxy(String[] args) {
+        Map<String, String> argsMap = convertCommandArgsArrayToArgMap(args);
+        if (getAppRunMode() == APP_RUN_MODE.BATCH
+                || getAppRunMode() == APP_RUN_MODE.ENCRYPT
+                || (argsMap.containsKey(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
+                        && "true".equalsIgnoreCase(argsMap.get(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH)))) {
+            // do not check for system proxy settings
+            // if run mode is batch or encrypt 
+            // or if on the 2nd iteration of the UI mode
+            return null;
+        }
+
         System.setProperty(SYSPROP_USE_SYSTEM_PROXIES, "true");
         logger.debug("detecting proxies");
         List<Proxy> proxyList = null;
