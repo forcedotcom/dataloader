@@ -226,7 +226,6 @@ public class AppConfig {
     // salesforce client connectivity
     public static final String USERNAME = "sfdc.username"; //$NON-NLS-1$
     public static final String PASSWORD = "sfdc.password"; //$NON-NLS-1$
-    public static final String AUTH_ENDPOINT = "sfdc.endpoint"; //$NON-NLS-1$
     public static final String AUTH_ENDPOINT_PROD = "sfdc.endpoint.production"; //$NON-NLS-1$
     public static final String AUTH_ENDPOINT_SANDBOX = "sfdc.endpoint.sandbox"; //$NON-NLS-1$
     public static final String PROXY_HOST = "sfdc.proxyHost"; //$NON-NLS-1$
@@ -531,11 +530,6 @@ public class AppConfig {
         
         // Properties initialization completed. Configure OAuth environment next
         setOAuthEnvironment(getString(SELECTED_AUTH_ENVIRONMENT));
-        String endpoint_prod = getString(AppConfig.AUTH_ENDPOINT_PROD);
-        if (AppConfig.DEFAULT_ENDPOINT_URL_PROD.equalsIgnoreCase(endpoint_prod)) {
-            endpoint_prod = getString(AppConfig.AUTH_ENDPOINT);
-            setValue(AUTH_ENDPOINT_PROD, endpoint_prod);
-        }
     }
     
     private String getLastRunPrefix() {
@@ -588,8 +582,7 @@ public class AppConfig {
         setDefaultValue(CSV_DELIMITER_OTHER_VALUE, "");
         setDefaultValue(CSV_DELIMITER_FOR_QUERY_RESULTS, AppUtil.COMMA);
 
-        setDefaultValue(AUTH_ENDPOINT, DEFAULT_ENDPOINT_URL_PROD);
-        setDefaultValue(AUTH_ENDPOINT_PROD, getString(AUTH_ENDPOINT));
+        setDefaultValue(AUTH_ENDPOINT_PROD, DEFAULT_ENDPOINT_URL_PROD);
         setDefaultValue(AUTH_ENDPOINT_SANDBOX, DEFAULT_ENDPOINT_URL_SANDBOX);
 
         setDefaultValue(IMPORT_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_IMPORT_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
@@ -1255,7 +1248,7 @@ public class AppConfig {
     
     public void setAuthEndpointForEnv(String authEndpoint, String env) {
         AppUtil.validateAuthenticationHostDomainUrlAndThrow(authEndpoint);
-        if (env != null && env.equalsIgnoreCase(getString(AppConfig.SB_ENVIRONMENT_VAL))) {
+        if (env != null && env.equalsIgnoreCase(AppConfig.SB_ENVIRONMENT_VAL)) {
             this.setValue(AppConfig.AUTH_ENDPOINT_SANDBOX, authEndpoint);
         } else {
             this.setValue(AppConfig.AUTH_ENDPOINT_PROD, authEndpoint);
