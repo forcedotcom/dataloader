@@ -533,7 +533,11 @@ public class Controller {
     }
 
     public boolean attachmentsEnabled() {
-        return !getAppConfig().useBulkAPIForCurrentOperation() || getAppConfig().getBoolean(AppConfig.BULK_API_ZIP_CONTENT);
+        if (getAppConfig().isBulkV2APIEnabled()) {
+            return false;
+        } else {
+            return getAppConfig().getBoolean(AppConfig.BULK_API_ZIP_CONTENT);
+        }
     }
 
     public void clearMapper() {

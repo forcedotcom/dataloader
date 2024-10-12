@@ -125,6 +125,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Composite bulkApiOptionsComposite;
     private Composite exportBatchSizeComposite;
     private Composite importBatchSizeComposite;
+    private Composite zipContentComposite;
     
     /**
      * InputDialog constructor
@@ -179,6 +180,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         enableApiOptions(selectedButton, true);
         setEnabled(this.exportBatchSizeComposite, useSoapAPI);
         setEnabled(this.importBatchSizeComposite, !useBulkV2API);
+        setEnabled(this.zipContentComposite, !useBulkV2API);
         this.buttonUndeleteEnabled.setSelection(useSoapAPI);
         this.buttonHardDeleteEnabled.setSelection(!useSoapAPI);
     }
@@ -487,9 +489,18 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.grabExcessHorizontalSpace = true;
         buttonBulkApiSerialMode.setLayoutData(data);
 
-        // Bulk API serial concurrency mode setting
-        createLink(bulkApiOptionsComposite, "bulkApiZipContent", null, null);
-        buttonBulkApiZipContent = new Button(this.bulkApiOptionsComposite, SWT.CHECK);
+        // SOAP and Bulk API zip content setting
+        this.zipContentComposite = new Composite(restComp, SWT.None);
+        data = new GridData(GridData.FILL_BOTH);
+        data.horizontalSpan = 2;
+        data.grabExcessHorizontalSpace = true;
+        this.zipContentComposite.setLayoutData(data);
+        layout = new GridLayout(2, true);
+        layout.verticalSpacing = 10;
+        this.zipContentComposite.setLayout(layout);
+
+        createLink(zipContentComposite, "bulkApiZipContent", null, null);
+        buttonBulkApiZipContent = new Button(zipContentComposite, SWT.CHECK);
         buttonBulkApiZipContent.setSelection(appConfig.getBoolean(AppConfig.BULK_API_ZIP_CONTENT));
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         data.grabExcessHorizontalSpace = true;
