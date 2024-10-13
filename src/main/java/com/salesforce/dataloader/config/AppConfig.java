@@ -1619,6 +1619,10 @@ public class AppConfig {
     public String getOAuthEnvironmentString(String environmentName, String name) {
         return getString(OAUTH_PREFIX + environmentName + "." + name);
     }
+    
+    public String getOAuthEnvironmentPropertyName(String environmentName, String propertyPartialName) {
+        return OAUTH_PREFIX + environmentName + "." + propertyPartialName;
+    }
 
     public void setOAuthEnvironmentString(String environmentName, String name, String... values) {
         setValue(OAUTH_PREFIX + environmentName + "." + name, values);
