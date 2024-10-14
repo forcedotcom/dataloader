@@ -380,7 +380,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
     
     private String generateBatchCSVFilename(String prefix, int batchNum) {
-        String successResultsFilename = controller.getAppConfig().getString(AppConfig.OUTPUT_SUCCESS);
+        String successResultsFilename = controller.getAppConfig().getString(AppConfig.PROP_OUTPUT_SUCCESS);
         int parentDirLocation = successResultsFilename.lastIndexOf(System.getProperty("file.separator"));
         String resultsDir = successResultsFilename.substring(0, parentDirLocation);
         return resultsDir 
@@ -425,8 +425,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     	this.getErrorWriter().close();
     	
     	AppConfig appConfig = this.getConfig();
-    	String successWriterFile = appConfig.getString(AppConfig.OUTPUT_SUCCESS);
-    	String errorWriterFile = appConfig.getString(AppConfig.OUTPUT_ERROR);
+    	String successWriterFile = appConfig.getString(AppConfig.PROP_OUTPUT_SUCCESS);
+    	String errorWriterFile = appConfig.getString(AppConfig.PROP_OUTPUT_ERROR);
     	// TODO for unprocessed records. Also uncomment in Controller.java to set the right value
     	// for Config.OUTPUT_UNPROCESSED_RECORDS
     	// String unprocessedRecordsWriterFile = config.getString(Config.OUTPUT_UNPROCESSED_RECORDS);

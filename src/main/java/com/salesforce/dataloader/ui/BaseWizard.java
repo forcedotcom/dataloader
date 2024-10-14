@@ -40,7 +40,7 @@ public abstract class BaseWizard extends Wizard {
     protected BaseWizard(Controller ctl, OperationInfo info) {
         this.controller = ctl;
 
-        getConfig().setValue(AppConfig.OPERATION, info.name());
+        getConfig().setValue(AppConfig.PROP_OPERATION, info.name());
         this.finishPage = setupPages();
         // Set the dialog window title
         setWindowTitle(getLabel("windowTitle"));

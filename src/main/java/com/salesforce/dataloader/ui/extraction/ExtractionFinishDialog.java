@@ -89,7 +89,7 @@ public class ExtractionFinishDialog extends WizardDialog {
         buttonComp.setLayoutData(data);
 
         // error status output is optional
-        boolean enableStatusOutput = getController().getAppConfig().getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT);
+        boolean enableStatusOutput = getController().getAppConfig().getBoolean(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT);
         if (enableStatusOutput) {
             layout = new GridLayout(3, false);
         } else {
@@ -104,7 +104,7 @@ public class ExtractionFinishDialog extends WizardDialog {
         viewExtraction.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                openViewer(getController().getAppConfig().getString(AppConfig.DAO_NAME), false);
+                openViewer(getController().getAppConfig().getString(AppConfig.PROP_DAO_NAME), false);
             }
 
             @Override
@@ -121,7 +121,7 @@ public class ExtractionFinishDialog extends WizardDialog {
             viewErrors.addSelectionListener(new SelectionListener() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    openViewer(getController().getAppConfig().getString(AppConfig.OUTPUT_ERROR), true);
+                    openViewer(getController().getAppConfig().getString(AppConfig.PROP_OUTPUT_ERROR), true);
                 }
 
                 @Override

@@ -108,7 +108,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
         this.batchSize = getConfig().getImportBatchSize();
         rowConversionFailureMap = new HashMap<Integer, Boolean>();
-        String newRichTextRegex = getConfig().getString(AppConfig.RICH_TEXT_FIELD_REGEX);
+        String newRichTextRegex = getConfig().getString(AppConfig.PROP_RICH_TEXT_FIELD_REGEX);
         if (newRichTextRegex != null && !newRichTextRegex.isBlank()) {
             this.richTextRegex = newRichTextRegex;
         }
@@ -127,7 +127,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     protected boolean isRowConversionSuccessful() {
         if (!gotSkippedRowsCount) {
             try {
-                skippedRowsCount = controller.getAppConfig().getInt(AppConfig.LOAD_ROW_TO_START_AT);
+                skippedRowsCount = controller.getAppConfig().getInt(AppConfig.PROP_LOAD_ROW_TO_START_AT);
                 gotSkippedRowsCount = true;
             } catch (ParameterLoadException e) {
                 // @ignored
@@ -153,13 +153,13 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         // the result are sforce fields mapped to data
         Row sforceDataRow = getMapper().mapData(row);
         
-        if (this.getConfig().getBoolean(AppConfig.TRUNCATE_FIELDS)
+        if (this.getConfig().getBoolean(AppConfig.PROP_TRUNCATE_FIELDS)
             && this.getConfig().isRESTAPIEnabled()
-            && "update".equalsIgnoreCase(this.getConfig().getString(AppConfig.OPERATION))) {
+            && "update".equalsIgnoreCase(this.getConfig().getString(AppConfig.PROP_OPERATION))) {
             PartnerClient partnerClient = this.getController().getPartnerClient();
             if (cachedFieldAttributesForOperation == null) {
                 cachedFieldAttributesForOperation = partnerClient.getSObjectFieldAttributesForRow(
-                                this.getConfig().getString(AppConfig.ENTITY), sforceDataRow);
+                                this.getConfig().getString(AppConfig.PROP_ENTITY), sforceDataRow);
             }
             for (Map.Entry<String, Object> field : sforceDataRow.entrySet()) {
                 for (Field fieldDescribe : cachedFieldAttributesForOperation) {
@@ -270,7 +270,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
     public void clearArrays() {
         // clear the arrays
-        if (!controller.getAppConfig().getBoolean(AppConfig.BULK_API_ENABLED)) {
+        if (!controller.getAppConfig().getBoolean(AppConfig.PROP_BULK_API_ENABLED)) {
             daoRowList.clear();
         }
         dynaArray.clear();
@@ -359,7 +359,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         getHtmlFormattedAndPhoneSforceFieldList();
         if (htmlFormattedSforceFieldList == null 
             || !htmlFormattedSforceFieldList.contains(fieldName)
-            || !getController().getAppConfig().getBoolean(AppConfig.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT)) {
+            || !getController().getAppConfig().getBoolean(AppConfig.PROP_LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT)) {
             return fieldValue;
         }
         return convertToHTMLFormatting((String)fieldValue, this.richTextRegex);
@@ -427,7 +427,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         getHtmlFormattedAndPhoneSforceFieldList();
         if (this.phoneSforceFieldList == null
                 || !this.phoneSforceFieldList.contains(fieldName)
-                || !this.getConfig().getBoolean(AppConfig.FORMAT_PHONE_FIELDS)) {
+                || !this.getConfig().getBoolean(AppConfig.PROP_FORMAT_PHONE_FIELDS)) {
             return fieldValue;
         }
         String localeStr = Locale.getDefault().toString();

@@ -197,7 +197,7 @@ public class DAORowUtil {
         // start at the correct row
         final int rowToStart;
         try {
-            rowToStart = cfg.getInt(AppConfig.LOAD_ROW_TO_START_AT);
+            rowToStart = cfg.getInt(AppConfig.PROP_LOAD_ROW_TO_START_AT);
         } catch (final ParameterLoadException e) {
             return;
         }

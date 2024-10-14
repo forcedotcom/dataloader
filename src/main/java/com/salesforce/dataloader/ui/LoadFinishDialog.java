@@ -96,7 +96,7 @@ public class LoadFinishDialog extends WizardDialog {
         viewSuccess.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                openViewer(getController().getAppConfig().getString(AppConfig.OUTPUT_SUCCESS));
+                openViewer(getController().getAppConfig().getString(AppConfig.PROP_OUTPUT_SUCCESS));
             }
 
             @Override
@@ -109,7 +109,7 @@ public class LoadFinishDialog extends WizardDialog {
         viewErrors.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                openViewer(getController().getAppConfig().getString(AppConfig.OUTPUT_ERROR));
+                openViewer(getController().getAppConfig().getString(AppConfig.PROP_OUTPUT_ERROR));
             }
 
             @Override

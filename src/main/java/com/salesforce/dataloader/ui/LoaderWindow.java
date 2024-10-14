@@ -138,10 +138,10 @@ public class LoaderWindow extends ApplicationWindow {
      */
     public void run() {
         AppConfig appConfig = controller.getAppConfig();
-        if (!appConfig.getBoolean(AppConfig.HIDE_WELCOME_SCREEN)) {
+        if (!appConfig.getBoolean(AppConfig.PROP_HIDE_WELCOME_SCREEN)) {
             displayTitleDialog(Display.getDefault(), this.operationActionsByIndex, this.controller.getAppConfig());
         }
-        if (appConfig.getBoolean(AppConfig.SHOW_LOADER_UPGRADE_SCREEN)) {
+        if (appConfig.getBoolean(AppConfig.PROP_SHOW_LOADER_UPGRADE_SCREEN)) {
             displayUpgradeDialog(Display.getDefault());
         }
         setBlockOnOpen(true);

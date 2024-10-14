@@ -57,7 +57,7 @@ public class DatabaseWriter implements DataWriter {
     private final DatabaseContext dbContext;
 
     public DatabaseWriter(AppConfig appConfig) throws DataAccessObjectInitializationException {
-        this(appConfig, appConfig.getString(AppConfig.DAO_NAME));
+        this(appConfig, appConfig.getString(AppConfig.PROP_DAO_NAME));
     }
 
     /**

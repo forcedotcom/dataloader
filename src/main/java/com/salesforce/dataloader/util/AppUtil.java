@@ -377,11 +377,11 @@ public class AppUtil {
         if (!argsMap.containsKey(AppUtil.CLI_OPTION_CONFIG_DIR_PROP)) {
             argsMap.put(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, args[0]);
         }
-        if (!argsMap.containsKey(AppConfig.PROCESS_NAME) 
+        if (!argsMap.containsKey(AppConfig.PROP_PROCESS_NAME) 
                 && args.length > 2
                 && !args[1].contains("=")) {
             // second argument must be process name
-            argsMap.put(AppConfig.PROCESS_NAME, args[1]);
+            argsMap.put(AppConfig.PROP_PROCESS_NAME, args[1]);
         }
     }
     
@@ -552,19 +552,19 @@ public class AppUtil {
     public static void setConnectorConfigProxySettings(AppConfig appConfig, ConnectorConfig connConfig) {
         // proxy properties
         try {
-            String proxyHost = appConfig.getString(AppConfig.PROXY_HOST);
-            int proxyPort = appConfig.getInt(AppConfig.PROXY_PORT);
+            String proxyHost = appConfig.getString(AppConfig.PROP_PROXY_HOST);
+            int proxyPort = appConfig.getInt(AppConfig.PROP_PROXY_PORT);
             if (proxyHost != null && proxyHost.length() > 0 && proxyPort > 0) {
                 logger.info(Messages.getFormattedString(
                         "AppUtil.sforceLoginProxyDetail", new String[] { proxyHost, String.valueOf(proxyPort) })); //$NON-NLS-1$
                 connConfig.setProxy(proxyHost, proxyPort);
 
-                String proxyUsername = appConfig.getString(AppConfig.PROXY_USERNAME);
+                String proxyUsername = appConfig.getString(AppConfig.PROP_PROXY_USERNAME);
                 if (proxyUsername != null && proxyUsername.length() > 0) {
                     logger.info(Messages.getFormattedString("AppUtil.sforceLoginProxyUser", proxyUsername)); //$NON-NLS-1$
                     connConfig.setProxyUsername(proxyUsername);
 
-                    String proxyPassword = appConfig.getString(AppConfig.PROXY_PASSWORD);
+                    String proxyPassword = appConfig.getString(AppConfig.PROP_PROXY_PASSWORD);
                     if (proxyPassword != null && proxyPassword.length() > 0) {
                         logger.info(Messages.getString("AppUtil.sforceLoginProxyPassword")); //$NON-NLS-1$
                         connConfig.setProxyPassword(proxyPassword);
@@ -574,7 +574,7 @@ public class AppUtil {
                     }
                 }
 
-                String proxyNtlmDomain = appConfig.getString(AppConfig.PROXY_NTLM_DOMAIN);
+                String proxyNtlmDomain = appConfig.getString(AppConfig.PROP_PROXY_NTLM_DOMAIN);
                 if (proxyNtlmDomain != null && proxyNtlmDomain.length() > 0) {
                     logger.info(Messages.getFormattedString("AppUtil.sforceLoginProxyNtlm", proxyNtlmDomain)); //$NON-NLS-1$
                     connConfig.setNtlmDomain(proxyNtlmDomain);
@@ -583,10 +583,10 @@ public class AppUtil {
         } catch (ParameterLoadException e) {
             logger.error(e.getMessage());
         }
-        if (appConfig.getBoolean(AppConfig.DEBUG_MESSAGES)) {
+        if (appConfig.getBoolean(AppConfig.PROP_DEBUG_MESSAGES)) {
             connConfig.setTraceMessage(true);
             connConfig.setPrettyPrintXml(true);
-            String filename = appConfig.getString(AppConfig.DEBUG_MESSAGES_FILE);
+            String filename = appConfig.getString(AppConfig.PROP_DEBUG_MESSAGES_FILE);
             if (filename.length() > 0) {
                 try {
                     connConfig.setTraceFile(filename);

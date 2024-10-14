@@ -86,7 +86,7 @@ public class LoginPage extends OperationPage {
         layouts[2].addListener(SWT.Selection, this::selectSessionId);
 
         //turn off oauth options if no configured environments found
-        if (appConfig.getStrings(AppConfig.AUTH_ENVIRONMENTS).size() > 0) {
+        if (appConfig.getStrings(AppConfig.PROP_AUTH_ENVIRONMENTS).size() > 0) {
             layouts[0].setSelection(true);
             selectOAuth(null);
         } else {
@@ -94,7 +94,7 @@ public class LoginPage extends OperationPage {
             layouts[1].setSelection(true);
             selectUnamePwd(null);
         }
-        if (!appConfig.getBoolean(AppConfig.SFDC_INTERNAL)){
+        if (!appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL)){
             grid.hide(layouts[2]);
             if (!layouts[0].getVisible()){
                 //no options other than standard so don't present them

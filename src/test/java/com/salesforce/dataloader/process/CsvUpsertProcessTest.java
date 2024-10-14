@@ -69,7 +69,7 @@ public class CsvUpsertProcessTest extends ProcessTestBase {
         Map<String, String> argMap = getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 10);
 
         // start at 3, not 0!!
-        argMap.put(AppConfig.LOAD_ROW_TO_START_AT, "3");
+        argMap.put(AppConfig.PROP_LOAD_ROW_TO_START_AT, "3");
 
         // perform the upsert
         runUpsertProcess(argMap, 0, 7);

@@ -84,7 +84,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     }
 
     protected void verifyErrors(Controller controller, String expectedErrorMessage) throws DataAccessObjectException {
-        String fileName = controller.getAppConfig().getString(AppConfig.OUTPUT_ERROR);
+        String fileName = controller.getAppConfig().getString(AppConfig.PROP_OUTPUT_ERROR);
         final CSVFileReader errReader = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
         try {
             errReader.open();
@@ -104,7 +104,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     }
 
     protected void verifySuccessIds(Controller ctl, Set<String> ids) throws DataAccessObjectException {
-        String fileName = ctl.getAppConfig().getString(AppConfig.OUTPUT_SUCCESS);
+        String fileName = ctl.getAppConfig().getString(AppConfig.PROP_OUTPUT_SUCCESS);
         final CSVFileReader successRdr = new CSVFileReader(new File(fileName), ctl.getAppConfig(), true, false);
         final Set<String> remaining = new HashSet<String>(ids);
         final Set<String> unexpected = new HashSet<String>();
@@ -336,7 +336,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         try {
             UpsertResult[] results = getBinding().upsert(
                     getController().getAppConfig().getString(
-                            AppConfig.IDLOOKUP_FIELD), records);
+                            AppConfig.PROP_IDLOOKUP_FIELD), records);
             String[] ids = new String[results.length];
             for (int i = 0; i < results.length; i++) {
                 UpsertResult result = results[i];
@@ -638,25 +638,25 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     protected final Map<String, String> getTestConfig(OperationInfo op, String daoName, String mappingFile,
             boolean isExtraction) {
         Map<String, String> res = super.getTestConfig();
-        res.put(AppConfig.MAPPING_FILE, mappingFile);
-        res.put(AppConfig.OPERATION, op.name());
-        res.put(AppConfig.DAO_NAME, daoName);
-        res.put(AppConfig.DAO_TYPE, isExtraction ? DataAccessObjectFactory.CSV_WRITE_TYPE
+        res.put(AppConfig.PROP_MAPPING_FILE, mappingFile);
+        res.put(AppConfig.PROP_OPERATION, op.name());
+        res.put(AppConfig.PROP_DAO_NAME, daoName);
+        res.put(AppConfig.PROP_DAO_TYPE, isExtraction ? DataAccessObjectFactory.CSV_WRITE_TYPE
                 : DataAccessObjectFactory.CSV_READ_TYPE);
-        res.put(AppConfig.OUTPUT_STATUS_DIR, getTestStatusDir());
+        res.put(AppConfig.PROP_OUTPUT_STATUS_DIR, getTestStatusDir());
         String apiType = "Soap";
         if (isBulkAPIEnabled(res)) {
             apiType = "Bulk";
         } else if (isBulkV2APIEnabled(res)) {
             apiType = "BulkV2";
         }
-        res.put(AppConfig.OUTPUT_SUCCESS, getSuccessFilePath(apiType));
-        res.put(AppConfig.OUTPUT_ERROR, getErrorFilePath(apiType));
+        res.put(AppConfig.PROP_OUTPUT_SUCCESS, getSuccessFilePath(apiType));
+        res.put(AppConfig.PROP_OUTPUT_ERROR, getErrorFilePath(apiType));
 
         // Don't debug by default, as it slows down the processing
         if (ProcessTestBase.DEBUG_MESSAGES) {
-            res.put(AppConfig.DEBUG_MESSAGES, "true");
-            res.put(AppConfig.DEBUG_MESSAGES_FILE,
+            res.put(AppConfig.PROP_DEBUG_MESSAGES, "true");
+            res.put(AppConfig.PROP_DEBUG_MESSAGES_FILE,
                     new File(getTestStatusDir(), this.baseName + apiType + "DebugTrace.log").getAbsolutePath());
         }
 
@@ -688,7 +688,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         int numInserts = 0;
         int numUpdates = 0;
 
-        OperationInfo op = OperationInfo.valueOf(argMap.get(AppConfig.OPERATION));
+        OperationInfo op = OperationInfo.valueOf(argMap.get(AppConfig.PROP_OPERATION));
         if (op == OperationInfo.insert)
             numInserts = numSuccesses;
         else if (op != null && op != OperationInfo.upsert)
@@ -716,7 +716,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     
     protected IProcess runBatchProcess(Map<String, String> argMap) {
         if (argMap == null) argMap = getTestConfig();
-        argMap.put(AppConfig.PROCESS_THREAD_NAME, this.baseName);
+        argMap.put(AppConfig.PROP_PROCESS_THREAD_NAME, this.baseName);
         argMap.put(AppConfig.READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
         argMap.put(AppConfig.CLI_OPTION_RUN_MODE, AppConfig.RUN_MODE_BATCH_VAL);
 
@@ -724,9 +724,9 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         String[] args = new String[argMap.size()+1];
         args[0] = getTestConfDir();
         int i = 1;
-        if (argMap.containsKey(AppConfig.PROCESS_NAME)) {
-            args[i++] = argMap.get(AppConfig.PROCESS_NAME);
-            argMap.remove(AppConfig.PROCESS_NAME);
+        if (argMap.containsKey(AppConfig.PROP_PROCESS_NAME)) {
+            args[i++] = argMap.get(AppConfig.PROP_PROCESS_NAME);
+            argMap.remove(AppConfig.PROP_PROCESS_NAME);
         }
         for (Map.Entry<String, String> entry: argMap.entrySet())
         {
@@ -787,7 +787,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     protected void verifySuccessFile(Controller ctl, int numInserts, int numUpdates, boolean emptyId)
             throws ParameterLoadException,
             DataAccessObjectException {
-        final String successFile = ctl.getAppConfig().getStringRequired(AppConfig.OUTPUT_SUCCESS);
+        final String successFile = ctl.getAppConfig().getStringRequired(AppConfig.PROP_OUTPUT_SUCCESS);
         //final String suceessFule2 = ctl.getConfig().
         assertNumRowsInCSVFile(successFile, numInserts + numUpdates);
         boolean isBulkV2Operation = ctl.getAppConfig().isBulkV2APIEnabled();
@@ -910,7 +910,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     protected void verifyFailureFile(Controller ctl, int numFailures)
             throws ParameterLoadException, DataAccessObjectException {
         assertNumRowsInCSVFile(ctl.getAppConfig().getStringRequired(
-                AppConfig.OUTPUT_ERROR), numFailures);
+                AppConfig.PROP_OUTPUT_ERROR), numFailures);
     }
 
     private void assertNumRowsInCSVFile(String fName, int expectedRows) throws DataAccessObjectException {
@@ -921,12 +921,12 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     }
 
     protected boolean isBulkAPIEnabled(Map<String, String> argMap) {
-        return isSettingEnabled(argMap, AppConfig.BULK_API_ENABLED)
-                && !isSettingEnabled(argMap, AppConfig.BULKV2_API_ENABLED);
+        return isSettingEnabled(argMap, AppConfig.PROP_BULK_API_ENABLED)
+                && !isSettingEnabled(argMap, AppConfig.PROP_BULKV2_API_ENABLED);
     }
     
     protected boolean isBulkV2APIEnabled(Map<String, String> argMap) {
-        return isSettingEnabled(argMap, AppConfig.BULKV2_API_ENABLED);
+        return isSettingEnabled(argMap, AppConfig.PROP_BULKV2_API_ENABLED);
     }
     protected boolean isSettingEnabled(Map<String, String> argMap, String configKey) {
         return AppConfig.TRUE.equalsIgnoreCase(argMap.get(configKey));
@@ -962,7 +962,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         final File mappingFile = new File(getTestDataDir(), fileNameBase + "Map.sdl");
         final Map<String, String> argMap = getTestConfig(isUpsert ? OperationInfo.upsert : OperationInfo.update,
                 updateFileName, mappingFile.getAbsolutePath(), false);
-        if (hasExtId) argMap.put(AppConfig.IDLOOKUP_FIELD, extIdField);
+        if (hasExtId) argMap.put(AppConfig.PROP_IDLOOKUP_FIELD, extIdField);
         return argMap;
     }
 
@@ -1003,7 +1003,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
      * Make sure to set external id field
      */
     protected String setExtIdField(String extIdField) {
-        getController().getAppConfig().setValue(AppConfig.IDLOOKUP_FIELD, extIdField);
+        getController().getAppConfig().setValue(AppConfig.PROP_IDLOOKUP_FIELD, extIdField);
         return extIdField;
     }
 
@@ -1025,7 +1025,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         upsertSfdcRecords(entity, 2);
 
         // get the client and make the query call
-        String extIdField = getController().getAppConfig().getString(AppConfig.IDLOOKUP_FIELD);
+        String extIdField = getController().getAppConfig().getString(AppConfig.PROP_IDLOOKUP_FIELD);
         PartnerClient client = new PartnerClient(getController());
         // only get the records that have external id set, avoid nulls
         String soql = "select " + extIdField + " from " + entity + " where " + whereClause + " and " + extIdField
@@ -1048,7 +1048,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     }
     
     protected BasicDynaClass setupDynaClass(String entity, Collection<String> sfFields) throws ConnectionException {
-        getController().getAppConfig().setValue(AppConfig.ENTITY, entity);
+        getController().getAppConfig().setValue(AppConfig.PROP_ENTITY, entity);
         PartnerClient client = getController().getPartnerClient();
         if (!client.isLoggedIn()) {
             client.connect();

@@ -47,7 +47,7 @@ class DeleteAction extends AbstractLoadAction {
     @Override
     protected DAOLoadVisitor createVisitor() {
         if (getController().getAppConfig().isRESTAPIEnabled()
-                && getController().getAppConfig().getBoolean(AppConfig.DELETE_WITH_EXTERNALID)) {
+                && getController().getAppConfig().getBoolean(AppConfig.PROP_DELETE_WITH_EXTERNALID)) {
             return new RESTDeleteVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
         } else {
             return new PartnerDeleteVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());

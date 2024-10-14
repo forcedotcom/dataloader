@@ -52,12 +52,12 @@ public class DataAccessObjectFactory {
             throws DataAccessObjectInitializationException {
         DataAccessObject dao = null;
 
-        logger.info(Messages.getFormattedString("DataAccessObjectFactory.creatingDao", new String[] {appConfig.getString(AppConfig.DAO_NAME), daoType}));
+        logger.info(Messages.getFormattedString("DataAccessObjectFactory.creatingDao", new String[] {appConfig.getString(AppConfig.PROP_DAO_NAME), daoType}));
 
         if (CSV_READ_TYPE.equalsIgnoreCase(daoType)) {
-            dao = new CSVFileReader(new File(appConfig.getString(AppConfig.DAO_NAME)), appConfig, false, false);
+            dao = new CSVFileReader(new File(appConfig.getString(AppConfig.PROP_DAO_NAME)), appConfig, false, false);
         } else if (CSV_WRITE_TYPE.equalsIgnoreCase(daoType)) {
-            dao = new CSVFileWriter(appConfig.getString(AppConfig.DAO_NAME), appConfig, appConfig.getString(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS));
+            dao = new CSVFileWriter(appConfig.getString(AppConfig.PROP_DAO_NAME), appConfig, appConfig.getString(AppConfig.PROP_CSV_DELIMITER_FOR_QUERY_RESULTS));
         } else if (DATABASE_READ_TYPE.equalsIgnoreCase(daoType)) {
             dao = new DatabaseReader(appConfig);
         } else if (DATABASE_WRITE_TYPE.equalsIgnoreCase(daoType)) {

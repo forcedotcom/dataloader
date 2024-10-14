@@ -117,7 +117,7 @@ public class ExternalIdPage extends LoadPage {
         extIdFieldCombo.setEnabled(true);
 
         // entity is known at this time, set the correct combo label
-        labelExtId.setText(Labels.getFormattedString("ExternalIdPage.externalIdComboText", controller.getAppConfig().getString(AppConfig.ENTITY))); //$NON-NLS-1$
+        labelExtId.setText(Labels.getFormattedString("ExternalIdPage.externalIdComboText", controller.getAppConfig().getString(AppConfig.PROP_ENTITY))); //$NON-NLS-1$
 
         DescribeSObjectResult fieldTypes = controller.getFieldTypes();
         Field[] fields = fieldTypes.getFields();
@@ -135,9 +135,9 @@ public class ExternalIdPage extends LoadPage {
         if(extIdFieldCombo.getItemCount() == 1) {
             extIdFieldCombo.setEnabled(false);
             extIdFieldCombo.setText(extIdNames[0]);
-            labelExtIdInfo.setText(Labels.getFormattedString("ExternalIdPage.externalIdInfoNoExtId", controller.getAppConfig().getString(AppConfig.ENTITY))); //$NON-NLS-1$
+            labelExtIdInfo.setText(Labels.getFormattedString("ExternalIdPage.externalIdInfoNoExtId", controller.getAppConfig().getString(AppConfig.PROP_ENTITY))); //$NON-NLS-1$
         } else {
-            labelExtIdInfo.setText(Labels.getFormattedString("ExternalIdPage.externalIdInfoExtIdExists", controller.getAppConfig().getString(AppConfig.ENTITY))); //$NON-NLS-1$
+            labelExtIdInfo.setText(Labels.getFormattedString("ExternalIdPage.externalIdInfoExtIdExists", controller.getAppConfig().getString(AppConfig.PROP_ENTITY))); //$NON-NLS-1$
         }
         setPageComplete();
         comp.layout();
@@ -181,7 +181,7 @@ public class ExternalIdPage extends LoadPage {
 
         // external id field
         String extIdField = extIdFieldCombo.getText();
-        appConfig.setValue(AppConfig.IDLOOKUP_FIELD, extIdField);
+        appConfig.setValue(AppConfig.PROP_IDLOOKUP_FIELD, extIdField);
 
         controller.saveConfig();
     }

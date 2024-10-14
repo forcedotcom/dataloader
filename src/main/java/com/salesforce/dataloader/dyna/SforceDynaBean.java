@@ -238,7 +238,7 @@ public class SforceDynaBean {
                         && val instanceof String
                         && !((String)val).isBlank()
                         && sforceObj.get(sforceField) == null) {
-                    String errStr = "unable to convert a non-null " + sforceField + "value " + (String)val + " to a field on entity " + AppConfig.getCurrentConfig().getString(AppConfig.ENTITY);
+                    String errStr = "unable to convert a non-null " + sforceField + "value " + (String)val + " to a field on entity " + AppConfig.getCurrentConfig().getString(AppConfig.PROP_ENTITY);
                     logger.error(errStr); //$NON-NLS-1$
                     throw new LoadException(errStr);
                 }
@@ -410,7 +410,7 @@ public class SforceDynaBean {
      * @param useEuroDates if true, european date format will be used
      */
     synchronized static public void registerConverters(AppConfig cfg) {
-        final boolean useEuroDates = cfg.getBoolean(AppConfig.EURO_DATES);
+        final boolean useEuroDates = cfg.getBoolean(AppConfig.PROP_EURO_DATES);
         final TimeZone tz = cfg.getTimeZone();
         // Register DynaBean type conversions
         ConvertUtils.register(new DateTimeConverter(tz, useEuroDates), Calendar.class);

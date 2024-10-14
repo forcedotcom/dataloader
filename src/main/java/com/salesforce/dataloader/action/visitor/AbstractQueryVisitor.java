@@ -79,7 +79,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
             DataWriter successWriter, DataWriter errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
         this.queryWriter = queryWriter;
-        this.soql = getConfig().getString(AppConfig.EXTRACT_SOQL);
+        this.soql = getConfig().getString(AppConfig.PROP_EXTRACT_SOQL);
         this.batchRows = new ArrayList<Row>();
         this.batchIds = new ArrayList<String>();
         this.batchSize = getWriteBatchSize();
@@ -115,7 +115,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
 
     @Override
     protected boolean writeStatus() {
-        return getConfig().getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT);
+        return getConfig().getBoolean(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT);
     }
 
     private String getSoql() {
@@ -127,7 +127,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
     }
 
     protected void addResultRow(Row row, String id) throws DataAccessObjectException {
-        if (controller.getAppConfig().getBoolean(AppConfig.INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS)) {
+        if (controller.getAppConfig().getBoolean(AppConfig.PROP_INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS)) {
             getRTFDataForRow(row);
         }
         this.batchRows.add(row);
@@ -199,7 +199,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
                     + "/services/data/v"
                     + Controller.getAPIVersion()
                     + "/sobjects/"
-                    + controller.getAppConfig().getString(AppConfig.ENTITY)
+                    + controller.getAppConfig().getString(AppConfig.PROP_ENTITY)
                     + "/"
                     + sobjectId
                     + "/richTextImageFields/"
@@ -231,7 +231,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
                 writeSuccesses();
             } else {
                 writeErrors(Messages.getMessage(getClass(), "statusErrorNotWritten",
-                        getConfig().getString(AppConfig.DAO_NAME)));
+                        getConfig().getString(AppConfig.PROP_DAO_NAME)));
             }
             getProgressMonitor().worked(this.batchRows.size());
             getProgressMonitor().setSubTask(getRateCalculator().calculateSubTask(getNumberOfRows(), getNumberErrors()));
@@ -239,7 +239,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
             throw ex;
         } catch (final DataAccessObjectException ex) {
             writeErrors(Messages.getMessage(getClass(), "statusErrorNotWrittenException",
-                    getConfig().getString(AppConfig.DAO_NAME), ex.getMessage()));
+                    getConfig().getString(AppConfig.PROP_DAO_NAME), ex.getMessage()));
         } finally {
             this.batchRows.clear();
             this.batchIds.clear();
@@ -263,7 +263,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
     protected int getWriteBatchSize() {
         int daoBatchSize;
         try {
-            daoBatchSize = getConfig().getInt(AppConfig.DAO_WRITE_BATCH_SIZE);
+            daoBatchSize = getConfig().getInt(AppConfig.PROP_DAO_WRITE_BATCH_SIZE);
             if (daoBatchSize > AppConfig.MAX_DAO_WRITE_BATCH_SIZE) {
                 daoBatchSize = AppConfig.MAX_DAO_WRITE_BATCH_SIZE;
             }

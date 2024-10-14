@@ -47,23 +47,23 @@ import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
  */
 public class OAuthSecretFlowUtil {
     public static String getStartUrlImpl(AppConfig appConfig) throws UnsupportedEncodingException {
-        return appConfig.getString(AppConfig.OAUTH_SERVER) +
+        return appConfig.getString(AppConfig.PROP_OAUTH_SERVER) +
                 "/services/oauth2/authorize"
                 + "?response_type=code"
                 + "&display=popup"
                 + "&" + appConfig.getClientIdNameValuePair()
                 + "&redirect_uri="
-                + URLEncoder.encode(appConfig.getString(AppConfig.OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
+                + URLEncoder.encode(appConfig.getString(AppConfig.PROP_OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
     }
 
     public static SimplePost handleSecondPost(String code, AppConfig appConfig) throws IOException, ParameterLoadException {
-        String server = appConfig.getString(AppConfig.OAUTH_SERVER) + "/services/oauth2/token";
+        String server = appConfig.getString(AppConfig.PROP_OAUTH_SERVER) + "/services/oauth2/token";
         SimplePost client = SimplePostFactory.getInstance(appConfig, server,
                 new BasicNameValuePair("grant_type", "authorization_code"),
                 new BasicNameValuePair("code", code),
-                new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.OAUTH_CLIENTID)),
-                new BasicNameValuePair("client_secret", appConfig.getString(AppConfig.OAUTH_CLIENTSECRET)),
-                new BasicNameValuePair("redirect_uri", appConfig.getString(AppConfig.OAUTH_REDIRECTURI))
+                new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.PROP_OAUTH_CLIENTID)),
+                new BasicNameValuePair("client_secret", appConfig.getString(AppConfig.PROP_OAUTH_CLIENTSECRET)),
+                new BasicNameValuePair("redirect_uri", appConfig.getString(AppConfig.PROP_OAUTH_REDIRECTURI))
         );
         client.post();
         if (client.isSuccessful()) {

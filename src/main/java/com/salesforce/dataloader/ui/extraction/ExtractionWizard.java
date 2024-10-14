@@ -66,7 +66,7 @@ public class ExtractionWizard extends BaseWizard {
         ExtractionPage soqlPage = new ExtractionSOQLPage(controller);
         addPage(soqlPage);
         WizardPage finishPage = soqlPage;
-        if (getConfig().getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT)) {
+        if (getConfig().getBoolean(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT)) {
             //need to reference the finish page for performFinish()
             finishPage = new ExtractionFinishPage(controller);
             addPage(finishPage);
@@ -121,7 +121,7 @@ public class ExtractionWizard extends BaseWizard {
 
     @Override
     public boolean performFinish() {
-        if (!validateExtractionPath(getConfig().getString(AppConfig.DAO_NAME))) {
+        if (!validateExtractionPath(getConfig().getString(AppConfig.PROP_DAO_NAME))) {
             return false;
         }
 

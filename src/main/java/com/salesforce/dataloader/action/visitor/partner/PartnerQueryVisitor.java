@@ -100,7 +100,7 @@ public class PartnerQueryVisitor extends AbstractQueryVisitor {
 
     private Row getDaoRow(SObject sob, boolean firstRowInBatch) {
         if (firstRowInBatch 
-            && !this.controller.getAppConfig().getBoolean(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
+            && !this.controller.getAppConfig().getBoolean(AppConfig.PROP_LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
             // header field is not set in the mapper
             Row row = getMapper().mapPartnerSObjectSfdcToLocal(sob);
             try {
@@ -111,7 +111,7 @@ public class PartnerQueryVisitor extends AbstractQueryVisitor {
                 final List<String> daoColumns = mapper.getDaoColumnsForSoql();
                 // setting DAO's column names forces output to be restricted to the provided field names
                 ((DataWriter)controller.getDao()).setColumnNames(daoColumns);
-                if (getConfig().getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT)) {
+                if (getConfig().getBoolean(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT)) {
                     try {
                         if (this.getErrorWriter() == null) {
                             this.setErrorWriter(this.action.createErrorWriter());

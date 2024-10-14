@@ -153,7 +153,7 @@ public class NAProcessTest extends ProcessTestBase {
         AppConfig appConfig = getController().getAppConfig();
         if (!appConfig.isBulkAPIEnabled() && !appConfig.isBulkV2APIEnabled() && isDateField) {
             controller = runProcess(argMap, true, null, 0, 0, 1, false);
-            String errorFile = controller.getAppConfig().getStringRequired(AppConfig.OUTPUT_ERROR);
+            String errorFile = controller.getAppConfig().getStringRequired(AppConfig.PROP_OUTPUT_ERROR);
             String errorMessage = getCsvFieldValue(errorFile, "ERROR");
             assertEquals("unexpected error message",
                     "Error converting value to correct data type: Failed to parse date: #N/A", errorMessage);
@@ -162,7 +162,7 @@ public class NAProcessTest extends ProcessTestBase {
             int numUpdate = operation.equals(OperationInfo.update) ? 1 : 0;
             controller = runProcess(argMap, true, null, numInsert, numUpdate, 0, false);
             String actualNullFieldValue = getFieldValueAfterOperation(nullFieldName, controller);
-            String expectedNullFieldValue = getController().getAppConfig().getBoolean(AppConfig.BULK_API_ENABLED) ? null : NATextValue.getInstance().toString();
+            String expectedNullFieldValue = getController().getAppConfig().getBoolean(AppConfig.PROP_BULK_API_ENABLED) ? null : NATextValue.getInstance().toString();
             assertEquals("unexpected field value", expectedNullFieldValue, actualNullFieldValue);
         }
     }
@@ -183,7 +183,7 @@ public class NAProcessTest extends ProcessTestBase {
     }
 
     private String getFieldValueAfterOperation(String nullFieldName, Controller controller) throws Exception {
-        String successFile = controller.getAppConfig().getStringRequired(AppConfig.OUTPUT_SUCCESS);
+        String successFile = controller.getAppConfig().getStringRequired(AppConfig.PROP_OUTPUT_SUCCESS);
         String taskId = getCsvFieldValue(successFile, "ID");
         QueryResult result = getController().getPartnerClient().query("select " + nullFieldName + " from Task where Id='" + taskId + "'");
         assertEquals(1, result.getSize());
@@ -192,8 +192,8 @@ public class NAProcessTest extends ProcessTestBase {
 
     private Map<String, String> getArgMap(OperationInfo operation) {
         Map<String, String> argMap = getTestConfig(operation, CSV_FILE_PATH, getTestDataDir() + File.separator + "NAProcessTest.sdl", false);
-        argMap.put(AppConfig.ENTITY, "Task");
-        argMap.remove(AppConfig.IDLOOKUP_FIELD);
+        argMap.put(AppConfig.PROP_ENTITY, "Task");
+        argMap.remove(AppConfig.PROP_IDLOOKUP_FIELD);
         return argMap;
     }
 
@@ -222,7 +222,7 @@ public class NAProcessTest extends ProcessTestBase {
 
     private String getUserId() throws Exception {
         QueryResult result = getController().getPartnerClient().query(
-                "select id from user where username='" + getController().getAppConfig().getString(AppConfig.USERNAME) + "'");
+                "select id from user where username='" + getController().getAppConfig().getString(AppConfig.PROP_USERNAME) + "'");
         assertEquals(1, result.getSize());
         return result.getRecords()[0].getId();
     }

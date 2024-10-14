@@ -222,7 +222,7 @@ public class MappingPage extends LoadPage {
         ArrayList<Field> mappableFieldList = new ArrayList<Field>();
         AppConfig appConfig = controller.getAppConfig();
         OperationInfo operation = appConfig.getOperationInfo();
-        String extIdField = appConfig.getString(AppConfig.IDLOOKUP_FIELD);
+        String extIdField = appConfig.getString(AppConfig.PROP_IDLOOKUP_FIELD);
         if(extIdField == null) {
             extIdField = "";
         } else {
@@ -240,7 +240,7 @@ public class MappingPage extends LoadPage {
             case delete:
                 if (controller.getAppConfig().isRESTAPIEnabled()
                         && Controller.getAPIMajorVersion() >= 61
-                        && controller.getAppConfig().getBoolean(AppConfig.DELETE_WITH_EXTERNALID) 
+                        && controller.getAppConfig().getBoolean(AppConfig.PROP_DELETE_WITH_EXTERNALID) 
                         && field.isIdLookup()) {
                     isMappable = true;
                 }
@@ -290,7 +290,7 @@ public class MappingPage extends LoadPage {
             for (Field field : fields) {
                 if (controller.getAppConfig().isRESTAPIEnabled()
                 && Controller.getAPIMajorVersion() >= 61
-                && controller.getAppConfig().getBoolean(AppConfig.DELETE_WITH_EXTERNALID) 
+                && controller.getAppConfig().getBoolean(AppConfig.PROP_DELETE_WITH_EXTERNALID) 
                 && field.isIdLookup()) {
                     refFieldList.add(field);
                 } else if (field.getType().toString().equalsIgnoreCase("id")) {

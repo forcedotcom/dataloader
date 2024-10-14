@@ -557,7 +557,7 @@ public class MappingDialog extends WizardDialog {
 
         ArrayList<Field> unmappedSobjectFieldList = new ArrayList<Field>();
         AppConfig appConfig = getController().getAppConfig();
-        String extIdField = appConfig.getString(AppConfig.IDLOOKUP_FIELD);
+        String extIdField = appConfig.getString(AppConfig.PROP_IDLOOKUP_FIELD);
         if(extIdField == null) {
             extIdField = "";
         } else {

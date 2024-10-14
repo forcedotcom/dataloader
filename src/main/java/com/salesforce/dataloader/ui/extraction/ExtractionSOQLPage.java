@@ -623,14 +623,14 @@ public class ExtractionSOQLPage extends ExtractionPage {
     private void initializeSOQLText() {
         logger.debug(Labels.getString("ExtractionSOQLPage.initializeMsg")); //$NON-NLS-1$
         AppConfig appConfig = controller.getAppConfig();
-        String entityStr = appConfig.getString(AppConfig.ENTITY);
+        String entityStr = appConfig.getString(AppConfig.PROP_ENTITY);
 
         if (entityStr == null || entityStr.isBlank()) {
             return;
         }
         DescribeSObjectResult result = controller.getFieldTypes();
         fieldsInSObject = result.getFields();
-        if (appConfig.getBoolean(AppConfig.SORT_EXTRACT_FIELDS)) {
+        if (appConfig.getBoolean(AppConfig.PROP_SORT_EXTRACT_FIELDS)) {
             Arrays.sort(fieldsInSObject, new Comparator<Field>(){
                 @Override
                 public int compare(Field f1, Field f2)
@@ -643,7 +643,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
         updateWhereFieldComboList(null);
         builderComp.layout();
         whereComp.layout();
-        fromEntityPart = new StringBuffer("\nFROM ").append(appConfig.getString(AppConfig.ENTITY)).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
+        fromEntityPart = new StringBuffer("\nFROM ").append(appConfig.getString(AppConfig.PROP_ENTITY)).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
     }
     
     private void updateWhereFieldComboList(String filterStr) {
@@ -724,7 +724,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
      */
     @Override
     public boolean finishAllowed() {
-        if (this.controller.getAppConfig().getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT)) {
+        if (this.controller.getAppConfig().getBoolean(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT)) {
             // this page is not the finish page if extract status output is enabled
             return false;
         }
@@ -736,7 +736,7 @@ public class ExtractionSOQLPage extends ExtractionPage {
         if (soqlStr == null || soqlStr.isBlank()) {
             return false;
         }
-        controller.getAppConfig().setValue(AppConfig.EXTRACT_SOQL, soqlStr);
+        controller.getAppConfig().setValue(AppConfig.PROP_EXTRACT_SOQL, soqlStr);
         if (!controller.saveConfig()) { return false; }
         return true;
     }
@@ -748,6 +748,6 @@ public class ExtractionSOQLPage extends ExtractionPage {
     
     @Override
     public boolean canFlipToNextPage() {
-        return (this.controller.getAppConfig().getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT) && isPageComplete());
+        return (this.controller.getAppConfig().getBoolean(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT) && isPageComplete());
      }
 }

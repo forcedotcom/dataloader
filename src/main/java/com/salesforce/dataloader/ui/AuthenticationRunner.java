@@ -90,7 +90,7 @@ public class AuthenticationRunner {
             authStatusChangeConsumer.accept(Labels.getString("LoginPage.verifyingLogin"));
             logger.info(Labels.getString("LoginPage.verifyingLogin"));
             if (criteria.getMode() == LoginCriteria.OAuthLogin){
-                if (appConfig.getBoolean(AppConfig.OAUTH_LOGIN_FROM_BROWSER)) {
+                if (appConfig.getBoolean(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER)) {
                     OAuthLoginFromBrowserFlow flow = new OAuthLoginFromBrowserFlow(shell, appConfig);
                     if (!flow.open()) {
                         String message = Labels.getString("LoginPage.invalidLoginOAuthBrowser");
@@ -98,7 +98,7 @@ public class AuthenticationRunner {
                         return;
                     }
                 } else { // OAuth login from Data Loader app
-                    boolean hasSecret = !appConfig.getString(AppConfig.OAUTH_CLIENTSECRET).trim().equals("");
+                    boolean hasSecret = !appConfig.getString(AppConfig.PROP_OAUTH_CLIENTSECRET).trim().equals("");
                     OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, appConfig) : new OAuthTokenFlow(shell, appConfig);
                     if (!flow.open()) {
                        String message = Labels.getString("LoginPage.invalidLoginOAuth");

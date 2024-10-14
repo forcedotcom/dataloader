@@ -381,7 +381,7 @@ public class ChooseLookupFieldForRelationshipPage extends LoadPage {
     public boolean setupPage() {
         boolean success = super.setupPage();
         if (this.controller != null && this.controller.isLoggedIn()) {
-            String message = Labels.getFormattedString(this.getClass().getSimpleName() + ".pageMessage", this.controller.getAppConfig().getString(AppConfig.ENTITY));
+            String message = Labels.getFormattedString(this.getClass().getSimpleName() + ".pageMessage", this.controller.getAppConfig().getString(AppConfig.PROP_ENTITY));
             this.setMessage(message);
         }
         return success;

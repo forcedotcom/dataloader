@@ -59,9 +59,9 @@ public class CsvExtractAggregateQueryProcessTest extends ProcessTestBase {
     @Before
     public void setUpTestConfig() {
         testConfig = getTestConfig(OperationInfo.extract, true);
-        testConfig.put(AppConfig.ENTITY, "Contact");
-        testConfig.put(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT, AppConfig.TRUE);
-        testConfig.remove(AppConfig.MAPPING_FILE);
+        testConfig.put(AppConfig.PROP_ENTITY, "Contact");
+        testConfig.put(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT, AppConfig.TRUE);
+        testConfig.remove(AppConfig.PROP_MAPPING_FILE);
     }
 
     @Test
@@ -75,19 +75,19 @@ public class CsvExtractAggregateQueryProcessTest extends ProcessTestBase {
     }
 
     private void runExtraction(String extractionQuery) throws ProcessInitializationException, DataAccessObjectException {
-        testConfig.put(AppConfig.EXTRACT_SOQL, extractionQuery);
-        testConfig.put(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS, AppConfig.TRUE);
+        testConfig.put(AppConfig.PROP_EXTRACT_SOQL, extractionQuery);
+        testConfig.put(AppConfig.PROP_LIMIT_OUTPUT_TO_QUERY_FIELDS, AppConfig.TRUE);
         runProcess(testConfig, 1, true);
     }
 
     private void runExtractionDoNotLimitOutputToQueryFields(String extractionQuery) throws ProcessInitializationException, DataAccessObjectException {
-        testConfig.put(AppConfig.EXTRACT_SOQL, extractionQuery);
-        testConfig.put(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS, AppConfig.FALSE);
+        testConfig.put(AppConfig.PROP_EXTRACT_SOQL, extractionQuery);
+        testConfig.put(AppConfig.PROP_LIMIT_OUTPUT_TO_QUERY_FIELDS, AppConfig.FALSE);
         runProcess(testConfig, 1, true);
     }
 
     private void validateAccountNameInOutputFile(final String accountName, boolean isLimitOutputToQueryFields) throws IOException {
-        FileInputStream fis = new FileInputStream(new File(testConfig.get(AppConfig.DAO_NAME)));
+        FileInputStream fis = new FileInputStream(new File(testConfig.get(AppConfig.PROP_DAO_NAME)));
         try {
             CSVReader rdr = new CSVReader(fis, StandardCharsets.UTF_8.name());
             int acctNameIndex = 0;

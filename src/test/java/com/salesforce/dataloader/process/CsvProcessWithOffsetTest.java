@@ -141,7 +141,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
                 expectedUpdates);
 
         // now check offset specs
-        String rowOffset = ctl.getAppConfig().getString(AppConfig.LOAD_ROW_TO_START_AT);
+        String rowOffset = ctl.getAppConfig().getString(AppConfig.PROP_LOAD_ROW_TO_START_AT);
 
         if (rowOffset != null) {
             verifyOffsetFromInputAndOutputFiles(iOffset, ctl.getAppConfig());
@@ -157,15 +157,15 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
 
         // finding rows in input file and opening it
 
-        numberOfInputRows = getNumCsvRows(cfg, AppConfig.DAO_NAME);
+        numberOfInputRows = getNumCsvRows(cfg, AppConfig.PROP_DAO_NAME);
 
         // finding rows in success file and opening it
-        CSVFileReader successFileReader = openConfiguredPath(cfg, AppConfig.OUTPUT_SUCCESS);
-        numberOfSuccessRows = getNumCsvRows(cfg, AppConfig.OUTPUT_SUCCESS);
+        CSVFileReader successFileReader = openConfiguredPath(cfg, AppConfig.PROP_OUTPUT_SUCCESS);
+        numberOfSuccessRows = getNumCsvRows(cfg, AppConfig.PROP_OUTPUT_SUCCESS);
 
         // finding rows in error file and opening it
-        CSVFileReader errorFileReader = openConfiguredPath(cfg, AppConfig.OUTPUT_ERROR);
-        numberOfErrorRows = getNumCsvRows(cfg, AppConfig.OUTPUT_ERROR);
+        CSVFileReader errorFileReader = openConfiguredPath(cfg, AppConfig.PROP_OUTPUT_ERROR);
+        numberOfErrorRows = getNumCsvRows(cfg, AppConfig.PROP_OUTPUT_ERROR);
 
         if (numberOfOffsetRows <= numberOfInputRows) {
             assertEquals("Number of lines between input and output do not match", numberOfInputRows,
@@ -193,7 +193,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
         }
 
         if (numberOfInputRows > 0) {
-            final CSVFileReader inputFileReader = openConfiguredPath(cfg, AppConfig.DAO_NAME);
+            final CSVFileReader inputFileReader = openConfiguredPath(cfg, AppConfig.PROP_DAO_NAME);
 
             getFirstRow(firstInputOffsetAdjustedRow, inputFileReader, false, numberOfOffsetRows);
             getLastRow(lastInputRow, inputFileReader, false);
@@ -264,7 +264,7 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
 
     private Map<String, String> getRowOffsetTestConfig(Object offset, int numInserts) throws DataAccessObjectException {
         final Map<String, String> argMap = getUpdateTestConfig(FILE_NAME_BASE, true, DEFAULT_ACCOUNT_EXT_ID_FIELD, numInserts);
-        argMap.put(AppConfig.LOAD_ROW_TO_START_AT, offset.toString());
+        argMap.put(AppConfig.PROP_LOAD_ROW_TO_START_AT, offset.toString());
         return argMap;
     }
 }

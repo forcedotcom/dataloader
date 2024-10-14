@@ -91,12 +91,12 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
                 new AttachmentTemplateListener());
 
         final Map<String, String> argMap = getTestConfig(OperationInfo.insert, fileName, false);
-        argMap.put(AppConfig.ENTITY, "Attachment");
+        argMap.put(AppConfig.PROP_ENTITY, "Attachment");
 
         // this feature does not work when bulk api is enabled but the zip content type is not
         final boolean bulkApi = isBulkAPIEnabled(argMap);
         final boolean bulkV2Api = isBulkV2APIEnabled(argMap);
-        final boolean zipContent = isSettingEnabled(argMap, AppConfig.BULK_API_ZIP_CONTENT);
+        final boolean zipContent = isSettingEnabled(argMap, AppConfig.PROP_BULK_API_ZIP_CONTENT);
         if ((bulkApi || bulkV2Api) && !zipContent) {
             final String failureMessage = "Data Loader cannot map \"Body\" field using Bulk API and CSV content type.  Please enable the ZIP_CSV content type for Bulk API.";
             runProcessNegative(argMap, failureMessage);
@@ -116,7 +116,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         // this feature does not work when bulk api is enabled but the zip content type is not
         final boolean bulkApi = isBulkAPIEnabled(configMap);
         final boolean bulkV2Api = isBulkV2APIEnabled(configMap);
-        final boolean zipContent = isSettingEnabled(configMap, AppConfig.BULK_API_ZIP_CONTENT);
+        final boolean zipContent = isSettingEnabled(configMap, AppConfig.PROP_BULK_API_ZIP_CONTENT);
         if (bulkApi && !zipContent) {
             // attachment is supported only if content is zipped
             return;
@@ -138,7 +138,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         results = getBinding().create(parentContacts);
         parentContacts[0].addField("id", results[0]);
 
-        configMap.put(AppConfig.ENTITY, "Attachment");
+        configMap.put(AppConfig.PROP_ENTITY, "Attachment");
         runProcess(configMap, 2);
     }
 
@@ -156,14 +156,14 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
                 myAttachmentTemplateListener);
 
         final Map<String, String> argMap = getTestConfig(OperationInfo.insert, fileName, false);
-        argMap.put(AppConfig.ENTITY, "Attachment");
+        argMap.put(AppConfig.PROP_ENTITY, "Attachment");
         // force multiple batches
-        argMap.put(AppConfig.IMPORT_BATCH_SIZE, "1");
+        argMap.put(AppConfig.PROP_IMPORT_BATCH_SIZE, "1");
 
         // this feature does not work when bulk api is enabled but the zip content type is not
         final boolean bulkApi = isBulkAPIEnabled(argMap);
         final boolean bulkV2Api = isBulkV2APIEnabled(argMap);
-        final boolean zipContent = isSettingEnabled(argMap, AppConfig.BULK_API_ZIP_CONTENT);
+        final boolean zipContent = isSettingEnabled(argMap, AppConfig.PROP_BULK_API_ZIP_CONTENT);
         if ((bulkApi || bulkV2Api) && !zipContent) {
             final String failureMessage = "Data Loader cannot map \"Body\" field using Bulk API and CSV content type.  Please enable the ZIP_CSV content type for Bulk API.";
             runProcessNegative(argMap, failureMessage);
@@ -237,7 +237,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         int numInserts = 0;
         int numUpdates = 0;
 
-        OperationInfo op = OperationInfo.valueOf(argMap.get(AppConfig.OPERATION));
+        OperationInfo op = OperationInfo.valueOf(argMap.get(AppConfig.PROP_OPERATION));
         if (op == OperationInfo.insert)
             numInserts = numSuccesses;
         else if (op != null && op != OperationInfo.upsert)
