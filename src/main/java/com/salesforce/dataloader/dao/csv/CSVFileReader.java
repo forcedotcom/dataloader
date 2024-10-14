@@ -88,18 +88,18 @@ public class CSVFileReader implements DataReader {
             LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageCommaSeparator"));            
         } else {
             if (isQueryOperationResult) {
-                separator.append(appConfig.getString(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS));
+                separator.append(appConfig.getString(AppConfig.PROP_CSV_DELIMITER_FOR_QUERY_RESULTS));
             } else { // reading CSV for a load operation
-                if (appConfig.getBoolean(AppConfig.CSV_DELIMITER_COMMA)) {
+                if (appConfig.getBoolean(AppConfig.PROP_CSV_DELIMITER_COMMA)) {
                     separator.append(AppUtil.COMMA);
                     LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageCommaSeparator"));
                 }
-                if (appConfig.getBoolean(AppConfig.CSV_DELIMITER_TAB)) {
+                if (appConfig.getBoolean(AppConfig.PROP_CSV_DELIMITER_TAB)) {
                     separator.append(AppUtil.TAB);
                     LOGGER.debug(Messages.getString("CSVFileDAO.debugMessageTabSeparator"));
                 }
-                if (appConfig.getBoolean(AppConfig.CSV_DELIMITER_OTHER)) {
-                    separator.append(appConfig.getString(AppConfig.CSV_DELIMITER_OTHER_VALUE));
+                if (appConfig.getBoolean(AppConfig.PROP_CSV_DELIMITER_OTHER)) {
+                    separator.append(appConfig.getString(AppConfig.PROP_CSV_DELIMITER_OTHER_VALUE));
                     LOGGER.debug(Messages.getFormattedString("CSVFileDAO.debugMessageSeparatorChar", separator));
                 }
             }

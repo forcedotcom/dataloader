@@ -80,16 +80,16 @@ public class CsvTest extends ConfigTestBase {
     
     @Test
     public void testCSVReadUTF16BEBOMBasic() throws Exception{
-        getController().getAppConfig().setValue(AppConfig.READ_CHARSET, "UTF-16BE");
+        getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "UTF-16BE");
         testCSVReadBasic("csvtext_BOM_UTF16BE.csv");
-        getController().getAppConfig().setValue(AppConfig.READ_CHARSET, "");
+        getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "");
     }
     
     @Test
     public void testCSVReadUTF16LEBOMBasic() throws Exception{
-        getController().getAppConfig().setValue(AppConfig.READ_CHARSET, "UTF-16LE");
+        getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "UTF-16LE");
         testCSVReadBasic("csvtext_BOM_UTF16LE.csv");
-        getController().getAppConfig().setValue(AppConfig.READ_CHARSET, "");
+        getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "");
     }
 
     private void testCSVReadBasic(String csvFile) throws Exception {
@@ -225,28 +225,28 @@ public class CsvTest extends ConfigTestBase {
         String storedDelimiter;
         boolean storedCsvDelimiterComma = false, storedCsvDelimiterTab = false, storedCsvDelimiterOther = false;
         if (isQueryResultsCSV) {
-            storedDelimiter = appConfig.getString(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS);
-            appConfig.setValue(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
+            storedDelimiter = appConfig.getString(AppConfig.PROP_CSV_DELIMITER_FOR_QUERY_RESULTS);
+            appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
         } else {
-            storedDelimiter = appConfig.getString(AppConfig.CSV_DELIMITER_OTHER_VALUE);
-            storedCsvDelimiterComma = appConfig.getBoolean(AppConfig.CSV_DELIMITER_COMMA);
-            storedCsvDelimiterTab = appConfig.getBoolean(AppConfig.CSV_DELIMITER_TAB);
-            storedCsvDelimiterOther = appConfig.getBoolean(AppConfig.CSV_DELIMITER_OTHER);
-            appConfig.setValue(AppConfig.CSV_DELIMITER_COMMA, false);
-            appConfig.setValue(AppConfig.CSV_DELIMITER_TAB, false);
-            appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER, false);
-            appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER_VALUE, delimiterStr);
+            storedDelimiter = appConfig.getString(AppConfig.PROP_CSV_DELIMITER_OTHER_VALUE);
+            storedCsvDelimiterComma = appConfig.getBoolean(AppConfig.PROP_CSV_DELIMITER_COMMA);
+            storedCsvDelimiterTab = appConfig.getBoolean(AppConfig.PROP_CSV_DELIMITER_TAB);
+            storedCsvDelimiterOther = appConfig.getBoolean(AppConfig.PROP_CSV_DELIMITER_OTHER);
+            appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_COMMA, false);
+            appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_TAB, false);
+            appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_OTHER, false);
+            appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_OTHER_VALUE, delimiterStr);
             if (AppUtil.COMMA.equals(delimiterStr)) {
-                appConfig.setValue(AppConfig.CSV_DELIMITER_COMMA, true);
+                appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_COMMA, true);
             } else if ("    ".equals(delimiterStr)) {
-                appConfig.setValue(AppConfig.CSV_DELIMITER_TAB, true);
+                appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_TAB, true);
             } else {
-                appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER, true);
-                storedDelimiter = appConfig.getString(AppConfig.CSV_DELIMITER_OTHER_VALUE);
-                appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER_VALUE, delimiterStr);
+                appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_OTHER, true);
+                storedDelimiter = appConfig.getString(AppConfig.PROP_CSV_DELIMITER_OTHER_VALUE);
+                appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_OTHER_VALUE, delimiterStr);
             }
         }
-        appConfig.setValue(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
+        appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_FOR_QUERY_RESULTS, delimiterStr);
         CSVFileReader csv = new CSVFileReader(new File(filePath), appConfig, ignoreDelimiterConfig, isQueryResultsCSV);
         try {
             csv.open();
@@ -274,12 +274,12 @@ public class CsvTest extends ConfigTestBase {
         }
         csv.close();
         if (isQueryResultsCSV) {
-            appConfig.setValue(AppConfig.CSV_DELIMITER_FOR_QUERY_RESULTS, storedDelimiter);
+            appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_FOR_QUERY_RESULTS, storedDelimiter);
         } else {
-            appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER_VALUE, storedDelimiter);
-            appConfig.setValue(AppConfig.CSV_DELIMITER_COMMA, storedCsvDelimiterComma);
-            appConfig.setValue(AppConfig.CSV_DELIMITER_TAB, storedCsvDelimiterTab);
-            appConfig.setValue(AppConfig.CSV_DELIMITER_OTHER, storedCsvDelimiterOther);
+            appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_OTHER_VALUE, storedDelimiter);
+            appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_COMMA, storedCsvDelimiterComma);
+            appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_TAB, storedCsvDelimiterTab);
+            appConfig.setValue(AppConfig.PROP_CSV_DELIMITER_OTHER, storedCsvDelimiterOther);
         }
     }
 }

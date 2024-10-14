@@ -42,8 +42,8 @@ public abstract class ConfigTestBase extends TestBase {
     @Deprecated
     protected static enum TestProperties {
         @Deprecated
-        ENTITY_DEFAULT(AppConfig.ENTITY), @Deprecated
-        ACCOUNT_EXTID(AppConfig.IDLOOKUP_FIELD);
+        ENTITY_DEFAULT(AppConfig.PROP_ENTITY), @Deprecated
+        ACCOUNT_EXTID(AppConfig.PROP_IDLOOKUP_FIELD);
 
         private final String configName;
 
@@ -69,16 +69,16 @@ public abstract class ConfigTestBase extends TestBase {
 
     protected Map<String, String> getTestConfig() {
         final HashMap<String, String> configBase = new HashMap<String, String>(this.baseConfig);
-        configBase.put(AppConfig.LAST_RUN_OUTPUT_DIR, getTestStatusDir());
+        configBase.put(AppConfig.PROP_LAST_RUN_OUTPUT_DIR, getTestStatusDir());
         for (TestProperties prop : getDefaultTestPropertiesSet()) {
             prop.putConfigSetting(configBase);
         }
         configBase.put(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, TEST_CONF_DIR);
-        String proxyUsername = System.getProperty(AppConfig.PROXY_USERNAME);
-        String proxyPassword = System.getProperty(AppConfig.PROXY_PASSWORD);
+        String proxyUsername = System.getProperty(AppConfig.PROP_PROXY_USERNAME);
+        String proxyPassword = System.getProperty(AppConfig.PROP_PROXY_PASSWORD);
         if (proxyUsername != null && proxyPassword != null) {
-            configBase.put(AppConfig.PROXY_USERNAME, proxyUsername);
-            configBase.put(AppConfig.PROXY_PASSWORD, proxyPassword);
+            configBase.put(AppConfig.PROP_PROXY_USERNAME, proxyUsername);
+            configBase.put(AppConfig.PROP_PROXY_PASSWORD, proxyPassword);
         }
         return configBase;
     }

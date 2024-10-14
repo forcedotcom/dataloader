@@ -172,7 +172,7 @@ public class CSVChooserDialog extends WizardDialog {
         buttonSuccess.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                String successFilePath = getController().getAppConfig().getString(AppConfig.OUTPUT_SUCCESS);
+                String successFilePath = getController().getAppConfig().getString(AppConfig.PROP_OUTPUT_SUCCESS);
                 if(StringUtils.hasText(successFilePath)) {
                     openViewer(successFilePath, true, false);
                 } else {
@@ -191,7 +191,7 @@ public class CSVChooserDialog extends WizardDialog {
         buttonError.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                String errorFilePath = getController().getAppConfig().getString(AppConfig.OUTPUT_ERROR);
+                String errorFilePath = getController().getAppConfig().getString(AppConfig.PROP_OUTPUT_ERROR);
                 if(StringUtils.hasText(errorFilePath)) {
                     openViewer(errorFilePath, true, false);
                 } else {

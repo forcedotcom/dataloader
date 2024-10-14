@@ -70,7 +70,7 @@ public abstract class ClientBase<ConnectionType> {
         this.controller = controller;
         this.appConfig = controller.getAppConfig();
         this.logger = logger;
-        String apiVersionStr = appConfig.getString(AppConfig.API_VERSION_PROP);
+        String apiVersionStr = appConfig.getString(AppConfig.PROP_API_VERSION);
         if (apiVersionStr != null && !apiVersionStr.isEmpty()) {
             apiVersionForTheSession = apiVersionStr;
         }
@@ -119,23 +119,23 @@ public abstract class ClientBase<ConnectionType> {
                 "client=" + ClientBase.getClientName(this.appConfig));      
         // set authentication credentials
         // blank username is not acceptible
-        String username = appConfig.getString(AppConfig.USERNAME);
-        boolean isManualSession = appConfig.getBoolean(AppConfig.SFDC_INTERNAL) && appConfig.getBoolean(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN);
-        boolean isOAuthSession = appConfig.getString(AppConfig.OAUTH_ACCESSTOKEN) != null && appConfig.getString(AppConfig.OAUTH_ACCESSTOKEN).trim().length() > 0;
+        String username = appConfig.getString(AppConfig.PROP_USERNAME);
+        boolean isManualSession = appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL) && appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN);
+        boolean isOAuthSession = appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN) != null && appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN).trim().length() > 0;
         if (!isManualSession && !isOAuthSession && (username == null || username.length() == 0)) {
-            String errMsg = Messages.getMessage(getClass(), "emptyUsername", AppConfig.USERNAME);
+            String errMsg = Messages.getMessage(getClass(), "emptyUsername", AppConfig.PROP_USERNAME);
             logger.error(errMsg);
             throw new IllegalStateException(errMsg);
         }
 
         cc.setUsername(username);
-        cc.setPassword(appConfig.getString(AppConfig.PASSWORD));
+        cc.setPassword(appConfig.getString(AppConfig.PROP_PASSWORD));
 
         AppUtil.setConnectorConfigProxySettings(appConfig, cc);
         // Time out after 5 seconds for connection
         int connTimeoutSecs;
         try {
-            connTimeoutSecs = appConfig.getInt(AppConfig.CONNECTION_TIMEOUT_SECS);
+            connTimeoutSecs = appConfig.getInt(AppConfig.PROP_CONNECTION_TIMEOUT_SECS);
         } catch (ParameterLoadException e1) {
             connTimeoutSecs = AppConfig.DEFAULT_CONNECTION_TIMEOUT_SECS;
         }
@@ -145,21 +145,21 @@ public abstract class ClientBase<ConnectionType> {
         // set timeout for operations based on config
         int timeoutSecs;
         try {
-            timeoutSecs = appConfig.getInt(AppConfig.TIMEOUT_SECS);
+            timeoutSecs = appConfig.getInt(AppConfig.PROP_TIMEOUT_SECS);
         } catch (ParameterLoadException e) {
             timeoutSecs = AppConfig.DEFAULT_TIMEOUT_SECS;
         }
         cc.setReadTimeout((timeoutSecs * 1000));
 
         // use compression or turn it off
-        if (appConfig.contains(AppConfig.NO_COMPRESSION)) {
-            cc.setCompression(!appConfig.getBoolean(AppConfig.NO_COMPRESSION));
+        if (appConfig.contains(AppConfig.PROP_NO_COMPRESSION)) {
+            cc.setCompression(!appConfig.getBoolean(AppConfig.PROP_NO_COMPRESSION));
         }
 
-        if (appConfig.getBoolean(AppConfig.DEBUG_MESSAGES)) {
+        if (appConfig.getBoolean(AppConfig.PROP_DEBUG_MESSAGES)) {
             cc.setTraceMessage(true);
             cc.setPrettyPrintXml(true);
-            String filename = appConfig.getString(AppConfig.DEBUG_MESSAGES_FILE);
+            String filename = appConfig.getString(AppConfig.PROP_DEBUG_MESSAGES_FILE);
             if (filename.length() > 0) {
                 try {
                     cc.setTraceFile(filename);
@@ -174,7 +174,7 @@ public abstract class ClientBase<ConnectionType> {
             cc.setServiceEndpoint(server + PartnerClient.getServicePath()); // Partner SOAP service
             cc.setRestEndpoint(server + BulkV1Client.getServicePath());  // REST service: Bulk v1
         }
-        cc.setTraceMessage(appConfig.getBoolean(AppConfig.WIRE_OUTPUT));
+        cc.setTraceMessage(appConfig.getBoolean(AppConfig.PROP_WIRE_OUTPUT));
 
         return cc;
     }

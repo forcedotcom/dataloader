@@ -66,14 +66,14 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
     @Before
     public void testSetup(){
         appConfig = getController().getAppConfig();
-        existingOAuthEnvironments = appConfig.getStrings(AppConfig.AUTH_ENVIRONMENTS);
+        existingOAuthEnvironments = appConfig.getStrings(AppConfig.PROP_AUTH_ENVIRONMENTS);
         existingEndPoint = appConfig.getAuthEndpoint();
         oauthServer = "https://OAUTH_PARTIAL_SERVER";
         oauthClientId = "CLIENTID";
         oauthRedirectUri = "https://REDIRECTURI";
         mockSimplePost = mock(SimplePost.class);
 
-        appConfig.setValue(AppConfig.AUTH_ENVIRONMENTS, "Testing");
+        appConfig.setValue(AppConfig.PROP_AUTH_ENVIRONMENTS, "Testing");
         appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_SERVER, oauthServer);
         appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_CLIENTID, oauthClientId);
         appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_REDIRECTURI, oauthRedirectUri);
@@ -85,7 +85,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
 
     @After
     public void testCleanup(){
-        appConfig.setValue(AppConfig.AUTH_ENVIRONMENTS, existingOAuthEnvironments.toArray(new String[0]));
+        appConfig.setValue(AppConfig.PROP_AUTH_ENVIRONMENTS, existingOAuthEnvironments.toArray(new String[0]));
         appConfig.setAuthEndpoint(existingEndPoint);
         SimplePostFactory.setConstructor(existingConstructor);
     }
@@ -93,7 +93,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
     @Test
     public void testGetStartUrl(){
         try {
-            appConfig.setValue(AppConfig.OAUTH_CLIENTID, "CLIENTID");
+            appConfig.setValue(AppConfig.PROP_OAUTH_CLIENTID, "CLIENTID");
             String expected = "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize"
                     + "?response_type=code"
                     + "&display=popup"
@@ -150,7 +150,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
             SimplePost simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", appConfig);
 
             String expected = "ACCESS";
-            String actual = appConfig.getString(AppConfig.OAUTH_ACCESSTOKEN);
+            String actual = appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN);
             when(mockSimplePost.isSuccessful()).thenReturn(true);
 
             Assert.assertEquals("Access token was not set", expected, actual);
@@ -179,7 +179,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
             SimplePost simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", appConfig);
 
             String expected = "REFRESHTOKEN";
-            String actual = appConfig.getString(AppConfig.OAUTH_REFRESHTOKEN);
+            String actual = appConfig.getString(AppConfig.PROP_OAUTH_REFRESHTOKEN);
 
             Assert.assertEquals("Access token was not set", expected, actual);
 
@@ -206,7 +206,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
             SimplePost simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", appConfig);
 
             String expected = "https://INSTANCEURL";
-            String actual = appConfig.getString(AppConfig.OAUTH_INSTANCE_URL);;
+            String actual = appConfig.getString(AppConfig.PROP_OAUTH_INSTANCE_URL);;
 
             Assert.assertEquals("Access token was not set", expected, actual);
 

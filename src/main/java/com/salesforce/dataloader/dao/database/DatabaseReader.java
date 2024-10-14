@@ -70,7 +70,7 @@ public class DatabaseReader implements DataReader {
      * @throws DataAccessObjectInitializationException
      */
     public DatabaseReader(AppConfig appConfig) throws DataAccessObjectInitializationException {
-        this(appConfig, appConfig.getString(AppConfig.DAO_NAME));
+        this(appConfig, appConfig.getString(AppConfig.PROP_DAO_NAME));
     }
 
     /**
@@ -134,7 +134,7 @@ public class DatabaseReader implements DataReader {
             // set the query fetch size
             int fetchSize;
             try {
-                fetchSize = appConfig.getInt(AppConfig.DAO_READ_BATCH_SIZE);
+                fetchSize = appConfig.getInt(AppConfig.PROP_DAO_READ_BATCH_SIZE);
                 if(fetchSize > AppConfig.MAX_DAO_READ_BATCH_SIZE) {
                     fetchSize = AppConfig.MAX_DAO_READ_BATCH_SIZE;
                 }
@@ -229,8 +229,8 @@ public class DatabaseReader implements DataReader {
     public int getTotalRows() throws DataAccessObjectException {
     	boolean skipRowCount = AppConfig.DEFAULT_SKIP_TOTAL_COUNT;
     	
-    	if (appConfig.contains(AppConfig.DAO_SKIP_TOTAL_COUNT))
-    		skipRowCount = appConfig.getBoolean(AppConfig.DAO_SKIP_TOTAL_COUNT);
+    	if (appConfig.contains(AppConfig.PROP_DAO_SKIP_TOTAL_COUNT))
+    		skipRowCount = appConfig.getBoolean(AppConfig.PROP_DAO_SKIP_TOTAL_COUNT);
     	
     	if (skipRowCount == true)
     		return 0;

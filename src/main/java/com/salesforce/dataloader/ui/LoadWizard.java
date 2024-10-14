@@ -158,7 +158,7 @@ public abstract class LoadWizard extends BaseWizard {
             super.hook_additionalLoadWizardPages();
             if (getController().getAppConfig().isRESTAPIEnabled()
                 && Controller.getAPIMajorVersion() >= 61
-                && getController().getAppConfig().getBoolean(AppConfig.DELETE_WITH_EXTERNALID)) {
+                && getController().getAppConfig().getBoolean(AppConfig.PROP_DELETE_WITH_EXTERNALID)) {
                 addPage(new ExternalIdPage(getController()));
             }
         }

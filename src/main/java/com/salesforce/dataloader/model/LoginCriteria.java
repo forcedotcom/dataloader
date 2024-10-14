@@ -96,14 +96,14 @@ public class LoginCriteria {
     public void updateConfig(AppConfig appConfig) {
         switch (getMode()){
             case LoginCriteria.UsernamePasswordLogin:
-                appConfig.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
-                appConfig.setValue(AppConfig.USERNAME, getUserName().trim());
-                appConfig.setValue(AppConfig.PASSWORD, getPassword().trim());
+                appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
+                appConfig.setValue(AppConfig.PROP_USERNAME, getUserName().trim());
+                appConfig.setValue(AppConfig.PROP_PASSWORD, getPassword().trim());
                 break;
             case LoginCriteria.SessionIdLogin:
-                appConfig.setValue(AppConfig.SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
-                appConfig.setValue(AppConfig.USERNAME, getUserName().trim());
-                appConfig.setValue(AppConfig.SFDC_INTERNAL_SESSION_ID, getSessionId().trim());
+                appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
+                appConfig.setValue(AppConfig.PROP_USERNAME, getUserName().trim());
+                appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID, getSessionId().trim());
                 break;
             case LoginCriteria.OAuthLogin:
                 appConfig.setOAuthEnvironment(getEnvironment());

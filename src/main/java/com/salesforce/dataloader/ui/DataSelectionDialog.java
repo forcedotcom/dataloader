@@ -65,14 +65,14 @@ public class DataSelectionDialog extends WizardDialog {
         super(parent, controller);
         this.daoNameStr = daoNameStr;
         this.sObjectName = sObjectName;
-        if (controller.getAppConfig().getBoolean(AppConfig.CSV_DELIMITER_COMMA)) {
+        if (controller.getAppConfig().getBoolean(AppConfig.PROP_CSV_DELIMITER_COMMA)) {
             this.delimiterList = " ','";
         }
-        if (controller.getAppConfig().getBoolean(AppConfig.CSV_DELIMITER_TAB)) {
+        if (controller.getAppConfig().getBoolean(AppConfig.PROP_CSV_DELIMITER_TAB)) {
             this.delimiterList += " '<tab>'";
         }
-        if (controller.getAppConfig().getBoolean(AppConfig.CSV_DELIMITER_OTHER)) {
-            String otherDelimiters = controller.getAppConfig().getString(AppConfig.CSV_DELIMITER_OTHER_VALUE);
+        if (controller.getAppConfig().getBoolean(AppConfig.PROP_CSV_DELIMITER_OTHER)) {
+            String otherDelimiters = controller.getAppConfig().getString(AppConfig.PROP_CSV_DELIMITER_OTHER_VALUE);
             for (char c : otherDelimiters.toCharArray()) {
                 this.delimiterList += " '" + c + "'";
             }
@@ -108,7 +108,7 @@ public class DataSelectionDialog extends WizardDialog {
             return;
         }
 
-        String daoPath = getController().getAppConfig().getString(AppConfig.DAO_NAME);
+        String daoPath = getController().getAppConfig().getString(AppConfig.PROP_DAO_NAME);
         File file = new File(daoPath);
 
         if (!file.exists() || !file.canRead()) {
@@ -171,7 +171,7 @@ public class DataSelectionDialog extends WizardDialog {
                 + "\n"
                 + Labels.getString("AdvancedSettingsDialog.startRow")
                 + " "
-                + getController().getAppConfig().getString(AppConfig.LOAD_ROW_TO_START_AT)
+                + getController().getAppConfig().getString(AppConfig.PROP_LOAD_ROW_TO_START_AT)
                 + "\n"
                 + apiInfoStr
             ); //$NON-NLS-1$

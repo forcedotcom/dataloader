@@ -94,8 +94,8 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
         AppConfig appConfig = this.controller.getAppConfig();
         OwnerChangeOption keepAccountTeamOption = new OwnerChangeOption();
         OwnerChangeOption[] ownerChangeOptionArray;
-        if (appConfig.getBoolean(AppConfig.PROCESS_KEEP_ACCOUNT_TEAM) 
-                && "Account".equalsIgnoreCase(appConfig.getString(AppConfig.ENTITY))) {
+        if (appConfig.getBoolean(AppConfig.PROP_PROCESS_KEEP_ACCOUNT_TEAM) 
+                && "Account".equalsIgnoreCase(appConfig.getString(AppConfig.PROP_ENTITY))) {
             // Support for Keeping Account keepAccountTeam during Account ownership change
             // More details at https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_header_ownerchangeoptions.htm
             keepAccountTeamOption.setExecute(true);

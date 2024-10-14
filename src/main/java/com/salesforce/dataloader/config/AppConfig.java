@@ -186,6 +186,7 @@ public class AppConfig {
     private Properties readOnlyPropertiesFromPropertiesFile = new LinkedProperties();
     private final Properties defaultProperties;
     private final boolean saveAllProps;
+    private Map<String,ConfigProperty> configPropsMap = ConfigProperty.getPropertiesMap();
     
     private Map<String, String> parameterOverridesMap;
 
@@ -210,56 +211,56 @@ public class AppConfig {
     // Property name constants (Settings specified in config.properties file or as command line options) 
     // =======================
     // Loader Preferences
-    public static final String HIDE_WELCOME_SCREEN = "loader.hideWelcome";
-    public static final String SHOW_LOADER_UPGRADE_SCREEN = "loader.ui.showUpgrade";
+    public static final String PROP_HIDE_WELCOME_SCREEN = "loader.hideWelcome";
+    public static final String PROP_SHOW_LOADER_UPGRADE_SCREEN = "loader.ui.showUpgrade";
 
     // Delimiter settings
-    public static final String CSV_DELIMITER_COMMA = "loader.csvComma";
-    public static final String CSV_DELIMITER_TAB = "loader.csvTab";
-    public static final String CSV_DELIMITER_OTHER = "loader.csvOther";
-    public static final String CSV_DELIMITER_OTHER_VALUE = "loader.csvOtherValue";
-    public static final String CSV_DELIMITER_FOR_QUERY_RESULTS = "loader.query.delimiter";
-    public static final String BUFFER_UNPROCESSED_BULK_QUERY_RESULTS = "loader.bufferUnprocessedBulkQueryResults";
-    public static final String INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS = "loader.query.includeBinaryData";
-    public static final String CACHE_DESCRIBE_GLOBAL_RESULTS = "loader.cacheSObjectNamesAndFields";
+    public static final String PROP_CSV_DELIMITER_COMMA = "loader.csvComma";
+    public static final String PROP_CSV_DELIMITER_TAB = "loader.csvTab";
+    public static final String PROP_CSV_DELIMITER_OTHER = "loader.csvOther";
+    public static final String PROP_CSV_DELIMITER_OTHER_VALUE = "loader.csvOtherValue";
+    public static final String PROP_CSV_DELIMITER_FOR_QUERY_RESULTS = "loader.query.delimiter";
+    public static final String PROP_BUFFER_UNPROCESSED_BULK_QUERY_RESULTS = "loader.bufferUnprocessedBulkQueryResults";
+    public static final String PROP_INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS = "loader.query.includeBinaryData";
+    public static final String PROP_CACHE_DESCRIBE_GLOBAL_RESULTS = "loader.cacheSObjectNamesAndFields";
     
     //Special Internal Configs
-    public static final String SFDC_INTERNAL = "sfdcInternal"; //$NON-NLS-1$
-    public static final String SFDC_INTERNAL_IS_SESSION_ID_LOGIN = "sfdcInternal.isSessionIdLogin"; //$NON-NLS-1$
-    public static final String SFDC_INTERNAL_SESSION_ID = "sfdcInternal.sessionId"; //$NON-NLS-1$
+    public static final String PROP_SFDC_INTERNAL = "sfdcInternal"; //$NON-NLS-1$
+    public static final String PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN = "sfdcInternal.isSessionIdLogin"; //$NON-NLS-1$
+    public static final String PROP_SFDC_INTERNAL_SESSION_ID = "sfdcInternal.sessionId"; //$NON-NLS-1$
 
     // salesforce client connectivity
-    public static final String USERNAME = "sfdc.username"; //$NON-NLS-1$
-    public static final String PASSWORD = "sfdc.password"; //$NON-NLS-1$
-    public static final String AUTH_ENDPOINT_PROD = "sfdc.endpoint.production"; //$NON-NLS-1$
-    public static final String AUTH_ENDPOINT_SANDBOX = "sfdc.endpoint.sandbox"; //$NON-NLS-1$
-    public static final String PROXY_HOST = "sfdc.proxyHost"; //$NON-NLS-1$
-    public static final String PROXY_PORT = "sfdc.proxyPort"; //$NON-NLS-1$
-    public static final String PROXY_USERNAME = "sfdc.proxyUsername"; //$NON-NLS-1$
-    public static final String PROXY_PASSWORD = "sfdc.proxyPassword"; //$NON-NLS-1$
-    public static final String PROXY_NTLM_DOMAIN = "sfdc.proxyNtlmDomain"; //$NON-NLS-1$
-    public static final String TIMEOUT_SECS = "sfdc.timeoutSecs"; //$NON-NLS-1$
-    public static final String CONNECTION_TIMEOUT_SECS = "sfdc.connectionTimeoutSecs"; //$NON-NLS-1$
-    public static final String NO_COMPRESSION = "sfdc.noCompression"; //$NON-NLS-1$
-    public static final String ENABLE_RETRIES = "sfdc.enableRetries"; //$NON-NLS-1$
-    public static final String MAX_RETRIES = "sfdc.maxRetries"; //$NON-NLS-1$
-    public static final String MIN_RETRY_SLEEP_SECS = "sfdc.minRetrySleepSecs"; //$NON-NLS-1$
-    public static final String DEBUG_MESSAGES = "sfdc.debugMessages"; //$NON-NLS-1$
-    public static final String DEBUG_MESSAGES_FILE = "sfdc.debugMessagesFile"; //$NON-NLS-1$
-    public static final String RESET_URL_ON_LOGIN = "sfdc.resetUrlOnLogin"; //$NON-NLS-1$
-    public static final String TRUNCATE_FIELDS = "sfdc.truncateFields";//$NON-NLS-1$
-    public static final String FORMAT_PHONE_FIELDS = "sfdc.formatPhoneFields";//$NON-NLS-1$
+    public static final String PROP_USERNAME = "sfdc.username"; //$NON-NLS-1$
+    public static final String PROP_PASSWORD = "sfdc.password"; //$NON-NLS-1$
+    public static final String PROP_AUTH_ENDPOINT_PROD = "sfdc.endpoint.production"; //$NON-NLS-1$
+    public static final String PROP_AUTH_ENDPOINT_SANDBOX = "sfdc.endpoint.sandbox"; //$NON-NLS-1$
+    public static final String PROP_PROXY_HOST = "sfdc.proxyHost"; //$NON-NLS-1$
+    public static final String PROP_PROXY_PORT = "sfdc.proxyPort"; //$NON-NLS-1$
+    public static final String PROP_PROXY_USERNAME = "sfdc.proxyUsername"; //$NON-NLS-1$
+    public static final String PROP_PROXY_PASSWORD = "sfdc.proxyPassword"; //$NON-NLS-1$
+    public static final String PROP_PROXY_NTLM_DOMAIN = "sfdc.proxyNtlmDomain"; //$NON-NLS-1$
+    public static final String PROP_TIMEOUT_SECS = "sfdc.timeoutSecs"; //$NON-NLS-1$
+    public static final String PROP_CONNECTION_TIMEOUT_SECS = "sfdc.connectionTimeoutSecs"; //$NON-NLS-1$
+    public static final String PROP_NO_COMPRESSION = "sfdc.noCompression"; //$NON-NLS-1$
+    public static final String PROP_ENABLE_RETRIES = "sfdc.enableRetries"; //$NON-NLS-1$
+    public static final String PROP_MAX_RETRIES = "sfdc.maxRetries"; //$NON-NLS-1$
+    public static final String PROP_MIN_RETRY_SLEEP_SECS = "sfdc.minRetrySleepSecs"; //$NON-NLS-1$
+    public static final String PROP_DEBUG_MESSAGES = "sfdc.debugMessages"; //$NON-NLS-1$
+    public static final String PROP_DEBUG_MESSAGES_FILE = "sfdc.debugMessagesFile"; //$NON-NLS-1$
+    public static final String PROP_RESET_URL_ON_LOGIN = "sfdc.resetUrlOnLogin"; //$NON-NLS-1$
+    public static final String PROP_TRUNCATE_FIELDS = "sfdc.truncateFields";//$NON-NLS-1$
+    public static final String PROP_FORMAT_PHONE_FIELDS = "sfdc.formatPhoneFields";//$NON-NLS-1$
 
-    public static final String BULK_API_ENABLED = "sfdc.useBulkApi";
-    public static final String BULK_API_SERIAL_MODE = "sfdc.bulkApiSerialMode";
-    public static final String BULK_API_CHECK_STATUS_INTERVAL = "sfdc.bulkApiCheckStatusInterval";
-    public static final String BULK_API_ZIP_CONTENT = "sfdc.bulkApiZipContent";
-    public static final String BULKV2_API_ENABLED = "sfdc.useBulkV2Api";
-    public static final String UPDATE_WITH_EXTERNALID = "sfdc.updateWithExternalId";
-    public static final String DELETE_WITH_EXTERNALID = "sfdc.deleteWithExternalId";
+    public static final String PROP_BULK_API_ENABLED = "sfdc.useBulkApi";
+    public static final String PROP_BULK_API_SERIAL_MODE = "sfdc.bulkApiSerialMode";
+    public static final String PROP_BULK_API_CHECK_STATUS_INTERVAL = "sfdc.bulkApiCheckStatusInterval";
+    public static final String PROP_BULK_API_ZIP_CONTENT = "sfdc.bulkApiZipContent";
+    public static final String PROP_BULKV2_API_ENABLED = "sfdc.useBulkV2Api";
+    public static final String PROP_UPDATE_WITH_EXTERNALID = "sfdc.updateWithExternalId";
+    public static final String PROP_DELETE_WITH_EXTERNALID = "sfdc.deleteWithExternalId";
 
-    public static final String WIRE_OUTPUT = "sfdc.wireOutput";
-    public static final String TIMEZONE = "sfdc.timezone";
+    public static final String PROP_WIRE_OUTPUT = "sfdc.wireOutput";
+    public static final String PROP_TIMEZONE = "sfdc.timezone";
 
     public static final String OAUTH_PREFIX = "sfdc.oauth.";
     public static final String OAUTH_PARTIAL_BULK = "bulk";
@@ -271,77 +272,77 @@ public class AppConfig {
     public static final String OAUTH_PARTIAL_BULK_CLIENTID = OAUTH_PARTIAL_BULK + "." + OAUTH_PARTIAL_CLIENTID;
     public static final String OAUTH_PARTIAL_PARTNER_CLIENTID = OAUTH_PARTIAL_PARTNER + "." + OAUTH_PARTIAL_CLIENTID;
 
-    public static final String AUTH_ENVIRONMENTS = OAUTH_PREFIX + "environments";
-    public static final String SELECTED_AUTH_ENVIRONMENT = OAUTH_PREFIX + "environment";
-    public static final String OAUTH_ACCESSTOKEN = OAUTH_PREFIX + "accesstoken";
-    public static final String OAUTH_REFRESHTOKEN = OAUTH_PREFIX + "refreshtoken";
-    public static final String OAUTH_SERVER = OAUTH_PREFIX + OAUTH_PARTIAL_SERVER;
-    public static final String OAUTH_CLIENTSECRET = OAUTH_PREFIX + OAUTH_PARTIAL_CLIENTSECRET;
-    public static final String OAUTH_CLIENTID = OAUTH_PREFIX + OAUTH_PARTIAL_CLIENTID;
-    public static final String OAUTH_REDIRECTURI = OAUTH_PREFIX + OAUTH_PARTIAL_REDIRECTURI;
-    public static final String OAUTH_LOGIN_FROM_BROWSER = OAUTH_PREFIX + "loginfrombrowser";
+    public static final String PROP_AUTH_ENVIRONMENTS = OAUTH_PREFIX + "environments";
+    public static final String PROP_SELECTED_AUTH_ENVIRONMENT = OAUTH_PREFIX + "environment";
+    public static final String PROP_OAUTH_ACCESSTOKEN = OAUTH_PREFIX + "accesstoken";
+    public static final String PROP_OAUTH_REFRESHTOKEN = OAUTH_PREFIX + "refreshtoken";
+    public static final String PROP_OAUTH_SERVER = OAUTH_PREFIX + OAUTH_PARTIAL_SERVER;
+    public static final String PROP_OAUTH_CLIENTSECRET = OAUTH_PREFIX + OAUTH_PARTIAL_CLIENTSECRET;
+    public static final String PROP_OAUTH_CLIENTID = OAUTH_PREFIX + OAUTH_PARTIAL_CLIENTID;
+    public static final String PROP_OAUTH_REDIRECTURI = OAUTH_PREFIX + OAUTH_PARTIAL_REDIRECTURI;
+    public static final String PROP_OAUTH_LOGIN_FROM_BROWSER = OAUTH_PREFIX + "loginfrombrowser";
     public static final String OAUTH_REDIRECT_URI_SUFFIX = "services/oauth2/success";
-    public static final String REUSE_CLIENT_CONNECTION = "sfdc.reuseClientConnection";
-    public static final String RICH_TEXT_FIELD_REGEX = "sfdx.richtext.regex";
+    public static final String PROP_REUSE_CLIENT_CONNECTION = "sfdc.reuseClientConnection";
+    public static final String PROP_RICH_TEXT_FIELD_REGEX = "sfdx.richtext.regex";
     
     // salesforce operation parameters
-    public static final String INSERT_NULLS = "sfdc.insertNulls"; //$NON-NLS-1$
-    public static final String ENTITY = "sfdc.entity"; //$NON-NLS-1$
-    public static final String IMPORT_BATCH_SIZE = "sfdc.loadBatchSize"; //$NON-NLS-1$
-    public static final String ASSIGNMENT_RULE = "sfdc.assignmentRule"; //$NON-NLS-1$
-    public static final String IDLOOKUP_FIELD = "sfdc.externalIdField"; //$NON-NLS-1$
-    public static final String EXPORT_BATCH_SIZE = "sfdc.extractionRequestSize"; //$NON-NLS-1$
-    public static final String EXTRACT_SOQL = "sfdc.extractionSOQL"; //$NON-NLS-1$
-    public static final String SORT_EXTRACT_FIELDS = "sfdc.sortExtractionFields"; //$NON-NLS-1$
-    public static final String LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT = "sfdc.load.preserveWhitespaceInRichText";
+    public static final String PROP_INSERT_NULLS = "sfdc.insertNulls"; //$NON-NLS-1$
+    public static final String PROP_ENTITY = "sfdc.entity"; //$NON-NLS-1$
+    public static final String PROP_IMPORT_BATCH_SIZE = "sfdc.loadBatchSize"; //$NON-NLS-1$
+    public static final String PROP_ASSIGNMENT_RULE = "sfdc.assignmentRule"; //$NON-NLS-1$
+    public static final String PROP_IDLOOKUP_FIELD = "sfdc.externalIdField"; //$NON-NLS-1$
+    public static final String PROP_EXPORT_BATCH_SIZE = "sfdc.extractionRequestSize"; //$NON-NLS-1$
+    public static final String PROP_EXTRACT_SOQL = "sfdc.extractionSOQL"; //$NON-NLS-1$
+    public static final String PROP_SORT_EXTRACT_FIELDS = "sfdc.sortExtractionFields"; //$NON-NLS-1$
+    public static final String PROP_LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT = "sfdc.load.preserveWhitespaceInRichText";
 
     //
     // process configuration (action parameters)
     //
     // process.name is used to load the DynaBean from process-conf.xml file 
     // with the same id as the value of process.name property.
-    public static final String PROCESS_NAME = "process.name";
-    public static final String OPERATION = "process.operation"; //$NON-NLS-1$
-    public static final String MAPPING_FILE = "process.mappingFile"; //$NON-NLS-1$
-    public static final String EURO_DATES = "process.useEuropeanDates"; //$NON-NLS-1$
+    public static final String PROP_PROCESS_NAME = "process.name";
+    public static final String PROP_OPERATION = "process.operation"; //$NON-NLS-1$
+    public static final String PROP_MAPPING_FILE = "process.mappingFile"; //$NON-NLS-1$
+    public static final String PROP_EURO_DATES = "process.useEuropeanDates"; //$NON-NLS-1$
 
     // process configuration
-    public static final String OUTPUT_STATUS_DIR = "process.statusOutputDirectory"; //$NON-NLS-1$
-    public static final String OUTPUT_SUCCESS = "process.outputSuccess"; //$NON-NLS-1$
-    public static final String ENABLE_EXTRACT_STATUS_OUTPUT = "process.enableExtractStatusOutput"; //$NON-NLS-1$
-    public static final String ENABLE_LAST_RUN_OUTPUT = "process.enableLastRunOutput"; //$NON-NLS-1$
-    public static final String LAST_RUN_OUTPUT_DIR = "process.lastRunOutputDirectory"; //$NON-NLS-1$
-    public static final String OUTPUT_ERROR = "process.outputError"; //$NON-NLS-1$
-    public static final String OUTPUT_UNPROCESSED_RECORDS = "process.unprocessedRecords"; //$NON-NLS-1$
-    public static final String LOAD_ROW_TO_START_AT = "process.loadRowToStartAt"; //$NON-NLS-1$
-    public static final String INITIAL_LAST_RUN_DATE = "process.initialLastRunDate";
-    public static final String ENCRYPTION_KEY_FILE = "process.encryptionKeyFile"; //$NON-NLS-1$
-    public static final String PROCESS_THREAD_NAME = "process.thread.name";
-    public static final String PROCESS_KEEP_ACCOUNT_TEAM = "process.keepAccountTeam";
-    public static final String PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE = "process.batchMode.exitWithErrorOnFailedRows";
+    public static final String PROP_OUTPUT_STATUS_DIR = "process.statusOutputDirectory"; //$NON-NLS-1$
+    public static final String PROP_OUTPUT_SUCCESS = "process.outputSuccess"; //$NON-NLS-1$
+    public static final String PROP_ENABLE_EXTRACT_STATUS_OUTPUT = "process.enableExtractStatusOutput"; //$NON-NLS-1$
+    public static final String PROP_ENABLE_LAST_RUN_OUTPUT = "process.enableLastRunOutput"; //$NON-NLS-1$
+    public static final String PROP_LAST_RUN_OUTPUT_DIR = "process.lastRunOutputDirectory"; //$NON-NLS-1$
+    public static final String PROP_OUTPUT_ERROR = "process.outputError"; //$NON-NLS-1$
+    public static final String PROP_OUTPUT_UNPROCESSED_RECORDS = "process.unprocessedRecords"; //$NON-NLS-1$
+    public static final String PROP_LOAD_ROW_TO_START_AT = "process.loadRowToStartAt"; //$NON-NLS-1$
+    public static final String PROP_INITIAL_LAST_RUN_DATE = "process.initialLastRunDate";
+    public static final String PROP_ENCRYPTION_KEY_FILE = "process.encryptionKeyFile"; //$NON-NLS-1$
+    public static final String PROP_PROCESS_THREAD_NAME = "process.thread.name";
+    public static final String PROP_PROCESS_KEEP_ACCOUNT_TEAM = "process.keepAccountTeam";
+    public static final String PROP_PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE = "process.batchMode.exitWithErrorOnFailedRows";
 
     // data access configuration (e.g., for CSV file, database, etc).
-    public static final String DAO_TYPE = "dataAccess.type"; //$NON-NLS-1$
-    public static final String DAO_NAME = "dataAccess.name"; //$NON-NLS-1$
-    public static final String DAO_READ_BATCH_SIZE = "dataAccess.readBatchSize";
-    public static final String DAO_WRITE_BATCH_SIZE = "dataAccess.writeBatchSize";
-    public static final String DAO_SKIP_TOTAL_COUNT = "dataAccess.skipTotalCount";
-    public static final String DAO_READ_PREPROCESSOR_SCRIPT = "dataAccess.read.preProcessorScript";
-    public static final String DAO_WRITE_POSTPROCESSOR_SCRIPT = "dataAccess.write.postProcessorScript";
+    public static final String PROP_DAO_TYPE = "dataAccess.type"; //$NON-NLS-1$
+    public static final String PROP_DAO_NAME = "dataAccess.name"; //$NON-NLS-1$
+    public static final String PROP_DAO_READ_BATCH_SIZE = "dataAccess.readBatchSize";
+    public static final String PROP_DAO_WRITE_BATCH_SIZE = "dataAccess.writeBatchSize";
+    public static final String PROP_DAO_SKIP_TOTAL_COUNT = "dataAccess.skipTotalCount";
 
     /*
      * TODO: when batching is introduced to the DataAccess, these parameters will become useful
      *     public static final String DAO_REQUEST_SIZE = "dataAccess.extractionRequestSize";
      *     public static final String DAO_BATCH_SIZE = "dataAccess.batchSize";
      */
-    public static final String READ_UTF8 = "dataAccess.readUTF8"; //$NON-NLS-1$
-    public static final String WRITE_UTF8 = "dataAccess.writeUTF8"; //$NON-NLS-1$
-    public static final String READ_CHARSET = "dataAccess.readCharset";
+    public static final String PROP_READ_UTF8 = "dataAccess.readUTF8"; //$NON-NLS-1$
+    public static final String PROP_WRITE_UTF8 = "dataAccess.writeUTF8"; //$NON-NLS-1$
+    public static final String PROP_READ_CHARSET = "dataAccess.readCharset";
     
-    public static final String API_VERSION_PROP="salesforce.api.version";
-    public static final String OAUTH_INSTANCE_URL="salesforce.oauth.instanceURL";
-    public static final String USE_LEGACY_HTTP_GET="sfdc.useLegacyHttpGet";
-    public static final String USE_SYSTEM_PROPS_FOR_HTTP_CLIENT="sfdc.useSysPropsForHttpClient";
+    public static final String PROP_API_VERSION="salesforce.api.version";
+    public static final String PROP_OAUTH_INSTANCE_URL="salesforce.oauth.instanceURL";
+    public static final String PROP_USE_LEGACY_HTTP_GET="sfdc.useLegacyHttpGet";
+    public static final String PROP_USE_SYSTEM_PROPS_FOR_HTTP_CLIENT="sfdc.useSysPropsForHttpClient";
+    public static final String PROP_LIMIT_OUTPUT_TO_QUERY_FIELDS = "loader.query.limitOutputToQueryFields";
+
     /**
      *  ===============  PILOT config properties ========
      * - These properties are used for the features in pilot phase. These features are
@@ -360,10 +361,12 @@ public class AppConfig {
     public static final String BULK_QUERY_PK_CHUNK_SIZE =  PILOT_PROPERTY_PREFIX + "sfdc.bulkQueryPKChunkSize";
     public static final String BULK_QUERY_PK_CHUNK_START_ROW = PILOT_PROPERTY_PREFIX + "sfdc.bulkQueryChunkStartRow";
     */
-    public static final String DUPLICATE_RULE_ALLOW_SAVE = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.allowSave"; //$NON-NLS-1$
-    public static final String DUPLICATE_RULE_INCLUDE_RECORD_DETAILS = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.includeRecordDetails"; //$NON-NLS-1$
-    public static final String DUPLICATE_RULE_RUN_AS_CURRENT_USER = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.runAsCurrentUser"; //$NON-NLS-1$
-    public static final String LIMIT_OUTPUT_TO_QUERY_FIELDS = "loader.query.limitOutputToQueryFields";
+    public static final String PROP_DUPLICATE_RULE_ALLOW_SAVE = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.allowSave"; //$NON-NLS-1$
+    public static final String PROP_DUPLICATE_RULE_INCLUDE_RECORD_DETAILS = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.includeRecordDetails"; //$NON-NLS-1$
+    public static final String PROP_DUPLICATE_RULE_RUN_AS_CURRENT_USER = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.runAsCurrentUser"; //$NON-NLS-1$
+    public static final String PROP_DAO_READ_PREPROCESSOR_SCRIPT = PILOT_PROPERTY_PREFIX + "dataAccess.read.preProcessorScript";
+    public static final String PROP_DAO_WRITE_POSTPROCESSOR_SCRIPT = PILOT_PROPERTY_PREFIX + "dataAccess.write.postProcessorScript";
+
     /*
      * ===============================
      * End of config properties
@@ -451,54 +454,54 @@ public class AppConfig {
     // - These properties are not set in Advanced Settings dialog.
     // - Make sure to list all sensitive properties such as password because these properties are not saved.
     private static final String[] READ_ONLY_PROPERTY_NAMES = {
-            PASSWORD,
-            IDLOOKUP_FIELD,
-            MAPPING_FILE,
-            EXTRACT_SOQL,
-            OUTPUT_SUCCESS,
-            OUTPUT_ERROR,
-            DAO_NAME,
-            DAO_TYPE,
-            ENTITY,
-            OPERATION,
-            DEBUG_MESSAGES,
-            DEBUG_MESSAGES_FILE,
-            WIRE_OUTPUT,
-            PROCESS_THREAD_NAME,
+            PROP_PASSWORD,
+            PROP_IDLOOKUP_FIELD,
+            PROP_MAPPING_FILE,
+            PROP_EXTRACT_SOQL,
+            PROP_OUTPUT_SUCCESS,
+            PROP_OUTPUT_ERROR,
+            PROP_DAO_NAME,
+            PROP_DAO_TYPE,
+            PROP_ENTITY,
+            PROP_OPERATION,
+            PROP_DEBUG_MESSAGES,
+            PROP_DEBUG_MESSAGES_FILE,
+            PROP_WIRE_OUTPUT,
+            PROP_PROCESS_THREAD_NAME,
             PROCESS_BULK_CACHE_DATA_FROM_DAO,
-            PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE,
+            PROP_PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE,
             SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV,
-            API_VERSION_PROP,
-            READ_CHARSET,
+            PROP_API_VERSION,
+            PROP_READ_CHARSET,
             READ_ONLY_CONFIG_PROPERTIES,
-            RICH_TEXT_FIELD_REGEX,
-            DAO_READ_PREPROCESSOR_SCRIPT,
-            DAO_WRITE_POSTPROCESSOR_SCRIPT,
+            PROP_RICH_TEXT_FIELD_REGEX,
+            PROP_DAO_READ_PREPROCESSOR_SCRIPT,
+            PROP_DAO_WRITE_POSTPROCESSOR_SCRIPT,
             ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG,
-            DELETE_WITH_EXTERNALID,
-            OAUTH_ACCESSTOKEN,
-            OAUTH_REFRESHTOKEN,
-            OAUTH_INSTANCE_URL,
-            OAUTH_SERVER,
-            OAUTH_REDIRECTURI,
+            PROP_DELETE_WITH_EXTERNALID,
+            PROP_OAUTH_ACCESSTOKEN,
+            PROP_OAUTH_REFRESHTOKEN,
+            PROP_OAUTH_INSTANCE_URL,
+            PROP_OAUTH_SERVER,
+            PROP_OAUTH_REDIRECTURI,
             OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_SERVER,
             OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_SERVER,
             OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI,
             OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI,
-            OAUTH_CLIENTID,
-            OAUTH_CLIENTSECRET,
+            PROP_OAUTH_CLIENTID,
+            PROP_OAUTH_CLIENTSECRET,
             OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
             OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
-            RESET_URL_ON_LOGIN,
-            USE_LEGACY_HTTP_GET,
-            USE_SYSTEM_PROPS_FOR_HTTP_CLIENT,
+            PROP_RESET_URL_ON_LOGIN,
+            PROP_USE_LEGACY_HTTP_GET,
+            PROP_USE_SYSTEM_PROPS_FOR_HTTP_CLIENT,
     };
     
     private static final String[] ENCRYPTED_PROPERTY_NAMES = {
-            PASSWORD,
-            PROXY_PASSWORD,
-            OAUTH_ACCESSTOKEN,
-            OAUTH_REFRESHTOKEN
+            PROP_PASSWORD,
+            PROP_PROXY_PASSWORD,
+            PROP_OAUTH_ACCESSTOKEN,
+            PROP_OAUTH_REFRESHTOKEN
     };
     
     /**
@@ -537,13 +540,13 @@ public class AppConfig {
         initializeLastRun(getLastRunPrefix());
         
         // Properties initialization completed. Configure OAuth environment next
-        setOAuthEnvironment(getString(SELECTED_AUTH_ENVIRONMENT));
+        setOAuthEnvironment(getString(PROP_SELECTED_AUTH_ENVIRONMENT));
     }
     
     private String getLastRunPrefix() {
-        String lastRunFilePrefix = getString(AppConfig.PROCESS_NAME);
+        String lastRunFilePrefix = getString(AppConfig.PROP_PROCESS_NAME);
         if (lastRunFilePrefix == null || lastRunFilePrefix.isBlank()) {
-            lastRunFilePrefix = getString(AppConfig.ENTITY) + getString(AppConfig.OPERATION);
+            lastRunFilePrefix = getString(AppConfig.PROP_ENTITY) + getString(AppConfig.PROP_OPERATION);
         }
         if (lastRunFilePrefix == null || lastRunFilePrefix.isBlank()) {
             lastRunFilePrefix = RUN_MODE_UI_VAL;
@@ -556,14 +559,14 @@ public class AppConfig {
             lastRunFileNamePrefix = getString(AppConfig.CLI_OPTION_RUN_MODE);
         }
         String lastRunFileName = lastRunFileNamePrefix + LAST_RUN_FILE_SUFFIX;
-        String lastRunDir = getString(AppConfig.LAST_RUN_OUTPUT_DIR);
+        String lastRunDir = getString(AppConfig.PROP_LAST_RUN_OUTPUT_DIR);
         if (lastRunDir == null || lastRunDir.length() == 0) {
             lastRunDir = this.configDir;
         }
 
-        this.lastRunProperties = new LastRunProperties(lastRunFileName, lastRunDir, getBoolean(AppConfig.ENABLE_LAST_RUN_OUTPUT));
+        this.lastRunProperties = new LastRunProperties(lastRunFileName, lastRunDir, getBoolean(AppConfig.PROP_ENABLE_LAST_RUN_OUTPUT));
         // Need to initialize last run date if it's present neither in config or override
-        lastRunProperties.setDefault(LastRunProperties.LAST_RUN_DATE, getString(INITIAL_LAST_RUN_DATE));
+        lastRunProperties.setDefault(LastRunProperties.LAST_RUN_DATE, getString(PROP_INITIAL_LAST_RUN_DATE));
 
         try {
             this.lastRunProperties.load();
@@ -581,54 +584,54 @@ public class AppConfig {
      * This sets the current defaults.
      */
     private void setDefaults(Map<String, String> cliOptionsMap) {
-        setDefaultValue(HIDE_WELCOME_SCREEN, true);
-        setDefaultValue(SHOW_LOADER_UPGRADE_SCREEN, true);
+        setDefaultValue(PROP_HIDE_WELCOME_SCREEN, true);
+        setDefaultValue(PROP_SHOW_LOADER_UPGRADE_SCREEN, true);
 
-        setDefaultValue(CSV_DELIMITER_COMMA, true);
-        setDefaultValue(CSV_DELIMITER_TAB, true);
-        setDefaultValue(CSV_DELIMITER_OTHER, false);
-        setDefaultValue(CSV_DELIMITER_OTHER_VALUE, "");
-        setDefaultValue(CSV_DELIMITER_FOR_QUERY_RESULTS, AppUtil.COMMA);
+        setDefaultValue(PROP_CSV_DELIMITER_COMMA, true);
+        setDefaultValue(PROP_CSV_DELIMITER_TAB, true);
+        setDefaultValue(PROP_CSV_DELIMITER_OTHER, false);
+        setDefaultValue(PROP_CSV_DELIMITER_OTHER_VALUE, "");
+        setDefaultValue(PROP_CSV_DELIMITER_FOR_QUERY_RESULTS, AppUtil.COMMA);
 
-        setDefaultValue(AUTH_ENDPOINT_PROD, DEFAULT_ENDPOINT_URL_PROD);
-        setDefaultValue(AUTH_ENDPOINT_SANDBOX, DEFAULT_ENDPOINT_URL_SANDBOX);
+        setDefaultValue(PROP_AUTH_ENDPOINT_PROD, DEFAULT_ENDPOINT_URL_PROD);
+        setDefaultValue(PROP_AUTH_ENDPOINT_SANDBOX, DEFAULT_ENDPOINT_URL_SANDBOX);
 
-        setDefaultValue(IMPORT_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_IMPORT_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
-        setDefaultValue(LOAD_ROW_TO_START_AT, 0);
-        setDefaultValue(TIMEOUT_SECS, DEFAULT_TIMEOUT_SECS);
-        setDefaultValue(CONNECTION_TIMEOUT_SECS, DEFAULT_CONNECTION_TIMEOUT_SECS);
-        setDefaultValue(ENABLE_RETRIES, true);
-        setDefaultValue(MAX_RETRIES, DEFAULT_MAX_RETRIES);
-        setDefaultValue(MIN_RETRY_SLEEP_SECS, DEFAULT_MIN_RETRY_SECS);
-        setDefaultValue(ASSIGNMENT_RULE, ""); //$NON-NLS-1$
-        setDefaultValue(INSERT_NULLS, false);
-        setDefaultValue(ENABLE_EXTRACT_STATUS_OUTPUT, false);
-        setDefaultValue(ENABLE_LAST_RUN_OUTPUT, true);
-        setDefaultValue(RESET_URL_ON_LOGIN, true);
-        setDefaultValue(EXPORT_BATCH_SIZE, DEFAULT_EXPORT_BATCH_SIZE);
-        setDefaultValue(SORT_EXTRACT_FIELDS, true);
-        setDefaultValue(DAO_WRITE_BATCH_SIZE, DEFAULT_DAO_WRITE_BATCH_SIZE);
-        setDefaultValue(DAO_READ_BATCH_SIZE, DEFAULT_DAO_READ_BATCH_SIZE);
-        setDefaultValue(TRUNCATE_FIELDS, true);
-        setDefaultValue(FORMAT_PHONE_FIELDS, false);
+        setDefaultValue(PROP_IMPORT_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_IMPORT_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
+        setDefaultValue(PROP_LOAD_ROW_TO_START_AT, 0);
+        setDefaultValue(PROP_TIMEOUT_SECS, DEFAULT_TIMEOUT_SECS);
+        setDefaultValue(PROP_CONNECTION_TIMEOUT_SECS, DEFAULT_CONNECTION_TIMEOUT_SECS);
+        setDefaultValue(PROP_ENABLE_RETRIES, true);
+        setDefaultValue(PROP_MAX_RETRIES, DEFAULT_MAX_RETRIES);
+        setDefaultValue(PROP_MIN_RETRY_SLEEP_SECS, DEFAULT_MIN_RETRY_SECS);
+        setDefaultValue(PROP_ASSIGNMENT_RULE, ""); //$NON-NLS-1$
+        setDefaultValue(PROP_INSERT_NULLS, false);
+        setDefaultValue(PROP_ENABLE_EXTRACT_STATUS_OUTPUT, false);
+        setDefaultValue(PROP_ENABLE_LAST_RUN_OUTPUT, true);
+        setDefaultValue(PROP_RESET_URL_ON_LOGIN, true);
+        setDefaultValue(PROP_EXPORT_BATCH_SIZE, DEFAULT_EXPORT_BATCH_SIZE);
+        setDefaultValue(PROP_SORT_EXTRACT_FIELDS, true);
+        setDefaultValue(PROP_DAO_WRITE_BATCH_SIZE, DEFAULT_DAO_WRITE_BATCH_SIZE);
+        setDefaultValue(PROP_DAO_READ_BATCH_SIZE, DEFAULT_DAO_READ_BATCH_SIZE);
+        setDefaultValue(PROP_TRUNCATE_FIELDS, true);
+        setDefaultValue(PROP_FORMAT_PHONE_FIELDS, false);
         // TODO: When we're ready, make Bulk API turned on by default.
-        setDefaultValue(BULK_API_ENABLED, useBulkApiByDefault());
-        setDefaultValue(BULK_API_SERIAL_MODE, false);
-        setDefaultValue(BULK_API_ZIP_CONTENT, false);
-        setDefaultValue(BULK_API_CHECK_STATUS_INTERVAL, DEFAULT_BULK_API_CHECK_STATUS_INTERVAL);
-        setDefaultValue(WIRE_OUTPUT, false);
-        setDefaultValue(DEBUG_MESSAGES, false);
-        setDefaultValue(TIMEZONE, TimeZone.getDefault().getID());
+        setDefaultValue(PROP_BULK_API_ENABLED, useBulkApiByDefault());
+        setDefaultValue(PROP_BULK_API_SERIAL_MODE, false);
+        setDefaultValue(PROP_BULK_API_ZIP_CONTENT, false);
+        setDefaultValue(PROP_BULK_API_CHECK_STATUS_INTERVAL, DEFAULT_BULK_API_CHECK_STATUS_INTERVAL);
+        setDefaultValue(PROP_WIRE_OUTPUT, false);
+        setDefaultValue(PROP_DEBUG_MESSAGES, false);
+        setDefaultValue(PROP_TIMEZONE, TimeZone.getDefault().getID());
         //sfdcInternal settings
-        setDefaultValue(SFDC_INTERNAL, false);
-        setDefaultValue(SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
-        setDefaultValue(SFDC_INTERNAL_SESSION_ID, (String) null);
+        setDefaultValue(PROP_SFDC_INTERNAL, false);
+        setDefaultValue(PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
+        setDefaultValue(PROP_SFDC_INTERNAL_SESSION_ID, (String) null);
 
         //oauth settings
-        setDefaultValue(OAUTH_SERVER, DEFAULT_ENDPOINT_URL_PROD);
-        setDefaultValue(OAUTH_REDIRECTURI, DEFAULT_ENDPOINT_URL_PROD);
-        setDefaultValue(SELECTED_AUTH_ENVIRONMENT, PROD_ENVIRONMENT_VAL);
-        setDefaultValue(AUTH_ENVIRONMENTS, PROD_ENVIRONMENT_VAL + AppUtil.COMMA + SB_ENVIRONMENT_VAL);
+        setDefaultValue(PROP_OAUTH_SERVER, DEFAULT_ENDPOINT_URL_PROD);
+        setDefaultValue(PROP_OAUTH_REDIRECTURI, DEFAULT_ENDPOINT_URL_PROD);
+        setDefaultValue(PROP_SELECTED_AUTH_ENVIRONMENT, PROD_ENVIRONMENT_VAL);
+        setDefaultValue(PROP_AUTH_ENVIRONMENTS, PROD_ENVIRONMENT_VAL + AppUtil.COMMA + SB_ENVIRONMENT_VAL);
 
         /* sfdc.oauth.<env>.<bulk | partner>.clientid = DataLoaderBulkUI | DataLoaderPartnerUI */
         setDefaultValue(OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
@@ -637,52 +640,52 @@ public class AppConfig {
         setDefaultValue(OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
         setDefaultValue(OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
 
-        setDefaultValue(OPERATION, "insert");
-        setDefaultValue(REUSE_CLIENT_CONNECTION, true);
+        setDefaultValue(PROP_OPERATION, "insert");
+        setDefaultValue(PROP_REUSE_CLIENT_CONNECTION, true);
         /*
         setDefaultValue(ENABLE_BULK_QUERY_PK_CHUNKING, false);
         setDefaultValue(BULK_QUERY_PK_CHUNK_SIZE, DEFAULT_BULK_QUERY_PK_CHUNK_SIZE);
         setDefaultValue(BULK_QUERY_PK_CHUNK_START_ROW, "");
         */
-        setDefaultValue(DUPLICATE_RULE_ALLOW_SAVE, false);
-        setDefaultValue(DUPLICATE_RULE_INCLUDE_RECORD_DETAILS, false);
-        setDefaultValue(DUPLICATE_RULE_RUN_AS_CURRENT_USER, false);
-        setDefaultValue(BUFFER_UNPROCESSED_BULK_QUERY_RESULTS, false);
-        setDefaultValue(BULKV2_API_ENABLED, false);
-        setDefaultValue(UPDATE_WITH_EXTERNALID, false);
-        setDefaultValue(DELETE_WITH_EXTERNALID, false);
-        setDefaultValue(OAUTH_LOGIN_FROM_BROWSER, true);
-        setDefaultValue(LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
+        setDefaultValue(PROP_DUPLICATE_RULE_ALLOW_SAVE, false);
+        setDefaultValue(PROP_DUPLICATE_RULE_INCLUDE_RECORD_DETAILS, false);
+        setDefaultValue(PROP_DUPLICATE_RULE_RUN_AS_CURRENT_USER, false);
+        setDefaultValue(PROP_BUFFER_UNPROCESSED_BULK_QUERY_RESULTS, false);
+        setDefaultValue(PROP_BULKV2_API_ENABLED, false);
+        setDefaultValue(PROP_UPDATE_WITH_EXTERNALID, false);
+        setDefaultValue(PROP_DELETE_WITH_EXTERNALID, false);
+        setDefaultValue(PROP_OAUTH_LOGIN_FROM_BROWSER, true);
+        setDefaultValue(PROP_LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
         setDefaultValue(AppConfig.CLI_OPTION_RUN_MODE, AppConfig.RUN_MODE_UI_VAL);
         setDefaultValue(SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV, false);
         setDefaultValue(PROCESS_BULK_CACHE_DATA_FROM_DAO, true);
-        setDefaultValue(PROCESS_KEEP_ACCOUNT_TEAM, false);
+        setDefaultValue(PROP_PROCESS_KEEP_ACCOUNT_TEAM, false);
         setDefaultValue(WIZARD_WIDTH, DEFAULT_WIZARD_WIDTH);
         setDefaultValue(WIZARD_HEIGHT, DEFAULT_WIZARD_HEIGHT);
         setDefaultValue(ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG, true);
-        setDefaultValue(DAO_READ_PREPROCESSOR_SCRIPT, "");
-        setDefaultValue(DAO_WRITE_POSTPROCESSOR_SCRIPT, "");
-        setDefaultValue(LIMIT_OUTPUT_TO_QUERY_FIELDS, true);
+        setDefaultValue(PROP_DAO_READ_PREPROCESSOR_SCRIPT, "");
+        setDefaultValue(PROP_DAO_WRITE_POSTPROCESSOR_SCRIPT, "");
+        setDefaultValue(PROP_LIMIT_OUTPUT_TO_QUERY_FIELDS, true);
         setDefaultValue(WIZARD_CLOSE_ON_FINISH, true);
         setDefaultValue(WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER, true);
         setDefaultValue(WIZARD_X_OFFSET, DEFAULT_WIZARD_X_OFFSET);
         setDefaultValue(WIZARD_Y_OFFSET, DEFAULT_WIZARD_Y_OFFSET);
-        setDefaultValue(CACHE_DESCRIBE_GLOBAL_RESULTS, true);
-        setDefaultValue(PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE, false);
-        setDefaultValue(INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, false);
-        setDefaultValue(OAUTH_INSTANCE_URL, false);
+        setDefaultValue(PROP_CACHE_DESCRIBE_GLOBAL_RESULTS, true);
+        setDefaultValue(PROP_PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE, false);
+        setDefaultValue(PROP_INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, false);
+        setDefaultValue(PROP_OAUTH_INSTANCE_URL, false);
         String systemProxyHost = cliOptionsMap.get(AppUtil.CLI_OPTION_SYSTEM_PROXY_HOST);
         String systemProxyPort = cliOptionsMap.get(AppUtil.CLI_OPTION_SYSTEM_PROXY_PORT);
         if (systemProxyHost != null && !systemProxyHost.isBlank()) {
-            setDefaultValue(PROXY_HOST, systemProxyHost);
-            setDefaultValue(PROXY_PORT, systemProxyPort);
+            setDefaultValue(PROP_PROXY_HOST, systemProxyHost);
+            setDefaultValue(PROP_PROXY_PORT, systemProxyPort);
         }
-        setDefaultValue(USE_LEGACY_HTTP_GET, false);
-        setDefaultValue(USE_SYSTEM_PROPS_FOR_HTTP_CLIENT, true);
-        setDefaultValue(EURO_DATES, false);
-        setDefaultValue(NO_COMPRESSION, false);
-        setDefaultValue(READ_UTF8, false);
-        setDefaultValue(WRITE_UTF8, false);
+        setDefaultValue(PROP_USE_LEGACY_HTTP_GET, false);
+        setDefaultValue(PROP_USE_SYSTEM_PROPS_FOR_HTTP_CLIENT, true);
+        setDefaultValue(PROP_EURO_DATES, false);
+        setDefaultValue(PROP_NO_COMPRESSION, false);
+        setDefaultValue(PROP_READ_UTF8, false);
+        setDefaultValue(PROP_WRITE_UTF8, false);
     }
 
     /**
@@ -831,7 +834,7 @@ public class AppConfig {
     }
 
     public TimeZone getTimeZone() {
-        return TimeZone.getTimeZone(getString(TIMEZONE));
+        return TimeZone.getTimeZone(getString(PROP_TIMEZONE));
     }
 
     /**
@@ -1136,7 +1139,7 @@ public class AppConfig {
             return;
         }
         // initialize encrypter
-        String keyFile = values.get(ENCRYPTION_KEY_FILE);
+        String keyFile = values.get(PROP_ENCRYPTION_KEY_FILE);
         if (keyFile != null && keyFile.length() != 0) {
             try {
                 encrypter.setCipherKeyFromFilePath(keyFile);
@@ -1230,27 +1233,27 @@ public class AppConfig {
     }
     
     public void setAuthEndpoint(String authEndpoint) {
-        this.setAuthEndpointForEnv(authEndpoint, getString(AppConfig.SELECTED_AUTH_ENVIRONMENT));
+        this.setAuthEndpointForEnv(authEndpoint, getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT));
     }
     
     public void setAuthEndpointForEnv(String authEndpoint, String env) {
         AppUtil.validateAuthenticationHostDomainUrlAndThrow(authEndpoint);
         if (env != null && env.equalsIgnoreCase(AppConfig.SB_ENVIRONMENT_VAL)) {
-            this.setValue(AppConfig.AUTH_ENDPOINT_SANDBOX, authEndpoint);
+            this.setValue(AppConfig.PROP_AUTH_ENDPOINT_SANDBOX, authEndpoint);
         } else {
-            this.setValue(AppConfig.AUTH_ENDPOINT_PROD, authEndpoint);
+            this.setValue(AppConfig.PROP_AUTH_ENDPOINT_PROD, authEndpoint);
         }
     }
     
     public String getAuthEndpoint() {
         String endpoint = null;
-        if (AppConfig.SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT))) {
-            endpoint = getString(AppConfig.AUTH_ENDPOINT_SANDBOX);
+        if (AppConfig.SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT))) {
+            endpoint = getString(AppConfig.PROP_AUTH_ENDPOINT_SANDBOX);
             if (endpoint == null || endpoint.isBlank()) {
                 endpoint = getDefaultAuthEndpoint();
             }
         } else {
-            endpoint = getString(AppConfig.AUTH_ENDPOINT_PROD);
+            endpoint = getString(AppConfig.PROP_AUTH_ENDPOINT_PROD);
             if (endpoint == null || endpoint.isBlank()) {
                 endpoint = getDefaultAuthEndpoint();
             }
@@ -1260,7 +1263,7 @@ public class AppConfig {
     }
     
     public String getDefaultAuthEndpoint() {
-        if (AppConfig.SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT))) {
+        if (AppConfig.SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT))) {
             return AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX;
         } else { // assume production is the only alternate environment
             return AppConfig.DEFAULT_ENDPOINT_URL_PROD;
@@ -1271,7 +1274,7 @@ public class AppConfig {
         if (endpoint == null || endpoint.isBlank()) {
             return false;
         }
-        if (AppConfig.SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT))) {
+        if (AppConfig.SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT))) {
             return AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX.equalsIgnoreCase(endpoint);
         } else { // assume production is the only alternate environment
             return AppConfig.DEFAULT_ENDPOINT_URL_PROD.equalsIgnoreCase(endpoint);
@@ -1397,7 +1400,7 @@ public class AppConfig {
     public static final String CLIENT_ID_HEADER_NAME="client_id";
     
     public String getClientIdNameValuePair() {
-        return CLIENT_ID_HEADER_NAME + "=" + this.getString(AppConfig.OAUTH_CLIENTID);
+        return CLIENT_ID_HEADER_NAME + "=" + this.getString(AppConfig.PROP_OAUTH_CLIENTID);
     }
 
     /**
@@ -1469,11 +1472,24 @@ public class AppConfig {
         }
     }
     
+    private void setConfigProperty(String propName, String propVal, boolean isDefault) {
+        ConfigProperty configProp = configPropsMap.get(propName);
+        if (configProp == null) {
+            configProp = new ConfigProperty(propName);
+            configPropsMap.put(propName, configProp);
+        }
+        configProp.setValue(propVal);
+        if (isDefault) {
+            configProp.setDefaultValue(propVal);
+        }
+    }
+    
     /**
      * @param name
      * @param newValue
      */
     private void setProperty(String name, String newValue, boolean skipIfAlreadySet) {
+        setConfigProperty(name, newValue, skipIfAlreadySet);
         final String oldValue = getString(name);
         if (skipIfAlreadySet && oldValue != null && !oldValue.isBlank()) {
             // do not override the old value
@@ -1510,7 +1526,7 @@ public class AppConfig {
         
         int bs = -1;
         try {
-            bs = getInt(IMPORT_BATCH_SIZE);
+            bs = getInt(PROP_IMPORT_BATCH_SIZE);
         } catch (ParameterLoadException e) {
         }
         int maxBatchSize = bulkApi ? MAX_BULK_API_IMPORT_BATCH_SIZE : MAX_SOAP_API_IMPORT_BATCH_SIZE;
@@ -1536,15 +1552,15 @@ public class AppConfig {
     }
 
     public boolean isBulkAPIEnabled() {
-        return getBoolean(BULK_API_ENABLED) && !isBulkV2APIEnabled();
+        return getBoolean(PROP_BULK_API_ENABLED) && !isBulkV2APIEnabled();
     }
     
     public boolean isBulkV2APIEnabled() {
-        return getBoolean(BULKV2_API_ENABLED);
+        return getBoolean(PROP_BULKV2_API_ENABLED);
     }
     
     public boolean isRESTAPIEnabled() {
-        return getBoolean(UPDATE_WITH_EXTERNALID);
+        return getBoolean(PROP_UPDATE_WITH_EXTERNALID);
     }
     
     private boolean isBulkApiOperation() {
@@ -1552,14 +1568,14 @@ public class AppConfig {
     }
 
     public OperationInfo getOperationInfo() {
-        return getEnum(OperationInfo.class, OPERATION);
+        return getEnum(OperationInfo.class, PROP_OPERATION);
     }
 
     public String getCsvEncoding(boolean isWrite) {
         // charset is for CSV read unless isWrite is set to true
-        String configProperty = READ_UTF8;
+        String configProperty = PROP_READ_UTF8;
         if (isWrite) {
-            configProperty = WRITE_UTF8;
+            configProperty = PROP_WRITE_UTF8;
             logger.debug("Getting charset for writing to CSV");
         } else {
             logger.debug("Getting charset for reading from CSV");
@@ -1571,7 +1587,7 @@ public class AppConfig {
             return StandardCharsets.UTF_8.name();
         }
         if (!isWrite) {
-            String charset = getString(READ_CHARSET);
+            String charset = getString(PROP_READ_CHARSET);
             if (charset != null && !charset.isEmpty()) {
                 return charset;
             }
@@ -1632,7 +1648,7 @@ public class AppConfig {
         if (environment == null || environment.isBlank()) {
             environment = PROD_ENVIRONMENT_VAL;
         }
-        String[] envArray = getString(AUTH_ENVIRONMENTS).split(",");
+        String[] envArray = getString(PROP_AUTH_ENVIRONMENTS).split(",");
         boolean isEnvMatch = false;
         for (String env : envArray) {
             env = env.strip();
@@ -1643,10 +1659,10 @@ public class AppConfig {
         if (!isEnvMatch) {
             environment = PROD_ENVIRONMENT_VAL;
         }
-        setValue(SELECTED_AUTH_ENVIRONMENT, environment);
+        setValue(PROP_SELECTED_AUTH_ENVIRONMENT, environment);
 
         String clientId;
-        if (getBoolean(BULK_API_ENABLED) || getBoolean(BULKV2_API_ENABLED)) {
+        if (getBoolean(PROP_BULK_API_ENABLED) || getBoolean(PROP_BULKV2_API_ENABLED)) {
             clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_BULK_CLIENTID);
         } else {
             clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_PARTNER_CLIENTID);
@@ -1654,8 +1670,8 @@ public class AppConfig {
         if (clientId == null || clientId.isEmpty()) {
             clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTID);
         }
-        setValue(OAUTH_CLIENTID, clientId);
-        setValue(OAUTH_CLIENTSECRET, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTSECRET));
+        setValue(PROP_OAUTH_CLIENTID, clientId);
+        setValue(PROP_OAUTH_CLIENTSECRET, getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTSECRET));
 
         // All URLs are driven from Config.ENDPOINT URL setting
         String endpointURL = getAuthEndpoint();
@@ -1669,7 +1685,7 @@ public class AppConfig {
                 && !envSpecificOAuthServerURL.contains(AppConfig.DEFAULT_ENDPOINT_URL_PROD)) {
             endpointURL = envSpecificOAuthServerURL;
         }
-        setValue(OAUTH_SERVER, endpointURL);
+        setValue(PROP_OAUTH_SERVER, endpointURL);
         
         String envSpecificOAuthRedirectURI = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_REDIRECTURI);
         String redirectURI = "";
@@ -1681,7 +1697,7 @@ public class AppConfig {
         } else {
             redirectURI = endpointURL + AppConfig.OAUTH_REDIRECT_URI_SUFFIX;
         }
-        setValue(OAUTH_REDIRECTURI, redirectURI);
+        setValue(PROP_OAUTH_REDIRECTURI, redirectURI);
     }
     
     /**

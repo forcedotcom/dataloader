@@ -57,7 +57,7 @@ public abstract class LoadPage extends OperationPage {
         + "    "
         + Labels.getString("AdvancedSettingsDialog.startRow")
         + " "
-        + controller.getAppConfig().getString(AppConfig.LOAD_ROW_TO_START_AT); //$NON-NLS-1$
+        + controller.getAppConfig().getString(AppConfig.PROP_LOAD_ROW_TO_START_AT); //$NON-NLS-1$
     }
 
     /*

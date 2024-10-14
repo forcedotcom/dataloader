@@ -61,15 +61,15 @@ abstract public class AbstractExtractAction extends AbstractAction {
 
     @Override
     protected boolean writeStatus() {
-        return getConfig().getBoolean(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS) && getConfig().getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT);
+        return getConfig().getBoolean(AppConfig.PROP_LIMIT_OUTPUT_TO_QUERY_FIELDS) && getConfig().getBoolean(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT);
     }
 
     @Override
     protected void checkDao(DataAccessObject dao) throws DataAccessObjectInitializationException {
         if (!(dao instanceof DataWriter)) {
-            final String errMsg = getMessage("errorWrongDao", getConfig().getString(AppConfig.DAO_TYPE),
+            final String errMsg = getMessage("errorWrongDao", getConfig().getString(AppConfig.PROP_DAO_TYPE),
                     DataAccessObjectFactory.CSV_WRITE_TYPE + " or " + DataAccessObjectFactory.DATABASE_WRITE_TYPE,
-                    getConfig().getString(AppConfig.OPERATION));
+                    getConfig().getString(AppConfig.PROP_OPERATION));
             getLogger().fatal(errMsg);
             throw new DataAccessObjectInitializationException(errMsg);
         }
@@ -86,7 +86,7 @@ abstract public class AbstractExtractAction extends AbstractAction {
     }
 
     private List<String> getDaoColumnsFromMapper() {
-        ((SOQLMapper)getController().getMapper()).initSoqlMapping(getConfig().getString(AppConfig.EXTRACT_SOQL));
+        ((SOQLMapper)getController().getMapper()).initSoqlMapping(getConfig().getString(AppConfig.PROP_EXTRACT_SOQL));
         return ((SOQLMapper)getController().getMapper()).getDaoColumnsForSoql();
     }
 
@@ -137,13 +137,13 @@ abstract public class AbstractExtractAction extends AbstractAction {
     @Override
     protected void initOperation() throws DataAccessObjectInitializationException, OperationException {
         ((SOQLMapper)getController().getMapper()).clearMappings();
-        if (getController().getAppConfig().getBoolean(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
+        if (getController().getAppConfig().getBoolean(AppConfig.PROP_LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
             final List<String> daoColumns = getDaoColumnsFromMapper();
             getDao().setColumnNames(daoColumns);
         } else {
             // check for syntactical correctness and presence of nested soql.
             // nested soql is currently not supported.
-            ((SOQLMapper)getController().getMapper()).parseSoql(getConfig().getString(AppConfig.EXTRACT_SOQL));
+            ((SOQLMapper)getController().getMapper()).parseSoql(getConfig().getString(AppConfig.PROP_EXTRACT_SOQL));
         }
     }
 

@@ -129,7 +129,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
 	// This test happens to configure its own encryption file and encrypted password
         // so we need to remove the default test password from the config
         final Map<String, String> argMap = getTestConfig();
-        argMap.remove(AppConfig.PASSWORD);
+        argMap.remove(AppConfig.PROP_PASSWORD);
         // insert
         testUpsertAccountsDb(argMap, NUM_ROWS, true, false);
         // update
@@ -145,10 +145,10 @@ public class DatabaseProcessTest extends ProcessTestBase {
 
         // specify the name of the configured process and select appropriate database access type
         if (args == null) args = getTestConfig();
-        args.put(AppConfig.PROCESS_NAME, processName);
+        args.put(AppConfig.PROP_PROCESS_NAME, processName);
         AppConfig.DATE_FORMATTER.parse(startTime);
         args.put(LastRunProperties.LAST_RUN_DATE, startTime);
-        args.put(AppConfig.OPERATION, OperationInfo.upsert.name());
+        args.put(AppConfig.PROP_OPERATION, OperationInfo.upsert.name());
 
         runUpsertProcess(args, isInsert ? numRows : 0, isInsert ? 0 : numRows);
     }
@@ -162,12 +162,12 @@ public class DatabaseProcessTest extends ProcessTestBase {
         }
         // TODO: we need to get the accounts from sfdc and check that field values were updated correctly
         // create some rows with non-null values in them
-        args.put(AppConfig.INSERT_NULLS, Boolean.toString(false));
+        args.put(AppConfig.PROP_INSERT_NULLS, Boolean.toString(false));
         testUpsertAccountsDb(args, 10, true, false);
         // update the rows with some null values, but with insert nulls disabled
         testUpsertAccountsDb(args, 10, false, true);
         // update the rows with some null values, but with insert nulls enabled
-        args.put(AppConfig.INSERT_NULLS, Boolean.toString(true));
+        args.put(AppConfig.PROP_INSERT_NULLS, Boolean.toString(true));
         testUpsertAccountsDb(args, 10, false, true);
     }
 
@@ -177,15 +177,15 @@ public class DatabaseProcessTest extends ProcessTestBase {
         // specify the name of the configured process and select appropriate database access type
         OperationInfo op = isInsert ? OperationInfo.insert : OperationInfo.update;
         Map<String, String> argMap = getTestConfig();
-        argMap.put(AppConfig.OPERATION, OperationInfo.extract.name());
-        argMap.put(AppConfig.PROCESS_NAME, processName);
-        argMap.put(AppConfig.DAO_NAME, op.name() + "Account");
-        argMap.put(AppConfig.OUTPUT_SUCCESS, new File(getTestStatusDir(), baseName + op.name() + "Success.csv")
+        argMap.put(AppConfig.PROP_OPERATION, OperationInfo.extract.name());
+        argMap.put(AppConfig.PROP_PROCESS_NAME, processName);
+        argMap.put(AppConfig.PROP_DAO_NAME, op.name() + "Account");
+        argMap.put(AppConfig.PROP_OUTPUT_SUCCESS, new File(getTestStatusDir(), baseName + op.name() + "Success.csv")
         .getAbsolutePath());
-        argMap.put(AppConfig.OUTPUT_ERROR, new File(getTestStatusDir(), baseName + op.name() + "Error.csv")
+        argMap.put(AppConfig.PROP_OUTPUT_ERROR, new File(getTestStatusDir(), baseName + op.name() + "Error.csv")
         .getAbsolutePath());
-        argMap.put(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT, AppConfig.TRUE);
-        argMap.put(AppConfig.DAO_WRITE_BATCH_SIZE, String.valueOf(BATCH_SIZE));
+        argMap.put(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT, AppConfig.TRUE);
+        argMap.put(AppConfig.PROP_DAO_WRITE_BATCH_SIZE, String.valueOf(BATCH_SIZE));
 
         Date startTime = new Date();
 
@@ -203,7 +203,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         try {
             reader = new DatabaseReader(theController.getAppConfig(), dbConfigName);
             reader.open();
-            int readBatchSize = theController.getAppConfig().getInt(AppConfig.DAO_READ_BATCH_SIZE);
+            int readBatchSize = theController.getAppConfig().getInt(AppConfig.PROP_DAO_READ_BATCH_SIZE);
             List<Row> successRows = reader.readRowList(readBatchSize);
             int rowsProcessed = 0;
             assertNotNull("Error reading " + readBatchSize + " rows", successRows);

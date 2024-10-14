@@ -52,7 +52,7 @@ public class ConfigTest extends ConfigTestBase {
         try {
             AppConfig appConfig = AppConfig.getInstance(getTestConfig());
             appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
-            String selectedAuthEnv = appConfig.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT);
+            String selectedAuthEnv = appConfig.getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT);
             assertEquals(selectedAuthEnv, AppConfig.PROD_ENVIRONMENT_VAL);
         } catch (ConfigInitializationException 
                 | FactoryConfigurationError
@@ -67,9 +67,9 @@ public class ConfigTest extends ConfigTestBase {
         try {
             AppConfig appConfig = AppConfig.getInstance(getTestConfig());
             appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
-            String configuredClientId = appConfig.getString(AppConfig.OAUTH_CLIENTID);
-            if (appConfig.getBoolean(AppConfig.BULK_API_ENABLED) 
-                    || appConfig.getBoolean(AppConfig.BULKV2_API_ENABLED)) {
+            String configuredClientId = appConfig.getString(AppConfig.PROP_OAUTH_CLIENTID);
+            if (appConfig.getBoolean(AppConfig.PROP_BULK_API_ENABLED) 
+                    || appConfig.getBoolean(AppConfig.PROP_BULKV2_API_ENABLED)) {
                 assertTrue(configuredClientId != null && configuredClientId.startsWith("DataLoaderBulkUI"));
             } else {
                 assertTrue(configuredClientId != null && configuredClientId.startsWith("DataLoaderPartnerUI"));
@@ -87,7 +87,7 @@ public class ConfigTest extends ConfigTestBase {
         try {
             AppConfig appConfig = AppConfig.getInstance(getTestConfig());
             appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
-            String configuredClientSecret = appConfig.getString(AppConfig.OAUTH_CLIENTSECRET);
+            String configuredClientSecret = appConfig.getString(AppConfig.PROP_OAUTH_CLIENTSECRET);
             assertTrue(configuredClientSecret == null || configuredClientSecret.isBlank());
         } catch (ConfigInitializationException 
                 | FactoryConfigurationError
@@ -102,7 +102,7 @@ public class ConfigTest extends ConfigTestBase {
         try {
             AppConfig appConfig = AppConfig.getInstance(getTestConfig());
             appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
-            String configuredOAuthServer = appConfig.getString(AppConfig.OAUTH_SERVER);
+            String configuredOAuthServer = appConfig.getString(AppConfig.PROP_OAUTH_SERVER);
             String expectedOAuthServer = getProperty("test.endpoint");
             if (expectedOAuthServer == null || expectedOAuthServer.isBlank()) {
                 logger.info("Expected prefix is " + expectedOAuthServer);
@@ -111,7 +111,7 @@ public class ConfigTest extends ConfigTestBase {
             assertTrue(configuredOAuthServer.startsWith(expectedOAuthServer));
             
             appConfig.setOAuthEnvironment(AppConfig.SB_ENVIRONMENT_VAL);
-            configuredOAuthServer = appConfig.getString(AppConfig.OAUTH_SERVER);
+            configuredOAuthServer = appConfig.getString(AppConfig.PROP_OAUTH_SERVER);
             assertTrue(configuredOAuthServer.startsWith(AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX));
         } catch (ConfigInitializationException 
                 | FactoryConfigurationError
@@ -128,7 +128,7 @@ public class ConfigTest extends ConfigTestBase {
             Map<String, String> testConfigMap = getTestConfig();
             AppConfig appConfig = AppConfig.getInstance(testConfigMap);
             appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
-            String configuredOAuthRedirectURI = appConfig.getString(AppConfig.OAUTH_REDIRECTURI);
+            String configuredOAuthRedirectURI = appConfig.getString(AppConfig.PROP_OAUTH_REDIRECTURI);
             String expectedOAuthRedirectURIPrefix = getProperty("test.endpoint");
             if (expectedOAuthRedirectURIPrefix == null || expectedOAuthRedirectURIPrefix.isBlank()) {
                 logger.info("Expected prefix is " + expectedOAuthRedirectURIPrefix);

@@ -261,8 +261,8 @@ abstract class TestBase {
 
     protected ConnectorConfig getWSCConfig(String apiVersionStr) {
         ConnectorConfig bindingConfig = new ConnectorConfig();
-        bindingConfig.setUsername(getController().getAppConfig().getString(AppConfig.USERNAME));
-        bindingConfig.setPassword(getController().getAppConfig().getString(AppConfig.PASSWORD));
+        bindingConfig.setUsername(getController().getAppConfig().getString(AppConfig.PROP_USERNAME));
+        bindingConfig.setPassword(getController().getAppConfig().getString(AppConfig.PROP_PASSWORD));
         String configEndpoint = getController().getAppConfig().getAuthEndpoint();
         if (!configEndpoint.equals("")) { //$NON-NLS-1$
             try {
@@ -273,10 +273,10 @@ abstract class TestBase {
                 bindingConfig.setManualLogin(true);
                 // set long timeout for tests with larger data sets
                 bindingConfig.setReadTimeout(5 * 60 * 1000);
-                if (getController().getAppConfig().getBoolean(AppConfig.DEBUG_MESSAGES)) {
+                if (getController().getAppConfig().getBoolean(AppConfig.PROP_DEBUG_MESSAGES)) {
                     bindingConfig.setTraceMessage(true);
                     bindingConfig.setPrettyPrintXml(true);
-                    String filename = getController().getAppConfig().getString(AppConfig.DEBUG_MESSAGES_FILE);
+                    String filename = getController().getAppConfig().getString(AppConfig.PROP_DEBUG_MESSAGES_FILE);
                     if (!filename.isEmpty()) {
                         try {
                             bindingConfig.setTraceFile(filename);

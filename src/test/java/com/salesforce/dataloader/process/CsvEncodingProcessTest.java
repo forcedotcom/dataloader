@@ -108,17 +108,17 @@ public class CsvEncodingProcessTest extends ProcessTestBase {
 
     private Map<String, String> getBulkUnicodeExtractConfig(String soql) {
         final Map<String, String> argMap = getTestConfig(OperationInfo.extract, true);
-        argMap.put(AppConfig.ENTITY, "Account");
-        argMap.put(AppConfig.EXTRACT_SOQL, soql);
-        argMap.put(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT, AppConfig.TRUE);
-        argMap.put(AppConfig.EXPORT_BATCH_SIZE, "2000");
+        argMap.put(AppConfig.PROP_ENTITY, "Account");
+        argMap.put(AppConfig.PROP_EXTRACT_SOQL, soql);
+        argMap.put(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT, AppConfig.TRUE);
+        argMap.put(AppConfig.PROP_EXPORT_BATCH_SIZE, "2000");
         argMap.putAll(config);
-        argMap.remove(AppConfig.MAPPING_FILE);
+        argMap.remove(AppConfig.PROP_MAPPING_FILE);
         return argMap;
     }
 
     private void validateExtraction(final String name, final Map<String, String> testConfig) throws IOException {
-        FileInputStream fis = new FileInputStream(new File(testConfig.get(AppConfig.DAO_NAME)));
+        FileInputStream fis = new FileInputStream(new File(testConfig.get(AppConfig.PROP_DAO_NAME)));
         try {
             CSVReader rdr = new CSVReader(fis, StandardCharsets.UTF_8.name());
             int nameidx = rdr.nextRecord().indexOf("Name");

@@ -70,7 +70,7 @@ public class UsernamePasswordLoginControl extends Composite {
         usernameLabel.setLayoutData(data);
         usernameLabel.setText(Labels.getString("LoginPage.username"));
         userName = new Text(this, SWT.LEFT | SWT.BORDER);
-        userName.setText(authRunner.getConfig().getString(AppConfig.USERNAME));
+        userName.setText(authRunner.getConfig().getString(AppConfig.PROP_USERNAME));
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
         userName.setLayoutData(data);
 
@@ -92,7 +92,7 @@ public class UsernamePasswordLoginControl extends Composite {
         if (authUsingSessionId) {
             pwdOrSessionIdLabel.setText(Labels.getString("LoginPage.sessionId"));
             sessionId = new Text(this, SWT.LEFT | SWT.BORDER);
-            sessionId.setText(authRunner.getConfig().getString(AppConfig.SFDC_INTERNAL_SESSION_ID));
+            sessionId.setText(authRunner.getConfig().getString(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID));
             sessionId.setLayoutData(data);
             password = null;
         } else {
@@ -122,7 +122,7 @@ public class UsernamePasswordLoginControl extends Composite {
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         envLabel.setLayoutData(data);
         envLabel.setText(Labels.getString("LoginPage.environment"));
-        ArrayList<String> environments = authRunner.getConfig().getStrings(AppConfig.AUTH_ENVIRONMENTS);
+        ArrayList<String> environments = authRunner.getConfig().getStrings(AppConfig.PROP_AUTH_ENVIRONMENTS);
 
         Combo envDropdown = new Combo(this, SWT.DROP_DOWN | SWT.BORDER);
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
@@ -130,7 +130,7 @@ public class UsernamePasswordLoginControl extends Composite {
         for (String label: environments) {
             envDropdown.add(label);
         }
-        String currentEnvironment = authRunner.getConfig().getString(AppConfig.SELECTED_AUTH_ENVIRONMENT);
+        String currentEnvironment = authRunner.getConfig().getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT);
         if (environments.contains(currentEnvironment)) {
             envDropdown.setText(currentEnvironment);
         }

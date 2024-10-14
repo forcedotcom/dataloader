@@ -89,8 +89,8 @@ public final class FileByteArrayConverter implements Converter {
             if (mimeType != null
                     && mimeType.equalsIgnoreCase("text/plain")
                     && appConfig != null
-                    && appConfig.getBoolean(AppConfig.LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT)
-                    && AppUtil.isContentSObject(appConfig.getString(AppConfig.ENTITY))) {
+                    && appConfig.getBoolean(AppConfig.PROP_LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT)
+                    && AppUtil.isContentSObject(appConfig.getString(AppConfig.PROP_ENTITY))) {
                 // Preserve the formatting only if the content is of type plain text
                 // AND the flag to preserve whitespace characters in RichText fields is enabled
                 // AND the content is for ContentNote sobject. 

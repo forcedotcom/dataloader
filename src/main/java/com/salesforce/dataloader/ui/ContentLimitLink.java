@@ -71,9 +71,9 @@ public class ContentLimitLink extends Link {
     
     public void setVisible() {
         AppConfig appConfig = controller.getAppConfig();
-        String operation = appConfig.getString(AppConfig.OPERATION);
+        String operation = appConfig.getString(AppConfig.PROP_OPERATION);
         boolean isVisible = AppUtil.isContentSObject(
-                appConfig.getString(AppConfig.ENTITY))
+                appConfig.getString(AppConfig.PROP_ENTITY))
                 && operation != null
                 && ("insert".equalsIgnoreCase(operation)
                     || "update".equalsIgnoreCase(operation)

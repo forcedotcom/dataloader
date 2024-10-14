@@ -55,6 +55,6 @@ public abstract class ExtractionPage extends OperationPage {
         // Batch size settings are applicable only for SOAP API
         return  Labels.getString("ExtractionInputDialog.exportBatchSize")
                 + " "
-                + appConfig.getString(AppConfig.EXPORT_BATCH_SIZE);
+                + appConfig.getString(AppConfig.PROP_EXPORT_BATCH_SIZE);
     }
 }

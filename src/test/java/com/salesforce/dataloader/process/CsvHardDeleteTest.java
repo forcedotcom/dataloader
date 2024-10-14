@@ -99,7 +99,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         // attempt to hard delete 100 accounts as a user without the "Bulk API Hard Delete" user perm enabled
         final Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(100));
         // change the configured user to be the standard user (ie without the perm)
-        argMap.put(AppConfig.USERNAME, getProperty("test.user.restricted"));
+        argMap.put(AppConfig.PROP_USERNAME, getProperty("test.user.restricted"));
 
         runProcessNegative(argMap, "You need the Bulk API Hard Delete user permission to permanently delete records.");
     }
@@ -152,8 +152,8 @@ public class CsvHardDeleteTest extends ProcessTestBase {
 
         // set batch process parameters
         Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(1));
-        argMap.remove(AppConfig.BULK_API_ENABLED);
-        argMap.remove(AppConfig.BULKV2_API_ENABLED);
+        argMap.remove(AppConfig.PROP_BULK_API_ENABLED);
+        argMap.remove(AppConfig.PROP_BULKV2_API_ENABLED);
         try {
             runProcess(argMap, 889);
             Assert.fail("hard delete should not succeed if bulk api is turned off");
@@ -221,7 +221,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
     public void testHardDeleteIDFromOtherObjectFails() throws Exception {
         // set batch process parameters
         Map<String, String> argMap = getHardDeleteTestConfig(new AccountIdTemplateListener(1));
-        argMap.put(AppConfig.ENTITY, "Contact");
+        argMap.put(AppConfig.PROP_ENTITY, "Contact");
         Controller theController = runProcessWithErrors(argMap, 0, 1);
 
         // verify there were errors during operation

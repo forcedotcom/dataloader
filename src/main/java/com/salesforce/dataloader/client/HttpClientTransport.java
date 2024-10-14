@@ -171,7 +171,7 @@ public class HttpClientTransport implements HttpTransportInterface {
         closeHttpClient();
         httpMethod = null;
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-        if (AppConfig.getCurrentConfig().getBoolean(AppConfig.USE_SYSTEM_PROPS_FOR_HTTP_CLIENT)) {
+        if (AppConfig.getCurrentConfig().getBoolean(AppConfig.PROP_USE_SYSTEM_PROPS_FOR_HTTP_CLIENT)) {
             httpClientBuilder = httpClientBuilder.useSystemProperties();
         }
         
@@ -442,7 +442,7 @@ public class HttpClientTransport implements HttpTransportInterface {
         Header clientIdHeaderVal = this.httpMethod.getFirstHeader(AppConfig.CLIENT_ID_HEADER_NAME);
         if (clientIdHeaderVal == null) {
             AppConfig appConfig = AppConfig.getCurrentConfig();
-            this.httpMethod.addHeader(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.OAUTH_CLIENTID));
+            this.httpMethod.addHeader(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.PROP_OAUTH_CLIENTID));
         }
         Header clientNameHeaderVal = this.httpMethod.getFirstHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER);
         if (clientNameHeaderVal == null) {
@@ -465,7 +465,7 @@ public class HttpClientTransport implements HttpTransportInterface {
 
     public static boolean isReuseHttpClient() {
         AppConfig appConfig = AppConfig.getCurrentConfig();
-        return appConfig.getBoolean(AppConfig.REUSE_CLIENT_CONNECTION);
+        return appConfig.getBoolean(AppConfig.PROP_REUSE_CLIENT_CONNECTION);
     }
     
     public InputStream httpGet(String urlStr) throws IOException, AsyncApiException, HttpClientTransportException {

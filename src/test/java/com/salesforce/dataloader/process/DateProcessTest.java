@@ -79,8 +79,8 @@ public class DateProcessTest extends ProcessTestBase {
     @Override
     protected Map<String, String> getTestConfig() {
         Map<String, String> cfg = super.getTestConfig();
-        cfg.put(AppConfig.TIMEZONE, "PDT");
-        cfg.put(AppConfig.ENTITY, "Account");
+        cfg.put(AppConfig.PROP_TIMEZONE, "PDT");
+        cfg.put(AppConfig.PROP_ENTITY, "Account");
         return cfg;
     }
 

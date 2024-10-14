@@ -95,11 +95,11 @@ public class OAuthBrowserLoginRunner {
     private void startBrowserLogin(AppConfig appConfig, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
         setLoginStatus(LoginStatus.WAIT);
         this.appConfig = appConfig;
-        appConfig.setOAuthEnvironment(appConfig.getString(AppConfig.SELECTED_AUTH_ENVIRONMENT));
-        oAuthTokenURLStr = appConfig.getString(AppConfig.OAUTH_SERVER) + "/services/oauth2/token";
+        appConfig.setOAuthEnvironment(appConfig.getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT));
+        oAuthTokenURLStr = appConfig.getString(AppConfig.PROP_OAUTH_SERVER) + "/services/oauth2/token";
         SimplePost client = SimplePostFactory.getInstance(appConfig, oAuthTokenURLStr,
                new BasicNameValuePair("response_type", "device_code"),
-               new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.OAUTH_CLIENTID)),
+               new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.PROP_OAUTH_CLIENTID)),
                new BasicNameValuePair("scope", "api")
         );
         client.post();
@@ -201,7 +201,7 @@ public class OAuthBrowserLoginRunner {
                    elapsedTimeInSec += pollingIntervalInSec;
                    client = SimplePostFactory.getInstance(appConfig, oAuthTokenURLStr,
                            new BasicNameValuePair("grant_type", "device"),
-                           new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.OAUTH_CLIENTID)),
+                           new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.PROP_OAUTH_CLIENTID)),
                            new BasicNameValuePair("code", deviceCode)
                    );
                    try {
@@ -334,8 +334,8 @@ public class OAuthBrowserLoginRunner {
                .create();
        OAuthToken token = gson.fromJson(jsonTokenResult, OAuthToken.class);
        appConfig.setAuthEndpoint(token.getInstanceUrl());
-       appConfig.setValue(AppConfig.OAUTH_ACCESSTOKEN, token.getAccessToken());
-       appConfig.setValue(AppConfig.OAUTH_REFRESHTOKEN, token.getRefreshToken());
-       appConfig.setValue(AppConfig.OAUTH_INSTANCE_URL, token.getInstanceUrl());
+       appConfig.setValue(AppConfig.PROP_OAUTH_ACCESSTOKEN, token.getAccessToken());
+       appConfig.setValue(AppConfig.PROP_OAUTH_REFRESHTOKEN, token.getRefreshToken());
+       appConfig.setValue(AppConfig.PROP_OAUTH_INSTANCE_URL, token.getInstanceUrl());
    }
 }

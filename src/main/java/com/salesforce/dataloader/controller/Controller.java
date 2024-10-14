@@ -276,11 +276,11 @@ public class Controller {
     }
 
     private void createDao(String daoTypeStr, String daoNameStr) throws DataAccessObjectInitializationException {
-        appConfig.setValue(AppConfig.DAO_NAME, daoNameStr);
-        appConfig.setValue(AppConfig.DAO_TYPE, daoTypeStr);
+        appConfig.setValue(AppConfig.PROP_DAO_NAME, daoNameStr);
+        appConfig.setValue(AppConfig.PROP_DAO_TYPE, daoTypeStr);
         try {
-            appConfig.getStringRequired(AppConfig.DAO_NAME); // verify required param exists: dao name
-            dao = daoFactory.getDaoInstance(appConfig.getStringRequired(AppConfig.DAO_TYPE), appConfig);
+            appConfig.getStringRequired(AppConfig.PROP_DAO_NAME); // verify required param exists: dao name
+            dao = daoFactory.getDaoInstance(appConfig.getStringRequired(AppConfig.PROP_DAO_TYPE), appConfig);
             logger.info(Messages.getString("Process.checkingDao")); //$NON-NLS-1$
             dao.checkConnection();
         } catch (Exception e) {
@@ -295,7 +295,7 @@ public class Controller {
         } catch (DataAccessObjectInitializationException e) {
             throw new MappingInitializationException(e.getMessage());
         }
-        appConfig.setValue(AppConfig.ENTITY, sObjectName);
+        appConfig.setValue(AppConfig.PROP_ENTITY, sObjectName);
         initializeMapping(); // initialize mapping before setting reference describes
         try {
             this.setFieldTypes();
@@ -306,7 +306,7 @@ public class Controller {
     }
     
     private void initializeMapping() throws MappingInitializationException {
-        String mappingFile = appConfig.getString(AppConfig.MAPPING_FILE);
+        String mappingFile = appConfig.getString(AppConfig.PROP_MAPPING_FILE);
         if (mappingFile != null 
                 && !mappingFile.isBlank() && !Files.exists(Path.of(mappingFile))) {
             throw new MappingInitializationException("Mapping file " + mappingFile + " does not exist");
@@ -461,11 +461,11 @@ public class Controller {
             }
         }
         // if status files are not specified, generate the files automatically
-        String successPath = appConfig.getString(AppConfig.OUTPUT_SUCCESS);
+        String successPath = appConfig.getString(AppConfig.PROP_OUTPUT_SUCCESS);
         if (generateFiles || successPath == null || successPath.length() == 0) {
             successPath = new File(statusDir, "success" + getFormattedCurrentTimestamp() + ".csv").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        String errorPath = appConfig.getString(AppConfig.OUTPUT_ERROR);
+        String errorPath = appConfig.getString(AppConfig.PROP_OUTPUT_ERROR);
         if (generateFiles || errorPath == null || errorPath.length() == 0) {
             errorPath = new File(statusDir, "error" + getFormattedCurrentTimestamp() + ".csv").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
         }
@@ -488,9 +488,9 @@ public class Controller {
             throw new ProcessInitializationException(e.getMessage(), e);
         }
 
-        appConfig.setValue(AppConfig.OUTPUT_STATUS_DIR, statusDirName);
-        appConfig.setValue(AppConfig.OUTPUT_SUCCESS, successPath);
-        appConfig.setValue(AppConfig.OUTPUT_ERROR, errorPath);
+        appConfig.setValue(AppConfig.PROP_OUTPUT_STATUS_DIR, statusDirName);
+        appConfig.setValue(AppConfig.PROP_OUTPUT_SUCCESS, successPath);
+        appConfig.setValue(AppConfig.PROP_OUTPUT_ERROR, errorPath);
         // TODO for unprocessed records
         // config.setValue(Config.OUTPUT_UNPROCESSED_RECORDS, unprocessedRecordsPath);
     }
@@ -504,7 +504,7 @@ public class Controller {
     private void validateFile(String filePath) throws IOException {
         File file = new File(filePath);
         // finally make sure the output isn't the data access file
-        String daoName = appConfig.getString(AppConfig.DAO_NAME);
+        String daoName = appConfig.getString(AppConfig.PROP_DAO_NAME);
 
         // if it doesn't exist and we can create it, its valid
         if (!file.exists()) {
@@ -529,14 +529,14 @@ public class Controller {
         this.partnerClient = null;
         this.bulkV2Client = null;
         this.restClient = null;
-        appConfig.setValue(AppConfig.OAUTH_ACCESSTOKEN, "");
+        appConfig.setValue(AppConfig.PROP_OAUTH_ACCESSTOKEN, "");
     }
 
     public boolean attachmentsEnabled() {
         if (getAppConfig().isBulkV2APIEnabled()) {
             return false;
         } else {
-            return getAppConfig().getBoolean(AppConfig.BULK_API_ZIP_CONTENT);
+            return getAppConfig().getBoolean(AppConfig.PROP_BULK_API_ZIP_CONTENT);
         }
     }
 

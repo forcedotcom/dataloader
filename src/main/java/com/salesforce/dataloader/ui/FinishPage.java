@@ -78,7 +78,7 @@ public class FinishPage extends LoadPage {
         dirComp.setLayoutData(data);
 
         dirFE = new DirectoryFieldEditor(Labels.getString("FinishPage.output"), Labels.getString("FinishPage.chooseDir"), dirComp); //$NON-NLS-1$ //$NON-NLS-2$
-        dirFE.setStringValue(controller.getAppConfig().getString(AppConfig.OUTPUT_STATUS_DIR));
+        dirFE.setStringValue(controller.getAppConfig().getString(AppConfig.PROP_OUTPUT_STATUS_DIR));
 
         Text textField = dirFE.getTextControl(dirComp);
         textField.addModifyListener(new ModifyListener() {

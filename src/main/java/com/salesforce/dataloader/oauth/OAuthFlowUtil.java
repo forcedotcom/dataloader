@@ -44,13 +44,13 @@ import com.salesforce.dataloader.model.OAuthToken;
  */
 public class OAuthFlowUtil {
     public static String getStartUrlImpl(AppConfig appConfig) throws UnsupportedEncodingException {
-        return appConfig.getString(AppConfig.OAUTH_SERVER) +
+        return appConfig.getString(AppConfig.PROP_OAUTH_SERVER) +
                 "/services/oauth2/authorize"
                 + "?response_type=token"
                 + "&display=popup"
                 + "&" + appConfig.getClientIdNameValuePair() 
                 + "&redirect_uri="
-                + URLEncoder.encode(appConfig.getString(AppConfig.OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
+                + URLEncoder.encode(appConfig.getString(AppConfig.PROP_OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
     }
     
 
@@ -94,9 +94,9 @@ public class OAuthFlowUtil {
             }
 
             appConfig.setAuthEndpoint(token.getInstanceUrl());
-            appConfig.setValue(AppConfig.OAUTH_ACCESSTOKEN, token.getAccessToken());
-            appConfig.setValue(AppConfig.OAUTH_REFRESHTOKEN, token.getRefreshToken());
-            appConfig.setValue(AppConfig.OAUTH_INSTANCE_URL, token.getInstanceUrl());
+            appConfig.setValue(AppConfig.PROP_OAUTH_ACCESSTOKEN, token.getAccessToken());
+            appConfig.setValue(AppConfig.PROP_OAUTH_REFRESHTOKEN, token.getRefreshToken());
+            appConfig.setValue(AppConfig.PROP_OAUTH_INSTANCE_URL, token.getInstanceUrl());
             return true;
         }
 

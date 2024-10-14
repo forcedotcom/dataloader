@@ -99,12 +99,12 @@ public class ProcessRunner implements InitializingBean, IProcess {
     private ILoaderProgress monitor;
     
     private static final String PROP_NAME_ARRAY[] = {
-            AppConfig.OPERATION,
-            AppConfig.USERNAME,
-            AppConfig.PASSWORD,
-            AppConfig.DAO_TYPE,
-            AppConfig.DAO_NAME,
-            AppConfig.ENTITY,
+            AppConfig.PROP_OPERATION,
+            AppConfig.PROP_USERNAME,
+            AppConfig.PROP_PASSWORD,
+            AppConfig.PROP_DAO_TYPE,
+            AppConfig.PROP_DAO_NAME,
+            AppConfig.PROP_ENTITY,
     };
     
     /**
@@ -134,22 +134,22 @@ public class ProcessRunner implements InitializingBean, IProcess {
         try {
             logger.info(Messages.getString("Process.initializingEngine")); //$NON-NLS-1$
             AppConfig appConfig = controller.getAppConfig();
-            if (!(appConfig.contains(AppConfig.USERNAME) && appConfig.contains(AppConfig.PASSWORD))
-                    && appConfig.getBoolean(AppConfig.OAUTH_LOGIN_FROM_BROWSER)) {
+            if (!(appConfig.contains(AppConfig.PROP_USERNAME) && appConfig.contains(AppConfig.PROP_PASSWORD))
+                    && appConfig.getBoolean(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER)) {
                 doLoginFromBrowser(appConfig);
             }
             // Make sure that the required properties are specified.
             validateConfigProperties(appConfig);
             if (name == null || name.isBlank()) {
                 // this can occur only if "process.name" is not specified as a  command line option
-                name = appConfig.getString(AppConfig.OPERATION);
+                name = appConfig.getString(AppConfig.PROP_OPERATION);
                 this.setName(name);
                 setThreadName(name);
             };
 
             // create files for status output unless it's an extract and status output is disabled
-            if (!appConfig.getOperationInfo().isExtraction() || appConfig.getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT)) {
-                controller.setStatusFiles(appConfig.getString(AppConfig.OUTPUT_STATUS_DIR), true, false);
+            if (!appConfig.getOperationInfo().isExtraction() || appConfig.getBoolean(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT)) {
+                controller.setStatusFiles(appConfig.getString(AppConfig.PROP_OUTPUT_STATUS_DIR), true, false);
             }
 
             logger.info(Messages.getFormattedString("Process.loggingIn", appConfig.getAuthEndpoint())); //$NON-NLS-1$
@@ -160,8 +160,8 @@ public class ProcessRunner implements InitializingBean, IProcess {
 
                 // instantiate the map
                 logger.info(Messages.getString("Process.creatingMap")); //$NON-NLS-1$
-                controller.initializeOperation(appConfig.getString(AppConfig.DAO_TYPE), 
-                        appConfig.getString(AppConfig.DAO_NAME), appConfig.getString(AppConfig.ENTITY));
+                controller.initializeOperation(appConfig.getString(AppConfig.PROP_DAO_TYPE), 
+                        appConfig.getString(AppConfig.PROP_DAO_NAME), appConfig.getString(AppConfig.PROP_ENTITY));
 
                 // execute the requested operation
                 controller.executeAction(monitor);
@@ -208,7 +208,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
         if (this.configOverrideMap.isEmpty()) {
             this.configOverrideMap.putAll(configOverrideMap);
             if (getName() != null && !getName().isBlank()) {
-                this.configOverrideMap.put(AppConfig.PROCESS_NAME, getName());
+                this.configOverrideMap.put(AppConfig.PROP_PROCESS_NAME, getName());
             }
         } else {
             throw new IllegalStateException("Attempting to set configOverrideMap but there are already "
@@ -274,7 +274,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
                 } else if (!progressMonitor.isSuccess()) {
                     logErrorAndExitProcess(progressMonitor.getMessage(), null, AppUtil.EXIT_CODE_SERVER_ERROR);
                 } else if (AppConfig.getCurrentConfig() != null
-                        && AppConfig.getCurrentConfig().getBoolean(AppConfig.PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE)
+                        && AppConfig.getCurrentConfig().getBoolean(AppConfig.PROP_PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE)
                         && progressMonitor.getNumberRowsWithError() > 0) {
                     DataLoaderRunner.setExitCode(AppUtil.EXIT_CODE_RESULTS_ERROR);
                 }
@@ -307,21 +307,21 @@ public class ProcessRunner implements InitializingBean, IProcess {
      */
     private static synchronized ProcessRunner getInstance(Map<String, String> argMap) throws ProcessInitializationException {
         logger.info(Messages.getString("Process.initializingEngine")); //$NON-NLS-1$
-        String dynaBeanID = argMap.get(AppConfig.PROCESS_NAME);
+        String dynaBeanID = argMap.get(AppConfig.PROP_PROCESS_NAME);
         ProcessRunner runner;
         if (dynaBeanID == null || dynaBeanID.isEmpty()) {
             // operation and other process params are specified in config.properties
-            logger.info(AppConfig.PROCESS_NAME 
+            logger.info(AppConfig.PROP_PROCESS_NAME 
                     + "is not specified in the command line. Loading the process properties from config.properties.");
             runner = new ProcessRunner();
             
-            if (argMap.containsKey(AppConfig.PROCESS_THREAD_NAME)) {
-                runner.setName(argMap.get(AppConfig.PROCESS_THREAD_NAME));
+            if (argMap.containsKey(AppConfig.PROP_PROCESS_THREAD_NAME)) {
+                runner.setName(argMap.get(AppConfig.PROP_PROCESS_THREAD_NAME));
             }
         } else {
             // process name specified in the command line arg. 
             // Load its DynaBean through process-conf.xml
-            logger.info(AppConfig.PROCESS_NAME 
+            logger.info(AppConfig.PROP_PROCESS_NAME 
                         + "is specified in the command line. Loading DynaBean with id " 
                         + dynaBeanID 
                         + " from process-conf.xml located in folder "
@@ -353,9 +353,9 @@ public class ProcessRunner implements InitializingBean, IProcess {
 
         for (String propName : PROP_NAME_ARRAY) {
             String propVal = appConfig.getString(propName);
-            if (propName.equals(AppConfig.PASSWORD) && (propVal == null || propVal.isBlank())) {
+            if (propName.equals(AppConfig.PROP_PASSWORD) && (propVal == null || propVal.isBlank())) {
                 // OAuth access token must be specified if password is not specified
-                propVal = appConfig.getString(AppConfig.OAUTH_ACCESSTOKEN);
+                propVal = appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN);
             }
             if (propVal == null || propVal.isBlank()) {
                 logger.fatal(Messages.getFormattedString("Config.errorNoRequiredParameter", propName));

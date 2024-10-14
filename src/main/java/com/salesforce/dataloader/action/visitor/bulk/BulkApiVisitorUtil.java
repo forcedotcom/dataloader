@@ -95,7 +95,7 @@ class BulkApiVisitorUtil {
 
         try {
             // getLong will return 0 if no value is provided
-            long checkStatusInt = ctl.getAppConfig().getLong(AppConfig.BULK_API_CHECK_STATUS_INTERVAL);
+            long checkStatusInt = ctl.getAppConfig().getLong(AppConfig.PROP_BULK_API_CHECK_STATUS_INTERVAL);
             this.checkStatusInterval = checkStatusInt > 0 ? checkStatusInt
                     : AppConfig.DEFAULT_BULK_API_CHECK_STATUS_INTERVAL;
         } catch (ParameterLoadException e) {
@@ -141,7 +141,7 @@ class BulkApiVisitorUtil {
         Date currentTime = new Date();
         SimpleDateFormat format = new SimpleDateFormat("MMddyyhhmmssSSS"); //$NON-NLS-1$
         String timestamp = format.format(currentTime);
-    	String statusOutputDir = appConfig.getString(AppConfig.OUTPUT_STATUS_DIR);
+    	String statusOutputDir = appConfig.getString(AppConfig.PROP_OUTPUT_STATUS_DIR);
 
         File stagingFile = new File(statusOutputDir, prefix + timestamp + suffix);
         return stagingFile.getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
@@ -161,11 +161,11 @@ class BulkApiVisitorUtil {
         final OperationEnum op = this.appConfig.getOperationInfo().getBulkOperationEnum();
         job.setOperation(op);
         if (op == OperationEnum.upsert) {
-            job.setExternalIdFieldName(this.appConfig.getString(AppConfig.IDLOOKUP_FIELD));
+            job.setExternalIdFieldName(this.appConfig.getString(AppConfig.PROP_IDLOOKUP_FIELD));
         }
-        job.setObject(this.appConfig.getString(AppConfig.ENTITY));
+        job.setObject(this.appConfig.getString(AppConfig.PROP_ENTITY));
         ContentType jobContentType = ContentType.CSV;
-        if (this.appConfig.getBoolean(AppConfig.BULK_API_ZIP_CONTENT) 
+        if (this.appConfig.getBoolean(AppConfig.PROP_BULK_API_ZIP_CONTENT) 
                 && op != OperationEnum.query
                 && !this.appConfig.isBulkV2APIEnabled()) {
             // ZIP CSV content is supported only for Bulk V1
@@ -174,7 +174,7 @@ class BulkApiVisitorUtil {
         job.setContentType(jobContentType);
         
         ConcurrencyMode jobConcurrencyMode = ConcurrencyMode.Parallel;
-        if (this.appConfig.getBoolean(AppConfig.BULK_API_SERIAL_MODE) 
+        if (this.appConfig.getBoolean(AppConfig.PROP_BULK_API_SERIAL_MODE) 
                 && !this.appConfig.isBulkV2APIEnabled()) {
             // Serial mode is supported only for Bulk V1
            jobConcurrencyMode = ConcurrencyMode.Serial;
@@ -182,7 +182,7 @@ class BulkApiVisitorUtil {
         job.setConcurrencyMode(jobConcurrencyMode);
         
         if (op == OperationEnum.update || op == OperationEnum.upsert || op == OperationEnum.insert) {
-            final String assRule = this.appConfig.getString(AppConfig.ASSIGNMENT_RULE);
+            final String assRule = this.appConfig.getString(AppConfig.PROP_ASSIGNMENT_RULE);
             if (assRule != null && (assRule.length() == 15 || assRule.length() == 18)) {
                 job.setAssignmentRuleId(assRule);
             }
@@ -200,7 +200,7 @@ class BulkApiVisitorUtil {
             }
         }
         if (isBulkV2QueryJob()) {
-            job.setObject(this.appConfig.getString(AppConfig.EXTRACT_SOQL));
+            job.setObject(this.appConfig.getString(AppConfig.PROP_EXTRACT_SOQL));
             logger.info("going to create BulkV2 query job");
         }
         job = this.connection.createJob(job);
@@ -263,7 +263,7 @@ class BulkApiVisitorUtil {
         
         try {
             // limit the number of max retries in case limit is exceeded
-            maxAttemptsCount = 1 + Math.min(AppConfig.MAX_RETRIES_LIMIT, this.appConfig.getInt(AppConfig.MAX_RETRIES));
+            maxAttemptsCount = 1 + Math.min(AppConfig.MAX_RETRIES_LIMIT, this.appConfig.getInt(AppConfig.PROP_MAX_RETRIES));
         } catch (ParameterLoadException e) {
             maxAttemptsCount = 1 + AppConfig.DEFAULT_MAX_RETRIES;
         }
@@ -358,9 +358,9 @@ class BulkApiVisitorUtil {
         }
         int numRecordsPerBatch = 0;
         try {
-            numRecordsPerBatch = this.appConfig.getInt(AppConfig.IMPORT_BATCH_SIZE);
+            numRecordsPerBatch = this.appConfig.getInt(AppConfig.PROP_IMPORT_BATCH_SIZE);
         } catch (ParameterLoadException e) {
-            logger.warn("Incorrectly configured " + AppConfig.IMPORT_BATCH_SIZE);
+            logger.warn("Incorrectly configured " + AppConfig.PROP_IMPORT_BATCH_SIZE);
         }
         if (numRecordsProcessedInJob == 0 && this.jobInfo.getNumberBatchesCompleted() > 0) {
             numRecordsProcessedInJob = numRecordsPerBatch 
@@ -374,9 +374,9 @@ class BulkApiVisitorUtil {
         int numRecordsFailedInJob = this.jobInfo.getNumberRecordsFailed();
         int numRecordsPerBatch = 0;
         try {
-            numRecordsPerBatch = this.appConfig.getInt(AppConfig.IMPORT_BATCH_SIZE);
+            numRecordsPerBatch = this.appConfig.getInt(AppConfig.PROP_IMPORT_BATCH_SIZE);
         } catch (ParameterLoadException e) {
-            logger.warn("Incorrectly configured " + AppConfig.IMPORT_BATCH_SIZE);
+            logger.warn("Incorrectly configured " + AppConfig.PROP_IMPORT_BATCH_SIZE);
         }
         if (numRecordsFailedInJob == 0 && this.jobInfo.getNumberBatchesFailed() > 0) {
             numRecordsFailedInJob = numRecordsPerBatch * jobInfo.getNumberBatchesFailed();

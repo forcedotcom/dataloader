@@ -98,7 +98,7 @@ public class RESTConnection {
             headers.put("Content-Type", "application/JSON");
             headers.put("ACCEPT", "application/JSON");
             headers.put("Authorization", "Bearer " + session.getSessionId());
-            String lookupFieldName = AppConfig.getCurrentConfig().getString(AppConfig.IDLOOKUP_FIELD);
+            String lookupFieldName = AppConfig.getCurrentConfig().getString(AppConfig.PROP_IDLOOKUP_FIELD);
             if (lookupFieldName == null || lookupFieldName.isBlank()) {
                 lookupFieldName = "id";
             }
@@ -121,7 +121,7 @@ public class RESTConnection {
             try {
                 OutputStream out = transport.connect(
                         connectorConfig.getRestEndpoint() 
-                            + controller.getAppConfig().getString(AppConfig.ENTITY) 
+                            + controller.getAppConfig().getString(AppConfig.PROP_ENTITY) 
                             + "/" + lookupFieldName + "/"
                             + "?updateOnly=true",
                         headers,
@@ -200,8 +200,8 @@ public class RESTConnection {
     
     private Map<String, Object> getSobjectMapForCompositeREST(List<DynaBean> dynaBeans, String opName) {
         try {
-            List<Map<String, Object>> sobjectList = SforceDynaBean.getRESTSObjectArray(controller, dynaBeans, controller.getAppConfig().getString(AppConfig.ENTITY),
-                    controller.getAppConfig().getBoolean(AppConfig.INSERT_NULLS));
+            List<Map<String, Object>> sobjectList = SforceDynaBean.getRESTSObjectArray(controller, dynaBeans, controller.getAppConfig().getString(AppConfig.PROP_ENTITY),
+                    controller.getAppConfig().getBoolean(AppConfig.PROP_INSERT_NULLS));
             HashMap<String, Object> recordsMap = new HashMap<String, Object>();
             recordsMap.put("records", sobjectList);
             recordsMap.put("allOrNone", false);

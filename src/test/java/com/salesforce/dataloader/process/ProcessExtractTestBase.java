@@ -122,13 +122,13 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
 
         final Map<String, String> argMap = getTestConfig(isExtractAll() ? OperationInfo.extract_all
                 : OperationInfo.extract, true);
-        argMap.put(AppConfig.ENTITY, entity);
-        argMap.put(AppConfig.EXTRACT_SOQL, soql);
-        argMap.put(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT, AppConfig.TRUE);
-        argMap.put(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS, AppConfig.TRUE);
-        argMap.put(AppConfig.EXPORT_BATCH_SIZE, "2000");
+        argMap.put(AppConfig.PROP_ENTITY, entity);
+        argMap.put(AppConfig.PROP_EXTRACT_SOQL, soql);
+        argMap.put(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT, AppConfig.TRUE);
+        argMap.put(AppConfig.PROP_LIMIT_OUTPUT_TO_QUERY_FIELDS, AppConfig.TRUE);
+        argMap.put(AppConfig.PROP_EXPORT_BATCH_SIZE, "2000");
         if (!useMappingFile) {
-            argMap.remove(AppConfig.MAPPING_FILE);
+            argMap.remove(AppConfig.PROP_MAPPING_FILE);
         }
         return argMap;
     }
@@ -136,7 +136,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
     Map<String, String> getDoNotLimitOutputToQueryFieldsTestConfig(String soql, String entity, boolean useMappingFile) {
 
         final Map<String, String> argMap = getExtractionTestConfig(soql, entity, useMappingFile);
-        argMap.put(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS, AppConfig.FALSE);
+        argMap.put(AppConfig.PROP_LIMIT_OUTPUT_TO_QUERY_FIELDS, AppConfig.FALSE);
         return argMap;
     }
     
@@ -150,7 +150,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         // assert that it's a CSV...if not fail
         final Set<String> unexpectedIds = new HashSet<String>();
         final Set<String> expectedIds = new HashSet<String>(Arrays.asList(ids));
-        String fileName = control.getAppConfig().getString(AppConfig.OUTPUT_SUCCESS);
+        String fileName = control.getAppConfig().getString(AppConfig.PROP_OUTPUT_SUCCESS);
         final DataReader resultReader = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
         try {
             resultReader.open();
@@ -266,7 +266,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
             Controller control = runProcess(testConfig, 1);
             // verify IDs and phone format 
             verifyIdsInCSV(control, testFieldIds, false);
-            String fileName = control.getAppConfig().getString(AppConfig.OUTPUT_SUCCESS);
+            String fileName = control.getAppConfig().getString(AppConfig.PROP_OUTPUT_SUCCESS);
             final DataReader resultReader = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
             try {
                 resultReader.open();
@@ -362,7 +362,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
             throws ProcessInitializationException, DataAccessObjectException {
 
         runProcess(argMap, 1);
-        final CSVFileReader resultReader = new CSVFileReader(new File(argMap.get(AppConfig.DAO_NAME)), getController().getAppConfig(), true, false);
+        final CSVFileReader resultReader = new CSVFileReader(new File(argMap.get(AppConfig.PROP_DAO_NAME)), getController().getAppConfig(), true, false);
         try {
             final Row resultRow = resultReader.readRow();
             assertEquals("Query returned incorrect Contact ID", contactId, resultRow.get("CONTACT_ID"));
@@ -396,14 +396,14 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
             
         }
         Map<String, String> testConfig = getExtractionTestConfig(soql, "Account", true);
-        testConfig.put(AppConfig.DAO_WRITE_BATCH_SIZE, "10"); // total 100 entries in the results file, write in chunks of 10
+        testConfig.put(AppConfig.PROP_DAO_WRITE_BATCH_SIZE, "10"); // total 100 entries in the results file, write in chunks of 10
         Controller control = runProcess(testConfig, numRecords);
         // verify IDs and phone format 
         verifyIdsInCSV(control, accountIds, true);
         
         // Verify that column positions match positions
         // specified in the mapping (.sdl) file.
-        String fileName = control.getAppConfig().getString(AppConfig.DAO_NAME);
+        String fileName = control.getAppConfig().getString(AppConfig.PROP_DAO_NAME);
         final DataReader extractionReader = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
         try {
             extractionReader.open();
@@ -461,7 +461,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                     "Aggregate Relationships not supported in Bulk Query");
         } else {
             runProcess(argMap, 1, true);
-            final CSVFileReader resultReader = new CSVFileReader(new File(argMap.get(AppConfig.DAO_NAME)), getController().getAppConfig(), true, false);
+            final CSVFileReader resultReader = new CSVFileReader(new File(argMap.get(AppConfig.PROP_DAO_NAME)), getController().getAppConfig(), true, false);
             try {
                 assertEquals(String.valueOf(numRecords - 1), resultReader.readRow().get("MAX(NUMBEROFEMPLOYEES)"));
             } finally {

@@ -62,7 +62,7 @@ abstract public class AbstractBulkQueryVisitor extends AbstractQueryVisitor {
     
     protected void writeExtractionForServerStream(InputStream serverResultStream) throws IOException, DataAccessObjectException {
         File bufferingFile = null;
-        final boolean bufferResults = getConfig().getBoolean(AppConfig.BUFFER_UNPROCESSED_BULK_QUERY_RESULTS);
+        final boolean bufferResults = getConfig().getBoolean(AppConfig.PROP_BUFFER_UNPROCESSED_BULK_QUERY_RESULTS);
         OutputStream bufferingFileWriter = null;
 
         InputStream resultStream = serverResultStream; //read directly from server by default
@@ -113,11 +113,11 @@ abstract public class AbstractBulkQueryVisitor extends AbstractQueryVisitor {
     private Row getDaoRow(List<String> queryResultHeaders, List<String> csvRow, 
             StringBuilder id, boolean isFirstRowInBatch) throws DataAccessObjectInitializationException {
         if (isFirstRowInBatch 
-            && !getConfig().getBoolean(AppConfig.LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
+            && !getConfig().getBoolean(AppConfig.PROP_LIMIT_OUTPUT_TO_QUERY_FIELDS)) {
             SOQLMapper mapper = (SOQLMapper)this.controller.getMapper();
             mapper.initSoqlMappingFromResultFields(queryResultHeaders);
             final List<String> daoColumns = mapper.getDaoColumnsForSoql();
-            if (getConfig().getBoolean(AppConfig.ENABLE_EXTRACT_STATUS_OUTPUT)) {
+            if (getConfig().getBoolean(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT)) {
                 try {
                     if (this.getErrorWriter() == null) {
                         this.setErrorWriter(this.action.createErrorWriter());

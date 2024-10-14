@@ -60,7 +60,7 @@ public class SOQLMapperTest extends ConfigTestBase {
 
     @Test
     public void testRelationshipQuery() throws Exception {
-        getController().getAppConfig().setValue(AppConfig.ENTITY, "User");
+        getController().getAppConfig().setValue(AppConfig.PROP_ENTITY, "User");
         soqlMapper.initSoqlMapping("select Id, Contact.Accountid from User");
 
         List<String> daoColumnsForSoql = soqlMapper.getDaoColumnsForSoql();
