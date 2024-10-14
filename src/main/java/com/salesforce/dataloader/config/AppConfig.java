@@ -513,6 +513,9 @@ public class AppConfig {
     // They are neither read from, nor written to config.properties file.
     private static final String[] INTERNAL_PROPERTY_NAMES = {
             PROP_OAUTH_CLIENTID,
+            PROP_SFDC_INTERNAL,
+            PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN,
+            PROP_SFDC_INTERNAL_SESSION_ID,
     };
     
     private static final String[] ENCRYPTED_PROPERTY_NAMES = {
@@ -559,6 +562,9 @@ public class AppConfig {
         
         // Properties initialization completed. Configure OAuth environment next
         setOAuthEnvironment(getString(PROP_SELECTED_AUTH_ENVIRONMENT));
+        if (getBoolean(AppUtil.CLI_OPTION_GENERATE_PROPERTIES_CSV)) {
+            ConfigPropertyMetadata.printCSV(this);
+        }
     }
     
     private String getLastRunPrefix() {
@@ -1778,7 +1784,10 @@ public class AppConfig {
      * @throws IOException 
      * @throws FactoryConfigurationError 
      */
-    public static synchronized AppConfig getInstance(Map<String, String> argMap) throws ConfigInitializationException, FactoryConfigurationError, IOException { 
+    public static synchronized AppConfig getInstance(Map<String, String> argMap) throws ConfigInitializationException, FactoryConfigurationError, IOException {
+        if (argMap == null) {
+            argMap = new HashMap<String, String>();
+        }
         AppUtil.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argMap));
         logger = LogManager.getLogger(AppConfig.class);
 

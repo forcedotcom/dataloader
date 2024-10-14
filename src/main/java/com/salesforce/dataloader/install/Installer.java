@@ -43,7 +43,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.status.StatusLogger.Config;
 
+import com.salesforce.dataloader.config.AppConfig;
+import com.salesforce.dataloader.config.ConfigPropertyMetadata;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.util.AppUtil;
 
@@ -132,6 +135,10 @@ public class Installer {
                     createAppsFolderShortcut(installationFolder, false); 
                 }
             }
+            /* comment out auto-generation of list of properties at installation time
+            AppConfig appConfig = AppConfig.getInstance(null);
+            ConfigPropertyMetadata.printCSV(appConfig);
+            */
         } catch (Exception ex) {
             handleException(ex, Level.FATAL);
             exitCode = AppUtil.EXIT_CODE_CLIENT_ERROR;
