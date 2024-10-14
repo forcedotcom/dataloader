@@ -108,6 +108,7 @@ public class AppUtil {
     public static final String CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP = "salesforce.installation.shortcut.macos.appsfolder";
     public static final String CLI_OPTION_SYSTEM_PROXY_HOST = "sfdc.system.proxyHost";
     public static final String CLI_OPTION_SYSTEM_PROXY_PORT = "sfdc.system.proxyPort";
+    public static final String CLI_OPTION_GENERATE_PROPERTIES_CSV = "salesforce.loader.generatePropsCSV";
     public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
     public static final String DATALOADER_DOWNLOAD_URL = "https://developer.salesforce.com/tools/data-loader";
     public static final int EXIT_CODE_NO_ERRORS = 0;
