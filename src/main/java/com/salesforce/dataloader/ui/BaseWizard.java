@@ -78,7 +78,7 @@ public abstract class BaseWizard extends Wizard {
     }
     
     protected boolean closeWizardPagePostSuccessfulFinish() {
-        return getConfig().getBoolean(AppConfig.WIZARD_CLOSE_ON_FINISH);
+        return getConfig().getBoolean(AppConfig.PROP_WIZARD_CLOSE_ON_FINISH);
     }
 
 }

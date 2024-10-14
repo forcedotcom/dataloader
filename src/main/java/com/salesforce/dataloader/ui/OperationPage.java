@@ -168,10 +168,10 @@ public abstract class OperationPage extends WizardPage {
                 }
                 AppConfig appConfig = controller.getAppConfig();
                 Rectangle shellBounds = this.getShell().getBounds();
-                appConfig.setValue(AppConfig.WIZARD_X_OFFSET, shellBounds.x);
-                appConfig.setValue(AppConfig.WIZARD_Y_OFFSET, shellBounds.y);
-                appConfig.setValue(AppConfig.WIZARD_WIDTH, shellBounds.width);
-                appConfig.setValue(AppConfig.WIZARD_HEIGHT, shellBounds.height);
+                appConfig.setValue(AppConfig.PROP_WIZARD_X_OFFSET, shellBounds.x);
+                appConfig.setValue(AppConfig.PROP_WIZARD_Y_OFFSET, shellBounds.y);
+                appConfig.setValue(AppConfig.PROP_WIZARD_WIDTH, shellBounds.width);
+                appConfig.setValue(AppConfig.PROP_WIZARD_HEIGHT, shellBounds.height);
                 try {
                     appConfig.save();
                 } catch (GeneralSecurityException | IOException e) {

@@ -145,7 +145,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     public boolean visit(Row row) throws OperationException, DataAccessObjectException,
     ConnectionException {
         AppConfig appConfig = controller.getAppConfig();
-        if (appConfig.getBoolean(AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+        if (appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
             || (!appConfig.isBulkAPIEnabled() && !appConfig.isBulkV2APIEnabled())) {
             // either bulk mode or cache bulk data uploaded from DAO
             this.daoRowList.add(row);

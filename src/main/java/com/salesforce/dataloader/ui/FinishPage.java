@@ -116,7 +116,7 @@ public class FinishPage extends LoadPage {
     protected boolean setupPagePostLogin() {
         try {
             verifySettings();
-            if (!controller.getAppConfig().getBoolean(AppConfig.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER)) {
+            if (!controller.getAppConfig().getBoolean(AppConfig.PROP_WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER)) {
                 dirFE.setStringValue(null); // clear previous selection
             }
         } catch (final MappingInitializationException e) {

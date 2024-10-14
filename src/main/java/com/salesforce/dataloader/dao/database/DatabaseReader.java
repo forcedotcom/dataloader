@@ -187,7 +187,7 @@ public class DatabaseReader implements DataReader {
             currentRowNumber++;
             return row;
         }
-        if (appConfig.getBoolean(AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+        if (appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
             && endOfDBReached) {
             return null;
         }

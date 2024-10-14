@@ -25,6 +25,7 @@
  */
 package com.salesforce.dataloader.config;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import com.salesforce.dataloader.ui.Labels;
@@ -32,19 +33,36 @@ import com.salesforce.dataloader.ui.Labels;
 /*
  * Data class capturing information about configuration property (aka Setting).
  */
-public class ConfigProperty {
-    private static final HashMap<String, ConfigProperty> propertiesMap = new HashMap<String, ConfigProperty>();
+public class ConfigPropertyMetadata {
+    private static final HashMap<String, ConfigPropertyMetadata> propertiesMap = new HashMap<String, ConfigPropertyMetadata>();
     
     private final String name;
     private String defaultValue = "";
-    private String value = "";
-    private boolean readonly;
-    private boolean encrypted;
-    private boolean commandLineOption;
+    private boolean readOnly = false;
+    private boolean encrypted = false;
+    private boolean commandLineOption = false;
     private final String uiLabelTemplate;
     private final String uiTooltipTemplate;
+    
+    static {
+        Field[] appConfigFields = AppConfig.class.getDeclaredFields();
+        for (Field configField : appConfigFields) {
+            if (configField.getName().startsWith("PROP_")) {
+                String propName;
+                try {
+                    propName = configField.get(null).toString();
+                } catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
+                    continue;
+                }
+                ConfigPropertyMetadata configProp = new ConfigPropertyMetadata(configField.getName());
+                configProp.setEncrypted(AppConfig.isEncryptedProperty(propName));
+                configProp.setReadOnly(AppConfig.isReadOnlyProperty(propName));
+                propertiesMap.put(propName, configProp);
+            }
+        }
+    }
 
-    public ConfigProperty(String name) {
+    public ConfigPropertyMetadata(String name) {
         this.name = name;
         this.uiLabelTemplate = Labels.getString("AdvancedSettingsDialog.uiLabel." + name);
         String tooltipText = null;
@@ -73,7 +91,7 @@ public class ConfigProperty {
         };
     }
     
-    public static HashMap<String, ConfigProperty> getPropertiesMap() {
+    public static HashMap<String, ConfigPropertyMetadata> getPropertiesMap() {
         return propertiesMap;
     }
     public String getDefaultValue() {
@@ -82,17 +100,11 @@ public class ConfigProperty {
     public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
     }
-    public String getValue() {
-        return value;
+    public boolean isReadOnly() {
+        return readOnly;
     }
-    public void setValue(String value) {
-        this.value = value;
-    }
-    public boolean isReadonly() {
-        return readonly;
-    }
-    public void setReadonly(boolean readonly) {
-        this.readonly = readonly;
+    public void setReadOnly(boolean readonly) {
+        this.readOnly = readonly;
     }
     public boolean isEncrypted() {
         return encrypted;

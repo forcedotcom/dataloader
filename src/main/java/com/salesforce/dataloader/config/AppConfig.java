@@ -186,7 +186,7 @@ public class AppConfig {
     private Properties readOnlyPropertiesFromPropertiesFile = new LinkedProperties();
     private final Properties defaultProperties;
     private final boolean saveAllProps;
-    private Map<String,ConfigProperty> configPropsMap = ConfigProperty.getPropertiesMap();
+    private Map<String,ConfigPropertyMetadata> configPropsMetadataMap = ConfigPropertyMetadata.getPropertiesMap();
     
     private Map<String, String> parameterOverridesMap;
 
@@ -429,16 +429,16 @@ public class AppConfig {
     public static final String RUN_MODE_INSTALL_VAL = "install";
     public static final String RUN_MODE_ENCRYPT_VAL = "encrypt";
     
-    public static final String SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV = "process.bulk.saveServerLoadAndRawResultsInCSV";
-    public static final String PROCESS_BULK_CACHE_DATA_FROM_DAO = "process.bulk.cacheDataFromDao";
-    public static final String READ_ONLY_CONFIG_PROPERTIES = "config.properties.readonly";
-    public static final String WIZARD_WIDTH = "sfdc.ui.wizard.width";
-    public static final String WIZARD_HEIGHT = "sfdc.ui.wizard.height";
-    public static final String WIZARD_X_OFFSET = "sfdc.ui.wizard.xoffset";
-    public static final String WIZARD_Y_OFFSET = "sfdc.ui.wizard.yoffset";
-    public static final String ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG = "sfdc.ui.wizard.enforceWidthHeight";
-    public static final String WIZARD_CLOSE_ON_FINISH = "sfdc.ui.wizard.closeOnFinish";
-    public static final String WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER = "sfdc.ui.wizard.finishStep.prepopulateWithPreviousOpResultsFolder";
+    public static final String PROP_SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV = "process.bulk.saveServerLoadAndRawResultsInCSV";
+    public static final String PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO = "process.bulk.cacheDataFromDao";
+    public static final String PROP_READ_ONLY_CONFIG_PROPERTIES = "config.properties.readonly";
+    public static final String PROP_WIZARD_WIDTH = "sfdc.ui.wizard.width";
+    public static final String PROP_WIZARD_HEIGHT = "sfdc.ui.wizard.height";
+    public static final String PROP_WIZARD_X_OFFSET = "sfdc.ui.wizard.xoffset";
+    public static final String PROP_WIZARD_Y_OFFSET = "sfdc.ui.wizard.yoffset";
+    public static final String PROP_ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG = "sfdc.ui.wizard.enforceWidthHeight";
+    public static final String PROP_WIZARD_CLOSE_ON_FINISH = "sfdc.ui.wizard.closeOnFinish";
+    public static final String PROP_WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER = "sfdc.ui.wizard.finishStep.prepopulateWithPreviousOpResultsFolder";
     public static final String DIALOG_BOUNDS_PREFIX = "sfdc.ui.dialog.";
     public static final String DIALOG_WIDTH_SUFFIX = ".width";
     public static final String DIALOG_HEIGHT_SUFFIX = ".height";
@@ -453,7 +453,7 @@ public class AppConfig {
     // Following properties are read-only, i.e. they are not overridden during save() to config.properties
     // - These properties are not set in Advanced Settings dialog.
     // - Make sure to list all sensitive properties such as password because these properties are not saved.
-    private static final String[] READ_ONLY_PROPERTY_NAMES = {
+    static final String[] READ_ONLY_PROPERTY_NAMES = {
             PROP_PASSWORD,
             PROP_IDLOOKUP_FIELD,
             PROP_MAPPING_FILE,
@@ -468,16 +468,16 @@ public class AppConfig {
             PROP_DEBUG_MESSAGES_FILE,
             PROP_WIRE_OUTPUT,
             PROP_PROCESS_THREAD_NAME,
-            PROCESS_BULK_CACHE_DATA_FROM_DAO,
+            PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO,
             PROP_PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE,
-            SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV,
+            PROP_SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV,
             PROP_API_VERSION,
             PROP_READ_CHARSET,
-            READ_ONLY_CONFIG_PROPERTIES,
+            PROP_READ_ONLY_CONFIG_PROPERTIES,
             PROP_RICH_TEXT_FIELD_REGEX,
             PROP_DAO_READ_PREPROCESSOR_SCRIPT,
             PROP_DAO_WRITE_POSTPROCESSOR_SCRIPT,
-            ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG,
+            PROP_ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG,
             PROP_DELETE_WITH_EXTERNALID,
             PROP_OAUTH_ACCESSTOKEN,
             PROP_OAUTH_REFRESHTOKEN,
@@ -497,7 +497,7 @@ public class AppConfig {
             PROP_USE_SYSTEM_PROPS_FOR_HTTP_CLIENT,
     };
     
-    private static final String[] ENCRYPTED_PROPERTY_NAMES = {
+    static final String[] ENCRYPTED_PROPERTY_NAMES = {
             PROP_PASSWORD,
             PROP_PROXY_PASSWORD,
             PROP_OAUTH_ACCESSTOKEN,
@@ -657,19 +657,19 @@ public class AppConfig {
         setDefaultValue(PROP_OAUTH_LOGIN_FROM_BROWSER, true);
         setDefaultValue(PROP_LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
         setDefaultValue(AppConfig.CLI_OPTION_RUN_MODE, AppConfig.RUN_MODE_UI_VAL);
-        setDefaultValue(SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV, false);
-        setDefaultValue(PROCESS_BULK_CACHE_DATA_FROM_DAO, true);
+        setDefaultValue(PROP_SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV, false);
+        setDefaultValue(PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO, true);
         setDefaultValue(PROP_PROCESS_KEEP_ACCOUNT_TEAM, false);
-        setDefaultValue(WIZARD_WIDTH, DEFAULT_WIZARD_WIDTH);
-        setDefaultValue(WIZARD_HEIGHT, DEFAULT_WIZARD_HEIGHT);
-        setDefaultValue(ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG, true);
+        setDefaultValue(PROP_WIZARD_WIDTH, DEFAULT_WIZARD_WIDTH);
+        setDefaultValue(PROP_WIZARD_HEIGHT, DEFAULT_WIZARD_HEIGHT);
+        setDefaultValue(PROP_ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG, true);
         setDefaultValue(PROP_DAO_READ_PREPROCESSOR_SCRIPT, "");
         setDefaultValue(PROP_DAO_WRITE_POSTPROCESSOR_SCRIPT, "");
         setDefaultValue(PROP_LIMIT_OUTPUT_TO_QUERY_FIELDS, true);
-        setDefaultValue(WIZARD_CLOSE_ON_FINISH, true);
-        setDefaultValue(WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER, true);
-        setDefaultValue(WIZARD_X_OFFSET, DEFAULT_WIZARD_X_OFFSET);
-        setDefaultValue(WIZARD_Y_OFFSET, DEFAULT_WIZARD_Y_OFFSET);
+        setDefaultValue(PROP_WIZARD_CLOSE_ON_FINISH, true);
+        setDefaultValue(PROP_WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER, true);
+        setDefaultValue(PROP_WIZARD_X_OFFSET, DEFAULT_WIZARD_X_OFFSET);
+        setDefaultValue(PROP_WIZARD_Y_OFFSET, DEFAULT_WIZARD_Y_OFFSET);
         setDefaultValue(PROP_CACHE_DESCRIBE_GLOBAL_RESULTS, true);
         setDefaultValue(PROP_PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE, false);
         setDefaultValue(PROP_INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, false);
@@ -1008,7 +1008,30 @@ public class AppConfig {
 
         dirty = false;
     }
-
+    
+    public static boolean isReadOnlyProperty(String propertyName) {
+        if (propertyName == null) {
+            return false;
+        }
+        for (String roProp : AppConfig.READ_ONLY_PROPERTY_NAMES) {
+            if (roProp.equals(propertyName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean isEncryptedProperty(String propertyName) {
+        if (propertyName == null) {
+            return false;
+        }
+        for (String encryptedProp : AppConfig.ENCRYPTED_PROPERTY_NAMES) {
+            if (encryptedProp.equals(propertyName)) {
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * Post process parameters. Right now, only decrypts encrypted values in the map
      *
@@ -1194,7 +1217,7 @@ public class AppConfig {
      */
     public void save() throws IOException, GeneralSecurityException {
         if (getString(AppConfig.CLI_OPTION_RUN_MODE).equalsIgnoreCase(AppConfig.RUN_MODE_BATCH_VAL)
-           || getBoolean(READ_ONLY_CONFIG_PROPERTIES)) {
+           || getBoolean(PROP_READ_ONLY_CONFIG_PROPERTIES)) {
             return; // do not save any updates to config.properties file
         }
         if (filename == null) {
@@ -1472,15 +1495,13 @@ public class AppConfig {
         }
     }
     
-    private void setConfigProperty(String propName, String propVal, boolean isDefault) {
-        ConfigProperty configProp = configPropsMap.get(propName);
-        if (configProp == null) {
-            configProp = new ConfigProperty(propName);
-            configPropsMap.put(propName, configProp);
+    private void setConfigPropertyMetadata(String propName, String propVal, boolean isDefault) {
+        ConfigPropertyMetadata configPropMD = configPropsMetadataMap.get(propName);
+        if (configPropMD == null) {
+            return; // did not find the property metadata in the registry of properties
         }
-        configProp.setValue(propVal);
         if (isDefault) {
-            configProp.setDefaultValue(propVal);
+            configPropMD.setDefaultValue(propVal);
         }
     }
     
@@ -1489,7 +1510,7 @@ public class AppConfig {
      * @param newValue
      */
     private void setProperty(String name, String newValue, boolean skipIfAlreadySet) {
-        setConfigProperty(name, newValue, skipIfAlreadySet);
+        setConfigPropertyMetadata(name, newValue, skipIfAlreadySet);
         final String oldValue = getString(name);
         if (skipIfAlreadySet && oldValue != null && !oldValue.isBlank()) {
             // do not override the old value

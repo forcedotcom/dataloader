@@ -178,7 +178,7 @@ public class CSVFileReader implements DataReader {
             return row;
         }
         
-        if (appConfig.getBoolean(AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+        if (appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
             && endOfFileReached) {
             return null;
         }

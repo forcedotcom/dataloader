@@ -95,7 +95,7 @@ public class CsvProcessTest extends ProcessTestBase {
     public void testInsertAccountCsv() throws Exception {
         Map<String, String> configMap = getTestConfig(OperationInfo.insert, false);
         if (isSettingEnabled(configMap, AppConfig.PROP_BULK_API_ZIP_CONTENT)
-                || isSettingEnabled(configMap, AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || isSettingEnabled(configMap, AppConfig.PROP_BULK_API_SERIAL_MODE)
                 || isSettingEnabled(configMap, AppConfig.PROP_NO_COMPRESSION)
                 ) {
@@ -139,7 +139,7 @@ public class CsvProcessTest extends ProcessTestBase {
         Map<String, String> configMap = getTestConfig(OperationInfo.insert, false);
         if (isSettingEnabled(configMap, AppConfig.PROP_BULK_API_ZIP_CONTENT)
                 || isSettingEnabled(configMap, AppConfig.PROP_UPDATE_WITH_EXTERNALID)
-                || isSettingEnabled(configMap, AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || isSettingEnabled(configMap, AppConfig.PROP_BULK_API_SERIAL_MODE)
                 || isSettingEnabled(configMap, AppConfig.PROP_NO_COMPRESSION)
                 ) {
@@ -172,7 +172,7 @@ public class CsvProcessTest extends ProcessTestBase {
     public void testUpdateAccountCsv() throws Exception {
         Map<String, String> configMap = getUpdateTestConfig(false, null, 100);
         if (isSettingEnabled(configMap, AppConfig.PROP_BULK_API_ZIP_CONTENT)
-                || isSettingEnabled(configMap, AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || isSettingEnabled(configMap, AppConfig.PROP_BULK_API_SERIAL_MODE)
                 || isSettingEnabled(configMap, AppConfig.PROP_NO_COMPRESSION)
                 || isSettingEnabled(configMap, AppConfig.PROP_UPDATE_WITH_EXTERNALID)
@@ -199,7 +199,7 @@ public class CsvProcessTest extends ProcessTestBase {
         Map<String, String> configMap = getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 50);
         if (isSettingEnabled(configMap, AppConfig.PROP_BULK_API_ZIP_CONTENT)
                 || isSettingEnabled(configMap, AppConfig.PROP_UPDATE_WITH_EXTERNALID)
-                || isSettingEnabled(configMap, AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || isSettingEnabled(configMap, AppConfig.PROP_BULK_API_SERIAL_MODE)
                 || isSettingEnabled(configMap, AppConfig.PROP_NO_COMPRESSION)
                 ) {
@@ -224,7 +224,7 @@ public class CsvProcessTest extends ProcessTestBase {
     public void testConstantMappingInCsv() throws Exception {
         Map<String, String> configMap = getTestConfig(OperationInfo.insert, false);
         if (isSettingEnabled(configMap, AppConfig.PROP_BULK_API_ZIP_CONTENT)
-                || isSettingEnabled(configMap, AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || isSettingEnabled(configMap, AppConfig.PROP_BULK_API_SERIAL_MODE)
                 || isSettingEnabled(configMap, AppConfig.PROP_NO_COMPRESSION)
                 ) {
@@ -263,7 +263,7 @@ public class CsvProcessTest extends ProcessTestBase {
         Map<String, String> configMap = getTestConfig(OperationInfo.insert, getTestDataDir()
                 + "/constantMappingInCsv.csv", false);
         if (isSettingEnabled(configMap, AppConfig.PROP_BULK_API_ZIP_CONTENT)
-                || isSettingEnabled(configMap, AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || isSettingEnabled(configMap, AppConfig.PROP_BULK_API_SERIAL_MODE)
                 || isSettingEnabled(configMap, AppConfig.PROP_NO_COMPRESSION)
                 ) {
@@ -298,7 +298,7 @@ public class CsvProcessTest extends ProcessTestBase {
         Map<String, String> configMap = getTestConfig(OperationInfo.insert,
                 getTestDataDir() + "/constantMappingInCsvClashing.csv", false);
         if (isSettingEnabled(configMap, AppConfig.PROP_BULK_API_ZIP_CONTENT)
-                || isSettingEnabled(configMap, AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(configMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || isSettingEnabled(configMap, AppConfig.PROP_BULK_API_SERIAL_MODE)
                 || isSettingEnabled(configMap, AppConfig.PROP_NO_COMPRESSION)
                 ) {
@@ -466,7 +466,7 @@ public class CsvProcessTest extends ProcessTestBase {
         if (isSettingEnabled(argMap, AppConfig.PROP_UPDATE_WITH_EXTERNALID)) {
             return;
         }
-        if (isSettingEnabled(argMap, AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
+        if (isSettingEnabled(argMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
             return;
         }
         
@@ -541,7 +541,7 @@ public class CsvProcessTest extends ProcessTestBase {
             return;
         }
         if (isSettingEnabled(argumentMap, AppConfig.PROP_BULK_API_ZIP_CONTENT)
-                || isSettingEnabled(argumentMap, AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(argumentMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || isSettingEnabled(argumentMap, AppConfig.PROP_BULK_API_SERIAL_MODE)
                 || isSettingEnabled(argumentMap, AppConfig.PROP_NO_COMPRESSION)
                 ) {
@@ -636,7 +636,7 @@ public class CsvProcessTest extends ProcessTestBase {
                 getTestDataDir() + "/timeZoneFormatTesting.csv", false);
         if (isSettingEnabled(argumentMap, AppConfig.PROP_BULK_API_ZIP_CONTENT)
                 || isSettingEnabled(argumentMap, AppConfig.PROP_UPDATE_WITH_EXTERNALID)
-                || isSettingEnabled(argumentMap, AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(argumentMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || isSettingEnabled(argumentMap, AppConfig.PROP_BULK_API_SERIAL_MODE)
                 || isSettingEnabled(argumentMap, AppConfig.PROP_NO_COMPRESSION)
                 ) {
@@ -692,7 +692,7 @@ public class CsvProcessTest extends ProcessTestBase {
                 + "/oneToManySforceFieldsMappingInCsv.csv", false);
         if (isSettingEnabled(argumentMap, AppConfig.PROP_BULK_API_ZIP_CONTENT)
                 || isSettingEnabled(argumentMap, AppConfig.PROP_UPDATE_WITH_EXTERNALID)
-                || isSettingEnabled(argumentMap, AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(argumentMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || isSettingEnabled(argumentMap, AppConfig.PROP_BULK_API_SERIAL_MODE)
                 || isSettingEnabled(argumentMap, AppConfig.PROP_NO_COMPRESSION)
                 ) {
@@ -735,7 +735,7 @@ public class CsvProcessTest extends ProcessTestBase {
     public void testEmptyFirstRowFieldValueInCsv() throws Exception {
         Map<String, String> argumentMap = getUpdateTestConfig(false, null, 2);
         if (isSettingEnabled(argumentMap, AppConfig.PROP_BULK_API_ZIP_CONTENT)
-                || isSettingEnabled(argumentMap, AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || isSettingEnabled(argumentMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || isSettingEnabled(argumentMap, AppConfig.PROP_BULK_API_SERIAL_MODE)
                 || isSettingEnabled(argumentMap, AppConfig.PROP_NO_COMPRESSION)
                 || isSettingEnabled(argumentMap, AppConfig.PROP_UPDATE_WITH_EXTERNALID)

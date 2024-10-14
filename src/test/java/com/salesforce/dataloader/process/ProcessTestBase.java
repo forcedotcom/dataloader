@@ -717,7 +717,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     protected IProcess runBatchProcess(Map<String, String> argMap) {
         if (argMap == null) argMap = getTestConfig();
         argMap.put(AppConfig.PROP_PROCESS_THREAD_NAME, this.baseName);
-        argMap.put(AppConfig.READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
+        argMap.put(AppConfig.PROP_READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
         argMap.put(AppConfig.CLI_OPTION_RUN_MODE, AppConfig.RUN_MODE_BATCH_VAL);
 
         // emulate invocation through process.bat script
