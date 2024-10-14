@@ -29,6 +29,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import com.salesforce.dataloader.ui.Labels;
+import com.salesforce.dataloader.util.AppUtil;
 
 /*
  * Data class capturing information about configuration property (aka Setting).
@@ -40,6 +41,7 @@ public class ConfigPropertyMetadata {
     private String defaultValue = "";
     private boolean readOnly = false;
     private boolean encrypted = false;
+    private boolean internal = false;
     private boolean commandLineOption = false;
     private final String uiLabelTemplate;
     private final String uiTooltipTemplate;
@@ -47,7 +49,8 @@ public class ConfigPropertyMetadata {
     static {
         Field[] appConfigFields = AppConfig.class.getDeclaredFields();
         for (Field configField : appConfigFields) {
-            if (configField.getName().startsWith("PROP_")) {
+            if (configField.getName().startsWith("PROP_")
+                || configField.getName().startsWith("CLI_OPTION_")) {
                 String propName;
                 try {
                     propName = configField.get(null).toString();
@@ -57,6 +60,21 @@ public class ConfigPropertyMetadata {
                 ConfigPropertyMetadata configProp = new ConfigPropertyMetadata(configField.getName());
                 configProp.setEncrypted(AppConfig.isEncryptedProperty(propName));
                 configProp.setReadOnly(AppConfig.isReadOnlyProperty(propName));
+                configProp.setInternal(AppConfig.isInternalProperty(propName));
+                propertiesMap.put(propName, configProp);
+            }
+        }
+        Field[] appUtilFields = AppUtil.class.getDeclaredFields();
+        for (Field configField : appUtilFields) {
+            if (configField.getName().startsWith("CLI_OPTION_")) {
+                String propName;
+                try {
+                    propName = configField.get(null).toString();
+                } catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
+                    continue;
+                }
+                ConfigPropertyMetadata configProp = new ConfigPropertyMetadata(configField.getName());
+                configProp.setReadOnly(true);
                 propertiesMap.put(propName, configProp);
             }
         }
@@ -123,5 +141,13 @@ public class ConfigPropertyMetadata {
     }
     public String getUiTooltip() {
         return uiTooltipTemplate;
+    }
+
+    public boolean isInternal() {
+        return internal;
+    }
+
+    public void setInternal(boolean internal) {
+        this.internal = internal;
     }
 }

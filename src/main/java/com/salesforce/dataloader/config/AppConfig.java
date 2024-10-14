@@ -281,6 +281,18 @@ public class AppConfig {
     public static final String PROP_OAUTH_CLIENTID = OAUTH_PREFIX + OAUTH_PARTIAL_CLIENTID;
     public static final String PROP_OAUTH_REDIRECTURI = OAUTH_PREFIX + OAUTH_PARTIAL_REDIRECTURI;
     public static final String PROP_OAUTH_LOGIN_FROM_BROWSER = OAUTH_PREFIX + "loginfrombrowser";
+    public static final String PROP_OAUTH_CLIENTID_PROD_PARTNER = OAUTH_PREFIX 
+            + PROD_ENVIRONMENT_VAL 
+            + "." +  OAUTH_PARTIAL_PARTNER_CLIENTID;
+    public static final String PROP_OAUTH_CLIENTID_PROD_BULK = OAUTH_PREFIX 
+            + PROD_ENVIRONMENT_VAL 
+            + "." +  OAUTH_PARTIAL_BULK_CLIENTID;
+    public static final String PROP_OAUTH_CLIENTID_SANDBOX_PARTNER = OAUTH_PREFIX 
+            + SB_ENVIRONMENT_VAL 
+            + "." +  OAUTH_PARTIAL_PARTNER_CLIENTID;
+    public static final String PROP_OAUTH_CLIENTID_SANDBOX_BULK = OAUTH_PREFIX 
+            + SB_ENVIRONMENT_VAL 
+            + "." +  OAUTH_PARTIAL_BULK_CLIENTID;
     public static final String OAUTH_REDIRECT_URI_SUFFIX = "services/oauth2/success";
     public static final String PROP_REUSE_CLIENT_CONNECTION = "sfdc.reuseClientConnection";
     public static final String PROP_RICH_TEXT_FIELD_REGEX = "sfdx.richtext.regex";
@@ -453,7 +465,7 @@ public class AppConfig {
     // Following properties are read-only, i.e. they are not overridden during save() to config.properties
     // - These properties are not set in Advanced Settings dialog.
     // - Make sure to list all sensitive properties such as password because these properties are not saved.
-    static final String[] READ_ONLY_PROPERTY_NAMES = {
+    private static final String[] READ_ONLY_PROPERTY_NAMES = {
             PROP_PASSWORD,
             PROP_IDLOOKUP_FIELD,
             PROP_MAPPING_FILE,
@@ -497,7 +509,13 @@ public class AppConfig {
             PROP_USE_SYSTEM_PROPS_FOR_HTTP_CLIENT,
     };
     
-    static final String[] ENCRYPTED_PROPERTY_NAMES = {
+    // internal properties are derived in code. 
+    // They are neither read from, nor written to config.properties file.
+    private static final String[] INTERNAL_PROPERTY_NAMES = {
+            PROP_OAUTH_CLIENTID,
+    };
+    
+    private static final String[] ENCRYPTED_PROPERTY_NAMES = {
             PROP_PASSWORD,
             PROP_PROXY_PASSWORD,
             PROP_OAUTH_ACCESSTOKEN,
@@ -634,11 +652,11 @@ public class AppConfig {
         setDefaultValue(PROP_AUTH_ENVIRONMENTS, PROD_ENVIRONMENT_VAL + AppUtil.COMMA + SB_ENVIRONMENT_VAL);
 
         /* sfdc.oauth.<env>.<bulk | partner>.clientid = DataLoaderBulkUI | DataLoaderPartnerUI */
-        setDefaultValue(OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
-        setDefaultValue(OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
+        setDefaultValue(PROP_OAUTH_CLIENTID_PROD_BULK, OAUTH_BULK_CLIENTID_VAL);
+        setDefaultValue(PROP_OAUTH_CLIENTID_PROD_PARTNER, OAUTH_PARTNER_CLIENTID_VAL);
 
-        setDefaultValue(OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_BULK_CLIENTID, OAUTH_BULK_CLIENTID_VAL);
-        setDefaultValue(OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_PARTNER_CLIENTID, OAUTH_PARTNER_CLIENTID_VAL);
+        setDefaultValue(PROP_OAUTH_CLIENTID_SANDBOX_BULK, OAUTH_BULK_CLIENTID_VAL);
+        setDefaultValue(PROP_OAUTH_CLIENTID_SANDBOX_PARTNER, OAUTH_PARTNER_CLIENTID_VAL);
 
         setDefaultValue(PROP_OPERATION, "insert");
         setDefaultValue(PROP_REUSE_CLIENT_CONNECTION, true);
@@ -1021,6 +1039,17 @@ public class AppConfig {
         return false;
     }
     
+    public static boolean isInternalProperty(String propertyName) {
+        if (propertyName == null) {
+            return false;
+        }
+        for (String roProp : AppConfig.INTERNAL_PROPERTY_NAMES) {
+            if (roProp.equals(propertyName)) {
+                return true;
+            }
+        }
+        return false;
+    }   
     public static boolean isEncryptedProperty(String propertyName) {
         if (propertyName == null) {
             return false;
