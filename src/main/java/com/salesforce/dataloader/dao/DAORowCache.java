@@ -45,7 +45,7 @@ public class DAORowCache {
     public Row getCurrentRow() {
         AppConfig appConfig = AppConfig.getCurrentConfig();
         if (currentRowIndex >= totalRows
-            || !appConfig.getBoolean(AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
+            || !appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
             return null;
         }
         return rowList.get(currentRowIndex++);

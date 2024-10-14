@@ -840,8 +840,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.horizontalSpan = 2;
         blankAgain.setLayoutData(data);
         
-        createLabel(restComp, null, null, AppConfig.WIZARD_CLOSE_ON_FINISH);
-        boolean closeWizardOnFinish = appConfig.getBoolean(AppConfig.WIZARD_CLOSE_ON_FINISH);
+        createLabel(restComp, null, null, AppConfig.PROP_WIZARD_CLOSE_ON_FINISH);
+        boolean closeWizardOnFinish = appConfig.getBoolean(AppConfig.PROP_WIZARD_CLOSE_ON_FINISH);
         buttonCloseWizardOnFinish = new Button(restComp, SWT.CHECK);
         buttonCloseWizardOnFinish.setSelection(closeWizardOnFinish);
 
@@ -852,7 +852,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         layout = new GridLayout(3, false);
         widthAndHeightComp.setLayout(layout);
         textWizardWidth = new Text(widthAndHeightComp, SWT.BORDER);
-        textWizardWidth.setText(appConfig.getString(AppConfig.WIZARD_WIDTH));
+        textWizardWidth.setText(appConfig.getString(AppConfig.PROP_WIZARD_WIDTH));
         data = new GridData();
         textWizardWidth.setTextLimit(4);
         data.widthHint = 4 * textSize.x;
@@ -869,7 +869,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         labelMultiplySymbol.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_CENTER));
 
         textWizardHeight = new Text(widthAndHeightComp, SWT.BORDER);
-        textWizardHeight.setText(appConfig.getString(AppConfig.WIZARD_HEIGHT));
+        textWizardHeight.setText(appConfig.getString(AppConfig.PROP_WIZARD_HEIGHT));
         textWizardHeight.setTextLimit(4);
         data.widthHint = 4 * textSize.x;
         textWizardHeight.setLayoutData(data);
@@ -880,8 +880,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
             }
         });
 
-        createLabel(restComp, null, null, AppConfig.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER);
-        boolean populateResultsFolderOnFinishStep = appConfig.getBoolean(AppConfig.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER);
+        createLabel(restComp, null, null, AppConfig.PROP_WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER);
+        boolean populateResultsFolderOnFinishStep = appConfig.getBoolean(AppConfig.PROP_WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER);
         buttonPopulateResultsFolderOnWizardFinishStep = new Button(restComp, SWT.CHECK);
         buttonPopulateResultsFolderOnWizardFinishStep.setSelection(populateResultsFolderOnFinishStep);
         
@@ -1036,11 +1036,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 appConfig.setValue(AppConfig.PROP_BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
                 appConfig.setValue(AppConfig.PROP_BULKV2_API_ENABLED, buttonUseBulkV2Api.getSelection());
                 appConfig.setValue(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER, buttonLoginFromBrowser.getSelection());
-                appConfig.setValue(AppConfig.WIZARD_CLOSE_ON_FINISH, buttonCloseWizardOnFinish.getSelection());
-                appConfig.setValue(AppConfig.WIZARD_WIDTH, textWizardWidth.getText());
-                appConfig.setValue(AppConfig.WIZARD_HEIGHT, textWizardHeight.getText());
+                appConfig.setValue(AppConfig.PROP_WIZARD_CLOSE_ON_FINISH, buttonCloseWizardOnFinish.getSelection());
+                appConfig.setValue(AppConfig.PROP_WIZARD_WIDTH, textWizardWidth.getText());
+                appConfig.setValue(AppConfig.PROP_WIZARD_HEIGHT, textWizardHeight.getText());
 
-                appConfig.setValue(AppConfig.WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER, buttonPopulateResultsFolderOnWizardFinishStep.getSelection());
+                appConfig.setValue(AppConfig.PROP_WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER, buttonPopulateResultsFolderOnWizardFinishStep.getSelection());
                 LoggingUtil.setLoggingLevel(LOGGING_LEVEL[comboLoggingLevelDropdown.getSelectionIndex()]);
                 String clientIdVal = textProductionPartnerClientID.getText();
                 if (clientIdVal != null && !clientIdVal.strip().isEmpty()) {

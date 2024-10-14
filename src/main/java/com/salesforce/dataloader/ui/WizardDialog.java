@@ -60,8 +60,8 @@ public abstract class WizardDialog extends BaseDialog {
         int height = wizardBounds.height;
         if (appConfig != null) {
             try {
-                xOffset = appConfig.getInt(AppConfig.WIZARD_X_OFFSET) + AppConfig.DIALOG_X_OFFSET;
-                yOffset = appConfig.getInt(AppConfig.WIZARD_Y_OFFSET) + AppConfig.DIALOG_Y_OFFSET;
+                xOffset = appConfig.getInt(AppConfig.PROP_WIZARD_X_OFFSET) + AppConfig.DIALOG_X_OFFSET;
+                yOffset = appConfig.getInt(AppConfig.PROP_WIZARD_Y_OFFSET) + AppConfig.DIALOG_Y_OFFSET;
                 width = appConfig.getInt(AppConfig.DIALOG_BOUNDS_PREFIX + getClass().getSimpleName() + AppConfig.DIALOG_WIDTH_SUFFIX);
                 height = appConfig.getInt(AppConfig.DIALOG_BOUNDS_PREFIX + getClass().getSimpleName() + AppConfig.DIALOG_HEIGHT_SUFFIX);
             } catch (Exception ex) {

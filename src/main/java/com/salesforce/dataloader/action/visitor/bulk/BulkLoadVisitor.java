@@ -393,7 +393,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private void createBatch(ByteArrayOutputStream os, int numRecords) throws AsyncApiException {
         if (numRecords <= 0) return;
         final byte[] request = os.toByteArray();
-        if (controller.getAppConfig().getBoolean(AppConfig.SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV)) {
+        if (controller.getAppConfig().getBoolean(AppConfig.PROP_SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV)) {
             this.batchCountForJob++;
             writeServerLoadBatchDataToCSV(os);
         }
@@ -449,7 +449,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         	return;
         }
         DataReader dataReader = null;
-        if (!controller.getAppConfig().getBoolean(AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
+        if (!controller.getAppConfig().getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
             dataReader = resetDAO();
         }
         // create a map of batch infos by batch id. Each batchinfo has the final processing state of the batch
@@ -490,7 +490,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         
         final int totalRowsInDAOInCurrentBatch = lastDAORowForCurrentBatch - this.firstDAORowForCurrentBatch + 1;
         List<Row> rows;
-        if (controller.getAppConfig().getBoolean(AppConfig.PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
+        if (controller.getAppConfig().getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
             rows = new ArrayList<Row>();
             for (int i=0; i<totalRowsInDAOInCurrentBatch; i++) {
                 rows.add(i, this.daoRowList.get(i + this.firstDAORowForCurrentBatch));
@@ -519,7 +519,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         // get the batch csv result stream from sfdc
         final CSVReader resultRdr = this.jobUtil.getBatchResults(batch.getId());
 
-        if (controller.getAppConfig().getBoolean(AppConfig.SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV)) {
+        if (controller.getAppConfig().getBoolean(AppConfig.PROP_SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV)) {
             this.batchCountForJob++;
             writeRawResultsToCSV(this.jobUtil.getBatchResults(batch.getId()), this.batchCountForJob);
         }

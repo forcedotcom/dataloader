@@ -139,10 +139,10 @@ public class UIUtils {
         int height = AppConfig.DEFAULT_WIZARD_HEIGHT;
         if (appConfig != null) {
             try {
-                xOffset = appConfig.getInt(AppConfig.WIZARD_X_OFFSET);
-                yOffset = appConfig.getInt(AppConfig.WIZARD_Y_OFFSET);
-                width = appConfig.getInt(AppConfig.WIZARD_WIDTH);
-                height = appConfig.getInt(AppConfig.WIZARD_HEIGHT);
+                xOffset = appConfig.getInt(AppConfig.PROP_WIZARD_X_OFFSET);
+                yOffset = appConfig.getInt(AppConfig.PROP_WIZARD_Y_OFFSET);
+                width = appConfig.getInt(AppConfig.PROP_WIZARD_WIDTH);
+                height = appConfig.getInt(AppConfig.PROP_WIZARD_HEIGHT);
             } catch (Exception ex) {
                 // no op
             }
