@@ -368,7 +368,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 String[] args = {getImportBatchLimitsURL(), 
                         Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
                 labelImportBatchSize.setText(
-                        Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".importBatchSize", args));
+                        Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".uiLabel." + AppConfig.PROP_IMPORT_BATCH_SIZE, args));
             }
         });
         
@@ -400,7 +400,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 String[] args = {getImportBatchLimitsURL(), 
                         Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
                 labelImportBatchSize.setText(
-                        Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".importBatchSize", args));
+                        Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".uiLabel." + AppConfig.PROP_IMPORT_BATCH_SIZE, args));
             }
         });
         
