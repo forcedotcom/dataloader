@@ -232,6 +232,7 @@ public class AppConfig {
     // salesforce client connectivity
     public static final String PROP_USERNAME = "sfdc.username"; //$NON-NLS-1$
     public static final String PROP_PASSWORD = "sfdc.password"; //$NON-NLS-1$
+    public static final String PROP_AUTH_ENDPOINT_LEGACY = "sfdc.endpoint";
     public static final String PROP_AUTH_ENDPOINT_PROD = "sfdc.endpoint.production"; //$NON-NLS-1$
     public static final String PROP_AUTH_ENDPOINT_SANDBOX = "sfdc.endpoint.sandbox"; //$NON-NLS-1$
     public static final String PROP_PROXY_HOST = "sfdc.proxyHost"; //$NON-NLS-1$
@@ -507,6 +508,7 @@ public class AppConfig {
             PROP_RESET_URL_ON_LOGIN,
             PROP_USE_LEGACY_HTTP_GET,
             PROP_USE_SYSTEM_PROPS_FOR_HTTP_CLIENT,
+            PROP_AUTH_ENDPOINT_LEGACY,
     };
     
     // internal properties are derived in code. 
@@ -564,6 +566,16 @@ public class AppConfig {
         setOAuthEnvironment(getString(PROP_SELECTED_AUTH_ENVIRONMENT));
         if (getBoolean(AppUtil.CLI_OPTION_GENERATE_PROPERTIES_CSV)) {
             ConfigPropertyMetadata.printCSV(this);
+        }
+        if (getString(PROP_AUTH_ENDPOINT_LEGACY) != null &&
+                !getString(PROP_AUTH_ENDPOINT_LEGACY).isBlank()) {
+            String propToSet = PROP_AUTH_ENDPOINT_LEGACY + "." + getString(PROP_SELECTED_AUTH_ENVIRONMENT);
+            String currentValue = getString(propToSet);
+            if (currentValue == null || currentValue.isBlank() 
+                    || currentValue.startsWith(DEFAULT_ENDPOINT_URL_PROD)
+                    || currentValue.startsWith(DEFAULT_ENDPOINT_URL_SANDBOX)) {
+                setValue(propToSet, getString(PROP_AUTH_ENDPOINT_LEGACY));
+            }
         }
     }
     
