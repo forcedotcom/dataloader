@@ -332,12 +332,13 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 
                 // update batch size when this setting changes
                 int newDefaultBatchSize = getController().getAppConfig().getDefaultImportBatchSize(false, false);
-                logger.info("Setting batch size to " + newDefaultBatchSize);
+                logger.debug("Setting batch size to " + newDefaultBatchSize);
                 textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
                 String[] args = {getImportBatchLimitsURL(), 
                         Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
                 labelImportBatchSize.setText(
-                        Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".importBatchSize", args));
+                        Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".uiLabel." + AppConfig.PROP_IMPORT_BATCH_SIZE, args));
+                labelImportBatchSize.redraw();
             }
         });
         
@@ -363,12 +364,13 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 
                 // update batch size when this setting changes
                 int newDefaultBatchSize = getController().getAppConfig().getDefaultImportBatchSize(true, false);
-                logger.info("Setting batch size to " + newDefaultBatchSize);
+                logger.debug("Setting batch size to " + newDefaultBatchSize);
                 textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
                 String[] args = {getImportBatchLimitsURL(), 
                         Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
                 labelImportBatchSize.setText(
                         Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".uiLabel." + AppConfig.PROP_IMPORT_BATCH_SIZE, args));
+                labelImportBatchSize.redraw();
             }
         });
         
@@ -395,12 +397,13 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 
                 // get default batch size for Bulk v2 and set it
                 int newDefaultBatchSize = getController().getAppConfig().getDefaultImportBatchSize(true, true);
-                logger.info("Setting batch size to " + newDefaultBatchSize);
+                logger.debug("Setting batch size to " + newDefaultBatchSize);
                 textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
                 String[] args = {getImportBatchLimitsURL(), 
                         Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
                 labelImportBatchSize.setText(
                         Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".uiLabel." + AppConfig.PROP_IMPORT_BATCH_SIZE, args));
+                labelImportBatchSize.redraw();
             }
         });
         
