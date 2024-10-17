@@ -442,7 +442,7 @@ public class HttpClientTransport implements HttpTransportInterface {
         Header clientIdHeaderVal = this.httpMethod.getFirstHeader(AppConfig.CLIENT_ID_HEADER_NAME);
         if (clientIdHeaderVal == null) {
             AppConfig appConfig = AppConfig.getCurrentConfig();
-            this.httpMethod.addHeader(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.PROP_OAUTH_CLIENTID));
+            this.httpMethod.addHeader(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getOAuthClientIDForCurrentEnv());
         }
         Header clientNameHeaderVal = this.httpMethod.getFirstHeader(ClientBase.SFORCE_CALL_OPTIONS_HEADER);
         if (clientNameHeaderVal == null) {

@@ -680,7 +680,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     private void loginInternal(final PartnerConnection conn) throws ConnectionException, PasswordExpiredException {
         final ConnectorConfig cc = conn.getConfig();
-        cc.setRequestHeader(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.PROP_OAUTH_CLIENTID));
+        cc.setRequestHeader(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getOAuthClientIDForCurrentEnv());
         try {
             logger.info(Messages.getMessage(getClass(), "sforceLoginDetail", cc.getAuthEndpoint(), cc.getUsername()));
             LoginResult loginResult = runOperation(LOGIN_OPERATION, conn);

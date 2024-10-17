@@ -52,7 +52,8 @@ public class ConfigPropertyMetadata {
     private boolean commandLineOption = false;
     private String uiLabelTemplate = "";
     private String uiTooltipTemplate = "";
-    
+    private String description = "";
+
     static {
         Field[] appConfigFields = AppConfig.class.getDeclaredFields();
         for (Field configField : appConfigFields) {
@@ -108,6 +109,20 @@ public class ConfigPropertyMetadata {
         } else {
             this.uiTooltipTemplate = tooltipText;
         };
+        String description = null;
+        description = Labels.getString("AppConfig.property.description." + propName);
+        if (description != null && description.startsWith("!") && description.endsWith("!")) {
+            description = null;
+        }
+        if (description == null 
+                || (description.startsWith("!") && description.endsWith("!"))) {
+            description = null;
+        }
+        if (description == null) {
+            this.description = "";
+        } else {
+            this.description = description;
+        };
     }
     
     public static HashMap<String, ConfigPropertyMetadata> getPropertiesMap() {
@@ -159,7 +174,8 @@ public class ConfigPropertyMetadata {
     private static final String CSV_FILENAME = "properties.csv";
     
     private static final String COL_PROPERTY_NAME = "property name";
-    private static final String COL_DESCRIPTION = "Description";
+    private static final String COL_UI_LABEL = "Entry in Settings Dialog";
+    private static final String COL_DESCRIPTION = "Tooltip/Description";
     private static final String COL_DEFAULT_VAL = "Default value";
     private static final String COL_IS_READ_ONLY = "Settable through Settings dialog?";
     private static final String COL_IS_COMMAND_LINE_OPTION = "Command line option only?";
@@ -180,6 +196,7 @@ public class ConfigPropertyMetadata {
         CSVFileWriter csvWriter = new CSVFileWriter(propsFilename, appConfig, AppUtil.COMMA);
         ArrayList<String> colHeaders = new ArrayList<String>();
         colHeaders.add(COL_PROPERTY_NAME);
+        colHeaders.add(COL_UI_LABEL);
         colHeaders.add(COL_DESCRIPTION);
         colHeaders.add(COL_DEFAULT_VAL);
         colHeaders.add(COL_IS_READ_ONLY);
@@ -201,7 +218,11 @@ public class ConfigPropertyMetadata {
                 }
                 Row row = new Row();
                 row.put(COL_PROPERTY_NAME, propMD.getName());
-                String description = propMD.getUiLabelTemplate() + propMD.getUiTooltip();
+                row.put(COL_UI_LABEL, propMD.getUiLabelTemplate().isBlank() ? "None" : propMD.getUiLabelTemplate());
+                String description = propMD.getDescription();
+                if (description == null || description.isBlank()) {
+                    description = propMD.getUiTooltip();
+                }
                 row.put(COL_DESCRIPTION, description);
                 row.put(COL_DEFAULT_VAL, propMD.getDefaultValue());
                 row.put(COL_IS_READ_ONLY, propMD.isReadOnly());
@@ -216,5 +237,9 @@ public class ConfigPropertyMetadata {
         } finally {
             csvWriter.close();
         }
+    }
+
+    public String getDescription() {
+        return this.description;
     }
 }
