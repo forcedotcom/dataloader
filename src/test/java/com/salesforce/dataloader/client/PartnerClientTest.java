@@ -101,7 +101,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
         final String origUsername = appConfig.getString(AppConfig.PROP_USERNAME);
         final String origPassword = appConfig.getString(AppConfig.PROP_PASSWORD);
-        final String origEndpoint = appConfig.getAuthEndpoint();
+        final String origEndpoint = appConfig.getAuthEndpointForCurrentEnv();
 
         //login normally just to get sessionId and endpoint
         PartnerClient setupOnlyClient = new PartnerClient(getController());
@@ -116,7 +116,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL, true);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
-            appConfig.setAuthEndpoint(endpoint);
+            appConfig.setAuthEndpointForCurrentEnv(endpoint);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID, sessionId);
 
             PartnerClient client = new PartnerClient(getController());
@@ -124,7 +124,7 @@ public class PartnerClientTest extends ProcessTestBase {
         } finally {
             appConfig.setValue(AppConfig.PROP_USERNAME, origUsername);
             appConfig.setValue(AppConfig.PROP_PASSWORD, origPassword);
-            appConfig.setAuthEndpoint(origEndpoint);
+            appConfig.setAuthEndpointForCurrentEnv(origEndpoint);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL, false);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID, "");
@@ -137,7 +137,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
         final String origUsername = appConfig.getString(AppConfig.PROP_USERNAME);
         final String origPassword = appConfig.getString(AppConfig.PROP_PASSWORD);
-        final String origEndpoint = appConfig.getAuthEndpoint();
+        final String origEndpoint = appConfig.getAuthEndpointForCurrentEnv();
 
         //login normally just to get sessionId and endpoint
         PartnerClient setupOnlyClient = new PartnerClient(getController());
@@ -152,7 +152,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL, false);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
-            appConfig.setAuthEndpoint(endpoint);
+            appConfig.setAuthEndpointForCurrentEnv(endpoint);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID, sessionId);
 
             PartnerClient client = new PartnerClient(getController());
@@ -166,7 +166,7 @@ public class PartnerClientTest extends ProcessTestBase {
         } finally {
             appConfig.setValue(AppConfig.PROP_USERNAME, origUsername);
             appConfig.setValue(AppConfig.PROP_PASSWORD, origPassword);
-            appConfig.setAuthEndpoint(origEndpoint);
+            appConfig.setAuthEndpointForCurrentEnv(origEndpoint);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL, false);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN, false);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID, "");

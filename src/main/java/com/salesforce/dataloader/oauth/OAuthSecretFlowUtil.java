@@ -47,7 +47,7 @@ import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
  */
 public class OAuthSecretFlowUtil {
     public static String getStartUrlImpl(AppConfig appConfig) throws UnsupportedEncodingException {
-        return appConfig.getAuthEndpoint() +
+        return appConfig.getAuthEndpointForCurrentEnv() +
                 "/services/oauth2/authorize"
                 + "?response_type=code"
                 + "&display=popup"
@@ -57,11 +57,11 @@ public class OAuthSecretFlowUtil {
     }
 
     public static SimplePost handleSecondPost(String code, AppConfig appConfig) throws IOException, ParameterLoadException {
-        String server = appConfig.getAuthEndpoint() + "/services/oauth2/token";
+        String server = appConfig.getAuthEndpointForCurrentEnv() + "/services/oauth2/token";
         SimplePost client = SimplePostFactory.getInstance(appConfig, server,
                 new BasicNameValuePair("grant_type", "authorization_code"),
                 new BasicNameValuePair("code", code),
-                new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getOAuthClientIDForCurrentEnv()),
+                new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getClientIDForCurrentEnv()),
                 new BasicNameValuePair("client_secret", appConfig.getOAuthClientSecretForCurrentEnv()),
                 new BasicNameValuePair("redirect_uri", appConfig.getOAuthRedirectURIForCurrentEnv())
         );

@@ -588,7 +588,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
 
     private boolean login() throws ConnectionException, ApiFault {
         disconnect();
-        String origEndpoint = new String(appConfig.getAuthEndpoint());
+        String origEndpoint = new String(appConfig.getAuthEndpointForCurrentEnv());
         try {
             dologin();
             logger.debug("able to successfully invoke server APIs of version " + getAPIVersionForTheSession());
@@ -608,11 +608,11 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 exceptionMessage = lf.getExceptionMessage();
             }
             logger.warn(Messages.getMessage(this.getClass(), "failedUsernamePasswordAuth", 
-                                            origEndpoint, appConfig.getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT), exceptionMessage));
-            if (!appConfig.isDefaultAuthEndpoint(origEndpoint)) {
+                                            origEndpoint, appConfig.getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT), exceptionMessage));
+            if (!appConfig.isDefaultAuthEndpointForCurrentEnv(origEndpoint)) {
                 // retry with default endpoint URL only if user is attempting production login
-                appConfig.setAuthEndpoint(appConfig.getDefaultAuthEndpoint());
-                logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", appConfig.getDefaultAuthEndpoint(), appConfig.getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT)));
+                appConfig.setAuthEndpointForCurrentEnv(appConfig.getDefaultAuthEndpointForCurrentEnv());
+                logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", appConfig.getDefaultAuthEndpointForCurrentEnv(), appConfig.getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT)));
                 login();
             } else {
                 logger.error("Failed to get user info using manually configured session id", e);
@@ -620,7 +620,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             }
         } finally {
             // restore original value of Config.ENDPOINT property
-            appConfig.setAuthEndpoint(origEndpoint);
+            appConfig.setAuthEndpointForCurrentEnv(origEndpoint);
         }
         return true; // exception thrown if there is an issue with login
     }
@@ -674,13 +674,13 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         if (userInfo == null) {
             userInfo = conn.getUserInfo(); // check to make sure we have a good connection
         }
-        loginSuccess(conn, getAuthenticationHostDomainUrl(appConfig.getAuthEndpoint()), userInfo);
+        loginSuccess(conn, getAuthenticationHostDomainUrl(appConfig.getAuthEndpointForCurrentEnv()), userInfo);
         return conn;
     }
 
     private void loginInternal(final PartnerConnection conn) throws ConnectionException, PasswordExpiredException {
         final ConnectorConfig cc = conn.getConfig();
-        cc.setRequestHeader(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getOAuthClientIDForCurrentEnv());
+        cc.setRequestHeader(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getClientIDForCurrentEnv());
         try {
             logger.info(Messages.getMessage(getClass(), "sforceLoginDetail", cc.getAuthEndpoint(), cc.getUsername()));
             LoginResult loginResult = runOperation(LOGIN_OPERATION, conn);
@@ -728,7 +728,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
         // Either RESET_URL_ON_LOGIN is false or input param serverURL 
         // is invalid. Try returning configured Auth endpoint instead.
-        return appConfig.getAuthEndpoint();
+        return appConfig.getAuthEndpointForCurrentEnv();
     }
 
     public boolean logout() {
@@ -903,7 +903,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private synchronized ConnectorConfig getLoginConnectorConfig() {
-        return getLoginConnectorConfig(appConfig.getAuthEndpoint());
+        return getLoginConnectorConfig(appConfig.getAuthEndpointForCurrentEnv());
     }
     
     private synchronized ConnectorConfig getLoginConnectorConfig(String serverURL) {

@@ -122,7 +122,7 @@ public class UsernamePasswordLoginControl extends Composite {
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         envLabel.setLayoutData(data);
         envLabel.setText(Labels.getString("LoginPage.environment"));
-        ArrayList<String> environments = authRunner.getConfig().getStrings(AppConfig.PROP_AUTH_ENVIRONMENTS);
+        ArrayList<String> environments = authRunner.getConfig().getStrings(AppConfig.PROP_SERVER_ENVIRONMENTS);
 
         Combo envDropdown = new Combo(this, SWT.DROP_DOWN | SWT.BORDER);
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
@@ -130,7 +130,7 @@ public class UsernamePasswordLoginControl extends Composite {
         for (String label: environments) {
             envDropdown.add(label);
         }
-        String currentEnvironment = authRunner.getConfig().getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT);
+        String currentEnvironment = authRunner.getConfig().getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT);
         if (environments.contains(currentEnvironment)) {
             envDropdown.setText(currentEnvironment);
         }
@@ -171,7 +171,7 @@ public class UsernamePasswordLoginControl extends Composite {
             criteria = new LoginCriteria(LoginCriteria.UsernamePasswordLogin);
             criteria.setPassword(password.getText());
         }
-        criteria.setInstanceUrl(this.authRunner.getConfig().getAuthEndpoint());
+        criteria.setInstanceUrl(this.authRunner.getConfig().getAuthEndpointForCurrentEnv());
         criteria.setUserName(userName.getText());
         authRunner.login(criteria, this::setLoginStatus);
     }

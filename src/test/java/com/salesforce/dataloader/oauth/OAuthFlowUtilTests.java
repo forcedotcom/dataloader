@@ -54,33 +54,33 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
     @Before
     public void testSetup(){
         appConfig = getController().getAppConfig();
-        existingOAuthEnvironments = appConfig.getStrings(AppConfig.PROP_AUTH_ENVIRONMENTS);
-        existingEndPoint = appConfig.getAuthEndpoint();
+        existingOAuthEnvironments = appConfig.getStrings(AppConfig.PROP_SERVER_ENVIRONMENTS);
+        existingEndPoint = appConfig.getAuthEndpointForCurrentEnv();
         oauthServer = "https://OAUTH_PARTIAL_SERVER";
         oauthClientId = "CLIENTID";
         oauthRedirectUri = "REDIRECTURI";
 
-        appConfig.setValue(AppConfig.PROP_AUTH_ENVIRONMENTS, "Testing");
-        appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_CLIENTID, oauthClientId);
+        appConfig.setValue(AppConfig.PROP_SERVER_ENVIRONMENTS, "Testing");
+        appConfig.setOAuthEnvironmentString("Testing", AppConfig.CLIENTID_LITERAL, oauthClientId);
         appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_REDIRECTURI, oauthRedirectUri);
-        appConfig.setOAuthEnvironment("Testing");
+        appConfig.setServerEnvironment("Testing");
     }
 
     @After
     public void testCleanup(){
-        appConfig.setValue(AppConfig.PROP_AUTH_ENVIRONMENTS, existingOAuthEnvironments.toArray(new String[0]));
-        appConfig.setAuthEndpoint(existingEndPoint);
+        appConfig.setValue(AppConfig.PROP_SERVER_ENVIRONMENTS, existingOAuthEnvironments.toArray(new String[0]));
+        appConfig.setAuthEndpointForCurrentEnv(existingEndPoint);
     }
 
     @Test
     public void testGetStartUrl(){
         try {
-            String expected = appConfig.getAuthEndpoint() + "/services/oauth2/authorize"
+            String expected = appConfig.getAuthEndpointForCurrentEnv() + "/services/oauth2/authorize"
                     + "?response_type=token"
                     + "&display=popup"
                     + "&" + appConfig.getClientIdNameValuePair()
                     + "&redirect_uri=" 
-                    + URLEncoder.encode(appConfig.getAuthEndpoint()
+                    + URLEncoder.encode(appConfig.getAuthEndpointForCurrentEnv()
                     + "services/oauth2/success", StandardCharsets.UTF_8.name());
             String actual = OAuthFlowUtil.getStartUrlImpl(appConfig);
 

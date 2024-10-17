@@ -54,9 +54,9 @@ public class OAuthLoginControl extends Composite {
         Grid12 grid =  new Grid12(this, 40, false, true);
 
         grid.createLabel(4, Labels.getString("LoginPage.environment"));
-        ArrayList<String> environments = authRunner.getConfig().getStrings(AppConfig.PROP_AUTH_ENVIRONMENTS);
+        ArrayList<String> environments = authRunner.getConfig().getStrings(AppConfig.PROP_SERVER_ENVIRONMENTS);
         environment = grid.createCombo(6, SWT.DROP_DOWN | SWT.BORDER, environments);
-        String currentEnvironment = authRunner.getConfig().getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT);
+        String currentEnvironment = authRunner.getConfig().getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT);
         if (environments.contains(currentEnvironment)) {
             environment.setText(currentEnvironment);
         }

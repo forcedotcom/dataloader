@@ -51,9 +51,9 @@ public class ConfigTest extends ConfigTestBase {
     public void testProperty_SELECTED_AUTH_ENVIRONMENT() {
         try {
             AppConfig appConfig = AppConfig.getInstance(getTestConfig());
-            appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
-            String selectedAuthEnv = appConfig.getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT);
-            assertEquals(selectedAuthEnv, AppConfig.PROD_ENVIRONMENT_VAL);
+            appConfig.setServerEnvironment(AppConfig.SERVER_PROD_ENVIRONMENT_VAL);
+            String selectedAuthEnv = appConfig.getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT);
+            assertEquals(selectedAuthEnv, AppConfig.SERVER_PROD_ENVIRONMENT_VAL);
         } catch (ConfigInitializationException 
                 | FactoryConfigurationError
                 | IOException e) {
@@ -66,8 +66,8 @@ public class ConfigTest extends ConfigTestBase {
     public void testProperty_OAUTH_CLIENTID() {
         try {
             AppConfig appConfig = AppConfig.getInstance(getTestConfig());
-            appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
-            String configuredClientId = appConfig.getOAuthClientIDForCurrentEnv();
+            appConfig.setServerEnvironment(AppConfig.SERVER_PROD_ENVIRONMENT_VAL);
+            String configuredClientId = appConfig.getClientIDForCurrentEnv();
             if (appConfig.getBoolean(AppConfig.PROP_BULK_API_ENABLED) 
                     || appConfig.getBoolean(AppConfig.PROP_BULKV2_API_ENABLED)) {
                 assertTrue(configuredClientId != null && configuredClientId.startsWith("DataLoaderBulkUI"));
@@ -86,7 +86,7 @@ public class ConfigTest extends ConfigTestBase {
     public void testProperty_OAUTH_CLIENTSECRET() {
         try {
             AppConfig appConfig = AppConfig.getInstance(getTestConfig());
-            appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
+            appConfig.setServerEnvironment(AppConfig.SERVER_PROD_ENVIRONMENT_VAL);
             String configuredClientSecret = appConfig.getOAuthClientSecretForCurrentEnv();
             assertTrue(configuredClientSecret == null || configuredClientSecret.isBlank());
         } catch (ConfigInitializationException 
@@ -101,8 +101,8 @@ public class ConfigTest extends ConfigTestBase {
     public void testProperty_OAUTH_SERVER() {
         try {
             AppConfig appConfig = AppConfig.getInstance(getTestConfig());
-            appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
-            String configuredOAuthServer = appConfig.getAuthEndpoint();
+            appConfig.setServerEnvironment(AppConfig.SERVER_PROD_ENVIRONMENT_VAL);
+            String configuredOAuthServer = appConfig.getAuthEndpointForCurrentEnv();
             String expectedOAuthServer = getProperty("test.endpoint");
             if (expectedOAuthServer == null || expectedOAuthServer.isBlank()) {
                 logger.info("Expected prefix is " + expectedOAuthServer);
@@ -110,8 +110,8 @@ public class ConfigTest extends ConfigTestBase {
             }
             assertTrue(configuredOAuthServer.startsWith(expectedOAuthServer));
             
-            appConfig.setOAuthEnvironment(AppConfig.SB_ENVIRONMENT_VAL);
-            configuredOAuthServer = appConfig.getAuthEndpoint();
+            appConfig.setServerEnvironment(AppConfig.SERVER_SB_ENVIRONMENT_VAL);
+            configuredOAuthServer = appConfig.getAuthEndpointForCurrentEnv();
             assertTrue(configuredOAuthServer.startsWith(AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX));
         } catch (ConfigInitializationException 
                 | FactoryConfigurationError
@@ -127,7 +127,7 @@ public class ConfigTest extends ConfigTestBase {
         try {
             Map<String, String> testConfigMap = getTestConfig();
             AppConfig appConfig = AppConfig.getInstance(testConfigMap);
-            appConfig.setOAuthEnvironment(AppConfig.PROD_ENVIRONMENT_VAL);
+            appConfig.setServerEnvironment(AppConfig.SERVER_PROD_ENVIRONMENT_VAL);
             String configuredOAuthRedirectURI = appConfig.getOAuthRedirectURIForCurrentEnv();
             String expectedOAuthRedirectURIPrefix = getProperty("test.endpoint");
             if (expectedOAuthRedirectURIPrefix == null || expectedOAuthRedirectURIPrefix.isBlank()) {
