@@ -157,8 +157,8 @@ public class AppConfig {
     public static final String OAUTH_PROD_REDIRECTURI_VAL = "https://login.salesforce.com/services/oauth2/success";
     public static final String OAUTH_SB_REDIRECTURI_VAL = "https://test.salesforce.com/services/oauth2/success";
 
-    public static final String OAUTH_BULK_CLIENTID_VAL = "DataLoaderBulkUI/";
-    public static final String OAUTH_PARTNER_CLIENTID_VAL = "DataLoaderPartnerUI/";
+    public static final String BULK_CLIENTID_VAL = "DataLoaderBulkUI/";
+    public static final String PARTNER_CLIENTID_VAL = "DataLoaderPartnerUI/";
     
     public static final int DEFAULT_BULK_QUERY_PK_CHUNK_SIZE = 100000;
     public static final int MAX_BULK_QUERY_PK_CHUNK_SIZE = 250000;
@@ -659,11 +659,11 @@ public class AppConfig {
         setDefaultValue(PROP_SERVER_ENVIRONMENTS, SERVER_PROD_ENVIRONMENT_VAL + AppUtil.COMMA + SERVER_SB_ENVIRONMENT_VAL);
 
         /* sfdc.oauth.<env>.<bulk | partner>.clientid = DataLoaderBulkUI | DataLoaderPartnerUI */
-        setDefaultValue(PROP_CLIENTID_PROD_BULK, OAUTH_BULK_CLIENTID_VAL);
-        setDefaultValue(PROP_CLIENTID_PROD_PARTNER, OAUTH_PARTNER_CLIENTID_VAL);
+        setDefaultValue(PROP_CLIENTID_PROD_BULK, BULK_CLIENTID_VAL);
+        setDefaultValue(PROP_CLIENTID_PROD_PARTNER, PARTNER_CLIENTID_VAL);
 
-        setDefaultValue(PROP_CLIENTID_SANDBOX_BULK, OAUTH_BULK_CLIENTID_VAL);
-        setDefaultValue(PROP_CLIENTID_SANDBOX_PARTNER, OAUTH_PARTNER_CLIENTID_VAL);
+        setDefaultValue(PROP_CLIENTID_SANDBOX_BULK, BULK_CLIENTID_VAL);
+        setDefaultValue(PROP_CLIENTID_SANDBOX_PARTNER, PARTNER_CLIENTID_VAL);
 
         setDefaultValue(PROP_OPERATION, "insert");
         setDefaultValue(PROP_REUSE_CLIENT_CONNECTION, true);
