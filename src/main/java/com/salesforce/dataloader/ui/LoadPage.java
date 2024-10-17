@@ -55,7 +55,7 @@ public abstract class LoadPage extends OperationPage {
         + " "
         + controller.getAppConfig().getImportBatchSize()
         + "    "
-        + Labels.getString("AdvancedSettingsDialog.startRow")
+        + Labels.getString("AdvancedSettingsDialog.uiLabel." + AppConfig.PROP_LOAD_ROW_TO_START_AT)
         + " "
         + controller.getAppConfig().getString(AppConfig.PROP_LOAD_ROW_TO_START_AT); //$NON-NLS-1$
     }

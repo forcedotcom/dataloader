@@ -169,7 +169,7 @@ public class DataSelectionDialog extends WizardDialog {
                 + " "
                 + getController().getAppConfig().getImportBatchSize()
                 + "\n"
-                + Labels.getString("AdvancedSettingsDialog.startRow")
+                + Labels.getString("AdvancedSettingsDialog.uiLabel." + AppConfig.PROP_LOAD_ROW_TO_START_AT)
                 + " "
                 + getController().getAppConfig().getString(AppConfig.PROP_LOAD_ROW_TO_START_AT)
                 + "\n"
