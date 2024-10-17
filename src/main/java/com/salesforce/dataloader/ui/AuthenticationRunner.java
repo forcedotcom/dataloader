@@ -98,7 +98,7 @@ public class AuthenticationRunner {
                         return;
                     }
                 } else { // OAuth login from Data Loader app
-                    boolean hasSecret = !appConfig.getString(AppConfig.PROP_OAUTH_CLIENTSECRET).trim().equals("");
+                    boolean hasSecret = !appConfig.getOAuthClientSecretForCurrentEnv().trim().equals("");
                     OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, appConfig) : new OAuthTokenFlow(shell, appConfig);
                     if (!flow.open()) {
                        String message = Labels.getString("LoginPage.invalidLoginOAuth");

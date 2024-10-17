@@ -35,6 +35,8 @@ import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
@@ -59,7 +61,6 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
         oauthRedirectUri = "REDIRECTURI";
 
         appConfig.setValue(AppConfig.PROP_AUTH_ENVIRONMENTS, "Testing");
-        appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_SERVER, oauthServer);
         appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_CLIENTID, oauthClientId);
         appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_REDIRECTURI, oauthRedirectUri);
         appConfig.setOAuthEnvironment("Testing");
@@ -74,12 +75,13 @@ public class OAuthFlowUtilTests extends ConfigTestBase {
     @Test
     public void testGetStartUrl(){
         try {
-            appConfig.setValue(AppConfig.PROP_OAUTH_CLIENTID, "CLIENTID");
-            String expected = "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize"
+            String expected = appConfig.getAuthEndpoint() + "/services/oauth2/authorize"
                     + "?response_type=token"
                     + "&display=popup"
                     + "&" + appConfig.getClientIdNameValuePair()
-                    + "&redirect_uri=REDIRECTURI";
+                    + "&redirect_uri=" 
+                    + URLEncoder.encode(appConfig.getAuthEndpoint()
+                    + "services/oauth2/success", StandardCharsets.UTF_8.name());
             String actual = OAuthFlowUtil.getStartUrlImpl(appConfig);
 
             Assert.assertEquals( "OAuth Token Flow returned the wrong url", expected, actual);

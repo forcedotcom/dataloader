@@ -74,7 +74,6 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
         mockSimplePost = mock(SimplePost.class);
 
         appConfig.setValue(AppConfig.PROP_AUTH_ENVIRONMENTS, "Testing");
-        appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_SERVER, oauthServer);
         appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_CLIENTID, oauthClientId);
         appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_REDIRECTURI, oauthRedirectUri);
         appConfig.setOAuthEnvironment("Testing");
@@ -93,12 +92,13 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
     @Test
     public void testGetStartUrl(){
         try {
-            appConfig.setValue(AppConfig.PROP_OAUTH_CLIENTID, "CLIENTID");
-            String expected = "https://OAUTH_PARTIAL_SERVER/services/oauth2/authorize"
+            String expected = appConfig.getAuthEndpoint() + "/services/oauth2/authorize"
                     + "?response_type=code"
                     + "&display=popup"
                     + "&" + appConfig.getClientIdNameValuePair()
-                    + "&" + "redirect_uri=" + URLEncoder.encode("https://REDIRECTURI",  StandardCharsets.UTF_8.name());
+                    + "&" + "redirect_uri="
+                    + URLEncoder.encode(appConfig.getAuthEndpoint()
+                    + "services/oauth2/success", StandardCharsets.UTF_8.name());
             String actual = OAuthSecretFlowUtil.getStartUrlImpl(appConfig);
 
             Assert.assertEquals( "OAuth Token Flow returned the wrong url", expected, actual);

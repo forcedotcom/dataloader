@@ -96,10 +96,10 @@ public class OAuthBrowserLoginRunner {
         setLoginStatus(LoginStatus.WAIT);
         this.appConfig = appConfig;
         appConfig.setOAuthEnvironment(appConfig.getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT));
-        oAuthTokenURLStr = appConfig.getString(AppConfig.PROP_OAUTH_SERVER) + "/services/oauth2/token";
+        oAuthTokenURLStr = appConfig.getAuthEndpoint() + "/services/oauth2/token";
         SimplePost client = SimplePostFactory.getInstance(appConfig, oAuthTokenURLStr,
                new BasicNameValuePair("response_type", "device_code"),
-               new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.PROP_OAUTH_CLIENTID)),
+               new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getOAuthClientIDForCurrentEnv()),
                new BasicNameValuePair("scope", "api")
         );
         client.post();
@@ -201,7 +201,7 @@ public class OAuthBrowserLoginRunner {
                    elapsedTimeInSec += pollingIntervalInSec;
                    client = SimplePostFactory.getInstance(appConfig, oAuthTokenURLStr,
                            new BasicNameValuePair("grant_type", "device"),
-                           new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getString(AppConfig.PROP_OAUTH_CLIENTID)),
+                           new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getOAuthClientIDForCurrentEnv()),
                            new BasicNameValuePair("code", deviceCode)
                    );
                    try {

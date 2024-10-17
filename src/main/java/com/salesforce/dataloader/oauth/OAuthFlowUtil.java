@@ -44,13 +44,13 @@ import com.salesforce.dataloader.model.OAuthToken;
  */
 public class OAuthFlowUtil {
     public static String getStartUrlImpl(AppConfig appConfig) throws UnsupportedEncodingException {
-        return appConfig.getString(AppConfig.PROP_OAUTH_SERVER) +
+        return appConfig.getAuthEndpoint() +
                 "/services/oauth2/authorize"
                 + "?response_type=token"
                 + "&display=popup"
                 + "&" + appConfig.getClientIdNameValuePair() 
                 + "&redirect_uri="
-                + URLEncoder.encode(appConfig.getString(AppConfig.PROP_OAUTH_REDIRECTURI), StandardCharsets.UTF_8.name());
+                + URLEncoder.encode(appConfig.getOAuthRedirectURIForCurrentEnv(), StandardCharsets.UTF_8.name());
     }
     
 
