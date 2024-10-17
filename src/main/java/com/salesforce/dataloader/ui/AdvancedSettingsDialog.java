@@ -425,7 +425,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         data.grabExcessHorizontalSpace = true;
         buttonKeepAccountTeam.setLayoutData(data);
-        buttonKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipKeepAccountTeam"));
+        buttonKeepAccountTeam.setToolTipText(Labels.getString("AdvancedSettingsDialog.uiTooltip." + AppConfig.PROP_PROCESS_KEEP_ACCOUNT_TEAM));
 
         // update using external id
         labelUpdateWithExternalId = createLabel(soapApiOptionsComposite, null, null, AppConfig.PROP_UPDATE_WITH_EXTERNALID);
@@ -457,7 +457,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         createLabel(soapApiOptionsComposite, null, null, AppConfig.PROP_NO_COMPRESSION);
         buttonCompression = new Button(soapApiOptionsComposite, SWT.CHECK);
         buttonCompression.setSelection(appConfig.getBoolean(AppConfig.PROP_NO_COMPRESSION));
-        buttonCompression.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipCompression"));
+        buttonCompression.setToolTipText(Labels.getString("AdvancedSettingsDialog.uiTooltip." + AppConfig.PROP_NO_COMPRESSION));
 
         //timeout size
         createLabel(soapApiOptionsComposite, null, null, AppConfig.PROP_TIMEOUT_SECS);
@@ -476,7 +476,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         gc.dispose();
         data.widthHint = 4 * textSize.x;
         textTimeout.setLayoutData(data);
-        textTimeout.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipTimeout"));
+        textTimeout.setToolTipText(Labels.getString("AdvancedSettingsDialog.uiTooltip." + AppConfig.PROP_TIMEOUT_SECS));
 
         // Bulk API serial concurrency mode setting
         this.bulkApiOptionsComposite = new Composite(restComp, SWT.None);
@@ -599,7 +599,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.widthHint = 18 * textSize.x;
         textRule.setLayoutData(data);
         textRule.setText(appConfig.getString(AppConfig.PROP_ASSIGNMENT_RULE));
-        textRule.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipAssignmentRule"));
+        textRule.setToolTipText(Labels.getString("AdvancedSettingsDialog.uiTooltip." + AppConfig.PROP_ASSIGNMENT_RULE));
 
         //endpoints
         createLink(restComp, null, null, AppConfig.PROP_AUTH_ENDPOINT_PROD);
@@ -816,7 +816,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         Text labelRowToStart = createLabel(restComp, null, null, AppConfig.PROP_LOAD_ROW_TO_START_AT);
         labelRowToStart.setText(Labels.getString("AdvancedSettingsDialog.uiLabel." + AppConfig.PROP_LOAD_ROW_TO_START_AT)
                 + "\n("
-                + Labels.getFormattedString("AdvancedSettingsDialog.uiLabel.lastBatch", lastBatch)
+                + Labels.getFormattedString("AdvancedSettingsDialog.uiLabel." + LastRunProperties.LAST_LOAD_BATCH_ROW, lastBatch)
                 + ")"); //$NON-NLS-1$
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         labelRowToStart.setLayoutData(data);
