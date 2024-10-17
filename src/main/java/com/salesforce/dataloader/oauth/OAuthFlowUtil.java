@@ -44,7 +44,7 @@ import com.salesforce.dataloader.model.OAuthToken;
  */
 public class OAuthFlowUtil {
     public static String getStartUrlImpl(AppConfig appConfig) throws UnsupportedEncodingException {
-        return appConfig.getAuthEndpoint() +
+        return appConfig.getAuthEndpointForCurrentEnv() +
                 "/services/oauth2/authorize"
                 + "?response_type=token"
                 + "&display=popup"
@@ -93,7 +93,7 @@ public class OAuthFlowUtil {
                 }
             }
 
-            appConfig.setAuthEndpoint(token.getInstanceUrl());
+            appConfig.setAuthEndpointForCurrentEnv(token.getInstanceUrl());
             appConfig.setValue(AppConfig.PROP_OAUTH_ACCESSTOKEN, token.getAccessToken());
             appConfig.setValue(AppConfig.PROP_OAUTH_REFRESHTOKEN, token.getRefreshToken());
             appConfig.setValue(AppConfig.PROP_OAUTH_INSTANCE_URL, token.getInstanceUrl());

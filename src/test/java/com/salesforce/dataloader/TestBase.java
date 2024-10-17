@@ -263,7 +263,7 @@ abstract class TestBase {
         ConnectorConfig bindingConfig = new ConnectorConfig();
         bindingConfig.setUsername(getController().getAppConfig().getString(AppConfig.PROP_USERNAME));
         bindingConfig.setPassword(getController().getAppConfig().getString(AppConfig.PROP_PASSWORD));
-        String configEndpoint = getController().getAppConfig().getAuthEndpoint();
+        String configEndpoint = getController().getAppConfig().getAuthEndpointForCurrentEnv();
         if (!configEndpoint.equals("")) { //$NON-NLS-1$
             try {
                 PartnerClient.setAPIVersionForTheSession(apiVersionStr);

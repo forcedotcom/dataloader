@@ -86,7 +86,7 @@ public class LoginPage extends OperationPage {
         layouts[2].addListener(SWT.Selection, this::selectSessionId);
 
         //turn off oauth options if no configured environments found
-        if (appConfig.getStrings(AppConfig.PROP_AUTH_ENVIRONMENTS).size() > 0) {
+        if (appConfig.getStrings(AppConfig.PROP_SERVER_ENVIRONMENTS).size() > 0) {
             layouts[0].setSelection(true);
             selectOAuth(null);
         } else {

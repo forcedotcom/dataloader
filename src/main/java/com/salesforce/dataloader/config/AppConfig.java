@@ -151,8 +151,8 @@ public class AppConfig {
     public static final String DEFAULT_ENDPOINT_URL_SANDBOX = "https://test.salesforce.com";
     public static final String LIGHTNING_ENDPOINT_URL_PART_VAL = "lightning.force.com";
     public static final String MYSF_ENDPOINT_URL_PART_VAL = "mysalesforce.com";
-    public static final String PROD_ENVIRONMENT_VAL = "Production";
-    public static final String SB_ENVIRONMENT_VAL = "Sandbox";
+    public static final String SERVER_PROD_ENVIRONMENT_VAL = "Production";
+    public static final String SERVER_SB_ENVIRONMENT_VAL = "Sandbox";
 
     public static final String OAUTH_PROD_REDIRECTURI_VAL = "https://login.salesforce.com/services/oauth2/success";
     public static final String OAUTH_SB_REDIRECTURI_VAL = "https://test.salesforce.com/services/oauth2/success";
@@ -264,31 +264,31 @@ public class AppConfig {
     public static final String PROP_TIMEZONE = "sfdc.timezone";
 
     public static final String OAUTH_PREFIX = "sfdc.oauth.";
-    public static final String OAUTH_PARTIAL_BULK = "bulk";
-    public static final String OAUTH_PARTIAL_PARTNER = "partner";
+    public static final String BULK_LITERAL = "bulk";
+    public static final String PARTNER_LITERAL = "partner";
     public static final String OAUTH_PARTIAL_CLIENTSECRET = "clientsecret";
-    public static final String OAUTH_PARTIAL_CLIENTID = "clientid";
+    public static final String CLIENTID_LITERAL = "clientid";
     public static final String OAUTH_PARTIAL_REDIRECTURI = "redirecturi";
-    public static final String OAUTH_PARTIAL_BULK_CLIENTID = OAUTH_PARTIAL_BULK + "." + OAUTH_PARTIAL_CLIENTID;
-    public static final String OAUTH_PARTIAL_PARTNER_CLIENTID = OAUTH_PARTIAL_PARTNER + "." + OAUTH_PARTIAL_CLIENTID;
+    public static final String BULK_CLIENTID_LITERAL = BULK_LITERAL + "." + CLIENTID_LITERAL;
+    public static final String PARTNER_CLIENTID_LITERAL = PARTNER_LITERAL + "." + CLIENTID_LITERAL;
 
-    public static final String PROP_AUTH_ENVIRONMENTS = OAUTH_PREFIX + "environments";
-    public static final String PROP_SELECTED_AUTH_ENVIRONMENT = OAUTH_PREFIX + "environment";
+    public static final String PROP_SERVER_ENVIRONMENTS = OAUTH_PREFIX + "environments";
+    public static final String PROP_SELECTED_SERVER_ENVIRONMENT = OAUTH_PREFIX + "environment";
     public static final String PROP_OAUTH_ACCESSTOKEN = OAUTH_PREFIX + "accesstoken";
     public static final String PROP_OAUTH_REFRESHTOKEN = OAUTH_PREFIX + "refreshtoken";
     public static final String PROP_OAUTH_LOGIN_FROM_BROWSER = OAUTH_PREFIX + "loginfrombrowser";
-    public static final String PROP_OAUTH_CLIENTID_PROD_PARTNER = OAUTH_PREFIX 
-            + PROD_ENVIRONMENT_VAL 
-            + "." +  OAUTH_PARTIAL_PARTNER_CLIENTID;
-    public static final String PROP_OAUTH_CLIENTID_PROD_BULK = OAUTH_PREFIX 
-            + PROD_ENVIRONMENT_VAL 
-            + "." +  OAUTH_PARTIAL_BULK_CLIENTID;
-    public static final String PROP_OAUTH_CLIENTID_SANDBOX_PARTNER = OAUTH_PREFIX 
-            + SB_ENVIRONMENT_VAL 
-            + "." +  OAUTH_PARTIAL_PARTNER_CLIENTID;
-    public static final String PROP_OAUTH_CLIENTID_SANDBOX_BULK = OAUTH_PREFIX 
-            + SB_ENVIRONMENT_VAL 
-            + "." +  OAUTH_PARTIAL_BULK_CLIENTID;
+    public static final String PROP_CLIENTID_PROD_PARTNER = OAUTH_PREFIX 
+            + SERVER_PROD_ENVIRONMENT_VAL 
+            + "." +  PARTNER_CLIENTID_LITERAL;
+    public static final String PROP_CLIENTID_PROD_BULK = OAUTH_PREFIX 
+            + SERVER_PROD_ENVIRONMENT_VAL 
+            + "." +  BULK_CLIENTID_LITERAL;
+    public static final String PROP_CLIENTID_SANDBOX_PARTNER = OAUTH_PREFIX 
+            + SERVER_SB_ENVIRONMENT_VAL 
+            + "." +  PARTNER_CLIENTID_LITERAL;
+    public static final String PROP_CLIENTID_SANDBOX_BULK = OAUTH_PREFIX 
+            + SERVER_SB_ENVIRONMENT_VAL 
+            + "." +  BULK_CLIENTID_LITERAL;
     public static final String OAUTH_REDIRECT_URI_SUFFIX = "services/oauth2/success";
     public static final String PROP_REUSE_CLIENT_CONNECTION = "sfdc.reuseClientConnection";
     public static final String PROP_RICH_TEXT_FIELD_REGEX = "sfdx.richtext.regex";
@@ -490,10 +490,10 @@ public class AppConfig {
             PROP_OAUTH_ACCESSTOKEN,
             PROP_OAUTH_REFRESHTOKEN,
             PROP_OAUTH_INSTANCE_URL,
-            OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI,
-            OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI,
-            OAUTH_PREFIX + PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
-            OAUTH_PREFIX + SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
+            OAUTH_PREFIX + SERVER_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI,
+            OAUTH_PREFIX + SERVER_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI,
+            OAUTH_PREFIX + SERVER_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
+            OAUTH_PREFIX + SERVER_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
             PROP_RESET_URL_ON_LOGIN,
             PROP_USE_LEGACY_HTTP_GET,
             PROP_USE_SYSTEM_PROPS_FOR_HTTP_CLIENT,
@@ -554,13 +554,13 @@ public class AppConfig {
         initializeLastRun(getLastRunPrefix());
         
         // Properties initialization completed. Configure OAuth environment next
-        setOAuthEnvironment(getString(PROP_SELECTED_AUTH_ENVIRONMENT));
+        setServerEnvironment(getString(PROP_SELECTED_SERVER_ENVIRONMENT));
         if (getBoolean(AppUtil.CLI_OPTION_GENERATE_PROPERTIES_CSV)) {
             ConfigPropertyMetadata.printCSV(this);
         }
         if (getString(PROP_AUTH_ENDPOINT_LEGACY) != null &&
                 !getString(PROP_AUTH_ENDPOINT_LEGACY).isBlank()) {
-            String propToSet = PROP_AUTH_ENDPOINT_LEGACY + "." + getString(PROP_SELECTED_AUTH_ENVIRONMENT);
+            String propToSet = PROP_AUTH_ENDPOINT_LEGACY + "." + getString(PROP_SELECTED_SERVER_ENVIRONMENT);
             String currentValue = getString(propToSet);
             if (currentValue == null || currentValue.isBlank() 
                     || currentValue.startsWith(DEFAULT_ENDPOINT_URL_PROD)
@@ -655,15 +655,15 @@ public class AppConfig {
         setDefaultValue(PROP_SFDC_INTERNAL_SESSION_ID, (String) null);
 
         //oauth settings
-        setDefaultValue(PROP_SELECTED_AUTH_ENVIRONMENT, PROD_ENVIRONMENT_VAL);
-        setDefaultValue(PROP_AUTH_ENVIRONMENTS, PROD_ENVIRONMENT_VAL + AppUtil.COMMA + SB_ENVIRONMENT_VAL);
+        setDefaultValue(PROP_SELECTED_SERVER_ENVIRONMENT, SERVER_PROD_ENVIRONMENT_VAL);
+        setDefaultValue(PROP_SERVER_ENVIRONMENTS, SERVER_PROD_ENVIRONMENT_VAL + AppUtil.COMMA + SERVER_SB_ENVIRONMENT_VAL);
 
         /* sfdc.oauth.<env>.<bulk | partner>.clientid = DataLoaderBulkUI | DataLoaderPartnerUI */
-        setDefaultValue(PROP_OAUTH_CLIENTID_PROD_BULK, OAUTH_BULK_CLIENTID_VAL);
-        setDefaultValue(PROP_OAUTH_CLIENTID_PROD_PARTNER, OAUTH_PARTNER_CLIENTID_VAL);
+        setDefaultValue(PROP_CLIENTID_PROD_BULK, OAUTH_BULK_CLIENTID_VAL);
+        setDefaultValue(PROP_CLIENTID_PROD_PARTNER, OAUTH_PARTNER_CLIENTID_VAL);
 
-        setDefaultValue(PROP_OAUTH_CLIENTID_SANDBOX_BULK, OAUTH_BULK_CLIENTID_VAL);
-        setDefaultValue(PROP_OAUTH_CLIENTID_SANDBOX_PARTNER, OAUTH_PARTNER_CLIENTID_VAL);
+        setDefaultValue(PROP_CLIENTID_SANDBOX_BULK, OAUTH_BULK_CLIENTID_VAL);
+        setDefaultValue(PROP_CLIENTID_SANDBOX_PARTNER, OAUTH_PARTNER_CLIENTID_VAL);
 
         setDefaultValue(PROP_OPERATION, "insert");
         setDefaultValue(PROP_REUSE_CLIENT_CONNECTION, true);
@@ -681,7 +681,7 @@ public class AppConfig {
         setDefaultValue(PROP_DELETE_WITH_EXTERNALID, false);
         setDefaultValue(PROP_OAUTH_LOGIN_FROM_BROWSER, true);
         setDefaultValue(PROP_LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
-        setDefaultValue(AppConfig.CLI_OPTION_RUN_MODE, AppConfig.RUN_MODE_UI_VAL);
+        setDefaultValue(CLI_OPTION_RUN_MODE, RUN_MODE_UI_VAL);
         setDefaultValue(PROP_SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV, false);
         setDefaultValue(PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO, true);
         setDefaultValue(PROP_PROCESS_KEEP_ACCOUNT_TEAM, false);
@@ -1291,28 +1291,28 @@ public class AppConfig {
         lastRunProperties.save();
     }
     
-    public void setAuthEndpoint(String authEndpoint) {
-        this.setAuthEndpointForEnv(authEndpoint, getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT));
+    public void setAuthEndpointForCurrentEnv(String authEndpoint) {
+        this.setAuthEndpointForEnv(authEndpoint, getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT));
     }
     
     public void setAuthEndpointForEnv(String authEndpoint, String env) {
         AppUtil.validateAuthenticationHostDomainUrlAndThrow(authEndpoint);
-        if (env != null && env.equalsIgnoreCase(AppConfig.SB_ENVIRONMENT_VAL)) {
+        if (env != null && env.equalsIgnoreCase(AppConfig.SERVER_SB_ENVIRONMENT_VAL)) {
             this.setValue(AppConfig.PROP_AUTH_ENDPOINT_SANDBOX, authEndpoint);
         } else {
             this.setValue(AppConfig.PROP_AUTH_ENDPOINT_PROD, authEndpoint);
         }
     }
     
-    public String getAuthEndpoint() {
+    public String getAuthEndpointForCurrentEnv() {
         String endpoint = null;
-        if (AppConfig.SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT))) {
+        if (AppConfig.SERVER_SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT))) {
             endpoint = getString(AppConfig.PROP_AUTH_ENDPOINT_SANDBOX);
         } else {
             endpoint = getString(AppConfig.PROP_AUTH_ENDPOINT_PROD);
         }
         if (endpoint == null || endpoint.isBlank()) {
-            endpoint = getDefaultAuthEndpoint();
+            endpoint = getDefaultAuthEndpointForCurrentEnv();
         }
         if (!endpoint.endsWith("/")) {
             endpoint += "/";
@@ -1321,19 +1321,19 @@ public class AppConfig {
         return endpoint;
     }
     
-    public String getDefaultAuthEndpoint() {
-        if (AppConfig.SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT))) {
+    public String getDefaultAuthEndpointForCurrentEnv() {
+        if (AppConfig.SERVER_SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT))) {
             return AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX;
         } else { // assume production is the only alternate environment
             return AppConfig.DEFAULT_ENDPOINT_URL_PROD;
         }
     }
     
-    public boolean isDefaultAuthEndpoint(String endpoint) {
+    public boolean isDefaultAuthEndpointForCurrentEnv(String endpoint) {
         if (endpoint == null || endpoint.isBlank()) {
             return false;
         }
-        if (AppConfig.SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT))) {
+        if (AppConfig.SERVER_SB_ENVIRONMENT_VAL.equals(this.getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT))) {
             return AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX.equalsIgnoreCase(endpoint);
         } else { // assume production is the only alternate environment
             return AppConfig.DEFAULT_ENDPOINT_URL_PROD.equalsIgnoreCase(endpoint);
@@ -1459,7 +1459,7 @@ public class AppConfig {
     public static final String CLIENT_ID_HEADER_NAME="client_id";
     
     public String getClientIdNameValuePair() {
-        return CLIENT_ID_HEADER_NAME + "=" + this.getOAuthClientIDForCurrentEnv();
+        return CLIENT_ID_HEADER_NAME + "=" + this.getClientIDForCurrentEnv();
     }
 
     /**
@@ -1701,11 +1701,11 @@ public class AppConfig {
         setValue(OAUTH_PREFIX + environmentName + "." + name, values);
     }
 
-    public void setOAuthEnvironment(String environment) {
+    public void setServerEnvironment(String environment) {
         if (environment == null || environment.isBlank()) {
-            environment = PROD_ENVIRONMENT_VAL;
+            environment = SERVER_PROD_ENVIRONMENT_VAL;
         }
-        String[] envArray = getString(PROP_AUTH_ENVIRONMENTS).split(",");
+        String[] envArray = getString(PROP_SERVER_ENVIRONMENTS).split(",");
         boolean isEnvMatch = false;
         for (String env : envArray) {
             env = env.strip();
@@ -1714,30 +1714,30 @@ public class AppConfig {
             }
         }
         if (!isEnvMatch) {
-            environment = PROD_ENVIRONMENT_VAL;
+            environment = SERVER_PROD_ENVIRONMENT_VAL;
         }
-        setValue(PROP_SELECTED_AUTH_ENVIRONMENT, environment);
+        setValue(PROP_SELECTED_SERVER_ENVIRONMENT, environment);
     }
     
     public String getOAuthClientSecretForCurrentEnv() {
-        return getOAuthEnvironmentString(getString(PROP_SELECTED_AUTH_ENVIRONMENT),
+        return getOAuthEnvironmentString(getString(PROP_SELECTED_SERVER_ENVIRONMENT),
                                             OAUTH_PARTIAL_CLIENTSECRET);
     }
     
     public String getOAuthRedirectURIForCurrentEnv() {
-        return getAuthEndpoint() + AppConfig.OAUTH_REDIRECT_URI_SUFFIX;
+        return getAuthEndpointForCurrentEnv() + AppConfig.OAUTH_REDIRECT_URI_SUFFIX;
     }
     
-    public String getOAuthClientIDForCurrentEnv() {
+    public String getClientIDForCurrentEnv() {
         String clientId;
-        String environment = getString(AppConfig.PROP_SELECTED_AUTH_ENVIRONMENT);
+        String environment = getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT);
         if (getBoolean(PROP_BULK_API_ENABLED) || getBoolean(PROP_BULKV2_API_ENABLED)) {
-            clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_BULK_CLIENTID);
+            clientId = getOAuthEnvironmentString(environment, BULK_CLIENTID_LITERAL);
         } else {
-            clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_PARTNER_CLIENTID);
+            clientId = getOAuthEnvironmentString(environment, PARTNER_CLIENTID_LITERAL);
         }
         if (clientId == null || clientId.isEmpty()) {
-            clientId = getOAuthEnvironmentString(environment, OAUTH_PARTIAL_CLIENTID);
+            clientId = getOAuthEnvironmentString(environment, CLIENTID_LITERAL);
         }
         return clientId;
     }
