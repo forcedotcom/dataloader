@@ -29,7 +29,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -42,7 +43,7 @@ import com.salesforce.dataloader.util.AppUtil;
  * Data class capturing information about configuration property (aka Setting).
  */
 public class ConfigPropertyMetadata {
-    private static final HashMap<String, ConfigPropertyMetadata> propertiesMap = new HashMap<String, ConfigPropertyMetadata>();
+    private static final TreeMap<String, ConfigPropertyMetadata> propertiesMap = new TreeMap<String, ConfigPropertyMetadata>();
     
     private final String name;
     private String defaultValue = "";
@@ -62,13 +63,13 @@ public class ConfigPropertyMetadata {
                 String propName;
                 try {
                     propName = configField.get(null).toString();
+                    if (propName == null || propName.isBlank() || propName.startsWith(AppConfig.PILOT_PROPERTY_PREFIX)) {
+                        continue;
+                    }
                 } catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
                     continue;
                 }
                 ConfigPropertyMetadata configProp = new ConfigPropertyMetadata(propName);
-                configProp.setEncrypted(AppConfig.isEncryptedProperty(propName));
-                configProp.setReadOnly(AppConfig.isReadOnlyProperty(propName));
-                configProp.setInternal(AppConfig.isInternalProperty(propName));
                 propertiesMap.put(propName, configProp);
             }
         }
@@ -82,7 +83,8 @@ public class ConfigPropertyMetadata {
                     continue;
                 }
                 ConfigPropertyMetadata configProp = new ConfigPropertyMetadata(propName);
-                configProp.setReadOnly(true);
+                configProp.setCommandLineOption(true);
+                configProp.setReadOnly(true); // all command line options are read-only
                 propertiesMap.put(propName, configProp);
             }
         }
@@ -122,10 +124,13 @@ public class ConfigPropertyMetadata {
             this.description = "";
         } else {
             this.description = description;
-        };
+        }
+        this.encrypted = AppConfig.isEncryptedProperty(propName);
+        this.readOnly = AppConfig.isReadOnlyProperty(propName);
+        this.internal = AppConfig.isInternalProperty(propName);
     }
     
-    public static HashMap<String, ConfigPropertyMetadata> getPropertiesMap() {
+    public static Map<String, ConfigPropertyMetadata> getPropertiesMap() {
         return propertiesMap;
     }
     public String getDefaultValue() {
@@ -137,14 +142,11 @@ public class ConfigPropertyMetadata {
     public boolean isReadOnly() {
         return readOnly;
     }
-    public void setReadOnly(boolean readonly) {
-        this.readOnly = readonly;
+    public void setReadOnly(boolean ro) {
+        this.readOnly = ro;
     }
     public boolean isEncrypted() {
         return encrypted;
-    }
-    public void setEncrypted(boolean encrypted) {
-        this.encrypted = encrypted;
     }
     public boolean isCommandLineOption() {
         return commandLineOption;
@@ -163,22 +165,18 @@ public class ConfigPropertyMetadata {
         return internal;
     }
 
-    public void setInternal(boolean internal) {
-        this.internal = internal;
-    }
-    
     public String getName() {
         return this.name;
     }
     
     private static final String CSV_FILENAME = "properties.csv";
     
-    private static final String COL_PROPERTY_NAME = "property name";
-    private static final String COL_UI_LABEL = "Entry in Settings Dialog";
-    private static final String COL_DESCRIPTION = "Tooltip/Description";
+    private static final String COL_PROPERTY_NAME = "Property";
+    private static final String COL_DESCRIPTION = "Description";
+    private static final String COL_UI_LABEL = "Property label in Settings Dialog (\"none\" means property is not in Settings dialog)";
     private static final String COL_DEFAULT_VAL = "Default value";
-    private static final String COL_IS_READ_ONLY = "Settable through Settings dialog?";
-    private static final String COL_IS_COMMAND_LINE_OPTION = "Command line option only?";
+    private static final String COL_IS_READ_ONLY = "is read-only?";
+    private static final String COL_IS_COMMAND_LINE_OPTION = "is settable only as a Command line option?";
     private static final String COL_IS_ENCRYPTED = "encrypted?";
 
     public static void printCSV(AppConfig appConfig) {
@@ -196,10 +194,10 @@ public class ConfigPropertyMetadata {
         CSVFileWriter csvWriter = new CSVFileWriter(propsFilename, appConfig, AppUtil.COMMA);
         ArrayList<String> colHeaders = new ArrayList<String>();
         colHeaders.add(COL_PROPERTY_NAME);
-        colHeaders.add(COL_UI_LABEL);
         colHeaders.add(COL_DESCRIPTION);
         colHeaders.add(COL_DEFAULT_VAL);
         colHeaders.add(COL_IS_READ_ONLY);
+        colHeaders.add(COL_UI_LABEL);
         colHeaders.add(COL_IS_COMMAND_LINE_OPTION);
         colHeaders.add(COL_IS_ENCRYPTED);
 

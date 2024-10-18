@@ -227,13 +227,9 @@ public class DatabaseReader implements DataReader {
 
     @Override
     public int getTotalRows() throws DataAccessObjectException {
-    	boolean skipRowCount = AppConfig.DEFAULT_SKIP_TOTAL_COUNT;
-    	
-    	if (appConfig.contains(AppConfig.PROP_DAO_SKIP_TOTAL_COUNT))
-    		skipRowCount = appConfig.getBoolean(AppConfig.PROP_DAO_SKIP_TOTAL_COUNT);
-    	
-    	if (skipRowCount == true)
+    	if (appConfig.getBoolean(AppConfig.PROP_DAO_SKIP_TOTAL_COUNT)) {
     		return 0;
+    	}
 
     	if (totalRows == 0) {
     		totalRows = DAORowUtil.calculateTotalRows(this);

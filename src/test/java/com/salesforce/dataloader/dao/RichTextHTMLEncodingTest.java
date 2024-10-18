@@ -35,9 +35,10 @@ import org.junit.Test;
 
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
+import com.salesforce.dataloader.config.AppConfig;
 
 public class RichTextHTMLEncodingTest extends ConfigTestBase {
-    String regex = DAOLoadVisitor.DEFAULT_RICHTEXT_REGEX;
+    String regex = AppConfig.DEFAULT_RICHTEXT_REGEX;
 
     @Test
     public void testNoHTMLTags() throws Exception {

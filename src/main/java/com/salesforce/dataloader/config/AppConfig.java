@@ -266,9 +266,9 @@ public class AppConfig {
     public static final String OAUTH_PREFIX = "sfdc.oauth.";
     public static final String BULK_LITERAL = "bulk";
     public static final String PARTNER_LITERAL = "partner";
-    public static final String OAUTH_PARTIAL_CLIENTSECRET = "clientsecret";
+    public static final String CLIENTSECRET_LITERAL = "clientsecret";
     public static final String CLIENTID_LITERAL = "clientid";
-    public static final String OAUTH_PARTIAL_REDIRECTURI = "redirecturi";
+    public static final String REDIRECTURI_LITERAL = "redirecturi";
     public static final String BULK_CLIENTID_LITERAL = BULK_LITERAL + "." + CLIENTID_LITERAL;
     public static final String PARTNER_CLIENTID_LITERAL = PARTNER_LITERAL + "." + CLIENTID_LITERAL;
 
@@ -289,6 +289,18 @@ public class AppConfig {
     public static final String PROP_CLIENTID_SANDBOX_BULK = OAUTH_PREFIX 
             + SERVER_SB_ENVIRONMENT_VAL 
             + "." +  BULK_CLIENTID_LITERAL;
+    public static final String PROP_OAUTH_CLIENTSECRET_PROD = OAUTH_PREFIX 
+            + SERVER_PROD_ENVIRONMENT_VAL 
+            + "." +  CLIENTSECRET_LITERAL;
+    public static final String PROP_OAUTH_CLIENTSECRET_SB = OAUTH_PREFIX 
+            + SERVER_SB_ENVIRONMENT_VAL 
+            + "." +  CLIENTSECRET_LITERAL;
+    public static final String PROP_OAUTH_REDIRECT_URI_PROD = OAUTH_PREFIX 
+            + SERVER_PROD_ENVIRONMENT_VAL 
+            + "." +  REDIRECTURI_LITERAL;
+    public static final String PROP_OAUTH_REDIRECT_URI_SB = OAUTH_PREFIX 
+            + SERVER_SB_ENVIRONMENT_VAL 
+            + "." +  REDIRECTURI_LITERAL;
     public static final String OAUTH_REDIRECT_URI_SUFFIX = "services/oauth2/success";
     public static final String PROP_REUSE_CLIENT_CONNECTION = "sfdc.reuseClientConnection";
     public static final String PROP_RICH_TEXT_FIELD_REGEX = "sfdx.richtext.regex";
@@ -321,7 +333,6 @@ public class AppConfig {
     public static final String PROP_ENABLE_LAST_RUN_OUTPUT = "process.enableLastRunOutput"; //$NON-NLS-1$
     public static final String PROP_LAST_RUN_OUTPUT_DIR = "process.lastRunOutputDirectory"; //$NON-NLS-1$
     public static final String PROP_OUTPUT_ERROR = "process.outputError"; //$NON-NLS-1$
-    public static final String PROP_OUTPUT_UNPROCESSED_RECORDS = "process.unprocessedRecords"; //$NON-NLS-1$
     public static final String PROP_LOAD_ROW_TO_START_AT = "process.loadRowToStartAt"; //$NON-NLS-1$
     public static final String PROP_INITIAL_LAST_RUN_DATE = "process.initialLastRunDate";
     public static final String PROP_ENCRYPTION_KEY_FILE = "process.encryptionKeyFile"; //$NON-NLS-1$
@@ -372,9 +383,10 @@ public class AppConfig {
     public static final String PROP_DUPLICATE_RULE_ALLOW_SAVE = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.allowSave"; //$NON-NLS-1$
     public static final String PROP_DUPLICATE_RULE_INCLUDE_RECORD_DETAILS = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.includeRecordDetails"; //$NON-NLS-1$
     public static final String PROP_DUPLICATE_RULE_RUN_AS_CURRENT_USER = PILOT_PROPERTY_PREFIX + "sfdc.duplicateRule.runAsCurrentUser"; //$NON-NLS-1$
+/*
     public static final String PROP_DAO_READ_PREPROCESSOR_SCRIPT = PILOT_PROPERTY_PREFIX + "dataAccess.read.preProcessorScript";
     public static final String PROP_DAO_WRITE_POSTPROCESSOR_SCRIPT = PILOT_PROPERTY_PREFIX + "dataAccess.write.postProcessorScript";
-
+*/
     /*
      * ===============================
      * End of config properties
@@ -424,6 +436,8 @@ public class AppConfig {
      */
     public static final String BULK_API_ENCODING = StandardCharsets.UTF_8.name();
     public static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
+    public static final String DEFAULT_RICHTEXT_REGEX = "<(?=[a-zA-Z/])(\"[^\"]*\"|'[^']*'|[^'\">])*>";
+
     
     /*
      * command line options. Not stored in config.properties file.
@@ -444,7 +458,6 @@ public class AppConfig {
     public static final String PROP_WIZARD_HEIGHT = "sfdc.ui.wizard.height";
     public static final String PROP_WIZARD_X_OFFSET = "sfdc.ui.wizard.xoffset";
     public static final String PROP_WIZARD_Y_OFFSET = "sfdc.ui.wizard.yoffset";
-    public static final String PROP_ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG = "sfdc.ui.wizard.enforceWidthHeight";
     public static final String PROP_WIZARD_CLOSE_ON_FINISH = "sfdc.ui.wizard.closeOnFinish";
     public static final String PROP_WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER = "sfdc.ui.wizard.finishStep.prepopulateWithPreviousOpResultsFolder";
     public static final String DIALOG_BOUNDS_PREFIX = "sfdc.ui.dialog.";
@@ -483,39 +496,78 @@ public class AppConfig {
             PROP_READ_CHARSET,
             PROP_READ_ONLY_CONFIG_PROPERTIES,
             PROP_RICH_TEXT_FIELD_REGEX,
+            /*
             PROP_DAO_READ_PREPROCESSOR_SCRIPT,
             PROP_DAO_WRITE_POSTPROCESSOR_SCRIPT,
-            PROP_ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG,
+            */
             PROP_DELETE_WITH_EXTERNALID,
             PROP_OAUTH_ACCESSTOKEN,
             PROP_OAUTH_REFRESHTOKEN,
             PROP_OAUTH_INSTANCE_URL,
-            OAUTH_PREFIX + SERVER_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI,
-            OAUTH_PREFIX + SERVER_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_REDIRECTURI,
-            OAUTH_PREFIX + SERVER_PROD_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
-            OAUTH_PREFIX + SERVER_SB_ENVIRONMENT_VAL + "." + OAUTH_PARTIAL_CLIENTSECRET,
+            PROP_OAUTH_REDIRECT_URI_PROD,
+            PROP_OAUTH_REDIRECT_URI_SB,
+            PROP_OAUTH_CLIENTSECRET_PROD,
+            PROP_OAUTH_CLIENTSECRET_SB,
             PROP_RESET_URL_ON_LOGIN,
             PROP_USE_LEGACY_HTTP_GET,
             PROP_USE_SYSTEM_PROPS_FOR_HTTP_CLIENT,
             PROP_AUTH_ENDPOINT_LEGACY,
+            PROP_DAO_WRITE_BATCH_SIZE,
+            PROP_BUFFER_UNPROCESSED_BULK_QUERY_RESULTS,
+            PROP_ENABLE_LAST_RUN_OUTPUT,
+            PROP_ENCRYPTION_KEY_FILE,
+            PROP_LAST_RUN_OUTPUT_DIR,
+            PROP_PROCESS_NAME,
+            PROP_OUTPUT_STATUS_DIR,
+            PROP_BULK_API_CHECK_STATUS_INTERVAL,
+            PROP_CONNECTION_TIMEOUT_SECS,
+            PROP_ENABLE_RETRIES,
+            PROP_LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT,
+            PROP_MAX_RETRIES,
+            PROP_MIN_RETRY_SLEEP_SECS,
+            PROP_REUSE_CLIENT_CONNECTION,
+            CLI_OPTION_RUN_MODE,
+            AppUtil.CLI_OPTION_CONFIG_DIR_PROP,
+            AppUtil.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE,
+            AppUtil.CLI_OPTION_GENERATE_PROPERTIES_CSV,
+            AppUtil.CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP,
+            AppUtil.CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP,
+            AppUtil.CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP,
+            AppUtil.CLI_OPTION_INSTALLATION_FOLDER_PROP,
+            AppUtil.CLI_OPTION_SAVE_ALL_PROPS,
+            AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH,
+            AppUtil.CLI_OPTION_SYSTEM_PROXY_HOST,
+            AppUtil.CLI_OPTION_SYSTEM_PROXY_PORT,
     };
     
-    // internal properties are derived in code. 
-    // They are neither read from, nor written to config.properties file.
-    private static final String[] INTERNAL_PROPERTY_NAMES = {
+    // Properties that are not published as their are either not saved or are read-only
+    // for edge use-cases.
+    private static final String[] UNPUBLISHED_PROPERTY_NAMES = {
             PROP_SFDC_INTERNAL,
             PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN,
             PROP_SFDC_INTERNAL_SESSION_ID,
             PROP_OAUTH_ACCESSTOKEN,
             PROP_OAUTH_REFRESHTOKEN,
             PROP_OAUTH_INSTANCE_URL,
+            PROP_DELETE_WITH_EXTERNALID,
+            PROP_PROCESS_THREAD_NAME,
+            PROP_USE_LEGACY_HTTP_GET,
+            PROP_SERVER_ENVIRONMENTS,
+            PROP_SELECTED_SERVER_ENVIRONMENT,
+            PROP_DAO_SKIP_TOTAL_COUNT,
+            AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH,
+            AppUtil.CLI_OPTION_INSTALLATION_FOLDER_PROP,
+            AppUtil.CLI_OPTION_SYSTEM_PROXY_HOST,
+            AppUtil.CLI_OPTION_SYSTEM_PROXY_PORT,
     };
     
     private static final String[] ENCRYPTED_PROPERTY_NAMES = {
             PROP_PASSWORD,
             PROP_PROXY_PASSWORD,
             PROP_OAUTH_ACCESSTOKEN,
-            PROP_OAUTH_REFRESHTOKEN
+            PROP_OAUTH_REFRESHTOKEN,
+            PROP_OAUTH_CLIENTSECRET_PROD,
+            PROP_OAUTH_CLIENTSECRET_SB,
     };
     
     /**
@@ -687,9 +739,10 @@ public class AppConfig {
         setDefaultValue(PROP_PROCESS_KEEP_ACCOUNT_TEAM, false);
         setDefaultValue(PROP_WIZARD_WIDTH, DEFAULT_WIZARD_WIDTH);
         setDefaultValue(PROP_WIZARD_HEIGHT, DEFAULT_WIZARD_HEIGHT);
-        setDefaultValue(PROP_ENFORCE_WIZARD_WIDTH_HEIGHT_CONFIG, true);
+        /*
         setDefaultValue(PROP_DAO_READ_PREPROCESSOR_SCRIPT, "");
         setDefaultValue(PROP_DAO_WRITE_POSTPROCESSOR_SCRIPT, "");
+        */
         setDefaultValue(PROP_LIMIT_OUTPUT_TO_QUERY_FIELDS, true);
         setDefaultValue(PROP_WIZARD_CLOSE_ON_FINISH, true);
         setDefaultValue(PROP_WIZARD_POPULATE_RESULTS_FOLDER_WITH_PREVIOUS_OP_RESULTS_FOLDER, true);
@@ -711,6 +764,9 @@ public class AppConfig {
         setDefaultValue(PROP_NO_COMPRESSION, false);
         setDefaultValue(PROP_READ_UTF8, false);
         setDefaultValue(PROP_WRITE_UTF8, false);
+        setDefaultValue(PROP_RICH_TEXT_FIELD_REGEX, DEFAULT_RICHTEXT_REGEX);
+        setDefaultValue(PROP_DAO_SKIP_TOTAL_COUNT, true);
+        setDefaultValue(PROP_READ_CHARSET ,getDefaultCharsetForCsvReadWrite());
     }
 
     /**
@@ -1050,7 +1106,7 @@ public class AppConfig {
         if (propertyName == null) {
             return false;
         }
-        for (String roProp : AppConfig.INTERNAL_PROPERTY_NAMES) {
+        for (String roProp : AppConfig.UNPUBLISHED_PROPERTY_NAMES) {
             if (roProp.equals(propertyName)) {
                 return true;
             }
@@ -1721,7 +1777,7 @@ public class AppConfig {
     
     public String getOAuthClientSecretForCurrentEnv() {
         return getOAuthEnvironmentString(getString(PROP_SELECTED_SERVER_ENVIRONMENT),
-                                            OAUTH_PARTIAL_CLIENTSECRET);
+                                            CLIENTSECRET_LITERAL);
     }
     
     public String getOAuthRedirectURIForCurrentEnv() {
