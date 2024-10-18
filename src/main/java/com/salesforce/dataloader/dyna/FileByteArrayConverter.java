@@ -97,7 +97,7 @@ public final class FileByteArrayConverter implements Converter {
                 //     See https://help.salesforce.com/s/articleView?id=000387816&type=1 for how
                 //     data loader processes ContentNote.
                 String content = byteStream.toString();
-                String formattedContent = DAOLoadVisitor.convertToHTMLFormatting(content, DAOLoadVisitor.DEFAULT_RICHTEXT_REGEX);
+                String formattedContent = DAOLoadVisitor.convertToHTMLFormatting(content, AppConfig.DEFAULT_RICHTEXT_REGEX);
                 return formattedContent.getBytes();
             } else {
                 return byteStream.toByteArray();

@@ -87,8 +87,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     // following regex pattern is based on info from:
     // - https://www.regular-expressions.info/lookaround.html
     // - https://www.geeksforgeeks.org/how-to-validate-html-tag-using-regular-expression/#
-    public static final String DEFAULT_RICHTEXT_REGEX = "<(?=[a-zA-Z/])(\"[^\"]*\"|'[^']*'|[^'\">])*>";
-    private String richTextRegex = DEFAULT_RICHTEXT_REGEX;
+    private String richTextRegex = AppConfig.DEFAULT_RICHTEXT_REGEX;
     private Field[] cachedFieldAttributesForOperation = null;
     
     protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
@@ -109,7 +108,9 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         this.batchSize = getConfig().getImportBatchSize();
         rowConversionFailureMap = new HashMap<Integer, Boolean>();
         String newRichTextRegex = getConfig().getString(AppConfig.PROP_RICH_TEXT_FIELD_REGEX);
-        if (newRichTextRegex != null && !newRichTextRegex.isBlank()) {
+        if (newRichTextRegex != null 
+                && !newRichTextRegex.isBlank() 
+                && !newRichTextRegex.equals(richTextRegex)) {
             this.richTextRegex = newRichTextRegex;
         }
         this.initLoadRateCalculator();

@@ -75,7 +75,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
 
         appConfig.setValue(AppConfig.PROP_SERVER_ENVIRONMENTS, "Testing");
         appConfig.setOAuthEnvironmentString("Testing", AppConfig.CLIENTID_LITERAL, oauthClientId);
-        appConfig.setOAuthEnvironmentString("Testing", AppConfig.OAUTH_PARTIAL_REDIRECTURI, oauthRedirectUri);
+        appConfig.setOAuthEnvironmentString("Testing", AppConfig.REDIRECTURI_LITERAL, oauthRedirectUri);
         appConfig.setServerEnvironment("Testing");
 
         existingConstructor = SimplePostFactory.getConstructor();
