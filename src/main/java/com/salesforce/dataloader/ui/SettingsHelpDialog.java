@@ -45,7 +45,6 @@ import com.salesforce.dataloader.config.ConfigPropertyMetadata;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
-import com.salesforce.dataloader.util.AppUtil;
 
 public class SettingsHelpDialog extends BaseDialog {
     private Shell dialogShell;
@@ -108,7 +107,6 @@ public class SettingsHelpDialog extends BaseDialog {
             }
             @Override
             public void mouseDown(MouseEvent arg0) {
-                ConfigPropertyMetadata.generateCSV(getController().getAppConfig());
                 CSVViewerDialog dlg = new CSVViewerDialog(getParent(), getController(), true, true);
                 dlg.setNumberOfRows(200);
                 dlg.setFileName(fullPathOfPropsCSV);
