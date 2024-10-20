@@ -38,6 +38,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.VerifyEvent;
@@ -224,54 +226,66 @@ public class AdvancedSettingsDialog extends BaseDialog {
         GridLayout containerLayout = new GridLayout(1, false);
         container.setLayout(containerLayout);
 
-        data = new GridData(GridData.FILL_HORIZONTAL);
-        data.heightHint = 50;
-        data.widthHint = 400;
-
-        // START TOP COMPONENT
-        Composite topComp = new Composite(container, SWT.NONE);
-        layout = new GridLayout(1, false);
-        layout.marginHeight = 0;
-        layout.marginWidth = 0;
-        layout.verticalSpacing = 0;
-        topComp.setLayout(layout);
-        topComp.setLayoutData(data);
-
-        Label blank = new Label(topComp, SWT.NONE);
+        Composite restComp = new Composite(container, SWT.NONE);
+        data = new GridData(GridData.FILL_BOTH);
+        restComp.setLayoutData(data);
+        layout = new GridLayout(2, false);
+        layout.verticalSpacing = 10;
+        restComp.setLayout(layout);
+        
+        Label blank = new Label(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
         data.heightHint = 10;
         blank.setLayoutData(data);
         blank.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 
+
         // Show the message
-        Link dialogMessage = createLink(topComp, "message", null, null);
+        Composite messageComp = new Composite(restComp, SWT.NONE);
         data = new GridData(GridData.FILL_HORIZONTAL);
-        data.heightHint = 30;
-        data.widthHint = 370;
+        data.grabExcessHorizontalSpace = true;
+        data.horizontalSpan = 2;
+        messageComp.setLayoutData(data);
+        messageComp.setLayout(new GridLayout(2, false));
+        
+        Link dialogMessage = createLink(messageComp, "message", null, null);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        data.grabExcessHorizontalSpace = true;
         Font f = dialogMessage.getFont();
         FontData[] farr = f.getFontData();
         FontData fd = farr[0];
         fd.setStyle(SWT.BOLD);
         dialogMessage.setFont(new Font(Display.getCurrent(), fd));
-
         dialogMessage.setLayoutData(data);
         dialogMessage.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 
-        Label labelSeparator = new Label(topComp, SWT.SEPARATOR | SWT.HORIZONTAL);
+        Link settingsHelp = new Link(messageComp, SWT.None);
+        settingsHelp.setText("<a>Help</a>");
+        data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        settingsHelp.setLayoutData(data);
+        settingsHelp.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseDoubleClick(MouseEvent arg0) {                
+            }
+            @Override
+            public void mouseDown(MouseEvent arg0) {
+                SettingsHelpDialog helpDlg = new SettingsHelpDialog(getParent(), getController());
+                helpDlg.open();
+            }
+            @Override
+            public void mouseUp(MouseEvent arg0) {
+            }
+        });
+
+        Label labelSeparator = new Label(restComp, SWT.SEPARATOR | SWT.HORIZONTAL);
         data = new GridData(GridData.FILL_HORIZONTAL);
+        data.horizontalSpan = 2;
         labelSeparator.setBackground(getParent().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
         labelSeparator.setLayoutData(data);
 
         // END TOP COMPONENT
 
         // START MIDDLE COMPONENT
-
-        Composite restComp = new Composite(container, SWT.NONE);
-        data = new GridData(GridData.FILL_BOTH);
-        restComp.setLayoutData(data);
-        layout = new GridLayout(2, true);
-        layout.verticalSpacing = 10;
-        restComp.setLayout(layout);
 
         // Hide welcome screen
         createLink(restComp,  null, null, AppConfig.PROP_HIDE_WELCOME_SCREEN);

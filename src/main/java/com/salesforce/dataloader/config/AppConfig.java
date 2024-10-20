@@ -608,7 +608,7 @@ public class AppConfig {
         // Properties initialization completed. Configure OAuth environment next
         setServerEnvironment(getString(PROP_SELECTED_SERVER_ENVIRONMENT));
         if (getBoolean(AppUtil.CLI_OPTION_GENERATE_PROPERTIES_CSV)) {
-            ConfigPropertyMetadata.printCSV(this);
+            ConfigPropertyMetadata.generateCSV(this);
         }
         if (getString(PROP_AUTH_ENDPOINT_LEGACY) != null &&
                 !getString(PROP_AUTH_ENDPOINT_LEGACY).isBlank()) {
