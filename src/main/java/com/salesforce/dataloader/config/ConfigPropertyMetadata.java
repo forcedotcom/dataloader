@@ -32,6 +32,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
@@ -169,19 +172,37 @@ public class ConfigPropertyMetadata {
         return this.name;
     }
     
-    private static final String CSV_FILENAME = "properties.csv";
+    public static final String PROPERTIES_CSV = "properties.csv";
     
-    private static final String COL_PROPERTY_NAME = "Property";
-    private static final String COL_DESCRIPTION = "Description";
-    private static final String COL_UI_LABEL = "Property label in Settings Dialog (\"none\" means property is not in Settings dialog)";
-    private static final String COL_DEFAULT_VAL = "Default value";
-    private static final String COL_IS_READ_ONLY = "is read-only?";
-    private static final String COL_IS_COMMAND_LINE_OPTION = "is settable only as a Command line option?";
-    private static final String COL_IS_ENCRYPTED = "encrypted?";
+    private static final String COL_PROPERTY_NAME = Messages.getString("ConfigPropertyMetadata.csvHeader.COL_PROPERTY_NAME");
+    private static final String COL_DESCRIPTION = Messages.getString("ConfigPropertyMetadata.csvHeader.COL_DESCRIPTION");
+    private static final String COL_UI_LABEL = Messages.getString("ConfigPropertyMetadata.csvHeader.COL_UI_LABEL");
+    private static final String COL_DEFAULT_VAL = Messages.getString("ConfigPropertyMetadata.csvHeader.COL_DEFAULT_VAL");
+    private static final String COL_IS_READ_ONLY = Messages.getString("ConfigPropertyMetadata.csvHeader.COL_IS_READ_ONLY");
+    private static final String COL_IS_COMMAND_LINE_OPTION = Messages.getString("ConfigPropertyMetadata.csvHeader.COL_IS_COMMAND_LINE_OPTION");
+    private static final String COL_IS_ENCRYPTED = Messages.getString("ConfigPropertyMetadata.csvHeader.COL_IS_ENCRYPTED");
+    private static String fullPathToPropsFile = null;
+    private static final Logger logger = LogManager.getLogger(ConfigPropertyMetadata.class);
+    
+    public static String getFullPathToPropsFile(AppConfig appConfig) {
+        if (fullPathToPropsFile != null 
+                && !fullPathToPropsFile.isBlank()) {
+            return fullPathToPropsFile;
+        }
+        if (appConfig == null) {
+            logger.warn(Messages.getString("ConfigPropertyMetadata.errorGeneratePathToCSV"));
+            return null;
+        }
+        fullPathToPropsFile = appConfig.constructConfigFilePath(PROPERTIES_CSV);
+        return fullPathToPropsFile;
+    }
 
-    public static void printCSV(AppConfig appConfig) {
-        String propsFilename = appConfig.constructConfigFilePath(CSV_FILENAME);
-        File propsFile = new File(propsFilename);
+    public static void generateCSV(AppConfig appConfig) {
+        if (appConfig == null) {
+            logger.warn(Messages.getString("ConfigPropertyMetadata.errorGenerateCSV"));
+            return;
+        }
+        File propsFile = new File(getFullPathToPropsFile(appConfig));
         if (propsFile.exists()) {
             // delete existing file
             propsFile.delete();
@@ -189,24 +210,30 @@ public class ConfigPropertyMetadata {
         try {
             propsFile.createNewFile();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.warn(Messages.getString("ConfigPropertyMetadata.errorGenerateCSV"));
+            logger.warn(e.getMessage());
+            logger.info(e.getStackTrace());
+            return;
         }
-        CSVFileWriter csvWriter = new CSVFileWriter(propsFilename, appConfig, AppUtil.COMMA);
+        
         ArrayList<String> colHeaders = new ArrayList<String>();
         colHeaders.add(COL_PROPERTY_NAME);
+        colHeaders.add(COL_UI_LABEL);
         colHeaders.add(COL_DESCRIPTION);
         colHeaders.add(COL_DEFAULT_VAL);
         colHeaders.add(COL_IS_READ_ONLY);
-        colHeaders.add(COL_UI_LABEL);
         colHeaders.add(COL_IS_COMMAND_LINE_OPTION);
         colHeaders.add(COL_IS_ENCRYPTED);
-
+        
+        CSVFileWriter csvWriter = new CSVFileWriter(
+                getFullPathToPropsFile(appConfig), appConfig, AppUtil.COMMA);
         try {
             csvWriter.open();
             csvWriter.setColumnNames(colHeaders);
         } catch (DataAccessObjectInitializationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.warn(Messages.getString("ConfigPropertyMetadata.errorGenerateCSV"));
+            logger.warn(e.getMessage());
+            logger.info(e.getStackTrace());
             return;
         }
         try {
@@ -216,7 +243,7 @@ public class ConfigPropertyMetadata {
                 }
                 Row row = new Row();
                 row.put(COL_PROPERTY_NAME, propMD.getName());
-                row.put(COL_UI_LABEL, propMD.getUiLabelTemplate().isBlank() ? "None" : propMD.getUiLabelTemplate());
+                row.put(COL_UI_LABEL, propMD.getUiLabelTemplate());
                 String description = propMD.getDescription();
                 if (description == null || description.isBlank()) {
                     description = propMD.getUiTooltip();
@@ -229,10 +256,13 @@ public class ConfigPropertyMetadata {
                 try {
                     csvWriter.writeRow(row);
                 } catch (DataAccessObjectException e) {
-                    e.printStackTrace();
+                    logger.warn(Messages.getFormattedString("ConfigPropertyMetadata.errorOutputPropInfo", propMD.getName()));
+                    logger.info(e.getStackTrace());
+                    continue; 
                 }
             }
         } finally {
+            logger.info(Messages.getFormattedString("ConfigPropertyMetadata.infoGeneratedCSVLocation", getFullPathToPropsFile(appConfig)));
             csvWriter.close();
         }
     }

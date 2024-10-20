@@ -529,7 +529,6 @@ public class AppConfig {
             CLI_OPTION_RUN_MODE,
             AppUtil.CLI_OPTION_CONFIG_DIR_PROP,
             AppUtil.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE,
-            AppUtil.CLI_OPTION_GENERATE_PROPERTIES_CSV,
             AppUtil.CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP,
             AppUtil.CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP,
             AppUtil.CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP,
@@ -607,9 +606,7 @@ public class AppConfig {
         
         // Properties initialization completed. Configure OAuth environment next
         setServerEnvironment(getString(PROP_SELECTED_SERVER_ENVIRONMENT));
-        if (getBoolean(AppUtil.CLI_OPTION_GENERATE_PROPERTIES_CSV)) {
-            ConfigPropertyMetadata.printCSV(this);
-        }
+        ConfigPropertyMetadata.generateCSV(this);
         if (getString(PROP_AUTH_ENDPOINT_LEGACY) != null &&
                 !getString(PROP_AUTH_ENDPOINT_LEGACY).isBlank()) {
             String propToSet = PROP_AUTH_ENDPOINT_LEGACY + "." + getString(PROP_SELECTED_SERVER_ENVIRONMENT);
