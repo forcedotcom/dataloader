@@ -26,7 +26,6 @@
 package com.salesforce.dataloader;
 
 import com.salesforce.dataloader.config.AppConfig;
-import com.salesforce.dataloader.util.AppUtil;
 
 import org.junit.Before;
 
@@ -73,7 +72,7 @@ public abstract class ConfigTestBase extends TestBase {
         for (TestProperties prop : getDefaultTestPropertiesSet()) {
             prop.putConfigSetting(configBase);
         }
-        configBase.put(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, TEST_CONF_DIR);
+        configBase.put(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, TEST_CONF_DIR);
         String proxyUsername = System.getProperty(AppConfig.PROP_PROXY_USERNAME);
         String proxyPassword = System.getProperty(AppConfig.PROP_PROXY_PASSWORD);
         if (proxyUsername != null && proxyPassword != null) {

@@ -205,10 +205,23 @@ public class AppConfig {
      * The Constants for the current Loader Keys
      */
     //
-    // salesforce constants
+
+    //
+    // Configurable properties that can be specified only as CLI options
+    //
+    public static final String CLI_OPTION_SYSTEM_PROXY_PORT = "sfdc.system.proxyPort";
+    public static final String CLI_OPTION_SYSTEM_PROXY_HOST = "sfdc.system.proxyHost";
+    public static final String CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP = "salesforce.installation.shortcut.macos.appsfolder";
+    public static final String CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP = "salesforce.installation.shortcut.windows.startmenu";
+    public static final String CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP = "salesforce.installation.shortcut.desktop";
+    public static final String CLI_OPTION_INSTALLATION_FOLDER_PROP = "salesforce.installation.dir";
+    public static final String CLI_OPTION_SAVE_ALL_PROPS = "salesforce.saveAllSettings";
+    public static final String CLI_OPTION_CONFIG_DIR_PROP = "salesforce.config.dir";
+    public static final String CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
+    public static final String CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
 
     // =======================
-    // Property name constants (Settings specified in config.properties file or as command line options) 
+    // Configurable properties specified in config.properties file
     // =======================
     // Loader Preferences
     public static final String PROP_HIDE_WELCOME_SCREEN = "loader.hideWelcome";
@@ -527,16 +540,16 @@ public class AppConfig {
             PROP_MIN_RETRY_SLEEP_SECS,
             PROP_REUSE_CLIENT_CONNECTION,
             CLI_OPTION_RUN_MODE,
-            AppUtil.CLI_OPTION_CONFIG_DIR_PROP,
-            AppUtil.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE,
-            AppUtil.CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP,
-            AppUtil.CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP,
-            AppUtil.CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP,
-            AppUtil.CLI_OPTION_INSTALLATION_FOLDER_PROP,
-            AppUtil.CLI_OPTION_SAVE_ALL_PROPS,
-            AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH,
-            AppUtil.CLI_OPTION_SYSTEM_PROXY_HOST,
-            AppUtil.CLI_OPTION_SYSTEM_PROXY_PORT,
+            AppConfig.CLI_OPTION_CONFIG_DIR_PROP,
+            AppConfig.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE,
+            AppConfig.CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP,
+            AppConfig.CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP,
+            AppConfig.CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP,
+            AppConfig.CLI_OPTION_INSTALLATION_FOLDER_PROP,
+            AppConfig.CLI_OPTION_SAVE_ALL_PROPS,
+            AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH,
+            AppConfig.CLI_OPTION_SYSTEM_PROXY_HOST,
+            AppConfig.CLI_OPTION_SYSTEM_PROXY_PORT,
     };
     
     // Properties that are not published as their are either not saved or are read-only
@@ -554,10 +567,10 @@ public class AppConfig {
             PROP_SERVER_ENVIRONMENTS,
             PROP_SELECTED_SERVER_ENVIRONMENT,
             PROP_DAO_SKIP_TOTAL_COUNT,
-            AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH,
-            AppUtil.CLI_OPTION_INSTALLATION_FOLDER_PROP,
-            AppUtil.CLI_OPTION_SYSTEM_PROXY_HOST,
-            AppUtil.CLI_OPTION_SYSTEM_PROXY_PORT,
+            AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH,
+            AppConfig.CLI_OPTION_INSTALLATION_FOLDER_PROP,
+            AppConfig.CLI_OPTION_SYSTEM_PROXY_HOST,
+            AppConfig.CLI_OPTION_SYSTEM_PROXY_PORT,
     };
     
     private static final String[] ENCRYPTED_PROPERTY_NAMES = {
@@ -598,7 +611,7 @@ public class AppConfig {
         // 1. process-conf.properties for CLI mode
         // 2. command line options for both CLI and UI modes
         this.loadParameterOverrides(cliOptionsMap);
-        saveAllProps = getBoolean(AppUtil.CLI_OPTION_SAVE_ALL_PROPS);
+        saveAllProps = getBoolean(AppConfig.CLI_OPTION_SAVE_ALL_PROPS);
         
         // last run gets initialized after loading config and overrides
         // since config params are needed for initializing last run.
@@ -749,8 +762,8 @@ public class AppConfig {
         setDefaultValue(PROP_PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE, false);
         setDefaultValue(PROP_INCLUDE_RICH_TEXT_FIELD_DATA_IN_QUERY_RESULTS, false);
         setDefaultValue(PROP_OAUTH_INSTANCE_URL, false);
-        String systemProxyHost = cliOptionsMap.get(AppUtil.CLI_OPTION_SYSTEM_PROXY_HOST);
-        String systemProxyPort = cliOptionsMap.get(AppUtil.CLI_OPTION_SYSTEM_PROXY_PORT);
+        String systemProxyHost = cliOptionsMap.get(AppConfig.CLI_OPTION_SYSTEM_PROXY_HOST);
+        String systemProxyPort = cliOptionsMap.get(AppConfig.CLI_OPTION_SYSTEM_PROXY_PORT);
         if (systemProxyHost != null && !systemProxyHost.isBlank()) {
             setDefaultValue(PROP_PROXY_HOST, systemProxyHost);
             setDefaultValue(PROP_PROXY_PORT, systemProxyPort);
