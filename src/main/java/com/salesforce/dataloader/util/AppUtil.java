@@ -98,16 +98,6 @@ public class AppUtil {
     public static final String DATALOADER_VERSION;
     public static final String DATALOADER_SHORT_VERSION;
     public static final String MIN_JAVA_VERSION;
-    public static final String CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
-    public static final String CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
-    public static final String CLI_OPTION_CONFIG_DIR_PROP = "salesforce.config.dir";
-    public static final String CLI_OPTION_SAVE_ALL_PROPS = "salesforce.saveAllSettings";
-    public static final String CLI_OPTION_INSTALLATION_FOLDER_PROP = "salesforce.installation.dir";
-    public static final String CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP = "salesforce.installation.shortcut.desktop";
-    public static final String CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP = "salesforce.installation.shortcut.windows.startmenu";
-    public static final String CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP = "salesforce.installation.shortcut.macos.appsfolder";
-    public static final String CLI_OPTION_SYSTEM_PROXY_HOST = "sfdc.system.proxyHost";
-    public static final String CLI_OPTION_SYSTEM_PROXY_PORT = "sfdc.system.proxyPort";
     public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
     public static final String DATALOADER_DOWNLOAD_URL = "https://developer.salesforce.com/tools/data-loader";
     public static final int EXIT_CODE_NO_ERRORS = 0;
@@ -262,8 +252,8 @@ public class AppUtil {
     }
 
     private static void setUseGMTForDateFieldValue(Map<String, String> argMap) {
-        if (argMap.containsKey(AppUtil.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE)) {
-            if ("true".equalsIgnoreCase(argMap.get(AppUtil.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE))) {
+        if (argMap.containsKey(AppConfig.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE)) {
+            if ("true".equalsIgnoreCase(argMap.get(AppConfig.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE))) {
                 useGMTForDateFieldValue = true;
             }
         }
@@ -290,13 +280,13 @@ public class AppUtil {
     }
     
     private static synchronized void setConfigurationsDir(Map<String, String> argsMap) {
-        if (argsMap != null && argsMap.containsKey(CLI_OPTION_CONFIG_DIR_PROP)) {
-            configurationsDir = argsMap.get(CLI_OPTION_CONFIG_DIR_PROP);
+        if (argsMap != null && argsMap.containsKey(AppConfig.CLI_OPTION_CONFIG_DIR_PROP)) {
+            configurationsDir = argsMap.get(AppConfig.CLI_OPTION_CONFIG_DIR_PROP);
         } else if (configurationsDir != null && !configurationsDir.isEmpty()) {
                 return;
         } else {
             // first time invocation and configurationsDir is not set through argsMap
-            configurationsDir = System.getProperty(CLI_OPTION_CONFIG_DIR_PROP);
+            configurationsDir = System.getProperty(AppConfig.CLI_OPTION_CONFIG_DIR_PROP);
             if (configurationsDir == null || configurationsDir.isBlank()) {
                 configurationsDir = getDefaultConfigDir();
             }
@@ -308,7 +298,7 @@ public class AppUtil {
             System.err.println("Unable to find configuration folder " + configurationsDir);
             configurationsDir = configDirFile.getAbsolutePath();
         }
-        System.setProperty(CLI_OPTION_CONFIG_DIR_PROP, configurationsDir);
+        System.setProperty(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, configurationsDir);
     }
     
     private static String getDefaultConfigDir() {
@@ -354,7 +344,7 @@ public class AppUtil {
     
     
     private static void processArgsForBatchMode(String[] args, Map<String,String> argsMap) {
-        if (!argsMap.containsKey(AppUtil.CLI_OPTION_CONFIG_DIR_PROP) && args.length < 2) {
+        if (!argsMap.containsKey(AppConfig.CLI_OPTION_CONFIG_DIR_PROP) && args.length < 2) {
             // config folder must be specified in the first argument
             System.err.println(
                     "Usage: process <configuration folder> [batch process bean id]\n"
@@ -374,8 +364,8 @@ public class AppUtil {
                     + "              process ../myconfigdir");
             System.exit(EXIT_CODE_CLIENT_ERROR);
         }
-        if (!argsMap.containsKey(AppUtil.CLI_OPTION_CONFIG_DIR_PROP)) {
-            argsMap.put(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, args[0]);
+        if (!argsMap.containsKey(AppConfig.CLI_OPTION_CONFIG_DIR_PROP)) {
+            argsMap.put(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, args[0]);
         }
         if (!argsMap.containsKey(AppConfig.PROP_PROCESS_NAME) 
                 && args.length > 2
@@ -506,8 +496,8 @@ public class AppUtil {
         Map<String, String> argsMap = convertCommandArgsArrayToArgMap(args);
         if (getAppRunMode() == APP_RUN_MODE.BATCH
                 || getAppRunMode() == APP_RUN_MODE.ENCRYPT
-                || (argsMap.containsKey(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
-                        && "true".equalsIgnoreCase(argsMap.get(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH)))) {
+                || (argsMap.containsKey(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
+                        && "true".equalsIgnoreCase(argsMap.get(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH)))) {
             // do not check for system proxy settings
             // if run mode is batch or encrypt 
             // or if on the 2nd iteration of the UI mode

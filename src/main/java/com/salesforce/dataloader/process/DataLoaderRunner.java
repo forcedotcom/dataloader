@@ -55,6 +55,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.client.HttpClientTransport;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 
 public class DataLoaderRunner extends Thread {
@@ -100,8 +101,8 @@ public class DataLoaderRunner extends Thread {
             /* Run in the UI mode, get the controller instance with batchMode == false */
             logger = LogManager.getLogger(DataLoaderRunner.class);
             Installer.install(argsMap);
-            if (argsMap.containsKey(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
-                && "true".equalsIgnoreCase(argsMap.get(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
+            if (argsMap.containsKey(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
+                && "true".equalsIgnoreCase(argsMap.get(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
                 try {
                     String defaultBrowser = System.getProperty("org.eclipse.swt.browser.DefaultType");
                     if (defaultBrowser == null) {
@@ -188,8 +189,8 @@ public class DataLoaderRunner extends Thread {
         }
         
         // add the argument to indicate that JAVA_LIB_PATH has the folder containing SWT native libraries
-        jvmArgs.add(AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
-        logger.debug("    " + AppUtil.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
+        jvmArgs.add(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
+        logger.debug("    " + AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
         
         // set System proxy info as proxy server defaults
         String proxyHost = null;
@@ -201,8 +202,8 @@ public class DataLoaderRunner extends Thread {
             if (addr != null) {
                 proxyHost = addr.getHostName();
                 proxyPort = addr.getPort();
-                jvmArgs.add(AppUtil.CLI_OPTION_SYSTEM_PROXY_HOST + "=" + proxyHost);
-                jvmArgs.add(AppUtil.CLI_OPTION_SYSTEM_PROXY_PORT + "=" + proxyPort);
+                jvmArgs.add(AppConfig.CLI_OPTION_SYSTEM_PROXY_HOST + "=" + proxyHost);
+                jvmArgs.add(AppConfig.CLI_OPTION_SYSTEM_PROXY_PORT + "=" + proxyPort);
             }
         }
         AppUtil.exec(jvmArgs, null);

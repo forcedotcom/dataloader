@@ -84,7 +84,7 @@ public class Installer {
                 logger.debug("going to show banner");
                 AppUtil.showBanner();
             }
-            String installationFolderFromCommandLine = argsmap.get(AppUtil.CLI_OPTION_INSTALLATION_FOLDER_PROP);
+            String installationFolderFromCommandLine = argsmap.get(AppConfig.CLI_OPTION_INSTALLATION_FOLDER_PROP);
             boolean promptUserToDeleteExistingInstallationFolder = false;
             if (installationFolderFromCommandLine == null || installationFolderFromCommandLine.isBlank()) {
                 skipCopyArtifacts = promptCurrentInstallationFolder();
@@ -102,7 +102,7 @@ public class Installer {
             }
             extractInstallationArtifactsFromJar(installationFolder);
             
-            String createDesktopShortcutStr = argsmap.get(AppUtil.CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP);
+            String createDesktopShortcutStr = argsmap.get(AppConfig.CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP);
             logger.debug("going to create desktop shortcut");
             if (interactiveMode) {
                 createDesktopShortcut(installationFolder, true); 
@@ -112,7 +112,7 @@ public class Installer {
                 createDesktopShortcut(installationFolder, false); 
             }
             
-            String createWindowsStartMenuShortcutStr = argsmap.get(AppUtil.CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP);
+            String createWindowsStartMenuShortcutStr = argsmap.get(AppConfig.CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP);
             logger.debug("going to create start menu shortcut");
             if (AppUtil.isRunningOnWindows()) {
                 if (interactiveMode) {
@@ -124,7 +124,7 @@ public class Installer {
                 }
             }
 
-            String createMacOSAppsFolderShortcutStr = argsmap.get(AppUtil.CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP);
+            String createMacOSAppsFolderShortcutStr = argsmap.get(AppConfig.CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP);
             logger.debug("going to create start menu shortcut");
             if (AppUtil.isRunningOnMacOS()) {
                 if (interactiveMode) {

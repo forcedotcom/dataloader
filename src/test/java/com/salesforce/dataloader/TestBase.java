@@ -103,13 +103,13 @@ abstract class TestBase {
         TEST_PROPS = loadTestProperties();
         TEST_FILES_DIR = getProperty("testfiles.dir");
         TEST_CONF_DIR = TEST_FILES_DIR + File.separator + "conf";
-        TEST_PROPS.put(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, TEST_CONF_DIR);
+        TEST_PROPS.put(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, TEST_CONF_DIR);
         TEST_DATA_DIR = TEST_FILES_DIR + File.separator + "data";
         TEST_STATUS_DIR = TEST_FILES_DIR + File.separator + "status";
         DEFAULT_ACCOUNT_EXT_ID_FIELD = getProperty("test.account.extid");
         
         Map<String, String> argsMap = new HashMap<String, String>();
-        argsMap.put(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
+        argsMap.put(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
         try {
             AppUtil.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argsMap));
         } catch (FactoryConfigurationError e) {
@@ -196,8 +196,8 @@ abstract class TestBase {
     protected void setupController(Map<String, String> configOverrideMap) {
         // configure the Controller to point to our testing config
         configOverrideMap.put(AppConfig.PROP_READ_ONLY_CONFIG_PROPERTIES, Boolean.TRUE.toString());
-        if (!System.getProperties().contains(AppUtil.CLI_OPTION_CONFIG_DIR_PROP))
-            System.setProperty(AppUtil.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
+        if (!System.getProperties().contains(AppConfig.CLI_OPTION_CONFIG_DIR_PROP))
+            System.setProperty(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
 
         try {
             controller = Controller.getInstance(configOverrideMap);
