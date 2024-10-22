@@ -39,7 +39,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.InputStream;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 public abstract class AbstractVisitor implements IVisitor {
 
@@ -55,7 +55,7 @@ public abstract class AbstractVisitor implements IVisitor {
 
     public AbstractVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
-        this.logger = LogManager.getLogger(getClass());
+        this.logger = DLLogManager.getLogger(getClass());
         this.controller = controller;
         this.monitor = monitor;
         this.successWriter = successWriter;

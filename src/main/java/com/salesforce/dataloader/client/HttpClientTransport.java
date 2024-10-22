@@ -69,7 +69,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -95,7 +95,7 @@ public class HttpClientTransport implements HttpTransportInterface {
     private ByteArrayOutputStream entityByteOut;
     private static CloseableHttpClient currentHttpClient = null;
     private static long serverInvocationCount = 0;
-    private static Logger logger = LogManager.getLogger(HttpClientTransport.class);
+    private static Logger logger = DLLogManager.getLogger(HttpClientTransport.class);
     private HttpResponse httpResponse;
     private static final HttpClientTransport singletonTransportInstance = new HttpClientTransport();
 

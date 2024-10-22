@@ -32,7 +32,7 @@ import com.salesforce.dataloader.model.Row;
 import junit.framework.TestCase;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -58,7 +58,7 @@ import java.util.Map;
 @SuppressWarnings("serial")
 public class DatabaseTestUtil {
 
-    private static final Logger logger = LogManager.getLogger(DatabaseTestUtil.class);
+    private static final Logger logger = DLLogManager.getLogger(DatabaseTestUtil.class);
 
     public enum DateType {CALENDAR, DATE, STRING, VALIDATION, NULL;};
 

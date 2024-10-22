@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 /**
  * Describe your class here.
@@ -51,7 +51,7 @@ public class CSVColumnVisitor {
     private char columnDelimiter = COMMA;
 
     //logger
-    private static Logger logger = LogManager.getLogger(CSVColumnVisitor.class);
+    private static Logger logger = DLLogManager.getLogger(CSVColumnVisitor.class);
 
     public CSVColumnVisitor(Writer writer, boolean escapeFormulaValue, char columnDelimiter) {
         this.writer = writer;

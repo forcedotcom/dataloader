@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 
 import org.apache.http.Header;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -60,7 +60,7 @@ import com.salesforce.dataloader.ui.URLUtil;
 
 public class OAuthBrowserLoginRunner {
     public enum LoginStatus { WAIT, FAIL, SUCCESS };
-    protected static Logger logger = LogManager.getLogger(OAuthBrowserLoginRunner.class);
+    protected static Logger logger = DLLogManager.getLogger(OAuthBrowserLoginRunner.class);
     private static LoginStatus loginResult = LoginStatus.WAIT;
     private String verificationURLStr = null;
     String userCodeStr;

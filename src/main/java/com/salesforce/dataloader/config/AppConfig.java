@@ -65,7 +65,9 @@ import java.util.TimeZone;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
+import com.salesforce.dataloader.util.LoggingUtil;
+
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -485,7 +487,9 @@ public class AppConfig {
     public static final int DEFAULT_WIZARD_Y_OFFSET = 0;
     public static final int DIALOG_X_OFFSET = 50;
     public static final int DIALOG_Y_OFFSET = 50;
-    
+    private static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
+    private static String configurationsDir = null;
+
     private static final String LAST_RUN_FILE_SUFFIX = "_lastRun.properties"; //$NON-NLS-1$
     // Following properties are read-only, i.e. they are not overridden during save() to config.properties
     // - These properties are not set in Advanced Settings dialog.
@@ -1813,6 +1817,49 @@ public class AppConfig {
         return clientId;
     }
     
+    public static synchronized String getConfigurationsDir() {
+        if (AppConfig.configurationsDir == null) {
+            setConfigurationsDir(null);
+        }
+        return AppConfig.configurationsDir;
+    }
+
+    private static String getDefaultConfigDir() {
+        return AppUtil.getDirContainingClassJar(AppConfig.class) 
+                + System.getProperty("file.separator")
+                + AppConfig.CONFIG_DIR_DEFAULT_VALUE;
+    }
+
+    private static synchronized void setConfigurationsDir(Map<String, String> argsMap) {
+        if (argsMap != null && argsMap.containsKey(CLI_OPTION_CONFIG_DIR_PROP)) {
+            AppConfig.configurationsDir = argsMap.get(CLI_OPTION_CONFIG_DIR_PROP);
+        } else if (AppConfig.configurationsDir != null && !AppConfig.configurationsDir.isEmpty()) {
+                return;
+        } else {
+            // first time invocation and configurationsDir is not set through argsMap
+            AppConfig.configurationsDir = System.getProperty(CLI_OPTION_CONFIG_DIR_PROP);
+            if (AppConfig.configurationsDir == null || AppConfig.configurationsDir.isBlank()) {
+                AppConfig.configurationsDir = AppConfig.getDefaultConfigDir();
+            }
+        }
+        File configDirFile = new File(AppConfig.configurationsDir);
+        try {
+            AppConfig.configurationsDir = configDirFile.getCanonicalPath();
+        } catch (IOException e) {
+            System.err.println("Unable to find configuration folder " + AppConfig.configurationsDir);
+            AppConfig.configurationsDir = configDirFile.getAbsolutePath();
+        }
+        System.setProperty(CLI_OPTION_CONFIG_DIR_PROP, AppConfig.configurationsDir);
+    }
+
+    public static synchronized String[] initializeAppConfig(String[] args) throws FactoryConfigurationError, IOException, ConfigInitializationException {
+        Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
+        AppConfig.setConfigurationsDir(argsMap);
+        LoggingUtil.initializeLog(argsMap);
+        AppUtil.setUseGMTForDateFieldValue(argsMap);
+        return AppUtil.convertCommandArgsMapToArgsArray(argsMap);
+    }
+
     /**
      * Create folder provided from the parameter
      *
@@ -1845,10 +1892,10 @@ public class AppConfig {
         if (argMap == null) {
             argMap = new HashMap<String, String>();
         }
-        AppUtil.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argMap));
-        logger = LogManager.getLogger(AppConfig.class);
+        AppConfig.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argMap));
+        logger = DLLogManager.getLogger(AppConfig.class);
 
-        String configurationsDirPath = AppUtil.getConfigurationsDir();
+        String configurationsDirPath = AppConfig.getConfigurationsDir();
         File configurationsDir;
         final String DEFAULT_CONFIG_FILE = "defaultConfig.properties"; //$NON-NLS-1$
 

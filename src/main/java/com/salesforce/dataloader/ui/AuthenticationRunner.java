@@ -41,7 +41,7 @@ import com.sforce.ws.bind.XmlObject;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
@@ -54,7 +54,7 @@ import java.util.function.Consumer;
  * AuthenticationRunner is the UI orchestration of logging in.
  */
 public class AuthenticationRunner {
-    private static Logger logger = LogManager.getLogger(AuthenticationRunner.class);
+    private static Logger logger = DLLogManager.getLogger(AuthenticationRunner.class);
 
     private final AppConfig appConfig;
     private final Controller controller;

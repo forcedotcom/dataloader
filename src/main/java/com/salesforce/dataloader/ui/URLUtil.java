@@ -29,11 +29,11 @@ import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
    
 public class URLUtil {
-    private static Logger logger = LogManager.getLogger(URLUtil.class);
+    private static Logger logger = DLLogManager.getLogger(URLUtil.class);
     public static void openURL(String url) {
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();

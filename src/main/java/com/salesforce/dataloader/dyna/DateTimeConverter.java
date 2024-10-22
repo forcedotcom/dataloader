@@ -34,7 +34,7 @@ import com.salesforce.dataloader.model.NATextValue;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.Converter;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 public class DateTimeConverter implements Converter {
 
@@ -42,7 +42,7 @@ public class DateTimeConverter implements Converter {
     static final List<String> supportedEuropeanPatterns = getSupportedPatterns(true);
     static final List<String> supportedRegularPatterns = getSupportedPatterns(false);
 
-    static Logger logger = LogManager.getLogger(DateTimeConverter.class);
+    static Logger logger = DLLogManager.getLogger(DateTimeConverter.class);
     /**
      * Should we return the default value on conversion errors?
      */

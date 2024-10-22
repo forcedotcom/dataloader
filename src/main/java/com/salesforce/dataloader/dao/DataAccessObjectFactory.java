@@ -29,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
@@ -41,7 +41,7 @@ import com.salesforce.dataloader.exception.DataAccessObjectInitializationExcepti
 import com.salesforce.dataloader.exception.UnsupportedDataAccessObjectException;
 
 public class DataAccessObjectFactory {
-    private static Logger logger = LogManager.getLogger(DataAccessObjectFactory.class);
+    private static Logger logger = DLLogManager.getLogger(DataAccessObjectFactory.class);
 
     static public final String CSV_READ_TYPE = "csvRead";
     static public final String CSV_WRITE_TYPE = "csvWrite";

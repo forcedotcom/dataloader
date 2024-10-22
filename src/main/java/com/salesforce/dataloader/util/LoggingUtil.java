@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -46,6 +47,7 @@ import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.LinkedProperties;
 import com.salesforce.dataloader.config.Messages;
 
@@ -63,6 +65,9 @@ public class LoggingUtil {
         if (logInitialized) {
             return;
         }
+        if (argsMap == null) {
+            argsMap = new HashMap<String, String>();
+        }
         // check the environment variable for log4j
         String log4jConfigFilePath = System.getenv("LOG4J_CONFIGURATION_FILE");
         if (log4jConfigFilePath == null || log4jConfigFilePath.isEmpty()) {
@@ -71,13 +76,13 @@ public class LoggingUtil {
         }
         
         if (log4jConfigFilePath == null || log4jConfigFilePath.isEmpty()) { // use the default
-            File logConfFile = new File(AppUtil.getConfigurationsDir() + "/" + LOG_CONF_DEFAULT_XML);
+            File logConfFile = new File(AppConfig.getConfigurationsDir() + "/" + LOG_CONF_DEFAULT_XML);
             if (logConfFile.exists()) {
                 LOG_CONF_DEFAULT = LOG_CONF_DEFAULT_XML;
             } else {
                 LOG_CONF_DEFAULT = LOG_CONF_DEFAULT_PROPERTIES;
             }
-            log4jConfigFilePath = Paths.get(AppUtil.getConfigurationsDir(), LOG_CONF_DEFAULT).toString();
+            log4jConfigFilePath = Paths.get(AppConfig.getConfigurationsDir(), LOG_CONF_DEFAULT).toString();
         }
        
         Path p = Paths.get(log4jConfigFilePath);

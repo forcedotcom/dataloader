@@ -31,7 +31,7 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.oauth.OAuthSecretFlowUtil;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressEvent;
@@ -47,7 +47,7 @@ import java.net.URISyntaxException;
  * it prompts for authentication but not authorization (once it's been authorized at least once).
  */
 public class OAuthSecretFlow extends OAuthFlow {
-    protected static Logger logger = LogManager.getLogger(OAuthSecretFlow.class);
+    protected static Logger logger = DLLogManager.getLogger(OAuthSecretFlow.class);
 
     public OAuthSecretFlow(Shell parent, AppConfig appConfig) {
         super(parent, appConfig);

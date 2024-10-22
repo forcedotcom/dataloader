@@ -27,7 +27,7 @@
 package com.salesforce.dataloader.client;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import com.salesforce.dataloader.action.visitor.bulk.BulkV1Connection;
 import com.salesforce.dataloader.config.Messages;
@@ -42,7 +42,7 @@ import com.sforce.ws.ConnectorConfig;
  * @since 17.0
  */
 public class BulkV1Client extends RESTClient<BulkV1Connection> {
-    private static Logger LOG = LogManager.getLogger(BulkV1Client.class);
+    private static Logger LOG = DLLogManager.getLogger(BulkV1Client.class);
 
     public BulkV1Client(Controller controller) {
         super(controller, LOG);

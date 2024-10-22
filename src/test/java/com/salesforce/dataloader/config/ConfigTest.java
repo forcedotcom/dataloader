@@ -33,7 +33,7 @@ import java.util.Map;
 
 import javax.xml.parsers.FactoryConfigurationError;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
@@ -41,7 +41,7 @@ import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.exception.ConfigInitializationException;
 
 public class ConfigTest extends ConfigTestBase {
-    private static Logger logger = LogManager.getLogger(ConfigTest.class);
+    private static Logger logger = DLLogManager.getLogger(ConfigTest.class);
 
     public ConfigTest() {
         super();

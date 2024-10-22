@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
@@ -44,7 +44,7 @@ import com.sforce.soap.partner.Field;
 public class ReferenceEntitiesDescribeMap {
 
     private Map<String, DescribeRefObject> referenceEntitiesDescribeMap = new HashMap<String, DescribeRefObject>();
-    private static final Logger logger = LogManager.getLogger(ReferenceEntitiesDescribeMap.class);
+    private static final Logger logger = DLLogManager.getLogger(ReferenceEntitiesDescribeMap.class);
     private PartnerClient client = null;
     /**
      * 

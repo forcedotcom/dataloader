@@ -28,7 +28,7 @@ package com.salesforce.dataloader.ui;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -63,7 +63,7 @@ public abstract class OperationPage extends WizardPage {
        this.setTitle(Labels.getString(getClass().getSimpleName() + ".title"));
        this.setImageDescriptor(UIUtils.getImageRegistry().getDescriptor("logo"));
        this.controller = controller;
-       this.logger = LogManager.getLogger(this.getClass());
+       this.logger = DLLogManager.getLogger(this.getClass());
        this.setPageComplete(false);
    }
 

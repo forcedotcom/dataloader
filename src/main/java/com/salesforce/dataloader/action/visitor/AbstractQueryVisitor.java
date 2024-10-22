@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -73,7 +73,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
     private final List<String> batchIds;
     private final int batchSize;
     protected final AbstractExtractAction action;
-    private static final Logger logger = LogManager.getLogger(AbstractQueryVisitor.class);
+    private static final Logger logger = DLLogManager.getLogger(AbstractQueryVisitor.class);
 
     public AbstractQueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {

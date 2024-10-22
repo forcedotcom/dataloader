@@ -28,7 +28,7 @@ package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.config.AppConfig;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressEvent;
@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.Shell;
  * The common class for listening to browser events use in oauth flows.
  */
 public abstract class OAuthBrowserListener implements ProgressListener {
-    private static Logger logger = LogManager.getLogger(AppConfig.class);
+    private static Logger logger = DLLogManager.getLogger(AppConfig.class);
     protected final Browser browser;
     protected final Shell shell;
     protected final AppConfig appConfig;

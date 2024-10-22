@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader.dyna;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.exception.RelationshipFormatException;
@@ -34,7 +34,7 @@ import com.salesforce.dataloader.exception.RelationshipFormatException;
 public class ParentIdLookupFieldFormatter {
     private String parentFieldName = null;
     private ParentSObjectFormatter parentSObjectFormatter = null;
-    private static final Logger logger = LogManager.getLogger(ParentIdLookupFieldFormatter.class);
+    private static final Logger logger = DLLogManager.getLogger(ParentIdLookupFieldFormatter.class);
 
     private static final String OLD_FORMAT_PARENT_IDLOOKUP_FIELD_SEPARATOR_CHAR = ":"; //$NON-NLS-1$
     // old format - <relationship name attribute of relationship field>:<idLookup field of parent sObject>

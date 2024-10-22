@@ -71,7 +71,7 @@ import com.sforce.ws.util.FileUtil;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -92,7 +92,7 @@ public class HttpClientTransportv1 implements HttpTransportInterfacev1 {
     private static CloseableHttpClient currentHttpClient = null;
     private static boolean reuseConnection = true;
     private static long serverInvocationCount = 0;
-    private static Logger logger = LogManager.getLogger(HttpClientTransport.class);
+    private static Logger logger = DLLogManager.getLogger(HttpClientTransport.class);
 
     public HttpClientTransportv1() {
     }

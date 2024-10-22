@@ -26,7 +26,7 @@
 package com.salesforce.dataloader.dyna;
 
 import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.DescribeRefObject;
@@ -46,7 +46,7 @@ import com.sforce.soap.partner.sobject.SObject;
 public class SObjectReference {
 
     private final Object referenceExtIdValue;
-    private static final Logger logger = LogManager.getLogger(SObjectReference.class);
+    private static final Logger logger = DLLogManager.getLogger(SObjectReference.class);
 
     /**
      * @param refValue

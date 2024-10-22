@@ -39,7 +39,7 @@ import com.salesforce.dataloader.util.ExitException;
 import java.io.File;
 import java.io.FileFilter;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
@@ -87,7 +87,7 @@ public class DataLoaderRunner extends Thread {
     public static IProcess runApp(String[] args, ILoaderProgress monitor) {
         Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
         try {
-            args = AppUtil.initializeAppConfig(args);
+            args = AppConfig.initializeAppConfig(args);
         } catch (FactoryConfigurationError | Exception ex) {
             ex.printStackTrace();
             System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
@@ -99,7 +99,7 @@ public class DataLoaderRunner extends Thread {
         } else {
             Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
             /* Run in the UI mode, get the controller instance with batchMode == false */
-            logger = LogManager.getLogger(DataLoaderRunner.class);
+            logger = DLLogManager.getLogger(DataLoaderRunner.class);
             Installer.install(argsMap);
             if (argsMap.containsKey(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
                 && "true".equalsIgnoreCase(argsMap.get(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){

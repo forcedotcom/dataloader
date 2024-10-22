@@ -49,7 +49,7 @@ import java.util.TreeSet;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
@@ -87,7 +87,7 @@ import com.sforce.async.CSVReader;
  */
 public class BulkLoadVisitor extends DAOLoadVisitor {
 
-    private static final Logger logger = LogManager.getLogger(BulkLoadVisitor.class);
+    private static final Logger logger = DLLogManager.getLogger(BulkLoadVisitor.class);
 
     private static final String SUCCESS_RESULT_COL = "Success";
     private static final String ERROR_RESULT_COL = "Error";

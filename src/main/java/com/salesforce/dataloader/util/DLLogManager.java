@@ -23,44 +23,22 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader.client;
+package com.salesforce.dataloader.util;
 
-import com.salesforce.dataloader.util.DLLogManager;
+import java.io.IOException;
+import javax.xml.parsers.FactoryConfigurationError;
+
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.salesforce.dataloader.action.visitor.bulk.BulkV2Connection;
-import com.salesforce.dataloader.config.Messages;
-import com.salesforce.dataloader.controller.Controller;
-import com.sforce.async.AsyncApiException;
-import com.sforce.ws.ConnectorConfig;
-
-public class BulkV2Client extends RESTClient<BulkV2Connection> {
-    private static Logger LOG = DLLogManager.getLogger(BulkV2Client.class);
-
-    public BulkV2Client(Controller controller) {
-        super(controller, LOG);
-    }
-    
-    @Override
-    protected boolean connectPostLogin(ConnectorConfig cc) {
+public class DLLogManager {
+    public static <T> Logger getLogger(Class<T> clazz) {
         try {
-            // Set up a connection object with the given config
-            setConnection(new BulkV2Connection(cc, controller));
-        } catch (AsyncApiException e) {
-            logger.error(Messages.getMessage(getClass(), "loginError", cc.getAuthEndpoint(), e.getExceptionMessage()),
-                    e);
-            // Wrap exception. Otherwise, we'll have to change lots of signatures
-            throw new RuntimeException(e.getExceptionMessage(), e);
+            LoggingUtil.initializeLog(null);
+        } catch (FactoryConfigurationError | IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-        return true;
-    }
-
-    public static String getServicePath() {
-        return  "/services/data/v" + getAPIVersionForTheSession() + "/jobs/";
-    }
-
-    @Override
-    public String getServiceURLPath() {
-        return getServicePath();
+        return LogManager.getLogger(clazz);
     }
 }

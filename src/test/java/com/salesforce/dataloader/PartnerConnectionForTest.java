@@ -31,7 +31,7 @@ import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 
@@ -54,7 +54,7 @@ import com.sforce.ws.ConnectionException;
  * @since 8.0
  */
 public class PartnerConnectionForTest extends TestBase {
-    private static Logger logger = LogManager.getLogger(PartnerConnectionForTest.class);
+    private static Logger logger = DLLogManager.getLogger(PartnerConnectionForTest.class);
     private PartnerConnection binding;
     private static HashSet<String> sObjectTypesCreatedOrUpserted = new HashSet<String>();
     private static final Calendar testStartTime = Calendar.getInstance();

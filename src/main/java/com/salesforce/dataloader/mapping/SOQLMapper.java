@@ -40,7 +40,7 @@ import com.sforce.ws.bind.XmlObject;
 
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.LinkedCaseInsensitiveMap;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -86,7 +86,7 @@ import javax.xml.namespace.QName;
  */
 public class SOQLMapper extends Mapper {
 
-    private static final Logger logger = LogManager.getLogger(SOQLMapper.class);
+    private static final Logger logger = DLLogManager.getLogger(SOQLMapper.class);
 
     private SOQLInfo soqlInfo;
     private Map<String, String> extractionMap = new LinkedCaseInsensitiveMap<String>();

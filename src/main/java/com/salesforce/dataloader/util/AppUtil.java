@@ -55,9 +55,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import javax.xml.parsers.FactoryConfigurationError;
-
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -65,7 +62,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
-import com.salesforce.dataloader.exception.ConfigInitializationException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.bind.CalendarCodec;
@@ -98,7 +94,6 @@ public class AppUtil {
     public static final String DATALOADER_VERSION;
     public static final String DATALOADER_SHORT_VERSION;
     public static final String MIN_JAVA_VERSION;
-    public static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
     public static final String DATALOADER_DOWNLOAD_URL = "https://developer.salesforce.com/tools/data-loader";
     public static final int EXIT_CODE_NO_ERRORS = 0;
     public static final int EXIT_CODE_CLIENT_ERROR = 1;
@@ -124,15 +119,6 @@ public class AppUtil {
         DATALOADER_SHORT_VERSION=versionParts[0];
         MIN_JAVA_VERSION=versionProps.getProperty("java.min.version");
         CONTENT_SOBJECT_LIST.add("ContentNote".toLowerCase());
-    }
-    
-    public static synchronized String[] initializeAppConfig(String[] args) throws FactoryConfigurationError, IOException, ConfigInitializationException {
-        Map<String, String> argsMap = convertCommandArgsArrayToArgMap(args);
-        setConfigurationsDir(argsMap);
-        LoggingUtil.initializeLog(argsMap);
-        logger = LogManager.getLogger(AppUtil.class);
-        setUseGMTForDateFieldValue(argsMap);
-        return convertCommandArgsMapToArgsArray(argsMap);
     }
     
     public static OSType getOSType() throws SecurityException {
@@ -203,6 +189,9 @@ public class AppUtil {
     }
     
     public static void extractDirFromJar(String extractionPrefix, String destDirName, boolean flatten) throws IOException, URISyntaxException {
+        if (logger == null) {
+            logger = DLLogManager.getLogger(AppUtil.class);
+        }
         String jarPath = getFullPathOfJar(AppUtil.class);
         java.util.jar.JarFile jarfile = new java.util.jar.JarFile(new java.io.File(jarPath)); //jar file path(here sqljdbc4.jar)
         java.util.Enumeration<java.util.jar.JarEntry> enu= jarfile.entries();
@@ -251,7 +240,7 @@ public class AppUtil {
         return appRunMode;
     }
 
-    private static void setUseGMTForDateFieldValue(Map<String, String> argMap) {
+    public static void setUseGMTForDateFieldValue(Map<String, String> argMap) {
         if (argMap.containsKey(AppConfig.PROP_GMT_FOR_DATE_FIELD_VALUE)) {
             if ("true".equalsIgnoreCase(argMap.get(AppConfig.PROP_GMT_FOR_DATE_FIELD_VALUE))) {
                 useGMTForDateFieldValue = true;
@@ -271,42 +260,6 @@ public class AppUtil {
         return useGMTForDateFieldValue;
     }
     
-    private static String configurationsDir = null;
-    public static synchronized String getConfigurationsDir() {
-        if (configurationsDir == null) {
-            setConfigurationsDir(null);
-        }
-        return configurationsDir;
-    }
-    
-    private static synchronized void setConfigurationsDir(Map<String, String> argsMap) {
-        if (argsMap != null && argsMap.containsKey(AppConfig.CLI_OPTION_CONFIG_DIR_PROP)) {
-            configurationsDir = argsMap.get(AppConfig.CLI_OPTION_CONFIG_DIR_PROP);
-        } else if (configurationsDir != null && !configurationsDir.isEmpty()) {
-                return;
-        } else {
-            // first time invocation and configurationsDir is not set through argsMap
-            configurationsDir = System.getProperty(AppConfig.CLI_OPTION_CONFIG_DIR_PROP);
-            if (configurationsDir == null || configurationsDir.isBlank()) {
-                configurationsDir = getDefaultConfigDir();
-            }
-        }
-        File configDirFile = new File(configurationsDir);
-        try {
-            configurationsDir = configDirFile.getCanonicalPath();
-        } catch (IOException e) {
-            System.err.println("Unable to find configuration folder " + configurationsDir);
-            configurationsDir = configDirFile.getAbsolutePath();
-        }
-        System.setProperty(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, configurationsDir);
-    }
-    
-    private static String getDefaultConfigDir() {
-        return AppUtil.getDirContainingClassJar(AppConfig.class) 
-                + System.getProperty("file.separator")
-                + CONFIG_DIR_DEFAULT_VALUE;
-    }
-
     public static void showBanner() {
         System.out.println(Messages.getMessage(AppUtil.class, "banner", DATALOADER_SHORT_VERSION, MIN_JAVA_VERSION));
     }
@@ -424,6 +377,9 @@ public class AppUtil {
     
     // Run a command in the native system while redirecting its stdout and stderr
     public static int exec(List<String> command, String exceptionMessage) {
+        if (logger == null) {
+            logger = DLLogManager.getLogger(AppUtil.class);
+        }
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.redirectErrorStream(true);
         if (exceptionMessage == null) {
@@ -493,6 +449,9 @@ public class AppUtil {
     
     private static final String SYSPROP_USE_SYSTEM_PROXIES = "java.net.useSystemProxies";
     public static Proxy getSystemHttpsProxy(String[] args) {
+        if (logger == null) {
+            logger = DLLogManager.getLogger(AppUtil.class);
+        }
         Map<String, String> argsMap = convertCommandArgsArrayToArgMap(args);
         if (getAppRunMode() == APP_RUN_MODE.BATCH
                 || getAppRunMode() == APP_RUN_MODE.ENCRYPT
@@ -540,6 +499,9 @@ public class AppUtil {
     }
     
     public static void setConnectorConfigProxySettings(AppConfig appConfig, ConnectorConfig connConfig) {
+        if (logger == null) {
+            logger = DLLogManager.getLogger(AppUtil.class);
+        }
         // proxy properties
         try {
             String proxyHost = appConfig.getString(AppConfig.PROP_PROXY_HOST);

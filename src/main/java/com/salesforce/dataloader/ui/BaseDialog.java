@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader.ui;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -53,7 +53,7 @@ public abstract class BaseDialog extends Dialog {
     protected BaseDialog(Shell parent, Controller controller) {
         super(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
         this.controller = controller;
-        this.logger = LogManager.getLogger(this.getClass());
+        this.logger = DLLogManager.getLogger(this.getClass());
         setText(Labels.getString(this.getClass().getSimpleName() + ".title")); //$NON-NLS-1$
         setMessage(Labels.getString(this.getClass().getSimpleName() + ".message")); //$NON-NLS-1$
     }

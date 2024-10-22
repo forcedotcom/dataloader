@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.IVisitor;
@@ -76,7 +76,7 @@ abstract class AbstractAction implements IAction {
 
     protected AbstractAction(Controller controller, ILoaderProgress monitor)
             throws DataAccessObjectInitializationException {
-        this.logger = LogManager.getLogger(getClass());
+        this.logger = DLLogManager.getLogger(getClass());
         this.monitor = monitor;
         this.controller = controller;
         checkDao(getController().getDao());

@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
@@ -182,7 +182,7 @@ public class ConfigPropertyMetadata {
     private static final String COL_IS_COMMAND_LINE_OPTION = Messages.getString("ConfigPropertyMetadata.csvHeader.COL_IS_COMMAND_LINE_OPTION");
     private static final String COL_IS_ENCRYPTED = Messages.getString("ConfigPropertyMetadata.csvHeader.COL_IS_ENCRYPTED");
     private static String fullPathToPropsFile = null;
-    private static final Logger logger = LogManager.getLogger(ConfigPropertyMetadata.class);
+    private static final Logger logger = DLLogManager.getLogger(ConfigPropertyMetadata.class);
     
     public static String getFullPathToPropsFile(AppConfig appConfig) {
         if (fullPathToPropsFile != null 

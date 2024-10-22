@@ -29,7 +29,7 @@ package com.salesforce.dataloader.ui;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
@@ -60,7 +60,7 @@ import java.io.UnsupportedEncodingException;
  * it prompts for authentication and authorization everytime.
  */
 public class OAuthLoginFromBrowserFlow extends Dialog {
-    protected static Logger logger = LogManager.getLogger(OAuthLoginFromBrowserFlow.class);
+    protected static Logger logger = DLLogManager.getLogger(OAuthLoginFromBrowserFlow.class);
     protected final AppConfig appConfig;
 
     public OAuthLoginFromBrowserFlow(Shell parent, AppConfig appConfig) {

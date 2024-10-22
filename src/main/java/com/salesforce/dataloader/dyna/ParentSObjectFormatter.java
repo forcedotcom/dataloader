@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader.dyna;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.exception.RelationshipFormatException;
@@ -40,7 +40,7 @@ import com.salesforce.dataloader.exception.RelationshipFormatException;
 public class ParentSObjectFormatter {
     private String relationshipName;
     private String parentObjectName = null;
-    private static final Logger logger = LogManager.getLogger(ParentSObjectFormatter.class);
+    private static final Logger logger = DLLogManager.getLogger(ParentSObjectFormatter.class);
 
     public static final String NEW_FORMAT_RELATIONSHIP_NAME_SEPARATOR_CHAR = ":";
   

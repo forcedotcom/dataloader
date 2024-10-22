@@ -40,15 +40,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.salesforce.dataloader.util.DLLogManager;
 
 public class NihilistProgressAdapter implements ILoaderProgress {
     private String message;
     private boolean success = false;
     private int numRowsWithError = 0;
     private int numberBatchesTotal = 0;
-    private final Logger logger = LogManager.getLogger(getClass());
+    private final Logger logger = DLLogManager.getLogger(getClass());
     private int workDone;
     private int totalWork;
     private final List<String> subTasksInOrder = new ArrayList<String>();
