@@ -52,11 +52,11 @@ Batch mode requires specifying an encrypted password in process-conf.xml, config
 
 Execute the following command to generate an encryption key file on Mac (Replace `dataloader_console` with `dataloader.sh` on Linux):
     
-    ./dataloader_console -k [<encryption key file>]  run.mode=encrypt
+    ./dataloader_console -k [<encryption key file>] run.mode=encrypt
     
     OR
     
-    java -jar dataloader-x.y.z.jar -k [<encryption key file>]  run.mode=encrypt
+    java -jar dataloader-x.y.z.jar -k [<encryption key file>] run.mode=encrypt
  
  Execute the following command to encrypt a password on Mac (Replace `dataloader_console` with `dataloader.sh` on Linux):
     
