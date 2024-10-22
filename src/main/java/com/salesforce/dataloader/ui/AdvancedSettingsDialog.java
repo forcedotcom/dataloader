@@ -909,7 +909,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
 
         createLabel(restComp, "configDir", null, null);
         Text textConfigDirLocation = new Text(restComp, SWT.LEFT | SWT.READ_ONLY);
-        textConfigDirLocation.setText(AppUtil.getConfigurationsDir()); //$NON-NLS-1$
+        textConfigDirLocation.setText(AppConfig.getConfigurationsDir()); //$NON-NLS-1$
 
         createLabel(restComp, "loggingConfigFile", null, null);
         String log4j2ConfFile = LoggingUtil.getLoggingConfigFile();

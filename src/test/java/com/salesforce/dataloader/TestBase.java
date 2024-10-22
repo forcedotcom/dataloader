@@ -40,7 +40,7 @@ import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -111,7 +111,7 @@ abstract class TestBase {
         Map<String, String> argsMap = new HashMap<String, String>();
         argsMap.put(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
         try {
-            AppUtil.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argsMap));
+            AppConfig.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argsMap));
         } catch (FactoryConfigurationError e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -119,7 +119,7 @@ abstract class TestBase {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        logger = LogManager.getLogger(TestBase.class);
+        logger = DLLogManager.getLogger(TestBase.class);
     }
 
     private static Properties loadTestProperties() {

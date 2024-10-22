@@ -29,7 +29,7 @@ package com.salesforce.dataloader.security;
 import com.salesforce.dataloader.util.AppUtil;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,7 +51,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class EncryptionAesUtil {
 
-    private static final Logger LOGGER = LogManager.getLogger(EncryptionAesUtil.class);
+    private static final Logger LOGGER = DLLogManager.getLogger(EncryptionAesUtil.class);
 
 
     private static AppUtil.OSType detectedOS;

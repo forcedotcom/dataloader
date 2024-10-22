@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.AppConfig;
@@ -44,6 +43,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ExtractException;
 import com.salesforce.dataloader.exception.ExtractExceptionOnServer;
 import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.util.DLLogManager;
 import com.salesforce.dataloader.util.LoadRateCalculator;
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.BatchInfo;
@@ -59,7 +59,7 @@ import com.sforce.async.OperationEnum;
 
 class BulkApiVisitorUtil {
 
-    private static final Logger logger = LogManager.getLogger(BulkApiVisitorUtil.class);
+    private static final Logger logger = DLLogManager.getLogger(BulkApiVisitorUtil.class);
 
     private final BulkConnection connection;
 

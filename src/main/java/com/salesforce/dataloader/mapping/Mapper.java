@@ -45,7 +45,7 @@ import com.sforce.soap.partner.FieldType;
 
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.LinkedCaseInsensitiveMap;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.client.PartnerClient;
@@ -67,7 +67,7 @@ import com.salesforce.dataloader.util.OrderedProperties;
  */
 public abstract class Mapper {
 
-    private static final Logger logger = LogManager.getLogger(Mapper.class);
+    private static final Logger logger = DLLogManager.getLogger(Mapper.class);
 
     public static class InvalidMappingException extends RuntimeException {
         /**

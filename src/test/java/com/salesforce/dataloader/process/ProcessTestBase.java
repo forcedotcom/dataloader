@@ -36,7 +36,7 @@ import org.apache.commons.beanutils.BasicDynaClass;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.junit.Assert;
 
 import com.salesforce.dataloader.*;
@@ -70,7 +70,7 @@ import com.sforce.ws.util.FileUtil;
  */
 public abstract class ProcessTestBase extends ConfigTestBase {
 
-    private static Logger logger = LogManager.getLogger(ProcessTestBase.class);
+    private static Logger logger = DLLogManager.getLogger(ProcessTestBase.class);
     private int serverApiInvocationThreshold = 150;
 
     protected ProcessTestBase() {

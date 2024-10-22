@@ -33,7 +33,7 @@ import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Field;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 
@@ -54,7 +54,7 @@ import java.util.Set;
  */
 public class LoadMapper extends Mapper {
 
-    private static final Logger logger = LogManager.getLogger(Mapper.class);
+    private static final Logger logger = DLLogManager.getLogger(Mapper.class);
 
     public LoadMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {

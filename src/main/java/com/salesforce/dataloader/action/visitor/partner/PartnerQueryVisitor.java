@@ -30,7 +30,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
@@ -64,7 +64,7 @@ public class PartnerQueryVisitor extends AbstractQueryVisitor {
     public PartnerQueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
             DataWriter successWriter, DataWriter errorWriter) {
         super(action, controller, monitor, queryWriter, successWriter, errorWriter);
-        this.logger = LogManager.getLogger(getClass());
+        this.logger = DLLogManager.getLogger(getClass());
     }
 
     @Override

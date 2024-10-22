@@ -37,7 +37,7 @@ import java.util.Map;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -61,7 +61,7 @@ import com.sforce.ws.ConnectorConfig;
 public class RESTConnection {
     private ConnectorConfig connectorConfig;
     private Controller controller;
-    private static Logger logger = LogManager.getLogger(RESTConnection.class);
+    private static Logger logger = DLLogManager.getLogger(RESTConnection.class);
 
     public RESTConnection(ConnectorConfig config, Controller controller) throws AsyncApiException {
         this.connectorConfig = config;

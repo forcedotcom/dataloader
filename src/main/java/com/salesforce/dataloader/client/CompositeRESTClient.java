@@ -28,7 +28,7 @@ package com.salesforce.dataloader.client;
 import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.action.visitor.rest.RESTConnection;
@@ -41,7 +41,7 @@ import com.sforce.ws.ConnectorConfig;
 
 public class CompositeRESTClient extends RESTClient<RESTConnection> {
     public static enum ACTION_ENUM {UPDATE, DELETE};
-    private static Logger LOG = LogManager.getLogger(BulkV2Client.class);
+    private static Logger LOG = DLLogManager.getLogger(BulkV2Client.class);
 
     public CompositeRESTClient(Controller controller) {
         super(controller, LOG);

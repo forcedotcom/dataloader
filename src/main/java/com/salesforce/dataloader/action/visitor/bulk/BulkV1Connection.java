@@ -31,7 +31,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.ClientBase;
@@ -47,13 +47,12 @@ import com.sforce.async.BulkConnection;
 import com.sforce.async.ContentType;
 import com.sforce.async.JobInfo;
 import com.sforce.async.QueryResultList;
-import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.parser.PullParserException;
 import com.sforce.ws.parser.XmlInputStream;
 
 public class BulkV1Connection extends BulkConnection {
-    private static Logger logger = LogManager.getLogger(BulkV1Connection.class);
+    private static Logger logger = DLLogManager.getLogger(BulkV1Connection.class);
 
     public BulkV1Connection(ConnectorConfig config) throws AsyncApiException {
         super(config);

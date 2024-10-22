@@ -39,7 +39,7 @@ import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
@@ -60,7 +60,7 @@ import com.sforce.async.CSVReader;
  */
 public class CSVFileReader implements DataReader {
 
-    private static final Logger LOGGER = LogManager.getLogger(CSVFileReader.class);
+    private static final Logger LOGGER = DLLogManager.getLogger(CSVFileReader.class);
     private final Object lock = new Object();
     private File file;
     private FileInputStream input;

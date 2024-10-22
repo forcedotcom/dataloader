@@ -71,7 +71,7 @@ import com.salesforce.dataloader.util.ExitException;
 import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
 import com.sforce.soap.partner.fault.ApiFault;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -256,7 +256,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
     }
     
     public static ProcessRunner runBatchMode(Map<String, String>argMap, ILoaderProgress progressMonitor) throws UnsupportedOperationException {
-        logger = LogManager.getLogger(ProcessRunner.class);
+        logger = DLLogManager.getLogger(ProcessRunner.class);
         ProcessRunner runner = null;
         try {
             // create the process
@@ -325,7 +325,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
                         + "is specified in the command line. Loading DynaBean with id " 
                         + dynaBeanID 
                         + " from process-conf.xml located in folder "
-                        + AppUtil.getConfigurationsDir());
+                        + AppConfig.getConfigurationsDir());
             runner = ProcessConfig.getProcessInstance(dynaBeanID);
         }
         runner.getConfigOverrideMap().putAll(argMap);

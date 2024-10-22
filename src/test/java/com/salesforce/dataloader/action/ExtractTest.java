@@ -27,7 +27,7 @@ package com.salesforce.dataloader.action;
 
 import com.salesforce.dataloader.exception.ExtractException;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -47,7 +47,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class ExtractTest {
 
-    private static final Logger logger = LogManager.getLogger(ExtractTest.class);
+    private static final Logger logger = DLLogManager.getLogger(ExtractTest.class);
 
     @Test
     public void testQueryParsePositive() throws Exception {

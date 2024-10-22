@@ -26,7 +26,7 @@
 package com.salesforce.dataloader.action;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -68,7 +68,7 @@ public enum OperationInfoUIHelper {
     public static final OperationInfoUIHelper[] ALL_OPERATIONS_IN_ORDER = { insert, update, upsert, delete, hard_delete,
         extract, extract_all };
 
-    private static final Logger logger = LogManager.getLogger(OperationInfoUIHelper.class);
+    private static final Logger logger = DLLogManager.getLogger(OperationInfoUIHelper.class);
 
     private final Class<? extends Wizard> wizardClass;
 

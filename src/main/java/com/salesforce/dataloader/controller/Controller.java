@@ -60,7 +60,7 @@ import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -363,7 +363,7 @@ public class Controller {
     }
 
     public static synchronized Controller getInstance(Map<String, String> argsMap) throws ControllerInitializationException, ParameterLoadException, ConfigInitializationException {
-        logger = LogManager.getLogger(Controller.class);
+        logger = DLLogManager.getLogger(Controller.class);
         return new Controller(argsMap);
     }
     
@@ -441,7 +441,7 @@ public class Controller {
         File statusDir = new File(statusDirName);
         // if status folder unspecified, create one based on config path
         if (statusDirName == null || statusDirName.length() == 0) {
-            statusDir = new File(new File(AppUtil.getConfigurationsDir()), "../status");
+            statusDir = new File(new File(AppConfig.getConfigurationsDir()), "../status");
             statusDirName = statusDir.getAbsolutePath();
         }
         // it's an error if folder files exists but not a folder

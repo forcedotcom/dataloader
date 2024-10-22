@@ -41,7 +41,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.status.StatusLogger.Config;
 
@@ -477,7 +477,7 @@ public class Installer {
 
     private static void setLogger() {
         if (logger == null) {
-            logger = LogManager.getLogger(Installer.class);
+            logger = DLLogManager.getLogger(Installer.class);
         }
     }
 }

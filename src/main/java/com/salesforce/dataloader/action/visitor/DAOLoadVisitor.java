@@ -35,7 +35,7 @@ import com.salesforce.dataloader.util.DAORowUtil;
 
 import org.apache.commons.beanutils.*;
 import org.apache.commons.text.StringEscapeUtils;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.regex.Matcher;
@@ -83,7 +83,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     protected List<Row> daoRowList = new ArrayList<Row>();
     protected ArrayList<Integer> batchRowToDAORowList = new ArrayList<Integer>();
     private int processedDAORowCounter = 0;
-    private static final Logger logger = LogManager.getLogger(DAOLoadVisitor.class);
+    private static final Logger logger = DLLogManager.getLogger(DAOLoadVisitor.class);
     // following regex pattern is based on info from:
     // - https://www.regular-expressions.info/lookaround.html
     // - https://www.geeksforgeeks.org/how-to-validate-html-tag-using-regular-expression/#

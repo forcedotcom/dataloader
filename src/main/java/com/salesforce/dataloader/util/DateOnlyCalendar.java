@@ -30,7 +30,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 public class DateOnlyCalendar extends GregorianCalendar {
@@ -42,7 +42,7 @@ public class DateOnlyCalendar extends GregorianCalendar {
     static final Logger logger;
     
     static {
-        logger = LogManager.getLogger(DateOnlyCalendar.class);
+        logger = DLLogManager.getLogger(DateOnlyCalendar.class);
     }
 
     public DateOnlyCalendar() {

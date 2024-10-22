@@ -147,7 +147,7 @@ import java.util.Set;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.ClientBase;
@@ -193,7 +193,7 @@ public class BulkV2Connection extends BulkConnection {
     private HashMap<String, String> headers = new HashMap<String, String>();
     private Controller controller = null;
     
-    private static Logger logger = LogManager.getLogger(BulkV2Connection.class);
+    private static Logger logger = DLLogManager.getLogger(BulkV2Connection.class);
 
     /**********************************
      * 

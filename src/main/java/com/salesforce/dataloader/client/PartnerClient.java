@@ -73,7 +73,7 @@ import com.sforce.ws.SessionRenewer;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
@@ -87,7 +87,7 @@ import java.util.TreeMap;
 
 public class PartnerClient extends ClientBase<PartnerConnection> {
 
-    private static Logger LOG = LogManager.getLogger(PartnerClient.class);
+    private static Logger LOG = DLLogManager.getLogger(PartnerClient.class);
 
     private ConnectorConfig connectorConfig = null;
 

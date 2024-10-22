@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -69,7 +69,7 @@ import com.salesforce.dataloader.util.DAORowUtil;
 public class CSVViewerDialog extends Dialog {
     private String input;
 
-    private Logger logger = LogManager.getLogger(CSVViewerDialog.class);
+    private Logger logger = DLLogManager.getLogger(CSVViewerDialog.class);
     private String filename;
     private final boolean ignoreDelimiterConfig;
     private final boolean isQueryOperationResult;

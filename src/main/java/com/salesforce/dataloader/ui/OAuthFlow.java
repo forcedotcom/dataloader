@@ -29,7 +29,7 @@ package com.salesforce.dataloader.ui;
 import com.salesforce.dataloader.config.AppConfig;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
@@ -47,7 +47,7 @@ import java.io.UnsupportedEncodingException;
  * by individuals using connected apps as it requires storing a secret which cannot be done for the normal login
  */
 public abstract class OAuthFlow extends Dialog {
-    protected static Logger logger = LogManager.getLogger(OAuthFlow.class);
+    protected static Logger logger = DLLogManager.getLogger(OAuthFlow.class);
     protected final AppConfig appConfig;
     private String reasonPhrase;
     private int statusCode;

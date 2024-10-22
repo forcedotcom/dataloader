@@ -32,7 +32,7 @@ import java.nio.file.Path;
 
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.Converter;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
@@ -53,7 +53,7 @@ public final class FileByteArrayConverter implements Converter {
     // ----------------------------------------------------------- Constructors
 
     public FileByteArrayConverter() {
-        logger = LogManager.getLogger(this.getClass().getName());
+        logger = DLLogManager.getLogger(this.getClass());
     }
 
     // --------------------------------------------------------- Public Methods

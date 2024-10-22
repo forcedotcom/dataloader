@@ -33,7 +33,7 @@ import com.salesforce.dataloader.util.DateOnlyCalendar;
 
 import org.apache.commons.beanutils.*;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import com.salesforce.dataloader.util.DLLogManager;
 
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.client.DescribeRefObject;
@@ -56,7 +56,7 @@ import com.sforce.soap.partner.sobject.SObject;
 public class SforceDynaBean {
 
     //logger
-    public static Logger logger = LogManager.getLogger(DAOLoadVisitor.class);
+    public static Logger logger = DLLogManager.getLogger(DAOLoadVisitor.class);
 
     /**
      *
