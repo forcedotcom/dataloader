@@ -239,25 +239,9 @@ public class AppUtil {
     public static APP_RUN_MODE getAppRunMode() {
         return appRunMode;
     }
-
-    public static void setUseGMTForDateFieldValue(Map<String, String> argMap) {
-        if (argMap.containsKey(AppConfig.PROP_GMT_FOR_DATE_FIELD_VALUE)) {
-            if ("true".equalsIgnoreCase(argMap.get(AppConfig.PROP_GMT_FOR_DATE_FIELD_VALUE))) {
-                useGMTForDateFieldValue = true;
-            }
-        }
-    }
-    
-    public static void setUseGMTForDateFieldValue(boolean val) {
-        useGMTForDateFieldValue = val;
-    }
     
     public static boolean isContentSObject(String sObjectName) {
         return CONTENT_SOBJECT_LIST.contains(sObjectName.toLowerCase());
-    }
-    private static boolean useGMTForDateFieldValue;
-    public static boolean isUseGMTForDateFieldValue() {
-        return useGMTForDateFieldValue;
     }
     
     public static void showBanner() {
