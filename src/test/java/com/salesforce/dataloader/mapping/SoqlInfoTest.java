@@ -26,6 +26,7 @@
 
 package com.salesforce.dataloader.mapping;
 
+import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.mapping.SOQLInfo.SOQLFieldInfo;
 import com.salesforce.dataloader.mapping.SOQLInfo.SOQLParserException;
 import org.junit.Assert;
@@ -42,7 +43,7 @@ import static org.junit.Assert.assertNull;
  * @author Colin Jarvis
  * @since 21.0
  */
-public class SoqlInfoTest {
+public class SoqlInfoTest extends ConfigTestBase {
 
     @Test
     public void testParseSoql() throws SOQLParserException {

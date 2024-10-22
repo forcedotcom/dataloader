@@ -26,6 +26,7 @@
 
 package com.salesforce.dataloader.EncryptionUtil;
 
+import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.dao.EncryptedDataSource;
 import com.salesforce.dataloader.security.EncryptionAesUtil;
 
@@ -46,7 +47,7 @@ import java.security.GeneralSecurityException;
  *
  * @author xbian
  */
-public class EncryptionUtilTest {
+public class EncryptionUtilTest extends ConfigTestBase {
 
     private static final Logger logger = DLLogManager.getLogger(EncryptionUtilTest.class);
 

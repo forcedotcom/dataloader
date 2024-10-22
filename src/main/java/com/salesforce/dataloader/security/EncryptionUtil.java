@@ -91,20 +91,27 @@ public class EncryptionUtil {
         }
 
         int i = 0;
-        String option = args[i];
-        if (option.length() < 2 || option.charAt(0) != '-') {
+        String operation = "";
+        for (String arg : args) {
+            if (arg.startsWith("-")) {
+                operation = arg;
+                break;
+            }
+            i++;
+        }
+        if (operation.length() < 2 || operation.charAt(0) != '-') {
             System.out.println("Invalid option format: " + args[i]);
             System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
         // make sure enough arguments are provided
-        if (arrayTooSmall(args, i) && option.charAt(1) != 'k') {
-            System.out.println("Option '" + option + "' requires at least one parameter.  Please check usage.\n");
+        if (arrayTooSmall(args, i) && operation.charAt(1) != 'k') {
+            System.out.println("Option '" + operation + "' requires at least one parameter.  Please check usage.\n");
             printUsage();
             System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
         // advance index to param and save the param value
         String param = null;
-        switch (option.charAt(1)) {
+        switch (operation.charAt(1)) {
             case 'e':
                 EncryptionAesUtil enc = new EncryptionAesUtil();
                 param = args[++i];
@@ -167,7 +174,7 @@ public class EncryptionUtil {
                 break;
 
             default:
-                System.out.println("Unsupported option: " + option);
+                System.out.println("Unsupported option: " + operation);
                 printUsage();
                 System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }

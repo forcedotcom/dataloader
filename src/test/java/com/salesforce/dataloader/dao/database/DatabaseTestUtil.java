@@ -25,6 +25,7 @@
  */
 package com.salesforce.dataloader.dao.database;
 
+import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
@@ -56,7 +57,7 @@ import java.util.Map;
  * @since 8.0
  */
 @SuppressWarnings("serial")
-public class DatabaseTestUtil {
+public class DatabaseTestUtil extends ConfigTestBase {
 
     private static final Logger logger = DLLogManager.getLogger(DatabaseTestUtil.class);
 

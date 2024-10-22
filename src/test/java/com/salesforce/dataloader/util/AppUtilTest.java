@@ -28,7 +28,9 @@ package com.salesforce.dataloader.util;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AppUtilTest {
+import com.salesforce.dataloader.ConfigTestBase;
+
+public class AppUtilTest extends ConfigTestBase {
     @Test
     public void testHttpsTester() {
         Assert.assertTrue(AppUtil.isValidHttpsUrl("https://my.com"));

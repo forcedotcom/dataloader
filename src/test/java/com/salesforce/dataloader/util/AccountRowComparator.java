@@ -25,6 +25,7 @@
  */
 package com.salesforce.dataloader.util;
 
+import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.model.Row;
 
 import static com.salesforce.dataloader.dao.database.DatabaseTestUtil.NAME_COL;
@@ -37,7 +38,7 @@ import java.util.Comparator;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class AccountRowComparator implements Comparator<Row> {
+public class AccountRowComparator extends ConfigTestBase implements Comparator<Row> {
 
     private static String getName(Row o1) {
         return o1.get(NAME_COL).toString();

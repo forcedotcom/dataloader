@@ -28,9 +28,11 @@ package com.salesforce.dataloader.util;
 
 import org.junit.Test;
 
+import com.salesforce.dataloader.ConfigTestBase;
+
 import static org.junit.Assert.assertEquals;
 
-public class DAORowUtilTest {
+public class DAORowUtilTest extends ConfigTestBase {
     @Test
     public void testNullPhoneFieldValue() {
         String result = DAORowUtil.getPhoneFieldValue(null, null);

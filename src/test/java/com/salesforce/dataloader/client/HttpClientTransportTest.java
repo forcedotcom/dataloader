@@ -35,10 +35,12 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.salesforce.dataloader.ConfigTestBase;
+
 /**
  * @author xbian
  */
-public class HttpClientTransportTest {
+public class HttpClientTransportTest extends ConfigTestBase {
     @Ignore
     @Test
     // This is a test based a SNI test website where it will check if Server Name Indication is included
