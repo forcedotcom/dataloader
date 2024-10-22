@@ -8,9 +8,9 @@ Java Runtime Environment (JRE) is required to install and run Data Loader. Revie
 # Installing Data Loader
 Salesforce officially supports Data Loader for Windows and macOS. All other operating systems are unsupported. The list of supported macOS and Windows versions and CPU architecture for a released version of Data Loader is provided in the [Release Notes](https://github.com/forcedotcom/dataloader/releases) for that release.
 
-Follow the installation instructions for [macOS](https://help.salesforce.com/articleView?id=sf.loader_install_mac.htm) and [Windows](https://help.​salesforce.com/articleView?id=​loader_install_windows.htm).
+Follow the installation instructions for [macOS](https://help.salesforce.com/articleView?id=sf.loader_install_mac.htm) and [Windows](https://help.salesforce.com/s/articleView?id=000383107&type=1).
 
-Installing on Linux: 
+Installing on Linux:
 - Extract contents of Data Loader zip file
 - Rename `install.command` as `install.sh`
 - Run the command in a shell terminal: `./install.sh`
@@ -30,7 +30,7 @@ For running Data Loader on Linux, type the following command in a command shell:
 Consult the [documentation](https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/configuring_the_data_loader.htm) for the details of how to configure and use Data Loader.
 
 # Running Data Loader in Batch mode
-Batch mode is officially supported only on Windows. To run Data Loader in Batch mode on Windows, see [Batch mode for Windows](https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_batchmode_intro.htm). 
+Batch mode is officially supported only on Windows. To run Data Loader in Batch mode on Windows, see [Batch mode for Windows](https://developer.salesforce.com/docs/atlas.en-us.dataLoader.meta/dataLoader/loader_batchmode_intro.htm).
 
 Execute the following command on Mac (Replace `dataloader_console` with `dataloader.sh` on Linux):
 
@@ -42,7 +42,7 @@ Alternately execute one of the following commands:
     
     OR
     
-    java -jar dataloader-x.y.z.jar salesforce.config.dir=<config dir containing process-conf.xml and config.properties files> process.name=<process name> run.mode=batch 
+    java -jar dataloader-x.y.z.jar salesforce.config.dir=<config dir containing process-conf.xml and config.properties files> process.name=<process name> run.mode=batch
     
 
 ## Commands to create an encryption key file, encrypt a password, or decrypt a password
@@ -52,15 +52,15 @@ Batch mode requires specifying an encrypted password in process-conf.xml, config
 
 Execute the following command to generate an encryption key file on Mac (Replace `dataloader_console` with `dataloader.sh` on Linux):
     
-    ./dataloader_console -k [<encryption key file>]  run.mode=encrypt 
+    ./dataloader_console -k [<encryption key file>] run.mode=encrypt
     
     OR
     
-    java -jar dataloader-x.y.z.jar -k [<encryption key file>]  run.mode=encrypt 
+    java -jar dataloader-x.y.z.jar -k [<encryption key file>] run.mode=encrypt
  
  Execute the following command to encrypt a password on Mac (Replace `dataloader_console` with `dataloader.sh` on Linux):
     
-    ./dataloader_console -e <password in plain text> [<encryption key file>] run.mode=encrypt 
+    ./dataloader_console -e <password in plain text> [<encryption key file>] run.mode=encrypt
     
     OR
     
@@ -68,7 +68,7 @@ Execute the following command to generate an encryption key file on Mac (Replace
 
 Execute the following command to decrypt a password on Mac (Replace `dataloader_console` with `dataloader.sh` on Linux):
     
-    ./dataloader_console -d <encrypted password> [<encryption key file>] run.mode=encrypt 
+    ./dataloader_console -d <encrypted password> [<encryption key file>] run.mode=encrypt
     
     OR
     
@@ -103,7 +103,7 @@ See the property setting for "<maven.compiler.release>" property in pom.xml to f
     cd dataloader
     git submodule init
     git submodule update
-    mvn clean package -DskipTests 
+    mvn clean package -DskipTests
         or
     ./dlbuilder.sh
 ```
@@ -125,7 +125,7 @@ See the [testing wiki](https://github.com/forcedotcom/dataloader/wiki/Testing-Da
 
 # Resources
 
-For more information, see the [Salesforce Data Loader Guide](https://na1.salesforce.com/help/doc/en/salesforce_data_loader.pdf). 
+For more information, see the [Salesforce Data Loader Guide](https://na1.salesforce.com/help/doc/en/salesforce_data_loader.pdf).
 
 Questions can be directed to the [open source forum](https://developer.salesforce.com/forums?feedtype=RECENT&dc=APIs_and_Integration&criteria=ALLQUESTIONS&#!/feedtype=RECENT&criteria=ALLQUESTIONS&).
 
