@@ -56,9 +56,13 @@ public class LoggingUtil {
     private static final String LOG_CONF_DEFAULT_PROPERTIES = "log4j2.properties";
     public static String LOG_CONF_DEFAULT = LOG_CONF_DEFAULT_PROPERTIES;
     private static Logger logger;
+    private static boolean logInitialized = false;
     
     
     public static synchronized void initializeLog(Map<String, String> argsMap) throws FactoryConfigurationError, IOException {
+        if (logInitialized) {
+            return;
+        }
         // check the environment variable for log4j
         String log4jConfigFilePath = System.getenv("LOG4J_CONFIGURATION_FILE");
         if (log4jConfigFilePath == null || log4jConfigFilePath.isEmpty()) {
@@ -113,8 +117,9 @@ public class LoggingUtil {
          
         // this will force a reconfiguration
         context.setConfigLocation(file.toURI());
-        logger = LogManager.getLogger(AppUtil.class);
-        logger.debug(Messages.getMessage(AppUtil.class, "logInit")); //$NON-NLS-1$
+        logger = LogManager.getLogger(LoggingUtil.class);
+        logger.debug(Messages.getMessage(LoggingUtil.class, "logInit")); //$NON-NLS-1$
+        logInitialized = true;
     }
     
     public static void setLoggingLevel(String newLevelStr) {
