@@ -252,8 +252,8 @@ public class AppUtil {
     }
 
     private static void setUseGMTForDateFieldValue(Map<String, String> argMap) {
-        if (argMap.containsKey(AppConfig.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE)) {
-            if ("true".equalsIgnoreCase(argMap.get(AppConfig.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE))) {
+        if (argMap.containsKey(AppConfig.PROP_GMT_FOR_DATE_FIELD_VALUE)) {
+            if ("true".equalsIgnoreCase(argMap.get(AppConfig.PROP_GMT_FOR_DATE_FIELD_VALUE))) {
                 useGMTForDateFieldValue = true;
             }
         }
