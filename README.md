@@ -8,7 +8,7 @@ Java Runtime Environment (JRE) is required to install and run Data Loader. Revie
 # Installing Data Loader
 Salesforce officially supports Data Loader for Windows and macOS. All other operating systems are unsupported. The list of supported macOS and Windows versions and CPU architecture for a released version of Data Loader is provided in the [Release Notes](https://github.com/forcedotcom/dataloader/releases) for that release.
 
-Follow the installation instructions for [macOS](https://help.salesforce.com/articleView?id=sf.loader_install_mac.htm) and [Windows](https://help.salesforce.com/s/articleView?id=000383107&type=1).
+[installation instructions for macOS and Windows](https://help.salesforce.com/articleView?id=sf.loader_install_mac.htm).
 
 Installing on Linux:
 - Extract contents of Data Loader zip file
