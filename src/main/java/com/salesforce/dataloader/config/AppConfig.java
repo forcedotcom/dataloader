@@ -1856,7 +1856,6 @@ public class AppConfig {
         Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
         AppConfig.setConfigurationsDir(argsMap);
         LoggingUtil.initializeLog(argsMap);
-        AppUtil.setUseGMTForDateFieldValue(argsMap);
         return AppUtil.convertCommandArgsMapToArgsArray(argsMap);
     }
 
