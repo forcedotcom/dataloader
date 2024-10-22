@@ -207,23 +207,27 @@ public class AppConfig {
     //
 
     //
-    // Configurable properties that can be specified only as CLI options
+    // Configurable properties that can only be specified as CLI options
     //
-    public static final String CLI_OPTION_SYSTEM_PROXY_PORT = "sfdc.system.proxyPort";
-    public static final String CLI_OPTION_SYSTEM_PROXY_HOST = "sfdc.system.proxyHost";
     public static final String CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP = "salesforce.installation.shortcut.macos.appsfolder";
     public static final String CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP = "salesforce.installation.shortcut.windows.startmenu";
     public static final String CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP = "salesforce.installation.shortcut.desktop";
     public static final String CLI_OPTION_INSTALLATION_FOLDER_PROP = "salesforce.installation.dir";
-    public static final String CLI_OPTION_SAVE_ALL_PROPS = "salesforce.saveAllSettings";
+    public static final String CLI_OPTION_RUN_MODE = "run.mode";
     public static final String CLI_OPTION_CONFIG_DIR_PROP = "salesforce.config.dir";
+
+    // following command line options are set in UI mode when invoking java runtime
+    // for the 2nd iteration
+    public static final String CLI_OPTION_SYSTEM_PROXY_PORT = "sfdc.system.proxyPort";
+    public static final String CLI_OPTION_SYSTEM_PROXY_HOST = "sfdc.system.proxyHost";
     public static final String CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH = "swt.nativelib.inpath";
-    public static final String CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
 
     // =======================
     // Configurable properties specified in config.properties file
     // =======================
     // Loader Preferences
+    public static final String PROP_SAVE_ALL_PROPS = "salesforce.saveAllSettings";
+    public static final String PROP_GMT_FOR_DATE_FIELD_VALUE = "datefield.usegmt";
     public static final String PROP_HIDE_WELCOME_SCREEN = "loader.hideWelcome";
     public static final String PROP_SHOW_LOADER_UPGRADE_SCREEN = "loader.ui.showUpgrade";
 
@@ -458,7 +462,6 @@ public class AppConfig {
      * Option names MUST start with the prefix "CLI_OPTION_"
      * ************
      */
-    public static final String CLI_OPTION_RUN_MODE = "run.mode";
     public static final String RUN_MODE_UI_VAL = "ui";
     public static final String RUN_MODE_BATCH_VAL = "batch";
     public static final String RUN_MODE_INSTALL_VAL = "install";
@@ -541,12 +544,12 @@ public class AppConfig {
             PROP_REUSE_CLIENT_CONNECTION,
             CLI_OPTION_RUN_MODE,
             AppConfig.CLI_OPTION_CONFIG_DIR_PROP,
-            AppConfig.CLI_OPTION_GMT_FOR_DATE_FIELD_VALUE,
+            AppConfig.PROP_GMT_FOR_DATE_FIELD_VALUE,
             AppConfig.CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP,
             AppConfig.CLI_OPTION_INSTALLATION_CREATE_MACOS_APPS_FOLDER_SHORTCUT_PROP,
             AppConfig.CLI_OPTION_INSTALLATION_CREATE_WINDOWS_START_MENU_SHORTCUT_PROP,
             AppConfig.CLI_OPTION_INSTALLATION_FOLDER_PROP,
-            AppConfig.CLI_OPTION_SAVE_ALL_PROPS,
+            AppConfig.PROP_SAVE_ALL_PROPS,
             AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH,
             AppConfig.CLI_OPTION_SYSTEM_PROXY_HOST,
             AppConfig.CLI_OPTION_SYSTEM_PROXY_PORT,
@@ -611,7 +614,7 @@ public class AppConfig {
         // 1. process-conf.properties for CLI mode
         // 2. command line options for both CLI and UI modes
         this.loadParameterOverrides(cliOptionsMap);
-        saveAllProps = getBoolean(AppConfig.CLI_OPTION_SAVE_ALL_PROPS);
+        saveAllProps = getBoolean(AppConfig.PROP_SAVE_ALL_PROPS);
         
         // last run gets initialized after loading config and overrides
         // since config params are needed for initializing last run.
@@ -777,6 +780,8 @@ public class AppConfig {
         setDefaultValue(PROP_RICH_TEXT_FIELD_REGEX, DEFAULT_RICHTEXT_REGEX);
         setDefaultValue(PROP_DAO_SKIP_TOTAL_COUNT, true);
         setDefaultValue(PROP_READ_CHARSET ,getDefaultCharsetForCsvReadWrite());
+        setDefaultValue(PROP_GMT_FOR_DATE_FIELD_VALUE, false);
+        setDefaultValue(PROP_SAVE_ALL_PROPS, false);
     }
 
     /**
