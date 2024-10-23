@@ -28,11 +28,13 @@ package com.salesforce.dataloader.util;
 
 import org.junit.Test;
 
+import com.salesforce.dataloader.ConfigTestBase;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
-public class LoadRateCalculatorTest {
+public class LoadRateCalculatorTest extends ConfigTestBase {
    @Test
    public void testRateCalculatorZeroCompletion() {
       LoadRateCalculator rateCalculator = new LoadRateCalculator();

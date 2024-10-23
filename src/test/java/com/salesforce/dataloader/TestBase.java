@@ -110,16 +110,6 @@ abstract class TestBase {
         
         Map<String, String> argsMap = new HashMap<String, String>();
         argsMap.put(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
-        try {
-            AppConfig.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argsMap));
-        } catch (FactoryConfigurationError e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        logger = DLLogManager.getLogger(TestBase.class);
     }
 
     private static Properties loadTestProperties() {
@@ -201,6 +191,7 @@ abstract class TestBase {
 
         try {
             controller = Controller.getInstance(configOverrideMap);
+            logger = DLLogManager.getLogger(TestBase.class);
         } catch (Exception e) {
             fail("While initializing controller instance", e);
         }

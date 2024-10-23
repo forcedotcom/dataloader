@@ -32,7 +32,6 @@ import org.junit.Test;
 
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.config.AppConfig;
-import com.salesforce.dataloader.util.AppUtil;
 
 import java.util.Calendar;
 import java.util.Date;

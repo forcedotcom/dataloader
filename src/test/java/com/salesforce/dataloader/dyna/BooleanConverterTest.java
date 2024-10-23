@@ -28,12 +28,14 @@ package com.salesforce.dataloader.dyna;
 import org.apache.commons.beanutils.ConversionException;
 import org.junit.Test;
 
+import com.salesforce.dataloader.ConfigTestBase;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-public class BooleanConverterTest {
+public class BooleanConverterTest extends ConfigTestBase {
 
     private static final String[] VALID_TRUE_VALUES = {"yes", "y", "true", "on", "1"};
     private static final String[] VALID_FALSE_VALUES = {"no", "n", "false", "off", "0"};

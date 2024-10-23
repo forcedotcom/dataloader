@@ -363,8 +363,9 @@ public class Controller {
     }
 
     public static synchronized Controller getInstance(Map<String, String> argsMap) throws ControllerInitializationException, ParameterLoadException, ConfigInitializationException {
+        Controller controller = new Controller(argsMap);
         logger = DLLogManager.getLogger(Controller.class);
-        return new Controller(argsMap);
+        return controller;
     }
     
     public synchronized boolean saveConfig() {

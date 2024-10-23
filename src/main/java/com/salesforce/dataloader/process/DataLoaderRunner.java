@@ -87,7 +87,7 @@ public class DataLoaderRunner extends Thread {
     public static IProcess runApp(String[] args, ILoaderProgress monitor) {
         Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
         try {
-            args = AppConfig.initializeAppConfig(args);
+            AppConfig.getInstance(AppUtil.convertCommandArgsArrayToArgMap(args));
         } catch (FactoryConfigurationError | Exception ex) {
             ex.printStackTrace();
             System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);

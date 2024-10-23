@@ -1852,7 +1852,7 @@ public class AppConfig {
         System.setProperty(CLI_OPTION_CONFIG_DIR_PROP, AppConfig.configurationsDir);
     }
 
-    public static synchronized String[] initializeAppConfig(String[] args) throws FactoryConfigurationError, IOException, ConfigInitializationException {
+    private static synchronized String[] initializeAppConfig(String[] args) throws FactoryConfigurationError, IOException, ConfigInitializationException {
         Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
         AppConfig.setConfigurationsDir(argsMap);
         LoggingUtil.initializeLog(argsMap);

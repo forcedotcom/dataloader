@@ -25,6 +25,7 @@
  */
 package com.salesforce.dataloader.action;
 
+import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.exception.ExtractException;
 import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.util.DLLogManager;
@@ -45,7 +46,7 @@ import static org.junit.Assert.assertTrue;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class ExtractTest {
+public class ExtractTest extends ConfigTestBase {
 
     private static final Logger logger = DLLogManager.getLogger(ExtractTest.class);
 

@@ -53,7 +53,7 @@ import com.sforce.ws.ConnectionException;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class PartnerConnectionForTest extends TestBase {
+public class PartnerConnectionForTest extends ConfigTestBase {
     private static Logger logger = DLLogManager.getLogger(PartnerConnectionForTest.class);
     private PartnerConnection binding;
     private static HashSet<String> sObjectTypesCreatedOrUpserted = new HashSet<String>();

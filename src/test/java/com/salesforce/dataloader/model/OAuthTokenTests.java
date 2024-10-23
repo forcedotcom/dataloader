@@ -28,10 +28,12 @@ package com.salesforce.dataloader.model;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.salesforce.dataloader.ConfigTestBase;
+
 /**
  * Created by rmazzeo on 12/9/15.
  */
-public class OAuthTokenTests {
+public class OAuthTokenTests extends ConfigTestBase {
     @Test
     public void testAccessToken(){
         OAuthToken target = new OAuthToken();
