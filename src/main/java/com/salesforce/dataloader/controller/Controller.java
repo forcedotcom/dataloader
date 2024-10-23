@@ -129,8 +129,13 @@ public class Controller {
         // if name is passed to controller, use it to create a unique run file name
         try {
             this.appConfig = AppConfig.getInstance(argsMap);
+            // config containing log4j config file is not initialized
+            // till AppConfig is instantiated.
+            logger = DLLogManager.getLogger(Controller.class);
         } catch (Exception e) {
-            logger.error("Exception happened in initConfig:", e);
+            System.err.println("Controller: Exception happened in initializing AppConfig:");
+            System.err.println(e.getMessage());
+            e.printStackTrace();
             throw new ControllerInitializationException(e.getMessage());
         }
 
@@ -363,9 +368,7 @@ public class Controller {
     }
 
     public static synchronized Controller getInstance(Map<String, String> argsMap) throws ControllerInitializationException, ParameterLoadException, ConfigInitializationException {
-        Controller controller = new Controller(argsMap);
-        logger = DLLogManager.getLogger(Controller.class);
-        return controller;
+        return new Controller(argsMap);
     }
     
     public synchronized boolean saveConfig() {

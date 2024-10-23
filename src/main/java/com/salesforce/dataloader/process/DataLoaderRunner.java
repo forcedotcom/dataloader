@@ -85,9 +85,10 @@ public class DataLoaderRunner extends Thread {
     }
     
     public static IProcess runApp(String[] args, ILoaderProgress monitor) {
+        Controller controller = null;
         Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
         try {
-            AppConfig.getInstance(AppUtil.convertCommandArgsArrayToArgMap(args));
+            controller = Controller.getInstance(AppUtil.convertCommandArgsArrayToArgMap(args));
         } catch (FactoryConfigurationError | Exception ex) {
             ex.printStackTrace();
             System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
@@ -110,7 +111,6 @@ public class DataLoaderRunner extends Thread {
                     } else {
                         logger.debug("org.eclipse.swt.browser.DefaultType set to " + defaultBrowser + " for UI mode on Windows");
                     }
-                    Controller controller = Controller.getInstance(argsMap);
                     controller.createAndShowGUI();
                 } catch (Exception e) {
                     UIUtils.errorMessageBox(new Shell(new Display()), e);
