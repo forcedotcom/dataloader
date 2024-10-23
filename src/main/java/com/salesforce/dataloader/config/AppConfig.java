@@ -1856,6 +1856,7 @@ public class AppConfig {
         Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
         AppConfig.setConfigurationsDir(argsMap);
         LoggingUtil.initializeLog(argsMap);
+        logger = DLLogManager.getLogger(AppConfig.class);
         return AppUtil.convertCommandArgsMapToArgsArray(argsMap);
     }
 
@@ -1892,7 +1893,6 @@ public class AppConfig {
             argMap = new HashMap<String, String>();
         }
         AppConfig.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argMap));
-        logger = DLLogManager.getLogger(AppConfig.class);
 
         String configurationsDirPath = AppConfig.getConfigurationsDir();
         File configurationsDir;
