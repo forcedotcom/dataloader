@@ -43,10 +43,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
 import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.status.StatusLogger.Config;
 
 import com.salesforce.dataloader.config.AppConfig;
-import com.salesforce.dataloader.config.ConfigPropertyMetadata;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.util.AppUtil;
 
@@ -56,7 +54,7 @@ public class Installer {
     private static final String CREATE_DEKSTOP_SHORTCUT_ON_WINDOWS = ":createDesktopShortcut";
     private static final String CREATE_START_MENU_SHORTCUT_ON_WINDOWS = ":createStartMenuShortcut";
 
-    private static Logger logger;
+    private static Logger logger =DLLogManager.getLogger(Installer.class);
     private static String[] OS_SPECIFIC_DL_COMMAND = {"dataloader.bat", "dataloader_console", "dataloader.sh"};
 
     public static void install(Map<String, String> argsmap) {
@@ -68,7 +66,6 @@ public class Installer {
             String installationFolder = ".";
             installationFolder = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation()
                     .toURI()).getParent();
-            setLogger();
 
             for (String dlCmd : OS_SPECIFIC_DL_COMMAND) {
                 Path installFilePath = Paths.get(installationFolder + PATH_SEPARATOR + dlCmd);
@@ -292,7 +289,7 @@ public class Installer {
                 try {
                     input = promptAndGetUserInput(prompt);
                 } catch (IOException e) {
-                    System.err.println(Messages.getMessage(Installer.class, "responseReadError"));
+                    logger.error(Messages.getMessage(Installer.class, "responseReadError"));
                     handleException(e, Level.ERROR);
                 }
             }
@@ -305,7 +302,7 @@ public class Installer {
                         System.out.println(success);
                     }
                 } catch (Exception ex) {
-                    System.err.println(Messages.getMessage(Installer.class, "shortcutCreateError"));
+                    logger.error(Messages.getMessage(Installer.class, "shortcutCreateError"));
                     handleException(ex, Level.ERROR);
                 }
                 break;
@@ -454,7 +451,6 @@ public class Installer {
     }
 
     public static void extractInstallationArtifactsFromJar(String installationDir) throws URISyntaxException, IOException {
-        setLogger();
         AppUtil.extractDirFromJar("samples", installationDir, false);
         AppUtil.extractDirFromJar("configs", installationDir, false);
         String osSpecificExtractionPrefix = "mac/";
@@ -472,12 +468,6 @@ public class Installer {
             logger.log(level, "Installer :", ex);
         } else {
             ex.printStackTrace();
-        }
-    }
-
-    private static void setLogger() {
-        if (logger == null) {
-            logger = DLLogManager.getLogger(Installer.class);
         }
     }
 }

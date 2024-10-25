@@ -87,7 +87,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
      */
 
     //logger
-    private static Logger logger;
+    private static Logger logger = DLLogManager.getLogger(ProcessRunner.class);
     
     private String name = null; // name of the loaded process DynaBean
 
@@ -238,25 +238,14 @@ public class ProcessRunner implements InitializingBean, IProcess {
 
     public static void logErrorAndExitProcess(String message, Throwable throwable, int exitCode) {
         if (throwable == null) {
-            if (logger == null) {
-                System.err.println(message);
-            } else {
-                logger.fatal(message);
-            }
-            throw new ExitException(message, exitCode); // expect caller to exit
+            logger.fatal(message);
         } else { // throwable != null
-            if (logger == null) {
-                System.err.println(throwable.getMessage());
-                throwable.printStackTrace();
-            } else {
-                logger.fatal(message, throwable);
-            }
-            throw new ExitException(throwable, exitCode);
+            logger.fatal(message, throwable);
         }
+        throw new ExitException(throwable, exitCode);
     }
     
     public static ProcessRunner runBatchMode(Map<String, String>argMap, ILoaderProgress progressMonitor) throws UnsupportedOperationException {
-        logger = DLLogManager.getLogger(ProcessRunner.class);
         ProcessRunner runner = null;
         try {
             // create the process

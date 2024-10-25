@@ -120,7 +120,7 @@ import org.apache.logging.log4j.Logger;
  *
  */
 public class AppConfig {
-    private static Logger logger;
+    private static Logger logger = DLLogManager.getLogger(AppConfig.class);
     private static final String DECRYPTED_SUFFIX = ".decrypted";
 
     /**
@@ -1846,7 +1846,7 @@ public class AppConfig {
         try {
             AppConfig.configurationsDir = configDirFile.getCanonicalPath();
         } catch (IOException e) {
-            System.err.println("Unable to find configuration folder " + AppConfig.configurationsDir);
+            logger.error("Unable to find configuration folder " + AppConfig.configurationsDir);
             AppConfig.configurationsDir = configDirFile.getAbsolutePath();
         }
         System.setProperty(CLI_OPTION_CONFIG_DIR_PROP, AppConfig.configurationsDir);
@@ -1856,7 +1856,6 @@ public class AppConfig {
         Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
         AppConfig.setConfigurationsDir(argsMap);
         LoggingUtil.initializeLog(argsMap);
-        logger = DLLogManager.getLogger(AppConfig.class);
         return AppUtil.convertCommandArgsMapToArgsArray(argsMap);
     }
 
