@@ -25,20 +25,11 @@
  */
 package com.salesforce.dataloader.util;
 
-import java.io.IOException;
-import javax.xml.parsers.FactoryConfigurationError;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class DLLogManager {
     public static <T> Logger getLogger(Class<T> clazz) {
-        try {
-            LoggingUtil.initializeLog(null);
-        } catch (FactoryConfigurationError | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
         return LogManager.getLogger(clazz);
     }
 }

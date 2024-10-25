@@ -111,7 +111,7 @@ public class Controller {
     private boolean lastOperationSuccessful = true;
 
     // logger
-    private static Logger logger;
+    private static Logger logger = DLLogManager.getLogger(Controller.class);
     
     private IAction lastExecutedAction = null;
     
@@ -121,7 +121,7 @@ public class Controller {
             versionProps.load(Controller.class.getClassLoader().getResourceAsStream("com/salesforce/dataloader/version.properties"));
             APP_VERSION = versionProps.getProperty("dataloader.version");
         } catch (IOException e) {
-            System.err.println("Unable to read version.properties file from uber jar");
+            logger.error("Unable to read version.properties file from uber jar");
         }
     }
 
@@ -129,13 +129,8 @@ public class Controller {
         // if name is passed to controller, use it to create a unique run file name
         try {
             this.appConfig = AppConfig.getInstance(argsMap);
-            // config containing log4j config file is not initialized
-            // till AppConfig is instantiated.
-            logger = DLLogManager.getLogger(Controller.class);
         } catch (Exception e) {
-            System.err.println("Controller: Exception happened in initializing AppConfig:");
-            System.err.println(e.getMessage());
-            e.printStackTrace();
+            logger.fatal("Controller: Exception happened in initializing AppConfig:", e);
             throw new ControllerInitializationException(e.getMessage());
         }
 

@@ -45,11 +45,11 @@ import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.LinkedProperties;
-import com.salesforce.dataloader.config.Messages;
 
 public class LoggingUtil {
     
@@ -57,14 +57,9 @@ public class LoggingUtil {
     private static final String LOG_CONF_DEFAULT_XML = "log-conf.xml";
     private static final String LOG_CONF_DEFAULT_PROPERTIES = "log4j2.properties";
     public static String LOG_CONF_DEFAULT = LOG_CONF_DEFAULT_PROPERTIES;
-    private static Logger logger;
-    private static boolean logInitialized = false;
-    
+    private static Logger logger = LogManager.getLogger(LoggingUtil.class);
     
     public static synchronized void initializeLog(Map<String, String> argsMap) throws FactoryConfigurationError, IOException {
-        if (logInitialized) {
-            return;
-        }
         if (argsMap == null) {
             argsMap = new HashMap<String, String>();
         }
@@ -122,9 +117,9 @@ public class LoggingUtil {
          
         // this will force a reconfiguration
         context.setConfigLocation(file.toURI());
-        logger = LogManager.getLogger(LoggingUtil.class);
-        logger.debug(Messages.getMessage(LoggingUtil.class, "logInit")); //$NON-NLS-1$
-        logInitialized = true;
+        Configurator.reconfigure();
+        
+        logger.debug("Initialized logging config"); //$NON-NLS-1$
     }
     
     public static void setLoggingLevel(String newLevelStr) {
