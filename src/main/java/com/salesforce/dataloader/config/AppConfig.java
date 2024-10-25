@@ -190,7 +190,7 @@ public class AppConfig {
     private final boolean saveAllProps;
     private Map<String,ConfigPropertyMetadata> configPropsMetadataMap = ConfigPropertyMetadata.getPropertiesMap();
     
-    private Map<String, String> parameterOverridesMap;
+    private Map<String, String> commandLineOptionsMap;
 
     /**
      * The default-default value for the respective types.
@@ -597,7 +597,7 @@ public class AppConfig {
      * @see #load()
      * @see #save()
      */
-    private AppConfig(String filename, Map<String, String> cliOptionsMap) throws ConfigInitializationException, IOException {
+    private AppConfig(String filename, Map<String, String> commandLineOptionsMap) throws ConfigInitializationException, IOException {
         loadedProperties = new LinkedProperties();
         this.filename = filename;
         
@@ -606,7 +606,7 @@ public class AppConfig {
         
         // initialize with defaults 
         // 
-        this.setDefaults(cliOptionsMap);
+        this.setDefaults(commandLineOptionsMap);
         this.defaultProperties = new LinkedProperties();
         this.defaultProperties.putAll(this.loadedProperties);
         
@@ -617,7 +617,7 @@ public class AppConfig {
         // parameter overrides are from two places:
         // 1. process-conf.properties for CLI mode
         // 2. command line options for both CLI and UI modes
-        this.loadParameterOverrides(cliOptionsMap);
+        this.loadCommandLineOptions(commandLineOptionsMap);
         saveAllProps = getBoolean(AppConfig.PROP_SAVE_ALL_PROPS);
         
         // last run gets initialized after loading config and overrides
@@ -1192,14 +1192,14 @@ public class AppConfig {
      * Load config parameter override values. The main use case is loading of overrides from
      * external config file
      */
-    public void loadParameterOverrides(Map<String, String> configOverrideMap) throws ParameterLoadException,
+    public void loadCommandLineOptions(Map<String, String> commandLineOptionsMap) throws ParameterLoadException,
             ConfigInitializationException {
-        this.parameterOverridesMap = configOverrideMap;
+        this.commandLineOptionsMap = commandLineOptionsMap;
         // make sure to post-process the args to be loaded
-        postLoad(configOverrideMap, false);
+        postLoad(commandLineOptionsMap, false);
 
         // replace values in the Config
-        putValue(configOverrideMap);
+        putValue(commandLineOptionsMap);
     }
 
     /**
@@ -1433,8 +1433,8 @@ public class AppConfig {
     }
     
     private void removeCommandLineOptionsBeforeSave() {
-        if (this.parameterOverridesMap != null) {
-            for (String propertyName : this.parameterOverridesMap.keySet()) {
+        if (this.commandLineOptionsMap != null) {
+            for (String propertyName : this.commandLineOptionsMap.keySet()) {
                 this.loadedProperties.remove(propertyName);
             }
         }

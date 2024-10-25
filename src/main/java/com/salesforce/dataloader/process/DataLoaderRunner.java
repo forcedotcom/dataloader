@@ -70,9 +70,9 @@ public class DataLoaderRunner extends Thread {
         HttpClientTransport.closeHttpClient();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] commandLineOptions) {
         try {
-            runApp(args, null);
+            runApp(commandLineOptions, null);
             System.exit(exitCode);
         } catch (ExitException ex) {
             System.exit(ex.getExitCode());
@@ -84,21 +84,21 @@ public class DataLoaderRunner extends Thread {
         System.exit(exitCode);
     }
     
-    public static IProcess runApp(String[] args, ILoaderProgress monitor) {
+    public static IProcess runApp(String[] commandLineOptions, ILoaderProgress monitor) {
         Controller controller = null;
         Runtime.getRuntime().addShutdownHook(new DataLoaderRunner());
         try {
-            controller = Controller.getInstance(AppUtil.convertCommandArgsArrayToArgMap(args));
+            controller = Controller.getInstance(AppUtil.convertCommandArgsArrayToArgMap(commandLineOptions));
         } catch (FactoryConfigurationError | Exception ex) {
             ex.printStackTrace();
             System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
         if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH) {
-            return ProcessRunner.runBatchMode(AppUtil.convertCommandArgsArrayToArgMap(args), monitor);
+            return ProcessRunner.runBatchMode(AppUtil.convertCommandArgsArrayToArgMap(commandLineOptions), monitor);
         } else if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.ENCRYPT) {
-            EncryptionUtil.main(args);
+            EncryptionUtil.main(commandLineOptions);
         } else {
-            Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
+            Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(commandLineOptions);
             /* Run in the UI mode, get the controller instance with batchMode == false */
             logger = DLLogManager.getLogger(DataLoaderRunner.class);
             Installer.install(argsMap);
@@ -117,7 +117,7 @@ public class DataLoaderRunner extends Thread {
                 }
             } else { // SWT_NATIVE_LIB_IN_JAVA_LIB_PATH not set
                 AppUtil.showBanner();
-                rerunWithSWTNativeLib(args);
+                rerunWithSWTNativeLib(commandLineOptions);
             }
         }
         return null;
