@@ -245,11 +245,11 @@ public class ProcessRunner implements InitializingBean, IProcess {
         throw new ExitException(throwable, exitCode);
     }
     
-    public static ProcessRunner runBatchMode(Map<String, String>argMap, ILoaderProgress progressMonitor) throws UnsupportedOperationException {
+    public static ProcessRunner runBatchMode(Map<String, String>commandLineOptionsMap, ILoaderProgress progressMonitor) throws UnsupportedOperationException {
         ProcessRunner runner = null;
         try {
             // create the process
-            runner = ProcessRunner.getInstance(argMap);
+            runner = ProcessRunner.getInstance(commandLineOptionsMap);
             if (runner == null) {
                 logErrorAndExitProcess("Process runner is null",
                         new NullPointerException(), AppUtil.EXIT_CODE_CLIENT_ERROR);
@@ -290,13 +290,13 @@ public class ProcessRunner implements InitializingBean, IProcess {
      */
 
     /**
-     * @param argMap
+     * @param commandLineOptionsMap
      * @return instance of ProcessRunner
      * @throws ProcessInitializationException
      */
-    private static synchronized ProcessRunner getInstance(Map<String, String> argMap) throws ProcessInitializationException {
+    private static synchronized ProcessRunner getInstance(Map<String, String> commandLineOptionsMap) throws ProcessInitializationException {
         logger.info(Messages.getString("Process.initializingEngine")); //$NON-NLS-1$
-        String dynaBeanID = argMap.get(AppConfig.PROP_PROCESS_NAME);
+        String dynaBeanID = commandLineOptionsMap.get(AppConfig.PROP_PROCESS_NAME);
         ProcessRunner runner;
         if (dynaBeanID == null || dynaBeanID.isEmpty()) {
             // operation and other process params are specified in config.properties
@@ -304,8 +304,8 @@ public class ProcessRunner implements InitializingBean, IProcess {
                     + "is not specified in the command line. Loading the process properties from config.properties.");
             runner = new ProcessRunner();
             
-            if (argMap.containsKey(AppConfig.PROP_PROCESS_THREAD_NAME)) {
-                runner.setName(argMap.get(AppConfig.PROP_PROCESS_THREAD_NAME));
+            if (commandLineOptionsMap.containsKey(AppConfig.PROP_PROCESS_THREAD_NAME)) {
+                runner.setName(commandLineOptionsMap.get(AppConfig.PROP_PROCESS_THREAD_NAME));
             }
         } else {
             // process name specified in the command line arg. 
@@ -317,7 +317,10 @@ public class ProcessRunner implements InitializingBean, IProcess {
                         + AppConfig.getConfigurationsDir());
             runner = ProcessConfig.getProcessInstance(dynaBeanID);
         }
-        runner.getConfigOverrideMap().putAll(argMap);
+        
+        // Override properties set in config.properties and process-conf.xml
+        // by properties specified as command line options
+        runner.getConfigOverrideMap().putAll(commandLineOptionsMap);
         return runner;
     }
 
