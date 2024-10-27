@@ -538,7 +538,6 @@ public class AppConfig {
             PROP_ENCRYPTION_KEY_FILE,
             PROP_LAST_RUN_OUTPUT_DIR,
             PROP_PROCESS_NAME,
-            PROP_OUTPUT_STATUS_DIR,
             PROP_BULK_API_CHECK_STATUS_INTERVAL,
             PROP_CONNECTION_TIMEOUT_SECS,
             PROP_ENABLE_RETRIES,
@@ -1321,11 +1320,12 @@ public class AppConfig {
      * @throws java.io.IOException if there is a problem saving this store
      */
     public void save() throws IOException, GeneralSecurityException {
+        // lastrun properties are always saved
+        lastRunProperties.save();
+        
         if (getString(AppConfig.CLI_OPTION_RUN_MODE).equalsIgnoreCase(AppConfig.RUN_MODE_BATCH_VAL)
            || getBoolean(PROP_READ_ONLY_CONFIG_PROPERTIES)
            || !inMemoryPropValuesHaveChanged) {
-            // lastrun properties are always saved
-            lastRunProperties.save();
             return; // do not save any updates to config.properties file
         }
         if (filename == null) {
@@ -1359,8 +1359,6 @@ public class AppConfig {
             // restore original in-memory property values
             loadedProperties = inMemoryProperties;
         }
-        // save last run statistics
-        lastRunProperties.save();
     }
     
     public void setAuthEndpointForCurrentEnv(String authEndpoint) {
@@ -1653,11 +1651,11 @@ public class AppConfig {
         } else {
             loadedProperties.put(name, newValue);
         }
-        if (isReadOnlyProperty(name)
-                || isOverrideProperty(name)
-                || isInternalProperty(name)
-                || skipIfAlreadySet
-                || lastRunProperties.hasParameter(name)) {
+        if (!isReadOnlyProperty(name)
+            && !isOverrideProperty(name)
+            && !isInternalProperty(name)
+            && !skipIfAlreadySet
+            && !lastRunProperties.hasParameter(name)) {
             //read-only properties, internal properties,
             // or properties overridden by setting them in process-conf.xml
             // or passing them as command line options should not result in updates
@@ -1665,8 +1663,6 @@ public class AppConfig {
             //
             // Also, if skipIfAlreadySet==true, the property was not set
             // in config.properties file. It is being set to its default value.
-            this.inMemoryPropValuesHaveChanged = false;
-        } else {
             this.inMemoryPropValuesHaveChanged = true;
         }
     }
