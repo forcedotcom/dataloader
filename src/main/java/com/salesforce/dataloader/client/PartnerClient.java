@@ -587,6 +587,14 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private boolean login() throws ConnectionException, ApiFault {
+        return loginWithRetries(0);
+    }
+    
+    private static final int MAX_LOGIN_RETRIES = 2;
+    private boolean loginWithRetries(int currentRetryCount) throws ConnectionException, ApiFault {
+        if (currentRetryCount > MAX_LOGIN_RETRIES) {
+            return false;
+        }
         disconnect();
         String origEndpoint = new String(appConfig.getAuthEndpointForCurrentEnv());
         try {
@@ -596,7 +604,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             if (fault.getExceptionCode() == ExceptionCode.UNSUPPORTED_API_VERSION) {
                 logger.error("Failed to successfully invoke server APIs of version " + getAPIVersionForTheSession());
                 setAPIVersionForTheSession(getPreviousAPIVersionInWSC());
-                login();
+                loginWithRetries(currentRetryCount++);
             } else {
                 logger.error("Failed to get user info using manually configured session id", fault);
                 throw fault;
@@ -613,7 +621,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
                 // retry with default endpoint URL only if user is attempting production login
                 appConfig.setAuthEndpointForCurrentEnv(appConfig.getDefaultAuthEndpointForCurrentEnv());
                 logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", appConfig.getDefaultAuthEndpointForCurrentEnv(), appConfig.getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT)));
-                login();
+                loginWithRetries(currentRetryCount++);
             } else {
                 logger.error("Failed to get user info using manually configured session id", e);
                 throw e;   
