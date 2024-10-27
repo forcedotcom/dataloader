@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Event;
 
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.exception.ParameterLoadException;
 
 /**
 * This is the base class for the LoadWizard and ExtractionWizard ui pages. Allows navigation to be done dynamically by forcing setupPage to
@@ -159,26 +160,49 @@ public abstract class OperationPage extends WizardPage {
        return this;
    }
    
-    private void persistedWizardShellBoundsChanged(Event event) {
-        switch (event.type) {
-            case SWT.Resize:
-            case SWT.Move:
-                if (!this.getShell().isVisible()) {
-                    return;
-                }
-                AppConfig appConfig = controller.getAppConfig();
-                Rectangle shellBounds = this.getShell().getBounds();
-                appConfig.setValue(AppConfig.PROP_WIZARD_X_OFFSET, shellBounds.x);
-                appConfig.setValue(AppConfig.PROP_WIZARD_Y_OFFSET, shellBounds.y);
-                appConfig.setValue(AppConfig.PROP_WIZARD_WIDTH, shellBounds.width);
-                appConfig.setValue(AppConfig.PROP_WIZARD_HEIGHT, shellBounds.height);
-                try {
-                    appConfig.save();
-                } catch (GeneralSecurityException | IOException e) {
-                    // no-op
-                    e.printStackTrace();
-                }
-                break;
-        }
-    }
+   private static boolean ignoreBoundsChanges = false;
+   private static final int IGNORE_BOUNDS_CHANGE_AMOUNT = 10;
+   protected static void setIgnoreBoundsChanges(boolean ignore) {
+       ignoreBoundsChanges = ignore;
+   }
+   
+   private void persistedWizardShellBoundsChanged(Event event) {
+       switch (event.type) {
+           case SWT.Resize:
+           case SWT.Move:
+               if (!this.getShell().isVisible() || ignoreBoundsChanges) {
+                   return;
+               }
+               AppConfig appConfig = controller.getAppConfig();
+               Rectangle shellBounds = this.getShell().getBounds();
+               try {
+                   int currentXOffset = appConfig.getInt(AppConfig.PROP_WIZARD_X_OFFSET);
+                   if (Math.abs(currentXOffset - shellBounds.x) > IGNORE_BOUNDS_CHANGE_AMOUNT) {
+                       appConfig.setValue(AppConfig.PROP_WIZARD_X_OFFSET, shellBounds.x);   
+                   }
+                   int currentYOffset = appConfig.getInt(AppConfig.PROP_WIZARD_Y_OFFSET);
+                   if (Math.abs(currentYOffset - shellBounds.x) > IGNORE_BOUNDS_CHANGE_AMOUNT) {
+                       appConfig.setValue(AppConfig.PROP_WIZARD_Y_OFFSET, shellBounds.y);
+                   }
+                   int currentWidth = appConfig.getInt(AppConfig.PROP_WIZARD_WIDTH);
+                   if (Math.abs(currentWidth - shellBounds.x) > IGNORE_BOUNDS_CHANGE_AMOUNT) {
+                       appConfig.setValue(AppConfig.PROP_WIZARD_WIDTH, shellBounds.width);
+                   }
+                   int currentHeight = appConfig.getInt(AppConfig.PROP_WIZARD_HEIGHT);
+                   if (Math.abs(currentHeight - shellBounds.x) > IGNORE_BOUNDS_CHANGE_AMOUNT) {
+                       appConfig.setValue(AppConfig.PROP_WIZARD_HEIGHT, shellBounds.height);
+                   }
+               } catch (ParameterLoadException e) {
+                   // TODO Auto-generated catch block
+                   e.printStackTrace();
+               }
+               try {
+                   appConfig.save();
+               } catch (GeneralSecurityException | IOException e) {
+                   // no-op
+                   e.printStackTrace();
+               }
+               break;
+       }
+   }
 }

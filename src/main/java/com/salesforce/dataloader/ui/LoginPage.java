@@ -123,11 +123,13 @@ public class LoginPage extends OperationPage {
             // following is a hack to correctly resize the list showing
             // sObjects in DataSelectionPage on Mac.
             // --- Start ---
+            setIgnoreBoundsChanges(true);
             Rectangle shellBounds = this.getShell().getBounds();
             shellBounds.height++;
             this.getShell().setBounds(shellBounds);
             shellBounds.height--;
             this.getShell().setBounds(shellBounds);
+            setIgnoreBoundsChanges(false);
             // --- End ----
         }
     }

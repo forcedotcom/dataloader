@@ -149,8 +149,8 @@ public class AppConfig {
     public static final int DEFAULT_BULK_API_IMPORT_BATCH_SIZE = 2000;
     
     public static final long DEFAULT_BULK_API_CHECK_STATUS_INTERVAL = 5000L;
-    public static final String DEFAULT_ENDPOINT_URL_PROD = "https://login.salesforce.com";
-    public static final String DEFAULT_ENDPOINT_URL_SANDBOX = "https://test.salesforce.com";
+    public static final String DEFAULT_ENDPOINT_URL_PROD = "https://login.salesforce.com/";
+    public static final String DEFAULT_ENDPOINT_URL_SANDBOX = "https://test.salesforce.com/";
     public static final String LIGHTNING_ENDPOINT_URL_PART_VAL = "lightning.force.com";
     public static final String MYSF_ENDPOINT_URL_PART_VAL = "mysalesforce.com";
     public static final String SERVER_PROD_ENVIRONMENT_VAL = "Production";
@@ -190,7 +190,7 @@ public class AppConfig {
     private final boolean saveAllProps;
     private Map<String,ConfigPropertyMetadata> configPropsMetadataMap = ConfigPropertyMetadata.getPropertiesMap();
     
-    private Map<String, String> commandLineOptionsMap;
+    private Map<String, String> overridesMap;
 
     /**
      * The default-default value for the respective types.
@@ -415,7 +415,7 @@ public class AppConfig {
     /**
      * Indicates whether a value as been changed
      */
-    private boolean dirty = false;
+    private boolean inMemoryPropValuesHaveChanged = false;
 
     /**
      * The file name used by the <code>load</code> method to load a property file. This filename is
@@ -617,7 +617,7 @@ public class AppConfig {
         // parameter overrides are from two places:
         // 1. process-conf.properties for CLI mode
         // 2. command line options for both CLI and UI modes
-        this.loadCommandLineOptions(commandLineOptionsMap);
+        this.loadPropertyOverrides(commandLineOptionsMap);
         saveAllProps = getBoolean(AppConfig.PROP_SAVE_ALL_PROPS);
         
         // last run gets initialized after loading config and overrides
@@ -640,12 +640,15 @@ public class AppConfig {
     }
     
     private String getLastRunPrefix() {
-        String lastRunFilePrefix = getString(AppConfig.PROP_PROCESS_NAME);
-        if (lastRunFilePrefix == null || lastRunFilePrefix.isBlank()) {
-            lastRunFilePrefix = getString(AppConfig.PROP_ENTITY) + getString(AppConfig.PROP_OPERATION);
-        }
-        if (lastRunFilePrefix == null || lastRunFilePrefix.isBlank()) {
-            lastRunFilePrefix = RUN_MODE_UI_VAL;
+        String lastRunFilePrefix  = RUN_MODE_UI_VAL;
+        if (isBatchMode()) {
+            lastRunFilePrefix = getString(AppConfig.PROP_PROCESS_NAME);
+            if (lastRunFilePrefix == null || lastRunFilePrefix.isBlank()) {
+                lastRunFilePrefix = getString(AppConfig.PROP_ENTITY) + getString(AppConfig.PROP_OPERATION);
+            }
+            if (lastRunFilePrefix == null || lastRunFilePrefix.isBlank()) {
+                lastRunFilePrefix = RUN_MODE_BATCH_VAL;
+            }
         }
         return lastRunFilePrefix;
     }
@@ -1029,7 +1032,7 @@ public class AppConfig {
             if (pilotValue != null && !pilotValue.isEmpty()) {
                 // if picking up the value from a pilot property that is no longer in pilot,
                 // set the value for the new property to be the same as the value of the pilot property
-                doSetPropertyAndUpdateConfig(name, propValue, pilotValue);
+                doSetPropertyAndUpdateConfig(name, propValue, pilotValue, false);
             }
             propValue = pilotValue;
         }
@@ -1106,7 +1109,7 @@ public class AppConfig {
         // paramter post-processing
         postLoad(loadedProperties, true);
 
-        dirty = false;
+        inMemoryPropValuesHaveChanged = false;
     }
     
     public static boolean isReadOnlyProperty(String propertyName) {
@@ -1117,6 +1120,17 @@ public class AppConfig {
             if (roProp.equals(propertyName)) {
                 return true;
             }
+        }
+        return false;
+    }
+    
+    private boolean isOverrideProperty(String propertyName) {
+        if (propertyName == null) {
+            return false;
+        }
+        if (this.overridesMap != null
+            && this.overridesMap.containsKey(propertyName)) {
+            return true;
         }
         return false;
     }
@@ -1192,14 +1206,14 @@ public class AppConfig {
      * Load config parameter override values. The main use case is loading of overrides from
      * external config file
      */
-    public void loadCommandLineOptions(Map<String, String> commandLineOptionsMap) throws ParameterLoadException,
+    public void loadPropertyOverrides(Map<String, String> overridesMap) throws ParameterLoadException,
             ConfigInitializationException {
-        this.commandLineOptionsMap = commandLineOptionsMap;
+        this.overridesMap = overridesMap;
         // make sure to post-process the args to be loaded
-        postLoad(commandLineOptionsMap, false);
+        postLoad(overridesMap, false);
 
         // replace values in the Config
-        putValue(commandLineOptionsMap);
+        putValues(overridesMap);
     }
 
     /**
@@ -1288,36 +1302,16 @@ public class AppConfig {
     }
 
     /**
-     * Returns whether the config needs saving
-     *
-     * @return boolean
-     */
-    public boolean needsSaving() {
-        return dirty;
-    }
-
-    /**
      * Puts a set of values from a map into config
      *
      * @param values Map of overriding values
      */
-    public void putValue(Map<String, String> values) throws ParameterLoadException, ConfigInitializationException {
+    public void putValues(Map<String, String> values) throws ParameterLoadException, ConfigInitializationException {
         if (values == null) {
             return;
         }
         for (String key : values.keySet()) {
-            putValue(key, values.get(key));
-        }
-    }
-
-    /**
-     * Puts a value into the config
-     */
-    public void putValue(String name, String value) {
-        String oldValue = getString(name);
-        if (oldValue == null || !oldValue.equals(value)) {
-            setValue(name, value);
-            dirty = true;
+            setProperty(key, values.get(key), false);
         }
     }
 
@@ -1328,7 +1322,10 @@ public class AppConfig {
      */
     public void save() throws IOException, GeneralSecurityException {
         if (getString(AppConfig.CLI_OPTION_RUN_MODE).equalsIgnoreCase(AppConfig.RUN_MODE_BATCH_VAL)
-           || getBoolean(PROP_READ_ONLY_CONFIG_PROPERTIES)) {
+           || getBoolean(PROP_READ_ONLY_CONFIG_PROPERTIES)
+           || !inMemoryPropValuesHaveChanged) {
+            // lastrun properties are always saved
+            lastRunProperties.save();
             return; // do not save any updates to config.properties file
         }
         if (filename == null) {
@@ -1354,12 +1351,12 @@ public class AppConfig {
         FileOutputStream out = null;
         try {
             out = new FileOutputStream(filename);
-            save(out, "Salesforce Data Loader Config"); //$NON-NLS-1$
+            saveConfigProperties(out, "Salesforce Data Loader Config", loadedProperties); //$NON-NLS-1$
         } finally {
             if (out != null) {
                 out.close();
             }
-            // restore original property values
+            // restore original in-memory property values
             loadedProperties = inMemoryProperties;
         }
         // save last run statistics
@@ -1433,8 +1430,8 @@ public class AppConfig {
     }
     
     private void removeCommandLineOptionsBeforeSave() {
-        if (this.commandLineOptionsMap != null) {
-            for (String propertyName : this.commandLineOptionsMap.keySet()) {
+        if (this.overridesMap != null) {
+            for (String propertyName : this.overridesMap.keySet()) {
                 this.loadedProperties.remove(propertyName);
             }
         }
@@ -1514,9 +1511,14 @@ public class AppConfig {
      * @param header the header
      * @throws java.io.IOException if there is a problem saving this store
      */
-    private void save(OutputStream out, String header) throws IOException {
-        loadedProperties.store(out, header);
-        dirty = false;
+    private void saveConfigProperties(OutputStream out, String header, Properties configProperties) throws IOException {
+        if (getString(AppConfig.CLI_OPTION_RUN_MODE).equalsIgnoreCase(AppConfig.RUN_MODE_BATCH_VAL)
+                || getBoolean(PROP_READ_ONLY_CONFIG_PROPERTIES)
+                || !inMemoryPropValuesHaveChanged) {
+            return;
+        }
+        configProperties.store(out, header);
+        inMemoryPropValuesHaveChanged = false;
     }
 
     public void setValue(String name, Map<String, String> valueMap) {
@@ -1528,7 +1530,7 @@ public class AppConfig {
             }
             sb.append(key + "=" + valueMap.get(key));
         }
-        putValue(name, sb.toString());
+        setProperty(name, sb.toString(), false);
     }
     
     public static final String CLIENT_ID_HEADER_NAME="client_id";
@@ -1601,7 +1603,11 @@ public class AppConfig {
     }
     
     private <T> void setValue(String name, T value, boolean skipIfAlreadySet) {
-        if (value != null) {
+        if (value == null) {
+            return;
+        }
+        String oldValue = getString(name);
+        if (oldValue == null || !oldValue.equals(value)) {
             setProperty(name, value.toString(), skipIfAlreadySet);
         }
     }
@@ -1630,22 +1636,43 @@ public class AppConfig {
         final boolean paramChanged = (oldValue == null || oldValue.length() == 0) ? (newValue != null && newValue
                 .length() > 0) : !oldValue.equals(newValue);
         if (paramChanged) {
-            doSetPropertyAndUpdateConfig(name, oldValue, newValue);
+            doSetPropertyAndUpdateConfig(name, oldValue, newValue, skipIfAlreadySet);
         }
     }
     
-    private void doSetPropertyAndUpdateConfig(String name, String oldValue, String newValue) {
-        this.dirty = true;
+    private void doSetPropertyAndUpdateConfig(String name, String oldValue, String newValue, boolean skipIfAlreadySet) {
         configChanged(name, oldValue, newValue);
+        if (oldValue == null) {
+            oldValue = "";
+        }
+        if (newValue == null) {
+            newValue = "";
+        }
         if (lastRunProperties != null && lastRunProperties.hasParameter(name)) {
             lastRunProperties.put(name, newValue);
         } else {
             loadedProperties.put(name, newValue);
         }
+        if (isReadOnlyProperty(name)
+                || isOverrideProperty(name)
+                || isInternalProperty(name)
+                || skipIfAlreadySet
+                || lastRunProperties.hasParameter(name)) {
+            //read-only properties, internal properties,
+            // or properties overridden by setting them in process-conf.xml
+            // or passing them as command line options should not result in updates
+            // to config.properties file. 
+            //
+            // Also, if skipIfAlreadySet==true, the property was not set
+            // in config.properties file. It is being set to its default value.
+            this.inMemoryPropValuesHaveChanged = false;
+        } else {
+            this.inMemoryPropValuesHaveChanged = true;
+        }
     }
 
     public boolean isBatchMode() {
-        return (AppConfig.RUN_MODE_BATCH_VAL.equalsIgnoreCase(getString(AppConfig.CLI_OPTION_RUN_MODE)));
+        return (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH);
     }
 
     public int getImportBatchSize() {
