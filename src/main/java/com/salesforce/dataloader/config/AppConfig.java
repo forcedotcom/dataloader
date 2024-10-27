@@ -484,7 +484,7 @@ public class AppConfig {
     public static final int DEFAULT_WIZARD_WIDTH = 600;
     public static final int DEFAULT_WIZARD_HEIGHT = 600;
     public static final int DEFAULT_WIZARD_X_OFFSET = 50;
-    public static final int DEFAULT_WIZARD_Y_OFFSET = 0;
+    public static final int DEFAULT_WIZARD_Y_OFFSET = 50;
     public static final int DIALOG_X_OFFSET = 50;
     public static final int DIALOG_Y_OFFSET = 50;
     private static final String CONFIG_DIR_DEFAULT_VALUE = "configs";
