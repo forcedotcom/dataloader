@@ -98,7 +98,6 @@ public class LoaderWindow extends ApplicationWindow {
 
         app = this;
 
-        addMenuBar();
         addStatusLine();
         this.controller = controller;
     }
