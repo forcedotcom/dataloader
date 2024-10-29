@@ -145,6 +145,7 @@ public class LoaderWindow extends ApplicationWindow {
             displayUpgradeDialog(Display.getDefault());
         }
         setBlockOnOpen(true);
+        addMenuBar();
         open();
 
         Display currentDisplay = Display.getCurrent();
@@ -272,7 +273,6 @@ public class LoaderWindow extends ApplicationWindow {
                 for (Entry<Integer, OperationUIAction> ent : map.entrySet()) {
                     if (result == ent.getKey()) ent.getValue().run();
                 }
-                addMenuBar();
             }
         });
     }
@@ -286,7 +286,6 @@ public class LoaderWindow extends ApplicationWindow {
             public void run() {
                 LoaderUpgradeDialog dlg = new LoaderUpgradeDialog(display.getActiveShell(), controller);
                 dlg.open();
-                addMenuBar();
             }
         });
     }
