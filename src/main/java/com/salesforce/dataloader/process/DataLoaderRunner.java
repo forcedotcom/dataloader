@@ -62,7 +62,7 @@ public class DataLoaderRunner extends Thread {
     private static final String LOCAL_SWT_DIR = "./target/";
     private static final String PATH_SEPARATOR = System.getProperty("path.separator");
     private static final String FILE_SEPARATOR = System.getProperty("file.separator");
-    private static Logger logger;
+    private static Logger logger = DLLogManager.getLogger(DataLoaderRunner.class);
     private static int exitCode = AppUtil.EXIT_CODE_NO_ERRORS;
 
     public void run() {
@@ -72,6 +72,10 @@ public class DataLoaderRunner extends Thread {
 
     public static void main(String[] commandLineOptions) {
         try {
+            Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(commandLineOptions);
+            if (!argsMap.containsKey(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH)) {
+                AppUtil.showBanner();
+            }
             runApp(commandLineOptions, null);
             System.exit(exitCode);
         } catch (ExitException ex) {
@@ -90,7 +94,7 @@ public class DataLoaderRunner extends Thread {
         try {
             controller = Controller.getInstance(AppUtil.convertCommandArgsArrayToArgMap(commandLineOptions));
         } catch (FactoryConfigurationError | Exception ex) {
-            ex.printStackTrace();
+            logger.fatal(ex);
             System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
         if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH) {
@@ -100,7 +104,6 @@ public class DataLoaderRunner extends Thread {
         } else {
             Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(commandLineOptions);
             /* Run in the UI mode, get the controller instance with batchMode == false */
-            logger = DLLogManager.getLogger(DataLoaderRunner.class);
             Installer.install(argsMap);
             if (argsMap.containsKey(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
                 && "true".equalsIgnoreCase(argsMap.get(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
@@ -116,7 +119,6 @@ public class DataLoaderRunner extends Thread {
                     UIUtils.errorMessageBox(new Shell(new Display()), e);
                 }
             } else { // SWT_NATIVE_LIB_IN_JAVA_LIB_PATH not set
-                AppUtil.showBanner();
                 rerunWithSWTNativeLib(commandLineOptions);
             }
         }

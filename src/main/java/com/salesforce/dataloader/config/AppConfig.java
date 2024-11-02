@@ -1894,12 +1894,12 @@ public class AppConfig {
         if (!dirPath.exists() || !dirPath.isDirectory()) {
             isSuccessful = dirPath.mkdirs();
             if (isSuccessful) {
-                logger.info("Created config folder: " + dirPath);
+                logger.debug("Created config folder: " + dirPath);
             } else {
-                logger.info("Unable to create config folder: " + dirPath);
+                logger.warn("Unable to create config folder: " + dirPath);
             }
         } else {
-            logger.info("Config folder already exists: " + dirPath);
+            logger.debug("Config folder already exists: " + dirPath);
         }
         return isSuccessful;
     }
@@ -1934,7 +1934,7 @@ public class AppConfig {
         File configFile = new File(configurationsDir.getAbsolutePath(), CONFIG_FILE);
 
         String configFilePath = configFile.getAbsolutePath();
-        logger.info("Looking for file in config path: " + configFilePath);
+        logger.debug("Looking for file in config path: " + configFilePath);
         if (!configFile.exists()) {
 
             File defaultConfigFile = new File(configurationsDir, DEFAULT_CONFIG_FILE);
@@ -1965,15 +1965,16 @@ public class AppConfig {
             configFile.setWritable(true);
             configFile.setReadable(true);
         } else {
-            logger.info("User config is found in " + configFile.getAbsolutePath());
+            logger.debug("User config is found in " + configFile.getAbsolutePath());
         }
 
         AppConfig appConfig = null;
         try {
             appConfig = new AppConfig(configFilePath, argMap);
             currentConfig = appConfig;
-            logger.info(Messages.getMessage(AppConfig.class, "configInit")); //$NON-NLS-1$
+            logger.debug(Messages.getMessage(AppConfig.class, "configInit")); //$NON-NLS-1$
         } catch (IOException | ProcessInitializationException e) {
+            logger.error(e.getMessage());
             throw new ConfigInitializationException(Messages.getMessage(AppConfig.class, "errorConfigLoad", configFilePath), e);
         }
         return appConfig;

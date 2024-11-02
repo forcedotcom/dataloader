@@ -75,12 +75,6 @@ public class Installer {
                     return;
                 }
             }
-            boolean hideBanner = false;
-            
-            if (!hideBanner) {
-                logger.debug("going to show banner");
-                AppUtil.showBanner();
-            }
             String installationFolderFromCommandLine = argsmap.get(AppConfig.CLI_OPTION_INSTALLATION_FOLDER_PROP);
             boolean promptUserToDeleteExistingInstallationFolder = false;
             if (installationFolderFromCommandLine == null || installationFolderFromCommandLine.isBlank()) {

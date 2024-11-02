@@ -257,12 +257,12 @@ public class ConfigPropertyMetadata {
                     csvWriter.writeRow(row);
                 } catch (DataAccessObjectException e) {
                     logger.warn(Messages.getFormattedString("ConfigPropertyMetadata.errorOutputPropInfo", propMD.getName()));
-                    logger.info(e.getStackTrace());
+                    logger.warn(e.getStackTrace());
                     continue; 
                 }
             }
         } finally {
-            logger.info(Messages.getFormattedString("ConfigPropertyMetadata.infoGeneratedCSVLocation", getFullPathToPropsFile(appConfig)));
+            logger.debug(Messages.getFormattedString("ConfigPropertyMetadata.infoGeneratedCSVLocation", getFullPathToPropsFile(appConfig)));
             csvWriter.close();
         }
     }

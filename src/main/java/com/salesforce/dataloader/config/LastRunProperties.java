@@ -84,7 +84,7 @@ public class LastRunProperties extends Properties {
             throw new IOException(Messages.getString("LastRun.fileMissing")); //$NON-NLS-1$
         }
         File lastRunFile = new File(filePath, filename);
-        logger.info(Messages.getFormattedString("LastRun.fileInfo", lastRunFile.getAbsolutePath()));
+        logger.debug(Messages.getFormattedString("LastRun.fileInfo", lastRunFile.getAbsolutePath()));
         if(!lastRunFile.exists()) {
             lastRunFile.createNewFile();
         }
