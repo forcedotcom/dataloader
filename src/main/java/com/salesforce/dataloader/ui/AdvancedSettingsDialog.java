@@ -965,6 +965,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
         // to the entered value
         Button ok = new Button(buttonComp, SWT.PUSH | SWT.FLAT);
         ok.setText(Labels.getString("UI.ok")); //$NON-NLS-1$
+        ok.setEnabled(!appConfig.getBoolean(AppConfig.PROP_READ_ONLY_CONFIG_PROPERTIES));
         ok.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
