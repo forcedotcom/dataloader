@@ -143,4 +143,24 @@ public class ConfigTest extends ConfigTestBase {
             fail("Failed to get config instance:", e);
         }
     }
+    
+    @Test
+    public void testProperty_PROP_AUTH_ENDPOINT_LEGACY() {
+        // This is to verify that legacy way to set the Auth endpoint continues to work.
+        try {
+            Map<String, String> testConfigMap = getTestConfig();
+            testConfigMap.put(AppConfig.PROP_AUTH_ENDPOINT_LEGACY, "https://mylegacyendpoint");
+            AppConfig appConfig = AppConfig.getInstance(testConfigMap);
+            
+            // clear prod endpoint property so that legacy endpoint property is used
+            appConfig.setValue(AppConfig.PROP_AUTH_ENDPOINT_PROD, "");
+            String configuredAuthEndpoint = appConfig.getAuthEndpointForCurrentEnv();
+            assertTrue(configuredAuthEndpoint.startsWith("https://mylegacyendpoint"));
+        } catch (ConfigInitializationException 
+            | FactoryConfigurationError
+            | IOException e) {
+            logger.error("Failed to get config instance: " + e.getMessage());
+            fail("Failed to get config instance:", e);
+        }
+    }
 }

@@ -252,8 +252,8 @@ public class AppConfig {
     public static final String PROP_USERNAME = "sfdc.username"; //$NON-NLS-1$
     public static final String PROP_PASSWORD = "sfdc.password"; //$NON-NLS-1$
     public static final String PROP_AUTH_ENDPOINT_LEGACY = "sfdc.endpoint";
-    public static final String PROP_AUTH_ENDPOINT_PROD = "sfdc.endpoint.production"; //$NON-NLS-1$
-    public static final String PROP_AUTH_ENDPOINT_SANDBOX = "sfdc.endpoint.sandbox"; //$NON-NLS-1$
+    public static final String PROP_AUTH_ENDPOINT_PROD = "sfdc.endpoint." + SERVER_PROD_ENVIRONMENT_VAL; //$NON-NLS-1$
+    public static final String PROP_AUTH_ENDPOINT_SANDBOX = "sfdc.endpoint." + SERVER_SB_ENVIRONMENT_VAL; //$NON-NLS-1$
     public static final String PROP_PROXY_HOST = "sfdc.proxyHost"; //$NON-NLS-1$
     public static final String PROP_PROXY_PORT = "sfdc.proxyPort"; //$NON-NLS-1$
     public static final String PROP_PROXY_USERNAME = "sfdc.proxyUsername"; //$NON-NLS-1$
@@ -626,16 +626,6 @@ public class AppConfig {
         // Properties initialization completed. Configure OAuth environment next
         setServerEnvironment(getString(PROP_SELECTED_SERVER_ENVIRONMENT));
         ConfigPropertyMetadata.generateCSV(this);
-        if (getString(PROP_AUTH_ENDPOINT_LEGACY) != null &&
-                !getString(PROP_AUTH_ENDPOINT_LEGACY).isBlank()) {
-            String propToSet = PROP_AUTH_ENDPOINT_LEGACY + "." + getString(PROP_SELECTED_SERVER_ENVIRONMENT);
-            String currentValue = getString(propToSet);
-            if (currentValue == null || currentValue.isBlank() 
-                    || currentValue.startsWith(DEFAULT_ENDPOINT_URL_PROD)
-                    || currentValue.startsWith(DEFAULT_ENDPOINT_URL_SANDBOX)) {
-                setValue(propToSet, getString(PROP_AUTH_ENDPOINT_LEGACY));
-            }
-        }
     }
     
     private String getLastRunPrefix() {
@@ -1380,6 +1370,11 @@ public class AppConfig {
             endpoint = getString(AppConfig.PROP_AUTH_ENDPOINT_SANDBOX);
         } else {
             endpoint = getString(AppConfig.PROP_AUTH_ENDPOINT_PROD);
+        }
+        
+        // try with legacy endpoint property
+        if (endpoint == null || endpoint.isBlank()) {
+            endpoint = getString(PROP_AUTH_ENDPOINT_LEGACY);
         }
         if (endpoint == null || endpoint.isBlank()) {
             endpoint = getDefaultAuthEndpointForCurrentEnv();
