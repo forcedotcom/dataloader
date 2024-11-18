@@ -622,6 +622,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.widthHint = 30 * textSize.x;
         textProdEndpoint.setLayoutData(data);
         String endpoint = appConfig.getString(AppConfig.PROP_AUTH_ENDPOINT_PROD);
+        // try with legacy endpoint property
+        if (endpoint == null 
+                || endpoint.isBlank()
+                || endpoint.startsWith(AppConfig.DEFAULT_ENDPOINT_URL_PROD)) {
+            endpoint = appConfig.getString(AppConfig.PROP_AUTH_ENDPOINT_LEGACY);
+        }
         if ("".equals(endpoint)) { //$NON-NLS-1$
             endpoint = AppConfig.DEFAULT_ENDPOINT_URL_PROD;
         }
@@ -633,6 +639,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.widthHint = 30 * textSize.x;
         textSBEndpoint.setLayoutData(data);
         endpoint = appConfig.getString(AppConfig.PROP_AUTH_ENDPOINT_SANDBOX);
+        // try with legacy endpoint property
+        if (endpoint == null 
+                || endpoint.isBlank()
+                || endpoint.startsWith(AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX)) {
+            endpoint = appConfig.getString(AppConfig.PROP_AUTH_ENDPOINT_LEGACY);
+        }
         if ("".equals(endpoint)) { //$NON-NLS-1$
             endpoint = AppConfig.DEFAULT_ENDPOINT_URL_SANDBOX;
         }
@@ -1176,8 +1188,8 @@ public class AdvancedSettingsDialog extends BaseDialog {
         t.setText(String.valueOf(val));
         
         buttonLocalSystemTimezone = new Button(timezoneComp, SWT.PUSH | SWT.FLAT);
-        buttonLocalSystemTimezone.setText(Labels.getString("AdvancedSettingsDialog.setClientSystemTimezone")); //$NON-NLS-1$
-        buttonLocalSystemTimezone.setToolTipText(Labels.getString("AdvancedSettingsDialog.TooltipSetClientSystemTimezone"));
+        buttonLocalSystemTimezone.setText(Labels.getString("AdvancedSettingsDialog.uiLabel.setClientSystemTimezone")); //$NON-NLS-1$
+        buttonLocalSystemTimezone.setToolTipText(Labels.getString("AdvancedSettingsDialog.uiTooltip.TooltipSetClientSystemTimezone"));
         buttonLocalSystemTimezone.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent event) {
                 t.setText(TimeZone.getDefault().getID());
