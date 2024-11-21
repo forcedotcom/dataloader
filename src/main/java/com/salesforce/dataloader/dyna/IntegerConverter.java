@@ -26,6 +26,11 @@
 
 package com.salesforce.dataloader.dyna;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
+
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.Converter;
 
@@ -65,10 +70,13 @@ public final class IntegerConverter implements Converter {
         } else if (value instanceof Number) {
             return Integer.valueOf(((Number)value).intValue());
         }
-
+        
         try {
-            return (Integer.parseInt(value.toString()));
-        } catch (Exception e) {
+            NumberFormat numFormat = DecimalFormat.getIntegerInstance(Locale.getDefault());
+            numFormat.setParseIntegerOnly(true);
+            Number number = numFormat.parse(value.toString());
+            return Integer.valueOf(number.intValue());
+        } catch (ParseException e) {
             throw new ConversionException(e);
         }
     }
