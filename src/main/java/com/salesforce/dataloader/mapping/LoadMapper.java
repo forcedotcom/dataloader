@@ -29,6 +29,7 @@ package com.salesforce.dataloader.mapping;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Field;
 
@@ -95,7 +96,7 @@ public class LoadMapper extends Mapper {
         return result;
     }
 
-    public Row mapData(Row localRow) {
+    public Row mapData(TableRow localRow) {
         Set<String> compositeDAOCols = this.getCompositeDAOColumns();
         HashMap<String, Object[]> compositeColValueMap = new HashMap<String, Object[]>();
         HashMap<String, Integer> compositeColSizeMap = this.getCompositeColSizeMap();
@@ -111,7 +112,7 @@ public class LoadMapper extends Mapper {
         
         HashMap<String, Integer> daoColPositionMap = this.getDaoColPositionInCompositeColMap();
         HashMap<String, String> daoColToCompositeColMap = this.getDaoColToCompositeColMap();
-        for (String daoCol : localRow.keySet()) {
+        for (String daoCol : localRow.getHeader().getColumns()) {
             String compositeColName = daoColToCompositeColMap.get(daoCol);
             if (compositeColName == null) {
                 continue; // DAO column is not mapped

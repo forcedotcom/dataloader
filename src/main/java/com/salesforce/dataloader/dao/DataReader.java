@@ -30,6 +30,7 @@ import java.util.List;
 
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 
 /**
  * Interface to be implemented for data readers -- data access objects that are used for reading rows of data.
@@ -48,6 +49,14 @@ public interface DataReader extends DataAccessObject {
     Row readRow() throws DataAccessObjectException;
 
     /**
+     * Get a row of data from a data source
+     *
+     * @return a {@link Row} containing all the keys and values of a row
+     * @throws DataAccessObjectException
+     */
+    TableRow readTableRow() throws DataAccessObjectException;
+
+    /**
      * Get a list of rows of data from a data source
      *
      * @param maxRows Maximum number of rows to read in one call
@@ -55,6 +64,15 @@ public interface DataReader extends DataAccessObject {
      * @throws DataAccessObjectException
      */
     List<Row> readRowList(int maxRows) throws DataAccessObjectException;
+
+    /**
+     * Get a list of rows of data from a data source
+     *
+     * @param maxRows Maximum number of rows to read in one call
+     * @return a list of up to maxRows {@link Row} objects, each of them containing all the keys and values of a row
+     * @throws DataAccessObjectException
+     */
+    List<TableRow> readTableRowList(int maxRows) throws DataAccessObjectException;
 
     /**
      * @return Total number of rows that will be read by the current Data Access Object

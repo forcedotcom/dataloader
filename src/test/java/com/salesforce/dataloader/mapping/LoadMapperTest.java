@@ -28,6 +28,9 @@ package com.salesforce.dataloader.mapping;
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableHeader;
+import com.salesforce.dataloader.model.TableRow;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -36,6 +39,7 @@ import org.junit.Test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -58,11 +62,13 @@ public class LoadMapperTest extends ConfigTestBase {
     private static final String[] DEST_NAMES = { "destinationOne", "destinationTwo", "destinationThree" };
     private static final String DEST_CONSTANT_NAME = "destinationConstant";
     private static final String CONSTANT_VALUE = "constantValue123";
-    private Row sourceRow;
+    private TableRow sourceRow;
 
     @Before
     public void setUp() throws Exception {
-        sourceRow = new Row();
+        List<String> headerList = Arrays.asList(SOURCE_NAMES);
+        TableHeader tableHeader = new TableHeader(headerList);
+        sourceRow = new TableRow(tableHeader);
         // populate all the available values
         for (int i = 0; i < SOURCE_NAMES.length; i++) {
             sourceRow.put(SOURCE_NAMES[i], SOURCE_VALUES[i]);
@@ -148,7 +154,7 @@ public class LoadMapperTest extends ConfigTestBase {
         mappings.setProperty("", "Value6");
         LoadMapper mapper = new LoadMapper(null, null, null, null);
         mapper.putPropertyFileMappings(mappings);
-        Row result = mapper.mapData(Row.emptyRow());
+        Row result = mapper.mapData(TableRow.emptyRow());
         assertEquals(constantValue, result.get("Name"));
         assertEquals(constantValue, result.get("field1__c"));
         assertEquals(constantValue, result.get("field2__c"));
@@ -190,7 +196,7 @@ public class LoadMapperTest extends ConfigTestBase {
         mapper.putPropertyFileMappings(mappings);
 
         //place a dao column -> sfdc field mapping
-        Row input = Row.singleEntryImmutableRow(csvFieldName, sfdcField);
+        TableRow input = TableRow.singleEntryImmutableRow(csvFieldName, sfdcField);
 
         //(src, dest).
         mapper.putMapping(csvFieldName, sfdcField);
@@ -227,7 +233,7 @@ public class LoadMapperTest extends ConfigTestBase {
         mappings.setProperty(wrappedConstantValue, sfdcField);
         mapper.putPropertyFileMappings(mappings);
 
-        Row input = Row.singleEntryImmutableRow(constantValue, sfdcField);
+        TableRow input = TableRow.singleEntryImmutableRow(constantValue, sfdcField);
 
         Map<String, Object> result = mapper.mapData(input);
 
@@ -240,7 +246,7 @@ public class LoadMapperTest extends ConfigTestBase {
         LoadMapper loadMapper = new LoadMapper(null, null, null, null);
         loadMapper.putMapping("SOURCE_COL", "");
 
-        Row inputData = Row.singleEntryImmutableRow("SOURCE_COL", "123");
+        TableRow inputData = TableRow.singleEntryImmutableRow("SOURCE_COL", "123");
 
         Map<String, Object> result = loadMapper.mapData(inputData);
 

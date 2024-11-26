@@ -41,6 +41,7 @@ import com.salesforce.dataloader.exception.OperationException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.mapping.LoadMapper;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.DAORowUtil;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
@@ -85,12 +86,12 @@ abstract class AbstractLoadAction extends AbstractAction {
 
         final int loadBatchSize = this.getConfig().getImportBatchSize();
         final int daoRowNumBase = getDao().getCurrentRowNumber();
-        final List<Row> daoRowList = getDao().readRowList(loadBatchSize);
+        final List<TableRow> daoRowList = getDao().readTableRowList(loadBatchSize);
         if (daoRowList == null || daoRowList.size() == 0) return false;
         int daoRowCount = 0;
 
-        for (final Row daoRow : daoRowList) {
-            if (!DAORowUtil.isValidRow(daoRow)) {
+        for (final TableRow daoRow : daoRowList) {
+            if (!DAORowUtil.isValidTableRow(daoRow)) {
                 getVisitor().setRowConversionStatus(daoRowNumBase + daoRowCount++, 
                         false);
                 return false;

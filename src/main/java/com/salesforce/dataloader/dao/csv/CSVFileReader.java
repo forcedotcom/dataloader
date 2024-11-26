@@ -49,6 +49,8 @@ import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.DataAccessRowException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableHeader;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DAORowUtil;
 import com.sforce.async.CSVReader;
@@ -68,6 +70,7 @@ public class CSVFileReader implements DataReader {
     private CSVReader csvReader;
     private int currentRowNumber;
     private List<String> headerRow;
+    private TableHeader tableHeader;
     private boolean isOpen;
     private char[] csvDelimiters;
     private AppConfig appConfig;
@@ -161,21 +164,37 @@ public class CSVFileReader implements DataReader {
         }
         return outputRows;
     }
+    
+    @Override
+    public List<TableRow> readTableRowList(int maxRows) throws DataAccessObjectException {
+        List<TableRow> outputRows = new ArrayList<TableRow>();
+        for (int i = 0; i < maxRows; i++) {
+            TableRow outputRow = readTableRow();
+            if (outputRow != null) {
+                // if row has been returned, add it to the output
+                outputRows.add(outputRow);
+            } else {
+                // if encountered null, the reading is over
+                break;
+            }
+        }
+        return outputRows;
+    }
 
     /**
      * Gets the next row from the current data access object data source. <i>Side effect:</i>
      * Updates the current record number
      */
     @Override
-    public Row readRow() throws DataAccessObjectException {
+    public TableRow readTableRow() throws DataAccessObjectException {
         if (!isOpen) {
             open();
         }
         
-        Row row = rowCache.getCurrentRow();
-        if (row != null) {
+        TableRow trow = rowCache.getCurrentRow();
+        if (trow != null) {
             currentRowNumber++;
-            return row;
+            return trow;
         }
         
         if (appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
@@ -207,18 +226,27 @@ public class CSVFileReader implements DataReader {
             throw new DataAccessRowException(errMsg);
         }
 
-        row = new Row(record.size());
+        trow = new TableRow(this.tableHeader);
 
         for (int i = 0; i < headerRow.size(); i++) {
             String value = record.get(i);
             if (value == null) {
                 value = "";
             }
-            row.put(headerRow.get(i), value);
+            trow.put(headerRow.get(i), value);
         }
         currentRowNumber++;
-        rowCache.addRow(row);
-        return row;
+        rowCache.addRow(trow);
+        return trow;
+    }
+    
+    @Override
+    public Row readRow() throws DataAccessObjectException {
+        TableRow tableRow = readTableRow();
+        if (tableRow == null) {
+            return null;
+        }
+        return tableRow.convertToRow();
     }
 
     /**
@@ -260,6 +288,7 @@ public class CSVFileReader implements DataReader {
                 LOGGER.error(Messages.getString("CSVFileDAO.errorHeaderRow"));
                 throw new DataAccessObjectInitializationException(Messages.getString("CSVFileDAO.errorHeaderRow"));
             }
+            tableHeader = new TableHeader(headerRow);
             LOGGER.debug(Messages.getFormattedString(
                     "CSVFileDAO.debugMessageHeaderRowSize", headerRow.size()));
 

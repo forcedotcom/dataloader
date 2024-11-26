@@ -30,6 +30,9 @@ import java.sql.*;
 import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableHeader;
+import com.salesforce.dataloader.model.TableRow;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.util.DLLogManager;
@@ -56,7 +59,8 @@ public class DatabaseReader implements DataReader {
 
     private final BasicDataSource dataSource;
     private final AppConfig appConfig;
-    private List<String> columnNames = new ArrayList<String>();
+    private List<String> headerRow = new ArrayList<String>();
+    private TableHeader tableHeader;
     private int totalRows = 0;
     private int currentRowNumber = 0;
     private final SqlConfig sqlConfig;
@@ -88,10 +92,11 @@ public class DatabaseReader implements DataReader {
         this.dataSource = dbConfig.getDataSource();
         this.sqlConfig = dbConfig.getSqlConfig();
         this.dbContext = new DatabaseContext(dbConfigName);
-        this.columnNames = sqlConfig.getColumnNames();
-        if(columnNames == null) {
-            columnNames = new ArrayList<String>();
+        this.headerRow = sqlConfig.getColumnNames();
+        if(headerRow == null) {
+            headerRow = new ArrayList<String>();
         }
+        tableHeader = new TableHeader(headerRow);
     }
 
     /*
@@ -175,17 +180,36 @@ public class DatabaseReader implements DataReader {
         }
         return outputRows;
     }
-
+    
+    /*
+     * (non-Javadoc)
+     * @see com.salesforce.dataloader.dao.DataReader#readRowList(int)
+     */
     @Override
-    public Row readRow() throws DataAccessObjectException {
+    public List<TableRow> readTableRowList(int maxRows) throws DataAccessObjectException {
+        List<TableRow> outputRows = new ArrayList<TableRow>();
+        for(int i=0; i < maxRows; i++) {
+            TableRow outputRow = readTableRow();
+            if(outputRow != null) {
+                // if row has been returned, add it to the output
+                outputRows.add(outputRow);
+            } else {
+                // if encountered null, the reading is over
+                break;
+            }
+        }
+        return outputRows;
+    }
+    @Override
+    public TableRow readTableRow() throws DataAccessObjectException {
         if (!dbContext.isOpen()) {
             open();
         }
         
-        Row row = rowCache.getCurrentRow();
-        if (row != null) {
+        TableRow trow = rowCache.getCurrentRow();
+        if (trow != null) {
             currentRowNumber++;
-            return row;
+            return trow;
         }
         if (appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
             && endOfDBReached) {
@@ -196,20 +220,21 @@ public class DatabaseReader implements DataReader {
         try {
             ResultSet rs = dbContext.getDataResultSet();
             if (rs != null && rs.next()) {
-                row = new Row(columnNames.size());
+                trow = new TableRow(tableHeader);
 
-                for (String columnName : columnNames) {
+                for (String columnName : headerRow) {
                     currentColumnName = columnName;
                     Object value = rs.getObject(columnName);
-                    row.put(columnName, value);
+                    trow.put(columnName, value);
                 }
-                rowCache.addRow(row);
+                rowCache.addRow(trow);
                 currentRowNumber++;
             }
-            if (row == null) {
+            if (trow == null) {
                 endOfDBReached = true;
+                return null;
             }
-            return row;
+            return trow;
         } catch (SQLException sqe) {
             String errMsg = Messages.getFormattedString("DatabaseDAO.sqlExceptionReadRow", new String[] {
                     currentColumnName, String.valueOf(currentRowNumber + 1), dbContext.getDbConfigName(), sqe.getMessage() });
@@ -224,7 +249,16 @@ public class DatabaseReader implements DataReader {
             throw new DataAccessObjectException(errMsg, e);
         }
     }
-
+    
+    @Override
+    public Row readRow() throws DataAccessObjectException {
+        TableRow tableRow = readTableRow();
+        if (tableRow == null) {
+            return null;
+        }
+        return tableRow.convertToRow();
+    }
+    
     @Override
     public int getTotalRows() throws DataAccessObjectException {
     	if (appConfig.getBoolean(AppConfig.PROP_DAO_SKIP_TOTAL_COUNT)) {
@@ -245,7 +279,7 @@ public class DatabaseReader implements DataReader {
 
     @Override
     public List<String> getColumnNames() {
-        return columnNames;
+        return headerRow;
     }
 
     /*
