@@ -492,10 +492,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final int totalRowsInDAOInCurrentBatch = lastDAORowForCurrentBatch - this.firstDAORowForCurrentBatch + 1;
         List<TableRow> rows;
         if (controller.getAppConfig().getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
-            rows = new ArrayList<TableRow>();
-            for (int i=0; i<totalRowsInDAOInCurrentBatch; i++) {
-                rows.add(i, this.daoRowList.get(i + this.firstDAORowForCurrentBatch));
-            }
+            rows = this.daoRowList.subList(firstDAORowForCurrentBatch, firstDAORowForCurrentBatch+totalRowsInDAOInCurrentBatch);
         } else {
             rows = dataReader.readTableRowList(totalRowsInDAOInCurrentBatch);
         }
