@@ -82,7 +82,7 @@ public abstract class RESTLoadVisitor extends DAOLoadVisitor {
         // are a) not the same class yet b) not subclassed
         int batchRowCounter = 0;
         for (int i = 0; i < this.daoRowList.size(); i++) {
-            Row daoRow = this.daoRowList.get(i);
+            Row daoRow = this.daoRowList.get(i).convertToRow();
             if (!isRowConversionSuccessful()) {
                 continue;
             }

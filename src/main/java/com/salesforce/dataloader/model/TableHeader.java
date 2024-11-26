@@ -23,29 +23,32 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package com.salesforce.dataloader.model;
 
-package com.salesforce.dataloader.action.visitor;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.salesforce.dataloader.model.TableRow;
-
-
-/**
- * Visitor to calculate the size of a DataAccessObject
- *
- * @author Lexi Viripaeff
- * @since 6.0
- */
-public class DAOSizeVisitor implements DAORowVisitor {
-
-    private int numberOfRows = 0;
-
-    @Override
-    public boolean visit(TableRow row) {
-        numberOfRows++;
-        return true;
+public class TableHeader {
+    private final Map<String, Integer> columnPositionMap = new HashMap<String, Integer>();
+    private int lastColPosition = 0;
+    private List<String> columns;
+    public TableHeader(List<String> cols) {
+        this.columns = cols;
+        for (String colName : cols) {
+            if (colName == null) {
+                continue;
+            }
+            columnPositionMap.put(colName.toLowerCase(), lastColPosition);
+            lastColPosition++;    
+        }
     }
 
-    public int getNumberOfRows() {
-        return numberOfRows;
+    public Integer getColumnPosition(String columnName) {
+        return columnPositionMap.get(columnName.toLowerCase());
+    }
+    
+    public List<String> getColumns() {
+        return this.columns;
     }
 }

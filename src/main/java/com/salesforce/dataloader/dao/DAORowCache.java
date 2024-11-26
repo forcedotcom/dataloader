@@ -28,10 +28,10 @@ package com.salesforce.dataloader.dao;
 import java.util.ArrayList;
 
 import com.salesforce.dataloader.config.AppConfig;
-import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 
 public class DAORowCache {
-    private ArrayList<Row> rowList = new ArrayList<Row>();
+    private ArrayList<TableRow> rowList = new ArrayList<TableRow>();
     private int currentRowIndex = 0;
     private int totalRows = 0;
 
@@ -42,7 +42,7 @@ public class DAORowCache {
         currentRowIndex = 0;
     }
     
-    public Row getCurrentRow() {
+    public TableRow getCurrentRow() {
         AppConfig appConfig = AppConfig.getCurrentConfig();
         if (currentRowIndex >= totalRows
             || !appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
@@ -51,7 +51,7 @@ public class DAORowCache {
         return rowList.get(currentRowIndex++);
     }
     
-    public void addRow(Row row) {
+    public void addRow(TableRow row) {
         rowList.add(row);
         currentRowIndex++;
         totalRows++;

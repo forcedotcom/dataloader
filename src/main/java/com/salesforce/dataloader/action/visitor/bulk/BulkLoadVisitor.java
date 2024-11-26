@@ -71,6 +71,7 @@ import com.salesforce.dataloader.model.NACalendarValue;
 import com.salesforce.dataloader.model.NADateOnlyCalendarValue;
 import com.salesforce.dataloader.model.NATextValue;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DAORowUtil;
 import com.sforce.async.AsyncApiException;
@@ -489,14 +490,14 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         int lastDAORowForCurrentBatch = this.batchRowToDAORowList.get(lastRowInCurrentBatch);
         
         final int totalRowsInDAOInCurrentBatch = lastDAORowForCurrentBatch - this.firstDAORowForCurrentBatch + 1;
-        List<Row> rows;
+        List<TableRow> rows;
         if (controller.getAppConfig().getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
-            rows = new ArrayList<Row>();
+            rows = new ArrayList<TableRow>();
             for (int i=0; i<totalRowsInDAOInCurrentBatch; i++) {
                 rows.add(i, this.daoRowList.get(i + this.firstDAORowForCurrentBatch));
             }
         } else {
-            rows = dataReader.readRowList(totalRowsInDAOInCurrentBatch);
+            rows = dataReader.readTableRowList(totalRowsInDAOInCurrentBatch);
         }
         if (batch.getState() == BatchStateEnum.Completed || batch.getNumberRecordsProcessed() > 0) {
             try {
@@ -505,8 +506,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 throw new LoadException("IOException while reading batch results", e);
             }
         } else {
-            for (final Row row : rows) {
-                writeError(row, errorMessage);
+            for (final TableRow row : rows) {
+                writeError(row.convertToRow(), errorMessage);
             }
         }
         // update to process the next batch
@@ -514,7 +515,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     private void processBatchResults(final BatchInfo batch, final String errorMessage, 
-            final BatchStateEnum state, final List<Row> rows, final int firstDataReaderRowInBatch) throws DataAccessObjectException, IOException, AsyncApiException {
+            final BatchStateEnum state, final List<TableRow> rows, final int firstDataReaderRowInBatch) throws DataAccessObjectException, IOException, AsyncApiException {
 
         // get the batch csv result stream from sfdc
         final CSVReader resultRdr = this.jobUtil.getBatchResults(batch.getId());
@@ -531,7 +532,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final int errIdx = hdrIndices.get(ERROR_RESULT_COL);
         hdrIndices = null;
 
-        for (final Row row : rows) {
+        for (final TableRow row : rows) {
             boolean conversionSuccessOfRow = isRowConversionSuccessful();
             if (!conversionSuccessOfRow) {
                 continue; // this DAO row failed to convert and was not part of the batch sent to the server. Go to the next one
@@ -542,16 +543,16 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             if (state == BatchStateEnum.Failed || errorMessage != null) {
                 getLogger().warn(
                         Messages.getMessage(getClass(), "logBatchInfoWithMessage", batch.getId(), state, errorMessage));
-                writeError(row, errorMessage);
+                writeError(row.convertToRow(), errorMessage);
             } else if (res == null || res.isEmpty()) {
                 String msg = Messages.getMessage(getClass(), "noResultForRow", row.toString(), batch.getId());
-                writeError(row, msg);
+                writeError(row.convertToRow(), msg);
                 getLogger().warn(msg);
             } else {
                 // convert the row into a RowResults so its easy to inspect
                 final RowResult rowResult = new RowResult(Boolean.valueOf(res.get(successIdx)), isDelete ? false
                         : Boolean.valueOf(res.get(createdIdx)), res.get(idIdx), res.get(errIdx));
-                writeRowResult(row, rowResult);
+                writeRowResult(row.convertToRow(), rowResult);
             }
         }
     }

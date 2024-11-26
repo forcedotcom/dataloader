@@ -31,6 +31,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.DAORowUtil;
 
 import org.apache.commons.beanutils.*;
@@ -80,7 +81,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     protected DynaProperty[] dynaProps = null;
 
     private final int batchSize;
-    protected List<Row> daoRowList = new ArrayList<Row>();
+    protected List<TableRow> daoRowList = new ArrayList<TableRow>();
     protected ArrayList<Integer> batchRowToDAORowList = new ArrayList<Integer>();
     private int processedDAORowCounter = 0;
     private static final Logger logger = DLLogManager.getLogger(DAOLoadVisitor.class);
@@ -143,7 +144,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     }
 
     @Override
-    public boolean visit(Row row) throws OperationException, DataAccessObjectException,
+    public boolean visit(TableRow row) throws OperationException, DataAccessObjectException,
     ConnectionException {
         AppConfig appConfig = controller.getAppConfig();
         if (appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
@@ -221,7 +222,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             String errMsg = Messages.getMessage("Visitor", "conversionErrorMsg", conve.getMessage());
             getLogger().error(errMsg, conve);
 
-            conversionFailed(row, errMsg);
+            conversionFailed(row.convertToRow(), errMsg);
             // this row cannot be added since conversion has failed
             return false;
         } catch (InvocationTargetException e) {

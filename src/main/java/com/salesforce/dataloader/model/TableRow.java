@@ -23,29 +23,58 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package com.salesforce.dataloader.model;
 
-package com.salesforce.dataloader.action.visitor;
+import java.util.ArrayList;
+import java.util.Collections;
 
-import com.salesforce.dataloader.model.TableRow;
+public class TableRow {
+    private TableHeader header;
+    private Object[] cellValues;
 
-
-/**
- * Visitor to calculate the size of a DataAccessObject
- *
- * @author Lexi Viripaeff
- * @since 6.0
- */
-public class DAOSizeVisitor implements DAORowVisitor {
-
-    private int numberOfRows = 0;
-
-    @Override
-    public boolean visit(TableRow row) {
-        numberOfRows++;
-        return true;
+    public TableRow(TableHeader header) {
+        this.header = header;
+        cellValues = new Object[header.getColumns().size()];
+    }
+    
+    public Object get(String key) {
+        Integer colPos = this.header.getColumnPosition(key);
+        if (colPos == null) {
+            return null;
+        }
+        return cellValues[colPos];
     }
 
-    public int getNumberOfRows() {
-        return numberOfRows;
+    public Object put(String key, Object value) {
+        Integer colPos = this.header.getColumnPosition(key);
+        if (colPos == null) {
+            return null;
+        }
+        return this.cellValues[colPos] = value;
+    }
+    
+    public Row convertToRow() {
+        Row row = new Row();
+        for (String colName : this.header.getColumns()) {
+            row.put(colName, cellValues[this.header.getColumnPosition(colName)]);
+        }
+        return row;
+    }
+    
+    public TableHeader getHeader() {
+        return this.header;
+    }
+    
+    public static TableRow emptyRow() {
+        return new TableRow(new TableHeader(new ArrayList<String>()));
+    }
+    
+    public static TableRow singleEntryImmutableRow(String key, Object value) {
+        ArrayList<String> headers = new ArrayList<String>();
+        headers.add(key);
+        TableHeader tableHeader = new TableHeader(headers);
+        TableRow row = new TableRow(tableHeader);
+        row.put(key, value);
+        return row;
     }
 }
