@@ -127,11 +127,13 @@ public class CSVFileReader implements DataReader {
         if (isOpen) {
             close();
         }
+        if (!appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || rowCache.getCachedRows() == 0) {
+            initalizeInput(csvDelimiters);
+            readHeaderRow();
+        }
         currentRowNumber = 0;
         rowCache.resetCurrentRowIndex();
-
-        initalizeInput(csvDelimiters);
-        readHeaderRow();
         isOpen = true;
     }
 
