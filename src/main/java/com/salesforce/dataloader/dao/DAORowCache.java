@@ -33,7 +33,7 @@ import com.salesforce.dataloader.model.TableRow;
 public class DAORowCache {
     private ArrayList<TableRow> rowList = new ArrayList<TableRow>();
     private int currentRowIndex = 0;
-    private int totalRows = 0;
+    private int cachedRows = 0;
 
     public DAORowCache() {
     }
@@ -44,7 +44,7 @@ public class DAORowCache {
     
     public TableRow getCurrentRow() {
         AppConfig appConfig = AppConfig.getCurrentConfig();
-        if (currentRowIndex >= totalRows
+        if (currentRowIndex >= cachedRows
             || !appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
             return null;
         }
@@ -52,8 +52,15 @@ public class DAORowCache {
     }
     
     public void addRow(TableRow row) {
-        rowList.add(row);
+        // add a row to the cache only if it is not cached already
+        if (currentRowIndex >= cachedRows) {
+            rowList.add(row);
+            cachedRows++;
+        }
         currentRowIndex++;
-        totalRows++;
+    }
+    
+    public int getCachedRows() {
+        return cachedRows;
     }
 }

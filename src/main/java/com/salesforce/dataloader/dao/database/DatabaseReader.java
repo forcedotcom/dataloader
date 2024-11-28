@@ -115,15 +115,22 @@ public class DatabaseReader implements DataReader {
      * @param params
      * @throws DataAccessObjectInitializationException
      */
-    public void open(Map<String,Object> params) throws DataAccessObjectInitializationException {
-        currentRowNumber = 0;
-        try {
-            setupQuery(params);
-        } catch (DataAccessObjectInitializationException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new DataAccessObjectInitializationException(e.getMessage(), e);
+    private void open(Map<String,Object> params) throws DataAccessObjectInitializationException {
+        if (dbContext.isOpen()) {
+            close();
         }
+        if (!appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                || rowCache.getCachedRows() == 0) {
+            try {
+                setupQuery(params);
+            } catch (DataAccessObjectInitializationException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new DataAccessObjectInitializationException(e.getMessage(), e);
+            }
+        }
+        currentRowNumber = 0;
+        rowCache.resetCurrentRowIndex();
         dbContext.setOpen(true);
     }
 
