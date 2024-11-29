@@ -39,10 +39,8 @@ import com.salesforce.dataloader.util.DLLogManager;
 
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
-import com.salesforce.dataloader.dao.DAORowCache;
-import com.salesforce.dataloader.dao.DataReader;
+import com.salesforce.dataloader.dao.AbstractDataReaderImpl;
 import com.salesforce.dataloader.exception.*;
-import com.salesforce.dataloader.util.DAORowUtil;
 
 /**
  * Data Access Object (DAO) that connects to database to update and retrieve the data This is a generic data access
@@ -52,21 +50,17 @@ import com.salesforce.dataloader.util.DAORowUtil;
  *
  * @author Alex Warshavsky
  */
-public class DatabaseReader implements DataReader {
+public class DatabaseReader extends AbstractDataReaderImpl {
 
     // logger
     private static Logger logger = DLLogManager.getLogger(DatabaseReader.class);
 
     private final BasicDataSource dataSource;
-    private final AppConfig appConfig;
     private List<String> headerRow = new ArrayList<String>();
     private TableHeader tableHeader;
-    private int totalRows = 0;
-    private int currentRowNumber = 0;
     private final SqlConfig sqlConfig;
     private final DatabaseContext dbContext;
-    private boolean endOfDBReached = false;
-    private DAORowCache rowCache = new DAORowCache();
+    private boolean endOfTableReached = false;
 
     /**
      * Get an instance of database reader for the data access object name from configuration
@@ -83,7 +77,7 @@ public class DatabaseReader implements DataReader {
      * @throws DataAccessObjectInitializationException
      */
     public DatabaseReader(AppConfig appConfig, String dbConfigName) throws DataAccessObjectInitializationException {
-        this.appConfig = appConfig;
+        super(appConfig);
         String dbConfigFilename = appConfig.constructConfigFilePath(DatabaseContext.DEFAULT_CONFIG_FILENAME);
         if(! (new File(dbConfigFilename).exists())) {
             throw new DataAccessObjectInitializationException(Messages.getFormattedString("DatabaseDAO.errorConfigFileExists", dbConfigFilename)); //$NON-NLS-1$
@@ -104,9 +98,8 @@ public class DatabaseReader implements DataReader {
      * @see com.salesforce.dataloader.dao.DataAccessObject#open()
      */
     @Override
-    public void open() throws DataAccessObjectInitializationException {
+    protected void openDAO() throws DataAccessObjectInitializationException {
         open(null);
-        rowCache.resetCurrentRowIndex();
     }
 
     /**
@@ -116,22 +109,21 @@ public class DatabaseReader implements DataReader {
      * @throws DataAccessObjectInitializationException
      */
     private void open(Map<String,Object> params) throws DataAccessObjectInitializationException {
-        if (dbContext.isOpen()) {
-            close();
+        try {
+            setupQuery(params);
+        } catch (DataAccessObjectInitializationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DataAccessObjectInitializationException(e.getMessage(), e);
         }
-        if (!appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
-                || rowCache.getCachedRows() == 0) {
-            try {
-                setupQuery(params);
-            } catch (DataAccessObjectInitializationException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new DataAccessObjectInitializationException(e.getMessage(), e);
-            }
-        }
-        currentRowNumber = 0;
-        rowCache.resetCurrentRowIndex();
-        dbContext.setOpen(true);
+    }
+    
+    protected void setOpenFlag(boolean open) {
+        dbContext.setOpen(open);
+    }
+    
+    protected boolean isOpenFlag() {
+        return dbContext.isOpen();
     }
 
     private void setupQuery(Map<String,Object> params) throws DataAccessObjectInitializationException, ParameterLoadException, IllegalArgumentException {
@@ -141,12 +133,13 @@ public class DatabaseReader implements DataReader {
             PreparedStatement statement = dbContext.prepareStatement();
             // right now, query doesn't support data input -- all the parameters are static vs. update which takes data
             // for every put call
-            dbContext.setSqlParamValues(sqlConfig, appConfig, params);
+            dbContext.setSqlParamValues(sqlConfig, 
+                    this.getAppConfig(), params);
 
             // set the query fetch size
             int fetchSize;
             try {
-                fetchSize = appConfig.getInt(AppConfig.PROP_DAO_READ_BATCH_SIZE);
+                fetchSize = this.getAppConfig().getInt(AppConfig.PROP_DAO_READ_BATCH_SIZE);
                 if(fetchSize > AppConfig.MAX_DAO_READ_BATCH_SIZE) {
                     fetchSize = AppConfig.MAX_DAO_READ_BATCH_SIZE;
                 }
@@ -193,7 +186,7 @@ public class DatabaseReader implements DataReader {
      * @see com.salesforce.dataloader.dao.DataReader#readRowList(int)
      */
     @Override
-    public List<TableRow> readTableRowList(int maxRows) throws DataAccessObjectException {
+    protected List<TableRow> readTableRowListFromDAO(int maxRows) throws DataAccessObjectException {
         List<TableRow> outputRows = new ArrayList<TableRow>();
         for(int i=0; i < maxRows; i++) {
             TableRow outputRow = readTableRow();
@@ -208,23 +201,13 @@ public class DatabaseReader implements DataReader {
         return outputRows;
     }
     @Override
-    public TableRow readTableRow() throws DataAccessObjectException {
-        if (!dbContext.isOpen()) {
-            open();
-        }
-        
-        TableRow trow = rowCache.getCurrentRow();
-        if (trow != null) {
-            currentRowNumber++;
-            return trow;
-        }
-        if (appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
-            && endOfDBReached) {
+    protected TableRow readTableRowFromDAO() throws DataAccessObjectException {
+        if (endOfTableReached) {
             return null;
         }
-            
         String currentColumnName = "";
         try {
+            TableRow trow = null;
             ResultSet rs = dbContext.getDataResultSet();
             if (rs != null && rs.next()) {
                 trow = new TableRow(tableHeader);
@@ -234,23 +217,21 @@ public class DatabaseReader implements DataReader {
                     Object value = rs.getObject(columnName);
                     trow.put(columnName, value);
                 }
-                rowCache.addRow(trow);
-                currentRowNumber++;
             }
             if (trow == null) {
-                endOfDBReached = true;
+                endOfTableReached = true;
                 return null;
             }
             return trow;
         } catch (SQLException sqe) {
             String errMsg = Messages.getFormattedString("DatabaseDAO.sqlExceptionReadRow", new String[] {
-                    currentColumnName, String.valueOf(currentRowNumber + 1), dbContext.getDbConfigName(), sqe.getMessage() });
+                    currentColumnName, String.valueOf(getCurrentRowNumber() + 1), dbContext.getDbConfigName(), sqe.getMessage() });
             logger.error(errMsg, sqe);
             close();
             throw new DataAccessObjectException(errMsg, sqe);
         } catch (Exception e) {
             String errMsg = Messages.getFormattedString("DatabaseDAO.exceptionReadRow", new String[] {
-                    currentColumnName, String.valueOf(currentRowNumber + 1), dbContext.getDbConfigName(), e.getMessage() });
+                    currentColumnName, String.valueOf(getCurrentRowNumber() + 1), dbContext.getDbConfigName(), e.getMessage() });
             logger.error(errMsg, e);
             close();
             throw new DataAccessObjectException(errMsg, e);
@@ -264,24 +245,6 @@ public class DatabaseReader implements DataReader {
             return null;
         }
         return tableRow.convertToRow();
-    }
-    
-    @Override
-    public int getTotalRows() throws DataAccessObjectException {
-    	if (appConfig.getBoolean(AppConfig.PROP_DAO_SKIP_TOTAL_COUNT)) {
-    		return 0;
-    	}
-
-    	if (totalRows == 0) {
-    		totalRows = DAORowUtil.calculateTotalRows(this);
-    	}
-
-    	return totalRows;
-    }
-
-    @Override
-    public int getCurrentRowNumber() {
-        return currentRowNumber;
     }
 
     @Override
@@ -305,5 +268,12 @@ public class DatabaseReader implements DataReader {
     @Override
     public void close() {
         dbContext.close();
+    }
+    
+    public int getTotalRows() throws DataAccessObjectException {
+        if (this.getAppConfig().getBoolean(AppConfig.PROP_DAO_SKIP_TOTAL_COUNT)) {
+            return 0;
+        }
+        return super.getTotalRows();
     }
 }
