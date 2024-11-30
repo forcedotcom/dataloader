@@ -215,7 +215,7 @@ public class DAORowUtil {
             // keep skipping over rows until we run into an invalid row or we have gotten
             // to the starting row
             while (daoReader.getCurrentRowNumber() < rowToStart) {
-                if (!DAORowUtil.isValidRow(daoReader.readRow())) break;
+                if (!DAORowUtil.isValidTableRow(daoReader.readTableRow())) break;
             }
         }
     }

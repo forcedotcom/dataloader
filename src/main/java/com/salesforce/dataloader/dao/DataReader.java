@@ -39,15 +39,6 @@ import com.salesforce.dataloader.model.TableRow;
  * @since 8.0
  */
 public interface DataReader extends DataAccessObject {
-
-    /**
-     * Get a row of data from a data source
-     *
-     * @return a {@link Row} containing all the keys and values of a row
-     * @throws DataAccessObjectException
-     */
-    Row readRow() throws DataAccessObjectException;
-
     /**
      * Get a row of data from a data source
      *

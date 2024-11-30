@@ -47,7 +47,6 @@ import com.salesforce.dataloader.dao.AbstractDataReaderImpl;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.DataAccessRowException;
-import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
@@ -204,15 +203,6 @@ public class CSVFileReader extends AbstractDataReaderImpl {
             trow.put(headerRow.get(i), value);
         }
         return trow;
-    }
-    
-    @Override
-    public Row readRow() throws DataAccessObjectException {
-        TableRow tableRow = readTableRow();
-        if (tableRow == null) {
-            return null;
-        }
-        return tableRow.convertToRow();
     }
 
     /**
