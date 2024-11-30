@@ -30,6 +30,7 @@ import java.sql.*;
 import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.util.DLLogManager;
@@ -119,7 +120,7 @@ public class DatabaseWriter implements DataWriter {
         dbContext.replaceSqlParams(sqlConfig.getSqlString());
         dbContext.prepareStatement();
     }
-
+    
     /*
      * (non-Javadoc)
      * @see com.salesforce.dataloader.dao.DataWriter#writeRowList(java.util.List)
@@ -284,5 +285,17 @@ public class DatabaseWriter implements DataWriter {
     
     public List<String> getColumnNamesFromRow(Row row) throws DataAccessObjectInitializationException {
         return null;
+    }
+
+    @Override
+    public boolean writeTableRowList(List<TableRow> trowList) throws DataAccessObjectException {
+        if (trowList == null) {
+            return false;
+        }
+        ArrayList<Row> rowList = new ArrayList<Row>(trowList.size());
+        for (TableRow trow : trowList) {
+            rowList.add(trow.convertToRow());
+        }
+        return writeRowList(rowList);
     }
 }

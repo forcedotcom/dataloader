@@ -53,6 +53,7 @@ import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.Base64;
 import com.salesforce.dataloader.action.progress.NihilistProgressAdapter;
@@ -88,7 +89,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         final CSVFileReader errReader = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
         try {
             errReader.open();
-            for (Row errorRow : errReader.readRowList(errReader.getTotalRows())) {
+            for (TableRow errorRow : errReader.readTableRowList(errReader.getTotalRows())) {
                 String actualMessage = (String) errorRow.get("ERROR");
                 if (actualMessage == null || !actualMessage.startsWith(expectedErrorMessage))
                     Assert.fail("Error row does not have the expected error message: " + expectedErrorMessage
@@ -109,7 +110,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         final Set<String> remaining = new HashSet<String>(ids);
         final Set<String> unexpected = new HashSet<String>();
         try {
-            for (Row row : successRdr.readRowList(Integer.MAX_VALUE)) {
+            for (TableRow row : successRdr.readTableRowList(Integer.MAX_VALUE)) {
                 final String rowid = (String) row.get("ID");
                 if (rowid != null && rowid.length() > 0 && !remaining.remove(rowid)) unexpected.add(rowid);
             }
@@ -540,7 +541,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     }
 
     protected static interface TemplateListener {
-        void updateRow(int idx, Row row);
+        void updateRow(int idx, TableRow row);
     }
 
     /**
@@ -555,13 +556,11 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         }
 
         @Override
-        public void updateRow(int idx, Row row) {
+        public void updateRow(int idx, TableRow row) {
             row.put("ID", idx < this.accountIds.length ? this.accountIds[idx] : "");
-            if (row.containsValue("standard@org.com")) {
-                for (String key : row.keySet()) {
-                    if ("standard@org.com".equals(row.get(key))) {
-                        row.put(key, getProperty("test.user.restricted"));
-                    }
+            for (String key : row.getHeader().getColumns()) {
+                if ("standard@org.com".equals(row.get(key))) {
+                    row.put(key, getProperty("test.user.restricted"));
                 }
             }
         }
@@ -591,10 +590,10 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             templateReader.open();
 
             int numRows = templateReader.getTotalRows();
-            final List<Row> templateRows = templateReader.readRowList(numRows);
+            final List<TableRow> templateRows = templateReader.readTableRowList(numRows);
             assertNotNull("CVSReader returned a null list of rows, but expected a list with size " + numRows,
                     templateRows);
-            final List<Row> inputRows = new ArrayList<Row>(templateRows.size());
+            final List<TableRow> inputRows = new ArrayList<TableRow>(templateRows.size());
 
             // verify that the template file is useable
             assertEquals("Wrong number of rows were read using readRowList while attempting to convert template file: "
@@ -603,8 +602,8 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             // insert accounts for the whole template or part of it if
             // maxInserts is smaller then template size
             int idx = 0;
-            for (Row templateRow : templateRows) {
-                final Row row = new Row(templateRow);
+            for (TableRow templateRow : templateRows) {
+                final TableRow row = new TableRow(templateRow);
                 if (listeners != null) {
                     for (TemplateListener l : listeners) {
                         l.updateRow(idx, row);
@@ -618,7 +617,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             try {
                 inputWriter.open();
                 inputWriter.setColumnNames(templateReader.getColumnNames());
-                inputWriter.writeRowList(inputRows);
+                inputWriter.writeTableRowList(inputRows);
                 return inputPath;
             } finally {
                 inputWriter.close();

@@ -29,6 +29,7 @@ import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AccountRowComparator;
 import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.util.DLLogManager;
@@ -140,7 +141,7 @@ public class DatabaseTest extends ConfigTestBase {
             reader = new DatabaseReader(theController.getAppConfig(), "queryAccountAll");
             reader.open();
             int readBatchSize = 1000;
-            List<Row> readRowList = reader.readRowList(readBatchSize);
+            List<TableRow> readRowList = reader.readTableRowList(readBatchSize);
             int rowsProcessed = 0;
             assertNotNull("Error reading " + readBatchSize + " rows", readRowList);
             while(readRowList.size() > 0) {
@@ -149,18 +150,18 @@ public class DatabaseTest extends ConfigTestBase {
                 Collections.sort(readRowList, new AccountRowComparator(!isInsert));
                 logger.info("Verifying database success for next " + (rowsProcessed + readRowList.size()) + " rows");
                 for (int i=0; i < readRowList.size(); i++) {
-                    Row readRow = readRowList.get(i);
+                    TableRow readRow = readRowList.get(i);
                     assertNotNull("Error reading data row #" + i + ": the row shouldn't be null", readRow);
-                    assertTrue("Error reading data row #" + i + ": the row shouldn't be empty", readRow.size() > 0);
+                    assertTrue("Error reading data row #" + i + ": the row shouldn't be empty", readRow.getNonEmptyCellsCount() > 0);
                     Row expectedRow = DatabaseTestUtil.getInsertOrUpdateAccountRow(isInsert, rowsProcessed, DatabaseTestUtil.DateType.VALIDATION);
                     // verify all expected data
                     for (String colName : VALIDATE_COLS) {
-                        verifyCol(colName, readRow, expectedRow);
+                        verifyCol(colName, readRow.convertToRow(), expectedRow);
                     }
 
                     rowsProcessed++;
                 }
-                readRowList = reader.readRowList(readBatchSize);
+                readRowList = reader.readTableRowList(readBatchSize);
                 assertNotNull("Error reading " + readBatchSize + " rows", readRowList);
             }
         } finally {

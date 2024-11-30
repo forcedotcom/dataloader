@@ -26,7 +26,7 @@
 package com.salesforce.dataloader.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 
 public class TableRow {
     private TableHeader header;
@@ -35,6 +35,11 @@ public class TableRow {
     public TableRow(TableHeader header) {
         this.header = header;
         cellValues = new Object[header.getColumns().size()];
+    }
+
+    public TableRow(TableRow rowToCopy) {
+        this.header = rowToCopy.getHeader();
+        cellValues = Arrays.copyOf(rowToCopy.cellValues, rowToCopy.cellValues.length);
     }
     
     public Object get(String key) {
@@ -76,5 +81,15 @@ public class TableRow {
         TableRow row = new TableRow(tableHeader);
         row.put(key, value);
         return row;
+    }
+    
+    public int getNonEmptyCellsCount() {
+        int numNonEmptyCells = 0;
+        for (int i = 0; i < this.cellValues.length; i++) {
+            if (cellValues[i] != null) {
+                numNonEmptyCells++;
+            }
+        }
+        return numNonEmptyCells;
     }
 }

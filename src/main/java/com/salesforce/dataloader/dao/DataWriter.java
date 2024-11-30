@@ -31,6 +31,7 @@ import java.util.List;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 
 /**
  * Interface to be implemented for data writers -- data access objects that are used for writing rows of data.
@@ -63,4 +64,6 @@ public interface DataWriter extends DataAccessObject {
     boolean writeRowList(List<Row> inputRowList) throws DataAccessObjectException;
     
     public List<String> getColumnNamesFromRow(Row row) throws DataAccessObjectInitializationException;
+
+    public boolean writeTableRowList(List<TableRow> rows) throws DataAccessObjectException;
 }

@@ -44,6 +44,7 @@ import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 
 /**
@@ -211,7 +212,21 @@ public class CSVFileWriter implements DataWriter {
         }
         return success;
     }
-
+    
+    /*
+     * (non-Javadoc)
+     * @see com.salesforce.dataloader.dao.csv.Writer#writeRowList(java.util.List)
+     */
+    @Override
+    public boolean writeTableRowList(List<TableRow> rows) throws DataAccessObjectException {
+        boolean success = true;
+        // return the last result, should be same as others
+        for (TableRow trow : rows) {
+            success = writeRow(trow.convertToRow());
+        }
+        return success;
+    }
+    
     private void visitHeaderColumns(List<String> columnNames, CSVColumnVisitor visitor) throws IOException {
         for (String colName : columnNames) {
             String outColName;

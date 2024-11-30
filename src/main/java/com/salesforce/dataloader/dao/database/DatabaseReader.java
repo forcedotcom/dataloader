@@ -160,30 +160,10 @@ public class DatabaseReader extends AbstractDataReaderImpl {
             throw new DataAccessObjectInitializationException(errMsg, sqe);
         }
     }
-
-    /*
-     * (non-Javadoc)
-     * @see com.salesforce.dataloader.dao.DataReader#readRowList(int)
-     */
-    @Override
-    public List<Row> readRowList(int maxRows) throws DataAccessObjectException {
-        List<Row> outputRows = new ArrayList<Row>();
-        for(int i=0; i < maxRows; i++) {
-            Row outputRow = readRow();
-            if(outputRow != null) {
-                // if row has been returned, add it to the output
-                outputRows.add(outputRow);
-            } else {
-                // if encountered null, the reading is over
-                break;
-            }
-        }
-        return outputRows;
-    }
     
     /*
      * (non-Javadoc)
-     * @see com.salesforce.dataloader.dao.DataReader#readRowList(int)
+     * @see com.salesforce.dataloader.dao.DataReader#readTableRowList(int)
      */
     @Override
     protected List<TableRow> readTableRowListFromDAO(int maxRows) throws DataAccessObjectException {

@@ -35,6 +35,7 @@ import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.sforce.soap.partner.GetUserInfoResult;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
@@ -322,7 +323,7 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
         final CSVFileReader successRdr = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
         String idFieldName = this.isBulkV2APIEnabled(insertArgMap)?"sf__Id":"ID";
         try {
-            for (Row row : successRdr.readRowList(Integer.MAX_VALUE)) {
+            for (TableRow row : successRdr.readTableRowList(Integer.MAX_VALUE)) {
                 final String rowId = (String) row.get(idFieldName);
                 if (rowId != null) {
                     ids.add(rowId);
