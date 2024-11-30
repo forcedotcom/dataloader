@@ -63,15 +63,6 @@ public interface DataReader extends DataAccessObject {
      * @return a list of up to maxRows {@link Row} objects, each of them containing all the keys and values of a row
      * @throws DataAccessObjectException
      */
-    List<Row> readRowList(int maxRows) throws DataAccessObjectException;
-
-    /**
-     * Get a list of rows of data from a data source
-     *
-     * @param maxRows Maximum number of rows to read in one call
-     * @return a list of up to maxRows {@link Row} objects, each of them containing all the keys and values of a row
-     * @throws DataAccessObjectException
-     */
     List<TableRow> readTableRowList(int maxRows) throws DataAccessObjectException;
 
     /**

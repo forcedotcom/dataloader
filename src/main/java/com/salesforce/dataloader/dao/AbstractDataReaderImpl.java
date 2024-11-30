@@ -46,7 +46,7 @@ public abstract class AbstractDataReaderImpl implements DataReader {
 
     public List<TableRow> readTableRowList(int maxRows) throws DataAccessObjectException {
         List<TableRow> rowList = null;
-        if (this.rowCache.size() >= this.currentRowNumber + maxRows) {
+        if (this.rowCache.size() > this.currentRowNumber + maxRows) {
             rowList = this.rowCache.getRows(currentRowNumber, maxRows);
             currentRowNumber = currentRowNumber + rowList.size();
             return rowList;

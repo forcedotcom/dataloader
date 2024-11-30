@@ -36,6 +36,7 @@ import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.sobject.SObject;
@@ -181,7 +182,7 @@ public class CsvProcessAttachmentTest extends ProcessTestBase {
         }
 
         @Override
-        public void updateRow(int idx, Row row) {
+        public void updateRow(int idx, TableRow row) {
             // set parent account id
             row.put("ParentId", getAccountIds()[0]);
             // make body pathname absolute

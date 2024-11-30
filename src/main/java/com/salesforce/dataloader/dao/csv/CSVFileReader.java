@@ -146,22 +146,6 @@ public class CSVFileReader extends AbstractDataReaderImpl {
     }
     
     @Override
-    public List<Row> readRowList(int maxRows) throws DataAccessObjectException {
-        List<Row> outputRows = new ArrayList<Row>();
-        for (int i = 0; i < maxRows; i++) {
-            Row outputRow = readRow();
-            if (outputRow != null) {
-                // if row has been returned, add it to the output
-                outputRows.add(outputRow);
-            } else {
-                // if encountered null, the reading is over
-                break;
-            }
-        }
-        return outputRows;
-    }
-    
-    @Override
     protected List<TableRow> readTableRowListFromDAO(int maxRows) throws DataAccessObjectException {
         List<TableRow> outputRows = new ArrayList<TableRow>();
         for (int i = 0; i < maxRows; i++) {

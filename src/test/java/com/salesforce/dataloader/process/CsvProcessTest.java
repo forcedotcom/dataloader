@@ -51,6 +51,7 @@ import com.salesforce.dataloader.dyna.DateTimeConverter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.sobject.SObject;
 
@@ -367,7 +368,7 @@ public class CsvProcessTest extends ProcessTestBase {
         final CSVFileReader successRdr = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
         try {
             // TODO: revise the use of Integer.MAX_VALUE
-            for (Row row : successRdr.readRowList(Integer.MAX_VALUE)) {
+            for (TableRow row : successRdr.readTableRowList(Integer.MAX_VALUE)) {
                 final String rowId = (String) row.get("ID");
                 if (rowId != null) {
                     ids.add(rowId);
@@ -446,7 +447,7 @@ public class CsvProcessTest extends ProcessTestBase {
         }
 
         @Override
-        public void updateRow(int idx, Row row) {
+        public void updateRow(int idx, TableRow row) {
             // set parent account id
             row.put("ParentId", getAccountIds()[0]);
             // make body pathname absolute

@@ -26,7 +26,7 @@
 package com.salesforce.dataloader.util;
 
 import com.salesforce.dataloader.ConfigTestBase;
-import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 
 import static com.salesforce.dataloader.dao.database.DatabaseTestUtil.NAME_COL;
 
@@ -38,9 +38,9 @@ import java.util.Comparator;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class AccountRowComparator extends ConfigTestBase implements Comparator<Row> {
+public class AccountRowComparator extends ConfigTestBase implements Comparator<TableRow> {
 
-    private static String getName(Row o1) {
+    private static String getName(TableRow o1) {
         return o1.get(NAME_COL).toString();
     }
 
@@ -58,7 +58,7 @@ public class AccountRowComparator extends ConfigTestBase implements Comparator<R
     }
 
     @Override
-    public int compare(Row o1, Row o2) {
+    public int compare(TableRow o1, TableRow o2) {
         final int result = getName(o1).compareTo(getName(o2));
         return isReverse ? -result : result;
     }

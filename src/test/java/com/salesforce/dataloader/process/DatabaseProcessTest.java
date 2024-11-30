@@ -47,7 +47,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.database.DatabaseReader;
 import com.salesforce.dataloader.dao.database.DatabaseTestUtil;
 import com.salesforce.dataloader.exception.*;
-import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 
 /**
  * Automated tests for dataloader database batch interface
@@ -204,14 +204,14 @@ public class DatabaseProcessTest extends ProcessTestBase {
             reader = new DatabaseReader(theController.getAppConfig(), dbConfigName);
             reader.open();
             int readBatchSize = theController.getAppConfig().getInt(AppConfig.PROP_DAO_READ_BATCH_SIZE);
-            List<Row> successRows = reader.readRowList(readBatchSize);
+            List<TableRow> successRows = reader.readTableRowList(readBatchSize);
             int rowsProcessed = 0;
             assertNotNull("Error reading " + readBatchSize + " rows", successRows);
             while(successRows.size() > 0) {
                 rowsProcessed += successRows.size();
                 logger.info("Verifying database success for next " + successRows.size() + " of total " + rowsProcessed + " rows");
                 assertTrue("No updated rows have been found in the database.", successRows.size() > 0);
-                successRows = reader.readRowList(readBatchSize);
+                successRows = reader.readTableRowList(readBatchSize);
             }
             assertEquals(expectedSuccesses, rowsProcessed);
         } catch (DataAccessObjectInitializationException e) {

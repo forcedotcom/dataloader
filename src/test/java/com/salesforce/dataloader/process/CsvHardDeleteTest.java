@@ -33,6 +33,8 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
+
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -172,7 +174,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         }
 
         @Override
-        public void updateRow(int idx, Row row) {
+        public void updateRow(int idx, TableRow row) {
             if (idx == 0)
                 row.put("ID", "abcde0123456789XYZ");
             else
@@ -237,7 +239,7 @@ public class CsvHardDeleteTest extends ProcessTestBase {
         }
 
         @Override
-        public void updateRow(int idx, Row row) {
+        public void updateRow(int idx, TableRow row) {
             if (idx < this.contactIds.length)
                 row.put("ID", this.contactIds[idx]);
             else
