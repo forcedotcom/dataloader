@@ -30,7 +30,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
@@ -57,7 +56,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
-import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.ui.csvviewer.CSVContentProvider;
 import com.salesforce.dataloader.ui.csvviewer.CSVLabelProvider;
 import com.salesforce.dataloader.util.AppUtil;
@@ -292,23 +291,23 @@ public class CSVViewerDialog extends Dialog {
 
         List<List<Object>> rowList = new ArrayList<List<Object>>();
         for (int i = 0; i < numberOfRows; i++) {
-            Row rowMap;
+            TableRow row;
             try {
-                rowMap = csvReader.readRow();
+                row = csvReader.readTableRow();
             } catch (DataAccessObjectException e) {
                 break;
             }
-            if (!DAORowUtil.isValidRow(rowMap)) {
+            if (!DAORowUtil.isValidTableRow(row)) {
                 break;
             }
 
             List<String> columns = csvReader.getColumnNames();
-            List<Object> row = new ArrayList<Object>();
-            row.add(0, String.valueOf(i + 1));
+            List<Object> listOfRowCells = new ArrayList<Object>();
+            listOfRowCells.add(0, String.valueOf(i + 1));
             for(String column : columns) {
-                row.add(rowMap.get(column));
+                listOfRowCells.add(row.get(column));
             }
-            rowList.add(row);
+            rowList.add(listOfRowCells);
         }
         csvReader.close();
         csvTblViewer.setInput(rowList);

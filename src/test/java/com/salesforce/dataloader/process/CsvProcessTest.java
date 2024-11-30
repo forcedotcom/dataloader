@@ -120,8 +120,8 @@ public class CsvProcessTest extends ProcessTestBase {
         String successFileName = controller.getAppConfig().getString(AppConfig.PROP_OUTPUT_SUCCESS);
         File successFile = new File(successFileName);
         CSVFileReader csvReader = new CSVFileReader(successFile, controller.getAppConfig(), false, false);
-        Row row1 = csvReader.readRow();
-        Row row2 = csvReader.readRow();
+        TableRow row1 = csvReader.readTableRow();
+        TableRow row2 = csvReader.readTableRow();
         String oracleIdRow1 = (String)row1.get("oracle_id");
         String oracleIdRow2 = (String)row2.get("oracle_id");
         if (oracleIdRow1 == null) {

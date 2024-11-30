@@ -43,6 +43,7 @@ import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -173,30 +174,30 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
         }
 
         // Initializations of row results
-        Row firstInputOffsetAdjustedRow = new Row();
-        Row lastInputRow = new Row();
-        Row firstSuccessRow = new Row();
-        Row lastSuccessRow = new Row();
-        Row firstErrorRow = new Row();
-        Row lastErrorRow = new Row();
+        TableRow firstInputOffsetAdjustedRow = null;
+        TableRow lastInputRow = null;
+        TableRow firstSuccessRow = null;
+        TableRow lastSuccessRow = null;
+        TableRow firstErrorRow = null;
+        TableRow lastErrorRow = null;
 
         // The next few if statements deal with the edge statements on file size...(i.e. suppose that there are no
         // errors)
         if (numberOfSuccessRows > 0) {
-            getFirstRow(firstSuccessRow, successFileReader, true, 0);
-            getLastRow(lastSuccessRow, successFileReader, true);
+            firstSuccessRow = getFirstRow(successFileReader, true, 0);
+            lastSuccessRow = getLastRow(successFileReader, true);
         }
 
         if (numberOfErrorRows > 0) {
-            getFirstRow(firstErrorRow, errorFileReader, false, 0);
-            getLastRow(lastErrorRow, errorFileReader, false);
+            firstErrorRow = getFirstRow(errorFileReader, false, 0);
+            lastErrorRow = getLastRow(errorFileReader, false);
         }
 
         if (numberOfInputRows > 0) {
             final CSVFileReader inputFileReader = openConfiguredPath(cfg, AppConfig.PROP_DAO_NAME);
 
-            getFirstRow(firstInputOffsetAdjustedRow, inputFileReader, false, numberOfOffsetRows);
-            getLastRow(lastInputRow, inputFileReader, false);
+            firstInputOffsetAdjustedRow = getFirstRow(inputFileReader, false, numberOfOffsetRows);
+            lastInputRow = getLastRow(inputFileReader, false);
         }
 
         // Requirement I: First offset-adjusted row of input matches to either the error or success file's first row
@@ -226,40 +227,27 @@ public class CsvProcessWithOffsetTest extends ProcessTestBase {
         return rdr;
     }
 
-    private void getFirstRow(Row rowResult, CSVFileReader reader, boolean isSuccessFile, int rowOffset)
+    private TableRow getFirstRow(CSVFileReader reader, boolean isSuccessFile, int rowOffset)
             throws Exception {
-        Row firstRow = reader.readRow();
+        TableRow firstRow = reader.readTableRow();
 
         for (int i = 0; i < rowOffset; i++) {
-            firstRow = reader.readRow(); // then, for each, move down one row
+            firstRow = reader.readTableRow(); // then, for each, move down one row
         }
-
-        if (isSuccessFile) {
-            // Also ask for ID
-            rowResult.put("ID", firstRow.get("ID"));
-        }
-        if (firstRow != null && firstRow.get("NAME") != null) {
-            rowResult.put("NAME", firstRow.get("NAME"));
-        }
+        return firstRow;
     }
 
-    private void getLastRow(Row rowResult, CSVFileReader reader, boolean isSuccessFile)
+    private TableRow getLastRow(CSVFileReader reader, boolean isSuccessFile)
             throws Exception {
 
-        Row tempRow = new Row();
-        Row lastRow = new Row();
+        TableRow tempRow = null;
+        TableRow lastRow = null;
 
         // get to the last row:
-        while ((tempRow = reader.readRow()) != null) {
+        while ((tempRow = reader.readTableRow()) != null) {
             lastRow = tempRow;
         }
-
-        if (isSuccessFile) {
-            // Also ask for ID
-            rowResult.put("ID", lastRow.get("ID"));
-        }
-
-        rowResult.put("NAME", lastRow.get("NAME"));
+        return lastRow;
     }
 
     private Map<String, String> getRowOffsetTestConfig(Object offset, int numInserts) throws DataAccessObjectException {

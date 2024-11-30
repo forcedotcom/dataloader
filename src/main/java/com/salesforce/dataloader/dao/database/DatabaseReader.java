@@ -29,7 +29,6 @@ import java.io.File;
 import java.sql.*;
 import java.util.*;
 
-import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
 
@@ -216,15 +215,6 @@ public class DatabaseReader extends AbstractDataReaderImpl {
             close();
             throw new DataAccessObjectException(errMsg, e);
         }
-    }
-    
-    @Override
-    public Row readRow() throws DataAccessObjectException {
-        TableRow tableRow = readTableRow();
-        if (tableRow == null) {
-            return null;
-        }
-        return tableRow.convertToRow();
     }
 
     @Override

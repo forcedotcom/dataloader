@@ -43,8 +43,7 @@ import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
-import com.salesforce.dataloader.model.Row;
-import com.sforce.soap.partner.SaveResult;
+import com.salesforce.dataloader.model.TableRow;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 
@@ -156,9 +155,9 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
             resultReader.open();
 
             // go through item by item and assert that it's there
-            Row row;
+            TableRow row;
             int currentRow = 0;
-            while ((row = resultReader.readRow()) != null) {
+            while ((row = resultReader.readTableRow()) != null) {
                 final String resultId = (String)row.get(AppConfig.ID_COLUMN_NAME);
                 assertValidId(resultId);
                 String resultPhone = (String)row.get("Phone");
@@ -272,9 +271,9 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
                 resultReader.open();
 
                 // go through item by item and assert that it's there
-                Row row;
+                TableRow row;
                 int rowIdx = 0;
-                while ((row = resultReader.readRow()) != null) {
+                while ((row = resultReader.readTableRow()) != null) {
                     final String resultId = (String)row.get(AppConfig.ID_COLUMN_NAME);
                     assertValidId(resultId);
                     assertEquals(resultId, testFieldIds[rowIdx]);
@@ -364,7 +363,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         runProcess(argMap, 1);
         final CSVFileReader resultReader = new CSVFileReader(new File(argMap.get(AppConfig.PROP_DAO_NAME)), getController().getAppConfig(), true, false);
         try {
-            final Row resultRow = resultReader.readRow();
+            final TableRow resultRow = resultReader.readTableRow();
             assertEquals("Query returned incorrect Contact ID", contactId, resultRow.get("CONTACT_ID"));
             assertEquals("Query returned incorrect Contact Name", "First 000000 Last 000000",
                     resultRow.get("CONTACT_NAME"));
@@ -463,7 +462,8 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
             runProcess(argMap, 1, true);
             final CSVFileReader resultReader = new CSVFileReader(new File(argMap.get(AppConfig.PROP_DAO_NAME)), getController().getAppConfig(), true, false);
             try {
-                assertEquals(String.valueOf(numRecords - 1), resultReader.readRow().get("MAX(NUMBEROFEMPLOYEES)"));
+                String maxNumEmployees = (String)resultReader.readTableRow().get("MAX(NUMBEROFEMPLOYEES)");
+                assertEquals(String.valueOf(numRecords - 1), maxNumEmployees);
             } finally {
                 resultReader.close();
             }

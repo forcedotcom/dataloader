@@ -52,7 +52,6 @@ import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
-import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.Base64;
@@ -791,7 +790,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         assertNumRowsInCSVFile(successFile, numInserts + numUpdates);
         boolean isBulkV2Operation = ctl.getAppConfig().isBulkV2APIEnabled();
 
-        Row row = null;
+        TableRow row = null;
         CSVFileReader rdr = new CSVFileReader(new File(successFile), getController().getAppConfig(), true, false);
         String expectedUpdateStatusVal = UPDATE_MSGS.get(ctl.getAppConfig().getOperationInfo());
         String expectedInsertStatusVal = INSERT_MSG;
@@ -801,7 +800,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         }
         int insertsFound = 0;
         int updatesFound = 0;
-        while ((row = rdr.readRow()) != null) {
+        while ((row = rdr.readTableRow()) != null) {
             String id = (String)row.get(AppConfig.ID_COLUMN_NAME);
             if (id == null) {
                 id = (String)row.get(AppConfig.ID_COLUMN_NAME_IN_BULKV2);

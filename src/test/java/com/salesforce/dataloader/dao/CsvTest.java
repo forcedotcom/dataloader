@@ -37,6 +37,7 @@ import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 
 import static org.junit.Assert.assertEquals;
@@ -105,12 +106,12 @@ public class CsvTest extends ConfigTestBase {
         assertEquals(COLUMN_2_NAME, headerRow.get(1));
         assertEquals(COLUMN_3_NAME, headerRow.get(2));
 
-        Row firstRow = csv.readRow();
+        TableRow firstRow = csv.readTableRow();
         assertEquals("row1-1", firstRow.get(COLUMN_1_NAME));
         assertEquals("row1-2", firstRow.get(COLUMN_2_NAME));
         assertEquals("row1-3", firstRow.get(COLUMN_3_NAME));
 
-        Row secondRow = csv.readRow();
+        TableRow secondRow = csv.readTableRow();
         assertEquals("row2-1", secondRow.get(COLUMN_1_NAME));
         assertEquals("row2-2", secondRow.get(COLUMN_2_NAME));
         assertEquals("row2-3", secondRow.get(COLUMN_3_NAME));
@@ -170,19 +171,19 @@ public class CsvTest extends ConfigTestBase {
 
         CSVFileReader csv = new CSVFileReader(f, getController().getAppConfig(), false, false);
         csv.open();
-        Row firstRow = csv.readRow();
+        TableRow firstRow = csv.readTableRow();
         assertEquals("somev1", firstRow.get("some"));
-        assertEquals(4, firstRow.size());
-        Row secondRow = csv.readRow();
+        assertEquals(4, firstRow.getNonEmptyCellsCount());
+        TableRow secondRow = csv.readTableRow();
         assertEquals("somev2", secondRow.get("some"));
         csv.close();
 
         getController().getAppConfig().setValue("loader.csvOther", false);
         csv = new CSVFileReader(f, getController().getAppConfig(), false, false);
         csv.open();
-        firstRow = csv.readRow();
+        firstRow = csv.readTableRow();
         assertEquals("col12!somev1", firstRow.get("column2!some"));
-        assertEquals(3, firstRow.size());
+        assertEquals(3, firstRow.getNonEmptyCellsCount());
         csv.close();
     }
 
@@ -195,10 +196,10 @@ public class CsvTest extends ConfigTestBase {
         CSVFileReader csv = new CSVFileReader(f, getController().getAppConfig(), false, false);
         csv.open();
 
-        Row firstRow = csv.readRow();
+        TableRow firstRow = csv.readTableRow();
         assertEquals("\"The Best\" Account", firstRow.get(COLUMN_1_NAME));
 
-        Row secondRow = csv.readRow();
+        TableRow secondRow = csv.readTableRow();
         assertEquals("The \"Best\" Account", secondRow.get(COLUMN_1_NAME));
 
         csv.close();
@@ -210,7 +211,7 @@ public class CsvTest extends ConfigTestBase {
         csvFileReader.open();
         assertEquals(20000, csvFileReader.getTotalRows());
         int count = 0;
-        for(Row row = csvFileReader.readRow(); row != null; row = csvFileReader.readRow(), count++);
+        for(TableRow row = csvFileReader.readTableRow(); row != null; row = csvFileReader.readTableRow(), count++);
         assertEquals(20000, count);
     }
 
@@ -262,15 +263,15 @@ public class CsvTest extends ConfigTestBase {
         }
 
         //check that row 1 is valid
-        Row firstRow = csv.readRow();
+        TableRow firstRow = csv.readTableRow();
         for (String headerColumn : writeHeader) {
-                assertEquals(row1.get(headerColumn), firstRow.get(headerColumn));
+            assertEquals(row1.get(headerColumn), firstRow.get(headerColumn));
         }
 
         //check that row 2 is valid
-        Row secondRow = csv.readRow();
+        TableRow secondRow = csv.readTableRow();
         for (String headerColumn : writeHeader) {
-                assertEquals(row2.get(headerColumn), secondRow.get(headerColumn));
+            assertEquals(row2.get(headerColumn), secondRow.get(headerColumn));
         }
         csv.close();
         if (isQueryResultsCSV) {

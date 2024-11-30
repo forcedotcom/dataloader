@@ -181,9 +181,9 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
                 // open the results of the extraction
                 final CSVFileReader rdr = new CSVFileReader(new File(argmap.get(AppConfig.PROP_DAO_NAME)), getController().getAppConfig(), true, false);
                 rdr.open();
-                Row row = rdr.readRow();
+                TableRow row = rdr.readTableRow();
                 assertNotNull(row);
-                assertEquals(5,row.size());
+                assertEquals(5,row.getNonEmptyCellsCount());
                 // validate the extract results are correct.
                 assertEquals(leadidArr[0], row.get("LID"));
                 assertTrue(userInfo.getUserFullName().contains(row.get("LNAME").toString()));
@@ -191,7 +191,7 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
                 assertEquals(uid, row.get("OID"));
                 assertEquals(uid,row.get("OWNID"));
                 // validate that we have read the only result. there should be only one.
-                assertNull(rdr.readRow());
+                assertNull(rdr.readTableRow());
         } finally {
             // cleanup here since the parent doesn't clean up leads
             getBinding().delete(leadidArr);
@@ -342,13 +342,13 @@ public class CsvExtractProcessTest extends ProcessExtractTestBase {
         controller = runProcess(queryArgMap, 1);
         CSVFileReader queryResultsReader = new CSVFileReader(new File(queryArgMap.get(AppConfig.PROP_DAO_NAME)), getController().getAppConfig(), true, false);
         queryResultsReader.open();
-        Row queryResultsRow = queryResultsReader.readRow();
+        TableRow queryResultsRow = queryResultsReader.readTableRow();
         String queryResultsRTVal = (String)queryResultsRow.get("RICHTEXT__c");
 
         if ("true".equalsIgnoreCase(inclueRTFBinaryData)) {
             CSVFileReader uploadedCSVReader = new CSVFileReader(new File(getTestDataDir() + "/acctsWithBinaryDataInRTF.csv"), getController().getAppConfig(), true, false);
             uploadedCSVReader.open();
-            Row uploadedRow = uploadedCSVReader.readRow();
+            TableRow uploadedRow = uploadedCSVReader.readTableRow();
             String uploadedRTVal = (String)queryResultsRow.get("RICHTEXT__c");
             assertEquals("Binary data in query result file does not match uploaded data: " 
             + queryArgMap.get(AppConfig.PROP_DAO_NAME), queryResultsRTVal, uploadedRTVal);
