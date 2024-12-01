@@ -34,6 +34,7 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -46,7 +47,8 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.model.NATextValue;
-import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableHeader;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.SaveResult;
@@ -87,9 +89,10 @@ public class NAProcessTest extends ProcessTestBase {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> getConfigGeneratorParams() {
         return Arrays.asList(
+                TestVariant.forSettings(TestSetting.BULK_API_DISABLED),
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED),
-               TestVariant.forSettings(TestSetting.BULK_API_DISABLED));
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED)
+            );
     }
 
     @Test
@@ -250,7 +253,13 @@ public class NAProcessTest extends ProcessTestBase {
             assertTrue("Could not delete existing CSV file: " + CSV_FILE_PATH, deleteCsvFileOk);
         }
 
-        Row row = new Row();
+        ArrayList<String> headerLabelList = new ArrayList<String>();
+        headerLabelList.add("OwnerId");
+        headerLabelList.add("Subject");
+        if (id != null) headerLabelList.add("Id");
+        headerLabelList.add(nullFieldName);
+        TableHeader header = new TableHeader(headerLabelList);
+        TableRow row = new TableRow(header);
         row.put("OwnerId", userId);
         row.put("Subject", TASK_SUBJECT);
         row.put(nullFieldName, nullFieldValue);
@@ -260,8 +269,8 @@ public class NAProcessTest extends ProcessTestBase {
         try {
             writer = new CSVFileWriter(CSV_FILE_PATH, getController().getAppConfig(), AppUtil.COMMA);
             writer.open();
-            writer.setColumnNames(new ArrayList<String>(row.keySet()));
-            writer.writeRow(row);
+            writer.setColumnNames(new ArrayList<String>(header.getColumns()));
+            writer.writeTableRow(row);
         } finally {
             if (writer != null) writer.close();
         }

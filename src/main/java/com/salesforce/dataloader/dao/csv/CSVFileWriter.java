@@ -194,9 +194,35 @@ public class CSVFileWriter implements DataWriter {
         }
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.salesforce.dataloader.dao.csv.Writer#writeRow(java.util.Map)
+     */
+    public boolean writeTableRow(TableRow row) throws DataAccessObjectException {
+        if (this.columnNames == null || this.columnNames.isEmpty()) {
+           List<String>colNames = getColumnNamesFromTableRow(row);
+           this.setColumnNames(colNames);
+        }
+        CSVColumnVisitor visitor = new CSVColumnVisitor(fileOut, false, this.columnDelimiter);
+        try {
+            visitTableRowColumns(columnNames, row, visitor);
+            fileOut.newLine();
+            visitor.newRow();
+            currentRowNumber++;
+            return true; // success unless there's an exception
+        } catch (IOException e) {
+            logger.error(Messages.getString("CSVWriter.errorWriting"), e); //$NON-NLS-1$
+            throw new DataAccessObjectException(Messages.getString("CSVWriter.errorWriting"), e); //$NON-NLS-1$
+        }
+    }
+    
     public List<String> getColumnNamesFromRow(Row row) throws DataAccessObjectInitializationException {
         Set<String> fieldNameSet = row.keySet();
         return new ArrayList<String>(fieldNameSet);    
+    }
+    
+    public List<String> getColumnNamesFromTableRow(TableRow row) {
+        return row.getHeader().getColumns();    
     }
 
     /*
@@ -222,7 +248,7 @@ public class CSVFileWriter implements DataWriter {
         boolean success = true;
         // return the last result, should be same as others
         for (TableRow trow : rows) {
-            success = writeRow(trow.convertToRow());
+            success = writeTableRow(trow);
         }
         return success;
     }
@@ -256,6 +282,19 @@ public class CSVFileWriter implements DataWriter {
         }
     }
 
+
+    static private void visitTableRowColumns(List<String> columnNames, TableRow row, CSVColumnVisitor visitor) throws IOException {
+        for (String colName : columnNames) {
+            Object colVal = row.get(colName);
+            if (colVal == null && colName.contains("(")) {
+                int lparenIdx = colName.indexOf('(');
+                int rparenIdx = colName.indexOf(')');
+                colName = colName.substring(lparenIdx + 1, rparenIdx);
+                colVal = row.get(colName);
+            }
+            visitor.visit(colVal != null ? colVal.toString() : "");
+        }
+    }
     @Override
     public List<String> getColumnNames() {
         return columnNames;

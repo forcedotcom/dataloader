@@ -42,29 +42,19 @@ import java.util.TreeMap;
  * class and not be spread in multiple class.
  */
 public class Row implements Map<String, Object> {
-
-    private static final int DEFAULT_COLUMN_COUNT = 16; // same as HashMap
     private final Map<String, Object> internalMap;
     private final Map<String, String> keyMap = new HashMap<String, String>();
 
     public Row() {
-        this(DEFAULT_COLUMN_COUNT);
-    }
-
-    public Row(int columnCount) {
-        internalMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        this.internalMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     }
 
     public Row(Map<String, Object> internalMap) {
-        this(internalMap.size());
+        this.internalMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         this.internalMap.putAll(internalMap);
         for (String key : internalMap.keySet()) {
             this.keyMap.put(key.toLowerCase(), key);
         }
-    }
-
-    public static Row emptyRow() {
-        return new Row(Collections.<String, Object>emptyMap());
     }
 
     public static Row singleEntryImmutableRow(String key, Object value) {
