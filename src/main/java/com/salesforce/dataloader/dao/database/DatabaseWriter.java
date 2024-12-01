@@ -240,6 +240,13 @@ public class DatabaseWriter implements DataWriter {
         return writeRowList(inputRowList);
     }
 
+    public boolean writeTableRow(TableRow inputRow) throws DataAccessObjectException {
+        // FIXME: Think about refactoring this for the caller to writeRow() and here take care of batching internally
+        List<TableRow> inputRowList = new ArrayList<TableRow>();
+        inputRowList.add(inputRow);
+        return writeTableRowList(inputRowList);
+    }
+    
     /**
      * @param sqe
      */

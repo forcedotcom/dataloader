@@ -29,7 +29,6 @@ package com.salesforce.dataloader.action.visitor;
 import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.client.HttpClientTransport;
-import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
@@ -46,7 +45,6 @@ import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;

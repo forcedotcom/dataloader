@@ -36,7 +36,7 @@ import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
-import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 
@@ -49,8 +49,8 @@ public class CsvTest extends ConfigTestBase {
     private static final String COLUMN_2_NAME = "column2";
     private static final String COLUMN_3_NAME = "column3";
     private List<String> writeHeader;
-    private Row row1;
-    private Row row2;
+    private TableRow row1;
+    private TableRow row2;
 
     @Before
     public void createTestData() {
@@ -59,12 +59,17 @@ public class CsvTest extends ConfigTestBase {
         writeHeader.add("COL2");
         writeHeader.add("COL3");
 
-        row1 = new Row();
+        ArrayList<String> headerLabelList = new ArrayList<String>();
+        headerLabelList.add("COL1");
+        headerLabelList.add("COL2");
+        headerLabelList.add("COL3");
+        TableHeader header = new TableHeader(headerLabelList);
+        row1 = new TableRow(header);
         row1.put("COL1", "row1col1");
         row1.put("COL2", "row1col2");
         row1.put("COL3", "row1col3");
 
-        row2 = new Row();
+        row2 = new TableRow(header);
         row2.put("COL1", "row2col1");
         row2.put("COL2", "row2col2");
         row2.put("COL3", "row2col3");
@@ -143,7 +148,7 @@ public class CsvTest extends ConfigTestBase {
         File f = new File(getTestDataDir(), "csvtestTemp.csv");
         String path = f.getAbsolutePath();
         CSVFileWriter writer = new CSVFileWriter(path, getController().getAppConfig(), delimiter);
-        List<Row> rowList = new ArrayList<Row>();
+        List<TableRow> rowList = new ArrayList<TableRow>();
 
         rowList.add(row1);
         rowList.add(row2);
@@ -151,7 +156,7 @@ public class CsvTest extends ConfigTestBase {
         writer.open();
         writer.setColumnNames(writeHeader);
 
-        writer.writeRowList(rowList);
+        writer.writeTableRowList(rowList);
         writer.close();
 
         compareWriterFile(path, delimiter, false, false); // 3rd param false and 4th param false => CSV for a upload

@@ -28,7 +28,6 @@ package com.salesforce.dataloader.dao.database;
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AccountRowComparator;
 import org.apache.logging.log4j.Logger;
@@ -36,6 +35,7 @@ import com.salesforce.dataloader.util.DLLogManager;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Timestamp;
@@ -153,10 +153,10 @@ public class DatabaseTest extends ConfigTestBase {
                     TableRow readRow = readRowList.get(i);
                     assertNotNull("Error reading data row #" + i + ": the row shouldn't be null", readRow);
                     assertTrue("Error reading data row #" + i + ": the row shouldn't be empty", readRow.getNonEmptyCellsCount() > 0);
-                    Row expectedRow = DatabaseTestUtil.getInsertOrUpdateAccountRow(isInsert, rowsProcessed, DatabaseTestUtil.DateType.VALIDATION);
+                    TableRow expectedRow = DatabaseTestUtil.getInsertOrUpdateAccountRow(isInsert, rowsProcessed, DatabaseTestUtil.DateType.VALIDATION);
                     // verify all expected data
                     for (String colName : VALIDATE_COLS) {
-                        verifyCol(colName, readRow.convertToRow(), expectedRow);
+                        verifyCol(colName, readRow, expectedRow);
                     }
 
                     rowsProcessed++;
@@ -169,7 +169,7 @@ public class DatabaseTest extends ConfigTestBase {
         }
     }
 
-    private static void verifyCol(String colName, Row row, Row expectedRow) {
+    private static void verifyCol(String colName, TableRow row, TableRow expectedRow) {
         Object actualValue = row.get(colName);
         Object expectedValue = expectedRow.get(colName);
         assertNotNull("actual value is null", actualValue);

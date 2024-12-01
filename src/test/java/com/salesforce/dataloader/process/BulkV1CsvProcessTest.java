@@ -39,7 +39,8 @@ import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
-import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableHeader;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 
 import static org.junit.Assert.assertEquals;
@@ -51,17 +52,21 @@ public class BulkV1CsvProcessTest extends ProcessTestBase {
     private static final String TARGET_DIR = getProperty("target.dir").trim();
     private static final String CSV_DIR_PATH = TARGET_DIR + File.separator + "BatchTests";
     private static final String CSV_FILE_PATH = CSV_DIR_PATH + File.separator + "BatchTests.csv";
-    private static Row validRow;
-    private static Row invalidRow;
+    private static TableRow validRow;
+    private static TableRow invalidRow;
     private Map<String, String> argMap;
 
     @BeforeClass
     public static void setUpData() {
-        validRow = new Row();
+        ArrayList<String> headerNames = new ArrayList<String>();
+        headerNames.add("Subject");
+        headerNames.add("ReminderDateTime");
+        TableHeader header = new TableHeader(headerNames);
+        validRow = new TableRow(header);
         validRow.put("Subject", TASK_SUBJECT);
         validRow.put("ReminderDateTime", "");
 
-        invalidRow = new Row();
+        invalidRow = new TableRow(header);
         invalidRow.put("Subject", TASK_SUBJECT);
         invalidRow.put("ReminderDateTime", "NULL"); // this makes date conversion fail
     }
@@ -102,7 +107,7 @@ public class BulkV1CsvProcessTest extends ProcessTestBase {
         return monitor;
     }
 
-    private void writeCsv(Row... rows) throws Exception {
+    private void writeCsv(TableRow... rows) throws Exception {
         File csvDir = new File(CSV_DIR_PATH);
         if (!csvDir.exists()) {
             boolean deleteCsvDirOk = csvDir.mkdirs();
@@ -118,8 +123,8 @@ public class BulkV1CsvProcessTest extends ProcessTestBase {
         try {
             writer = new CSVFileWriter(CSV_FILE_PATH, getController().getAppConfig(), AppUtil.COMMA);
             writer.open();
-            writer.setColumnNames(new ArrayList<String>(rows[0].keySet()));
-            writer.writeRowList(Arrays.asList(rows));
+            writer.setColumnNames(rows[0].getHeader().getColumns());
+            writer.writeTableRowList(Arrays.asList(rows));
         } finally {
             if (writer != null) {
                 writer.close();

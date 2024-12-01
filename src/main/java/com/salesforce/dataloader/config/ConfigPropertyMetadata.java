@@ -38,7 +38,8 @@ import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
-import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableHeader;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.util.AppUtil;
 
@@ -237,11 +238,22 @@ public class ConfigPropertyMetadata {
             return;
         }
         try {
+            ArrayList<String> headerLabelList = new ArrayList<String>();
+            headerLabelList.add(COL_PROPERTY_NAME);
+            headerLabelList.add(COL_UI_LABEL);
+            headerLabelList.add(COL_DESCRIPTION);
+            headerLabelList.add(COL_DEFAULT_VAL);
+            headerLabelList.add(COL_IS_READ_ONLY);
+            headerLabelList.add(COL_IS_COMMAND_LINE_OPTION);
+            headerLabelList.add(COL_IS_ENCRYPTED);
+            ArrayList<TableRow> rowList = new ArrayList<TableRow>(propertiesMap.size());
+            TableHeader header = new TableHeader(headerLabelList);
+
             for (ConfigPropertyMetadata propMD : propertiesMap.values()) {
                 if (propMD.isInternal()) {
                     continue;
                 }
-                Row row = new Row();
+                TableRow row = new TableRow(header);
                 row.put(COL_PROPERTY_NAME, propMD.getName());
                 row.put(COL_UI_LABEL, propMD.getUiLabelTemplate());
                 String description = propMD.getDescription();
@@ -253,13 +265,12 @@ public class ConfigPropertyMetadata {
                 row.put(COL_IS_READ_ONLY, propMD.isReadOnly());
                 row.put(COL_IS_COMMAND_LINE_OPTION, propMD.isCommandLineOption());
                 row.put(COL_IS_ENCRYPTED, propMD.isEncrypted());
-                try {
-                    csvWriter.writeRow(row);
-                } catch (DataAccessObjectException e) {
-                    logger.warn(Messages.getFormattedString("ConfigPropertyMetadata.errorOutputPropInfo", propMD.getName()));
-                    logger.warn(e.getStackTrace());
-                    continue; 
-                }
+                rowList.add(row);
+            }
+            try {
+                csvWriter.writeTableRowList(rowList);
+            } catch (DataAccessObjectException e) {
+                logger.warn(e.getStackTrace());
             }
         } finally {
             logger.debug(Messages.getFormattedString("ConfigPropertyMetadata.infoGeneratedCSVLocation", getFullPathToPropsFile(appConfig)));

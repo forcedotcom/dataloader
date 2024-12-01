@@ -25,6 +25,7 @@
  */
 package com.salesforce.dataloader.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class TableHeader {
     private int lastColPosition = 0;
     private List<String> columns;
     public TableHeader(List<String> cols) {
-        this.columns = cols;
+        this.columns = new ArrayList<String>(cols);
         for (String colName : cols) {
             if (colName == null) {
                 continue;
@@ -49,6 +50,6 @@ public class TableHeader {
     }
     
     public List<String> getColumns() {
-        return this.columns;
+        return new ArrayList<String>(columns);
     }
 }
