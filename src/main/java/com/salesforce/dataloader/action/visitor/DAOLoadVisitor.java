@@ -153,8 +153,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             this.daoRowList.add(row);
         }
         // the result are sforce fields mapped to data
-        Row sforceDataRow = getMapper().mapData(row);
-        
+        TableRow sforceDataRow = getMapper().mapData(row, processedDAORowCounter == 0);
         if (this.getConfig().getBoolean(AppConfig.PROP_TRUNCATE_FIELDS)
             && this.getConfig().isRESTAPIEnabled()
             && "update".equalsIgnoreCase(this.getConfig().getString(AppConfig.PROP_OPERATION))) {
@@ -163,13 +162,13 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
                 cachedFieldAttributesForOperation = partnerClient.getSObjectFieldAttributesForRow(
                                 this.getConfig().getString(AppConfig.PROP_ENTITY), sforceDataRow);
             }
-            for (Map.Entry<String, Object> field : sforceDataRow.entrySet()) {
+            for (String fieldName : sforceDataRow.getHeader().getColumns()) {
                 for (Field fieldDescribe : cachedFieldAttributesForOperation) {
                     // Field truncation is applicable to certain field types only.
                     // See https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/sforce_api_header_allowfieldtruncation.htm
                     // for the list of field types that field truncation is applicable to.
                     FieldType type = fieldDescribe.getType();
-                    if (fieldDescribe.getName().equalsIgnoreCase(field.getKey())
+                    if (fieldDescribe.getName().equalsIgnoreCase(fieldName)
                             && (type == FieldType.email
                                || type == FieldType.string
                                || type == FieldType.picklist
@@ -178,17 +177,17 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
                                || type == FieldType.multipicklist)
                         ) {
                         int fieldLength = fieldDescribe.getLength();
-                        if (field.getValue().toString().length() > fieldLength) {
+                        if (row.get(fieldName).toString().length() > fieldLength) {
                             if (type == FieldType.email) {
-                                String[] emailParts = field.getValue().toString().split("@");
+                                String[] emailParts = row.get(fieldName).toString().split("@");
                                 if (emailParts.length == 2) {
                                     String firstPart = emailParts[0].substring(0,
                                             fieldLength - emailParts[1].length() - 1);
-                                    field.setValue(firstPart + "@" + emailParts[1]);
+                                    row.put(fieldName, firstPart + "@" + emailParts[1]);
                                     continue;
                                 }
                             }
-                            field.setValue(field.getValue().toString().substring(0, fieldLength));
+                            row.put(fieldName, row.get(fieldName).toString().substring(0, fieldLength));
                         }
                     }
                 }
@@ -206,7 +205,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         }
         try {
             convertBulkAPINulls(sforceDataRow);
-            DynaBean dynaBean = SforceDynaBean.convertToDynaBean(dynaClass, sforceDataRow);
+            DynaBean dynaBean = SforceDynaBean.convertToDynaBean(dynaClass, sforceDataRow.convertToRow());
             Map<String, String> fieldMap = BeanUtils.describe(dynaBean);
             for (String fName : fieldMap.keySet()) {
                 if (fieldMap.get(fName) != null) {
@@ -222,7 +221,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             String errMsg = Messages.getMessage("Visitor", "conversionErrorMsg", conve.getMessage());
             getLogger().error(errMsg, conve);
 
-            conversionFailed(row.convertToRow(), errMsg);
+            conversionFailed(row, errMsg);
             // this row cannot be added since conversion has failed
             return false;
         } catch (InvocationTargetException e) {
@@ -252,12 +251,12 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
      * @throws DataAccessObjectException
      * @throws OperationException
      */
-    protected void conversionFailed(Row row, String errMsg) throws DataAccessObjectException,
+    protected void conversionFailed(TableRow row, String errMsg) throws DataAccessObjectException,
             OperationException {
         writeError(row, errMsg);
     }
 
-    protected void convertBulkAPINulls(Row row) {}
+    protected void convertBulkAPINulls(TableRow row) {}
 
     public void flushRemaining() throws OperationException, DataAccessObjectException {
         // check if there are any entities left
@@ -441,7 +440,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     }
     
 
-    protected void processResult(Row dataRow, boolean isSuccess, String id, Error[] errors)
+    protected void processResult(TableRow dataRow, boolean isSuccess, String id, Error[] errors)
             throws DataAccessObjectException {
         // process success vs. error
         // extract error message from error result

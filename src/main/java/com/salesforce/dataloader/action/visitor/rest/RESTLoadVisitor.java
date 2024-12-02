@@ -42,6 +42,7 @@ import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.LoadException;
 import com.salesforce.dataloader.exception.OperationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
@@ -82,7 +83,7 @@ public abstract class RESTLoadVisitor extends DAOLoadVisitor {
         // are a) not the same class yet b) not subclassed
         int batchRowCounter = 0;
         for (int i = 0; i < this.daoRowList.size(); i++) {
-            Row daoRow = this.daoRowList.get(i).convertToRow();
+            TableRow daoRow = this.daoRowList.get(i);
             if (!isRowConversionSuccessful()) {
                 continue;
             }

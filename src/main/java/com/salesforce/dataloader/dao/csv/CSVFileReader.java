@@ -47,7 +47,6 @@ import com.salesforce.dataloader.dao.AbstractDataReaderImpl;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.DataAccessRowException;
-import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DAORowUtil;
@@ -65,8 +64,6 @@ public class CSVFileReader extends AbstractDataReaderImpl {
     private File file;
     private FileInputStream input;
     private CSVReader csvReader;
-    private List<String> headerRow;
-    private TableHeader tableHeader;
     private boolean isOpen;
     private char[] csvDelimiters;
     private boolean endOfFileReached = false;
@@ -119,7 +116,6 @@ public class CSVFileReader extends AbstractDataReaderImpl {
     @Override
     protected void openDAO() throws DataAccessObjectInitializationException {
         initalizeInput(csvDelimiters);
-        readHeaderRow();
     }
 
     /**
@@ -183,57 +179,51 @@ public class CSVFileReader extends AbstractDataReaderImpl {
             return null;
         }
 
-        if (record.size() > headerRow.size()) {
+        if (record.size() > getColumnNames().size()) {
             String errMsg = Messages.getFormattedString("CSVFileDAO.errorRowTooLarge", new String[]{
-                    String.valueOf(getCurrentRowNumber()), String.valueOf(record.size()), String.valueOf(headerRow.size())});
+                    String.valueOf(getCurrentRowNumber()), String.valueOf(record.size()), String.valueOf(getColumnNames().size())});
             throw new DataAccessRowException(errMsg);
-        } else if (record.size() < headerRow.size()) {
+        } else if (record.size() < getColumnNames().size()) {
             String errMsg = Messages.getFormattedString("CSVFileDAO.errorRowTooSmall", new String[]{
-                    String.valueOf(getCurrentRowNumber()), String.valueOf(record.size()), String.valueOf(headerRow.size())});
+                    String.valueOf(getCurrentRowNumber()), String.valueOf(record.size()), String.valueOf(getColumnNames().size())});
             throw new DataAccessRowException(errMsg);
         }
 
-        TableRow trow = new TableRow(this.tableHeader);
+        TableRow trow = new TableRow(getTableHeader());
 
-        for (int i = 0; i < headerRow.size(); i++) {
+        for (int i = 0; i < getColumnNames().size(); i++) {
             String value = record.get(i);
             if (value == null) {
                 value = "";
             }
-            trow.put(headerRow.get(i), value);
+            trow.put(getColumnNames().get(i), value);
         }
         return trow;
     }
 
-    /**
-     * @return Names of output columns being read during each readRow call
-     */
-    @Override
-    public List<String> getColumnNames() {
-        return headerRow;
-    }
-
-    private void readHeaderRow() throws DataAccessObjectInitializationException {
+    protected List<String> initializeDaoColumnsList() throws DataAccessObjectInitializationException {
+        List<String> daoColsList = null;
         try {
             synchronized (lock) {
-                headerRow = csvReader.nextRecord();
+                daoColsList = csvReader.nextRecord();
             }
-            if (headerRow == null) {
+            if (daoColsList == null) {
                 LOGGER.error(Messages.getString("CSVFileDAO.errorHeaderRow"));
                 throw new DataAccessObjectInitializationException(Messages.getString("CSVFileDAO.errorHeaderRow"));
             }
-            tableHeader = new TableHeader(headerRow);
+            
             LOGGER.debug(Messages.getFormattedString(
-                    "CSVFileDAO.debugMessageHeaderRowSize", headerRow.size()));
+                    "CSVFileDAO.debugMessageHeaderRowSize", daoColsList.size()));
 
-            LOGGER.info("Columns in CSV header = " + headerRow.size());
+            LOGGER.info("Columns in CSV header = " + daoColsList.size());
+            return daoColsList;
         } catch (IOException e) {
             String errMsg = Messages.getString("CSVFileDAO.errorHeaderRow");
             LOGGER.error(errMsg, e);
             throw new DataAccessObjectInitializationException(errMsg, e);
         } finally {
             // if there's a problem getting header row, the stream needs to be closed
-            if (headerRow == null) {
+            if (daoColsList == null) {
                 IOUtils.closeQuietly(input);
             }
         }

@@ -44,7 +44,7 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
 import com.salesforce.dataloader.exception.RelationshipFormatException;
 import com.salesforce.dataloader.mapping.LoadMapper;
-import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.DeleteResult;
@@ -942,13 +942,13 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         return result;
     }
     
-    public Field[] getSObjectFieldAttributesForRow(String sObjectName, Row dataRow) throws ConnectionException {
+    public Field[] getSObjectFieldAttributesForRow(String sObjectName, TableRow dataRow) throws ConnectionException {
         ArrayList<Field> attributesForRow = new ArrayList<Field>();
         DescribeSObjectResult entityDescribe = describeSObject(sObjectName);
-        for (Map.Entry<String, Object> dataRowField : dataRow.entrySet()) {
+        for (String headerColumnName : dataRow.getHeader().getColumns()) {
             Field[] fieldAttributesArray = entityDescribe.getFields();
             for (Field fieldAttributes : fieldAttributesArray) {
-                if (fieldAttributes.getName().equalsIgnoreCase(dataRowField.getKey())) {
+                if (fieldAttributes.getName().equalsIgnoreCase(headerColumnName)) {
                     attributesForRow.add(fieldAttributes);
                 }
             }

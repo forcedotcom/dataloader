@@ -28,7 +28,7 @@ package com.salesforce.dataloader.mapping;
 
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.exception.MappingInitializationException;
-import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Field;
@@ -56,7 +56,9 @@ import java.util.Set;
 public class LoadMapper extends Mapper {
 
     private static final Logger logger = DLLogManager.getLogger(Mapper.class);
-
+    private TableHeader localCompositeRowHeader = null;
+    private TableHeader sfdcRowHeader = null;
+    
     public LoadMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
         super(client, columnNames, fields, mappingFileName);
@@ -92,11 +94,36 @@ public class LoadMapper extends Mapper {
                 result.put(currentMapEntry.getKey(), currentMapEntry.getValue());
             }
         }
-        
         return result;
     }
 
-    public Row mapData(TableRow localRow) {
+    private void initializeHeaders() {
+        Map<String, String> currentMappings = getMappingWithUnmappedColumns(false);
+        this.localCompositeRowHeader = new TableHeader(new ArrayList<String>(currentMappings.keySet()));
+        ArrayList<String> sfdcFieldList = new ArrayList<String>();
+        for (String localCompositeCol : currentMappings.keySet()) {
+            String sfdcNameList = getMapping(localCompositeCol, true, true);
+            if (StringUtils.hasText(sfdcNameList)) {
+                String sfdcNameArray[] = sfdcNameList.split(AppUtil.COMMA);
+                for (String sfdcName : sfdcNameArray) {
+                    sfdcFieldList.add(sfdcName.trim());
+                }
+            }
+        }
+        Map<String, String> constantsMap = getConstantsMap();
+        for (String sfdcNameList : constantsMap.keySet()) {
+            String sfdcNameArray[] = sfdcNameList.split(AppUtil.COMMA);
+            for (String sfdcName : sfdcNameArray) {
+                sfdcFieldList.add(sfdcName.trim());
+            }
+        }
+        this.sfdcRowHeader = new TableHeader(sfdcFieldList);
+    }
+    
+    public TableRow mapData(TableRow localRow, boolean firstRow) {
+        if (firstRow) {
+            initializeHeaders();
+        }
         Set<String> compositeDAOCols = this.getCompositeDAOColumns();
         HashMap<String, Object[]> compositeColValueMap = new HashMap<String, Object[]>();
         HashMap<String, Integer> compositeColSizeMap = this.getCompositeColSizeMap();
@@ -135,7 +162,7 @@ public class LoadMapper extends Mapper {
             }
         }
         
-        Row localCompositeRow = new Row();
+        TableRow localCompositeRow = new TableRow(this.localCompositeRowHeader);
         for (String compositeCol : compositeDAOCols) {
             Object[] compositeColValueArray = compositeColValueMap.get(compositeCol);
             Object compositeColValue = compositeColValueArray[0];
@@ -144,16 +171,16 @@ public class LoadMapper extends Mapper {
             }
             localCompositeRow.put(compositeCol, compositeColValue);
         }
-        Row mappedData = new Row();
-        for (Map.Entry<String, Object> entry : localCompositeRow.entrySet()) {
-            String sfdcNameList = getMapping(entry.getKey(), true, true);
+        TableRow mappedData = new TableRow(this.sfdcRowHeader);
+        for (String localCompositeRowElement : localCompositeRowHeader.getColumns()) {
+            String sfdcNameList = getMapping(localCompositeRowElement, true, true);
             if (StringUtils.hasText(sfdcNameList)) {
                 String sfdcNameArray[] = sfdcNameList.split(AppUtil.COMMA);
                 for (String sfdcName : sfdcNameArray) {
-                    mappedData.put(sfdcName.trim(), entry.getValue());
+                    mappedData.put(sfdcName.trim(), localCompositeRow.get(localCompositeRowElement));
                 }
             } else {
-                logger.info("Mapping for field " + entry.getKey() + " will be ignored since destination column is empty");
+                logger.info("Mapping for field " + localCompositeRowElement + " will be ignored since destination column is empty");
             }
         }
         mapConstants(mappedData);

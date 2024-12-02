@@ -25,6 +25,7 @@
  */
 package com.salesforce.dataloader.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -141,5 +142,13 @@ public class Row implements Map<String, Object> {
                 " size=" + internalMap.size() +
                 " columns=" + internalMap +
                 '}';
+    }
+    
+    public TableRow convertToTableRow(TableHeader header) {
+        TableRow trow = new TableRow(header);
+        for (String headerColName : header.getColumns()) {
+            trow.put(headerColName, this.get(headerColName));
+        }
+        return trow;
     }
 }

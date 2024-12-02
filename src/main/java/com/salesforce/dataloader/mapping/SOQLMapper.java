@@ -31,6 +31,7 @@ import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.mapping.SOQLInfo.SOQLFieldInfo;
 import com.salesforce.dataloader.mapping.SOQLInfo.SOQLParserException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.FieldType;
@@ -191,6 +192,13 @@ public class SOQLMapper extends Mapper {
         }
         mapConstants(resultRow);
         return resultRow;
+    }
+    
+
+    protected void mapConstants(Row row) {
+        for (String constKey : getConstantsMap().keySet()) {
+            row.put(constKey, getConstantsMap().get(constKey));
+        }
     }
     
     public boolean parseSoql(String soql) throws InvalidMappingException {

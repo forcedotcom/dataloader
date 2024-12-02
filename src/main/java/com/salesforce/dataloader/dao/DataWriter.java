@@ -55,6 +55,7 @@ public interface DataWriter extends DataAccessObject {
      * @throws DataAccessObjectException
      */
     boolean writeRow(Row inputRow) throws DataAccessObjectException;
+    boolean writeTableRow(TableRow inputRow) throws DataAccessObjectException;
 
     /**
      * @param inputRowList

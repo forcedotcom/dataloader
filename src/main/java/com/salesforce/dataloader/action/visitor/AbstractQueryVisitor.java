@@ -40,6 +40,7 @@ import com.salesforce.dataloader.exception.OperationException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.mapping.SOQLMapper;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableHeader;
 import com.sforce.async.AsyncApiException;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
@@ -247,14 +248,35 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
     private void writeSuccesses() throws DataAccessObjectException {
         final String msg = Messages.getMessage(getClass(), "statusItemQueried");
         final Iterator<String> ids = this.batchIds.iterator();
+        if (this.batchRows == null || this.batchRows.isEmpty()) {
+            return;
+        }
+        ArrayList<String> headerColumnList = new ArrayList<String>();
+        headerColumnList.add(AppConfig.ID_COLUMN_NAME);
+        Row firstRow = this.batchRows.get(0);
+        for (String fieldName : firstRow.keySet()) {
+            headerColumnList.add(fieldName);
+        }
+        headerColumnList.add(AppConfig.STATUS_COLUMN_NAME);
+        TableHeader header = new TableHeader(headerColumnList);
         for (final Row row : this.batchRows) {
-            writeSuccess(row, ids.next(), msg);
+            writeSuccess(row.convertToTableRow(header), ids.next(), msg);
         }
     }
 
     private void writeErrors(String errorMessage) throws DataAccessObjectException {
+        if (this.batchRows == null || this.batchRows.isEmpty()) {
+            return;
+        }
+        ArrayList<String> headerColumnList = new ArrayList<String>();
+        Row firstRow = this.batchRows.get(0);
+        for (String fieldName : firstRow.keySet()) {
+            headerColumnList.add(fieldName);
+        }
+        headerColumnList.add(AppConfig.ERROR_COLUMN_NAME);
+        TableHeader header = new TableHeader(headerColumnList);
         for (final Row row : this.batchRows) {
-            writeError(row, errorMessage);
+            writeError(row.convertToTableRow(header), errorMessage);
         }
     }
 

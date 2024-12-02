@@ -28,7 +28,8 @@ package com.salesforce.dataloader.action.visitor.partner;
 
 import java.util.List;
 
-import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
+
 import org.apache.commons.beanutils.DynaBean;
 
 import com.salesforce.dataloader.action.OperationInfo;
@@ -115,7 +116,7 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
         // are a) not the same class yet b) not subclassed
         int batchRowCounter = 0;
         for (int i = 0; i < this.daoRowList.size(); i++) {
-            Row daoRow = this.daoRowList.get(i).convertToRow();
+            TableRow daoRow = this.daoRowList.get(i);
             if (!isRowConversionSuccessful()) {
                 continue;
             }
