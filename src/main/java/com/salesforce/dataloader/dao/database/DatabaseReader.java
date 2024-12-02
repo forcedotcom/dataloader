@@ -29,7 +29,6 @@ import java.io.File;
 import java.sql.*;
 import java.util.*;
 
-import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
 
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -55,8 +54,6 @@ public class DatabaseReader extends AbstractDataReaderImpl {
     private static Logger logger = DLLogManager.getLogger(DatabaseReader.class);
 
     private final BasicDataSource dataSource;
-    private List<String> headerRow = new ArrayList<String>();
-    private TableHeader tableHeader;
     private final SqlConfig sqlConfig;
     private final DatabaseContext dbContext;
     private boolean endOfTableReached = false;
@@ -85,11 +82,6 @@ public class DatabaseReader extends AbstractDataReaderImpl {
         this.dataSource = dbConfig.getDataSource();
         this.sqlConfig = dbConfig.getSqlConfig();
         this.dbContext = new DatabaseContext(dbConfigName);
-        this.headerRow = sqlConfig.getColumnNames();
-        if(headerRow == null) {
-            headerRow = new ArrayList<String>();
-        }
-        tableHeader = new TableHeader(headerRow);
     }
 
     /*
@@ -189,9 +181,9 @@ public class DatabaseReader extends AbstractDataReaderImpl {
             TableRow trow = null;
             ResultSet rs = dbContext.getDataResultSet();
             if (rs != null && rs.next()) {
-                trow = new TableRow(tableHeader);
+                trow = new TableRow(getTableHeader());
 
-                for (String columnName : headerRow) {
+                for (String columnName : getColumnNames()) {
                     currentColumnName = columnName;
                     Object value = rs.getObject(columnName);
                     trow.put(columnName, value);
@@ -217,11 +209,6 @@ public class DatabaseReader extends AbstractDataReaderImpl {
         }
     }
 
-    @Override
-    public List<String> getColumnNames() {
-        return headerRow;
-    }
-
     /*
      * (non-Javadoc)
      * @see com.salesforce.dataloader.dao.DataAccessObject#checkConnection()
@@ -245,5 +232,14 @@ public class DatabaseReader extends AbstractDataReaderImpl {
             return 0;
         }
         return super.getTotalRows();
+    }
+
+    @Override
+    protected List<String> initializeDaoColumnsList() {
+        List<String> daoColsList = sqlConfig.getColumnNames();
+        if(daoColsList == null) {
+            daoColsList = new ArrayList<String>();
+        }
+       return daoColsList;
     }
 }

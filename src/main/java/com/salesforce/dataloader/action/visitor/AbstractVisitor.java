@@ -32,7 +32,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.mapping.Mapper;
-import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.LoadRateCalculator;
 import org.apache.logging.log4j.Logger;
 
@@ -131,7 +131,7 @@ public abstract class AbstractVisitor implements IVisitor {
     	return this.successWriter;
     }
 
-    protected void writeSuccess(Row row, String id, String message) throws DataAccessObjectException {
+    protected void writeSuccess(TableRow row, String id, String message) throws DataAccessObjectException {
         if (writeStatus()) {
             if (id != null && id.length() > 0) {
                 row.put(AppConfig.ID_COLUMN_NAME, id);
@@ -139,19 +139,19 @@ public abstract class AbstractVisitor implements IVisitor {
             if (message != null && message.length() > 0) {
                 row.put(AppConfig.STATUS_COLUMN_NAME, message);
             }
-            this.successWriter.writeRow(row);
+            this.successWriter.writeTableRow(row);
         }
         addSuccess();
     }
 
-    protected void writeError(Row row, String errorMessage) throws DataAccessObjectException {
+    protected void writeError(TableRow row, String errorMessage) throws DataAccessObjectException {
         if (writeStatus()) {
             if (row == null) {
-                row = Row.singleEntryImmutableRow(AppConfig.ERROR_COLUMN_NAME, errorMessage);
+                row = TableRow.singleEntryImmutableRow(AppConfig.ERROR_COLUMN_NAME, errorMessage);
             } else {
                 row.put(AppConfig.ERROR_COLUMN_NAME, errorMessage);
             }
-            this.errorWriter.writeRow(row);
+            this.errorWriter.writeTableRow(row);
         }
         addErrors();
     }

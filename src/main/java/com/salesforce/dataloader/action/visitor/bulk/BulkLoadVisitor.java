@@ -504,7 +504,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             }
         } else {
             for (final TableRow row : rows) {
-                writeError(row.convertToRow(), errorMessage);
+                writeError(row, errorMessage);
             }
         }
         // update to process the next batch
@@ -540,16 +540,16 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             if (state == BatchStateEnum.Failed || errorMessage != null) {
                 getLogger().warn(
                         Messages.getMessage(getClass(), "logBatchInfoWithMessage", batch.getId(), state, errorMessage));
-                writeError(row.convertToRow(), errorMessage);
+                writeError(row, errorMessage);
             } else if (res == null || res.isEmpty()) {
                 String msg = Messages.getMessage(getClass(), "noResultForRow", row.toString(), batch.getId());
-                writeError(row.convertToRow(), msg);
+                writeError(row, msg);
                 getLogger().warn(msg);
             } else {
                 // convert the row into a RowResults so its easy to inspect
                 final RowResult rowResult = new RowResult(Boolean.valueOf(res.get(successIdx)), isDelete ? false
                         : Boolean.valueOf(res.get(createdIdx)), res.get(idIdx), res.get(errIdx));
-                writeRowResult(row.convertToRow(), rowResult);
+                writeRowResult(row, rowResult);
             }
         }
     }
@@ -573,7 +573,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         return dataReader;
     }
 
-    private void writeRowResult(Row row, RowResult resultRow) throws DataAccessObjectException {
+    private void writeRowResult(TableRow row, RowResult resultRow) throws DataAccessObjectException {
         if (resultRow.success) {
             String successMessage;
             switch (getConfig().getOperationInfo()) {
@@ -632,16 +632,16 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     @Override
-    protected void convertBulkAPINulls(Row row) {
-        for (final Map.Entry<String, Object> entry : row.entrySet()) {
-            if (NATextValue.isNA(entry.getValue())) {
-                entry.setValue(NATextValue.getInstance());
+    protected void convertBulkAPINulls(TableRow row) {
+        for (String columnName : row.getHeader().getColumns()) {
+            if (NATextValue.isNA(row.get(columnName))) {
+                row.put(columnName, NATextValue.getInstance());
             }
         }
     }
 
     @Override
-    protected void conversionFailed(Row row, String errMsg) throws DataAccessObjectException,
+    protected void conversionFailed(TableRow row, String errMsg) throws DataAccessObjectException,
             OperationException {
         super.conversionFailed(row, errMsg);
         getLogger().warn("Skipping results for row " + row + " which failed before upload to Saleforce.com");

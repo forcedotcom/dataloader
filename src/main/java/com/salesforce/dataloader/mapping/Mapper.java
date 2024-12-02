@@ -55,6 +55,7 @@ import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
 import com.salesforce.dataloader.dyna.ParentSObjectFormatter;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.OrderedProperties;
 
@@ -249,8 +250,10 @@ public abstract class Mapper {
         return constantVal.substring(1, constantVal.length() - 1);
     }
 
-    protected void mapConstants(Row rowMap) {
-        rowMap.putAll(constants);
+    protected void mapConstants(TableRow row) {
+        for (String constKey : constants.keySet()) {
+            row.put(constKey, constants.get(constKey));
+        }
     }
 
     private Properties loadProperties(String fileName) throws MappingInitializationException {

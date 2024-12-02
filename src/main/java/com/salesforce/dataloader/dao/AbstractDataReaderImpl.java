@@ -26,11 +26,13 @@
 
 package com.salesforce.dataloader.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.DAORowUtil;
 
@@ -39,6 +41,8 @@ public abstract class AbstractDataReaderImpl implements DataReader {
     private DAORowCache rowCache = new DAORowCache();
     private int currentRowNumber;
     private int totalRows = 0;
+    private TableHeader tableHeader = null;
+    private List<String> daoColsList = new ArrayList<String>();
 
     public AbstractDataReaderImpl(AppConfig appConfig) {
         this.appConfig = appConfig;
@@ -62,10 +66,30 @@ public abstract class AbstractDataReaderImpl implements DataReader {
         if (!appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
                 || rowCache.size() == 0) {
             openDAO();
+            this.daoColsList = initializeDaoColumnsList();
+            initializeTableHeader();
         }
         currentRowNumber = 0;
         rowCache.resetCurrentRowIndex();
         setOpenFlag(true);
+    }
+    
+    private void initializeTableHeader() {
+        if (this.daoColsList == null) {
+            this.daoColsList = new ArrayList<String>();
+        }
+        ArrayList<String> tableHeaderCols = new ArrayList<>(this.daoColsList);
+        if (tableHeaderCols.get(0) == null
+            || !tableHeaderCols.get(0).equalsIgnoreCase(AppConfig.ID_COLUMN_NAME)) {
+            tableHeaderCols.add(0, AppConfig.ID_COLUMN_NAME);
+        }
+        if (!tableHeaderCols.contains(AppConfig.STATUS_COLUMN_NAME)) {
+            tableHeaderCols.add(AppConfig.STATUS_COLUMN_NAME);
+        }
+        if (!tableHeaderCols.contains(AppConfig.ERROR_COLUMN_NAME)) {
+            tableHeaderCols.add(AppConfig.ERROR_COLUMN_NAME);
+        }
+        this.tableHeader = new TableHeader(tableHeaderCols);
     }
     
     public TableRow readTableRow() throws DataAccessObjectException {
@@ -110,9 +134,19 @@ public abstract class AbstractDataReaderImpl implements DataReader {
         return this.appConfig;
     }
     
+    protected TableHeader getTableHeader() {
+        return this.tableHeader;
+    }
+    
+    @Override
+    public List<String> getColumnNames() {
+        return new ArrayList<>(this.daoColsList);
+    }
+    
     abstract protected void setOpenFlag(boolean open);
     abstract protected boolean isOpenFlag();
     abstract protected void openDAO() throws DataAccessObjectInitializationException;
     abstract protected List<TableRow> readTableRowListFromDAO(int maxRows) throws DataAccessObjectException;
     abstract protected TableRow readTableRowFromDAO() throws DataAccessObjectException;
+    abstract protected List<String> initializeDaoColumnsList() throws DataAccessObjectInitializationException;
 }

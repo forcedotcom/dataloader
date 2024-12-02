@@ -154,7 +154,7 @@ public class LoadMapperTest extends ConfigTestBase {
         mappings.setProperty("", "Value6");
         LoadMapper mapper = new LoadMapper(null, null, null, null);
         mapper.putPropertyFileMappings(mappings);
-        Row result = mapper.mapData(TableRow.emptyRow());
+        TableRow result = mapper.mapData(TableRow.emptyRow(), true);
         assertEquals(constantValue, result.get("Name"));
         assertEquals(constantValue, result.get("field1__c"));
         assertEquals(constantValue, result.get("field2__c"));
@@ -200,7 +200,7 @@ public class LoadMapperTest extends ConfigTestBase {
 
         //(src, dest).
         mapper.putMapping(csvFieldName, sfdcField);
-        Map<String, Object> result = mapper.mapData(input);
+        TableRow result = mapper.mapData(input, true);
 
         //verify that the old value holds
         assertEquals(constantValue, result.get(sfdcField));
@@ -235,7 +235,7 @@ public class LoadMapperTest extends ConfigTestBase {
 
         TableRow input = TableRow.singleEntryImmutableRow(constantValue, sfdcField);
 
-        Map<String, Object> result = mapper.mapData(input);
+        TableRow result = mapper.mapData(input, true);
 
         //verify that the old value holds
         assertEquals(constantValue, result.get(sfdcField));
@@ -248,9 +248,8 @@ public class LoadMapperTest extends ConfigTestBase {
 
         TableRow inputData = TableRow.singleEntryImmutableRow("SOURCE_COL", "123");
 
-        Map<String, Object> result = loadMapper.mapData(inputData);
-
-        assertTrue("Empty destination column should have not been mapped", result.isEmpty());
+        TableRow result = loadMapper.mapData(inputData, true);
+        assertTrue("Empty destination column should have not been mapped", result.getNonEmptyCellsCount() == 0);
     }
 
     @Test
@@ -276,7 +275,7 @@ public class LoadMapperTest extends ConfigTestBase {
      * Helper method to verify that the LoadMapper has mapped the specified columns to their correct respective field, along with any constants in the mapping file.
      */
     private void verifyMapping(LoadMapper mapper, String... destNames) {
-        Row destValueMap = mapper.mapData(this.sourceRow);
+        TableRow destValueMap = mapper.mapData(this.sourceRow, true);
         for (int i = 0; i < destNames.length; i++) {
             assertNotNull("Destination# " + i + "(" + destNames[i]
                     + ") should have a mapped value",
