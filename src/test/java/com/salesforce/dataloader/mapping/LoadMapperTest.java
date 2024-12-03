@@ -30,6 +30,8 @@ import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
+import com.sforce.soap.partner.Field;
+import com.sforce.soap.partner.FieldType;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -270,7 +272,24 @@ public class LoadMapperTest extends ConfigTestBase {
             // expected
         }
     }
-
+    
+    @Test
+    public void testCompositeMap() throws Exception {
+        Field[] fields = new Field[3];
+        for (int i = 0; i < 3; i++) {
+            fields[i] = new Field();
+            fields[i].setName(DEST_NAMES[i]);
+            fields[i].setType(FieldType.string);       
+        }
+        LoadMapper loadMapper = new LoadMapper(getController().getPartnerClient(), null, fields, null);
+        loadMapper.putMapping(SOURCE_NAMES[0] + "," + SOURCE_NAMES[1],
+               DEST_NAMES[0] + "," + DEST_NAMES[1]);
+        TableRow destValueRow = loadMapper.mapData(this.sourceRow, true);
+        String expectedDestValue = this.sourceRow.get(SOURCE_NAMES[0]) + ", " + this.sourceRow.get(SOURCE_NAMES[1]);
+        assertEquals(destValueRow.get(DEST_NAMES[0]), expectedDestValue);
+        assertEquals(destValueRow.get(DEST_NAMES[1]), expectedDestValue);
+    }
+   
     /**
      * Helper method to verify that the LoadMapper has mapped the specified columns to their correct respective field, along with any constants in the mapping file.
      */
