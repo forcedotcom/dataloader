@@ -333,6 +333,7 @@ public class AppConfig {
     public static final String PROP_EXPORT_BATCH_SIZE = "sfdc.extractionRequestSize"; //$NON-NLS-1$
     public static final String PROP_EXTRACT_SOQL = "sfdc.extractionSOQL"; //$NON-NLS-1$
     public static final String PROP_SORT_EXTRACT_FIELDS = "sfdc.sortExtractionFields"; //$NON-NLS-1$
+    public static final String PROP_EXTRACT_ALL_CAPS_HEADERS="sfdc.extraction.allCapsHeaders";
     public static final String PROP_LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT = "sfdc.load.preserveWhitespaceInRichText";
 
     //
@@ -778,6 +779,7 @@ public class AppConfig {
         setDefaultValue(PROP_READ_CHARSET ,getDefaultCharsetForCsvReadWrite());
         setDefaultValue(PROP_GMT_FOR_DATE_FIELD_VALUE, false);
         setDefaultValue(PROP_SAVE_ALL_PROPS, false);
+        setDefaultValue(PROP_EXTRACT_ALL_CAPS_HEADERS, false);
     }
 
     /**

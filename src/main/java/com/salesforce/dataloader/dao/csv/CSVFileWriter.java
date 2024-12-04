@@ -77,7 +77,7 @@ public class CSVFileWriter implements DataWriter {
     /**
      * If <code>capitalizedHeadings</code> is true, output header row in caps
      */
-    private final boolean capitalizedHeadings = false;
+    private boolean capitalizedHeadings = false;
     private final char columnDelimiter;
         
     public CSVFileWriter(String fileName, AppConfig appConfig, String columnDelimiterStr) {
@@ -89,6 +89,7 @@ public class CSVFileWriter implements DataWriter {
             columnDelimiterStr = AppUtil.COMMA;
         }
         this.columnDelimiter = columnDelimiterStr.charAt(0);
+        this.capitalizedHeadings = appConfig.getOperationInfo().isExtraction() && appConfig.getBoolean(AppConfig.PROP_EXTRACT_ALL_CAPS_HEADERS);
     }
 
     /**
