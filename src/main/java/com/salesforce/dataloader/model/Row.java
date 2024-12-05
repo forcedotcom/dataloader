@@ -27,8 +27,8 @@ package com.salesforce.dataloader.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -42,24 +42,12 @@ import java.util.TreeMap;
  * methods and probably stop implementing Map interface. All Row behavior should be moved into this
  * class and not be spread in multiple class.
  */
-public class Row implements Map<String, Object> {
+public class Row implements Map<String, Object>, RowInterface {
     private final Map<String, Object> internalMap;
     private final Map<String, String> keyMap = new HashMap<String, String>();
 
     public Row() {
         this.internalMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    }
-
-    public Row(Map<String, Object> internalMap) {
-        this.internalMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        this.internalMap.putAll(internalMap);
-        for (String key : internalMap.keySet()) {
-            this.keyMap.put(key.toLowerCase(), key);
-        }
-    }
-
-    public static Row singleEntryImmutableRow(String key, Object value) {
-        return new Row(Collections.singletonMap(key, value));
     }
 
     @Override
@@ -150,5 +138,16 @@ public class Row implements Map<String, Object> {
             trow.put(headerColName, this.get(headerColName));
         }
         return trow;
+    }
+
+    @Override
+    public Object get(String key) {
+        return get((Object)key);
+    }
+
+    @Override
+    public List<String> getColumnNames() {
+        Set<String> fieldNameSet = this.keySet();
+        return new ArrayList<String>(fieldNameSet);
     }
 }

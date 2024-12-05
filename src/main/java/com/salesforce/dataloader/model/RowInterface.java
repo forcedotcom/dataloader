@@ -23,42 +23,12 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-package com.salesforce.dataloader.dao;
+package com.salesforce.dataloader.model;
 
 import java.util.List;
 
-import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
-import com.salesforce.dataloader.model.RowInterface;
-
-/**
- * Interface to be implemented for data writers -- data access objects that are used for writing rows of data.
- *
- * @author Alex Warshavsky
- * @since 8.0
- */
-public interface DataWriter extends DataAccessObject {
-    /**
-     * Set ordered list of columns to be used for the data access object records. Useful for data access objects that
-     * rely on consistent column ordering, such as CSV file
-     *
-     * @param columnNames
-     * @throws DataAccessObjectInitializationException
-     */
-    void setColumnNames(List<String> columnNames) throws DataAccessObjectInitializationException;
-
-    /**
-     * @param inputRow
-     * @return Any data columns generated as a result of writing
-     * @throws DataAccessObjectException
-     */
-    boolean writeRow(RowInterface inputRow) throws DataAccessObjectException;
-
-    /**
-     * @param inputRowList
-     * @return List of data rows with generated data columns as a result of writing
-     * @throws DataAccessObjectException
-     */
-    boolean writeRowList(List<? extends RowInterface> inputRowList) throws DataAccessObjectException;
+public interface RowInterface {
+    public Object put(String key, Object value);
+    public Object get(String key);
+    public List<String> getColumnNames();
 }

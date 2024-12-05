@@ -205,7 +205,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         }
         try {
             convertBulkAPINulls(sforceDataRow);
-            DynaBean dynaBean = SforceDynaBean.convertToDynaBean(dynaClass, sforceDataRow.convertToRow());
+            DynaBean dynaBean = SforceDynaBean.convertToDynaBean(dynaClass, sforceDataRow);
             Map<String, String> fieldMap = BeanUtils.describe(dynaBean);
             for (String fName : fieldMap.keySet()) {
                 if (fieldMap.get(fName) != null) {

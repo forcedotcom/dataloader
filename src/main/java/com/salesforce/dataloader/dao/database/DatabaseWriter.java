@@ -30,6 +30,7 @@ import java.sql.*;
 import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.RowInterface;
 import com.salesforce.dataloader.model.TableRow;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.logging.log4j.Logger;
@@ -126,7 +127,7 @@ public class DatabaseWriter implements DataWriter {
      * @see com.salesforce.dataloader.dao.DataWriter#writeRowList(java.util.List)
      */
     @Override
-    public boolean writeRowList(List<Row> inputRowList) throws DataAccessObjectException {
+    public boolean writeRowList(List<? extends RowInterface> inputRowList) throws DataAccessObjectException {
 
         // make sure that the update is setup and ready to go, otherwise stop
         if (!dbContext.isOpen()) { throw new DataAccessObjectInitializationException(Messages
@@ -138,13 +139,26 @@ public class DatabaseWriter implements DataWriter {
         try {
             //for batchsize = 1, don't do batching, this provides much better error output
             if(inputRowList.size() == 1) {
-                dbContext.setSqlParamValues(sqlConfig, appConfig, inputRowList.get(0));
+                if (inputRowList.get(0) instanceof Row) {
+                    dbContext.setSqlParamValues(sqlConfig, appConfig, (Row)inputRowList.get(0));
+                } else if (inputRowList.get(0) == null) {
+                    dbContext.setSqlParamValues(sqlConfig, appConfig, null);
+                } else {
+                    dbContext.setSqlParamValues(sqlConfig, appConfig, 
+                            ((TableRow)inputRowList.get(0)).convertToRow());
+                }
                 currentRowNumber++;
             } else {
                 // for each row set the Sql params in the prepared statement
                 dbContext.getDataStatement().clearBatch();
-                for (Row inputRow : inputRowList) {
-                    dbContext.setSqlParamValues(sqlConfig, appConfig, inputRow);
+                for (RowInterface inputRow : inputRowList) {
+                    if (inputRow instanceof Row) {
+                        dbContext.setSqlParamValues(sqlConfig, appConfig, (Row)inputRow);
+                    } else if (inputRow == null) {
+                        dbContext.setSqlParamValues(sqlConfig, appConfig, null);
+                    } else {
+                        dbContext.setSqlParamValues(sqlConfig, appConfig, ((TableRow)inputRow).convertToRow());
+                    }
                     dbContext.getDataStatement().addBatch();
                     currentRowNumber++;
                 }
@@ -233,18 +247,11 @@ public class DatabaseWriter implements DataWriter {
      * @throws DataAccessObjectException
      */
     @Override
-    public boolean writeRow(Row inputRow) throws DataAccessObjectException {
+    public boolean writeRow(RowInterface inputRow) throws DataAccessObjectException {
         // FIXME: Think about refactoring this for the caller to writeRow() and here take care of batching internally
-        List<Row> inputRowList = new ArrayList<Row>();
+        List<RowInterface> inputRowList = new ArrayList<RowInterface>();
         inputRowList.add(inputRow);
         return writeRowList(inputRowList);
-    }
-
-    public boolean writeTableRow(TableRow inputRow) throws DataAccessObjectException {
-        // FIXME: Think about refactoring this for the caller to writeRow() and here take care of batching internally
-        List<TableRow> inputRowList = new ArrayList<TableRow>();
-        inputRowList.add(inputRow);
-        return writeTableRowList(inputRowList);
     }
     
     /**
@@ -294,15 +301,4 @@ public class DatabaseWriter implements DataWriter {
         return null;
     }
 
-    @Override
-    public boolean writeTableRowList(List<TableRow> trowList) throws DataAccessObjectException {
-        if (trowList == null) {
-            return false;
-        }
-        ArrayList<Row> rowList = new ArrayList<Row>(trowList.size());
-        for (TableRow trow : trowList) {
-            rowList.add(trow.convertToRow());
-        }
-        return writeRowList(rowList);
-    }
 }

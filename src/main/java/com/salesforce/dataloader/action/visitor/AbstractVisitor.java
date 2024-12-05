@@ -139,7 +139,7 @@ public abstract class AbstractVisitor implements IVisitor {
             if (message != null && message.length() > 0) {
                 row.put(AppConfig.STATUS_COLUMN_NAME, message);
             }
-            this.successWriter.writeTableRow(row);
+            this.successWriter.writeRow(row);
         }
         addSuccess();
     }
@@ -151,7 +151,7 @@ public abstract class AbstractVisitor implements IVisitor {
             } else {
                 row.put(AppConfig.ERROR_COLUMN_NAME, errorMessage);
             }
-            this.errorWriter.writeTableRow(row);
+            this.errorWriter.writeRow(row);
         }
         addErrors();
     }

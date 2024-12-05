@@ -105,7 +105,7 @@ public class PartnerQueryVisitor extends AbstractQueryVisitor {
             Row row = getMapper().mapPartnerSObjectSfdcToLocal(sob);
             try {
                 List<String> queryResultFieldsList;
-                queryResultFieldsList = ((DataWriter)controller.getDao()).getColumnNamesFromRow(row);
+                queryResultFieldsList =  row.getColumnNames();
                 SOQLMapper mapper = (SOQLMapper)this.controller.getMapper();
                 mapper.initSoqlMappingFromResultFields(queryResultFieldsList);
                 final List<String> daoColumns = mapper.getDaoColumnsForSoql();

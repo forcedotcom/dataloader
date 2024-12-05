@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.util.DLLogManager;
@@ -43,8 +42,7 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
-import com.salesforce.dataloader.model.Row;
-import com.salesforce.dataloader.model.TableRow;
+import com.salesforce.dataloader.model.RowInterface;
 import com.salesforce.dataloader.util.AppUtil;
 
 /**
@@ -177,9 +175,9 @@ public class CSVFileWriter implements DataWriter {
      * @see com.salesforce.dataloader.dao.csv.Writer#writeRow(java.util.Map)
      */
     @Override
-    public boolean writeRow(Row row) throws DataAccessObjectException {
+    public boolean writeRow(RowInterface row) throws DataAccessObjectException {
         if (this.columnNames == null || this.columnNames.isEmpty()) {
-           List<String>colNames = getColumnNamesFromRow(row);
+           List<String>colNames = row.getColumnNames();
            this.setColumnNames(colNames);
         }
         CSVColumnVisitor visitor = new CSVColumnVisitor(fileOut, false, this.columnDelimiter);
@@ -194,62 +192,17 @@ public class CSVFileWriter implements DataWriter {
             throw new DataAccessObjectException(Messages.getString("CSVWriter.errorWriting"), e); //$NON-NLS-1$
         }
     }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.salesforce.dataloader.dao.csv.Writer#writeRow(java.util.Map)
-     */
-    public boolean writeTableRow(TableRow row) throws DataAccessObjectException {
-        if (this.columnNames == null || this.columnNames.isEmpty()) {
-           List<String>colNames = getColumnNamesFromTableRow(row);
-           this.setColumnNames(colNames);
-        }
-        CSVColumnVisitor visitor = new CSVColumnVisitor(fileOut, false, this.columnDelimiter);
-        try {
-            visitTableRowColumns(columnNames, row, visitor);
-            fileOut.newLine();
-            visitor.newRow();
-            currentRowNumber++;
-            return true; // success unless there's an exception
-        } catch (IOException e) {
-            logger.error(Messages.getString("CSVWriter.errorWriting"), e); //$NON-NLS-1$
-            throw new DataAccessObjectException(Messages.getString("CSVWriter.errorWriting"), e); //$NON-NLS-1$
-        }
-    }
-    
-    public List<String> getColumnNamesFromRow(Row row) throws DataAccessObjectInitializationException {
-        Set<String> fieldNameSet = row.keySet();
-        return new ArrayList<String>(fieldNameSet);    
-    }
-    
-    public List<String> getColumnNamesFromTableRow(TableRow row) {
-        return row.getHeader().getColumns();    
-    }
 
     /*
      * (non-Javadoc)
      * @see com.salesforce.dataloader.dao.csv.Writer#writeRowList(java.util.List)
      */
     @Override
-    public boolean writeRowList(List<Row> rows) throws DataAccessObjectException {
+    public boolean writeRowList(List<? extends RowInterface> rows) throws DataAccessObjectException {
         boolean success = true;
         // return the last result, should be same as others
-        for (Row row : rows) {
+        for (RowInterface row : rows) {
             success = writeRow(row);
-        }
-        return success;
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.salesforce.dataloader.dao.csv.Writer#writeRowList(java.util.List)
-     */
-    @Override
-    public boolean writeTableRowList(List<TableRow> rows) throws DataAccessObjectException {
-        boolean success = true;
-        // return the last result, should be same as others
-        for (TableRow trow : rows) {
-            success = writeTableRow(trow);
         }
         return success;
     }
@@ -270,7 +223,7 @@ public class CSVFileWriter implements DataWriter {
         }
     }
 
-    static private void visitColumns(List<String> columnNames, Row row, CSVColumnVisitor visitor) throws IOException {
+    static private void visitColumns(List<String> columnNames, RowInterface row, CSVColumnVisitor visitor) throws IOException {
         for (String colName : columnNames) {
             Object colVal = row.get(colName);
             if (colVal == null && colName.contains("(")) {
@@ -283,19 +236,6 @@ public class CSVFileWriter implements DataWriter {
         }
     }
 
-
-    static private void visitTableRowColumns(List<String> columnNames, TableRow row, CSVColumnVisitor visitor) throws IOException {
-        for (String colName : columnNames) {
-            Object colVal = row.get(colName);
-            if (colVal == null && colName.contains("(")) {
-                int lparenIdx = colName.indexOf('(');
-                int rparenIdx = colName.indexOf(')');
-                colName = colName.substring(lparenIdx + 1, rparenIdx);
-                colVal = row.get(colName);
-            }
-            visitor.visit(colVal != null ? colVal.toString() : "");
-        }
-    }
     @Override
     public List<String> getColumnNames() {
         return columnNames;
@@ -334,5 +274,4 @@ public class CSVFileWriter implements DataWriter {
     public int getCurrentRowNumber() {
         return currentRowNumber;
     }
-
 }
