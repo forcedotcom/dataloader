@@ -36,6 +36,7 @@ import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
+import com.salesforce.dataloader.model.RowInterface;
 import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
@@ -148,7 +149,7 @@ public class CsvTest extends ConfigTestBase {
         File f = new File(getTestDataDir(), "csvtestTemp.csv");
         String path = f.getAbsolutePath();
         CSVFileWriter writer = new CSVFileWriter(path, getController().getAppConfig(), delimiter);
-        List<TableRow> rowList = new ArrayList<TableRow>();
+        List<RowInterface> rowList = new ArrayList<RowInterface>();
 
         rowList.add(row1);
         rowList.add(row2);
@@ -156,7 +157,7 @@ public class CsvTest extends ConfigTestBase {
         writer.open();
         writer.setColumnNames(writeHeader);
 
-        writer.writeTableRowList(rowList);
+        writer.writeRowList(rowList);
         writer.close();
 
         compareWriterFile(path, delimiter, false, false); // 3rd param false and 4th param false => CSV for a upload

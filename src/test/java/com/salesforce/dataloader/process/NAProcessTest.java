@@ -270,7 +270,7 @@ public class NAProcessTest extends ProcessTestBase {
             writer = new CSVFileWriter(CSV_FILE_PATH, getController().getAppConfig(), AppUtil.COMMA);
             writer.open();
             writer.setColumnNames(new ArrayList<String>(header.getColumns()));
-            writer.writeTableRow(row);
+            writer.writeRow(row);
         } finally {
             if (writer != null) writer.close();
         }

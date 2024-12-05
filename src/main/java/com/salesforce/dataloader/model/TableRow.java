@@ -27,8 +27,9 @@ package com.salesforce.dataloader.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-public class TableRow {
+public class TableRow implements RowInterface {
     private TableHeader header;
     private Object[] cellValues;
 
@@ -91,5 +92,10 @@ public class TableRow {
             }
         }
         return numNonEmptyCells;
+    }
+
+    @Override
+    public List<String> getColumnNames() {
+        return new ArrayList<String>(this.header.getColumns());
     }
 }

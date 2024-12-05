@@ -29,6 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.DateOnlyCalendar;
 
 import org.apache.commons.beanutils.*;
@@ -255,6 +256,11 @@ public class SforceDynaBean {
             logger.error(Messages.getString("Visitor.invocationError"), e); //$NON-NLS-1$
             throw new LoadException(e);
         }
+    }
+    
+    static public DynaBean convertToDynaBean(BasicDynaClass dynaClass, TableRow sforceDataRow)
+            throws ConversionException, LoadException {
+        return convertToDynaBean(dynaClass, sforceDataRow.convertToRow());
     }
 
     /**

@@ -108,7 +108,7 @@ public class DatabaseTestUtil extends ConfigTestBase {
                 accountRowList.add(accountRow);
                 if(accountRowList.size() >= 1000 || i == (numAccounts-1)) {
                     rowsProcessed += accountRowList.size();
-                    writer.writeTableRowList(accountRowList);
+                    writer.writeRowList(accountRowList);
                     logger.info("Written " + rowsProcessed + " of " + numAccounts + " total accounts using database config: " + dbConfigName);
                     accountRowList = new ArrayList<TableRow>();
                 }

@@ -52,6 +52,7 @@ import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.exception.UnsupportedOperationException;
+import com.salesforce.dataloader.model.RowInterface;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.Base64;
@@ -592,7 +593,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             final List<TableRow> templateRows = templateReader.readTableRowList(numRows);
             assertNotNull("CVSReader returned a null list of rows, but expected a list with size " + numRows,
                     templateRows);
-            final List<TableRow> inputRows = new ArrayList<TableRow>(templateRows.size());
+            final List<RowInterface> inputRows = new ArrayList<RowInterface>(templateRows.size());
 
             // verify that the template file is useable
             assertEquals("Wrong number of rows were read using readRowList while attempting to convert template file: "
@@ -616,7 +617,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             try {
                 inputWriter.open();
                 inputWriter.setColumnNames(templateReader.getColumnNames());
-                inputWriter.writeTableRowList(inputRows);
+                inputWriter.writeRowList(inputRows);
                 return inputPath;
             } finally {
                 inputWriter.close();

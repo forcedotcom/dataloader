@@ -38,6 +38,7 @@ import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.model.RowInterface;
 import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.ui.Labels;
@@ -246,7 +247,7 @@ public class ConfigPropertyMetadata {
             headerLabelList.add(COL_IS_READ_ONLY);
             headerLabelList.add(COL_IS_COMMAND_LINE_OPTION);
             headerLabelList.add(COL_IS_ENCRYPTED);
-            ArrayList<TableRow> rowList = new ArrayList<TableRow>(propertiesMap.size());
+            ArrayList<RowInterface> rowList = new ArrayList<RowInterface>(propertiesMap.size());
             TableHeader header = new TableHeader(headerLabelList);
 
             for (ConfigPropertyMetadata propMD : propertiesMap.values()) {
@@ -268,7 +269,7 @@ public class ConfigPropertyMetadata {
                 rowList.add(row);
             }
             try {
-                csvWriter.writeTableRowList(rowList);
+                csvWriter.writeRowList(rowList);
             } catch (DataAccessObjectException e) {
                 logger.warn(e.getStackTrace());
             }
