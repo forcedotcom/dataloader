@@ -29,6 +29,7 @@ import java.io.File;
 import java.sql.*;
 import java.util.*;
 
+import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
 
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -124,8 +125,15 @@ public class DatabaseReader extends AbstractDataReaderImpl {
             PreparedStatement statement = dbContext.prepareStatement();
             // right now, query doesn't support data input -- all the parameters are static vs. update which takes data
             // for every put call
+            TableRow row = null;
+            if (params != null) {
+                Set<String> colHeaderNames = params.keySet();
+                @SuppressWarnings("unchecked")
+                TableHeader header = new TableHeader((List<String>)(Object)Arrays.asList(colHeaderNames.toArray()));
+                row = new TableRow(header);
+            }
             dbContext.setSqlParamValues(sqlConfig, 
-                    this.getAppConfig(), params);
+                    this.getAppConfig(), row);
 
             // set the query fetch size
             int fetchSize;

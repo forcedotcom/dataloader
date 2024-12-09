@@ -29,9 +29,7 @@ import java.io.File;
 import java.sql.*;
 import java.util.*;
 
-import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.model.RowInterface;
-import com.salesforce.dataloader.model.TableRow;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.util.DLLogManager;
@@ -139,26 +137,13 @@ public class DatabaseWriter implements DataWriter {
         try {
             //for batchsize = 1, don't do batching, this provides much better error output
             if(inputRowList.size() == 1) {
-                if (inputRowList.get(0) instanceof Row) {
-                    dbContext.setSqlParamValues(sqlConfig, appConfig, (Row)inputRowList.get(0));
-                } else if (inputRowList.get(0) == null) {
-                    dbContext.setSqlParamValues(sqlConfig, appConfig, null);
-                } else {
-                    dbContext.setSqlParamValues(sqlConfig, appConfig, 
-                            ((TableRow)inputRowList.get(0)).convertToRow());
-                }
+                dbContext.setSqlParamValues(sqlConfig, appConfig, inputRowList.get(0));
                 currentRowNumber++;
             } else {
                 // for each row set the Sql params in the prepared statement
                 dbContext.getDataStatement().clearBatch();
                 for (RowInterface inputRow : inputRowList) {
-                    if (inputRow instanceof Row) {
-                        dbContext.setSqlParamValues(sqlConfig, appConfig, (Row)inputRow);
-                    } else if (inputRow == null) {
-                        dbContext.setSqlParamValues(sqlConfig, appConfig, null);
-                    } else {
-                        dbContext.setSqlParamValues(sqlConfig, appConfig, ((TableRow)inputRow).convertToRow());
-                    }
+                    dbContext.setSqlParamValues(sqlConfig, appConfig, inputRow);
                     dbContext.getDataStatement().addBatch();
                     currentRowNumber++;
                 }
@@ -296,9 +281,4 @@ public class DatabaseWriter implements DataWriter {
         // TODO: Ordered column names can possibly used for ordered output from the write. Currently, this is not used
         // since writeRow will contain column information anyway and order doesn't matter in database
     }
-    
-    public List<String> getColumnNamesFromRow(Row row) throws DataAccessObjectInitializationException {
-        return null;
-    }
-
 }

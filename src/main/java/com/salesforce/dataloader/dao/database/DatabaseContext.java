@@ -39,6 +39,8 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dyna.DateTimeConverter;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.RowInterface;
 
 /**
  * Describe your class here.
@@ -148,18 +150,18 @@ public class DatabaseContext {
      *            Values for the parameter replacement
      * @throws ParameterLoadException
      */
-    public void setSqlParamValues(SqlConfig sqlConfig, AppConfig appConfig, Map<String, Object> paramValues)
+    public void setSqlParamValues(SqlConfig sqlConfig, AppConfig appConfig, RowInterface paramValues)
             throws ParameterLoadException {
         // detect if there're no parameters to set
         if (sqlConfig.getSqlParams() == null) { return; }
 
         if (paramValues == null) {
-            paramValues = new HashMap<String, Object>();
+            paramValues = new Row();
         }
 
         for (String paramName : sqlConfig.getSqlParams().keySet()) {
             String type = sqlConfig.getSqlParams().get(paramName);
-            if (paramValues.containsKey(paramName)) {
+            if (paramValues.getColumnNames().contains(paramName)) {
                 Object sqlValue = mapParamToDbType(appConfig, paramValues.get(paramName), type);
                 paramValues.put(paramName, sqlValue);
             } else {
