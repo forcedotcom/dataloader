@@ -52,4 +52,12 @@ public class TableHeader {
     public List<String> getColumns() {
         return new ArrayList<String>(columns);
     }
+    
+    public void addColumn(String colName) {
+        this.columns.add(colName);
+    }
+    
+    public void removeColumn(String colName) {
+        this.columns.remove(colName);
+    }
 }

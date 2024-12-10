@@ -29,6 +29,6 @@ import java.util.List;
 
 public interface RowInterface {
     public Object put(String key, Object value);
-    public Object get(String key);
+    public Object get(Object key);
     public List<String> getColumnNames();
 }
