@@ -28,7 +28,8 @@ package com.salesforce.dataloader.dyna;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import com.salesforce.dataloader.model.Row;
+import com.salesforce.dataloader.model.RowInterface;
+import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.DateOnlyCalendar;
 
@@ -225,7 +226,7 @@ public class SforceDynaBean {
      * @throws ConversionException
      * @throws LoadException
      */
-    static public DynaBean convertToDynaBean(BasicDynaClass dynaClass, Row sforceDataRow)
+    static public DynaBean convertToDynaBean(BasicDynaClass dynaClass, RowInterface sforceDataRow)
             throws ConversionException, LoadException {
         //now convert the data types, through our strongly typed bean
         DynaBean sforceObj = null;
@@ -233,7 +234,7 @@ public class SforceDynaBean {
             sforceObj = dynaClass.newInstance();
             //This does an automatic conversion of types.
             BeanUtils.copyProperties(sforceObj, sforceDataRow);
-            for (String sforceField : sforceDataRow.keySet()) {
+            for (String sforceField : sforceDataRow.getColumnNames()) {
                 Object val = sforceDataRow.get(sforceField);
                 if (val != null
                         && val instanceof String
@@ -256,11 +257,6 @@ public class SforceDynaBean {
             logger.error(Messages.getString("Visitor.invocationError"), e); //$NON-NLS-1$
             throw new LoadException(e);
         }
-    }
-    
-    static public DynaBean convertToDynaBean(BasicDynaClass dynaClass, TableRow sforceDataRow)
-            throws ConversionException, LoadException {
-        return convertToDynaBean(dynaClass, sforceDataRow.convertToRow());
     }
 
     /**
@@ -390,7 +386,10 @@ public class SforceDynaBean {
                         DescribeSObjectResult parentSObjectDescribe = controller.getPartnerClient().describeSObject(idLookupFieldFormatter.getParent().getParentObjectName());
                         DynaProperty[] parentDynaProps = createDynaProps(parentSObjectDescribe, controller);
                         BasicDynaClass parentDynaClass = getDynaBeanInstance(parentDynaProps);
-                        Row parentDataRow = new Row();
+                        ArrayList<String> parentLookupFieldList = new ArrayList<String>();
+                        parentLookupFieldList.add(idLookupFieldFormatter.getParentFieldName());
+                        TableHeader header = new TableHeader(parentLookupFieldList);
+                        TableRow parentDataRow = new TableRow(header);
                         parentDataRow.put(idLookupFieldFormatter.getParentFieldName(), value);
                         DynaBean parentDynaBean = convertToDynaBean(parentDynaClass, parentDataRow);
                         Map<String, Object> parentRESTSObject = getCompositeRESTSObject(controller, idLookupFieldFormatter.getParent().getParentObjectName(), parentDynaBean);

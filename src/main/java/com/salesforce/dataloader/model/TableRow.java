@@ -25,11 +25,16 @@
  */
 package com.salesforce.dataloader.model;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class TableRow implements RowInterface {
+public class TableRow implements Map<String, Object>, RowInterface {
     private TableHeader header;
     private Object[] cellValues;
 
@@ -43,8 +48,8 @@ public class TableRow implements RowInterface {
         cellValues = Arrays.copyOf(rowToCopy.cellValues, rowToCopy.cellValues.length);
     }
     
-    public Object get(String key) {
-        Integer colPos = this.header.getColumnPosition(key);
+    public Object get(Object key) {
+        Integer colPos = this.header.getColumnPosition((String)key);
         if (colPos == null) {
             return null;
         }
@@ -57,14 +62,6 @@ public class TableRow implements RowInterface {
             return null;
         }
         return this.cellValues[colPos] = value;
-    }
-    
-    public Row convertToRow() {
-        Row row = new Row();
-        for (String colName : this.header.getColumns()) {
-            row.put(colName, cellValues[this.header.getColumnPosition(colName)]);
-        }
-        return row;
     }
     
     public TableHeader getHeader() {
@@ -97,5 +94,72 @@ public class TableRow implements RowInterface {
     @Override
     public List<String> getColumnNames() {
         return new ArrayList<String>(this.header.getColumns());
+    }
+
+    @Override
+    public int size() {
+        return this.header.getColumns().size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+        return this.header.getColumns().contains(key);
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+        for (Object val : this.cellValues) {
+            if (val != null && val.equals(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Object remove(Object key) {
+        Integer colPos = this.header.getColumnPosition((String)key);
+        if (colPos == null) {
+            return null;
+        }
+        Object value = this.get(key);
+        this.header.removeColumn((String)key);
+        return value;
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ? extends Object> m) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void clear() {
+        ArrayList<String> headerNames = new ArrayList<String>();
+        this.header = new TableHeader(headerNames);
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return new HashSet<String>(this.header.getColumns());
+    }
+
+    @Override
+    public Collection<Object> values() {
+        return Arrays.asList(this.cellValues);
+    }
+
+    @Override
+    public Set<Map.Entry<String, Object>> entrySet() {
+        HashSet<Map.Entry<String, Object>> rowEntrySet = new HashSet<Entry<String, Object>>();
+        for (String colName : this.header.getColumns()) {
+            Map.Entry<String, Object> colEntry = new AbstractMap.SimpleEntry<String, Object>(colName, get(colName));
+            rowEntrySet.add(colEntry);
+        }
+        return rowEntrySet;
     }
 }

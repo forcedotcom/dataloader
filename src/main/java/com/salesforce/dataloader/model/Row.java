@@ -141,11 +141,6 @@ public class Row implements Map<String, Object>, RowInterface {
     }
 
     @Override
-    public Object get(String key) {
-        return get((Object)key);
-    }
-
-    @Override
     public List<String> getColumnNames() {
         Set<String> fieldNameSet = this.keySet();
         return new ArrayList<String>(fieldNameSet);
