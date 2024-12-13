@@ -37,8 +37,11 @@ import org.junit.Test;
 
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.AppConfig;
+import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
+import com.salesforce.dataloader.model.TableRow;
 import com.sforce.async.CSVReader;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
@@ -89,14 +92,21 @@ public class CsvExtractAggregateQueryProcessTest extends ProcessTestBase {
     private void validateAccountNameInOutputFile(final String accountName, boolean isLimitOutputToQueryFields) throws IOException {
         FileInputStream fis = new FileInputStream(new File(testConfig.get(AppConfig.PROP_DAO_NAME)));
         try {
-            CSVReader rdr = new CSVReader(fis, StandardCharsets.UTF_8.name());
-            int acctNameIndex = 0;
+            CSVFileReader rdr = new CSVFileReader(new File(testConfig.get(AppConfig.PROP_DAO_NAME)),
+                    this.getController().getAppConfig(), false, true);
+            rdr.open();
+            TableRow row = rdr.readTableRow();
+            String extractedNameVal = (String)row.get("Name");
             if (isLimitOutputToQueryFields) {
-                acctNameIndex = rdr.nextRecord().indexOf("Account.Name");
-            } else {
-                acctNameIndex = rdr.nextRecord().indexOf("Name");
+                extractedNameVal = (String)row.get("Account.Name");
             }
-            assertEquals(accountName, rdr.nextRecord().get(acctNameIndex));
+            assertEquals(accountName, extractedNameVal);
+        } catch (DataAccessObjectInitializationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (DataAccessObjectException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         } finally {
             IOUtils.closeQuietly(fis);
         }

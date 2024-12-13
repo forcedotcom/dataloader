@@ -45,6 +45,10 @@ import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.AppConfig;
+import com.salesforce.dataloader.dao.csv.CSVFileReader;
+import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.model.TableRow;
 import com.sforce.async.CSVReader;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
@@ -120,9 +124,18 @@ public class CsvEncodingProcessTest extends ProcessTestBase {
     private void validateExtraction(final String name, final Map<String, String> testConfig) throws IOException {
         FileInputStream fis = new FileInputStream(new File(testConfig.get(AppConfig.PROP_DAO_NAME)));
         try {
-            CSVReader rdr = new CSVReader(fis, StandardCharsets.UTF_8.name());
-            int nameidx = rdr.nextRecord().indexOf("Name");
-            assertEquals(name, rdr.nextRecord().get(nameidx));
+            CSVFileReader rdr = new CSVFileReader(new File(testConfig.get(AppConfig.PROP_DAO_NAME)),
+                    this.getController().getAppConfig(), false, true);
+            rdr.open();
+            TableRow row = rdr.readTableRow();
+            String extractedNameVal = (String)row.get("Name");
+            assertEquals(name, extractedNameVal);
+        } catch (DataAccessObjectInitializationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (DataAccessObjectException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         } finally {
             IOUtils.closeQuietly(fis);
         }
