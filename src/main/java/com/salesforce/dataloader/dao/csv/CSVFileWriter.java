@@ -28,9 +28,10 @@ package com.salesforce.dataloader.dao.csv;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,18 +71,24 @@ public class CSVFileWriter implements DataWriter {
     /**
      * <code>encoding</code> contains a value for output character encoding, blank indicates "use default"
      */
-    private final String encoding;
+    private String encoding;
 
     /**
      * If <code>capitalizedHeadings</code> is true, output header row in caps
      */
     private boolean capitalizedHeadings = false;
     private final char columnDelimiter;
+    private AppConfig appConfig;
         
     public CSVFileWriter(String fileName, AppConfig appConfig, String columnDelimiterStr) {
 
         this.fileName = fileName;
+        this.appConfig = appConfig;
         encoding = appConfig.getCsvEncoding(true);
+        logger.debug("CSV encoding is set to " + Charset.forName(encoding));
+        if (encoding == null) {
+            encoding = Charset.defaultCharset().name();
+        }
         logger.debug(this.getClass().getName(), "encoding used to write to CSV file is " + encoding);
         if (columnDelimiterStr.length() == 0) {
             columnDelimiterStr = AppUtil.COMMA;
@@ -107,18 +114,28 @@ public class CSVFileWriter implements DataWriter {
     @Override
     public void open() throws DataAccessObjectInitializationException {
         try {
-            if (this.encoding != null) {
-                fileOut = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(this.fileName), this.encoding));
-            } else {
-                fileOut = new BufferedWriter(new FileWriter(this.fileName));
-            }
+            FileOutputStream os = new FileOutputStream(this.fileName);
+            OutputStreamWriter osw = new OutputStreamWriter(os, this.encoding);
+            fileOut = new BufferedWriter(osw);
             currentRowNumber = 0;
+            if (appConfig.getBoolean(AppConfig.PROP_EXTRACT_CSV_OUTPUT_BOM)) {
+                os.write(getBOM());
+            }
             setOpen(true);
         } catch (IOException e) {
             String errMsg = Messages.getFormattedString("CSVWriter.errorOpening", this.fileName);
             logger.error(errMsg, e);
             throw new DataAccessObjectInitializationException(errMsg, e);
         }
+    }
+    
+    private byte[] getBOM() {
+        if (StandardCharsets.UTF_8.equals(Charset.forName(this.encoding))) {
+            return new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
+        } else if (StandardCharsets.UTF_16.equals(Charset.forName(this.encoding))) {
+            return new byte[]{(byte) 0xFE, (byte) 0xFF};
+        }
+        return new byte[0];
     }
 
     /*
