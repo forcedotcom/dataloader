@@ -49,7 +49,7 @@
     <dependency>
       <groupId>com.force.api</groupId>
       <artifactId>force-partner-api</artifactId>
-      <version>62.0.0</version>
+      <version>63.0.0</version>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
