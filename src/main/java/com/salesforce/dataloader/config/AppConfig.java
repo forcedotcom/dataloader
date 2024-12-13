@@ -376,7 +376,8 @@ public class AppConfig {
     public static final String PROP_READ_UTF8 = "dataAccess.readUTF8"; //$NON-NLS-1$
     public static final String PROP_WRITE_UTF8 = "dataAccess.writeUTF8"; //$NON-NLS-1$
     public static final String PROP_READ_CHARSET = "dataAccess.readCharset";
-    
+    public static final String PROP_WRITE_CHARSET = "dataAccess.writeCharset";
+
     public static final String PROP_API_VERSION="salesforce.api.version";
     public static final String PROP_OAUTH_INSTANCE_URL="salesforce.oauth.instanceURL";
     public static final String PROP_USE_LEGACY_HTTP_GET="sfdc.useLegacyHttpGet";
@@ -778,6 +779,7 @@ public class AppConfig {
         setDefaultValue(PROP_RICH_TEXT_FIELD_REGEX, DEFAULT_RICHTEXT_REGEX);
         setDefaultValue(PROP_DAO_SKIP_TOTAL_COUNT, true);
         setDefaultValue(PROP_READ_CHARSET ,getDefaultCharsetForCsvReadWrite());
+        setDefaultValue(PROP_WRITE_CHARSET ,getDefaultCharsetForCsvReadWrite());
         setDefaultValue(PROP_GMT_FOR_DATE_FIELD_VALUE, false);
         setDefaultValue(PROP_SAVE_ALL_PROPS, false);
         setDefaultValue(PROP_EXTRACT_ALL_CAPS_HEADERS, false);
@@ -1735,24 +1737,35 @@ public class AppConfig {
         } else {
             logger.debug("Getting charset for reading from CSV");
         }
+        String charset = getDefaultCharsetForCsvReadWrite();
         if (getBoolean(configProperty)) {
             logger.debug("Using UTF8 charset because '" 
                     +  configProperty
                     +"' is set to true");
-            return StandardCharsets.UTF_8.name();
-        }
-        if (!isWrite) {
-            String charset = getString(PROP_READ_CHARSET);
-            if (charset != null && !charset.isEmpty()) {
-                return charset;
+            charset = StandardCharsets.UTF_8.name();
+        } else {
+            if (isWrite) {
+                charset = getString(PROP_WRITE_CHARSET);
+            } else {
+                charset = getString(PROP_READ_CHARSET);
+            }
+            boolean validCharset = false;
+            for (String charsetName : Charset.availableCharsets().keySet()) {
+                if (charset.equalsIgnoreCase(charsetName)) {
+                    validCharset = true;
+                    break;
+                }
+            }
+            if (!validCharset) {
+                logger.warn("configured charset" + charset + " is not supported");
+                charset = getDefaultCharsetForCsvReadWrite(); 
             }
         }
-        String charset = getDefaultCharsetForCsvReadWrite();
         logger.debug("Using charset " + charset);
         return charset;
     }
     
-    private static String defaultCharsetForCsvReadWrite = Charset.defaultCharset().name();
+    private static String defaultCharsetForCsvReadWrite = null;
     private synchronized static String getDefaultCharsetForCsvReadWrite() {
         if (defaultCharsetForCsvReadWrite != null) {
             return defaultCharsetForCsvReadWrite;
