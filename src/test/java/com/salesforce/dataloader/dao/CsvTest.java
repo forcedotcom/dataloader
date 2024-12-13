@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.salesforce.dataloader.ConfigTestBase;
@@ -131,6 +132,41 @@ public class CsvTest extends ConfigTestBase {
     }
     
     @Test
+    public void testCSVWriteUTF8BOMBasic() throws Exception{
+        getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "UTF-8");
+        getController().getAppConfig().setValue(AppConfig.PROP_WRITE_CHARSET, "UTF-8");
+        doTestCSVWriteBasic(AppUtil.COMMA);
+    }
+    
+    @Test
+    public void testCSVWriteUTF16LEBOMBasic() throws Exception{
+        getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "UTF-16LE");
+        getController().getAppConfig().setValue(AppConfig.PROP_WRITE_CHARSET, "UTF-16LE");
+        doTestCSVWriteBasic(AppUtil.COMMA);
+    }
+    
+    @Test
+    public void testCSVWriteUTF16BEBOMBasic() throws Exception{
+        getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "UTF-16BE");
+        getController().getAppConfig().setValue(AppConfig.PROP_WRITE_CHARSET, "UTF-16BE");
+        doTestCSVWriteBasic(AppUtil.COMMA);
+    }   
+    
+    @Test
+    public void testCSVWriteUTF32LEBOMBasic() throws Exception{
+        getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "UTF-32LE");
+        getController().getAppConfig().setValue(AppConfig.PROP_WRITE_CHARSET, "UTF-32LE");
+        doTestCSVWriteBasic(AppUtil.COMMA);
+    }
+    
+    @Test
+    public void testCSVWriteUTF32BEBOMBasic() throws Exception{
+        getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "UTF-32BE");
+        getController().getAppConfig().setValue(AppConfig.PROP_WRITE_CHARSET, "UTF-32BE");
+        doTestCSVWriteBasic(AppUtil.COMMA);
+    }
+    
+    @Test
     public void testCSVWriteBasicWithDashDelimiter() throws Exception {
         doTestCSVWriteBasic("-");
     }
@@ -145,8 +181,9 @@ public class CsvTest extends ConfigTestBase {
         doTestCSVWriteBasic(AppUtil.TAB);
     }
     
+    private String writeCSVFilename = getTestDataDir() + "/csvtestTemp.csv";
     private void doTestCSVWriteBasic(String delimiter) throws Exception {
-        File f = new File(getTestDataDir(), "csvtestTemp.csv");
+        File f = new File(writeCSVFilename);
         String path = f.getAbsolutePath();
         CSVFileWriter writer = new CSVFileWriter(path, getController().getAppConfig(), delimiter);
         List<RowInterface> rowList = new ArrayList<RowInterface>();
