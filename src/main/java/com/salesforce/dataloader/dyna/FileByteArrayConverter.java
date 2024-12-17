@@ -74,8 +74,8 @@ public final class FileByteArrayConverter implements Converter {
 
         if (value == null || String.valueOf(value).length() == 0) { return null; }
         final String absolutePath = new File(String.valueOf(value.toString())).getAbsolutePath();
+        final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         try {
-            final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
             // just in case the file is not found we want to display the absolute file name to the user
             File file = new File(absolutePath);
             if (!file.canRead()) {
@@ -113,6 +113,12 @@ public final class FileByteArrayConverter implements Converter {
                 }
             }
             throw new ConversionException(e);
+        } finally {
+            try {
+                byteStream.close();
+            } catch (Exception ex) {
+                // do nothing
+            }
         }
     }
 

@@ -269,6 +269,7 @@ public class HttpClientTransportv1 implements HttpTransportInterfacev1 {
                 }
             }
         } finally {
+            entityByteOut.close();
             if (isReuseConnection()) {
                 closeConnections();
             }
@@ -369,7 +370,6 @@ public class HttpClientTransportv1 implements HttpTransportInterfacev1 {
             URL url = new URL(endpoint);
             output = new MessageHandlerOutputStream(currentConfig, url, output);
         }
-
         return output;
     }
     
