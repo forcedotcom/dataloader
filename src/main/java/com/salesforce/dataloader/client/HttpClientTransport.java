@@ -250,6 +250,7 @@ public class HttpClientTransport implements HttpTransportInterface {
                     }
                 }
             }
+            bOut.close();
         }
         return input;
     }

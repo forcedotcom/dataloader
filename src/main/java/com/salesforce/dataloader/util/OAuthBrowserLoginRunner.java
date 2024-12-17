@@ -111,6 +111,7 @@ public class OAuthBrowserLoginRunner {
                 result.write(buffer, 0, length);
             }
             String response = result.toString(StandardCharsets.UTF_8.name());
+            result.close();
             logger.error(response);
             throw new OAuthBrowserLoginRunnerException(response);
         }

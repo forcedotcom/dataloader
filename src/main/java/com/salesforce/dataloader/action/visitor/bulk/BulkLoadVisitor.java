@@ -179,6 +179,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(dynaArraySize);
         final PrintStream out = new PrintStream(os, true, AppConfig.BULK_API_ENCODING);
         doOneBatch(out, os, this.dynaArray);
+        os.close();
     }
 
     private void doOneBatch(PrintStream out, ByteArrayOutputStream os, List<DynaBean> rows) throws OperationException,
