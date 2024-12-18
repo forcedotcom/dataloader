@@ -26,8 +26,11 @@
 package com.salesforce.dataloader.dao;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -57,24 +60,20 @@ public class CsvTest extends ConfigTestBase {
     @Before
     public void createTestData() {
         writeHeader = new ArrayList<String>(3);
-        writeHeader.add("COL1");
-        writeHeader.add("COL2");
-        writeHeader.add("COL3");
+        writeHeader.add("column1");
+        writeHeader.add("column2");
+        writeHeader.add("column3");
 
-        ArrayList<String> headerLabelList = new ArrayList<String>();
-        headerLabelList.add("COL1");
-        headerLabelList.add("COL2");
-        headerLabelList.add("COL3");
-        TableHeader header = new TableHeader(headerLabelList);
+        TableHeader header = new TableHeader(writeHeader);
         row1 = new TableRow(header);
-        row1.put("COL1", "row1col1");
-        row1.put("COL2", "row1col2");
-        row1.put("COL3", "row1col3");
+        row1.put(writeHeader.get(0), "row1-1");
+        row1.put(writeHeader.get(1), "row1-2");
+        row1.put(writeHeader.get(2), "row1-3");
 
         row2 = new TableRow(header);
-        row2.put("COL1", "row2col1");
-        row2.put("COL2", "row2col2");
-        row2.put("COL3", "row2col3");
+        row2.put(writeHeader.get(0), "row2-1");
+        row2.put(writeHeader.get(1), "row2-2");
+        row2.put(writeHeader.get(2), "row2-3");
     }
     @Test
     public void testCSVReadBasic() throws Exception {
@@ -84,12 +83,16 @@ public class CsvTest extends ConfigTestBase {
     @Test
     public void testCSVReadUTF8BOMBasic() throws Exception{
         testCSVReadBasic("csvtext_BOM_UTF8.csv");
+        assertTrue("did not find BOM in " + getTestDataDir() + "/csvtext_BOM_UTF8.csv",
+                    hasBOM(getTestDataDir() + "/csvtext_BOM_UTF8.csv"));
     }
     
     @Test
     public void testCSVReadUTF16BEBOMBasic() throws Exception{
         getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "UTF-16BE");
         testCSVReadBasic("csvtext_BOM_UTF16BE.csv");
+        assertTrue("did not find BOM in " + getTestDataDir() + "/csvtext_BOM_UTF16BE.csv",
+                    hasBOM(getTestDataDir() + "/csvtext_BOM_UTF16BE.csv"));
         getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "");
     }
     
@@ -97,6 +100,26 @@ public class CsvTest extends ConfigTestBase {
     public void testCSVReadUTF16LEBOMBasic() throws Exception{
         getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "UTF-16LE");
         testCSVReadBasic("csvtext_BOM_UTF16LE.csv");
+        assertTrue("did not find BOM in " + getTestDataDir() + "/csvtext_BOM_UTF16LE.csv",
+                hasBOM(getTestDataDir() + "/csvtext_BOM_UTF16LE.csv"));
+       getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "");
+    }
+    
+    @Test
+    public void testCSVReadUTF32LEBOMBasic() throws Exception{
+        getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "UTF-32LE");
+        testCSVReadBasic("csvtext_BOM_UTF32LE.csv");
+        assertTrue("did not find BOM in " + getTestDataDir() + "/csvtext_BOM_UTF32LE.csv",
+                hasBOM(getTestDataDir() + "/csvtext_BOM_UTF32LE.csv"));
+        getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "");
+    }
+    
+    @Test
+    public void testCSVReadUTF32BEBOMBasic() throws Exception{
+        getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "UTF-32BE");
+        testCSVReadBasic("csvtext_BOM_UTF32BE.csv");
+        assertTrue("did not find BOM in " + getTestDataDir() + "/csvtext_BOM_UTF32BE.csv",
+                hasBOM(getTestDataDir() + "/csvtext_BOM_UTF32BE.csv"));
         getController().getAppConfig().setValue(AppConfig.PROP_READ_CHARSET, "");
     }
 
@@ -124,6 +147,28 @@ public class CsvTest extends ConfigTestBase {
         assertEquals("row2-3", secondRow.get(COLUMN_3_NAME));
 
         csv.close();
+    }
+    
+
+    public static boolean hasBOM(String filePath) throws IOException {
+        try (InputStream is = new FileInputStream(filePath)) {
+            byte[] bom = new byte[3];
+            if (is.read(bom) == 3) {
+                boolean bomFound = false;
+                // UTF-8 case
+                bomFound = bom[0] == (byte) 0xEF && bom[1] == (byte) 0xBB && bom[2] == (byte) 0xBF;
+                if (!bomFound) {
+                    // UTF-16BE, UTF-32BE, UTF-32LE cases
+                    bomFound = bom[0] == (byte)0xFE && bom[1] == (byte) 0xFF;
+                }
+                if (!bomFound) {
+                    // UTF16-LE case
+                    bomFound = bom[0] == (byte)0xFF && bom[1] == (byte) 0xFE;
+                }
+                return bomFound;
+            }
+        }
+        return false;
     }
 
     @Test
@@ -196,6 +241,7 @@ public class CsvTest extends ConfigTestBase {
 
         writer.writeRowList(rowList);
         writer.close();
+        assertTrue("did not find BOM in " + path, hasBOM(path));
 
         compareWriterFile(path, delimiter, false, false); // 3rd param false and 4th param false => CSV for a upload
         compareWriterFile(path, delimiter, false, true);  // 3rd param false and 4th param true => query result CSV
