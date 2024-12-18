@@ -132,7 +132,8 @@ public class CSVFileWriter implements DataWriter {
     private byte[] getBOM() {
         if (StandardCharsets.UTF_8.equals(Charset.forName(this.encoding))) {
             return new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
-        } else if (this.encoding.startsWith(StandardCharsets.UTF_16.name())) {
+        } else if (this.encoding.startsWith(StandardCharsets.UTF_16.name())
+                || this.encoding.startsWith("UTF-32")) {
             return new byte[]{(byte) 0xFE, (byte) 0xFF};
         }
         return new byte[0];
