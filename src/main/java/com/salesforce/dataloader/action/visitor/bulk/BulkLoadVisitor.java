@@ -29,6 +29,8 @@ package com.salesforce.dataloader.action.visitor.bulk;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -176,14 +178,14 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     private void createBatches() throws OperationException, IOException, AsyncApiException {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream(dynaArraySize);
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
         final PrintStream out = new PrintStream(os, true, AppConfig.BULK_API_ENCODING);
         doOneBatch(out, os, this.dynaArray);
         os.close();
     }
 
     private void doOneBatch(PrintStream out, ByteArrayOutputStream os, List<DynaBean> rows) throws OperationException,
-            AsyncApiException {
+            AsyncApiException, FileNotFoundException {
         int processedRecordsCount = 0;
         final List<String> userColumns = getController().getDao().getColumnNames();
         List<String> headerColumns = null;
@@ -340,7 +342,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         addedCols.add(sfdcColumn);
     }
 
-    private void writeServerLoadBatchDataToCSV(ByteArrayOutputStream os) {
+    private String writeServerLoadBatchDataToCSV(ByteArrayOutputStream os) {
         String filenamePrefix = "uploadedToServer";
         String filename = generateBatchCSVFilename(filenamePrefix, batchCountForJob);
         File uploadedToServerCSVFile = new File(filename);
@@ -352,6 +354,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         } catch (Exception ex) {
             logger.info("unable to create file " + filename);
         }
+        return filename;
     }
     
     private void writeRawResultsToCSV(CSVReader serverResultsReader, int batchNum) {
@@ -392,16 +395,22 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 + controller.getFormattedCurrentTimestamp() + ".csv";
     }
 
-    private void createBatch(ByteArrayOutputStream os, int numRecords) throws AsyncApiException {
+    private void createBatch(ByteArrayOutputStream os, int numRecords) throws AsyncApiException, FileNotFoundException {
         if (numRecords <= 0) return;
         final byte[] request = os.toByteArray();
+        String uploadDataFileName = null;
         if (controller.getAppConfig().getBoolean(AppConfig.PROP_SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV)) {
             this.batchCountForJob++;
-            writeServerLoadBatchDataToCSV(os);
+            uploadDataFileName = writeServerLoadBatchDataToCSV(os);
+        }
+        BatchInfo bi = null;
+        if (uploadDataFileName != null) {
+            bi = this.jobUtil.createBatch(new FileInputStream(uploadDataFileName));
+        } else {
+            bi = this.jobUtil.createBatch(new ByteArrayInputStream(request, 0, request.length));
         }
         os.reset();
-        BatchInfo bi = this.jobUtil.createBatch(new ByteArrayInputStream(request, 0, request.length));
-        this.allBatchesInOrder.add(new BatchData(bi.getId(), numRecords));
+        this.allBatchesInOrder.add(new BatchData(bi.getId(), numRecords));           
     }
 
     @Override
