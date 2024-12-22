@@ -193,7 +193,8 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
                 }
             }
         }
-        
+        convertBulkAPINulls(sforceDataRow);
+                
         // Make sure to initialize dynaClass only after mapping a row.
         // This is to make sure that all polymorphic field mappings specified
         // in the mapping file are mapped to parent object.
@@ -204,7 +205,6 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             dynaClass = SforceDynaBean.getDynaBeanInstance(dynaProps);
         }
         try {
-            convertBulkAPINulls(sforceDataRow);
             DynaBean dynaBean = SforceDynaBean.convertToDynaBean(dynaClass, sforceDataRow);
             Map<String, String> fieldMap = BeanUtils.describe(dynaBean);
             for (String fName : fieldMap.keySet()) {
@@ -212,7 +212,6 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
                     // see if any entity foreign key references are embedded here
                     Object value = this.getFieldValue(fName, dynaBean.get(fName));
                     dynaBean.set(fName, value);
-                    dynaArraySize += fName.length() + value.toString().length();
                 }
             }
             dynaArray.add(dynaBean);
