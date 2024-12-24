@@ -23,22 +23,44 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-package com.salesforce.dataloader.action.visitor;
-
-import com.salesforce.dataloader.exception.BatchSizeLimitException;
-import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.exception.OperationException;
-import com.salesforce.dataloader.model.TableRow;
-import com.sforce.ws.ConnectionException;
+package com.salesforce.dataloader.exception;
 
 /**
+ * Describe your class here.
  *
- * @author Lexi Viripaeff
- * @since 6.0
+ * @author Alex Warshavsky
+ * @since 8.0
  */
-public interface DAORowVisitor {
+@SuppressWarnings("serial")
+public class BatchSizeLimitException extends Exception {
 
-    public boolean visit(TableRow row) throws OperationException, DataAccessObjectException, ConnectionException, BatchSizeLimitException;
+    /**
+     *
+     */
+    public BatchSizeLimitException() {
+        super();
+    }
+
+    /**
+     * @param message
+     */
+    public BatchSizeLimitException(String message) {
+        super(message);
+    }
+
+    /**
+     * @param message
+     * @param cause
+     */
+    public BatchSizeLimitException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * @param cause
+     */
+    public BatchSizeLimitException(Throwable cause) {
+        super(cause);
+    }
 
 }

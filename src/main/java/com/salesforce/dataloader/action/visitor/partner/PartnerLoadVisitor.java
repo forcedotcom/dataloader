@@ -177,4 +177,12 @@ public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
     protected abstract Object[] executeClientAction(PartnerClient client, List<DynaBean> data)
             throws ConnectionException;
 
+    @Override
+    protected int getMaxBytesInBatch() {
+        return  AppConfig.MAX_SOAP_API_IMPORT_BATCH_BYTES;
+    }
+    @Override
+    protected int getBytesInBean(DynaBean dynaBean) {
+        return dynaBean.toString().length();
+    }
 }

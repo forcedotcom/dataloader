@@ -40,6 +40,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObject;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
+import com.salesforce.dataloader.exception.BatchSizeLimitException;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.ExtractExceptionOnServer;
@@ -108,8 +109,9 @@ abstract class AbstractAction implements IAction {
     /** @return a new IVisitor object to be used by this action */
     protected abstract IVisitor createVisitor();
 
-    /** flushes any remaining records to or from the dao */
-    protected abstract void flush() throws OperationException, DataAccessObjectException;
+    /** flushes any remaining records to or from the dao 
+     * @throws BatchSizeLimitException */
+    protected abstract void flush() throws OperationException, DataAccessObjectException, BatchSizeLimitException;
 
     /** subclasses should do operation specific initialization here */
     protected abstract void initOperation() throws DataAccessObjectInitializationException, OperationException,

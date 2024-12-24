@@ -53,7 +53,7 @@ public abstract class LoadPage extends OperationPage {
     protected String getConfigInfo() {
         return Labels.getString("LoadPage.importBatchSize")
         + " "
-        + controller.getAppConfig().getImportBatchSize()
+        + controller.getAppConfig().getMaxRowsInImportBatch()
         + "    "
         + Labels.getString("AdvancedSettingsDialog.uiLabel." + AppConfig.PROP_LOAD_ROW_TO_START_AT)
         + " "

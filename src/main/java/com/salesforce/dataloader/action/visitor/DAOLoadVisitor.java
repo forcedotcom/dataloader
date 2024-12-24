@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.DAORowUtil;
 
@@ -80,7 +79,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     protected BasicDynaClass dynaClass = null;
     protected DynaProperty[] dynaProps = null;
 
-    private final int batchSize;
+    private final int MAX_ROWS_IN_BATCH;
     protected List<TableRow> daoRowList = new ArrayList<TableRow>();
     protected ArrayList<Integer> batchRowToDAORowList = new ArrayList<Integer>();
     private int processedDAORowCounter = 0;
@@ -106,7 +105,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         dynaArray = dynaList;
         SforceDynaBean.registerConverters(getConfig());
 
-        this.batchSize = getConfig().getImportBatchSize();
+        this.MAX_ROWS_IN_BATCH = getConfig().getMaxRowsInImportBatch();
         rowConversionFailureMap = new HashMap<Integer, Boolean>();
         String newRichTextRegex = getConfig().getString(AppConfig.PROP_RICH_TEXT_FIELD_REGEX);
         if (newRichTextRegex != null 
@@ -142,16 +141,13 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         }
         return true;   // no entry in the list of failed conversions means successful conversion
     }
+    
+    private int bytesInBatch = 0;
 
     @Override
     public boolean visit(TableRow row) throws OperationException, DataAccessObjectException,
-    ConnectionException {
+    ConnectionException, BatchSizeLimitException {
         AppConfig appConfig = controller.getAppConfig();
-        if (appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
-            || (!appConfig.isBulkAPIEnabled() && !appConfig.isBulkV2APIEnabled())) {
-            // either bulk mode or cache bulk data uploaded from DAO
-            this.daoRowList.add(row);
-        }
         // the result are sforce fields mapped to data
         TableRow sforceDataRow = getMapper().mapData(row, processedDAORowCounter == 0);
         if (this.getConfig().getBoolean(AppConfig.PROP_TRUNCATE_FIELDS)
@@ -214,14 +210,31 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
                     dynaBean.set(fName, value);
                 }
             }
+
+            int bytesInBean = getBytesInBean(dynaBean);
+            if (this.bytesInBatch + bytesInBean > getMaxBytesInBatch()) {
+                loadBatch();
+                this.bytesInBatch = 0;
+                throw new BatchSizeLimitException("batch max bytes size reached");
+            }
+            if (appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                    || (!appConfig.isBulkAPIEnabled() && !appConfig.isBulkV2APIEnabled())) {
+                // either bulk mode or cache bulk data uploaded from DAO
+                this.daoRowList.add(row);
+            }
             dynaArray.add(dynaBean);
+            this.bytesInBatch += bytesInBean;
             this.batchRowToDAORowList.add(this.processedDAORowCounter);
         } catch (ConversionException | IllegalAccessException conve) {
             String errMsg = Messages.getMessage("Visitor", "conversionErrorMsg", conve.getMessage());
             getLogger().error(errMsg, conve);
 
             conversionFailed(row, errMsg);
-            // this row cannot be added since conversion has failed
+            if (appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                    || (!appConfig.isBulkAPIEnabled() && !appConfig.isBulkV2APIEnabled())) {
+                // either bulk mode or cache bulk data uploaded from DAO
+                this.daoRowList.add(row);
+            }
             return false;
         } catch (InvocationTargetException e) {
             // TODO Auto-generated catch block
@@ -234,15 +247,14 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         }
 
         // load the batch
-        if (dynaArray.size() >= this.batchSize || maxBatchBytesReached(dynaArray)) {
+        if (dynaArray.size() >= this.MAX_ROWS_IN_BATCH) {
             loadBatch();
         }
         return true;
     }
-    
-    protected boolean maxBatchBytesReached(List<DynaBean> dynaArray) {
-        return false;
-    }
+        
+    protected abstract int getBytesInBean(DynaBean dynaBean);
+    protected abstract int getMaxBytesInBatch();
 
     /**
      * @param row
@@ -257,7 +269,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
     protected void convertBulkAPINulls(TableRow row) {}
 
-    public void flushRemaining() throws OperationException, DataAccessObjectException {
+    public void flushRemaining() throws OperationException, DataAccessObjectException, BatchSizeLimitException {
         // check if there are any entities left
         if (dynaArray.size() > 0) {
             loadBatch();
@@ -266,7 +278,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         cachedFieldAttributesForOperation = null;
     }
 
-    protected abstract void loadBatch() throws DataAccessObjectException, OperationException;
+    protected abstract void loadBatch() throws DataAccessObjectException, OperationException, BatchSizeLimitException;
 
     public void clearArrays() {
         // clear the arrays

@@ -134,19 +134,21 @@ public class AppConfig {
     public static final int MAX_RETRIES_LIMIT = 10;
     public static final int DEFAULT_CONNECTION_TIMEOUT_SECS = 60;
     public static final int DEFAULT_TIMEOUT_SECS = 540;
-    public static final int DEFAULT_LOAD_BATCH_SIZE = 200;
+    public static final int DEFAULT_NUM_ROWS_LOAD_BATCH = 200;
     public static final int DEFAULT_DAO_WRITE_BATCH_SIZE = 500;
     public static final int DEFAULT_DAO_READ_BATCH_SIZE = 200;
-    public static final int MAX_SOAP_API_IMPORT_BATCH_SIZE = 200;
+    public static final int MAX_NUM_ROWS_SOAP_API_IMPORT_BATCH = 200;
     public static final int MAX_DAO_READ_BATCH_SIZE = 200;
     public static final int MAX_DAO_WRITE_BATCH_SIZE = 2000;
-    
+    public static final int MAX_SOAP_API_IMPORT_BATCH_BYTES = 50000000;
+    public static final int MAX_REST_API_IMPORT_BATCH_BYTES = 50000000;
+
     // Bulk v1 and v2 limits specified at https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_bulkapi.htm
     public static final int MAX_BULK_API_IMPORT_BATCH_BYTES = 10000000;
-    public static final int MAX_BULK_API_IMPORT_BATCH_SIZE = 10000;
+    public static final int MAX_NUM_ROWS_BULK_API_IMPORT_BATCH = 10000;
     public static final int MAX_BULKV2_API_IMPORT_JOB_BYTES = 150000000;
-    public static final int MAX_BULKV2_API_IMPORT_JOB_SIZE = 150000000;
-    public static final int DEFAULT_BULK_API_IMPORT_BATCH_SIZE = 2000;
+    public static final int MAX_NUM_ROWS_BULKV2_API_IMPORT_JOB = 150000000;
+    public static final int DEFAULT_NUM_ROWS_BULK_API_IMPORT_BATCH = 2000;
     
     public static final long DEFAULT_BULK_API_CHECK_STATUS_INTERVAL = 5000L;
     public static final String DEFAULT_ENDPOINT_URL_PROD = "https://login.salesforce.com/";
@@ -687,7 +689,7 @@ public class AppConfig {
         setDefaultValue(PROP_AUTH_ENDPOINT_PROD, DEFAULT_ENDPOINT_URL_PROD);
         setDefaultValue(PROP_AUTH_ENDPOINT_SANDBOX, DEFAULT_ENDPOINT_URL_SANDBOX);
 
-        setDefaultValue(PROP_IMPORT_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_BULK_API_IMPORT_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE);
+        setDefaultValue(PROP_IMPORT_BATCH_SIZE, useBulkApiByDefault() ? DEFAULT_NUM_ROWS_BULK_API_IMPORT_BATCH : DEFAULT_NUM_ROWS_LOAD_BATCH);
         setDefaultValue(PROP_LOAD_ROW_TO_START_AT, 0);
         setDefaultValue(PROP_TIMEOUT_SECS, DEFAULT_TIMEOUT_SECS);
         setDefaultValue(PROP_CONNECTION_TIMEOUT_SECS, DEFAULT_CONNECTION_TIMEOUT_SECS);
@@ -1673,12 +1675,12 @@ public class AppConfig {
         return (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH);
     }
 
-    public int getImportBatchSize() {
+    public int getMaxRowsInImportBatch() {
         boolean bulkApi = isBulkAPIEnabled();
         boolean bulkV2Api = this.isBulkV2APIEnabled();
         
         if (bulkV2Api) {
-            return MAX_BULKV2_API_IMPORT_JOB_SIZE;
+            return MAX_NUM_ROWS_BULKV2_API_IMPORT_JOB;
         }
         
         int bs = -1;
@@ -1686,22 +1688,22 @@ public class AppConfig {
             bs = getInt(PROP_IMPORT_BATCH_SIZE);
         } catch (ParameterLoadException e) {
         }
-        int maxBatchSize = bulkApi ? MAX_BULK_API_IMPORT_BATCH_SIZE : MAX_SOAP_API_IMPORT_BATCH_SIZE;
+        int maxBatchSize = bulkApi ? MAX_NUM_ROWS_BULK_API_IMPORT_BATCH : MAX_NUM_ROWS_SOAP_API_IMPORT_BATCH;
         return bs > maxBatchSize ? maxBatchSize : bs > 0 ? bs : getDefaultImportBatchSize(bulkApi, bulkV2Api);
     }
 
     public int getDefaultImportBatchSize(boolean bulkApi, boolean bulkV2Api) {
         if (bulkV2Api) {
-            return MAX_BULKV2_API_IMPORT_JOB_SIZE;
+            return MAX_NUM_ROWS_BULKV2_API_IMPORT_JOB;
         }
-        return bulkApi ? DEFAULT_BULK_API_IMPORT_BATCH_SIZE : DEFAULT_LOAD_BATCH_SIZE;
+        return bulkApi ? DEFAULT_NUM_ROWS_BULK_API_IMPORT_BATCH : DEFAULT_NUM_ROWS_LOAD_BATCH;
     }
     
     public int getMaxImportBatchSize(boolean bulkApi, boolean bulkV2Api) {
         if (bulkV2Api) {
-            return MAX_BULKV2_API_IMPORT_JOB_SIZE;
+            return MAX_NUM_ROWS_BULKV2_API_IMPORT_JOB;
         }
-        return bulkApi ? MAX_BULK_API_IMPORT_BATCH_SIZE : MAX_SOAP_API_IMPORT_BATCH_SIZE;
+        return bulkApi ? MAX_NUM_ROWS_BULK_API_IMPORT_BATCH : MAX_NUM_ROWS_SOAP_API_IMPORT_BATCH;
     }
     
     public boolean useBulkAPIForCurrentOperation() {
