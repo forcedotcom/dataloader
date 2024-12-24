@@ -35,7 +35,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -476,9 +475,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         	return;
         }
         DataReader dataReader = null;
-        if (!controller.getAppConfig().getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
-            dataReader = resetDAO();
-        }
+        dataReader = resetDAO();
+        
         // create a map of batch infos by batch id. Each batchinfo has the final processing state of the batch
         final Map<String, BatchInfo> batchInfoMap = createBatchInfoMap();
 
@@ -517,11 +515,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         
         final int totalRowsInDAOInCurrentBatch = lastDAORowForCurrentBatch - this.firstDAORowForCurrentBatch + 1;
         List<TableRow> rows;
-        if (controller.getAppConfig().getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)) {
-            rows = this.daoRowList.subList(firstDAORowForCurrentBatch, firstDAORowForCurrentBatch+totalRowsInDAOInCurrentBatch);
-        } else {
-            rows = dataReader.readTableRowList(totalRowsInDAOInCurrentBatch);
-        }
+        rows = dataReader.readTableRowList(totalRowsInDAOInCurrentBatch);
         if (batch.getState() == BatchStateEnum.Completed || batch.getNumberRecordsProcessed() > 0) {
             try {
                 processBatchResults(batch, errorMessage, batch.getState(), rows, this.firstDAORowForCurrentBatch);
