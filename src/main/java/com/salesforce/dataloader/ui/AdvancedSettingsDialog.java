@@ -540,7 +540,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
         labelImportBatchSize = createLink(importBatchSizeComposite, null, args, AppConfig.PROP_IMPORT_BATCH_SIZE);
         textImportBatchSize = new Text(importBatchSizeComposite, SWT.BORDER);
-        textImportBatchSize.setText(Integer.toString(appConfig.getImportBatchSize()));
+        textImportBatchSize.setText(Integer.toString(appConfig.getMaxRowsInImportBatch()));
         textImportBatchSize.setEnabled(!useBulkV2API);
         textImportBatchSize.addVerifyListener(new VerifyListener() {
             @Override

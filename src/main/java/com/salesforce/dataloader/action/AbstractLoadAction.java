@@ -33,6 +33,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObject;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
 import com.salesforce.dataloader.dao.DataReader;
+import com.salesforce.dataloader.exception.BatchSizeLimitException;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.MappingInitializationException;
@@ -77,7 +78,7 @@ abstract class AbstractLoadAction extends AbstractAction {
     protected boolean visit() throws DataAccessObjectException, ParameterLoadException, OperationException,
     ConnectionException {
 
-        final int loadBatchSize = this.getConfig().getImportBatchSize();
+        final int loadBatchSize = this.getConfig().getMaxRowsInImportBatch();
         final int daoRowNumBase = getDao().getCurrentRowNumber();
         final List<TableRow> daoRowList = getDao().readTableRowList(loadBatchSize);
         if (daoRowList == null || daoRowList.size() == 0) return false;
@@ -89,14 +90,24 @@ abstract class AbstractLoadAction extends AbstractAction {
                         false);
                 return false;
             }
-            getVisitor().setRowConversionStatus(daoRowNumBase + daoRowCount++, 
-                                                    getVisitor().visit(daoRow));
+            boolean successfulVisit = false;
+            try {
+                successfulVisit = getVisitor().visit(daoRow);
+            } catch (BatchSizeLimitException ex) {
+                // retry the same row again
+                try {
+                    successfulVisit = getVisitor().visit(daoRow);
+                } catch (BatchSizeLimitException e) {
+                    getLogger().warn("row byte size is too large to process");
+                }
+            }
+            getVisitor().setRowConversionStatus(daoRowNumBase + daoRowCount++, successfulVisit);
         }
         return true;
     }
 
     @Override
-    protected void flush() throws OperationException, DataAccessObjectException {
+    protected void flush() throws OperationException, DataAccessObjectException, BatchSizeLimitException {
         getVisitor().flushRemaining();
     }
 

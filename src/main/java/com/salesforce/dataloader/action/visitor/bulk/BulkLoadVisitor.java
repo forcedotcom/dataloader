@@ -35,7 +35,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,6 +63,7 @@ import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.DataWriter;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
+import com.salesforce.dataloader.exception.BatchSizeLimitException;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.LoadException;
@@ -72,7 +73,6 @@ import com.salesforce.dataloader.exception.RelationshipFormatException;
 import com.salesforce.dataloader.model.NACalendarValue;
 import com.salesforce.dataloader.model.NADateOnlyCalendarValue;
 import com.salesforce.dataloader.model.NATextValue;
-import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DAORowUtil;
@@ -100,12 +100,14 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private final boolean isDelete;
     private static final DateFormat DATE_FMT;
     private int batchCountForJob = 0;
+    private List<String> headerColumns = null;
 
     static {
         DATE_FMT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         DATE_FMT.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
     private final BulkApiVisitorUtil jobUtil;
+    private ArrayList<BulkApiVisitorUtil> bulkv2JobsList = new ArrayList<BulkApiVisitorUtil>();
 
     // This keeps track of all the batches we send in order so that we know whats what when processsing results
     private final List<BatchData> allBatchesInOrder = new ArrayList<BatchData>();
@@ -141,10 +143,13 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         super(controller, monitor, successWriter, errorWriter);
         this.isDelete = getController().getAppConfig().getOperationInfo().isDelete();
         this.jobUtil = new BulkApiVisitorUtil(getController(), getProgressMonitor(), getRateCalculator());
+        if (controller.getAppConfig().isBulkV2APIEnabled()) {
+            bulkv2JobsList.add(this.jobUtil);
+        }
     }
 
     @Override
-    protected void loadBatch() throws DataAccessObjectException, OperationException {
+    protected void loadBatch() throws DataAccessObjectException, OperationException, BatchSizeLimitException {
         try {
             if (!this.jobUtil.hasJob()) this.jobUtil.createJob();
             createBatches();
@@ -177,7 +182,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         return null;
     }
 
-    private void createBatches() throws OperationException, IOException, AsyncApiException {
+    private void createBatches() throws OperationException, IOException, AsyncApiException, BatchSizeLimitException {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         final PrintStream out = new PrintStream(os, true, AppConfig.BULK_API_ENCODING);
         doOneBatch(out, os, this.dynaArray);
@@ -185,11 +190,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     private void doOneBatch(PrintStream out, ByteArrayOutputStream os, List<DynaBean> rows) throws OperationException,
-            AsyncApiException, FileNotFoundException {
+            AsyncApiException, FileNotFoundException, BatchSizeLimitException {
         int processedRecordsCount = 0;
-        final List<String> userColumns = getController().getDao().getColumnNames();
-        List<String> headerColumns = null;
-        int maxBatchBytes = this.getConfig().isBulkV2APIEnabled() ? AppConfig.MAX_BULKV2_API_IMPORT_JOB_BYTES : AppConfig.MAX_BULK_API_IMPORT_BATCH_BYTES;
         long startTime = System.currentTimeMillis();
         long measureTime = System.currentTimeMillis();
         long elapsedTime = measureTime - startTime;
@@ -204,31 +206,44 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 logger.debug("rows.get() invocation time after processing 10k records is " + elapsedTime + " msec");
             }
             if (processedRecordsCount == 0) {
+                List<String> userColumns = getController().getDao().getColumnNames();
                 headerColumns = addBatchRequestHeader(out, row, userColumns);
             }
             measureTime = System.currentTimeMillis();
-            writeRow(row, out, processedRecordsCount, headerColumns);
+            writeRow(row, out, headerColumns);
             if (processedRecordsCount % timeMeasureGap == 0) {
                 elapsedTime = System.currentTimeMillis() - measureTime;
                 logger.debug("writeRow() invocation time after processing 10k records is " + elapsedTime + " msec");
             }
             processedRecordsCount++;
 
-            if (os.size() > maxBatchBytes) {
+            int nextRowBytes = 0;
+            if (i < rows.size()-1) {
+                DynaBean nextRow = rows.get(i+1);
+                nextRowBytes = this.getBytesInBean(nextRow);
+            }
+            if (os.size() + nextRowBytes > this.getMaxBytesInBatch()) {
+                logger.info("upload request size in bytes: " + os.size());
             	createBatch(os, processedRecordsCount); // resets outputstream
                 // reset for the next batch
             	processedRecordsCount = 0;
+            	if (controller.getAppConfig().isBulkV2APIEnabled()
+            	        && i < rows.size()-1) {
+            	    // more rows to process
+            	    throw new BatchSizeLimitException("batch max bytes size reached");            	}
             }
             if (processedRecordsCount % timeMeasureGap == 0) {
                 logger.debug("loop processing time after processing 10k records is " + (System.currentTimeMillis() - loopStartTime) + " msec");
                 logger.debug("total processed = " + processedRecordsCount + "\n\n");
             }
         }
-        if (processedRecordsCount > 0) createBatch(os, processedRecordsCount);
+        if (processedRecordsCount > 0) {
+            createBatch(os, processedRecordsCount);
+        }
         this.jobUtil.periodicCheckStatus();
     }
-
-    private void writeRow(DynaBean row, PrintStream out, int recordsInBatch,
+    
+    private void writeRow(DynaBean row, PrintStream out,
             List<String> header) throws LoadException {
         boolean notFirst = false;
         for (final String sfdcColumn : header) {
@@ -398,6 +413,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private void createBatch(ByteArrayOutputStream os, int numRecords) throws AsyncApiException, FileNotFoundException {
         if (numRecords <= 0) return;
         final byte[] request = os.toByteArray();
+        logger.info("upload request size in bytes: " + request.length);
         String uploadDataFileName = null;
         if (controller.getAppConfig().getBoolean(AppConfig.PROP_SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV)) {
             this.batchCountForJob++;
@@ -414,7 +430,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     @Override
-    public void flushRemaining() throws OperationException, DataAccessObjectException {
+    public void flushRemaining() throws OperationException, DataAccessObjectException, BatchSizeLimitException {
         super.flushRemaining();
         if (this.jobUtil.hasJob()) {
             try {
@@ -660,5 +676,32 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     @Override
     public Map<String, InputStream> getAttachments() {
         return this.jobUtil.getAttachments();
+    }
+
+    @Override
+    protected int getMaxBytesInBatch() {
+        return this.getConfig().isBulkV2APIEnabled() ? AppConfig.MAX_BULKV2_API_IMPORT_JOB_BYTES : AppConfig.MAX_BULK_API_IMPORT_BATCH_BYTES;
+    }
+
+    @Override
+    protected int getBytesInBean(DynaBean dynaBean) {
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        PrintStream ps;
+        int beanBytes = 0;
+
+        try {
+            ps = new PrintStream(os, true, AppConfig.BULK_API_ENCODING);
+            if (headerColumns == null) {
+                List<String> userColumns = getController().getDao().getColumnNames();
+                headerColumns = addBatchRequestHeader(ps, dynaBean, userColumns);
+            }
+            writeRow(dynaBean, ps, headerColumns);
+            beanBytes = os.size();
+            ps.close();
+            os.close();
+        } catch (IOException | LoadException e) {
+            logger.warn("unable to determine row size");
+        }
+        return beanBytes;
     }
 }

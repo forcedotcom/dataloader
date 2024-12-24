@@ -117,6 +117,15 @@ public abstract class RESTLoadVisitor extends DAOLoadVisitor {
         
     }
     
+    @Override
+    protected int getMaxBytesInBatch() {
+        return  AppConfig.MAX_REST_API_IMPORT_BATCH_BYTES;
+    }
+    @Override
+    protected int getBytesInBean(DynaBean dynaBean) {
+        return dynaBean.toString().length();
+    }
+    
     /**
      * This method performs the actual client action. It must be implemented by all subclasses. It returns an object[]
      * because of saveResult[] and deleteResult[], while do the exact same thing, are two different classes without
