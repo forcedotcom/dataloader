@@ -96,6 +96,10 @@ abstract class AbstractLoadAction extends AbstractAction {
             } catch (BatchSizeLimitException ex) {
                 // retry the same row again
                 try {
+                    if (this.getConfig().isBulkV2APIEnabled()) {
+                        // create a new visitor for a new job
+                        setVisitor(this.createVisitor());
+                    }
                     successfulVisit = getVisitor().visit(daoRow);
                 } catch (BatchSizeLimitException e) {
                     getLogger().warn("row byte size is too large to process");

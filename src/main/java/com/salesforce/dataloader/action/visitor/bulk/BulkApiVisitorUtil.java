@@ -63,7 +63,7 @@ class BulkApiVisitorUtil {
 
     private final BulkConnection connection;
 
-    private JobInfo jobInfo;
+    private JobInfo jobInfo = null;
     private int recordsProcessed;
 
     private final Map<String, InputStream> attachments = new HashMap<String, InputStream>();
