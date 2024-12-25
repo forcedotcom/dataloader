@@ -215,6 +215,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             if (this.bytesInBatch + bytesInBean > getMaxBytesInBatch()) {
                 loadBatch();
                 this.bytesInBatch = 0;
+                this.processedDAORowCounter--; // roll back the counter by 1
                 throw new BatchSizeLimitException("batch max bytes size reached");
             }
             if (appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)

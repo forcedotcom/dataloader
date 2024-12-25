@@ -215,22 +215,6 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 logger.debug("writeRow() invocation time after processing 10k records is " + elapsedTime + " msec");
             }
             processedRecordsCount++;
-
-            int nextRowBytes = 0;
-            if (i < rows.size()-1) {
-                DynaBean nextRow = rows.get(i+1);
-                nextRowBytes = this.getBytesInBean(nextRow);
-            }
-            if (os.size() + nextRowBytes > this.getMaxBytesInBatch()) {
-                logger.info("upload request size in bytes: " + os.size());
-            	createBatch(os, processedRecordsCount); // resets outputstream
-                // reset for the next batch
-            	processedRecordsCount = 0;
-            	if (controller.getAppConfig().isBulkV2APIEnabled()
-            	        && i < rows.size()-1) {
-            	    // more rows to process
-            	    throw new BatchSizeLimitException("batch max bytes size reached");            	}
-            }
             if (processedRecordsCount % timeMeasureGap == 0) {
                 logger.debug("loop processing time after processing 10k records is " + (System.currentTimeMillis() - loopStartTime) + " msec");
                 logger.debug("total processed = " + processedRecordsCount + "\n\n");

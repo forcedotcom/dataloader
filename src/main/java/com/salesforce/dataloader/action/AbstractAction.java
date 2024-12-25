@@ -65,7 +65,7 @@ abstract class AbstractAction implements IAction {
 
     private final ILoaderProgress monitor;
     private final Controller controller;
-    private final IVisitor visitor;
+    private IVisitor visitor;
 
     protected DataWriter successWriter;
     protected DataWriter errorWriter;
@@ -294,6 +294,10 @@ abstract class AbstractAction implements IAction {
 
     public IVisitor getVisitor() {
         return this.visitor;
+    }
+    
+    protected void setVisitor(IVisitor newVisitor) {
+        this.visitor = newVisitor;
     }
 
     protected void handleException(Exception e) {
