@@ -230,9 +230,8 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             getLogger().error(errMsg, conve);
 
             conversionFailed(row, errMsg);
-            if (appConfig.getBoolean(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
-                    || (!appConfig.isBulkAPIEnabled() && !appConfig.isBulkV2APIEnabled())) {
-                // either bulk mode or cache bulk data uploaded from DAO
+            if (!appConfig.isBulkAPIEnabled() && !appConfig.isBulkV2APIEnabled()) {
+                // SOAP or REST API use daoRowList to process results of an upload request
                 this.daoRowList.add(row);
             }
             return false;
@@ -282,9 +281,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
     public void clearArrays() {
         // clear the arrays
-        if (!controller.getAppConfig().getBoolean(AppConfig.PROP_BULK_API_ENABLED)) {
-            daoRowList.clear();
-        }
+        daoRowList.clear();
         dynaArray.clear();
     }
 
