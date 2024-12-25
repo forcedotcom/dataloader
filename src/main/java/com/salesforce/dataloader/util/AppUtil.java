@@ -234,6 +234,7 @@ public class AppUtil {
                 extractionDestination.setExecutable(true);
             }
         }
+        jarfile.close();
     }
 
     public static APP_RUN_MODE getAppRunMode() {
