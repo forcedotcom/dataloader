@@ -60,7 +60,6 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReader;
 import com.salesforce.dataloader.dao.DataWriter;
-import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
 import com.salesforce.dataloader.exception.BatchSizeLimitException;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -100,13 +99,13 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private static final DateFormat DATE_FMT;
     private int batchCountForJob = 0;
     private List<String> headerColumns = null;
+    private boolean firstBatchOrJob = true;
 
     static {
         DATE_FMT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         DATE_FMT.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
     private final BulkApiVisitorUtil jobUtil;
-    private ArrayList<BulkApiVisitorUtil> bulkv2JobsList = new ArrayList<BulkApiVisitorUtil>();
 
     // This keeps track of all the batches we send in order so that we know whats what when processsing results
     private final List<BatchData> allBatchesInOrder = new ArrayList<BatchData>();
@@ -142,9 +141,10 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         super(controller, monitor, successWriter, errorWriter);
         this.isDelete = getController().getAppConfig().getOperationInfo().isDelete();
         this.jobUtil = new BulkApiVisitorUtil(getController(), getProgressMonitor(), getRateCalculator());
-        if (controller.getAppConfig().isBulkV2APIEnabled()) {
-            bulkv2JobsList.add(this.jobUtil);
-        }
+    }
+    
+    protected BulkApiVisitorUtil getVisitorUtil() {
+        return this.jobUtil;
     }
 
     @Override
@@ -157,6 +157,10 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             handleException(e);
         } catch (final IOException e) {
             handleException(e);
+        } finally {
+            if (firstBatchOrJob) {
+                firstBatchOrJob = false;
+            }
         }
     }
 
@@ -188,7 +192,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         os.close();
     }
 
-    private void doOneBatch(PrintStream out, ByteArrayOutputStream os, List<DynaBean> rows) throws OperationException,
+    protected void doOneBatch(PrintStream out, ByteArrayOutputStream os, List<DynaBean> rows) throws OperationException,
             AsyncApiException, FileNotFoundException, BatchSizeLimitException {
         int processedRecordsCount = 0;
         long startTime = System.currentTimeMillis();
@@ -396,7 +400,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     private void createBatch(ByteArrayOutputStream os, int numRecords) throws AsyncApiException, FileNotFoundException {
         if (numRecords <= 0) return;
         final byte[] request = os.toByteArray();
-        logger.info("upload request size in bytes: " + request.length);
+        logger.debug("upload request size in bytes: " + request.length);
         String uploadDataFileName = null;
         if (controller.getAppConfig().getBoolean(AppConfig.PROP_SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV)) {
             this.batchCountForJob++;
@@ -411,10 +415,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         os.reset();
         this.allBatchesInOrder.add(new BatchData(bi.getId(), numRecords));           
     }
-
-    @Override
-    public void flushRemaining() throws OperationException, DataAccessObjectException, BatchSizeLimitException {
-        super.flushRemaining();
+    
+    protected void closeJob() throws OperationException, DataAccessObjectException {
         if (this.jobUtil.hasJob()) {
             try {
                 this.jobUtil.awaitCompletionAndCloseJob();
@@ -422,42 +424,15 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 logger.warn("Failed to close job", e);
             }
             try {
-            	if (this.getConfig().isBulkAPIEnabled() || this.getConfig().isBulkV2APIEnabled())
-                getResults();
+                getResults(firstBatchOrJob);
             } catch (AsyncApiException e) {
                 throw new LoadException("Failed to get batch results", e);
             }
         }
     }
-    
-    private void getBulkV2LoadJobResults() throws AsyncApiException, OperationException, DataAccessObjectException {
-    	this.getSuccessWriter().close();
-    	this.getErrorWriter().close();
-    	
-    	AppConfig appConfig = this.getConfig();
-    	String successWriterFile = appConfig.getString(AppConfig.PROP_OUTPUT_SUCCESS);
-    	String errorWriterFile = appConfig.getString(AppConfig.PROP_OUTPUT_ERROR);
-    	// TODO for unprocessed records. Also uncomment in Controller.java to set the right value
-    	// for Config.OUTPUT_UNPROCESSED_RECORDS
-    	// String unprocessedRecordsWriterFile = config.getString(Config.OUTPUT_UNPROCESSED_RECORDS);
 
-    	this.jobUtil.getBulkV2LoadSuccessResults(successWriterFile);
-        CSVFileReader csvReader = new CSVFileReader(new File(successWriterFile), appConfig, true, false);
-        this.setSuccesses(csvReader.getTotalRows());
-    	
-    	this.jobUtil.getBulkV2LoadErrorResults(errorWriterFile);
-        csvReader = new CSVFileReader(new File(errorWriterFile), appConfig, true, false);
-        this.setErrors(csvReader.getTotalRows());
-    }
-
-    private void getResults() throws AsyncApiException, OperationException, DataAccessObjectException {
-
+    protected void getResults(boolean firstBatchOrJob) throws AsyncApiException, OperationException, DataAccessObjectException {
         getProgressMonitor().setSubTask(Messages.getMessage(getClass(), "retrievingResults"));
-
-        if (this.getConfig().isBulkV2APIEnabled()) {
-        	getBulkV2LoadJobResults();
-        	return;
-        }
         DataReader dataReader = null;
         dataReader = resetDAO();
         
@@ -474,7 +449,6 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             uploadedRowCount += clientBatchInfo.numRows;
         }
     }
-    
 
     private int firstDAORowForCurrentBatch = 0;
 

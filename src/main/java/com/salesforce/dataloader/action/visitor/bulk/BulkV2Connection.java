@@ -309,8 +309,8 @@ public class BulkV2Connection extends BulkConnection {
         return getJobStatus(jobId);
     }
     
-    public void saveIngestSuccessResults(String jobId, String filename) throws AsyncApiException {
-    	doSaveIngestResults(jobId, filename, INGEST_RESULTS_SUCCESSFUL, false);
+    public void saveIngestSuccessResults(String jobId, String filename, boolean append) throws AsyncApiException {
+    	doSaveIngestResults(jobId, filename, INGEST_RESULTS_SUCCESSFUL, append);
     }
     
     public void saveIngestFailureResults(String jobId, String filename) throws AsyncApiException {

@@ -406,8 +406,8 @@ class BulkApiVisitorUtil {
         return getNumRecordsProcessedInJob();
     }
     
-    void getBulkV2LoadSuccessResults(String filename) throws AsyncApiException {
-    	this.controller.getBulkV2Client().getConnection().saveIngestSuccessResults(this.getJobId(), filename);
+    void getBulkV2LoadSuccessResults(String filename, boolean append) throws AsyncApiException {
+    	this.controller.getBulkV2Client().getConnection().saveIngestSuccessResults(this.getJobId(), filename, append);
     }
     
     void getBulkV2LoadErrorResults(String filename) throws AsyncApiException {

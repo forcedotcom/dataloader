@@ -276,8 +276,13 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         }
         // clear the caches
         cachedFieldAttributesForOperation = null;
+        closeJob();
     }
-
+    
+    protected void closeJob() throws OperationException, DataAccessObjectException, BatchSizeLimitException {
+        // do nothing. Subclasses should override if they have a job to close
+    }
+    
     protected abstract void loadBatch() throws DataAccessObjectException, OperationException, BatchSizeLimitException;
 
     public void clearArrays() {
