@@ -26,11 +26,13 @@
 
 package com.salesforce.dataloader.action;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.action.visitor.bulk.BulkLoadVisitor;
+import com.salesforce.dataloader.action.visitor.bulk.BulkV2LoadVisitor;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.mapping.LoadMapper;
@@ -48,6 +50,9 @@ class BulkLoadAction extends AbstractLoadAction {
 
     @Override
     protected DAOLoadVisitor createVisitor() {
+        if (this.getConfig().isBulkV2APIEnabled()) {
+            return new BulkV2LoadVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
+        }
         return new BulkLoadVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
     }
     
