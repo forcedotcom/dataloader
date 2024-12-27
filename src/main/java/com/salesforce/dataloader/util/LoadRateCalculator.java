@@ -40,8 +40,10 @@ public class LoadRateCalculator {
 
     // TODO: we can probably move all references to this code into a base ProgressMonitor class
     private Date startTime = null;
-    private long totalRecordsInJob = 0;
+    private long totalRecordsAcrossAllJobs = 0;
     private boolean started = false;
+    private long numSuccessesAcrossCompletedJobs = 0;
+    private long numErrorsAcrossCompletedJobs = 0;
 
     public LoadRateCalculator() {
         // do nothing
@@ -51,14 +53,16 @@ public class LoadRateCalculator {
         if (!started) {
             started = true;
             this.startTime = new Date();
-            this.totalRecordsInJob = numRecords;
+            this.totalRecordsAcrossAllJobs = numRecords;
         }
     }
 
     public String calculateSubTask(long processedRecordsInJob, long numErrorsInJob) {
 
         final Date currentLoadTime = new Date();
-        final long numSuccessInJob = processedRecordsInJob - numErrorsInJob;
+        final long totalProcessedRecords = processedRecordsInJob + this.numErrorsAcrossCompletedJobs + this.numSuccessesAcrossCompletedJobs;
+        final long totalErrors =  this.numErrorsAcrossCompletedJobs + numErrorsInJob;
+        final long totalSuccesses = totalProcessedRecords - totalErrors;
         //final long currentPerMin = numSuccess * 60 * 60;
         long hourlyProcessingRate;
 
@@ -67,14 +71,14 @@ public class LoadRateCalculator {
         if (totalElapsedTimeInSec == 0) {
             hourlyProcessingRate = 0;
         } else {
-            hourlyProcessingRate = (processedRecordsInJob * 60 * 60) / totalElapsedTimeInSec;
+            hourlyProcessingRate = (totalProcessedRecords * 60 * 60) / totalElapsedTimeInSec;
         }
 
         long remainingTimeInSec = 0;
         long estimatedTotalTimeInSec = 0;
-        if (this.totalRecordsInJob > 0 && processedRecordsInJob > 0) {
+        if (this.totalRecordsAcrossAllJobs > 0 && totalProcessedRecords > 0) {
             // can estimate remaining time only if a few records are processed already.
-            estimatedTotalTimeInSec = (long) (totalElapsedTimeInSec * this.totalRecordsInJob / processedRecordsInJob);
+            estimatedTotalTimeInSec = (long) (totalElapsedTimeInSec * this.totalRecordsAcrossAllJobs / totalProcessedRecords);
             remainingTimeInSec = estimatedTotalTimeInSec - totalElapsedTimeInSec;
         }
 
@@ -85,24 +89,32 @@ public class LoadRateCalculator {
             // LoadRateCalculator.processedTimeUnknown=Processed {0} of {1} total records. 
             // There are {2} successes and {3} errors.
             return Messages.getMessage(getClass(), "processedTimeUnknown", 
-                    processedRecordsInJob, // {0}
-                    this.totalRecordsInJob,  // {1}
-                    numSuccessInJob,       // {2}
-                    numErrorsInJob);       // {3}
+                    totalProcessedRecords, // {0}
+                    this.totalRecordsAcrossAllJobs,  // {1}
+                    totalSuccesses,       // {2}
+                    totalErrors);       // {3}
         }
         // LoadRateCalculator.processed=Processed {0} of {1} total records in {8} minutes, {7} seconds. 
         // There are {5} successes and {6} errors. \nRate: {2} records per hour. 
         // Estimated time to complete: {3} minutes and {4} seconds. 
         return Messages.getMessage(getClass(), "processed", 
-                processedRecordsInJob, // {0}
-                this.totalRecordsInJob,  // {1}
+                totalProcessedRecords, // {0}
+                this.totalRecordsAcrossAllJobs,  // {1}
                 hourlyProcessingRate,    // {2}
                 remainingTimeInMinutes,  // {3}
                 remainingSeconds,        // {4}
-                numSuccessInJob,       // {5}
-                numErrorsInJob,       // {6}
+                totalSuccesses,       // {5}
+                totalErrors,       // {6}
                 totalElapsedTimeInSec - (60 * elapsedTimeInMinutes), // {7}
                 elapsedTimeInMinutes // {8}
             );
+    }
+    
+    public void setNumSuccessesAcrossCompletedJobs(long num) {
+        this.numSuccessesAcrossCompletedJobs = num;
+    }
+    
+    public void setNumErrorsAcrossCompletedJobs(long num) {
+        this.numErrorsAcrossCompletedJobs = num;
     }
 }

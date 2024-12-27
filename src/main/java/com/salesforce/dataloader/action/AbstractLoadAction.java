@@ -42,6 +42,7 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.mapping.LoadMapper;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.DAORowUtil;
+import com.salesforce.dataloader.util.LoadRateCalculator;
 import com.sforce.ws.ConnectionException;
 
 import java.util.List;
@@ -58,7 +59,7 @@ abstract class AbstractLoadAction extends AbstractAction {
     }
 
     @Override
-    protected abstract DAOLoadVisitor createVisitor(boolean isFirstJob);
+    protected abstract DAOLoadVisitor createVisitor(LoadRateCalculator rateCalculator, boolean isFirstJob);
 
     @Override
     protected void checkDao(DataAccessObject dao) throws DataAccessObjectInitializationException {
@@ -97,8 +98,10 @@ abstract class AbstractLoadAction extends AbstractAction {
                 // retry the same row again
                 try {
                     if (this.getConfig().isBulkV2APIEnabled()) {
-                        // create a new visitor for a new job
-                        setVisitor(this.createVisitor(false));
+                        // BulkV2 completed a job.
+                        // Create a new visitor for a new job. However, it should use
+                        // the LoadRateCalculator instance from the current visitor.
+                        setVisitor(this.createVisitor(this.getVisitor().getLoadRateCalculator(), false));
                     }
                     successfulVisit = getVisitor().visit(daoRow);
                 } catch (BatchSizeLimitException e) {

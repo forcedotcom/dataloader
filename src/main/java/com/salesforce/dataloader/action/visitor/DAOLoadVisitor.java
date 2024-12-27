@@ -36,6 +36,8 @@ import com.salesforce.dataloader.util.DAORowUtil;
 import org.apache.commons.beanutils.*;
 import org.apache.commons.text.StringEscapeUtils;
 import com.salesforce.dataloader.util.DLLogManager;
+import com.salesforce.dataloader.util.LoadRateCalculator;
+
 import org.apache.logging.log4j.Logger;
 
 import java.util.regex.Matcher;
@@ -89,10 +91,15 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     // - https://www.geeksforgeeks.org/how-to-validate-html-tag-using-regular-expression/#
     private String richTextRegex = AppConfig.DEFAULT_RICHTEXT_REGEX;
     private Field[] cachedFieldAttributesForOperation = null;
-    
+
     protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
-        super(controller, monitor, successWriter, errorWriter);
+        this(controller, monitor, successWriter, errorWriter, null);
+    }
+   
+    protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+            DataWriter errorWriter, LoadRateCalculator rateCalculator) {
+        super(controller, monitor, successWriter, errorWriter, rateCalculator);
 
         this.columnNames = ((DataReader)controller.getDao()).getColumnNames();
 

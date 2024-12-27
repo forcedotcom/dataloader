@@ -44,6 +44,7 @@ import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.LoadException;
 import com.salesforce.dataloader.exception.OperationException;
 import com.salesforce.dataloader.util.DLLogManager;
+import com.salesforce.dataloader.util.LoadRateCalculator;
 import com.sforce.async.AsyncApiException;
 
 public class BulkV2LoadVisitor extends BulkLoadVisitor {
@@ -52,8 +53,8 @@ public class BulkV2LoadVisitor extends BulkLoadVisitor {
     private boolean isFirstJob;
     
     public BulkV2LoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter, boolean isFirstJob) {
-        super(controller, monitor, successWriter, errorWriter);
+            DataWriter errorWriter, LoadRateCalculator rateCalculator, boolean isFirstJob) {
+        super(controller, monitor, successWriter, errorWriter, rateCalculator);
         this.isFirstJob = isFirstJob;
     }
     
@@ -84,11 +85,13 @@ public class BulkV2LoadVisitor extends BulkLoadVisitor {
         this.getVisitorUtil().getBulkV2LoadSuccessResults(successWriterFile, !this.isFirstJob);
         CSVFileReader csvReader = new CSVFileReader(new File(successWriterFile), appConfig, true, false);
         this.setSuccesses(csvReader.getTotalRows());
+        this.getLoadRateCalculator().setNumSuccessesAcrossCompletedJobs(csvReader.getTotalRows());
         csvReader.close();
         
         this.getVisitorUtil().getBulkV2LoadErrorResults(errorWriterFile);
         csvReader = new CSVFileReader(new File(errorWriterFile), appConfig, true, false);
         this.setErrors(csvReader.getTotalRows());
+        this.getLoadRateCalculator().setNumErrorsAcrossCompletedJobs(csvReader.getTotalRows());
         csvReader.close();
         gotUploadResultsFromServer = true;
     }
