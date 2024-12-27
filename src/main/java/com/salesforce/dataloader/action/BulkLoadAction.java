@@ -49,9 +49,9 @@ class BulkLoadAction extends AbstractLoadAction {
     }
 
     @Override
-    protected DAOLoadVisitor createVisitor() {
+    protected DAOLoadVisitor createVisitor(boolean isFirstJob) {
         if (this.getConfig().isBulkV2APIEnabled()) {
-            return new BulkV2LoadVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
+            return new BulkV2LoadVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter(), isFirstJob);
         }
         return new BulkLoadVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
     }

@@ -43,7 +43,7 @@ class InsertAction extends AbstractLoadAction {
     }
 
     @Override
-    protected DAOLoadVisitor createVisitor() {
+    protected DAOLoadVisitor createVisitor(boolean isFirstJob) {
         return new PartnerInsertVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
     }
 

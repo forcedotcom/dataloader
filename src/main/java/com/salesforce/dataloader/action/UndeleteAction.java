@@ -43,7 +43,7 @@ class UndeleteAction extends AbstractLoadAction {
     }
 
     @Override
-    protected DAOLoadVisitor createVisitor() {
+    protected DAOLoadVisitor createVisitor(boolean isFirstJob) {
         return new PartnerUndeleteVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
     }
 

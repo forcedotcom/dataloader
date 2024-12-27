@@ -424,14 +424,14 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
                 logger.warn("Failed to close job", e);
             }
             try {
-                getResults(firstBatchOrJob);
+                getResults();
             } catch (AsyncApiException e) {
                 throw new LoadException("Failed to get batch results", e);
             }
         }
     }
 
-    protected void getResults(boolean firstBatchOrJob) throws AsyncApiException, OperationException, DataAccessObjectException {
+    protected void getResults() throws AsyncApiException, OperationException, DataAccessObjectException {
         getProgressMonitor().setSubTask(Messages.getMessage(getClass(), "retrievingResults"));
         DataReader dataReader = null;
         dataReader = resetDAO();
