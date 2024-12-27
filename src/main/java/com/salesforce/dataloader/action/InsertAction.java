@@ -31,6 +31,7 @@ import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.action.visitor.partner.PartnerInsertVisitor;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.util.LoadRateCalculator;
 
 /**
  * @author Lexi Viripaeff
@@ -43,7 +44,7 @@ class InsertAction extends AbstractLoadAction {
     }
 
     @Override
-    protected DAOLoadVisitor createVisitor(boolean isFirstJob) {
+    protected DAOLoadVisitor createVisitor(LoadRateCalculator rateCalculator, boolean isFirstJob) {
         return new PartnerInsertVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
     }
 

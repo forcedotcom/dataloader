@@ -36,6 +36,7 @@ import com.salesforce.dataloader.action.visitor.bulk.BulkV2LoadVisitor;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.mapping.LoadMapper;
+import com.salesforce.dataloader.util.LoadRateCalculator;
 
 /**
  * @author Jesper Joergensen, Colin Jarvis
@@ -49,9 +50,9 @@ class BulkLoadAction extends AbstractLoadAction {
     }
 
     @Override
-    protected DAOLoadVisitor createVisitor(boolean isFirstJob) {
+    protected DAOLoadVisitor createVisitor(LoadRateCalculator rateCalculator, boolean isFirstJob) {
         if (this.getConfig().isBulkV2APIEnabled()) {
-            return new BulkV2LoadVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter(), isFirstJob);
+            return new BulkV2LoadVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter(), rateCalculator, isFirstJob);
         }
         return new BulkLoadVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
     }

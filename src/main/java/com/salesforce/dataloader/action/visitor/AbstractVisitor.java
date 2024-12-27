@@ -51,16 +51,29 @@ public abstract class AbstractVisitor implements IVisitor {
     private DataWriter errorWriter;
     private long errors;
     private long successes;
-    private final LoadRateCalculator rateCalculator;
+    private LoadRateCalculator rateCalculator;
 
     public AbstractVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
+        this(controller, monitor, successWriter, errorWriter, null);
+    }
+    
+    public AbstractVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+            DataWriter errorWriter, LoadRateCalculator rateCalculator) {
         this.logger = DLLogManager.getLogger(getClass());
         this.controller = controller;
         this.monitor = monitor;
         this.successWriter = successWriter;
         this.errorWriter = errorWriter;
-        this.rateCalculator = new LoadRateCalculator();
+        if (rateCalculator == null) {
+            this.rateCalculator = new LoadRateCalculator();
+        } else {
+            this.rateCalculator = rateCalculator;
+        }
+    }
+    
+    public LoadRateCalculator getLoadRateCalculator() {
+        return this.rateCalculator;
     }
 
     protected abstract boolean writeStatus();

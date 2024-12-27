@@ -51,7 +51,7 @@ import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.util.DLLogManager;
-
+import com.salesforce.dataloader.util.LoadRateCalculator;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.client.DescribeRefObject;
@@ -79,6 +79,7 @@ import com.sforce.async.AsyncExceptionCode;
 import com.sforce.async.BatchInfo;
 import com.sforce.async.BatchStateEnum;
 import com.sforce.async.CSVReader;
+import com.sforce.async.JobStateEnum;
 
 /**
  * Visitor for operations using the bulk API client
@@ -138,7 +139,12 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
     public BulkLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
             DataWriter errorWriter) {
-        super(controller, monitor, successWriter, errorWriter);
+        this(controller, monitor, successWriter, errorWriter, null);
+    }
+    
+    public BulkLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
+            DataWriter errorWriter, LoadRateCalculator rateCalculator) {
+        super(controller, monitor, successWriter, errorWriter, rateCalculator);
         this.isDelete = getController().getAppConfig().getOperationInfo().isDelete();
         this.jobUtil = new BulkApiVisitorUtil(getController(), getProgressMonitor(), getRateCalculator());
     }
@@ -417,7 +423,9 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
     
     protected void closeJob() throws OperationException, DataAccessObjectException {
-        if (this.jobUtil.hasJob()) {
+        if (this.jobUtil.hasJob() 
+            && this.jobUtil.getJobInfo().getState() != JobStateEnum.JobComplete 
+            && this.jobUtil.getJobInfo().getState() != JobStateEnum.Closed) {
             try {
                 this.jobUtil.awaitCompletionAndCloseJob();
             } catch (final AsyncApiException e) {

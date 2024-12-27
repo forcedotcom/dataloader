@@ -31,7 +31,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.util.DLLogManager;
-
+import com.salesforce.dataloader.util.LoadRateCalculator;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.IVisitor;
 import com.salesforce.dataloader.config.AppConfig;
@@ -89,7 +89,9 @@ abstract class AbstractAction implements IAction {
             this.successWriter = null;
             this.errorWriter = null;
         }
-        this.visitor = createVisitor(true);
+        // Let the IVisitor instance create LoadRateCalculator instance for the first job by passing
+        // null as the first argument.
+        this.visitor = createVisitor(null, true);
         int retries = -1;
         this.enableRetries = controller.getAppConfig().getBoolean(AppConfig.PROP_ENABLE_RETRIES);
         if (this.enableRetries) {
@@ -107,7 +109,7 @@ abstract class AbstractAction implements IAction {
     protected abstract void checkDao(DataAccessObject dao) throws DataAccessObjectInitializationException;
 
     /** @return a new IVisitor object to be used by this action */
-    protected abstract IVisitor createVisitor(boolean isFirstJob);
+    protected abstract IVisitor createVisitor(LoadRateCalculator rateCalculator, boolean isFirstJob);
 
     /** flushes any remaining records to or from the dao 
      * @throws BatchSizeLimitException */

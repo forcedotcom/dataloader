@@ -34,6 +34,7 @@ import com.salesforce.dataloader.action.visitor.rest.RESTDeleteVisitor;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
+import com.salesforce.dataloader.util.LoadRateCalculator;
 
 /**
  * @author Lexi Viripaeff
@@ -45,7 +46,7 @@ class DeleteAction extends AbstractLoadAction {
     }
 
     @Override
-    protected DAOLoadVisitor createVisitor(boolean isFirstJob) {
+    protected DAOLoadVisitor createVisitor(LoadRateCalculator rateCalculator, boolean isFirstJob) {
         if (getController().getAppConfig().isRESTAPIEnabled()
                 && getController().getAppConfig().getBoolean(AppConfig.PROP_DELETE_WITH_EXTERNALID)) {
             return new RESTDeleteVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
