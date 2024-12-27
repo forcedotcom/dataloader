@@ -49,10 +49,12 @@ import com.sforce.async.AsyncApiException;
 public class BulkV2LoadVisitor extends BulkLoadVisitor {
     private static final Logger logger = DLLogManager.getLogger(BulkV2LoadVisitor.class);
     private boolean gotUploadResultsFromServer = false;
+    private boolean isFirstJob;
     
     public BulkV2LoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter) {
+            DataWriter errorWriter, boolean isFirstJob) {
         super(controller, monitor, successWriter, errorWriter);
+        this.isFirstJob = isFirstJob;
     }
     
     protected void doOneBatch(PrintStream out, ByteArrayOutputStream os, List<DynaBean> rows) throws OperationException, FileNotFoundException, AsyncApiException, BatchSizeLimitException {
@@ -64,7 +66,7 @@ public class BulkV2LoadVisitor extends BulkLoadVisitor {
         }
     }
     
-    protected void getResults(boolean firstBatchOrJob) throws AsyncApiException, OperationException, DataAccessObjectException {
+    protected void getResults() throws AsyncApiException, OperationException, DataAccessObjectException {
         if (gotUploadResultsFromServer) {
             // Bulk v2 job has only one batch.
             return;
@@ -79,7 +81,7 @@ public class BulkV2LoadVisitor extends BulkLoadVisitor {
         // for Config.OUTPUT_UNPROCESSED_RECORDS
         // String unprocessedRecordsWriterFile = config.getString(Config.OUTPUT_UNPROCESSED_RECORDS);
 
-        this.getVisitorUtil().getBulkV2LoadSuccessResults(successWriterFile, !firstBatchOrJob);
+        this.getVisitorUtil().getBulkV2LoadSuccessResults(successWriterFile, !this.isFirstJob);
         CSVFileReader csvReader = new CSVFileReader(new File(successWriterFile), appConfig, true, false);
         this.setSuccesses(csvReader.getTotalRows());
         csvReader.close();

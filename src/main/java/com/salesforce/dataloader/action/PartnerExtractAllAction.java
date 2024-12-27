@@ -46,7 +46,7 @@ class PartnerExtractAllAction extends AbstractExtractAction {
     }
 
     @Override
-    protected IVisitor createVisitor() {
+    protected IVisitor createVisitor(boolean isFirstJob) {
         return new PartnerQueryAllVisitor(this, getController(), getMonitor(), getDao(), getSuccessWriter(), getErrorWriter());
     }
 

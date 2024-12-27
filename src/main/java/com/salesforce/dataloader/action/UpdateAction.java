@@ -42,7 +42,7 @@ class UpdateAction extends AbstractLoadAction {
     }
 
     @Override
-    protected DAOLoadVisitor createVisitor() {
+    protected DAOLoadVisitor createVisitor(boolean isFirstJob) {
         if (getController().getAppConfig().isRESTAPIEnabled()) {
             return new RESTUpdateVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
         } else {

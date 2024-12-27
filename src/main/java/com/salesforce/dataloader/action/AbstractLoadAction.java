@@ -58,7 +58,7 @@ abstract class AbstractLoadAction extends AbstractAction {
     }
 
     @Override
-    protected abstract DAOLoadVisitor createVisitor();
+    protected abstract DAOLoadVisitor createVisitor(boolean isFirstJob);
 
     @Override
     protected void checkDao(DataAccessObject dao) throws DataAccessObjectInitializationException {
@@ -98,7 +98,7 @@ abstract class AbstractLoadAction extends AbstractAction {
                 try {
                     if (this.getConfig().isBulkV2APIEnabled()) {
                         // create a new visitor for a new job
-                        setVisitor(this.createVisitor());
+                        setVisitor(this.createVisitor(false));
                     }
                     successfulVisit = getVisitor().visit(daoRow);
                 } catch (BatchSizeLimitException e) {

@@ -89,7 +89,7 @@ abstract class AbstractAction implements IAction {
             this.successWriter = null;
             this.errorWriter = null;
         }
-        this.visitor = createVisitor();
+        this.visitor = createVisitor(true);
         int retries = -1;
         this.enableRetries = controller.getAppConfig().getBoolean(AppConfig.PROP_ENABLE_RETRIES);
         if (this.enableRetries) {
@@ -107,7 +107,7 @@ abstract class AbstractAction implements IAction {
     protected abstract void checkDao(DataAccessObject dao) throws DataAccessObjectInitializationException;
 
     /** @return a new IVisitor object to be used by this action */
-    protected abstract IVisitor createVisitor();
+    protected abstract IVisitor createVisitor(boolean isFirstJob);
 
     /** flushes any remaining records to or from the dao 
      * @throws BatchSizeLimitException */

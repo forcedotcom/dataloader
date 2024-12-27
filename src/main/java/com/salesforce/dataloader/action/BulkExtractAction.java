@@ -47,7 +47,7 @@ class BulkExtractAction extends AbstractExtractAction {
     }
 
     @Override
-    protected IVisitor createVisitor() {
+    protected IVisitor createVisitor(boolean isFirstJob) {
     	if (getController().getAppConfig().isBulkV2APIEnabled() ) {
     		return new BulkV2QueryVisitor(this, getController(), getMonitor(), getDao(), getSuccessWriter(), getErrorWriter());
     	}

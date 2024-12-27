@@ -43,7 +43,7 @@ class UpsertAction extends AbstractLoadAction {
     }
 
     @Override
-    protected PartnerUpsertVisitor createVisitor() {
+    protected PartnerUpsertVisitor createVisitor(boolean isFirstJob) {
         return new PartnerUpsertVisitor(getController(), getMonitor(), getSuccessWriter(), getErrorWriter());
     }
 
