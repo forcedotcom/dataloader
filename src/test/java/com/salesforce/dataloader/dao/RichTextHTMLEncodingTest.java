@@ -165,6 +165,21 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
     }
     
     @Test
+    public void testFullWidthSpaceCharInText() throws Exception {    
+        String origText = "&#x3000;";
+        String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
+        assertEquals("Incorrect conversion of " + origText, origText.length(), convertedText.length() + 7);
+        origText = "&#x3000;&#x3000;";
+        // expect "&nbsp;&nbsp;" in convertedText
+        convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
+        assertEquals("Incorrect conversion of " + origText, origText.length(), convertedText.length() + 4);
+        origText = " &#x3000;";
+        // expect "&nbsp;&nbsp;" in convertedText
+        convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
+        assertEquals("Incorrect conversion of " + origText, origText.length(), convertedText.length() - 3);
+    }
+    
+    @Test
     public void testMultipleHTMLTagNoWhitespaceInText() throws Exception {    
         String origText = "<br></br><br/><br>";
         String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
