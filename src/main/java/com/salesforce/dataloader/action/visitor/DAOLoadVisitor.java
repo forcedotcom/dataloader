@@ -384,14 +384,18 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             || !getController().getAppConfig().getBoolean(AppConfig.PROP_LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT)) {
             return fieldValue;
         }
-        return convertToHTMLFormatting((String)fieldValue, this.richTextRegex);
+        return preserveWhitespaceInRichText((String)fieldValue, this.richTextRegex);
     }
 
-    public static String convertToHTMLFormatting(String fvalue, String regex) {
-        fvalue = fvalue.replaceAll("\r\n", "<br/>");
-        fvalue = fvalue.replaceAll("\n", "<br/>");
-        fvalue = fvalue.replaceAll("\r", "<br/>");
+    public static String preserveWhitespaceInRichText(String fvalue, String regex) {
         String[] outsideHTMLTags = fvalue.split(regex);
+        if (outsideHTMLTags.length == 1) {
+            // no HTML formatting. Make sure to preserve line breaks.
+            fvalue = fvalue.replaceAll("\r\n", "<br/>");
+            fvalue = fvalue.replaceAll("\n", "<br/>");
+            fvalue = fvalue.replaceAll("\r", "<br/>");
+        }
+        outsideHTMLTags = fvalue.split(regex);
         Pattern htmlTagInRichTextPattern = Pattern.compile(regex);
         Matcher matcher = htmlTagInRichTextPattern.matcher(fvalue);
         String htmlEscapedValue = "";

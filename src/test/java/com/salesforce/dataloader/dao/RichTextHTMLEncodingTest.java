@@ -31,6 +31,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.salesforce.dataloader.ConfigTestBase;
@@ -43,7 +44,7 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
     @Test
     public void testNoHTMLTags() throws Exception {
         String origText = "    a  ";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
                 4, getSpaceChars(convertedText.substring(0, 24)));
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
@@ -55,7 +56,7 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
     public void testHTMLTagAttrsWithDoubleQuotes() throws Exception {    
         String tag = "<span style=\"font-size: 172px;\">";
         String origText = tag + "    a</span>  ";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
                 4, getSpaceChars(convertedText.substring(
                         tag.length(), 
@@ -68,7 +69,7 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
     public void testHTMLTagWithoutClosingQuote() throws Exception {    
         String tag = "<span style=\"font-size: 172px;>"; // skip closing doublequotes in style attribute
         String origText = tag + "    a  </p>";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
         assertEquals("Incorrect conversion of " + origText, "&lt;", convertedText.substring(0, 4));
     }
     
@@ -76,7 +77,7 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
     public void testHTMLTagAttrsWithSingleQuotes() throws Exception {    
         String tag = "<span style=\'font-size: 172px;\'>";
         String origText = tag + "    a</span    >  ";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
                 4, getSpaceChars(convertedText.substring(
                         tag.length(), 
@@ -88,27 +89,27 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
     @Test
     public void testLTAndGTCharsInString() throws Exception {    
         String origText = "    <0    or >1 ";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
                 true, convertedText.contains("&lt;")); // text interpret as containing a HTML tag
 
         origText = "    <div ";
-        convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
                 true, convertedText.contains("&lt;")); // text interpret as containing a HTML tag
 
         origText = "    <div/> ";
-        convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
                 true, convertedText.contains("<")); // text interpret as containing a HTML tag
  
         origText = "    </div> ";
-        convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
                 true, convertedText.contains("<")); // text interpret as containing a HTML tag
         
         origText = "    < /div> ";
-        convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
         assertEquals("Incorrect encoding of whitespace characters in string" + origText,
                 true, convertedText.contains("&lt;")); // text interpret as containing a HTML tag
 
@@ -137,7 +138,7 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
                 + "</ol>\n"
                 + "";
         String origText = tag + "    a  </p>";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
         assertEquals("Incorrect conversion of " + origText, "<", convertedText.substring(0, 1));
         String[] parts = convertedText.split("1a");
         assertEquals("Incorrect encoding of whitespace characters in string" + origText, 2, parts.length);
@@ -159,21 +160,21 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
     @Test
     public void testSingleHTMLTagNoWhitespaceInText() throws Exception {    
         String origText = "<img   alt=\"dlscreenshot\"   src=\"https://ashit-dev-ed.file.force.com/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId=0684W00000eYv7k&operationContext=CHATTER&contentId=05T4W000020p7wj\"></img>";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
         assertEquals("Incorrect conversion of " + origText, origText.length(), convertedText.length());
     }
     
     @Test
     public void testMultipleHTMLTagNoWhitespaceInText() throws Exception {    
         String origText = "<br></br><br/><br>";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
         assertEquals("Incorrect conversion of " + origText, origText.length(), convertedText.length());
     }
     
     @Test
     public void testHTMLEncodedString() throws Exception {
         String origText = "  &amp; & < * $ ~ % &quot;6400L -37° &#127752; \n1  \r2  \r\n3";
-        String convertedText = DAOLoadVisitor.convertToHTMLFormatting(origText, regex);
+        String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
         int diff = convertedText.length() - origText.length();
         assertEquals("Incorrect conversion of " + origText, origText.length() + 45, convertedText.length());
 
