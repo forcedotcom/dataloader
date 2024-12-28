@@ -389,12 +389,14 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
     public static String preserveWhitespaceInRichText(String fvalue, String regex) {
         String[] outsideHTMLTags = fvalue.split(regex);
-        if (outsideHTMLTags.length == 1) {
-            // no HTML formatting. Make sure to preserve line breaks.
-            fvalue = fvalue.replaceAll("\r\n", "<br/>");
-            fvalue = fvalue.replaceAll("\n", "<br/>");
-            fvalue = fvalue.replaceAll("\r", "<br/>");
-        }
+        
+        // preserve newline chars if the field value has no HTML tags.
+        // Convert them to whitespace char otherwise.
+        String newlineReplacement = (outsideHTMLTags.length == 1)?"<br/>" : " ";
+        fvalue = fvalue.replaceAll("\r\n", newlineReplacement);
+        fvalue = fvalue.replaceAll("\n", newlineReplacement);
+        fvalue = fvalue.replaceAll("\r", newlineReplacement);
+
         outsideHTMLTags = fvalue.split(regex);
         Pattern htmlTagInRichTextPattern = Pattern.compile(regex);
         Matcher matcher = htmlTagInRichTextPattern.matcher(fvalue);
@@ -420,31 +422,32 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         }
         String unescapedInput = StringEscapeUtils.unescapeHtml4(input);
         StringBuffer htmlFormattedStr = new StringBuffer("");
-        for (int i = 0, len = unescapedInput.length(); i < len; i++) {
-            char c = unescapedInput.charAt(i);
-            int cval = c;
-            char nextChar = 0;
-            if (i+1 < unescapedInput.length()) {
-                nextChar = unescapedInput.charAt(i+1);
+        int unescapedInputLength = unescapedInput.length();
+        for (int offset = 0; offset < unescapedInputLength; ) {
+            int unicodeValOfChar = unescapedInput.codePointAt(offset);
+            int unicodeValOfNextChar = 0;
+            if (offset+1 < unescapedInput.length()) {
+                unicodeValOfNextChar = unescapedInput.codePointAt(offset+1);
             }
-            char prevChar = 0;
-            if (i > 0) {
-                prevChar = unescapedInput.charAt(i-1);
+            int unicodeValOfPrevChar = 0;
+            if (offset > 0) {
+                unicodeValOfPrevChar = unescapedInput.codePointAt(offset-Character.charCount(unicodeValOfChar));
             }
 
-            boolean isCharWhitespace = Character.isWhitespace(c) || cval == NONBREAKING_SPACE_ASCII_VAL;
-            boolean isNextCharWhitespace = Character.isWhitespace(nextChar) || nextChar == NONBREAKING_SPACE_ASCII_VAL;
-            boolean isPrevCharWhitespace = Character.isWhitespace(prevChar) || prevChar == NONBREAKING_SPACE_ASCII_VAL;
+            boolean isCharWhitespace = Character.getType(unicodeValOfChar) == Character.SPACE_SEPARATOR;
+            boolean isNextCharWhitespace = Character.getType(unicodeValOfNextChar) == Character.SPACE_SEPARATOR;
+            boolean isPrevCharWhitespace = Character.getType(unicodeValOfPrevChar) == Character.SPACE_SEPARATOR;
             //only occurrences of multiple w
             if (isCharWhitespace) {
                 if (isNextCharWhitespace || isPrevCharWhitespace) {
                     htmlFormattedStr.append("&nbsp;");
                 } else {
-                    htmlFormattedStr.append(c);
+                    htmlFormattedStr.append(Character.toString(unicodeValOfChar));
                 }
             } else {
-                htmlFormattedStr.append(StringEscapeUtils.escapeHtml4(Character.toString(c)));
+                htmlFormattedStr.append(StringEscapeUtils.escapeHtml4(Character.toString(unicodeValOfChar)));
             }
+            offset += Character.charCount(unicodeValOfChar);
         }
         return htmlFormattedStr.toString();
     }

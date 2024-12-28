@@ -172,6 +172,22 @@ public class RichTextHTMLEncodingTest extends ConfigTestBase {
     }
     
     @Test
+    public void testHTMLTagsAndLineBreaks() throws Exception {    
+        String origText = "1\n2\r\n3\r<p>a</p><p>b</p><p>c</p>";
+        String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
+        // preserveWhitespaceInRichText() should convert newline chars into a space char ' '
+        assertEquals("Incorrect conversion of " + origText, origText.length(), convertedText.length()+1);
+    }
+    
+    @Test
+    public void testNoHTMLTagsAndLineBreaks() throws Exception {    
+        String origText = "1\n2\r\n3\r";
+        String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
+        // preserveWhitespaceInRichText() should convert newline chars into html tag "<br/>"
+        assertEquals("Incorrect conversion of " + origText, origText.length(), convertedText.length()-11);
+    }
+    
+    @Test
     public void testHTMLEncodedString() throws Exception {
         String origText = "  &amp; & < * $ ~ % &quot;6400L -37° &#127752; \n1  \r2  \r\n3";
         String convertedText = DAOLoadVisitor.preserveWhitespaceInRichText(origText, regex);
