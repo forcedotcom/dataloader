@@ -534,4 +534,23 @@ public class AppUtil {
         }
 
     }
+    
+    private static HashMap<String, Long> usedHeapCheckMap = new HashMap<String, Long>();
+    private static boolean usedHeapCaptureEnabled = false;
+    public static void captureUsedHeap(String tag) {
+        if (!usedHeapCaptureEnabled) {
+            return;
+        }
+        Runtime runtime = Runtime.getRuntime();
+        System.gc();
+        usedHeapCheckMap.put(tag, runtime.totalMemory() - runtime.freeMemory());
+    }
+    
+    public static void enableUsedHeapCapture(boolean enable) {
+        usedHeapCaptureEnabled = enable;
+    }
+    
+    public static Long getUsedHeap(String tag) {
+        return usedHeapCheckMap.get(tag);
+    }
 }

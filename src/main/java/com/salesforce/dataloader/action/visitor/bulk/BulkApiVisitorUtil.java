@@ -43,6 +43,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ExtractException;
 import com.salesforce.dataloader.exception.ExtractExceptionOnServer;
 import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DLLogManager;
 import com.salesforce.dataloader.util.LoadRateCalculator;
 import com.sforce.async.AsyncApiException;
@@ -57,7 +58,7 @@ import com.sforce.async.JobInfo;
 import com.sforce.async.JobStateEnum;
 import com.sforce.async.OperationEnum;
 
-class BulkApiVisitorUtil {
+public class BulkApiVisitorUtil {
 
     private static final Logger logger = DLLogManager.getLogger(BulkApiVisitorUtil.class);
 
@@ -226,6 +227,7 @@ class BulkApiVisitorUtil {
         return this.attachments;
     }
 
+    public static final String MEMORY_USE_TAG_CREATE_BULK_UPLOAD_= "createBulkUploadBatch";
     BatchInfo createBatch(InputStream batchContent) throws AsyncApiException {
         BatchInfo batch = null;
         if (isBulkV2QueryJob()) {
@@ -243,7 +245,8 @@ class BulkApiVisitorUtil {
 	        }
 	        logger.info(Messages.getMessage(getClass(), "logBatchLoaded", batch.getId()));
         }
-        
+        AppUtil.captureUsedHeap(MEMORY_USE_TAG_CREATE_BULK_UPLOAD_);
+
         // Done creating a batch. Clear attachments map in preparation for the next batch
         this.attachments.clear();
         this.attachmentNum = 0;
