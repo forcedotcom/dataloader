@@ -32,6 +32,8 @@ import java.text.ParseException;
 import java.util.*;
 
 import org.apache.logging.log4j.Logger;
+
+import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DLLogManager;
 
 import org.junit.*;
@@ -41,6 +43,7 @@ import org.junit.runners.Parameterized;
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
+import com.salesforce.dataloader.action.visitor.bulk.BulkApiVisitorUtil;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.LastRunProperties;
 import com.salesforce.dataloader.controller.Controller;
@@ -74,7 +77,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED),
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED),
                 TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_SERIAL_MODE_ENABLED),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED)
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED)
                 );
     }
 
@@ -132,7 +135,32 @@ public class DatabaseProcessTest extends ProcessTestBase {
         final Map<String, String> argMap = getTestConfig();
         argMap.remove(AppConfig.PROP_PASSWORD);
         // insert
+        long usedMemoryBefore = 0;
+        Runtime runtime = Runtime.getRuntime();
+        if (isSettingEnabled(argMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
+            && isSettingEnabled(argMap, AppConfig.PROP_BULK_API_ENABLED)
+                || isSettingEnabled(argMap, AppConfig.PROP_BULKV2_API_ENABLED)) {
+            AppUtil.enableUsedHeapCapture(true);
+            System.gc();
+            usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
+        }
         testUpsertAccountsDb(argMap, NUM_ROWS, true, false);
+        
+        if (isSettingEnabled(argMap, AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO)
+                && isSettingEnabled(argMap, AppConfig.PROP_BULK_API_ENABLED)
+                    || isSettingEnabled(argMap, AppConfig.PROP_BULKV2_API_ENABLED)) {
+            System.gc();
+            long usedMemoryAfter = runtime.totalMemory() - runtime.freeMemory();
+            long usedMemoryDuring = AppUtil.getUsedHeap(BulkApiVisitorUtil.MEMORY_USE_TAG_CREATE_BULK_UPLOAD_);
+            long memoryIncreaseAfterUse = usedMemoryAfter - usedMemoryBefore;
+            long memoryIncreaseDuringUse = usedMemoryDuring - usedMemoryBefore;
+            assertTrue("Potential memory leak", memoryIncreaseAfterUse < 2000000);
+            if (isSettingEnabled(argMap, AppConfig.PROP_BULKV2_API_ENABLED)) {
+                // empirically the memory used during the operation is < 22Mb. If the memory use goes up by 
+                assertTrue("Potential memory use increase",  memoryIncreaseDuringUse < 25000000);
+            }
+            AppUtil.enableUsedHeapCapture(false);
+        }
         // update
         testUpsertAccountsDb(argMap, NUM_ROWS, false, false);
     }
