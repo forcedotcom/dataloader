@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,7 +72,19 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 @SuppressWarnings("unused")
 public class CsvProcessTest extends ProcessTestBase {
+    private static long startTime = 0;
+    @BeforeClass
+    public static void setUpBeforeClass() {
+        startTime = System.currentTimeMillis();
+    }
 
+    @AfterClass
+    public static void tearDownAfterClass() {
+        long endTime = System.currentTimeMillis();
+        long elapsedTimeInMinutes = (endTime - startTime) / 60000;
+        assertTrue("Tests slowed down by more than 1 minute", elapsedTimeInMinutes < 15);
+    }
+    
     public CsvProcessTest(Map<String, String> config) {
         super(config);
     }
