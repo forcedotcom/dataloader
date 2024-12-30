@@ -37,7 +37,10 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import com.salesforce.dataloader.util.DLLogManager;
+
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 
 import com.salesforce.dataloader.*;
 import com.salesforce.dataloader.action.OperationInfo;
@@ -73,7 +76,29 @@ public abstract class ProcessTestBase extends ConfigTestBase {
 
     private static Logger logger = DLLogManager.getLogger(ProcessTestBase.class);
     private int serverApiInvocationThreshold = 150;
+    private long usedMemoryBefore = 0;
+    Runtime runtime = Runtime.getRuntime();
 
+    @Before
+    public void setUpMemoryProfiling() throws Exception {
+        AppUtil.enableUsedHeapCapture(true);
+        System.gc();
+        usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
+    }
+
+    @After
+    public void tearDownMemoryProfiling() throws Exception {
+        System.gc();
+        long usedMemoryAfter = runtime.totalMemory() - runtime.freeMemory();
+        long memoryIncreaseAfterUse = usedMemoryAfter - usedMemoryBefore;
+        if (memoryIncreaseAfterUse > 2000000) {
+            System.out.println("\n==========================");
+            System.out.println("memory increase after use: " + memoryIncreaseAfterUse / 1024/1024 + "Mb");
+            System.out.println("==========================\n");
+        }
+        AppUtil.enableUsedHeapCapture(false);
+    }
+    
     protected ProcessTestBase() {
         super(Collections.<String, String>emptyMap());
         HttpClientTransport.resetServerInvocationCount();
