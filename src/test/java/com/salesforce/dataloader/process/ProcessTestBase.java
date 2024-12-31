@@ -90,12 +90,11 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     public void tearDownMemoryProfiling() throws Exception {
         System.gc();
         long usedMemoryAfter = runtime.totalMemory() - runtime.freeMemory();
-        long memoryIncreaseAfterUse = usedMemoryAfter - usedMemoryBefore;
-        if (memoryIncreaseAfterUse > 2000000) {
-            System.out.println("\n==========================");
-            System.out.println("memory increase after use: " + memoryIncreaseAfterUse / 1024/1024 + "Mb");
-            System.out.println("==========================\n");
+        long memoryIncreaseAfterUseInMb = (usedMemoryAfter - usedMemoryBefore)/1024/1024;
+        if (memoryIncreaseAfterUseInMb > 2) {
+            logger.warn("memory increase after use: " + memoryIncreaseAfterUseInMb + "Mb");
         }
+        assertTrue("potential memory leak", memoryIncreaseAfterUseInMb < 20);
         AppUtil.enableUsedHeapCapture(false);
     }
     
