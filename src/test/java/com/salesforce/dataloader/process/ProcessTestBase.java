@@ -78,6 +78,10 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     private int serverApiInvocationThreshold = 150;
     private long usedMemoryBefore = 0;
     Runtime runtime = Runtime.getRuntime();
+    private static final long MEMORY_INCREASE_THRESHOLD_IN_MB_FOR_LOGGING = 2;
+    private static final long DEFAULT_MEMORY_INCREASE_THRESHOLD_IN_MB_FOR_FAILING = 20;
+    private long memoryIncreaseThresholdInMbForFailing = DEFAULT_MEMORY_INCREASE_THRESHOLD_IN_MB_FOR_FAILING;
+    private long memoryIncreaseThresholdInMbForLogging = MEMORY_INCREASE_THRESHOLD_IN_MB_FOR_LOGGING;
 
     @Before
     public void setUpMemoryProfiling() throws Exception {
@@ -91,13 +95,19 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         System.gc();
         long usedMemoryAfter = runtime.totalMemory() - runtime.freeMemory();
         long memoryIncreaseAfterUseInMb = (usedMemoryAfter - usedMemoryBefore)/1024/1024;
-        if (memoryIncreaseAfterUseInMb > 2) {
+        if (memoryIncreaseAfterUseInMb > memoryIncreaseThresholdInMbForLogging) {
             logger.warn("memory increase after use: " + memoryIncreaseAfterUseInMb + "Mb");
         }
-        assertTrue("potential memory leak", memoryIncreaseAfterUseInMb < 20);
+        assertTrue("potential memory leak", memoryIncreaseAfterUseInMb < memoryIncreaseThresholdInMbForFailing);
         AppUtil.enableUsedHeapCapture(false);
     }
     
+    protected void setMemoryIncreaseThresholds(int expectedIncreaseInMb) {
+        // warn if increase more than 5%
+        memoryIncreaseThresholdInMbForLogging = (long) (expectedIncreaseInMb * 1.05);
+        // fail if increase more than 20%
+        memoryIncreaseThresholdInMbForFailing = (long) (expectedIncreaseInMb * 1.2);
+    }
     protected ProcessTestBase() {
         super(Collections.<String, String>emptyMap());
         HttpClientTransport.resetServerInvocationCount();
