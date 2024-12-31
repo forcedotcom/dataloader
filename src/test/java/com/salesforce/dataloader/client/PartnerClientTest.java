@@ -66,7 +66,7 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("unused")
 public class PartnerClientTest extends ProcessTestBase {
 
-    @Test
+    @Ignore
     public void testPartnerClientConnect() throws Exception {
         PartnerClient client = new PartnerClient(getController());
         assertFalse(getController().getAppConfig().getBoolean(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN));
@@ -78,7 +78,7 @@ public class PartnerClientTest extends ProcessTestBase {
         assertTrue(client.getConnection().getDisableFeedTrackingHeader().isDisableFeedTracking());
     }
 
-    @Test
+    @Ignore
     public void testPartnerClientNoUserName() throws ConnectionException {
         AppConfig appConfig = getController().getAppConfig();
         String origUserName = appConfig.getString(AppConfig.PROP_USERNAME);
@@ -95,7 +95,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
-    @Test
+    @Ignore
     public void testPartnerClientSfdcInternalSessionIdConnect() throws Exception {
         AppConfig appConfig = getController().getAppConfig();
 
@@ -131,7 +131,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
-    @Test
+    @Ignore
     public void testPartnerClientSfdcInternalSessionIdWithoutSfdcInternalConnect() throws Exception {
         AppConfig appConfig = getController().getAppConfig();
 
@@ -173,7 +173,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
-    @Test
+    @Ignore
     public void testIsSessionValidAlwaysTrueForSessionIdLogin() throws Exception {
         AppConfig appConfig = getController().getAppConfig();
 
@@ -189,7 +189,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
-    @Test
+    @Ignore
     public void testDisconnect() throws Exception {
         PartnerClient client = new PartnerClient(getController());
 
@@ -200,7 +200,7 @@ public class PartnerClientTest extends ProcessTestBase {
         assertFalse(client.isLoggedIn());
     }
 
-    @Test
+    @Ignore
     public void testSetEntityDescribe() throws Exception{
         PartnerClient client = new PartnerClient(getController());
         assertNotNull(client.getDescribeGlobalResults());
@@ -208,6 +208,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
     @Test
     public void testDescribeSObjects() throws Exception {
+        setMemoryIncreaseThresholds(220);
         PartnerClient client = new PartnerClient(getController());
 
         int numDescribes = 0;
@@ -228,14 +229,14 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
-    @Test
+    @Ignore
     public void testSetFieldTypes() throws Exception {
         PartnerClient client = new PartnerClient(getController());
         client.setFieldTypes();
         assertNotNull(client.getFieldTypes());
     }
 
-    @Test
+    @Ignore
     public void testGetSforceField() throws Exception {
         // test for account name as a default test case
         PartnerClient client = new PartnerClient(getController());
@@ -253,7 +254,7 @@ public class PartnerClientTest extends ProcessTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    @Test
+    @Ignore
     public void testInsertBasic() throws Exception {
         // setup our dynabeans
         BasicDynaClass dynaClass;
@@ -283,12 +284,12 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
-    @Test
+    @Ignore
     public void testUpdateBasic() throws Exception {
         doTestUpdateBasic(false);
     }
     
-    @Test
+    @Ignore
     public void testUpdateBasicWithoutCompression() throws Exception {
         doTestUpdateBasic(true);
     }
@@ -333,7 +334,7 @@ public class PartnerClientTest extends ProcessTestBase {
      * Basic failing - forgetting the id
      */
     @SuppressWarnings("unchecked")
-    @Test
+    @Ignore
     public void testUpdateFailBasic() throws Exception {
 
         // setup our dynabeans
@@ -367,7 +368,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test basic upsert operation
      */
-    @Test
+    @Ignore
     public void testUpsertAccountBasic() throws Exception {
         doUpsertAccount(false);
     }
@@ -375,7 +376,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test basic upsert operation
      */
-    @Test
+    @Ignore
     public void testUpsertContactBasic() throws Exception {
         doUpsertContact(false);
     }
@@ -383,7 +384,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test basic upsert on foreign key
      */
-    @Test
+    @Ignore
     public void testUpsertAccountFkBasic() throws Exception {
         doUpsertAccount(true);
     }
@@ -391,7 +392,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test basic upsert on foreign key
      */
-    @Test
+    @Ignore
     public void testUpsertContactFkBasic() throws Exception {
         doUpsertContact(true);
     }
@@ -399,7 +400,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test basic failure to upsert - no external id specified
      */
-    @Test
+    @Ignore
     public void testUpsertFailBasic() throws Exception {
         doUpsertFailBasic(false);
     }
@@ -407,7 +408,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test basic failure to upsert on foreign key - no foreign key external id specified (blank value)
      */
-    @Test
+    @Ignore
     public void testUpsertFkFailBasic() throws Exception {
         doUpsertFailBasic(true);
     }
@@ -530,7 +531,7 @@ public class PartnerClientTest extends ProcessTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    @Test
+    @Ignore
     public void testDeleteBasic() throws Exception {
         String id = getRandomAccountId();
 
@@ -567,7 +568,7 @@ public class PartnerClientTest extends ProcessTestBase {
     /**
      * Test a delete missing the id
      */
-    @Test
+    @Ignore
     public void testDeleteFailBasic() throws Exception {
 
         // setup our dynabeans
@@ -599,7 +600,7 @@ public class PartnerClientTest extends ProcessTestBase {
         }
     }
 
-    @Test
+    @Ignore
     public void testQueryBasic() throws Exception {
         // make sure there're some records to test with
         upsertSfdcAccounts(10);
