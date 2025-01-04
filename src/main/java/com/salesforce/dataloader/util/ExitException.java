@@ -28,7 +28,7 @@ package com.salesforce.dataloader.util;
 
 public class ExitException extends RuntimeException {
     private static final long serialVersionUID = 1L;
-    private int exitCode = AppUtil.EXIT_CODE_NO_ERRORS;
+    private int exitCode = AppUtil.EXIT_CODE_OPERATION_ERROR;
     public ExitException(Throwable ex, int exitCode) {
         super(ex);
         this.exitCode = exitCode;

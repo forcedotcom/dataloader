@@ -247,6 +247,9 @@ public class ProcessRunner implements InitializingBean, IProcess {
     
     public static ProcessRunner runBatchMode(Map<String, String>commandLineOptionsMap, ILoaderProgress progressMonitor) throws UnsupportedOperationException {
         ProcessRunner runner = null;
+        String errorMessage = "";
+        int exitCode = AppUtil.EXIT_CODE_NO_ERRORS;
+        Throwable throwable = null;
         try {
             // create the process
             runner = ProcessRunner.getInstance(commandLineOptionsMap);
@@ -257,15 +260,22 @@ public class ProcessRunner implements InitializingBean, IProcess {
             // run the process
             runner.run(progressMonitor);
             progressMonitor = runner.getMonitor();
+
             if (progressMonitor != null) {
                 if (progressMonitor.isCanceled()) {
-                    logErrorAndExitProcess(progressMonitor.getMessage(), null, AppUtil.EXIT_CODE_CLIENT_ERROR);
+                    errorMessage = progressMonitor.getMessage();
+                    throwable = null;
+                    exitCode = AppUtil.EXIT_CODE_CLIENT_ERROR;
                 } else if (!progressMonitor.isSuccess()) {
-                    logErrorAndExitProcess(progressMonitor.getMessage(), null, AppUtil.EXIT_CODE_SERVER_ERROR);
+                    errorMessage = progressMonitor.getMessage();
+                    throwable = null;
+                    exitCode = AppUtil.EXIT_CODE_SERVER_ERROR;
                 } else if (AppConfig.getCurrentConfig() != null
                         && AppConfig.getCurrentConfig().getBoolean(AppConfig.PROP_PROCESS_EXIT_WITH_ERROR_ON_FAILED_ROWS_BATCH_MODE)
                         && progressMonitor.getNumberRowsWithError() > 0) {
-                    DataLoaderRunner.setExitCode(AppUtil.EXIT_CODE_RESULTS_ERROR);
+                    errorMessage = Messages.getFormattedString("Process.operationSuccessWithErrorRows", progressMonitor.getNumberRowsWithError());
+                    throwable = null;
+                    exitCode = AppUtil.EXIT_CODE_RESULTS_ERROR;
                 }
             }
         } catch (Throwable t) {
@@ -277,7 +287,13 @@ public class ProcessRunner implements InitializingBean, IProcess {
             if (t.getClass().equals(ExitException.class)) {
                 throw (ExitException)t;
             }
-            logErrorAndExitProcess("Unable to run process", t, AppUtil.EXIT_CODE_OPERATION_ERROR);
+            errorMessage = "Unable to run process";
+            throwable = t;
+            exitCode = AppUtil.EXIT_CODE_OPERATION_ERROR;
+        } finally {
+            if (exitCode != AppUtil.EXIT_CODE_NO_ERRORS) {
+                logErrorAndExitProcess(errorMessage, throwable, exitCode);
+            }
         }
         return runner;
     }
