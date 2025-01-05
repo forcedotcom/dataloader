@@ -639,11 +639,6 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
     }
 
     @Override
-    protected int getMaxBytesInBatch() {
-        return this.getConfig().isBulkV2APIEnabled() ? AppConfig.MAX_BULKV2_API_IMPORT_JOB_BYTES : AppConfig.MAX_BULK_API_IMPORT_BATCH_BYTES;
-    }
-
-    @Override
     protected int getBytesInBean(DynaBean dynaBean) {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         PrintStream ps;
@@ -663,5 +658,10 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
             logger.warn("unable to determine row size");
         }
         return beanBytes;
+    }
+
+    @Override
+    protected int getMaxBytesInBatch() {
+        return controller.getAppConfig().getMaxBytesInBulkBatch();
     }
 }

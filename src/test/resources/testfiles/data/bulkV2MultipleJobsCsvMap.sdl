@@ -1,0 +1,9 @@
+#Mapping values
+#Tue Jun 20 18:59:17 PDT 2006
+ACCOUNTNUMBER__C=AccountNumber__c
+NAME=Name
+WEBSITE=Website
+TYPE=Type
+ANNUALREVENUE=AnnualRevenue
+PHONE=Phone
+ORACLE_ID__C=Oracle_Id__c

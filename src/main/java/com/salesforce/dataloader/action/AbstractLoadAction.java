@@ -79,7 +79,7 @@ abstract class AbstractLoadAction extends AbstractAction {
     protected boolean visit() throws DataAccessObjectException, ParameterLoadException, OperationException,
     ConnectionException {
 
-        final int loadBatchSize = this.getConfig().getMaxRowsInImportBatch();
+        final int loadBatchSize = this.getConfig().getCurrentSettingForMaxRowsInImportBatch();
         final int daoRowNumBase = getDao().getCurrentRowNumber();
         final List<TableRow> daoRowList = getDao().readTableRowList(loadBatchSize);
         if (daoRowList == null || daoRowList.size() == 0) return false;
@@ -101,6 +101,7 @@ abstract class AbstractLoadAction extends AbstractAction {
                         // BulkV2 completed a job.
                         // Create a new visitor for a new job. However, it should use
                         // the LoadRateCalculator instance from the current visitor.
+                        getLogger().info("Need to run multiple Bulkv2 API jobs to complete upload");
                         setVisitor(this.createVisitor(this.getVisitor().getLoadRateCalculator(), false));
                     }
                     successfulVisit = getVisitor().visit(daoRow);
