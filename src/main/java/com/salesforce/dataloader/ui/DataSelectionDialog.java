@@ -167,7 +167,7 @@ public class DataSelectionDialog extends WizardDialog {
                 + "\n\n"
                 + Labels.getString("LoadPage.importBatchSize")
                 + " "
-                + getController().getAppConfig().getMaxRowsInImportBatch()
+                + getController().getAppConfig().getCurrentSettingForMaxRowsInImportBatch()
                 + "\n"
                 + Labels.getString("AdvancedSettingsDialog.uiLabel." + AppConfig.PROP_LOAD_ROW_TO_START_AT)
                 + " "

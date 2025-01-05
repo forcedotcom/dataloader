@@ -146,7 +146,8 @@ public class AppConfig {
     // Bulk v1 and v2 limits specified at https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_bulkapi.htm
     public static final int MAX_BULK_API_IMPORT_BATCH_BYTES = 10000000;
     public static final int MAX_NUM_ROWS_BULK_API_IMPORT_BATCH = 10000;
-    public static final int MAX_BULKV2_API_IMPORT_JOB_BYTES = 150000000;
+    public static final int DEFAULT_MAX_BULKV2_API_IMPORT_JOB_BYTES = 150000000;
+    private static int currentMaxBulkv2APIImportJobBytes = DEFAULT_MAX_BULKV2_API_IMPORT_JOB_BYTES;
     public static final int MAX_NUM_ROWS_BULKV2_API_IMPORT_JOB = 150000000;
     public static final int DEFAULT_NUM_ROWS_BULK_API_IMPORT_BATCH = 2000;
     
@@ -1675,7 +1676,7 @@ public class AppConfig {
         return (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH);
     }
 
-    public int getMaxRowsInImportBatch() {
+    public int getCurrentSettingForMaxRowsInImportBatch() {
         boolean bulkApi = isBulkAPIEnabled();
         boolean bulkV2Api = this.isBulkV2APIEnabled();
         
@@ -1689,17 +1690,17 @@ public class AppConfig {
         } catch (ParameterLoadException e) {
         }
         int maxBatchSize = bulkApi ? MAX_NUM_ROWS_BULK_API_IMPORT_BATCH : MAX_NUM_ROWS_SOAP_API_IMPORT_BATCH;
-        return bs > maxBatchSize ? maxBatchSize : bs > 0 ? bs : getDefaultImportBatchSize(bulkApi, bulkV2Api);
+        return bs > maxBatchSize ? maxBatchSize : bs > 0 ? bs : getDefaultNumRowsImportBatch(bulkApi, bulkV2Api);
     }
 
-    public int getDefaultImportBatchSize(boolean bulkApi, boolean bulkV2Api) {
+    public int getDefaultNumRowsImportBatch(boolean bulkApi, boolean bulkV2Api) {
         if (bulkV2Api) {
             return MAX_NUM_ROWS_BULKV2_API_IMPORT_JOB;
         }
         return bulkApi ? DEFAULT_NUM_ROWS_BULK_API_IMPORT_BATCH : DEFAULT_NUM_ROWS_LOAD_BATCH;
     }
     
-    public int getMaxImportBatchSize(boolean bulkApi, boolean bulkV2Api) {
+    public int getMaxPossibleNumRowsImportBatchForAPIType(boolean bulkApi, boolean bulkV2Api) {
         if (bulkV2Api) {
             return MAX_NUM_ROWS_BULKV2_API_IMPORT_JOB;
         }
@@ -2002,5 +2003,13 @@ public class AppConfig {
     
     public static interface ConfigListener {
         void configValueChanged(String key, String oldValue, String newValue);
+    }
+    
+    public static void setBulkV2JobMaxBytes(int maxBytes) {
+        currentMaxBulkv2APIImportJobBytes = maxBytes;
+    }
+    
+    public int getMaxBytesInBulkBatch() {
+        return isBulkV2APIEnabled() ? AppConfig.currentMaxBulkv2APIImportJobBytes : AppConfig.MAX_BULK_API_IMPORT_BATCH_BYTES;
     }
 }

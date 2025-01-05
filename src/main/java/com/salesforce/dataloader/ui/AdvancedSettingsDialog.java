@@ -345,11 +345,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 setAllApiOptions();
                 
                 // update batch size when this setting changes
-                int newDefaultBatchSize = getController().getAppConfig().getDefaultImportBatchSize(false, false);
+                int newDefaultBatchSize = getController().getAppConfig().getDefaultNumRowsImportBatch(false, false);
                 logger.debug("Setting batch size to " + newDefaultBatchSize);
                 textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
                 String[] args = {getImportBatchLimitsURL(), 
-                        Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
+                        Integer.toString(appConfig.getMaxPossibleNumRowsImportBatchForAPIType(useBulkAPI || useBulkV2API, useBulkV2API))};
                 labelImportBatchSize.setText(
                         Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".uiLabel." + AppConfig.PROP_IMPORT_BATCH_SIZE, args));
                 labelImportBatchSize.redraw();
@@ -377,11 +377,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 setAllApiOptions();
                 
                 // update batch size when this setting changes
-                int newDefaultBatchSize = getController().getAppConfig().getDefaultImportBatchSize(true, false);
+                int newDefaultBatchSize = getController().getAppConfig().getDefaultNumRowsImportBatch(true, false);
                 logger.debug("Setting batch size to " + newDefaultBatchSize);
                 textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
                 String[] args = {getImportBatchLimitsURL(), 
-                        Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
+                        Integer.toString(appConfig.getMaxPossibleNumRowsImportBatchForAPIType(useBulkAPI || useBulkV2API, useBulkV2API))};
                 labelImportBatchSize.setText(
                         Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".uiLabel." + AppConfig.PROP_IMPORT_BATCH_SIZE, args));
                 labelImportBatchSize.redraw();
@@ -410,11 +410,11 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 setAllApiOptions();
                 
                 // get default batch size for Bulk v2 and set it
-                int newDefaultBatchSize = getController().getAppConfig().getDefaultImportBatchSize(true, true);
+                int newDefaultBatchSize = getController().getAppConfig().getDefaultNumRowsImportBatch(true, true);
                 logger.debug("Setting batch size to " + newDefaultBatchSize);
                 textImportBatchSize.setText(String.valueOf(newDefaultBatchSize));
                 String[] args = {getImportBatchLimitsURL(), 
-                        Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
+                        Integer.toString(appConfig.getMaxPossibleNumRowsImportBatchForAPIType(useBulkAPI || useBulkV2API, useBulkV2API))};
                 labelImportBatchSize.setText(
                         Labels.getFormattedString(AdvancedSettingsDialog.class.getSimpleName() + ".uiLabel." + AppConfig.PROP_IMPORT_BATCH_SIZE, args));
                 labelImportBatchSize.redraw();
@@ -537,10 +537,10 @@ public class AdvancedSettingsDialog extends BaseDialog {
         this.importBatchSizeComposite.setLayout(layout);
 
         String[] args = {getImportBatchLimitsURL(), 
-                Integer.toString(appConfig.getMaxImportBatchSize(useBulkAPI || useBulkV2API, useBulkV2API))};
+                Integer.toString(appConfig.getMaxPossibleNumRowsImportBatchForAPIType(useBulkAPI || useBulkV2API, useBulkV2API))};
         labelImportBatchSize = createLink(importBatchSizeComposite, null, args, AppConfig.PROP_IMPORT_BATCH_SIZE);
         textImportBatchSize = new Text(importBatchSizeComposite, SWT.BORDER);
-        textImportBatchSize.setText(Integer.toString(appConfig.getMaxRowsInImportBatch()));
+        textImportBatchSize.setText(Integer.toString(appConfig.getCurrentSettingForMaxRowsInImportBatch()));
         textImportBatchSize.setEnabled(!useBulkV2API);
         textImportBatchSize.addVerifyListener(new VerifyListener() {
             @Override

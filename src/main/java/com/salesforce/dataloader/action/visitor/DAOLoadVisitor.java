@@ -112,7 +112,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         dynaArray = dynaList;
         SforceDynaBean.registerConverters(getConfig());
 
-        this.MAX_ROWS_IN_BATCH = getConfig().getMaxRowsInImportBatch();
+        this.MAX_ROWS_IN_BATCH = getConfig().getCurrentSettingForMaxRowsInImportBatch();
         rowConversionFailureMap = new HashMap<Integer, Boolean>();
         String newRichTextRegex = getConfig().getString(AppConfig.PROP_RICH_TEXT_FIELD_REGEX);
         if (newRichTextRegex != null 

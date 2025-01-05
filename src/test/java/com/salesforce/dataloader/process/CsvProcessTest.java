@@ -222,8 +222,29 @@ public class CsvProcessTest extends ProcessTestBase {
         }
         // manually inserts 50 accounts, then upserts 100 accounts (50 inserts and 50 updates)
         runUpsertProcess(configMap, 50, 50);
+        if (isSettingEnabled(configMap, AppConfig.PROP_BULKV2_API_ENABLED)) {
+            // test ability to run multiple Bulk v2 jobs
+            AppConfig.setBulkV2JobMaxBytes(1500);
+            runUpsertProcess(configMap, 0, 100);
+            AppConfig.setBulkV2JobMaxBytes(AppConfig.DEFAULT_MAX_BULKV2_API_IMPORT_JOB_BYTES);
+       }
     }
-
+    
+    /**
+     * test ability to run multiple Bulk v2 jobs
+     */
+    @Test
+    public void testBulkV2MultipleJobsCsv() throws Exception {
+        Map<String, String> configMap = getUpdateTestConfig(true, DEFAULT_ACCOUNT_EXT_ID_FIELD, 50);
+        if (!isSettingEnabled(configMap, AppConfig.PROP_BULKV2_API_ENABLED)) {
+            return;
+        }
+        AppConfig.setBulkV2JobMaxBytes(1500);
+        // creates multiple bulk v2 jobs while creating 50 accounts, then upserting 100 accounts (50 inserts and 50 updates)
+        runUpsertProcess(configMap, 50, 50);
+        AppConfig.setBulkV2JobMaxBytes(AppConfig.DEFAULT_MAX_BULKV2_API_IMPORT_JOB_BYTES);
+    }
+    
     /**
      * Verify that when the constants are placed into the .sdl mapping file,
      * they are treated correctly. It tests that constants mapped on 1 field and
