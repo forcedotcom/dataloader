@@ -25,17 +25,96 @@
  */
 package com.salesforce.dataloader.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.salesforce.dataloader.ConfigTestBase;
 
-public class AppUtilTest extends ConfigTestBase {
+public class AppUtilTest extends ConfigTestBase {    
     @Test
-    public void testHttpsTester() {
+    public void testIsValidHttpsUrl() {
         Assert.assertTrue(AppUtil.isValidHttpsUrl("https://my.com"));
         Assert.assertFalse(AppUtil.isValidHttpsUrl("http://my.com"));
         Assert.assertFalse(AppUtil.isValidHttpsUrl("my.com"));
         Assert.assertFalse(AppUtil.isValidHttpsUrl("ftp://my.com"));
     }
+    
+    @Test
+    public void testGetFullPathOfJar() {
+        String path = AppUtil.getFullPathOfJar(AppUtil.class);
+        Assert.assertNotNull(path);
+        Assert.assertTrue(path.endsWith(".jar"));
+    }
+
+    @Test
+    public void testGetDirContainingClassJar() {
+        String dir = AppUtil.getDirContainingClassJar(AppUtil.class);
+        Assert.assertNotNull(dir);
+        Assert.assertTrue(new File(dir).isDirectory());
+    }
+
+    @Test
+    public void testConvertCommandArgsArrayToArgMap() {
+        String[] args = {"key1=value1", "key2=value2"};
+        Map<String, String> argMap = AppUtil.convertCommandArgsArrayToArgMap(args);
+        Assert.assertEquals("value1", argMap.get("key1"));
+        Assert.assertEquals("value2", argMap.get("key2"));
+    }
+
+    @Test
+    public void testConvertCommandArgsMapToArgsArray() {
+        Map<String, String> argMap = new HashMap<>();
+        argMap.put("key1", "value1");
+        argMap.put("key2", "value2");
+        String[] argsArray = AppUtil.convertCommandArgsMapToArgsArray(argMap);
+        Assert.assertArrayEquals(new String[]{"key1=value1", "key2=value2"}, argsArray);
+    }
+
+    @Test
+    public void testIsRunningOnMacOS() {
+        boolean isMac = AppUtil.isRunningOnMacOS();
+        Assert.assertEquals(System.getProperty("os.name").contains("Mac"), isMac);
+    }
+
+    @Test
+    public void testIsRunningOnWindows() {
+        boolean isWindows = AppUtil.isRunningOnWindows();
+        Assert.assertEquals(System.getProperty("os.name").contains("Windows"), isWindows);
+    }
+
+    @Test
+    public void testIsRunningOnLinux() {
+        boolean isLinux = AppUtil.isRunningOnLinux();
+        Assert.assertEquals(System.getProperty("os.name").contains("Linux"), isLinux);
+    }
+
+    @Test
+    public void testExec() {
+        int exitCode = AppUtil.exec(List.of("echo", "Hello, World!"), "Execution failed");
+        Assert.assertEquals(0, exitCode);
+    }
+
+    @Test
+    public void testSerializeToJson() throws IOException {
+        Map<String, Object> map = new HashMap<>();
+        map.put("key", "value");
+        String json = AppUtil.serializeToJson(map);
+        Assert.assertEquals("{\"key\":\"value\"}", json);
+    }
+
+    @Test
+    public void testDeserializeJsonToObject() throws IOException {
+        String json = "{\"key\":\"value\"}";
+        Map<String, Object> map = AppUtil.deserializeJsonToObject(new ByteArrayInputStream(json.getBytes()), Map.class);
+        Assert.assertEquals("value", map.get("key"));
+    }
+
 }

@@ -31,7 +31,6 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import com.salesforce.dataloader.config.AppConfig;
-import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 public class DateOnlyCalendar extends GregorianCalendar {
@@ -59,15 +58,21 @@ public class DateOnlyCalendar extends GregorianCalendar {
         TimeZone myTimeZone = super.getTimeZone();
         
         if (myTimeZone == null) {
-            logger.info("timezone is null");
+            logger.info("timezone is null. Settting it to GMT");
+            myTimeZone = GMT_TZ;
+            super.setTimeZone(myTimeZone);
         } else {
             logger.info("Timezone is " + myTimeZone.getDisplayName());
         }
         Calendar cal = Calendar.getInstance(myTimeZone);
         cal.setTimeInMillis(specifiedTimeInMilliSeconds);
 
-        if (!AppConfig.getCurrentConfig().getBoolean(AppConfig.PROP_GMT_FOR_DATE_FIELD_VALUE)
-                && myTimeZone != null) {
+        boolean useGMTForDateField = false;
+        AppConfig config = AppConfig.getCurrentConfig();
+        if (config != null) {
+            useGMTForDateField = config.getBoolean(AppConfig.PROP_GMT_FOR_DATE_FIELD_VALUE);
+        }
+        if (!useGMTForDateField && myTimeZone != null) {
             // Set hour, minute, second, and millisec to 0 (12:00AM) as it is date-only value
             cal.set(Calendar.HOUR, 0);
             cal.set(Calendar.MINUTE, 0);
@@ -85,7 +90,12 @@ public class DateOnlyCalendar extends GregorianCalendar {
     }
 
     public static DateOnlyCalendar getInstance(TimeZone timeZone) {
-        if (AppConfig.getCurrentConfig().getBoolean(AppConfig.PROP_GMT_FOR_DATE_FIELD_VALUE)) {
+        boolean useGMTForDateField = false;
+        AppConfig config = AppConfig.getCurrentConfig();
+        if (config != null) {
+            useGMTForDateField = config.getBoolean(AppConfig.PROP_GMT_FOR_DATE_FIELD_VALUE);
+        }
+        if (useGMTForDateField || timeZone == null) {
             timeZone = GMT_TZ;
         } 
         return new DateOnlyCalendar(timeZone);
