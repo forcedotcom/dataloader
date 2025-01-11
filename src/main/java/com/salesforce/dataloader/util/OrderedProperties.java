@@ -51,10 +51,14 @@ public class OrderedProperties extends Properties {
         if (props.containsKey(key)) {
             props.remove(key);
         }
+        
+        if (value == null) {
+            value = "";
+        }
 
         props.put(key, value);
 
-        return super .put(key, value);
+        return super.put(key, value);
     }
     
     public Set<Map.Entry<Object, Object>> entrySet() {
