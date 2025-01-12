@@ -29,7 +29,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.salesforce.dataloader.ConfigTestBase;
-import com.salesforce.dataloader.client.SimplePost;
+import com.salesforce.dataloader.client.SimplePostInterface;
 import com.salesforce.dataloader.client.SimplePostFactory;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.ParameterLoadException;
@@ -54,14 +54,14 @@ import java.util.function.Function;
  */
 public class OAuthSecretFlowUtilTests extends ConfigTestBase {
 
-    private SimplePost mockSimplePost;
+    private SimplePostInterface mockSimplePost;
     private AppConfig appConfig;
     private ArrayList<String> existingOAuthEnvironments;
     private String oauthServer;
     private String oauthClientId;
     private String oauthRedirectUri;
     private String existingEndPoint;
-    private Function<SimplePostFactory.Criteria, SimplePost> existingConstructor;
+    private Function<SimplePostFactory.Criteria, SimplePostInterface> existingConstructor;
 
     @Before
     public void testSetup(){
@@ -71,7 +71,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
         oauthServer = "https://OAUTH_PARTIAL_SERVER";
         oauthClientId = "CLIENTID";
         oauthRedirectUri = "https://REDIRECTURI";
-        mockSimplePost = mock(SimplePost.class);
+        mockSimplePost = mock(SimplePostInterface.class);
 
         appConfig.setValue(AppConfig.PROP_SERVER_ENVIRONMENTS, "Testing");
         appConfig.setOAuthEnvironmentString("Testing", AppConfig.CLIENTID_LITERAL, oauthClientId);
@@ -147,7 +147,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
             when(mockSimplePost.isSuccessful()).thenReturn(true);
 
             @SuppressWarnings("unused")
-            SimplePost simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", appConfig);
+            SimplePostInterface simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", appConfig);
 
             String expected = "ACCESS";
             String actual = appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN);
@@ -176,7 +176,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
             when(mockSimplePost.isSuccessful()).thenReturn(true);
 
             @SuppressWarnings("unused")
-            SimplePost simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", appConfig);
+            SimplePostInterface simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", appConfig);
 
             String expected = "REFRESHTOKEN";
             String actual = appConfig.getString(AppConfig.PROP_OAUTH_REFRESHTOKEN);
@@ -203,7 +203,7 @@ public class OAuthSecretFlowUtilTests extends ConfigTestBase {
             when(mockSimplePost.isSuccessful()).thenReturn(true);
 
             @SuppressWarnings("unused")
-            SimplePost simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", appConfig);
+            SimplePostInterface simplePost = OAuthSecretFlowUtil.handleSecondPost("simplePost", appConfig);
 
             String expected = "https://INSTANCEURL";
             String actual = appConfig.getString(AppConfig.PROP_OAUTH_INSTANCE_URL);;

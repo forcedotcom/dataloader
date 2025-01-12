@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader.ui;
 
-import com.salesforce.dataloader.client.SimplePost;
+import com.salesforce.dataloader.client.SimplePostInterface;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.oauth.OAuthSecretFlowUtil;
@@ -82,7 +82,7 @@ public class OAuthSecretFlow extends OAuthFlow {
                 String code = OAuthSecretFlowUtil.handleInitialUrl(url);
 
                 if (code != null) {
-                    SimplePost client = OAuthSecretFlowUtil.handleSecondPost(code, appConfig);
+                    SimplePostInterface client = OAuthSecretFlowUtil.handleSecondPost(code, appConfig);
                     setReasonPhrase(client.getReasonPhrase());
                     setStatusCode(client.getStatusCode());
                     setResult(client.isSuccessful());

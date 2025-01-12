@@ -35,7 +35,7 @@ import java.util.function.Function;
  */
 public class SimplePostFactory {
 
-    private static Function<Criteria, SimplePost> constructor = c -> new DefaultSimplePost(c.appConfig, c.endpoint, c.pairs);;
+    private static Function<Criteria, SimplePostInterface> constructor = c -> new SimplePostImpl(c.appConfig, c.endpoint, c.pairs);;
 
     public static class Criteria{
         public AppConfig appConfig;
@@ -43,17 +43,17 @@ public class SimplePostFactory {
         public BasicNameValuePair[] pairs;
     }
 
-    public static Function<Criteria, SimplePost> getConstructor()
+    public static Function<Criteria, SimplePostInterface> getConstructor()
     {
         return constructor;
     }
 
-    public static void setConstructor(Function<Criteria, SimplePost> constructor)
+    public static void setConstructor(Function<Criteria, SimplePostInterface> constructor)
     {
         SimplePostFactory.constructor = constructor;
     }
 
-    public static SimplePost getInstance(AppConfig appConfig, String endpoint, BasicNameValuePair... pairs){
+    public static SimplePostInterface getInstance(AppConfig appConfig, String endpoint, BasicNameValuePair... pairs){
         Criteria criteria = new Criteria();
         criteria.appConfig = appConfig;
         criteria.endpoint = endpoint;

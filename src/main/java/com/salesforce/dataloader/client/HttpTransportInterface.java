@@ -52,6 +52,7 @@ public interface HttpTransportInterface extends Transport {
 		DELETE,
 		GET
 	}
+    int PROXY_AUTHENTICATION_REQUIRED = 407;
     OutputStream connect(String endpoint, HashMap<String, String> httpHeaders, boolean enableCompression,
     		HttpTransportInterface.SupportedHttpMethodType httpMethod) throws IOException;
 

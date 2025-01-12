@@ -92,7 +92,7 @@ public class HttpClientTransportv1 implements HttpTransportInterfacev1 {
     private static CloseableHttpClient currentHttpClient = null;
     private static boolean reuseConnection = true;
     private static long serverInvocationCount = 0;
-    private static Logger logger = DLLogManager.getLogger(HttpClientTransport.class);
+    private static Logger logger = DLLogManager.getLogger(HttpTransportImpl.class);
 
     public HttpClientTransportv1() {
     }

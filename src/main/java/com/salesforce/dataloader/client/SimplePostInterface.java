@@ -36,7 +36,7 @@ import org.apache.http.message.BasicNameValuePair;
 /**
  * Created by rmazzeo on 12/9/15.
  */
-public interface SimplePost {
+public interface SimplePostInterface {
     void post() throws IOException, ParameterLoadException;
 
     boolean isSuccessful();

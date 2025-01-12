@@ -45,7 +45,7 @@ import org.junit.Before;
 import com.salesforce.dataloader.*;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.client.HttpClientTransport;
+import com.salesforce.dataloader.client.HttpTransportImpl;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
@@ -110,12 +110,12 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     }
     protected ProcessTestBase() {
         super(Collections.<String, String>emptyMap());
-        HttpClientTransport.resetServerInvocationCount();
+        HttpTransportImpl.resetServerInvocationCount();
     }
 
     protected ProcessTestBase(Map<String, String> config) {
         super(config);
-        HttpClientTransport.resetServerInvocationCount();
+        HttpTransportImpl.resetServerInvocationCount();
     }
 
     protected void verifyErrors(Controller controller, String expectedErrorMessage) throws DataAccessObjectException {
@@ -784,7 +784,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
             assertTrue("Process failed: " + actualMessage, monitor.isSuccess());
             verifyFailureFile(controller, numFailures);        //A.S.: To be removed and replaced
             verifySuccessFile(controller, numInserts, numUpdates, emptyId);
-            long serverAPIInvocations = HttpClientTransport.getServerInvocationCount();
+            long serverAPIInvocations = HttpTransportImpl.getServerInvocationCount();
             assertTrue("Number of server invocations (" + serverAPIInvocations + ") have exceeded the threshold of " + serverApiInvocationThreshold, serverAPIInvocations <= serverApiInvocationThreshold);
         } else {
             assertFalse("Expected process to fail but got success: " + actualMessage, monitor.isSuccess());
