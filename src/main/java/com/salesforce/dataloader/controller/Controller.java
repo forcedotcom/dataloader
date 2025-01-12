@@ -31,7 +31,7 @@ import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.client.BulkV1Client;
 import com.salesforce.dataloader.client.BulkV2Client;
 import com.salesforce.dataloader.client.ClientBase;
-import com.salesforce.dataloader.client.HttpClientTransport;
+import com.salesforce.dataloader.client.HttpTransportImpl;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.client.CompositeRESTClient;
 import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
@@ -149,7 +149,7 @@ public class Controller {
         try {
             ConnectorConfig connConfig = new ConnectorConfig();
             AppUtil.setConnectorConfigProxySettings(appConfig, connConfig);
-            HttpClientTransport clientTransport = HttpClientTransport.getInstance();
+            HttpTransportImpl clientTransport = HttpTransportImpl.getInstance();
             clientTransport.setConfig(connConfig);
             InputStream inputStream = clientTransport.httpGet(AppUtil.DATALOADER_DOWNLOAD_URL);
 

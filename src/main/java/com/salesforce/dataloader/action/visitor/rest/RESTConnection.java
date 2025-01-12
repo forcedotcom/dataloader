@@ -41,7 +41,7 @@ import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.salesforce.dataloader.client.HttpClientTransport;
+import com.salesforce.dataloader.client.HttpTransportImpl;
 import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.client.SessionInfo;
 import com.salesforce.dataloader.client.CompositeRESTClient.ACTION_ENUM;
@@ -110,7 +110,7 @@ public class RESTConnection {
                 logger.error(message);
                 throw new ConnectionException(message);
             }
-            HttpClientTransport transport = HttpClientTransport.getInstance();
+            HttpTransportImpl transport = HttpTransportImpl.getInstance();
             transport.setConfig(connectorConfig);
             
             // assume update operation by default and set http method value to PATCH

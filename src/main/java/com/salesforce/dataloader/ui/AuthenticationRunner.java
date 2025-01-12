@@ -26,7 +26,7 @@
 
 package com.salesforce.dataloader.ui;
 
-import com.salesforce.dataloader.client.DefaultSimplePost;
+import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.model.LoginCriteria;
@@ -102,7 +102,7 @@ public class AuthenticationRunner {
                     OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, appConfig) : new OAuthTokenFlow(shell, appConfig);
                     if (!flow.open()) {
                        String message = Labels.getString("LoginPage.invalidLoginOAuth");
-                        if (flow.getStatusCode() == DefaultSimplePost.PROXY_AUTHENTICATION_REQUIRED) {
+                        if (flow.getStatusCode() == HttpTransportInterface.PROXY_AUTHENTICATION_REQUIRED) {
                             message = Labels.getFormattedString("LoginPage.proxyError", flow.getReasonPhrase());
                         }
     

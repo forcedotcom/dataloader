@@ -151,7 +151,7 @@ import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.ClientBase;
-import com.salesforce.dataloader.client.HttpClientTransport;
+import com.salesforce.dataloader.client.HttpTransportImpl;
 import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
@@ -284,7 +284,7 @@ public class BulkV2Connection extends BulkConnection {
         String urlString = constructRequestURL(jobId) + "batches/";
         HashMap<String, String> headers = getHeaders(CSV_CONTENT_TYPE, JSON_CONTENT_TYPE);
         try {
-        	HttpClientTransport clientTransport = HttpClientTransport.getInstance();
+        	HttpTransportImpl clientTransport = HttpTransportImpl.getInstance();
         	clientTransport.setConfig(getConfig());
         	clientTransport.connect(urlString, headers, false, HttpTransportInterface.SupportedHttpMethodType.PUT, bulkUploadStream, CSV_CONTENT_TYPE);
 
@@ -413,7 +413,7 @@ public class BulkV2Connection extends BulkConnection {
 		try {
 	        InputStream in = null;
 	        boolean successfulRequest = true;
-            HttpClientTransport transport = HttpClientTransport.getInstance();
+            HttpTransportImpl transport = HttpTransportImpl.getInstance();
             transport.setConfig(getConfig());
 	        if (requestMethod == HttpMethod.GET) {
 	        	if (requestBodyMap != null && !requestBodyMap.isEmpty()) {
@@ -528,7 +528,7 @@ public class BulkV2Connection extends BulkConnection {
     private InputStream doGetQueryResultStream(URL resultsURL, HashMap<String, String> headers) throws IOException, AsyncApiException, ConnectionException {
         InputStream is = null;
         try {
-            HttpClientTransport transport = HttpClientTransport.getInstance();
+            HttpTransportImpl transport = HttpTransportImpl.getInstance();
             transport.setConfig(getConfig());
             is = transport.httpGet(resultsURL.toString());
             HttpResponse httpResponse = transport.getHttpResponse();
@@ -559,7 +559,7 @@ public class BulkV2Connection extends BulkConnection {
         String resultsURLString = constructRequestURL(jobId) + resultsType;
         InputStream is = null;
         try {
-            HttpClientTransport transport = HttpClientTransport.getInstance();
+            HttpTransportImpl transport = HttpTransportImpl.getInstance();
             transport.setConfig(getConfig());
             is = transport.httpGet(resultsURLString);
         } catch (IOException e) {

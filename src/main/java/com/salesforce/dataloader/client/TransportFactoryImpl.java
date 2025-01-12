@@ -35,7 +35,7 @@ public class TransportFactoryImpl implements TransportFactory {
 
     @Override
     public Transport createTransport() {
-        return HttpClientTransport.getInstance();
+        return HttpTransportImpl.getInstance();
     }
 
 }

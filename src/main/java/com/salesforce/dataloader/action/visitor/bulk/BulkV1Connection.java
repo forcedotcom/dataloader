@@ -35,7 +35,7 @@ import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.ClientBase;
-import com.salesforce.dataloader.client.HttpClientTransport;
+import com.salesforce.dataloader.client.HttpTransportImpl;
 import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
@@ -136,7 +136,7 @@ public class BulkV1Connection extends BulkConnection {
             }
         }
         try {
-            HttpTransportInterface transport = HttpClientTransport.getInstance();
+            HttpTransportInterface transport = HttpTransportImpl.getInstance();
             transport.setConfig(getConfig());
             return transport.httpGet(endpoint);
         } catch (IOException | HttpClientTransportException e) {

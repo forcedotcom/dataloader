@@ -39,9 +39,7 @@ import java.io.*;
 /**
  * simplied http client transport for posts (used for oauth)
  */
-public class DefaultSimplePost implements SimplePost {
-
-    public static final int PROXY_AUTHENTICATION_REQUIRED = 407;
+public class SimplePostImpl implements SimplePostInterface {
 
     private boolean successful;
     private AppConfig appConfig;
@@ -52,7 +50,7 @@ public class DefaultSimplePost implements SimplePost {
     private String reasonPhrase;
     private CloseableHttpResponse response;
 
-    DefaultSimplePost(AppConfig appConfig, String endpoint, BasicNameValuePair... pairs) {
+    SimplePostImpl(AppConfig appConfig, String endpoint, BasicNameValuePair... pairs) {
         this.appConfig = appConfig;
         this.endpoint = endpoint;
         this.pairs = pairs;
@@ -71,7 +69,7 @@ public class DefaultSimplePost implements SimplePost {
     public void post() throws IOException, ParameterLoadException {
         ConnectorConfig connConfig = new ConnectorConfig();
         AppUtil.setConnectorConfigProxySettings(appConfig, connConfig);
-        HttpClientTransport clientTransport = HttpClientTransport.getInstance();
+        HttpTransportImpl clientTransport = HttpTransportImpl.getInstance();
         clientTransport.setConfig(connConfig);
         this.input = clientTransport.simplePost(endpoint, null, pairs);
         successful = clientTransport.isSuccessful();

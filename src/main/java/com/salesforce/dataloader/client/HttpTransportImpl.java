@@ -80,7 +80,7 @@ import org.apache.logging.log4j.Logger;
  * @author Jeff Lai
  * @since 25.0.2
  */
-public class HttpClientTransport implements HttpTransportInterface {
+public class HttpTransportImpl implements HttpTransportInterface {
 
     
     private static final String AUTH_HEADER_VALUE_PREFIX = "Bearer ";
@@ -95,9 +95,9 @@ public class HttpClientTransport implements HttpTransportInterface {
     private ByteArrayOutputStream entityByteOut;
     private static CloseableHttpClient currentHttpClient = null;
     private static long serverInvocationCount = 0;
-    private static Logger logger = DLLogManager.getLogger(HttpClientTransport.class);
+    private static Logger logger = DLLogManager.getLogger(HttpTransportImpl.class);
     private HttpResponse httpResponse;
-    private static final HttpClientTransport singletonTransportInstance = new HttpClientTransport();
+    private static final HttpTransportImpl singletonTransportInstance = new HttpTransportImpl();
 
     @Override
     public synchronized void setConfig(ConnectorConfig newConfig) {
@@ -476,7 +476,7 @@ public class HttpClientTransport implements HttpTransportInterface {
         return in;
     }
     
-    public static HttpClientTransport getInstance() {
+    public static HttpTransportImpl getInstance() {
         return singletonTransportInstance;
     }
 }

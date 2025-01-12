@@ -35,7 +35,7 @@ import java.util.Map;
 
 import org.apache.http.message.BasicNameValuePair;
 
-import com.salesforce.dataloader.client.SimplePost;
+import com.salesforce.dataloader.client.SimplePostInterface;
 import com.salesforce.dataloader.client.SimplePostFactory;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.ParameterLoadException;
@@ -56,9 +56,9 @@ public class OAuthSecretFlowUtil {
                 + URLEncoder.encode(appConfig.getOAuthRedirectURIForCurrentEnv(), StandardCharsets.UTF_8.name());
     }
 
-    public static SimplePost handleSecondPost(String code, AppConfig appConfig) throws IOException, ParameterLoadException {
+    public static SimplePostInterface handleSecondPost(String code, AppConfig appConfig) throws IOException, ParameterLoadException {
         String server = appConfig.getAuthEndpointForCurrentEnv() + "/services/oauth2/token";
-        SimplePost client = SimplePostFactory.getInstance(appConfig, server,
+        SimplePostInterface client = SimplePostFactory.getInstance(appConfig, server,
                 new BasicNameValuePair("grant_type", "authorization_code"),
                 new BasicNameValuePair("code", code),
                 new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getClientIDForCurrentEnv()),

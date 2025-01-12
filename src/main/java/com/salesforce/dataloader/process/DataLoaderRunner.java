@@ -54,7 +54,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.client.HttpClientTransport;
+import com.salesforce.dataloader.client.HttpTransportImpl;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 
@@ -67,7 +67,7 @@ public class DataLoaderRunner extends Thread {
 
     public void run() {
         // called just before the program closes
-        HttpClientTransport.closeHttpClient();
+        HttpTransportImpl.closeHttpClient();
     }
 
     public static void main(String[] commandLineOptions) {
@@ -82,7 +82,7 @@ public class DataLoaderRunner extends Thread {
             System.exit(ex.getExitCode());
         } finally {
             if (logger != null) {
-                logger.debug("Number of server API invocations = " + HttpClientTransport.getServerInvocationCount());
+                logger.debug("Number of server API invocations = " + HttpTransportImpl.getServerInvocationCount());
             }
         }
         System.exit(exitCode);

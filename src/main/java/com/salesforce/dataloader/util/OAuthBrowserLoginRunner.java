@@ -48,7 +48,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.salesforce.dataloader.client.SimplePost;
+import com.salesforce.dataloader.client.SimplePostInterface;
 import com.salesforce.dataloader.client.SimplePostFactory;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
@@ -97,7 +97,7 @@ public class OAuthBrowserLoginRunner {
         this.appConfig = appConfig;
         appConfig.setServerEnvironment(appConfig.getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT));
         oAuthTokenURLStr = appConfig.getAuthEndpointForCurrentEnv() + "/services/oauth2/token";
-        SimplePost client = SimplePostFactory.getInstance(appConfig, oAuthTokenURLStr,
+        SimplePostInterface client = SimplePostFactory.getInstance(appConfig, oAuthTokenURLStr,
                new BasicNameValuePair("response_type", "device_code"),
                new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getClientIDForCurrentEnv()),
                new BasicNameValuePair("scope", "api")
@@ -191,7 +191,7 @@ public class OAuthBrowserLoginRunner {
                // other than 'authorization_pending'.
                int maxPollingTimeInSec = 1200; 
                int elapsedTimeInSec = 0;
-               SimplePost client;
+               SimplePostInterface client;
                InputStream in;
                while (elapsedTimeInSec <= maxPollingTimeInSec) {
                    try {
