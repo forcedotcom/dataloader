@@ -25,7 +25,7 @@
  */
 package com.salesforce.dataloader.ui;
 
-import com.salesforce.dataloader.client.SimplePostInterface;
+import com.salesforce.dataloader.client.transport.SimplePostInterface;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.oauth.OAuthSecretFlowUtil;

@@ -26,7 +26,7 @@
 
 package com.salesforce.dataloader.ui;
 
-import com.salesforce.dataloader.client.HttpTransportInterface;
+import com.salesforce.dataloader.client.transport.HttpTransportInterface;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.model.LoginCriteria;

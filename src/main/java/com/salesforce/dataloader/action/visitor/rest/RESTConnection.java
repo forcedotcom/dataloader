@@ -41,10 +41,10 @@ import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.salesforce.dataloader.client.HttpTransportImpl;
-import com.salesforce.dataloader.client.HttpTransportInterface;
 import com.salesforce.dataloader.client.SessionInfo;
 import com.salesforce.dataloader.client.CompositeRESTClient.ACTION_ENUM;
+import com.salesforce.dataloader.client.transport.HttpTransportImpl;
+import com.salesforce.dataloader.client.transport.HttpTransportInterface;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
