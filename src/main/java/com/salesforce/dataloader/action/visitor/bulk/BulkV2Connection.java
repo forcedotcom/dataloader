@@ -151,8 +151,8 @@ import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.ClientBase;
-import com.salesforce.dataloader.client.HttpTransportImpl;
-import com.salesforce.dataloader.client.HttpTransportInterface;
+import com.salesforce.dataloader.client.transport.HttpTransportImpl;
+import com.salesforce.dataloader.client.transport.HttpTransportInterface;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
 import com.salesforce.dataloader.util.AppUtil;

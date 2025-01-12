@@ -35,8 +35,8 @@ import java.util.Map;
 
 import org.apache.http.message.BasicNameValuePair;
 
-import com.salesforce.dataloader.client.SimplePostInterface;
-import com.salesforce.dataloader.client.SimplePostFactory;
+import com.salesforce.dataloader.client.transport.SimplePostFactory;
+import com.salesforce.dataloader.client.transport.SimplePostInterface;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;

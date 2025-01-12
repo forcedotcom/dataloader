@@ -30,6 +30,7 @@ import java.io.FileNotFoundException;
 import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.SessionInfo.NotLoggedInException;
+import com.salesforce.dataloader.client.transport.TransportFactoryImpl;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;

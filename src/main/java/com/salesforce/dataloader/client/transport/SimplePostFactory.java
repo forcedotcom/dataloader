@@ -23,31 +23,43 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader.client;
+package com.salesforce.dataloader.client.transport;
 
-import com.salesforce.dataloader.exception.ParameterLoadException;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.apache.http.Header;
+import com.salesforce.dataloader.config.AppConfig;
 import org.apache.http.message.BasicNameValuePair;
+
+import java.util.function.Function;
 
 /**
  * Created by rmazzeo on 12/9/15.
  */
-public interface SimplePostInterface {
-    void post() throws IOException, ParameterLoadException;
+public class SimplePostFactory {
 
-    boolean isSuccessful();
+    private static Function<Criteria, SimplePostInterface> constructor = c -> new SimplePostImpl(c.appConfig, c.endpoint, c.pairs);;
 
-    InputStream getInput();
+    public static class Criteria{
+        public AppConfig appConfig;
+        public String endpoint;
+        public BasicNameValuePair[] pairs;
+    }
 
-    int getStatusCode();
+    public static Function<Criteria, SimplePostInterface> getConstructor()
+    {
+        return constructor;
+    }
 
-    String getReasonPhrase();
-    
-    Header[] getResponseHeaders(String headerName);
-    
-    void addBasicNameValuePair(BasicNameValuePair pair);
+    public static void setConstructor(Function<Criteria, SimplePostInterface> constructor)
+    {
+        SimplePostFactory.constructor = constructor;
+    }
+
+    public static SimplePostInterface getInstance(AppConfig appConfig, String endpoint, BasicNameValuePair... pairs){
+        Criteria criteria = new Criteria();
+        criteria.appConfig = appConfig;
+        criteria.endpoint = endpoint;
+        criteria.pairs = pairs;
+
+        return constructor.apply(criteria);
+
+    }
 }

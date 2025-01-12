@@ -23,7 +23,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader.client;
+package com.salesforce.dataloader.client.transport;
 
 import java.io.*;
 import java.net.*;
@@ -55,6 +55,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 
+import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.HttpClientTransportException;
 import com.salesforce.dataloader.util.AppUtil;

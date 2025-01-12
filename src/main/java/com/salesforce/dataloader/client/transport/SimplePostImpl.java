@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.salesforce.dataloader.client;
+package com.salesforce.dataloader.client.transport;
 
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.ParameterLoadException;

@@ -23,19 +23,31 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.dataloader.client;
+package com.salesforce.dataloader.client.transport;
 
-import com.sforce.ws.transport.Transport;
-import com.sforce.ws.transport.TransportFactory;
+import com.salesforce.dataloader.exception.ParameterLoadException;
 
-public class TransportFactoryImpl implements TransportFactory {
+import java.io.IOException;
+import java.io.InputStream;
 
-    public TransportFactoryImpl() {
-    }
+import org.apache.http.Header;
+import org.apache.http.message.BasicNameValuePair;
 
-    @Override
-    public Transport createTransport() {
-        return HttpTransportImpl.getInstance();
-    }
+/**
+ * Created by rmazzeo on 12/9/15.
+ */
+public interface SimplePostInterface {
+    void post() throws IOException, ParameterLoadException;
 
+    boolean isSuccessful();
+
+    InputStream getInput();
+
+    int getStatusCode();
+
+    String getReasonPhrase();
+    
+    Header[] getResponseHeaders(String headerName);
+    
+    void addBasicNameValuePair(BasicNameValuePair pair);
 }
