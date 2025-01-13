@@ -29,7 +29,7 @@ package com.salesforce.dataloader.action.visitor;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.mapping.Mapper;
 import com.salesforce.dataloader.model.TableRow;
@@ -47,19 +47,19 @@ public abstract class AbstractVisitor implements IVisitor {
 
     protected final Controller controller;
     private final ILoaderProgress monitor;
-    private DataWriter successWriter;
-    private DataWriter errorWriter;
+    private DataWriterInterface successWriter;
+    private DataWriterInterface errorWriter;
     private long errors;
     private long successes;
     private LoadRateCalculator rateCalculator;
 
-    public AbstractVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter) {
+    public AbstractVisitor(Controller controller, ILoaderProgress monitor, DataWriterInterface successWriter,
+            DataWriterInterface errorWriter) {
         this(controller, monitor, successWriter, errorWriter, null);
     }
     
-    public AbstractVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter, LoadRateCalculator rateCalculator) {
+    public AbstractVisitor(Controller controller, ILoaderProgress monitor, DataWriterInterface successWriter,
+            DataWriterInterface errorWriter, LoadRateCalculator rateCalculator) {
         this.logger = DLLogManager.getLogger(getClass());
         this.controller = controller;
         this.monitor = monitor;
@@ -78,10 +78,10 @@ public abstract class AbstractVisitor implements IVisitor {
 
     protected abstract boolean writeStatus();
     
-    protected void setSuccessWriter(DataWriter successWriter) {
+    protected void setSuccessWriter(DataWriterInterface successWriter) {
         this.successWriter = successWriter;
     }
-    protected void setErrorWriter(DataWriter errorWriter) {
+    protected void setErrorWriter(DataWriterInterface errorWriter) {
         this.errorWriter = errorWriter;
     }
 
@@ -136,11 +136,11 @@ public abstract class AbstractVisitor implements IVisitor {
         return getController().getMapper();
     }
     
-    protected DataWriter getErrorWriter() {
+    protected DataWriterInterface getErrorWriter() {
     	return this.errorWriter;
     }
     
-    protected DataWriter getSuccessWriter() {
+    protected DataWriterInterface getSuccessWriter() {
     	return this.successWriter;
     }
 

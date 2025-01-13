@@ -42,7 +42,7 @@ import org.eclipse.swt.widgets.Shell;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
-import com.salesforce.dataloader.dao.DataReader;
+import com.salesforce.dataloader.dao.DataReaderInterface;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.util.DAORowUtil;
@@ -118,7 +118,7 @@ public class DataSelectionDialog extends WizardDialog {
                 );
             return;
         }
-        DataReader dataReader = (DataReader)getController().getDao();
+        DataReaderInterface dataReader = (DataReaderInterface)getController().getDao();
 
         List<String> header = null;
         int totalRows = 0;

@@ -40,7 +40,7 @@ import com.salesforce.dataloader.util.DLLogManager;
 
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.model.RowInterface;
@@ -52,7 +52,7 @@ import com.salesforce.dataloader.util.AppUtil;
  * @author Lexi Viripaeff
  * @since 6.0
  */
-public class CSVFileWriter implements DataWriter {
+public class CSVFileWriter implements DataWriterInterface {
 
     //logger
     private static Logger logger = DLLogManager.getLogger(CSVFileWriter.class);

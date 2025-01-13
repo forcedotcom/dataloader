@@ -39,7 +39,7 @@ import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOSizeVisitor;
 import com.salesforce.dataloader.config.*;
 import com.salesforce.dataloader.dao.DataAccessObject;
-import com.salesforce.dataloader.dao.DataReader;
+import com.salesforce.dataloader.dao.DataReaderInterface;
 import com.salesforce.dataloader.exception.*;
 
 /**
@@ -63,7 +63,7 @@ public class DAORowUtil {
      * Utility function for calculating the total number of rows available to current DAO instance
      * @throws DataAccessObjectException
      */
-    public static int calculateTotalRows(DataReader dataReader) throws DataAccessObjectException {
+    public static int calculateTotalRows(DataReaderInterface dataReader) throws DataAccessObjectException {
         try {
             //visit the rows
             DAOSizeVisitor visitor = new DAOSizeVisitor();
@@ -134,7 +134,7 @@ public class DAORowUtil {
         return error;
     }
 
-    public void skipRowToStartOffset(AppConfig cfg, DataReader rdr, ILoaderProgress mon, boolean updateProgress)
+    public void skipRowToStartOffset(AppConfig cfg, DataReaderInterface rdr, ILoaderProgress mon, boolean updateProgress)
             throws LoadException {
 
         try {
@@ -203,7 +203,7 @@ public class DAORowUtil {
     /**
      * Set the dataReader to point to the row where load has to be started
      */
-    private void rowToStart(AppConfig cfg, DataReader daoReader) throws DataAccessObjectException {
+    private void rowToStart(AppConfig cfg, DataReaderInterface daoReader) throws DataAccessObjectException {
         // start at the correct row
         final int rowToStart;
         try {

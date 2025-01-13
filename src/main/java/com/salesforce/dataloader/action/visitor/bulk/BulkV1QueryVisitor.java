@@ -36,7 +36,7 @@ import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ExtractException;
 import com.salesforce.dataloader.exception.ExtractExceptionOnServer;
@@ -56,8 +56,8 @@ public class BulkV1QueryVisitor extends AbstractBulkQueryVisitor {
 
     private BatchInfo[] batches;
 
-    public BulkV1QueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
-            DataWriter successWriter, DataWriter errorWriter) {
+    public BulkV1QueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriterInterface queryWriter,
+            DataWriterInterface successWriter, DataWriterInterface errorWriter) {
         super(action, controller, monitor, queryWriter, successWriter, errorWriter);
     }
 

@@ -32,7 +32,7 @@ import com.salesforce.dataloader.client.transport.HttpTransportImpl;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.ExtractException;
@@ -66,7 +66,7 @@ import org.apache.logging.log4j.Logger;
  */
 public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQueryVisitor {
 
-    private final DataWriter queryWriter;
+    private final DataWriterInterface queryWriter;
     private final String soql;
     private final List<Row> batchRows;
     private final List<String> batchIds;
@@ -74,8 +74,8 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
     protected final AbstractExtractAction action;
     private static final Logger logger = DLLogManager.getLogger(AbstractQueryVisitor.class);
 
-    public AbstractQueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
-            DataWriter successWriter, DataWriter errorWriter) {
+    public AbstractQueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriterInterface queryWriter,
+            DataWriterInterface successWriter, DataWriterInterface errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
         this.queryWriter = queryWriter;
         this.soql = getConfig().getString(AppConfig.PROP_EXTRACT_SOQL);
@@ -121,7 +121,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
         return this.soql;
     }
 
-    private DataWriter getQueryWriter() {
+    private DataWriterInterface getQueryWriter() {
         return this.queryWriter;
     }
 

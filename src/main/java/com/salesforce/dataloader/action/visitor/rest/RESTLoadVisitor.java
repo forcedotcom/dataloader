@@ -37,7 +37,7 @@ import com.salesforce.dataloader.client.CompositeRESTClient;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.LoadException;
 import com.salesforce.dataloader.exception.OperationException;
@@ -49,8 +49,8 @@ import com.sforce.ws.ConnectionException;
 
 public abstract class RESTLoadVisitor extends DAOLoadVisitor {
 
-    public RESTLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter) {
+    public RESTLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriterInterface successWriter,
+            DataWriterInterface errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
     }
 

@@ -50,8 +50,8 @@ import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.LastRunProperties;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataReader;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataReaderInterface;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.mapping.LoadMapper;
@@ -92,20 +92,20 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     private String richTextRegex = AppConfig.DEFAULT_RICHTEXT_REGEX;
     private Field[] cachedFieldAttributesForOperation = null;
 
-    protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter) {
+    protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriterInterface successWriter,
+            DataWriterInterface errorWriter) {
         this(controller, monitor, successWriter, errorWriter, null);
     }
    
-    protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter, LoadRateCalculator rateCalculator) {
+    protected DAOLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriterInterface successWriter,
+            DataWriterInterface errorWriter, LoadRateCalculator rateCalculator) {
         super(controller, monitor, successWriter, errorWriter, rateCalculator);
 
-        this.columnNames = ((DataReader)controller.getDao()).getColumnNames();
+        this.columnNames = ((DataReaderInterface)controller.getDao()).getColumnNames();
 
         List<DynaBean> dynaList = null;
         try {
-            dynaList = new ArrayList<DynaBean>(((DataReader)controller.getDao()).getTotalRows());
+            dynaList = new ArrayList<DynaBean>(((DataReaderInterface)controller.getDao()).getTotalRows());
         } catch (DataAccessObjectException e) {
             dynaList = new ArrayList<DynaBean>();
         }
@@ -322,7 +322,7 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
 
     private void initLoadRateCalculator() {
         try {
-            DataReader dao = (DataReader)getController().getDao();
+            DataReaderInterface dao = (DataReaderInterface)getController().getDao();
             getRateCalculator().start(dao.getTotalRows());
             getProgressMonitor().setSubTask(getRateCalculator().calculateSubTask(getNumberOfRows(), getNumberErrors()));
         } catch (Exception e) {

@@ -32,7 +32,7 @@ import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObject;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
-import com.salesforce.dataloader.dao.DataReader;
+import com.salesforce.dataloader.dao.DataReaderInterface;
 import com.salesforce.dataloader.exception.BatchSizeLimitException;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
@@ -63,7 +63,7 @@ abstract class AbstractLoadAction extends AbstractAction {
 
     @Override
     protected void checkDao(DataAccessObject dao) throws DataAccessObjectInitializationException {
-        if (!(dao instanceof DataReader)) {
+        if (!(dao instanceof DataReaderInterface)) {
             final String errMsg = getMessage("errorWrongDao", getConfig().getString(AppConfig.PROP_DAO_TYPE),
                     DataAccessObjectFactory.CSV_READ_TYPE + " or " + DataAccessObjectFactory.DATABASE_READ_TYPE,
                     getConfig().getString(AppConfig.PROP_OPERATION));
@@ -135,8 +135,8 @@ abstract class AbstractLoadAction extends AbstractAction {
     }
 
     @Override
-    protected DataReader getDao() {
-        return (DataReader)super.getDao();
+    protected DataReaderInterface getDao() {
+        return (DataReaderInterface)super.getDao();
     }
 
     @Override

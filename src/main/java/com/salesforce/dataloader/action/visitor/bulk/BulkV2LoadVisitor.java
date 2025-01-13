@@ -37,7 +37,7 @@ import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.BatchSizeLimitException;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -52,8 +52,8 @@ public class BulkV2LoadVisitor extends BulkLoadVisitor {
     private boolean gotUploadResultsFromServer = false;
     private boolean isFirstJob;
     
-    public BulkV2LoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter, LoadRateCalculator rateCalculator, boolean isFirstJob) {
+    public BulkV2LoadVisitor(Controller controller, ILoaderProgress monitor, DataWriterInterface successWriter,
+            DataWriterInterface errorWriter, LoadRateCalculator rateCalculator, boolean isFirstJob) {
         super(controller, monitor, successWriter, errorWriter, rateCalculator);
         this.isFirstJob = isFirstJob;
     }

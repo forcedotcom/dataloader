@@ -29,7 +29,7 @@ package com.salesforce.dataloader.action.visitor.partner;
 import com.salesforce.dataloader.action.AbstractExtractAction;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.ws.ConnectionException;
 
@@ -41,8 +41,8 @@ import com.sforce.ws.ConnectionException;
  */
 public class PartnerQueryAllVisitor extends PartnerQueryVisitor {
 
-    public PartnerQueryAllVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
-            DataWriter successWriter, DataWriter errorWriter) {
+    public PartnerQueryAllVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriterInterface queryWriter,
+            DataWriterInterface successWriter, DataWriterInterface errorWriter) {
         super(action, controller, monitor, queryWriter, successWriter, errorWriter);
     }
 

@@ -39,7 +39,7 @@ import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.AbstractQueryVisitor;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.OperationException;
@@ -55,8 +55,8 @@ import com.sforce.async.CSVReader;
  */
 abstract public class AbstractBulkQueryVisitor extends AbstractQueryVisitor {
 
-    public AbstractBulkQueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
-            DataWriter successWriter, DataWriter errorWriter) {
+    public AbstractBulkQueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriterInterface queryWriter,
+            DataWriterInterface successWriter, DataWriterInterface errorWriter) {
         super(action, controller, monitor, queryWriter, successWriter, errorWriter);
     }
     
