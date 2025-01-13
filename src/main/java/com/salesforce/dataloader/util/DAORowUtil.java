@@ -38,7 +38,7 @@ import com.salesforce.dataloader.util.DLLogManager;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOSizeVisitor;
 import com.salesforce.dataloader.config.*;
-import com.salesforce.dataloader.dao.DataAccessObject;
+import com.salesforce.dataloader.dao.DataAccessObjectInterface;
 import com.salesforce.dataloader.dao.DataReaderInterface;
 import com.salesforce.dataloader.exception.*;
 
@@ -115,7 +115,7 @@ public class DAORowUtil {
      * @param dao Data access object to validate columns for
      * @return A validation warning or null
      */
-    public static String validateColumns(DataAccessObject dao) {
+    public static String validateColumns(DataAccessObjectInterface dao) {
         HashSet<String> uniqueHeaders = new HashSet<String>();
         String error = null;
         for (String header : dao.getColumnNames()) {

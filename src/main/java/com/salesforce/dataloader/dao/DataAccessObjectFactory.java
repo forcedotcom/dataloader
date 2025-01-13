@@ -48,9 +48,9 @@ public class DataAccessObjectFactory {
     static public final String DATABASE_READ_TYPE = "databaseRead";
     static public final String DATABASE_WRITE_TYPE = "databaseWrite";
 
-    public DataAccessObject getDaoInstance(String daoType, AppConfig appConfig)
+    public DataAccessObjectInterface getDaoInstance(String daoType, AppConfig appConfig)
             throws DataAccessObjectInitializationException {
-        DataAccessObject dao = null;
+        DataAccessObjectInterface dao = null;
 
         logger.info(Messages.getFormattedString("DataAccessObjectFactory.creatingDao", new String[] {appConfig.getString(AppConfig.PROP_DAO_NAME), daoType}));
 

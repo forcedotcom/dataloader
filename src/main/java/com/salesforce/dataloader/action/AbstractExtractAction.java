@@ -65,7 +65,7 @@ abstract public class AbstractExtractAction extends AbstractAction {
     }
 
     @Override
-    protected void checkDao(DataAccessObject dao) throws DataAccessObjectInitializationException {
+    protected void checkDao(DataAccessObjectInterface dao) throws DataAccessObjectInitializationException {
         if (!(dao instanceof DataWriterInterface)) {
             final String errMsg = getMessage("errorWrongDao", getConfig().getString(AppConfig.PROP_DAO_TYPE),
                     DataAccessObjectFactory.CSV_WRITE_TYPE + " or " + DataAccessObjectFactory.DATABASE_WRITE_TYPE,

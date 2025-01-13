@@ -37,7 +37,7 @@ import com.salesforce.dataloader.exception.DataAccessObjectInitializationExcepti
  * @author Alex Warshavsky
  * @since 8.0
  */
-public interface DataAccessObject {
+public interface DataAccessObjectInterface {
 
     /**
      * Function to provide any intialization of resources that we want to initialize after creation.

@@ -37,7 +37,7 @@ import com.salesforce.dataloader.action.visitor.IVisitor;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataAccessObject;
+import com.salesforce.dataloader.dao.DataAccessObjectInterface;
 import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.BatchSizeLimitException;
@@ -69,7 +69,7 @@ abstract class AbstractAction implements IAction {
 
     protected DataWriterInterface successWriter;
     protected DataWriterInterface errorWriter;
-    private final DataAccessObject dao;
+    private final DataAccessObjectInterface dao;
 
     private final Logger logger;
     private boolean enableRetries;
@@ -106,7 +106,7 @@ abstract class AbstractAction implements IAction {
     }
 
     /** This method should throw an error if the data access object is configured incorrectly */
-    protected abstract void checkDao(DataAccessObject dao) throws DataAccessObjectInitializationException;
+    protected abstract void checkDao(DataAccessObjectInterface dao) throws DataAccessObjectInitializationException;
 
     /** @return a new IVisitor object to be used by this action */
     protected abstract IVisitor createVisitor(LoadRateCalculator rateCalculator, boolean isFirstJob);
@@ -269,7 +269,7 @@ abstract class AbstractAction implements IAction {
         return this.controller;
     }
 
-    protected DataAccessObject getDao() {
+    protected DataAccessObjectInterface getDao() {
         return this.dao;
     }
 

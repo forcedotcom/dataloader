@@ -30,7 +30,7 @@ import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataAccessObject;
+import com.salesforce.dataloader.dao.DataAccessObjectInterface;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
 import com.salesforce.dataloader.dao.DataReaderInterface;
 import com.salesforce.dataloader.exception.BatchSizeLimitException;
@@ -62,7 +62,7 @@ abstract class AbstractLoadAction extends AbstractAction {
     protected abstract DAOLoadVisitor createVisitor(LoadRateCalculator rateCalculator, boolean isFirstJob);
 
     @Override
-    protected void checkDao(DataAccessObject dao) throws DataAccessObjectInitializationException {
+    protected void checkDao(DataAccessObjectInterface dao) throws DataAccessObjectInitializationException {
         if (!(dao instanceof DataReaderInterface)) {
             final String errMsg = getMessage("errorWrongDao", getConfig().getString(AppConfig.PROP_DAO_TYPE),
                     DataAccessObjectFactory.CSV_READ_TYPE + " or " + DataAccessObjectFactory.DATABASE_READ_TYPE,

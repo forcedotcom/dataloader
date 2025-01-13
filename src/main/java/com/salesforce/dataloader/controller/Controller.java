@@ -37,7 +37,7 @@ import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
 import com.salesforce.dataloader.client.transport.HttpTransportImpl;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
-import com.salesforce.dataloader.dao.DataAccessObject;
+import com.salesforce.dataloader.dao.DataAccessObjectInterface;
 import com.salesforce.dataloader.dao.DataAccessObjectFactory;
 import com.salesforce.dataloader.exception.ConfigInitializationException;
 import com.salesforce.dataloader.exception.ControllerInitializationException;
@@ -102,7 +102,7 @@ public class Controller {
     private Mapper mapper;
 
     private DataAccessObjectFactory daoFactory;
-    private DataAccessObject dao;
+    private DataAccessObjectInterface dao;
     private BulkV1Client bulkV1Client;
     private BulkV2Client bulkV2Client;
     private PartnerClient partnerClient;
@@ -427,7 +427,7 @@ public class Controller {
         return appConfig;
     }
 
-    public DataAccessObject getDao() {
+    public DataAccessObjectInterface getDao() {
         return dao;
     }
 
