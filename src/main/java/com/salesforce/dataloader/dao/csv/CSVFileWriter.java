@@ -271,7 +271,7 @@ public class CSVFileWriter implements DataWriterInterface {
             throw new DataAccessObjectInitializationException(errMsg);
         }
         // save column names
-        this.columnNames = columnNames;
+        this.columnNames = new ArrayList<String>(columnNames);
 
         writeHeaderRow();
     }
