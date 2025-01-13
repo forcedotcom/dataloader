@@ -38,8 +38,6 @@ import org.junit.Test;
 
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.config.AppConfig;
-import com.salesforce.dataloader.dao.csv.CSVFileReader;
-import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.model.RowInterface;
 import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
