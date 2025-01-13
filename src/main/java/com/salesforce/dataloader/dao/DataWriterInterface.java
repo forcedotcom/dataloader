@@ -29,36 +29,36 @@ package com.salesforce.dataloader.dao;
 import java.util.List;
 
 import com.salesforce.dataloader.exception.DataAccessObjectException;
-import com.salesforce.dataloader.model.Row;
-import com.salesforce.dataloader.model.TableRow;
+import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
+import com.salesforce.dataloader.model.RowInterface;
 
 /**
- * Interface to be implemented for data readers -- data access objects that are used for reading rows of data.
+ * Interface to be implemented for data writers -- data access objects that are used for writing rows of data.
  *
  * @author Alex Warshavsky
  * @since 8.0
  */
-public interface DataReader extends DataAccessObject {
+public interface DataWriterInterface extends DataAccessObject {
     /**
-     * Get a row of data from a data source
+     * Set ordered list of columns to be used for the data access object records. Useful for data access objects that
+     * rely on consistent column ordering, such as CSV file
      *
-     * @return a {@link Row} containing all the keys and values of a row
-     * @throws DataAccessObjectException
+     * @param columnNames
+     * @throws DataAccessObjectInitializationException
      */
-    TableRow readTableRow() throws DataAccessObjectException;
+    void setColumnNames(List<String> columnNames) throws DataAccessObjectInitializationException;
 
     /**
-     * Get a list of rows of data from a data source
-     *
-     * @param maxRows Maximum number of rows to read in one call
-     * @return a list of up to maxRows {@link Row} objects, each of them containing all the keys and values of a row
+     * @param inputRow
+     * @return Any data columns generated as a result of writing
      * @throws DataAccessObjectException
      */
-    List<TableRow> readTableRowList(int maxRows) throws DataAccessObjectException;
+    boolean writeRow(RowInterface inputRow) throws DataAccessObjectException;
 
     /**
-     * @return Total number of rows that will be read by the current Data Access Object
+     * @param inputRowList
+     * @return List of data rows with generated data columns as a result of writing
      * @throws DataAccessObjectException
      */
-    int getTotalRows() throws DataAccessObjectException;
+    boolean writeRowList(List<? extends RowInterface> inputRowList) throws DataAccessObjectException;
 }

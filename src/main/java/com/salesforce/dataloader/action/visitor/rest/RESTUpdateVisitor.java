@@ -33,13 +33,13 @@ import org.apache.commons.beanutils.DynaBean;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
 import com.salesforce.dataloader.client.CompositeRESTClient;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.sforce.ws.ConnectionException;
 
 public class RESTUpdateVisitor extends RESTLoadVisitor {
 
-    public RESTUpdateVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter) {
+    public RESTUpdateVisitor(Controller controller, ILoaderProgress monitor, DataWriterInterface successWriter,
+            DataWriterInterface errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
     }
 

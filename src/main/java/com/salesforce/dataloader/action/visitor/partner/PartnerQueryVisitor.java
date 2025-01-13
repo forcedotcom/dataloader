@@ -38,7 +38,7 @@ import com.salesforce.dataloader.action.visitor.AbstractQueryVisitor;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.DataAccessObjectInitializationException;
 import com.salesforce.dataloader.exception.OperationException;
@@ -61,8 +61,8 @@ public class PartnerQueryVisitor extends AbstractQueryVisitor {
     private QueryResult qr;
     private final Logger logger;
 
-    public PartnerQueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriter queryWriter,
-            DataWriter successWriter, DataWriter errorWriter) {
+    public PartnerQueryVisitor(AbstractExtractAction action, Controller controller, ILoaderProgress monitor, DataWriterInterface queryWriter,
+            DataWriterInterface successWriter, DataWriterInterface errorWriter) {
         super(action, controller, monitor, queryWriter, successWriter, errorWriter);
         this.logger = DLLogManager.getLogger(getClass());
     }
@@ -110,7 +110,7 @@ public class PartnerQueryVisitor extends AbstractQueryVisitor {
                 mapper.initSoqlMappingFromResultFields(queryResultFieldsList);
                 final List<String> daoColumns = mapper.getDaoColumnsForSoql();
                 // setting DAO's column names forces output to be restricted to the provided field names
-                ((DataWriter)controller.getDao()).setColumnNames(daoColumns);
+                ((DataWriterInterface)controller.getDao()).setColumnNames(daoColumns);
                 if (getConfig().getBoolean(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT)) {
                     try {
                         if (this.getErrorWriter() == null) {

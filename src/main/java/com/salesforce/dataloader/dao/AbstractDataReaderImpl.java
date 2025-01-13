@@ -36,7 +36,7 @@ import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.DAORowUtil;
 
-public abstract class AbstractDataReaderImpl implements DataReader {
+public abstract class AbstractDataReaderImpl implements DataReaderInterface {
     private AppConfig appConfig;
     private DAORowCache rowCache = new DAORowCache();
     private int currentRowNumber;

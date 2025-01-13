@@ -39,7 +39,7 @@ import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataReader;
+import com.salesforce.dataloader.dao.DataReaderInterface;
 import com.salesforce.dataloader.dao.csv.CSVFileReader;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
@@ -150,7 +150,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         final Set<String> unexpectedIds = new HashSet<String>();
         final Set<String> expectedIds = new HashSet<String>(Arrays.asList(ids));
         String fileName = control.getAppConfig().getString(AppConfig.PROP_OUTPUT_SUCCESS);
-        final DataReader resultReader = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
+        final DataReaderInterface resultReader = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
         try {
             resultReader.open();
 
@@ -266,7 +266,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
             // verify IDs and phone format 
             verifyIdsInCSV(control, testFieldIds, false);
             String fileName = control.getAppConfig().getString(AppConfig.PROP_OUTPUT_SUCCESS);
-            final DataReader resultReader = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
+            final DataReaderInterface resultReader = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
             try {
                 resultReader.open();
 
@@ -403,7 +403,7 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         // Verify that column positions match positions
         // specified in the mapping (.sdl) file.
         String fileName = control.getAppConfig().getString(AppConfig.PROP_DAO_NAME);
-        final DataReader extractionReader = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
+        final DataReaderInterface extractionReader = new CSVFileReader(new File(fileName), getController().getAppConfig(), true, false);
         try {
             extractionReader.open();
             List<String> daoCols = extractionReader.getColumnNames();

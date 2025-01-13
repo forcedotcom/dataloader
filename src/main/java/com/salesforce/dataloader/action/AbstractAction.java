@@ -38,7 +38,7 @@ import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataAccessObject;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.dao.csv.CSVFileWriter;
 import com.salesforce.dataloader.exception.BatchSizeLimitException;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -67,8 +67,8 @@ abstract class AbstractAction implements IAction {
     private final Controller controller;
     private IVisitor visitor;
 
-    protected DataWriter successWriter;
-    protected DataWriter errorWriter;
+    protected DataWriterInterface successWriter;
+    protected DataWriterInterface errorWriter;
     private final DataAccessObject dao;
 
     private final Logger logger;
@@ -273,7 +273,7 @@ abstract class AbstractAction implements IAction {
         return this.dao;
     }
 
-    protected DataWriter getErrorWriter() {
+    protected DataWriterInterface getErrorWriter() {
         return this.errorWriter;
     }
 
@@ -290,7 +290,7 @@ abstract class AbstractAction implements IAction {
         return this.monitor;
     }
 
-    protected DataWriter getSuccessWriter() {
+    protected DataWriterInterface getSuccessWriter() {
         return this.successWriter;
     }
 
@@ -317,7 +317,7 @@ abstract class AbstractAction implements IAction {
      * @return Error Writer
      * @throws DataAccessObjectInitializationException
      */
-    public DataWriter createErrorWriter() throws DataAccessObjectInitializationException {
+    public DataWriterInterface createErrorWriter() throws DataAccessObjectInitializationException {
         final String filename = getConfig().getString(AppConfig.PROP_OUTPUT_ERROR);
         if (filename == null || filename.length() == 0)
             throw new DataAccessObjectInitializationException(getMessage("errorMissingErrorFile"));
@@ -330,7 +330,7 @@ abstract class AbstractAction implements IAction {
      * @return Success Writer
      * @throws DataAccessObjectInitializationException
      */
-    public DataWriter createSuccesWriter() throws DataAccessObjectInitializationException {
+    public DataWriterInterface createSuccesWriter() throws DataAccessObjectInitializationException {
         final String filename = getConfig().getString(AppConfig.PROP_OUTPUT_SUCCESS);
         if (filename == null || filename.length() == 0)
             throw new DataAccessObjectInitializationException(getMessage("errorMissingSuccessFile"));

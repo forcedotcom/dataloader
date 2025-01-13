@@ -36,7 +36,7 @@ import com.salesforce.dataloader.util.DLLogManager;
 
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.exception.*;
 
 /**
@@ -45,7 +45,7 @@ import com.salesforce.dataloader.exception.*;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public class DatabaseWriter implements DataWriter {
+public class DatabaseWriter implements DataWriterInterface {
 
     // logger
     private static Logger logger = DLLogManager.getLogger(DatabaseReader.class);

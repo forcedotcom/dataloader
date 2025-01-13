@@ -38,7 +38,7 @@ import com.salesforce.dataloader.action.visitor.DAOLoadVisitor;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.*;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.exception.*;
 import com.sforce.soap.partner.DeleteResult;
 import com.sforce.soap.partner.OwnerChangeOption;
@@ -58,8 +58,8 @@ import com.sforce.ws.ConnectionException;
  */
 public abstract class PartnerLoadVisitor extends DAOLoadVisitor {
 
-    public PartnerLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter) {
+    public PartnerLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriterInterface successWriter,
+            DataWriterInterface errorWriter) {
         super(controller, monitor, successWriter, errorWriter);
     }
 

@@ -58,8 +58,8 @@ import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dao.DataReader;
-import com.salesforce.dataloader.dao.DataWriter;
+import com.salesforce.dataloader.dao.DataReaderInterface;
+import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
 import com.salesforce.dataloader.exception.BatchSizeLimitException;
 import com.salesforce.dataloader.exception.DataAccessObjectException;
@@ -137,13 +137,13 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         final String error;
     }
 
-    public BulkLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter) {
+    public BulkLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriterInterface successWriter,
+            DataWriterInterface errorWriter) {
         this(controller, monitor, successWriter, errorWriter, null);
     }
     
-    public BulkLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriter successWriter,
-            DataWriter errorWriter, LoadRateCalculator rateCalculator) {
+    public BulkLoadVisitor(Controller controller, ILoaderProgress monitor, DataWriterInterface successWriter,
+            DataWriterInterface errorWriter, LoadRateCalculator rateCalculator) {
         super(controller, monitor, successWriter, errorWriter, rateCalculator);
         this.isDelete = getController().getAppConfig().getOperationInfo().isDelete();
         this.jobUtil = new BulkApiVisitorUtil(getController(), getProgressMonitor(), getRateCalculator());
@@ -441,7 +441,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
     protected void getResults() throws AsyncApiException, OperationException, DataAccessObjectException {
         getProgressMonitor().setSubTask(Messages.getMessage(getClass(), "retrievingResults"));
-        DataReader dataReader = null;
+        DataReaderInterface dataReader = null;
         dataReader = resetDAO();
         
         // create a map of batch infos by batch id. Each batchinfo has the final processing state of the batch
@@ -460,7 +460,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
 
     private int firstDAORowForCurrentBatch = 0;
 
-    private void processResults(final DataReader dataReader, final BatchInfo batch, 
+    private void processResults(final DataReaderInterface dataReader, final BatchInfo batch, 
             BatchData clientBatchInfo, final int firstRowInBatch)
             throws LoadException, DataAccessObjectException, AsyncApiException {
         // For Bulk API, we don't save any success or error until the end,
@@ -549,8 +549,8 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         return batchInfoMap;
     }
 
-    private DataReader resetDAO() throws DataAccessObjectInitializationException, LoadException {
-        final DataReader dataReader = (DataReader)getController().getDao();
+    private DataReaderInterface resetDAO() throws DataAccessObjectInitializationException, LoadException {
+        final DataReaderInterface dataReader = (DataReaderInterface)getController().getDao();
         dataReader.close();
         // TODO: doing this causes sql to be executed twice, for sql we should cache results in a local file
         dataReader.open();
