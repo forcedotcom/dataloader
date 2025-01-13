@@ -38,7 +38,7 @@ import com.salesforce.dataloader.model.RowInterface;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public interface DataWriterInterface extends DataAccessObject {
+public interface DataWriterInterface extends DataAccessObjectInterface {
     /**
      * Set ordered list of columns to be used for the data access object records. Useful for data access objects that
      * rely on consistent column ordering, such as CSV file

@@ -38,7 +38,7 @@ import com.salesforce.dataloader.model.TableRow;
  * @author Alex Warshavsky
  * @since 8.0
  */
-public interface DataReaderInterface extends DataAccessObject {
+public interface DataReaderInterface extends DataAccessObjectInterface {
     /**
      * Get a row of data from a data source
      *
