@@ -137,6 +137,7 @@ class SOQLInfo {
         }
 
         String rawFields = soql.substring(SELECT_KEYWORD.length(), fromIdx).trim();
+        if (rawFields.length() == 0) throw invalidSoql("No sobject specified after 'FROM' keyword");
         AtomicInteger aggIdx = new AtomicInteger();
         for (String fieldString : rawFields.split(AppUtil.COMMA)) {
             SOQLFieldInfo soqlFieldInfo = new SOQLFieldInfo(fieldString, aggIdx);
