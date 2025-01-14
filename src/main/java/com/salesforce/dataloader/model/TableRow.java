@@ -68,6 +68,11 @@ public class TableRow implements Map<String, Object>, RowInterface {
         return this.header;
     }
     
+    public void addHeaderColumn(String columnName) {
+        this.header.addColumn(columnName);
+        this.cellValues = Arrays.copyOf(this.cellValues, this.header.getColumns().size());
+    }
+    
     public static TableRow emptyRow() {
         return new TableRow(new TableHeader(new ArrayList<String>()));
     }

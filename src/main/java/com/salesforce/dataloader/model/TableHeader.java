@@ -40,8 +40,7 @@ public class TableHeader {
             if (colName == null) {
                 continue;
             }
-            columnPositionMap.put(colName.toLowerCase(), lastColPosition);
-            lastColPosition++;    
+            columnPositionMap.put(colName.toLowerCase(), lastColPosition++);
         }
     }
 
@@ -54,6 +53,7 @@ public class TableHeader {
     }
     
     public void addColumn(String colName) {
+        columnPositionMap.put(colName.toLowerCase(), lastColPosition++);
         this.columns.add(colName);
     }
     
