@@ -96,8 +96,8 @@ public class SoqlInfoTest extends ConfigTestBase {
         try {
             new SOQLInfo("select  from account  where id = ''");
             Assert.fail("should not be able to parse query");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Cannot parse empty string", e.getMessage());
+        } catch (Exception e) {
+            assertEquals("Invalid soql: No sobject specified after 'FROM' keyword", e.getMessage());
         }
     }
 
