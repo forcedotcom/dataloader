@@ -132,6 +132,7 @@ public class SOQLMapper extends Mapper {
     }
 
     private void mapPartnerSObject(Row row, String prefix, XmlObject sobj) {
+        if (sobj == null) return;
         Iterator<XmlObject> fields = sobj.getChildren();
         if (fields == null) return;
         while (fields.hasNext()) {
@@ -341,6 +342,9 @@ public class SOQLMapper extends Mapper {
             } else if (fieldExpr.startsWith(aliasPrefix)) {
                 fieldExpr = fieldExpr.substring(aliasPrefix.length());
             }
+        }
+        if (getClient() == null) {
+            return fieldExpr;
         }
         DescribeSObjectResult describeResult = getClient().getFieldTypes();
         return evalSfdcField(describeResult, fieldExpr);
