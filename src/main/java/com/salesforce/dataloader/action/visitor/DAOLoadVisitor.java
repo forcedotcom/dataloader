@@ -52,6 +52,8 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReaderInterface;
 import com.salesforce.dataloader.dao.DataWriterInterface;
+import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
+import com.salesforce.dataloader.dyna.SObjectReference;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.mapping.LoadMapper;
@@ -374,11 +376,15 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     
     public Object getFieldValue(String fieldName, Object fieldValue) {
         // TODO: this needs to be controlled by a config property.
-        if (getController().getAppConfig().getBoolean(AppConfig.PROP_LOAD_REMOVE_NONBREAKING_SPACE_IN_IDLOOKUP_FIELD)
+        if (getController().getAppConfig().getBoolean(AppConfig.PROP_LOAD_REMOVE_LEADING_TRAILING_WHITESPACE_IN_IDLOOKUP_FIELD)
                 && isIdLookupField(fieldName)) {
-            String fieldValueStr = (String)fieldValue;
+            if (fieldValue instanceof String) {
+                String fieldValueStr = (String)fieldValue;
+                return fieldValueStr.strip(); // remove leading and trailing whitespace
+            } else {
+                return fieldValue;
+            }
             // idLookupFields do not have leading or trailing whitespace chars
-            return fieldValueStr.strip(); // remove leading and trailing whitespace
         }
         fieldValue = getHtmlFormattedFieldValue(fieldName, fieldValue);
         fieldValue = getPhoneFieldValue(fieldName, fieldValue);
@@ -510,9 +516,22 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     
     private HashMap<String, Boolean> fieldTypesMap = new HashMap<String, Boolean>();
     private boolean isIdLookupField(String fieldName) {
+        if (fieldName == null) {
+            return false;
+        }
         if (fieldTypesMap.containsKey(fieldName)) {
             return fieldTypesMap.get(fieldName);
         }
+        try {
+            ParentIdLookupFieldFormatter pidLookupFormatter = new ParentIdLookupFieldFormatter(fieldName);
+            if (pidLookupFormatter.getParentFieldName() != null) {
+                fieldTypesMap.put(fieldName, true);
+                return true;
+            }
+        } catch (RelationshipFormatException e) {
+            // do nothing
+        }
+                
         PartnerClient partnerClient = this.getController().getPartnerClient();
         DescribeSObjectResult describeSObjectResult;
         try {

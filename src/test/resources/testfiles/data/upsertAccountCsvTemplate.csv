@@ -1,5 +1,5 @@
 NAME,TYPE,PHONE,ACCOUNTNUMBER__C,WEBSITE,ANNUALREVENUE,ORACLE_ID__C
-account Upsert #0,Account,415-555-0000,ACCT_0,http://www.accountUpsert0.com,0,1-000000
+account Upsert #0,Account,415-555-0000,ACCT_0,http://www.accountUpsert0.com,0,"　 　1-000000　 　"
 account Upsert #1,Account,415-555-0001,ACCT_1,http://www.accountUpsert1.com,1000,1-000001
 account Upsert #2,Account,415-555-0002,ACCT_2,http://www.accountUpsert2.com,2000,1-000002
 account Upsert #3,Account,415-555-0003,ACCT_3,http://www.accountUpsert3.com,3000,1-000003
