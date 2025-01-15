@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.client.SObject4JSON;
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.RelationshipFormatException;
@@ -53,6 +54,10 @@ public class SObjectReference {
      */
     public SObjectReference(Object refValue) {
         if (refValue != null && String.valueOf(refValue).length() == 0) refValue = null;
+        if (refValue instanceof String
+                && AppConfig.getCurrentConfig().getBoolean(AppConfig.PROP_LOAD_REMOVE_LEADING_TRAILING_WHITESPACE_IN_IDLOOKUP_FIELD)) {
+            refValue = refValue == null ? null : ((String)refValue).strip();
+        }
         this.referenceExtIdValue = refValue;
     }
 
@@ -82,7 +87,8 @@ public class SObjectReference {
         sObjRef.setType(entityRefInfo.getParentObjectName());
         // set idLookup, do type conversion as well
         Class<?> typeClass = SforceDynaBean.getConverterClass(entityRefInfo.getParentObjectFieldMap().get(parentFieldName));
-        Object extIdValue = ConvertUtils.convert(this.referenceExtIdValue.toString(), typeClass);
+        String refValueStr = this.referenceExtIdValue == null ? null : this.referenceExtIdValue.toString();
+        Object extIdValue = ConvertUtils.convert(refValueStr, typeClass);
         sObjRef.setField(parentFieldName, extIdValue);
         // Add the sObject reference as a child elemetn, name set to relationshipName
         if (restSObj == null) {
@@ -112,7 +118,7 @@ public class SObjectReference {
     public Object getReferenceExtIdValue() {
         return referenceExtIdValue;
     }
-
+    
     public static String getRelationshipField(Controller controller, String refFieldName) {
         String relName;
         try {
