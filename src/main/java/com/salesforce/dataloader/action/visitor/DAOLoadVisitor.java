@@ -211,7 +211,8 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             DynaBean dynaBean = SforceDynaBean.convertToDynaBean(dynaClass, sforceDataRow);
             Map<String, String> fieldMap = BeanUtils.describe(dynaBean);
             for (String fName : fieldMap.keySet()) {
-                if (fieldMap.get(fName) != null) {
+                Object fieldVal = fieldMap.get(fName);
+                if (fieldVal != null) {
                     // see if any entity foreign key references are embedded here
                     Object value = this.getFieldValue(fName, dynaBean.get(fName));
                     dynaBean.set(fName, value);
@@ -372,6 +373,13 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
     }
     
     public Object getFieldValue(String fieldName, Object fieldValue) {
+        // TODO: this needs to be controlled by a config property.
+        if (getController().getAppConfig().getBoolean(AppConfig.PROP_LOAD_REMOVE_NONBREAKING_SPACE_IN_IDLOOKUP_FIELD)
+                && isIdLookupField(fieldName)) {
+            String fieldValueStr = (String)fieldValue;
+            // idLookupFields do not have leading or trailing whitespace chars
+            return fieldValueStr.strip(); // remove leading and trailing whitespace
+        }
         fieldValue = getHtmlFormattedFieldValue(fieldName, fieldValue);
         fieldValue = getPhoneFieldValue(fieldName, fieldValue);
         return fieldValue;
@@ -498,5 +506,27 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             getLogger().error(errMsg, e);
             handleException(errMsg, e);
         }
+    }
+    
+    private HashMap<String, Boolean> fieldTypesMap = new HashMap<String, Boolean>();
+    private boolean isIdLookupField(String fieldName) {
+        if (fieldTypesMap.containsKey(fieldName)) {
+            return fieldTypesMap.get(fieldName);
+        }
+        PartnerClient partnerClient = this.getController().getPartnerClient();
+        DescribeSObjectResult describeSObjectResult;
+        try {
+            describeSObjectResult = partnerClient.describeSObject(this.getConfig().getString(AppConfig.PROP_ENTITY));
+            Field[] fields = describeSObjectResult.getFields();
+            for (Field field : fields) {
+                if (field.getName().equalsIgnoreCase(fieldName)) {
+                    fieldTypesMap.put(fieldName, field.isIdLookup());
+                    return field.isIdLookup();
+                }
+            }
+        } catch (ConnectionException e) {
+            logger.warn(fieldName + " field type not found in describeSObjectResult");
+        }
+        return false;
     }
 }
