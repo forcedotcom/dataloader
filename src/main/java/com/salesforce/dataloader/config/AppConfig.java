@@ -339,6 +339,7 @@ public class AppConfig {
     public static final String PROP_EXTRACT_ALL_CAPS_HEADERS="sfdc.extraction.allCapsHeaders";
     public static final String PROP_EXTRACT_CSV_OUTPUT_BOM="sfdc.extraction.outputByteOrderMark";
     public static final String PROP_LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT = "sfdc.load.preserveWhitespaceInRichText";
+    public static final String PROP_LOAD_REMOVE_NONBREAKING_SPACE_IN_IDLOOKUP_FIELD="sfdc.load.removeNonBreakingSpaceInIdLookupField";
 
     //
     // process configuration (action parameters)
@@ -787,7 +788,7 @@ public class AppConfig {
         setDefaultValue(PROP_SAVE_ALL_PROPS, false);
         setDefaultValue(PROP_EXTRACT_ALL_CAPS_HEADERS, false);
         setDefaultValue(PROP_EXTRACT_CSV_OUTPUT_BOM, true);
-        
+        setDefaultValue(PROP_LOAD_REMOVE_NONBREAKING_SPACE_IN_IDLOOKUP_FIELD, true);
     }
 
     /**
