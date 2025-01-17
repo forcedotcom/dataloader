@@ -157,7 +157,7 @@ public class BulkApiVisitorUtil {
         this.jobInfo = jinfo;
     }
 
-    void createJob() throws AsyncApiException {
+    void createJob(String soql) throws AsyncApiException {
         JobInfo job = new JobInfo();
         final OperationEnum op = this.appConfig.getOperationInfo().getBulkOperationEnum();
         job.setOperation(op);
@@ -201,7 +201,7 @@ public class BulkApiVisitorUtil {
             }
         }
         if (isBulkV2QueryJob()) {
-            job.setObject(this.appConfig.getString(AppConfig.PROP_EXTRACT_SOQL));
+            job.setObject(soql);
             logger.info("going to create BulkV2 query job");
         }
         job = this.connection.createJob(job);

@@ -58,7 +58,7 @@ public class BulkV2QueryVisitor extends AbstractBulkQueryVisitor {
     protected int executeQuery(String soql) throws AsyncApiException, OperationException {
         final BulkApiVisitorUtil jobUtil = new BulkApiVisitorUtil(getController(), getProgressMonitor(),
                 getRateCalculator(), false);
-        jobUtil.createJob();
+        jobUtil.createJob(soql);
         this.jobId = jobUtil.getJobId();
         jobUtil.awaitCompletionAndCloseJob();
         return jobUtil.getRecordsProcessed();
