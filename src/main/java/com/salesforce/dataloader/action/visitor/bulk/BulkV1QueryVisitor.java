@@ -65,7 +65,7 @@ public class BulkV1QueryVisitor extends AbstractBulkQueryVisitor {
     protected int executeQuery(String soql) throws AsyncApiException, OperationException {
         final BulkApiVisitorUtil jobUtil = new BulkApiVisitorUtil(getController(), getProgressMonitor(),
                 getRateCalculator(), false);
-        jobUtil.createJob();
+        jobUtil.createJob(soql);
         try {
             jobUtil.createBatch(new ByteArrayInputStream(soql.getBytes(AppConfig.BULK_API_ENCODING)));
         } catch (final UnsupportedEncodingException e) {
