@@ -126,7 +126,7 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
         return getConfig().getBoolean(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT);
     }
     
-    public static final int DEFAULT_MAX_SOQL_CHAR_LENGTH = 500;
+    public static final int DEFAULT_MAX_SOQL_CHAR_LENGTH = 100000;
     public static final int MAX_IDLOOKUP_FIELD_LENGTH = 255;
     private int daoLastProcessedRow = 0;
     private CSVFileReader csvReader = null;
@@ -134,7 +134,6 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
     private int numRows = 0;
     private boolean isGetSoqlForNextBatchCalled = false;
     private int maxSoqlCharLength = DEFAULT_MAX_SOQL_CHAR_LENGTH;
-    private static final String INFILE = "IN";
     private String getSoqlForNextBatch() throws OperationException {
         List<String> inClauseFileAndColumnNameList = parseInClauseForFileAndColumnName(soql);
         if (inClauseFileAndColumnNameList.size() == 2) {
