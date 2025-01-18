@@ -59,18 +59,6 @@ public abstract class ProcessExtractTestBase extends ProcessTestBase {
         super(config);
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> getParameters() {
-        return Arrays.asList(
-                // partner API
-                TestVariant.forSettings(TestSetting.BULK_API_DISABLED, TestSetting.BULK_V2_API_DISABLED)
-                // Bulk API
-                , TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_DISABLED)
-                // Bulk V2 Query API
-                , TestVariant.forSettings(TestSetting.BULK_V2_API_ENABLED)
-                );
-    }
-
     protected class ExtractContactGenerator extends ContactGenerator {
         private final String uniqueLastName;
 
