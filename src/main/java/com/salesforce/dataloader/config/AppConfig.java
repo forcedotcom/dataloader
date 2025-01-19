@@ -1927,9 +1927,13 @@ public class AppConfig {
      * @throws IOException 
      * @throws FactoryConfigurationError 
      */
+    private static AppConfig currentConfig = null;
     public static synchronized AppConfig getInstance(Map<String, String> argMap) throws ConfigInitializationException, FactoryConfigurationError, IOException {
         if (argMap == null) {
             argMap = new HashMap<String, String>();
+        }
+        if (argMap.isEmpty()) {
+            logger.warn("No arguments provided to initialize AppConfig. Loading default configuration.");
         }
         AppConfig.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argMap));
 
@@ -1985,20 +1989,17 @@ public class AppConfig {
             logger.debug("User config is found in " + configFile.getAbsolutePath());
         }
 
-        AppConfig appConfig = null;
         try {
-            appConfig = new AppConfig(configFilePath, argMap);
-            currentConfig = appConfig;
+            currentConfig = new AppConfig(configFilePath, argMap);
             logger.debug(Messages.getMessage(AppConfig.class, "configInit")); //$NON-NLS-1$
         } catch (IOException | ProcessInitializationException e) {
             logger.error(e.getMessage());
             throw new ConfigInitializationException(Messages.getMessage(AppConfig.class, "errorConfigLoad", configFilePath), e);
         }
-        return appConfig;
+        return currentConfig;
     }
     
-    private static AppConfig currentConfig = null;
-    public static AppConfig getCurrentConfig() {
+    public synchronized static AppConfig getCurrentConfig() {
         return currentConfig;
     }
     
