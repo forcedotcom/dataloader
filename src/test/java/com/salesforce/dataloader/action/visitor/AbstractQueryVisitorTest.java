@@ -61,6 +61,15 @@ public class AbstractQueryVisitorTest {
         assertEquals("acctid", result.get(1));
     }
     
+
+    @Test
+    public void testParseInClauseForFileAndColumnNameWithAndValidInput() {
+        String input = "SELECT name FROM Account WHERE id iN ({c:\\users\\me\\dataloader\\accounts.csv}, {acctid}) AND name='bar'";
+        List<String> result = AbstractQueryVisitor.parseInClauseForFileAndColumnName(input);
+        assertEquals(2, result.size());
+        assertEquals("c:\\users\\me\\dataloader\\accounts.csv", result.get(0));
+        assertEquals("acctid", result.get(1));
+    }
     @Test
     public void testParseInClauseForFileAndColumnName_InvalidInput() {
         String input = "SELECT name FROM Account WHERE id IN ()";
