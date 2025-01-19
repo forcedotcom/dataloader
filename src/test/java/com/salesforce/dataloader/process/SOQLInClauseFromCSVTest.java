@@ -93,7 +93,8 @@ public class SOQLInClauseFromCSVTest extends ProcessTestBase {
     @Test
     public void testSoqlInClauseUsingCSV() throws Exception {
         Map<String, String> configMap = getTestConfig(OperationInfo.insert, false);
-        String accountId = insertAccount(NAME_VAL, ORACLE_ID_VAL);
+        String accountId1 = insertAccount(NAME_VAL, ORACLE_ID_VAL);
+        String accountId2 = insertAccount(NAME_VAL+"2", ORACLE_ID_VAL+"2");
         String extractionFileName = getTestDataDir() + File.separator + "SoqlInClauseFromCSV.csv";
         runExtraction("select name from Account where "
                 + COL_IN_CSV
@@ -101,14 +102,22 @@ public class SOQLInClauseFromCSVTest extends ProcessTestBase {
                 + extractionFileName 
                 + "}, {"
                 + COL_IN_CSV
-                + "})");
-        validateAccountNameInOutputFile("acctNameXyz");
+                + "}) OR Name = '" + NAME_VAL + "2' ORDER BY Name", 2);
+        validateAccountNamesInOutputFile(NAME_VAL, 2);
+        runExtraction("select name from Account where Name = '" + NAME_VAL + "' AND "
+                + COL_IN_CSV
+                + " in ({" 
+                + extractionFileName 
+                + "}, {"
+                + COL_IN_CSV
+                + "})", 1);
+        validateAccountNamesInOutputFile(NAME_VAL, 1);
     }
 
-    private void runExtraction(String extractionQuery) throws ProcessInitializationException, DataAccessObjectException {
+    private void runExtraction(String extractionQuery, int numSuccesses) throws ProcessInitializationException, DataAccessObjectException {
         testConfig.put(AppConfig.PROP_EXTRACT_SOQL, extractionQuery);
         testConfig.put(AppConfig.PROP_LIMIT_OUTPUT_TO_QUERY_FIELDS, AppConfig.TRUE);
-        runProcess(testConfig, 1, true);
+        runProcess(testConfig, numSuccesses, true);
     }
     
     private String insertAccount(String name, String oracleId) throws ConnectionException {
@@ -121,7 +130,8 @@ public class SOQLInClauseFromCSVTest extends ProcessTestBase {
         return id;
     }
     
-    private void validateAccountNameInOutputFile(final String accountName) throws IOException {
+    private void validateAccountNamesInOutputFile(
+            final String accountNamePrefix, final int count) throws IOException {
 
         FileInputStream fis = new FileInputStream(new File(testConfig.get(AppConfig.PROP_DAO_NAME)));
         try {
@@ -129,8 +139,11 @@ public class SOQLInClauseFromCSVTest extends ProcessTestBase {
                     this.getController().getAppConfig(), false, true);
             rdr.open();
             TableRow row = rdr.readTableRow();
-            String extractedNameVal = (String)row.get("Name");
-            assertEquals(accountName, extractedNameVal);
+            for (int i = 0; i < count; i++) {
+                String extractedNameVal = (String) row.get("Name");
+                assertTrue(extractedNameVal.startsWith(accountNamePrefix));
+                row = rdr.readTableRow();
+            }
         } catch (DataAccessObjectInitializationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
