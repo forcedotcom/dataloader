@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 public abstract class ConfigTestBase extends TestBase {
@@ -79,6 +80,17 @@ public abstract class ConfigTestBase extends TestBase {
             configBase.put(AppConfig.PROP_PROXY_USERNAME, proxyUsername);
             configBase.put(AppConfig.PROP_PROXY_PASSWORD, proxyPassword);
         }
+        
+
+        Properties systemProperties = System.getProperties();
+
+        // Iterate through system properties
+        systemProperties.forEach((key, value) -> {
+            System.out.println(key + " : " + value);
+            if (key.toString().startsWith("test.")) {
+                configBase.put(key.toString(), value.toString());
+            }
+        });
         return configBase;
     }
 

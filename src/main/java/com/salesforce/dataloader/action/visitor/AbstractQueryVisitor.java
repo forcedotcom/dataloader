@@ -426,9 +426,9 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
     }
     
     private static final String IN_CLAUSE_REGEX = "\\s+IN\\s+\\(\\s*\\{\\s*([^}]+)\\s*\\}\\s*,\\s*\\{\\s*([^}]+)\\s*\\}\\s*\\)";
-    private List<String> parseInClauseForFileAndColumnName(String input) {
+    static List<String> parseInClauseForFileAndColumnName(String input) {
         List<String> values = new ArrayList<>();
-        Pattern pattern = Pattern.compile(IN_CLAUSE_REGEX);
+        Pattern pattern = Pattern.compile(IN_CLAUSE_REGEX,  Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(input);
     
         if (matcher.find()) {
