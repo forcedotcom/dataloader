@@ -134,13 +134,11 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
         return getConfig().getBoolean(AppConfig.PROP_ENABLE_EXTRACT_STATUS_OUTPUT);
     }
     
-    public static final int DEFAULT_MAX_SOQL_CHAR_LENGTH = 100000;
     public static final int MAX_IDLOOKUP_FIELD_LENGTH = 255;
     private int daoLastProcessedRow = 0;
     private CSVFileReader csvReader = null;
     private String inClauseColName = null;
     private int numRows = 0;
-    private static int maxSoqlCharLength = DEFAULT_MAX_SOQL_CHAR_LENGTH;
 
     private String getSoqlForNextBatch() throws OperationException {
         List<String> inClauseFileAndColumnNameList = parseInClauseForFileAndColumnName(soql);
@@ -386,10 +384,6 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
     protected SOQLMapper getMapper() {
         return (SOQLMapper)super.getMapper();
     }
-    
-    public static void setMaxSoqlCharLength(int maxSoqlCharLength) {
-        AbstractQueryVisitor.maxSoqlCharLength = maxSoqlCharLength;
-    }
 
     private static final String IN_CLAUSE = " IN ";
     private String constructSoqlFromFile(String soql, CSVFileReader csvReader, String columnName) throws IOException, DataAccessObjectException {
@@ -411,8 +405,15 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
 
         boolean firstRowOfCurrentBatch = true;
         int soqlLength = soqlBuilder.length() + MAX_IDLOOKUP_FIELD_LENGTH + 4 + soqlAfterInClause.length();
+        int maxSoqlLength = AppConfig.DEFAULT_MAX_SOQL_CHAR_LENGTH;
+        try {
+            maxSoqlLength = this.controller.getAppConfig().getInt(AppConfig.PROP_SOQL_MAX_LENGTH);
+        } catch (ParameterLoadException e) {
+            logger.warn("Error getting max soql length: " + e.getMessage());
+            maxSoqlLength = AppConfig.DEFAULT_MAX_SOQL_CHAR_LENGTH;
+        }
         while (daoLastProcessedRow < numRows
-                && soqlLength  < this.maxSoqlCharLength) {
+                && soqlLength  < maxSoqlLength) {
             if (firstRowOfCurrentBatch) {
                 firstRowOfCurrentBatch = false;
             }  else {

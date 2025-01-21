@@ -335,6 +335,7 @@ public class AppConfig {
     public static final String PROP_IDLOOKUP_FIELD = "sfdc.externalIdField"; //$NON-NLS-1$
     public static final String PROP_EXPORT_BATCH_SIZE = "sfdc.extractionRequestSize"; //$NON-NLS-1$
     public static final String PROP_EXTRACT_SOQL = "sfdc.extractionSOQL"; //$NON-NLS-1$
+    public static final String PROP_SOQL_MAX_LENGTH = "sfdc.soql.maxlength"; //$NON-NLS-1$
     public static final String PROP_SORT_EXTRACT_FIELDS = "sfdc.sortExtractionFields"; //$NON-NLS-1$
     public static final String PROP_EXTRACT_ALL_CAPS_HEADERS="sfdc.extraction.allCapsHeaders";
     public static final String PROP_EXTRACT_CSV_OUTPUT_BOM="sfdc.extraction.outputByteOrderMark";
@@ -553,6 +554,7 @@ public class AppConfig {
             PROP_MIN_RETRY_SLEEP_SECS,
             PROP_REUSE_CLIENT_CONNECTION,
             CLI_OPTION_RUN_MODE,
+            PROP_SOQL_MAX_LENGTH,
             AppConfig.CLI_OPTION_CONFIG_DIR_PROP,
             AppConfig.PROP_GMT_FOR_DATE_FIELD_VALUE,
             AppConfig.CLI_OPTION_INSTALLATION_CREATE_DESKTOP_SHORTCUT_PROP,
@@ -580,6 +582,7 @@ public class AppConfig {
             PROP_SERVER_ENVIRONMENTS,
             PROP_SELECTED_SERVER_ENVIRONMENT,
             PROP_DAO_SKIP_TOTAL_COUNT,
+            PROP_SOQL_MAX_LENGTH,
             AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH,
             AppConfig.CLI_OPTION_INSTALLATION_FOLDER_PROP,
             AppConfig.CLI_OPTION_SYSTEM_PROXY_HOST,
@@ -789,6 +792,7 @@ public class AppConfig {
         setDefaultValue(PROP_EXTRACT_ALL_CAPS_HEADERS, false);
         setDefaultValue(PROP_EXTRACT_CSV_OUTPUT_BOM, true);
         setDefaultValue(PROP_LOAD_REMOVE_LEADING_TRAILING_WHITESPACE_IN_IDLOOKUP_FIELD, true);
+        setDefaultValue(PROP_SOQL_MAX_LENGTH, DEFAULT_MAX_SOQL_CHAR_LENGTH);
     }
 
     /**
@@ -1793,6 +1797,7 @@ public class AppConfig {
     }
 
     private final List<ConfigListener> listeners = new ArrayList<ConfigListener>();
+    public static final int DEFAULT_MAX_SOQL_CHAR_LENGTH = 100000;
 
     public synchronized void addListener(ConfigListener l) {
         listeners.add(l);
