@@ -103,7 +103,7 @@ public class ConfigTest extends ConfigTestBase {
             AppConfig appConfig = AppConfig.getInstance(getTestConfig());
             appConfig.setServerEnvironment(AppConfig.SERVER_PROD_ENVIRONMENT_VAL);
             String configuredOAuthServer = appConfig.getAuthEndpointForCurrentEnv();
-            String expectedOAuthServer = getProperty("test.endpoint");
+            String expectedOAuthServer = getPropertyNoOverriedes("test.endpoint");
             if (expectedOAuthServer == null || expectedOAuthServer.isBlank()) {
                 logger.info("Expected prefix is " + expectedOAuthServer);
                 logger.info("Actual prefix is " + configuredOAuthServer);
@@ -129,7 +129,7 @@ public class ConfigTest extends ConfigTestBase {
             AppConfig appConfig = AppConfig.getInstance(testConfigMap);
             appConfig.setServerEnvironment(AppConfig.SERVER_PROD_ENVIRONMENT_VAL);
             String configuredOAuthRedirectURI = appConfig.getOAuthRedirectURIForCurrentEnv();
-            String expectedOAuthRedirectURIPrefix = getProperty("test.endpoint");
+            String expectedOAuthRedirectURIPrefix = getPropertyNoOverriedes("test.endpoint");
             if (expectedOAuthRedirectURIPrefix == null || expectedOAuthRedirectURIPrefix.isBlank()) {
                 logger.info("Expected prefix is " + expectedOAuthRedirectURIPrefix);
                 logger.info("Actual prefix is " + configuredOAuthRedirectURI);

@@ -71,7 +71,7 @@ import javax.xml.parsers.FactoryConfigurationError;
  * @author Alex Warshavsky
  * @since 8.0
  */
-abstract class TestBase {
+abstract public class TestBase {
 
     private static final Pattern INSIDE_BRACKETS_TEST_PARAMETERS = Pattern.compile("\\[.+\\]");
     @Rule
@@ -83,6 +83,7 @@ abstract class TestBase {
      * *********
      */
     private static final Properties TEST_PROPS;
+    private static final Properties TEST_PROPS_NO_OVERRIDES = loadTestProperties();
     private static final String TEST_FILES_DIR;
     protected static final String TEST_CONF_DIR;
     private static final String TEST_DATA_DIR;
@@ -110,6 +111,15 @@ abstract class TestBase {
         
         Map<String, String> argsMap = new HashMap<String, String>();
         argsMap.put(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
+        
+        // Iterate through system properties to check for test properties settings
+        Properties systemProperties = System.getProperties();
+        systemProperties.forEach((key, value) -> {
+            System.out.println(key + " : " + value);
+            if (key.toString().startsWith("test.")) {
+                TEST_PROPS.put(key.toString(), value.toString());
+            }
+        });
     }
 
     private static Properties loadTestProperties() {
@@ -133,6 +143,18 @@ abstract class TestBase {
         return TEST_PROPS.getProperty(testProperty);
     }
 
+    protected static String getPropertyNoOverriedes(String testProperty) {
+        return TEST_PROPS_NO_OVERRIDES.getProperty(testProperty);
+    }
+    
+    protected static Properties getTestBaseProperties() {
+        return TEST_PROPS;
+    }
+    
+    protected static Properties getTestBasePropertiesNoOverrides() {
+        return TEST_PROPS_NO_OVERRIDES;
+    }
+    
     private static final String API_CLIENT_NAME = "DataLoaderTestBatch/" + Controller.APP_VERSION;
 
     protected static final String DEFAULT_CONTACT_EXT_ID_FIELD = "NumberId__c";

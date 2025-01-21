@@ -179,4 +179,9 @@ public abstract class AbstractVisitor implements IVisitor {
         return null;
     }
 
+    protected void resetCalculations() {
+        this.rateCalculator = new LoadRateCalculator();
+        this.errors = 0;
+        this.successes = 0;
+    }
 }

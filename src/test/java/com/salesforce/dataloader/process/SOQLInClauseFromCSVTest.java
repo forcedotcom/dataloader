@@ -45,6 +45,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import com.salesforce.dataloader.TestBase;
 import com.salesforce.dataloader.TestSetting;
 import com.salesforce.dataloader.TestVariant;
 import com.salesforce.dataloader.action.OperationInfo;
@@ -93,8 +94,8 @@ public class SOQLInClauseFromCSVTest extends ProcessTestBase {
     @Test
     public void testSoqlInClauseUsingCSV() throws Exception {
         Map<String, String> configMap = getTestConfig(OperationInfo.insert, false);
-        String accountId1 = insertAccount(NAME_VAL, ORACLE_ID_VAL);
-        String accountId2 = insertAccount(NAME_VAL+"2", ORACLE_ID_VAL+"2");
+        String accountId1 = insertAccount(NAME_VAL+"1", ORACLE_ID_VAL+"1", TestBase.ACCOUNT_NUMBER_PREFIX+"1");
+        String accountId2 = insertAccount(NAME_VAL+"2", ORACLE_ID_VAL+"2", TestBase.ACCOUNT_NUMBER_PREFIX+"2");
         String extractionFileName = getTestDataDir() + File.separator + "SoqlInClauseFromCSV.csv";
         runExtraction("select name from Account where "
                 + COL_IN_CSV
@@ -104,7 +105,7 @@ public class SOQLInClauseFromCSVTest extends ProcessTestBase {
                 + COL_IN_CSV
                 + "}) OR Name = '" + NAME_VAL + "2' ORDER BY Name", 2);
         validateAccountNamesInOutputFile(NAME_VAL, 2);
-        runExtraction("select name from Account where Name = '" + NAME_VAL + "' AND "
+        runExtraction("select name from Account where Name = '" + NAME_VAL + "1' AND "
                 + COL_IN_CSV
                 + " in ({" 
                 + extractionFileName 
@@ -113,6 +114,20 @@ public class SOQLInClauseFromCSVTest extends ProcessTestBase {
                 + "})", 1);
         validateAccountNamesInOutputFile(NAME_VAL, 1);
     }
+    
+    @Test
+    public void testSoqlInClauseUsingCSVMultiBatch() throws Exception {
+        AbstractQueryVisitor.setMaxSoqlCharLength(500);
+        Map<String, String> configMap = getTestConfig(OperationInfo.insert, false);
+        for (int i = 0; i < 20; i++) {
+            insertAccount(NAME_VAL + i, ORACLE_ID_VAL + i, TestBase.ACCOUNT_NUMBER_PREFIX + i);
+        }
+        String extractionFileName = getTestDataDir() + File.separator + "SoqlInClauseFromCSV.csv";
+        runExtraction("select name from Account where " + COL_IN_CSV + " in ({" + extractionFileName + "}, {"
+                + COL_IN_CSV + "})", 20);
+        validateAccountNamesInOutputFile(NAME_VAL, 20);
+        AbstractQueryVisitor.setMaxSoqlCharLength(AbstractQueryVisitor.DEFAULT_MAX_SOQL_CHAR_LENGTH);
+    }
 
     private void runExtraction(String extractionQuery, int numSuccesses) throws ProcessInitializationException, DataAccessObjectException {
         testConfig.put(AppConfig.PROP_EXTRACT_SOQL, extractionQuery);
@@ -120,11 +135,12 @@ public class SOQLInClauseFromCSVTest extends ProcessTestBase {
         runProcess(testConfig, numSuccesses, true);
     }
     
-    private String insertAccount(String name, String oracleId) throws ConnectionException {
+    private String insertAccount(String name, String oracleId, String acctId) throws ConnectionException {
         final SObject account = new SObject();
         account.setType("Account");
         account.setField("Name", name);
         account.setField("Oracle_Id__c", oracleId);
+        account.setField("AccountNumber__c", acctId); // to make sure that records are deleted before/after test execution
         String id = getBinding().create(new SObject[]{account})[0].getId();
         assertNotNull(id);
         return id;

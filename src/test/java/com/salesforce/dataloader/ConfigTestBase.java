@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -73,6 +74,9 @@ public abstract class ConfigTestBase extends TestBase {
         for (TestProperties prop : getDefaultTestPropertiesSet()) {
             prop.putConfigSetting(configBase);
         }
+        for (Entry<Object, Object> prop : getTestBaseProperties().entrySet()) {
+            configBase.put(prop.getKey().toString(), prop.getValue().toString());
+        }
         configBase.put(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, TEST_CONF_DIR);
         String proxyUsername = System.getProperty(AppConfig.PROP_PROXY_USERNAME);
         String proxyPassword = System.getProperty(AppConfig.PROP_PROXY_PASSWORD);
@@ -80,17 +84,6 @@ public abstract class ConfigTestBase extends TestBase {
             configBase.put(AppConfig.PROP_PROXY_USERNAME, proxyUsername);
             configBase.put(AppConfig.PROP_PROXY_PASSWORD, proxyPassword);
         }
-        
-
-        Properties systemProperties = System.getProperties();
-
-        // Iterate through system properties
-        systemProperties.forEach((key, value) -> {
-            System.out.println(key + " : " + value);
-            if (key.toString().startsWith("test.")) {
-                configBase.put(key.toString(), value.toString());
-            }
-        });
         return configBase;
     }
 

@@ -109,6 +109,11 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
                     flushResults();
                 }
                 soql = getSoqlForNextBatch();
+                if (soql != null) {
+                    this.resetCalculations();
+                    this.batchRows.clear();
+                    this.batchIds.clear();
+                }
             } 
         } catch (final ApiFault e) {
             throw new ExtractException(e.getExceptionMessage(), e);
@@ -135,7 +140,8 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
     private CSVFileReader csvReader = null;
     private String inClauseColName = null;
     private int numRows = 0;
-    private int maxSoqlCharLength = DEFAULT_MAX_SOQL_CHAR_LENGTH;
+    private static int maxSoqlCharLength = DEFAULT_MAX_SOQL_CHAR_LENGTH;
+
     private String getSoqlForNextBatch() throws OperationException {
         List<String> inClauseFileAndColumnNameList = parseInClauseForFileAndColumnName(soql);
         if (inClauseFileAndColumnNameList.size() == 2) {
@@ -381,8 +387,8 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
         return (SOQLMapper)super.getMapper();
     }
     
-    public void setMaxSoqlCharLength(int maxSoqlCharLength) {
-        this.maxSoqlCharLength = maxSoqlCharLength;
+    public static void setMaxSoqlCharLength(int maxSoqlCharLength) {
+        AbstractQueryVisitor.maxSoqlCharLength = maxSoqlCharLength;
     }
 
     private static final String IN_CLAUSE = " IN ";
