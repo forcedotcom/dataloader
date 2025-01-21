@@ -93,7 +93,6 @@ public class SOQLInClauseFromCSVTest extends ProcessTestBase {
 
     @Test
     public void testSoqlInClauseUsingCSV() throws Exception {
-        Map<String, String> configMap = getTestConfig(OperationInfo.insert, false);
         String accountId1 = insertAccount(NAME_VAL+"1", ORACLE_ID_VAL+"1", TestBase.ACCOUNT_NUMBER_PREFIX+"1");
         String accountId2 = insertAccount(NAME_VAL+"2", ORACLE_ID_VAL+"2", TestBase.ACCOUNT_NUMBER_PREFIX+"2");
         String extractionFileName = getTestDataDir() + File.separator + "SoqlInClauseFromCSV.csv";
@@ -117,8 +116,7 @@ public class SOQLInClauseFromCSVTest extends ProcessTestBase {
     
     @Test
     public void testSoqlInClauseUsingCSVMultiBatch() throws Exception {
-        AbstractQueryVisitor.setMaxSoqlCharLength(500);
-        Map<String, String> configMap = getTestConfig(OperationInfo.insert, false);
+        testConfig.put(AppConfig.PROP_SOQL_MAX_LENGTH, "500");
         for (int i = 0; i < 20; i++) {
             insertAccount(NAME_VAL + i, ORACLE_ID_VAL + i, TestBase.ACCOUNT_NUMBER_PREFIX + i);
         }
@@ -126,7 +124,7 @@ public class SOQLInClauseFromCSVTest extends ProcessTestBase {
         runExtraction("select name from Account where " + COL_IN_CSV + " in ({" + extractionFileName + "}, {"
                 + COL_IN_CSV + "})", 20);
         validateAccountNamesInOutputFile(NAME_VAL, 20);
-        AbstractQueryVisitor.setMaxSoqlCharLength(AbstractQueryVisitor.DEFAULT_MAX_SOQL_CHAR_LENGTH);
+        testConfig.put(AppConfig.PROP_SOQL_MAX_LENGTH, Integer.toString(AppConfig.DEFAULT_MAX_SOQL_CHAR_LENGTH));
     }
 
     private void runExtraction(String extractionQuery, int numSuccesses) throws ProcessInitializationException, DataAccessObjectException {
