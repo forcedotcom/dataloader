@@ -89,24 +89,30 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
         this.action = action;
     }
 
-    private boolean isGetSoqlMethodCalledOnce = false;
     @Override
     public final void visit() throws DataAccessObjectException, OperationException {
-        isGetSoqlMethodCalledOnce = false;
         try {
             if (getProgressMonitor().isCanceled()) return;
             String soql = getSoqlForNextBatch();
-            isGetSoqlMethodCalledOnce = true;
+            boolean singleSoqlQuery = false;
+            if (soql != null && soql.equalsIgnoreCase(this.soql)) {
+                singleSoqlQuery = true;
+            }
+            int totalProcessedRows = 0;
             while (soql != null) {
                 final int size = executeQuery(soql);
+                totalProcessedRows += size;
                 if (size == 0) {
                     getLogger().info(Messages.getMessage(getClass(), "noneReturned"));
                 } else {
                     if (getProgressMonitor().isCanceled())
                         return;
-                    startWriteExtraction(size);
+                    startWriteExtraction(totalProcessedRows);
                     writeExtraction();
                     flushResults();
+                }
+                if (singleSoqlQuery) {
+                    break;
                 }
                 soql = getSoqlForNextBatch();
                 if (soql != null) {
@@ -188,12 +194,8 @@ public abstract class AbstractQueryVisitor extends AbstractVisitor implements IQ
                 csvReader = null;
             }
             return batchSoql;
-        } else if (!isGetSoqlMethodCalledOnce) {
-            // return the full soql for the first time
-            return soql;
         } else {
-            // return null to indicate that there are no more batches
-            return null;
+            return soql;
         }
     }
 
