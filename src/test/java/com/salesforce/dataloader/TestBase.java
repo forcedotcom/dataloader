@@ -111,15 +111,28 @@ abstract public class TestBase {
         
         Map<String, String> argsMap = new HashMap<String, String>();
         argsMap.put(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, getTestConfDir());
-        
+        initializeTestPropsFromSystemProperties();
+    }
+    
+    static void initializeTestPropsFromSystemProperties() {
         // Iterate through system properties to check for test properties settings
         Properties systemProperties = System.getProperties();
-        systemProperties.forEach((key, value) -> {
-            System.out.println(key + " : " + value);
-            if (key.toString().startsWith("test.")) {
-                TEST_PROPS.put(key.toString(), value.toString());
-            }
-        });
+        String sysPropVal = systemProperties.getProperty("test.endpoint");
+        if (sysPropVal != null) {
+            TEST_PROPS.put(AppConfig.PROP_AUTH_ENDPOINT_PROD, sysPropVal);
+        }
+        sysPropVal = systemProperties.getProperty("test.redirect");
+        if (sysPropVal != null) {
+            TEST_PROPS.put(AppConfig.PROP_RESET_URL_ON_LOGIN, sysPropVal);
+        }
+        sysPropVal = systemProperties.getProperty("test.user.default");
+        if (sysPropVal != null) {
+            TEST_PROPS.put(AppConfig.PROP_USERNAME, sysPropVal);
+        }
+        sysPropVal = systemProperties.getProperty("test.password");
+        if (sysPropVal != null) {
+            TEST_PROPS.put(AppConfig.PROP_PASSWORD, sysPropVal);
+        }
     }
 
     private static Properties loadTestProperties() {
