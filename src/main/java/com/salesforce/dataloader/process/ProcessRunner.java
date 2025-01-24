@@ -366,8 +366,8 @@ public class ProcessRunner implements InitializingBean, IProcess {
                 propVal = appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN);
             }
             if (propVal == null || propVal.isBlank()) {
-                logger.fatal(Messages.getFormattedString("Config.errorNoRequiredParameter", propName));
-                throw new ParameterLoadException(Messages.getFormattedString("Config.errorNoRequiredParameter", propName));
+                logger.fatal(Messages.getFormattedString(AppConfig.class.getSimpleName() + ".errorNoRequiredParameter", propName));
+                throw new ParameterLoadException(Messages.getFormattedString(AppConfig.class.getSimpleName() + ".errorNoRequiredParameter", propName));
             }
         }
     }
