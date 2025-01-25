@@ -49,8 +49,8 @@ public abstract class AbstractVisitor implements IVisitor {
     private final ILoaderProgress monitor;
     private DataWriterInterface successWriter;
     private DataWriterInterface errorWriter;
-    private long errors;
-    private long successes;
+    private long errors = 0;
+    private long successes = 0;
     private LoadRateCalculator rateCalculator;
 
     public AbstractVisitor(Controller controller, ILoaderProgress monitor, DataWriterInterface successWriter,
