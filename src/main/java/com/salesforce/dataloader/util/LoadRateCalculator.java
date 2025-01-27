@@ -28,6 +28,8 @@ package com.salesforce.dataloader.util;
 
 import java.util.Date;
 
+import org.apache.logging.log4j.Logger;
+
 import com.salesforce.dataloader.config.Messages;
 
 /**
@@ -44,12 +46,20 @@ public class LoadRateCalculator {
     private boolean started = false;
     private long numSuccessesAcrossCompletedJobs = 0;
     private long numErrorsAcrossCompletedJobs = 0;
+    private Logger logger;
+    private boolean isCalculateSubTaskInvoked = false;
 
     public LoadRateCalculator() {
-        // do nothing
+        logger = DLLogManager.getLogger(LoadRateCalculator.class);
     }
 
     public synchronized void start(int numRecords) {
+        if (numSuccessesAcrossCompletedJobs != 0) {
+            logger.debug("numSuccessesAcrossCompletedJobs = " + numSuccessesAcrossCompletedJobs);
+        }
+        if (numErrorsAcrossCompletedJobs != 0) {
+            logger.debug("numErrorsAcrossCompletedJobs = " + numErrorsAcrossCompletedJobs);
+        }
         if (!started) {
             started = true;
             this.startTime = new Date();
@@ -59,6 +69,15 @@ public class LoadRateCalculator {
 
     public String calculateSubTask(long processedRecordsInJob, long numErrorsInJob) {
 
+        if (!isCalculateSubTaskInvoked) {
+            isCalculateSubTaskInvoked = true;
+            if (numSuccessesAcrossCompletedJobs != 0) {
+                logger.warn("calculateSubTask() called for the first time while numSuccessesAcrossCompletedJobs is " + numSuccessesAcrossCompletedJobs);
+            }
+            if (numErrorsAcrossCompletedJobs != 0) {
+                logger.warn("calculateSubTask() called for the first time while numErrorsAcrossCompletedJobs is " + numErrorsAcrossCompletedJobs);
+            }
+        }
         final Date currentLoadTime = new Date();
         final long totalProcessedRecords = processedRecordsInJob + this.numErrorsAcrossCompletedJobs + this.numSuccessesAcrossCompletedJobs;
         final long totalErrors =  this.numErrorsAcrossCompletedJobs + numErrorsInJob;
@@ -81,11 +100,20 @@ public class LoadRateCalculator {
             estimatedTotalTimeInSec = (long) (totalElapsedTimeInSec * this.totalRecordsAcrossAllJobs / totalProcessedRecords);
             remainingTimeInSec = estimatedTotalTimeInSec - totalElapsedTimeInSec;
         }
+        
+        if (totalProcessedRecords > this.totalRecordsAcrossAllJobs) {
+            logger.warn("Calculation Error: Total processed records is greater than total records across all jobs.");
+            Thread.currentThread().getStackTrace();
+        }
+        if (remainingTimeInSec < 0) {
+            logger.warn("Remaining time calculation error.");
+            Thread.currentThread().getStackTrace();
+        }
 
         final long remainingTimeInMinutes = remainingTimeInSec / 60;
         final long remainingSeconds = remainingTimeInSec - remainingTimeInMinutes * 60;
 
-        if (hourlyProcessingRate <= 0 || (remainingTimeInMinutes > 7 * 24 * 60)) { // processing time not calculated or imprecise
+        if (remainingTimeInMinutes < 0 || hourlyProcessingRate <= 0 || (remainingTimeInMinutes > 7 * 24 * 60)) { // processing time not calculated or imprecise
             // LoadRateCalculator.processedTimeUnknown=Processed {0} of {1} total records. 
             // There are {2} successes and {3} errors.
             return Messages.getMessage(getClass(), "processedTimeUnknown", 

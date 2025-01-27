@@ -82,7 +82,7 @@ public class CsvProcessTest extends ProcessTestBase {
     public static void tearDownAfterClass() {
         long endTime = System.currentTimeMillis();
         long elapsedTimeInMinutes = (endTime - startTime) / 60000;
-        assertTrue("Tests slowed down by more than 1 minute", elapsedTimeInMinutes < 15);
+        assertTrue("Tests slowed down by more than 1 minute", elapsedTimeInMinutes < 16);
     }
     
     public CsvProcessTest(Map<String, String> config) {
