@@ -60,19 +60,19 @@ Execute the following command to generate an encryption key file on Mac (Replace
  
  Execute the following command to encrypt a password on Mac (Replace `dataloader_console` with `dataloader.sh` on Linux):
     
-    ./dataloader_console -e <password in plain text> [<encryption key file>] run.mode=encrypt
+    ./dataloader_console run.mode=encrypt -e <password in plain text> [<encryption key file>]
     
     OR
     
-    java -jar dataloader-x.y.z.jar -e <password in plain text> [<encryption key file>] run.mode=encrypt
+    java -jar dataloader-x.y.z.jar run.mode=encrypt -e <password in plain text> [<encryption key file>]
 
 Execute the following command to decrypt a password on Mac (Replace `dataloader_console` with `dataloader.sh` on Linux):
     
-    ./dataloader_console -d <encrypted password> [<encryption key file>] run.mode=encrypt
+    ./dataloader_console run.mode=encrypt -d <encrypted password> [<encryption key file>]
     
     OR
     
-    java -jar dataloader-x.y.z.jar -d <encrypted password> [<encryption key file>] run.mode=encrypt
+    java -jar dataloader-x.y.z.jar run.mode=encrypt -d <encrypted password> [<encryption key file>]
 
 NOTE: these commands use the default encryption key file `${HOME}/.dataloader/dataloader.key` if an encryption key file is not specified.
 
