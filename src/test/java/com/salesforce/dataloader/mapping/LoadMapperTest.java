@@ -283,7 +283,7 @@ public class LoadMapperTest extends ConfigTestBase {
         }
         LoadMapper loadMapper = new LoadMapper(getController().getPartnerClient(), null, fields, null);
         loadMapper.putMapping(SOURCE_NAMES[0] + "," + SOURCE_NAMES[1],
-               DEST_NAMES[0] + "," + DEST_NAMES[1]);
+               DEST_NAMES[0] + "," + DEST_NAMES[1], true);
         TableRow destValueRow = loadMapper.mapData(this.sourceRow, true);
         String expectedDestValue = this.sourceRow.get(SOURCE_NAMES[0]) + ", " + this.sourceRow.get(SOURCE_NAMES[1]);
         assertEquals(destValueRow.get(DEST_NAMES[0]), expectedDestValue);

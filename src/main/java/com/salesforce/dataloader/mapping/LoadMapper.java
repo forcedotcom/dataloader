@@ -70,7 +70,7 @@ public class LoadMapper extends Mapper {
         String sfdc = (String)entry.getValue();
         if (isConstant(dao))
             putConstant(sfdc, dao);
-        else if (!hasDaoColumns() || hasDaoColumn(dao)) putMapping(dao, sfdc);
+        else if (!hasDaoColumns() || hasDaoColumn(dao)) putMapping(dao, sfdc, true);
     }
 
     public Map<String, String> getMappingWithUnmappedColumns(boolean includeUnmapped) {
