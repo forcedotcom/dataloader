@@ -54,7 +54,6 @@ import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
 import com.salesforce.dataloader.dyna.ParentSObjectFormatter;
 import com.salesforce.dataloader.exception.MappingInitializationException;
-import com.salesforce.dataloader.model.Row;
 import com.salesforce.dataloader.model.TableRow;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.OrderedProperties;
@@ -135,7 +134,11 @@ public abstract class Mapper {
     }
 
     public final void putMapping(String src, String destList) {
-        processCompositeDaoColName(src, destList);
+        putMapping(src, destList, false);
+    }
+
+    public final void putMapping(String src, String destList, boolean isSrcNameComposite) {
+        processCompositeDaoColName(src, destList, isSrcNameComposite);
 
         // destination can be multiple field names for upload operations
         StringTokenizer st = new StringTokenizer(destList, AppUtil.COMMA);
@@ -184,7 +187,7 @@ public abstract class Mapper {
         this.map.put(src, originalDestList);
     }
     
-    private void processCompositeDaoColName(String mappingSrcStr, String destFieldList) {
+    private void processCompositeDaoColName(String mappingSrcStr, String destFieldList, boolean isSrcNameComposite) {
         boolean isDestinationListStringOnly = true;
         StringTokenizer st = new StringTokenizer(destFieldList, AppUtil.COMMA);
         while(st.hasMoreElements()) {
@@ -199,35 +202,37 @@ public abstract class Mapper {
         }
 
         int daoColCount = 0;
-        st = new StringTokenizer(mappingSrcStr, AppUtil.COMMA);
-        while(st.hasMoreElements()) {
-            String mappingSrcCol = st.nextToken();
-            mappingSrcCol = mappingSrcCol.trim();
-            String daoCol = daoColumnNames.get(mappingSrcCol);
-            if (daoCol == null) {
-                daoCol = mappingSrcCol;
+        if (isSrcNameComposite) {
+            st = new StringTokenizer(mappingSrcStr, AppUtil.COMMA);
+            while(st.hasMoreElements()) {
+                String mappingSrcCol = st.nextToken();
+                mappingSrcCol = mappingSrcCol.trim();
+                String daoCol = daoColumnNames.get(mappingSrcCol);
+                if (daoCol == null) {
+                    daoCol = mappingSrcCol;
+                }
+                daoColPositionInCompositeColMap.put(daoCol, daoColCount);
+                if (daoColCount == 0 && st.countTokens() == 0 && daoCol.equalsIgnoreCase(mappingSrcCol)) {
+                    // keep dao column's label if possible
+                    daoColToCompositeColMap.put(daoCol, daoCol);
+                } else {
+                    daoColToCompositeColMap.put(daoCol, mappingSrcStr);
+                }
+                daoColCount++;
+                if (!isDestinationListStringOnly) {
+                    // set up only the first daoCol for mapping if the destination
+                    // field list contains a field whose type is not string
+                    logger.debug("Using only the first CSV column '" + daoCol + "' for mapping because one of the sobject fields it is mapped to is not a string or a text area");
+                    break; 
+                }
             }
-            daoColPositionInCompositeColMap.put(daoCol, daoColCount);
-            if (daoColCount == 0 && st.countTokens() == 0 && daoCol.equalsIgnoreCase(mappingSrcCol)) {
-                // keep dao column's label if possible
-                daoColToCompositeColMap.put(daoCol, daoCol);
-            } else {
-                daoColToCompositeColMap.put(daoCol, mappingSrcStr);
-            }
-            daoColCount++;
-            if (!isDestinationListStringOnly) {
-                // set up only the first daoCol for mapping if the destination
-                // field list contains a field whose type is not string
-                logger.debug("Using only the first CSV column '" + daoCol + "' for mapping because one of the sobject fields it is mapped to is not a string or a text area");
-                break; 
-            }
-        }
-        if (daoColCount == 0) {
-            String daoCol = daoColumnNames.get(mappingSrcStr);
+        } else {
+            String daoCol = daoColumnNames.get(mappingSrcStr.trim());
             if (daoCol == null) {
                 daoCol = mappingSrcStr;
             }
-            getDaoColToCompositeColMap().put(mappingSrcStr, mappingSrcStr);
+            daoColToCompositeColMap.put(daoCol, daoCol);
+            daoColPositionInCompositeColMap.put(daoCol, daoColCount);
             daoColCount = 1;
         }
         compositeColSizeMap.put(mappingSrcStr, daoColCount);
