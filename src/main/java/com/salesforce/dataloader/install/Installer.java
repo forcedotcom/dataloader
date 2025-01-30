@@ -68,7 +68,7 @@ public class Installer {
 
             for (String dlCmd : OS_SPECIFIC_DL_COMMAND) {
                 Path installFilePath = Paths.get(installationFolder + PATH_SEPARATOR + dlCmd);
-                if (Files.exists(installFilePath) && AppUtil.getAppRunMode() != AppUtil.APP_RUN_MODE.INSTALL) {
+                if (Files.exists(installFilePath)) {
                     // installation completed
                     return;
                 }
