@@ -137,7 +137,9 @@ public class Controller {
         if (daoFactory == null) {
             daoFactory = new DataAccessObjectFactory();
         }
-        getLatestDownloadableDataLoaderVersion();
+        if (AppUtil.getAppRunMode() != AppUtil.APP_RUN_MODE.INSTALL) {
+            getLatestDownloadableDataLoaderVersion();
+        }
     }
     
     private static String latestDownloadableDataLoaderVersion = null;
@@ -162,6 +164,7 @@ public class Controller {
                 downloadableVersion = downloadableVersion.substring(0, downloadableVersion.lastIndexOf("."));
             }
             latestDownloadableDataLoaderVersion = downloadableVersion;
+            inputStream.close();
             return downloadableVersion;
         } catch (Exception e) {
             logger.info("Unable to check for the latest available data loader version: " + e.getMessage());
