@@ -1,2 +1,2 @@
 @echo off
-CALL "%~dp0..\util\util.bat" :runDataLoader %* run.mode=encrypt
+CALL "%~dp0..\util\util.bat" :runDataLoader run.mode=encrypt %*

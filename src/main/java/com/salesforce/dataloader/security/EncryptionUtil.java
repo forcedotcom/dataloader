@@ -26,6 +26,10 @@
 package com.salesforce.dataloader.security;
 
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import com.salesforce.dataloader.util.AppUtil;
 
@@ -89,22 +93,35 @@ public class EncryptionUtil {
             printUsage();
             System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
+        // remove all config properties passed through command line
+        args = removeCommandLineOptions(args);
 
-        int i = 0;
         String operation = "";
+        String[] applicableArgs = Arrays.copyOf(args, args.length);
         for (String arg : args) {
             if (arg.startsWith("-")) {
-                operation = arg;
+                if (arg.equals("-e") || arg.equals("-d") || arg.equals("-k")) {
+                    operation = arg;
+                    break;
+                } else {
+                    applicableArgs = removeElement(applicableArgs, arg);
+                }
+            }
+        }
+        args = applicableArgs;
+        int operationArgIndex = 0;
+        for (String arg : args) {
+            if (arg.equals(operation)) {
                 break;
             }
-            i++;
+            operationArgIndex++;
         }
         if (operation.length() < 2 || operation.charAt(0) != '-') {
-            System.out.println("Invalid option format: " + args[i]);
+            System.out.println("Invalid option format: " + args[operationArgIndex]);
             System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
         // make sure enough arguments are provided
-        if (arrayTooSmall(args, i) && operation.charAt(1) != 'k') {
+        if (arrayTooSmall(args, operationArgIndex) && operation.charAt(1) != 'k') {
             System.out.println("Option '" + operation + "' requires at least one parameter.  Please check usage.\n");
             printUsage();
             System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
@@ -114,9 +131,9 @@ public class EncryptionUtil {
         switch (operation.charAt(1)) {
             case 'e':
                 EncryptionAesUtil enc = new EncryptionAesUtil();
-                param = args[++i];
-                if (!arrayTooSmall(args, i)) {
-                    String keyFilename = args[++i];
+                param = args[operationArgIndex+1];
+                if (!arrayTooSmall(args, operationArgIndex+1)) {
+                    String keyFilename = args[operationArgIndex+2];
                     try {
                         enc.setCipherKeyFromFilePath(keyFilename);
                     } catch (Exception e) {
@@ -139,8 +156,8 @@ public class EncryptionUtil {
                 // optional [Path to key file]
                 try {
                     EncryptionAesUtil encAes = new EncryptionAesUtil();
-                    if (i == args.length - 2 || i == args.length - 1) {
-                        String filePath = encAes.createKeyFileIfNotExisting(i == args.length - 1 ? null : args[i + 1]);
+                    if (operationArgIndex == args.length - 2 || operationArgIndex == args.length - 1) {
+                        String filePath = encAes.createKeyFileIfNotExisting(operationArgIndex == args.length - 1 ? null : args[operationArgIndex + 1]);
                         System.out.println("Keyfile \"" + filePath + "\" was created! ");
                     } else {
                         System.out.println("Please provide correct parameters!");
@@ -154,9 +171,9 @@ public class EncryptionUtil {
 
             case 'd':
                 EncryptionAesUtil encAes = new EncryptionAesUtil();
-                String encryptMsg = args[++i];
-                if (!arrayTooSmall(args, i)) {
-                    String keyFilename = args[++i];
+                String encryptMsg = args[operationArgIndex+1];
+                if (!arrayTooSmall(args, operationArgIndex+1)) {
+                    String keyFilename = args[operationArgIndex+2];
                     try {
                         encAes.setCipherKeyFromFilePath(keyFilename);
                     } catch (GeneralSecurityException e) {
@@ -185,5 +202,36 @@ public class EncryptionUtil {
      */
     private static boolean arrayTooSmall(String[] array, int index) {
         return (index + 1) > (array.length - 1);
+    }
+    
+    private static String[] removeCommandLineOptions(String[] args) {
+        List<String> remainingArgs = new ArrayList<>();
+
+        for (String arg : args) {
+            if (!arg.contains("=")) {
+                remainingArgs.add(arg);
+            }
+        }
+
+        return remainingArgs.toArray(new String[0]);
+    }
+    
+    private static String[] removeElement(String[] array, String elementToRemove) {
+        int newSize = 0;
+        for (String element : array) {
+            if (!element.equals(elementToRemove)) {
+                newSize++;
+            }
+        }
+
+        String[] newArray = new String[newSize];
+        int newIndex = 0;
+        for (String element : array) {
+            if (!element.equals(elementToRemove)) {
+                newArray[newIndex++] = element;
+            }
+        }
+
+        return newArray;
     }
 }
