@@ -1938,7 +1938,7 @@ public class AppConfig {
             argMap = new HashMap<String, String>();
         }
         if (argMap.isEmpty()) {
-            logger.warn("No arguments provided to initialize AppConfig. Loading default configuration.");
+            logger.debug("No arguments provided to initialize AppConfig. Loading default configuration.");
         }
         AppConfig.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argMap));
 
