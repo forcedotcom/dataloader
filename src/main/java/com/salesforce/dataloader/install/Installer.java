@@ -60,7 +60,6 @@ public class Installer {
     public static void install(Map<String, String> argsmap) {
         int exitCode = AppUtil.EXIT_CODE_NO_ERRORS;
         boolean interactiveMode = true;
-        boolean installedInPreviousRun = false;
         boolean skipCopyArtifacts = false;
         try {
             String installationFolder = ".";
@@ -71,7 +70,6 @@ public class Installer {
                 Path installFilePath = Paths.get(installationFolder + PATH_SEPARATOR + dlCmd);
                 if (Files.exists(installFilePath) && AppUtil.getAppRunMode() != AppUtil.APP_RUN_MODE.INSTALL) {
                     // installation completed
-                    installedInPreviousRun = true;
                     return;
                 }
             }
@@ -134,7 +132,7 @@ public class Installer {
             handleException(ex, Level.FATAL);
             exitCode = AppUtil.EXIT_CODE_CLIENT_ERROR;
         } finally {
-            if (installedInPreviousRun || skipCopyArtifacts) {
+            if (skipCopyArtifacts) {
                 return;
             }
             if (interactiveMode) {

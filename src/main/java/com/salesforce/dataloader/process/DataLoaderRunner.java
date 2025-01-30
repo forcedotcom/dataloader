@@ -104,7 +104,6 @@ public class DataLoaderRunner extends Thread {
         } else {
             Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(commandLineOptions);
             /* Run in the UI mode, get the controller instance with batchMode == false */
-            Installer.install(argsMap);
             if (argsMap.containsKey(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
                 && "true".equalsIgnoreCase(argsMap.get(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH))){
                 try {
@@ -119,6 +118,7 @@ public class DataLoaderRunner extends Thread {
                     UIUtils.errorMessageBox(new Shell(new Display()), e);
                 }
             } else { // SWT_NATIVE_LIB_IN_JAVA_LIB_PATH not set
+                Installer.install(argsMap);
                 rerunWithSWTNativeLib(commandLineOptions);
             }
         }
