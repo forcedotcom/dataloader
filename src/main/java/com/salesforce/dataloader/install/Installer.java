@@ -61,6 +61,8 @@ public class Installer {
         int exitCode = AppUtil.EXIT_CODE_NO_ERRORS;
         boolean interactiveMode = true;
         boolean skipCopyArtifacts = false;
+        boolean installedInPreviousRun = false;
+
         try {
             String installationFolder = ".";
             installationFolder = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation()
@@ -70,6 +72,7 @@ public class Installer {
                 Path installFilePath = Paths.get(installationFolder + PATH_SEPARATOR + dlCmd);
                 if (Files.exists(installFilePath)) {
                     // installation completed
+                    installedInPreviousRun = true;
                     return;
                 }
             }
@@ -132,7 +135,7 @@ public class Installer {
             handleException(ex, Level.FATAL);
             exitCode = AppUtil.EXIT_CODE_CLIENT_ERROR;
         } finally {
-            if (skipCopyArtifacts) {
+            if (installedInPreviousRun || skipCopyArtifacts) {
                 return;
             }
             if (interactiveMode) {
