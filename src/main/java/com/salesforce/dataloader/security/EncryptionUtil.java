@@ -100,9 +100,11 @@ public class EncryptionUtil {
         String[] applicableArgs = Arrays.copyOf(args, args.length);
         for (String arg : args) {
             if (arg.startsWith("-")) {
-                if (arg.equals("-e") || arg.equals("-d") || arg.equals("-k")) {
+                if (operation.isBlank()
+                    && (arg.equals("-e") 
+                        || arg.equals("-d") 
+                        || arg.equals("-k"))) {
                     operation = arg;
-                    break;
                 } else {
                     applicableArgs = removeElement(applicableArgs, arg);
                 }
@@ -156,7 +158,7 @@ public class EncryptionUtil {
                 // optional [Path to key file]
                 try {
                     EncryptionAesUtil encAes = new EncryptionAesUtil();
-                    if (operationArgIndex == args.length - 2 || operationArgIndex == args.length - 1) {
+                    if (operationArgIndex <= args.length - 2 || operationArgIndex <= args.length - 1) {
                         String filePath = encAes.createKeyFileIfNotExisting(operationArgIndex == args.length - 1 ? null : args[operationArgIndex + 1]);
                         System.out.println("Keyfile \"" + filePath + "\" was created! ");
                     } else {
