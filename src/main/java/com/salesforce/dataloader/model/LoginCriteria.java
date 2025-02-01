@@ -106,8 +106,8 @@ public class LoginCriteria {
                 appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID, getSessionId().trim());
                 break;
             case LoginCriteria.OAuthLogin:
-                appConfig.setServerEnvironment(getEnvironment());
                 break;
         }
+        appConfig.setServerEnvironment(getEnvironment());
     }
 }

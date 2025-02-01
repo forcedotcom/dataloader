@@ -53,6 +53,7 @@ public class UsernamePasswordLoginControl extends Composite {
     private final Text sessionId;
     private final boolean authUsingSessionId;
     private final LoginPage loginPage;
+    private Combo envDropdown;
 
     public UsernamePasswordLoginControl(Composite parent, int style, LoginPage loginPage, AuthenticationRunner authRunner, boolean authUsingSessionId) {
         super(parent, style);
@@ -124,7 +125,7 @@ public class UsernamePasswordLoginControl extends Composite {
         envLabel.setText(Labels.getString("LoginPage.environment"));
         ArrayList<String> environments = authRunner.getConfig().getStrings(AppConfig.PROP_SERVER_ENVIRONMENTS);
 
-        Combo envDropdown = new Combo(this, SWT.DROP_DOWN | SWT.BORDER);
+        envDropdown = new Combo(this, SWT.DROP_DOWN | SWT.BORDER);
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
         envDropdown.setLayoutData(data);
         for (String label: environments) {
@@ -171,8 +172,8 @@ public class UsernamePasswordLoginControl extends Composite {
             criteria = new LoginCriteria(LoginCriteria.UsernamePasswordLogin);
             criteria.setPassword(password.getText());
         }
-        criteria.setInstanceUrl(this.authRunner.getConfig().getAuthEndpointForCurrentEnv());
         criteria.setUserName(userName.getText());
+        criteria.setEnvironment(envDropdown.getText());
         authRunner.login(criteria, this::setLoginStatus);
     }
     
