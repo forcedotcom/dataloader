@@ -587,24 +587,19 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     }
 
     private boolean login() throws ConnectionException, ApiFault {
-        return loginWithRetries(0);
-    }
-    
-    private static final int MAX_LOGIN_RETRIES = 2;
-    private boolean loginWithRetries(int currentRetryCount) throws ConnectionException, ApiFault {
-        if (currentRetryCount > MAX_LOGIN_RETRIES) {
-            return false;
-        }
         disconnect();
         String origEndpoint = new String(appConfig.getAuthEndpointForCurrentEnv());
         try {
             dologin();
             logger.debug("able to successfully invoke server APIs of version " + getAPIVersionForTheSession());
         } catch (UnexpectedErrorFault fault) {
-            if (fault.getExceptionCode() == ExceptionCode.UNSUPPORTED_API_VERSION) {
+            // attempt login with previous API version
+            if (fault.getExceptionCode() == ExceptionCode.UNSUPPORTED_API_VERSION
+                    && getAPIVersionForTheSession() != null 
+                    && !getAPIVersionForTheSession().equals(getPreviousAPIVersionInWSC())) {
                 logger.error("Failed to successfully invoke server APIs of version " + getAPIVersionForTheSession());
                 setAPIVersionForTheSession(getPreviousAPIVersionInWSC());
-                loginWithRetries(currentRetryCount++);
+                login(); 
             } else {
                 logger.error("Failed to get user info using manually configured session id", fault);
                 throw fault;
@@ -617,11 +612,12 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             }
             logger.warn(Messages.getMessage(this.getClass(), "failedUsernamePasswordAuth", 
                                             origEndpoint, appConfig.getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT), exceptionMessage));
+            // attempt login with the default endpoint for the selected environment
             if (!appConfig.isDefaultAuthEndpointForCurrentEnv(origEndpoint)) {
                 // retry with default endpoint URL only if user is attempting production login
                 appConfig.setAuthEndpointForCurrentEnv(appConfig.getDefaultAuthEndpointForCurrentEnv());
                 logger.info(Messages.getMessage(this.getClass(), "retryUsernamePasswordAuth", appConfig.getDefaultAuthEndpointForCurrentEnv(), appConfig.getString(AppConfig.PROP_SELECTED_SERVER_ENVIRONMENT)));
-                loginWithRetries(currentRetryCount++);
+                login();
             } else {
                 logger.error("Failed to get user info using manually configured session id", e);
                 throw e;   
