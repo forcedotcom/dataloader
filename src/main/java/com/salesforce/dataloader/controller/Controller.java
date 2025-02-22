@@ -137,7 +137,8 @@ public class Controller {
         if (daoFactory == null) {
             daoFactory = new DataAccessObjectFactory();
         }
-        if (AppUtil.getAppRunMode() != AppUtil.APP_RUN_MODE.INSTALL) {
+        if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.UI
+                || AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH) {
             getLatestDownloadableDataLoaderVersion();
         }
     }
