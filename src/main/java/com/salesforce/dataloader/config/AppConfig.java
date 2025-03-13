@@ -1296,7 +1296,7 @@ public class AppConfig {
             try {
                 encrypter.setCipherKeyFromFilePath(keyFile);
             } catch (Exception e) {
-                String errMsg = Messages.getFormattedString("Config.errorSecurityInit", new String[]{keyFile,
+                String errMsg = Messages.getFormattedString("AppConfig.errorSecurityInit", new String[]{keyFile,
                         e.getMessage()});
                 logger.error(errMsg);
                 throw new ConfigInitializationException(errMsg);
@@ -1334,7 +1334,7 @@ public class AppConfig {
             return; // do not save any updates to config.properties file
         }
         if (filename == null) {
-            throw new IOException(Messages.getString("Config.fileMissing")); //$NON-NLS-1$
+            throw new IOException(Messages.getString("AppConfig.fileMissing")); //$NON-NLS-1$
         }
 
         Properties inMemoryProperties = new LinkedProperties();
@@ -1999,7 +1999,7 @@ public class AppConfig {
             logger.debug(Messages.getMessage(AppConfig.class, "configInit")); //$NON-NLS-1$
         } catch (IOException | ProcessInitializationException e) {
             logger.error(e.getMessage());
-            throw new ConfigInitializationException(Messages.getMessage(AppConfig.class, "errorConfigLoad", configFilePath), e);
+            throw new ConfigInitializationException(Messages.getFormattedString("Controller.errorConfigLoad", configFilePath), e);
         }
         return currentConfig;
     }
