@@ -249,8 +249,8 @@ public class AppUtil {
         System.out.println(Messages.getMessage(AppUtil.class, "banner", DATALOADER_SHORT_VERSION, MIN_JAVA_VERSION));
     }
 
-    private static final String OTHER_ARGS_KEY = "__OTHER_ARGS__";
-    private static int otherArgsCount = 0;
+    private static final String REMAINING_ARG_KEY_PREFIX = "__REMAINING_ARG__";
+    private static int remainingArgsCount = 0;
     public synchronized static Map<String, String> convertCommandArgsArrayToArgMap(String[] argArray){
         Map<String, String> commandArgsMap = new HashMap<String, String>();
         if (argArray == null) {
@@ -259,7 +259,7 @@ public class AppUtil {
 
         if (argArray != null) {
             //Process name=value config setting
-            otherArgsCount = 0;
+            remainingArgsCount = 0;
             Arrays.stream(argArray).forEach(arg ->
             {
                 String[] nameValuePair = arg.split("=", 2);
@@ -269,8 +269,8 @@ public class AppUtil {
                     } else {
                         commandArgsMap.put(nameValuePair[0], nameValuePair[1]);
                     }
-                } else {
-                    commandArgsMap.put(OTHER_ARGS_KEY + otherArgsCount++, arg);
+                } else if (!arg.startsWith("-")) {
+                    commandArgsMap.put(REMAINING_ARG_KEY_PREFIX + remainingArgsCount++, arg);
                 }
             });
         }
@@ -302,14 +302,14 @@ public class AppUtil {
                     + "              process ../myconfigdir");
             System.exit(EXIT_CODE_CLIENT_ERROR);
         }
-        if (!argsMap.containsKey(AppConfig.CLI_OPTION_CONFIG_DIR_PROP)) {
-            argsMap.put(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, args[0]);
+        if (!argsMap.containsKey(AppConfig.CLI_OPTION_CONFIG_DIR_PROP)
+                && argsMap.get(REMAINING_ARG_KEY_PREFIX + 0) != null) {
+            argsMap.put(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, argsMap.get(REMAINING_ARG_KEY_PREFIX + 0));
         }
         if (!argsMap.containsKey(AppConfig.PROP_PROCESS_NAME) 
-                && args.length > 2
-                && !args[1].contains("=")) {
+                && argsMap.get(REMAINING_ARG_KEY_PREFIX + 1) != null) {
             // second argument must be process name
-            argsMap.put(AppConfig.PROP_PROCESS_NAME, args[1]);
+            argsMap.put(AppConfig.PROP_PROCESS_NAME, argsMap.get(REMAINING_ARG_KEY_PREFIX + 1));
         }
     }
     
@@ -338,7 +338,7 @@ public class AppUtil {
         ArrayList<String> argKeysList = new ArrayList<String>(argsMap.keySet());
         Collections.sort(argKeysList);
         for (String argKey : argKeysList) {
-            if (argKey.startsWith(OTHER_ARGS_KEY)) {
+            if (argKey.startsWith(REMAINING_ARG_KEY_PREFIX)) {
                 argsList.add(argsMap.get(argKey));
             } else {
                 String argVal = argsMap.get(argKey);
