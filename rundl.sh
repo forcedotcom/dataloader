@@ -11,7 +11,8 @@ do
       debug="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=0.0.0.0:5005,suspend=y"
       ;;
     b)
-      batchmodeargs="./.. upsertAccounts run.mode=batch"
+      batchmodeargs="run.mode=batch ./configs upsertAccounts"
+      configdir=""
       ;;
     e)
       encryptionargs="run.mode=encrypt"
