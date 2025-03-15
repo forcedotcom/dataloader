@@ -28,7 +28,6 @@ package com.salesforce.dataloader.util;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +36,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.salesforce.dataloader.ConfigTestBase;
+import com.salesforce.dataloader.process.DataLoaderRunner;
 
 public class AppUtilTest extends ConfigTestBase {    
     @Test
@@ -64,18 +64,9 @@ public class AppUtilTest extends ConfigTestBase {
     @Test
     public void testConvertCommandArgsArrayToArgMap() {
         String[] args = {"key1=value1", "key2=value2"};
-        Map<String, String> argMap = AppUtil.convertCommandArgsArrayToArgMap(args);
+        Map<String, String> argMap = DataLoaderRunner.configureRunModeAndGetArgsMap(args);
         Assert.assertEquals("value1", argMap.get("key1"));
         Assert.assertEquals("value2", argMap.get("key2"));
-    }
-
-    @Test
-    public void testConvertCommandArgsMapToArgsArray() {
-        Map<String, String> argMap = new HashMap<>();
-        argMap.put("key1", "value1");
-        argMap.put("key2", "value2");
-        String[] argsArray = AppUtil.convertCommandArgsMapToArgsArray(argMap);
-        Assert.assertArrayEquals(new String[]{"key1=value1", "key2=value2"}, argsArray);
     }
 
     @Test

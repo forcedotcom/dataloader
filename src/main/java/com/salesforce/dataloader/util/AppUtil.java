@@ -46,8 +46,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -249,71 +247,7 @@ public class AppUtil {
         System.out.println(Messages.getMessage(AppUtil.class, "banner", DATALOADER_SHORT_VERSION, MIN_JAVA_VERSION));
     }
 
-    private static final String REMAINING_ARG_KEY_PREFIX = "__REMAINING_ARG__";
-    private static int remainingArgsCount = 0;
-    public synchronized static Map<String, String> convertCommandArgsArrayToArgMap(String[] argArray){
-        Map<String, String> commandArgsMap = new HashMap<String, String>();
-        if (argArray == null) {
-            return commandArgsMap;
-        }
-
-        if (argArray != null) {
-            //Process name=value config setting
-            remainingArgsCount = 0;
-            Arrays.stream(argArray).forEach(arg ->
-            {
-                String[] nameValuePair = arg.split("=", 2);
-                if (nameValuePair.length == 2) {
-                    if (nameValuePair[0].equalsIgnoreCase(AppConfig.CLI_OPTION_RUN_MODE)) {
-                        setAppRunMode(nameValuePair[1]);
-                    } else {
-                        commandArgsMap.put(nameValuePair[0], nameValuePair[1]);
-                    }
-                } else if (!arg.startsWith("-")) {
-                    commandArgsMap.put(REMAINING_ARG_KEY_PREFIX + remainingArgsCount++, arg);
-                }
-            });
-        }
-        if (getAppRunMode() == APP_RUN_MODE.BATCH) {
-            processArgsForBatchMode(argArray, commandArgsMap);
-        }
-        return commandArgsMap;
-    }
-    
-    
-    private static void processArgsForBatchMode(String[] args, Map<String,String> argsMap) {
-        if (!argsMap.containsKey(AppConfig.CLI_OPTION_CONFIG_DIR_PROP) && args.length < 2) {
-            // config folder must be specified in the first argument
-            System.err.println(
-                    "Usage: process <configuration folder> [batch process bean id]\n"
-                    + "\n"
-                    + "      configuration folder -- required -- folder that contains configuration files,\n"
-                    + "          i.e. config.properties, process-conf.xml, database-conf.xml\n"
-                    + "\n"
-                    + "      batch process bean id -- optional -- id of a batch process bean in process-conf.xml,\n"
-                    + "          for example:\n"
-                    + "\n"
-                    + "              process ../myconfigdir AccountInsert\n"
-                    + "\n"
-                    + "      If process bean id is not specified, the value of the property process.name in config.properties\n"
-                    + "      will be used to run the process instead of process-conf.xml,\n"
-                    + "          for example:\n"
-                    + "\n"
-                    + "              process ../myconfigdir");
-            System.exit(EXIT_CODE_CLIENT_ERROR);
-        }
-        if (!argsMap.containsKey(AppConfig.CLI_OPTION_CONFIG_DIR_PROP)
-                && argsMap.get(REMAINING_ARG_KEY_PREFIX + 0) != null) {
-            argsMap.put(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, argsMap.get(REMAINING_ARG_KEY_PREFIX + 0));
-        }
-        if (!argsMap.containsKey(AppConfig.PROP_PROCESS_NAME) 
-                && argsMap.get(REMAINING_ARG_KEY_PREFIX + 1) != null) {
-            // second argument must be process name
-            argsMap.put(AppConfig.PROP_PROCESS_NAME, argsMap.get(REMAINING_ARG_KEY_PREFIX + 1));
-        }
-    }
-    
-    private static void setAppRunMode(String modeStr) {
+    public static void setAppRunMode(String modeStr) {
         if (modeStr == null) return;
         switch (modeStr) {
             case "batch":
@@ -328,24 +262,6 @@ public class AppUtil {
             default:
                 appRunMode = APP_RUN_MODE.UI;
         }
-    }
-    
-    public static String[] convertCommandArgsMapToArgsArray(Map<String, String> argsMap) {
-        if (argsMap == null) {
-            return null;
-        }
-        ArrayList<String> argsList = new ArrayList<String>();
-        ArrayList<String> argKeysList = new ArrayList<String>(argsMap.keySet());
-        Collections.sort(argKeysList);
-        for (String argKey : argKeysList) {
-            if (argKey.startsWith(REMAINING_ARG_KEY_PREFIX)) {
-                argsList.add(argsMap.get(argKey));
-            } else {
-                String argVal = argsMap.get(argKey);
-                argsList.add(argKey + "=" + argVal);
-            }
-        }
-        return argsList.toArray(new String[0]);
     }
     
     public static boolean isRunningOnMacOS() {
@@ -433,11 +349,10 @@ public class AppUtil {
     }
     
     private static final String SYSPROP_USE_SYSTEM_PROXIES = "java.net.useSystemProxies";
-    public static Proxy getSystemHttpsProxy(String[] args) {
+    public static Proxy getSystemHttpsProxy(Map<String, String> argsMap) {
         if (logger == null) {
             logger = DLLogManager.getLogger(AppUtil.class);
         }
-        Map<String, String> argsMap = convertCommandArgsArrayToArgMap(args);
         if (getAppRunMode() == APP_RUN_MODE.BATCH
                 || getAppRunMode() == APP_RUN_MODE.ENCRYPT
                 || (argsMap.containsKey(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH) 
