@@ -1897,11 +1897,9 @@ public class AppConfig {
         System.setProperty(CLI_OPTION_CONFIG_DIR_PROP, AppConfig.configurationsDir);
     }
 
-    private static synchronized String[] initializeAppConfig(String[] args) throws FactoryConfigurationError, IOException, ConfigInitializationException {
-        Map<String, String> argsMap = AppUtil.convertCommandArgsArrayToArgMap(args);
+    private static synchronized void initializeAppConfig(Map<String, String> argsMap) throws FactoryConfigurationError, IOException, ConfigInitializationException {
         AppConfig.setConfigurationsDir(argsMap);
         LoggingUtil.initializeLog(argsMap);
-        return AppUtil.convertCommandArgsMapToArgsArray(argsMap);
     }
 
     /**
@@ -1940,7 +1938,7 @@ public class AppConfig {
         if (argMap.isEmpty()) {
             logger.debug("No arguments provided to initialize AppConfig. Loading default configuration.");
         }
-        AppConfig.initializeAppConfig(AppUtil.convertCommandArgsMapToArgsArray(argMap));
+        AppConfig.initializeAppConfig(argMap);
 
         String configurationsDirPath = AppConfig.getConfigurationsDir();
         File configurationsDir;
