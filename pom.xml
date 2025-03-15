@@ -39,7 +39,7 @@
     <dependency>
       <groupId>local.swt</groupId>
       <artifactId>swtmac_aarch64</artifactId>
-      <version>4.33</version>
+      <version>4.35</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
     <dependency>
