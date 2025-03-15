@@ -190,20 +190,23 @@ localSWTVersion = ""
 if os.path.isdir(LOCAL_REPO_DIR):
     shutil.move(LOCAL_REPO_DIR + "/", LOCAL_REPO_SAVE_DIR)
     
-# Windows
-updateSWT("swtwin32_x86_64", "Windows (64 bit version)", rootdir, version, forceUpdate)
+# Windows x86
+updateSWT("swtwin32_x86_64", "Windows (x86 64-bit)", rootdir, version, forceUpdate)
+
+# Windows ARM
+updateSWT("swtwin32_aarch64", "Windows (ARM 64-bit)", rootdir, version, forceUpdate)
 
 # Mac x86
-updateSWT("swtmac_x86_64", "Mac OSX (64 bit version)", rootdir, version, forceUpdate)
+updateSWT("swtmac_x86_64", "Mac OSX (x86 64-bit)", rootdir, version, forceUpdate)
 
 # Mac ARM
-updateSWT("swtmac_aarch64", "Mac OSX (64 bit version for Arm64/AArch64)", rootdir, version, forceUpdate)
+updateSWT("swtmac_aarch64", "Mac OSX (ARM 64-bit)", rootdir, version, forceUpdate)
 
 # Linux x86
-updateSWT("swtlinux_x86_64", "Linux (64 bit version)", rootdir, version, forceUpdate)
+updateSWT("swtlinux_x86_64", "Linux (x86 64-bit)", rootdir, version, forceUpdate)
 
 # Linux ARM
-updateSWT("swtlinux_aarch64", "Linux (64 bit version for AArch64)", rootdir, version, forceUpdate)
+updateSWT("swtlinux_aarch64", "Linux (ARM 64-bit)", rootdir, version, forceUpdate)
 
 if os.path.isdir(LOCAL_REPO_SAVE_DIR):
     shutil.rmtree(LOCAL_REPO_SAVE_DIR)

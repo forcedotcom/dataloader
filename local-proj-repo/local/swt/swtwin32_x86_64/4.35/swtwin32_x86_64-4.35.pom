@@ -4,6 +4,6 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>local.swt</groupId>
   <artifactId>swtwin32_x86_64</artifactId>
-  <version>4.33</version>
+  <version>4.35</version>
   <description>POM was created from install:install-file</description>
 </project>
