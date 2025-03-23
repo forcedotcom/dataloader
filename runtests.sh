@@ -71,7 +71,7 @@ if [ ! -d ./target ]; then
 fi
 
 jarname="$(find ./target -name 'dataloader-[0-9][0-9].[0-9].[0-9].jar' | tail -1)"
-if [ "${jarfile}" == "" ]; then
+if [ "${jarname}" == "" ]; then
         mvn package -Dmaven.test.skip=true
 fi
 
