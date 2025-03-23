@@ -18,7 +18,7 @@ usage() {
 test=""
 debug=""
 debugEncryption=""
-doClean="No"
+doClean="Yes"
 #encryptionFile=${HOME}/.dataloader/dataLoader.key
 encryptionFile=
 
@@ -63,7 +63,7 @@ fi
 
 #echo $@
 if [ ${doClean} == "Yes" ]; then
-    mvn clean package -Dmaven.test.skip=true
+    mvn clean
 fi
 
 if [ ! -d ./target ]; then
@@ -71,6 +71,10 @@ if [ ! -d ./target ]; then
 fi
 
 jarname="$(find ./target -name 'dataloader-[0-9][0-9].[0-9].[0-9].jar' | tail -1)"
+if [ "${jarname}" == "" ]; then
+        mvn package -Dmaven.test.skip=true
+fi
+
 #echo "password = ${4}"
 encryptedPassword="$(java ${debugEncryption} -cp ${jarname} com.salesforce.dataloader.process.DataLoaderRunner run.mode=encrypt -e ${4} ${encryptionFile} | tail -1)"
 
@@ -88,4 +92,4 @@ done
 #decryptedPassword="$(java ${debugEncryption} -cp ${jarname} com.salesforce.dataloader.process.DataLoaderRunner run.mode=encrypt -d ${encryptedPassword} ${encryptionFile} | tail -1)"
 #echo "decryptedPassword = ${decryptedPassword}"
 
-mvn clean ${failfast} -Dtest.endpoint=${1} -Dtest.user.default=${2} -Dtest.user.restricted=${3} -Dtest.password=${encryptedPassword} -Dtest.encryptionFile=${encryptionFile} verify ${debug} ${test} ${additionalOptions}
+mvn ${failfast} -Dtest.endpoint=${1} -Dtest.user.default=${2} -Dtest.user.restricted=${3} -Dtest.password=${encryptedPassword} -Dtest.encryptionFile=${encryptionFile} verify ${debug} ${test} ${additionalOptions}
