@@ -86,126 +86,132 @@ public class EncryptionUtil {
     }
 
     public static void main(String[] args) {
+        System.exit(execute(args));
+    }
+    
+    public static int execute(String[] args) throws IllegalArgumentException {
         // args[0] = input data, required
         // args[1] = key (optional)
-        if (args.length < 1) {
-            printUsage();
-            System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
-        }
-        // remove all config properties passed through command line
-        args = removeCommandLineOptions(args);
-
-        String operation = "";
-        String[] applicableArgs = Arrays.copyOf(args, args.length);
-        for (String arg : args) {
-            if (arg.startsWith("-")) {
-                if (operation.isBlank()
-                    && (arg.equals("-e") 
-                        || arg.equals("-d") 
-                        || arg.equals("-k"))) {
-                    operation = arg;
-                } else {
-                    applicableArgs = removeElement(applicableArgs, arg);
-                }
-            }
-        }
-        args = applicableArgs;
-        int operationArgIndex = 0;
-        for (String arg : args) {
-            if (arg.equals(operation)) {
-                break;
-            }
-            operationArgIndex++;
-        }
-        if (operation.length() < 2 || operation.charAt(0) != '-') {
-            System.out.println("Invalid option format: " + args[operationArgIndex]);
-            System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
-        }
-        // make sure enough arguments are provided
-        if (arrayTooSmall(args, operationArgIndex) && operation.charAt(1) != 'k') {
-            System.out.println("Option '" + operation + "' requires at least one parameter.  Please check usage.\n");
-            printUsage();
-            System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
-        }
-        // advance index to param and save the param value
-        String param = null;
-        switch (operation.charAt(1)) {
-            case 'e':
-                EncryptionAesUtil enc = new EncryptionAesUtil();
-                param = args[operationArgIndex+1];
-                if (!arrayTooSmall(args, operationArgIndex+1)) {
-                    String keyFilename = args[operationArgIndex+2];
-                    try {
-                        enc.setCipherKeyFromFilePath(keyFilename);
-                    } catch (Exception e) {
-                        System.out.println("Error setting the key from file: "
-                                + keyFilename + ", error: " + e.getMessage());
-                        System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
-                    }
-                }
-                try {
-                    String encrypted = enc.encryptMsg(param);
-                    System.out.println("The output string of encryption is: \n" + encrypted);
-                } catch (Exception e) {
-                    System.out.println("Error setting the key: " + e.getMessage());
-                    System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
-                }
-
-                break;
-
-            case 'k':
-                // optional [Path to key file]
-                try {
-                    EncryptionAesUtil encAes = new EncryptionAesUtil();
-                    if (operationArgIndex <= args.length - 2 || operationArgIndex <= args.length - 1) {
-                        String filePath = encAes.createKeyFileIfNotExisting(operationArgIndex == args.length - 1 ? null : args[operationArgIndex + 1]);
-                        System.out.println("Keyfile \"" + filePath + "\" was created! ");
-                    } else {
-                        System.out.println("Please provide correct parameters!");
-                        printUsage();
-                        System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
-                    }
-                } catch (Exception e) {
-                    System.out.println("Error occurred:  " + e.getMessage());
-                }
-                break;
-
-            case 'd':
-                EncryptionAesUtil encAes = new EncryptionAesUtil();
-                String encryptMsg = args[operationArgIndex+1];
-                if (!arrayTooSmall(args, operationArgIndex+1)) {
-                    String keyFilename = args[operationArgIndex+2];
-                    try {
-                        encAes.setCipherKeyFromFilePath(keyFilename);
-                    } catch (GeneralSecurityException e) {
-                        System.out.println("Failed in decryption: " + e.getMessage() + "\n Make sure using the same keyfile to decrypt.");
-                        System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
-                    }
-                }
-                try {
-                    String plainText = encAes.decryptMsg(encryptMsg);
-                    System.out.println("The output string of decryption is: \n" + plainText);
-                } catch (Exception e) {
-                    System.out.println("Failed in decryption: " + e.getMessage() + "\n Make sure using the same keyfile to decrypt.");
-                    System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
-                }
-                break;
-
-            default:
-                System.out.println("Unsupported option: " + operation);
+        try {
+            if (args.length < 1) {
                 printUsage();
                 System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
+            }
+            // remove all config properties passed through command line
+            args = removeCommandLineOptions(args);
+    
+            String operation = "";
+            String[] applicableArgs = Arrays.copyOf(args, args.length);
+            for (String arg : args) {
+                if (arg.startsWith("-")) {
+                    if (operation.isBlank()
+                        && (arg.equals("-e") 
+                            || arg.equals("-d") 
+                            || arg.equals("-k"))) {
+                        operation = arg;
+                    } else {
+                        applicableArgs = removeElement(applicableArgs, arg);
+                    }
+                }
+            }
+            args = applicableArgs;
+            int operationArgIndex = 0;
+            for (String arg : args) {
+                if (arg.equals(operation)) {
+                    break;
+                }
+                operationArgIndex++;
+            }
+            if (operation.length() < 2 || operation.charAt(0) != '-') {
+                throw new IllegalArgumentException();
+            }
+            // make sure enough arguments are provided
+            if (arrayTooSmall(args, operationArgIndex) && operation.charAt(1) != 'k') {
+                System.out.println("Option '" + operation + "' requires at least one parameter.  Please check usage.\n");
+                throw new IllegalArgumentException();
+            }
+            // advance index to param and save the param value
+            String param = null;
+            switch (operation.charAt(1)) {
+                case 'e':
+                    EncryptionAesUtil enc = new EncryptionAesUtil();
+                    param = args[operationArgIndex+1];
+                    if (!arrayTooSmall(args, operationArgIndex+1)) {
+                        String keyFilename = args[operationArgIndex+2];
+                        try {
+                            enc.setCipherKeyFromFilePath(keyFilename);
+                        } catch (Exception e) {
+                            System.out.println("Error setting the key from file: "
+                                    + keyFilename + ", error: " + e.getMessage());
+                            throw new IllegalArgumentException();
+                        }
+                    }
+                    try {
+                        String encrypted = enc.encryptMsg(param);
+                        System.out.println("The output string of encryption is: \n" + encrypted);
+                    } catch (Exception e) {
+                        System.out.println("Error setting the key: " + e.getMessage());
+                        throw new IllegalArgumentException();
+                    }
+    
+                    break;
+    
+                case 'k':
+                    // optional [Path to key file]
+                    try {
+                        EncryptionAesUtil encAes = new EncryptionAesUtil();
+                        if (operationArgIndex <= args.length - 2 || operationArgIndex <= args.length - 1) {
+                            String filePath = encAes.createKeyFileIfNotExisting(operationArgIndex == args.length - 1 ? null : args[operationArgIndex + 1]);
+                            System.out.println("Keyfile \"" + filePath + "\" was created! ");
+                        } else {
+                            System.out.println("Please provide correct parameters!");
+                            throw new IllegalArgumentException();
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error occurred:  " + e.getMessage());
+                        throw new IllegalArgumentException();
+                    }
+                    break;
+    
+                case 'd':
+                    EncryptionAesUtil encAes = new EncryptionAesUtil();
+                    String encryptMsg = args[operationArgIndex+1];
+                    if (!arrayTooSmall(args, operationArgIndex+1)) {
+                        String keyFilename = args[operationArgIndex+2];
+                        try {
+                            encAes.setCipherKeyFromFilePath(keyFilename);
+                        } catch (GeneralSecurityException e) {
+                            System.out.println("Failed in decryption: " + e.getMessage() + "\n Make sure using the same keyfile to decrypt.");
+                            throw new IllegalArgumentException();
+                        }
+                    }
+                    try {
+                        String plainText = encAes.decryptMsg(encryptMsg);
+                        System.out.println("The output string of decryption is: \n" + plainText);
+                    } catch (Exception e) {
+                        System.out.println("Failed in decryption: " + e.getMessage() + "\n Make sure using the same keyfile to decrypt.");
+                        throw new IllegalArgumentException();
+                    }
+                    break;
+    
+                default:
+                    throw new IllegalArgumentException();
+            }
+            return AppUtil.EXIT_CODE_NO_ERRORS;
+        } catch (IllegalArgumentException e) {
+            printUsage();
+            return AppUtil.EXIT_CODE_CLIENT_ERROR;
         }
     }
 
     /**
      * @return true if array is too small to increment the index
      */
-    private static boolean arrayTooSmall(String[] array, int index) {
+    public static boolean arrayTooSmall(String[] array, int index) {
         return (index + 1) > (array.length - 1);
     }
     
-    private static String[] removeCommandLineOptions(String[] args) {
+    public static String[] removeCommandLineOptions(String[] args) {
         List<String> remainingArgs = new ArrayList<>();
 
         for (String arg : args) {
