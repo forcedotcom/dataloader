@@ -29,15 +29,20 @@ package com.salesforce.dataloader.EncryptionUtil;
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.dao.EncryptedDataSource;
 import com.salesforce.dataloader.security.EncryptionAesUtil;
+import com.salesforce.dataloader.security.EncryptionUtil;
 
 import org.apache.logging.log4j.Logger;
+
+import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DLLogManager;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
@@ -146,5 +151,151 @@ public class EncryptionUtilTest extends ConfigTestBase {
         dataSource.close();
         Assert.assertNotEquals("Encrypted password should be not be equal to original password", passwordText, encryptedPassword);                
         Assert.assertEquals("Password recovered from EncryptedDataSource instance is as the expected: ", passwordText, savedPassword);
+    }
+    
+    @Test
+    public void testTextToBytes() {
+        String input = "48656c6c6f"; // Hexadecimal representation of "Hello"
+        byte[] expected = {72, 101, 108, 108, 111}; // ASCII values of "Hello"
+        byte[] result = EncryptionUtil.textToBytes(input);
+        Assert.assertArrayEquals("The byte array should match the expected values.", expected, result);
+    }
+
+    @Test(expected = NumberFormatException.class)
+    public void testTextToBytesInvalidInput() {
+        String input = "InvalidHex"; // Invalid hexadecimal string
+        EncryptionUtil.textToBytes(input);
+    }
+
+    @Test
+    public void testBytesToText() {
+        byte[] input = {72, 101, 108, 108, 111}; // ASCII values of "Hello"
+        String expected = "48656c6c6f"; // Hexadecimal representation of "Hello"
+        String result = EncryptionUtil.bytesToText(input);
+        Assert.assertEquals("The hexadecimal string should match the expected value.", expected, result);
+    }
+
+    @Test
+    public void testBytesToTextEmptyArray() {
+        byte[] input = {};
+        String result = EncryptionUtil.bytesToText(input);
+        Assert.assertEquals("The result should be an empty string for an empty byte array.", "", result);
+    }
+
+    @Test
+    public void testArrayTooSmall() {
+        String[] array = {"-e", "Hello"};
+        Assert.assertTrue("The array should be considered too small.", EncryptionUtil.arrayTooSmall(array, 1));
+        Assert.assertFalse("The array should not be considered too small.", EncryptionUtil.arrayTooSmall(array, 0));
+    }
+
+    @Test
+    public void testRemoveCommandLineOptions() {
+        String[] args = {"-e", "Hello", "key=value"};
+        String[] expected = {"-e", "Hello"};
+        String[] result = EncryptionUtil.removeCommandLineOptions(args);
+        Assert.assertArrayEquals("The command-line options should be removed.", expected, result);
+    }
+
+    @Test
+    public void testExecuteInvalidArguments() {
+        String[] args = {"-x", "InvalidOption"};
+        // Redirect System.out for testing
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+
+        int exitCode = EncryptionUtil.execute(args);
+        Assert.assertTrue("Expected error code.", exitCode == AppUtil.EXIT_CODE_CLIENT_ERROR);
+
+        String output = outputStream.toString().trim();
+        Assert.assertTrue("The output should contain an error message.", output.startsWith("Utility to encrypt a string"));
+    }
+    
+    @Test
+    public void testExecuteEncryption() {
+        String[] args = {"-e", "abc123"};
+        // Redirect System.out for testing
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+
+        int exitCode = EncryptionUtil.execute(args);
+        Assert.assertTrue("Expected success.", exitCode == AppUtil.EXIT_CODE_NO_ERRORS);
+
+        String output = outputStream.toString().trim();
+        Assert.assertTrue("The output should contain the encrypted string.", 
+                output.startsWith("The output string of encryption is:"));
+        
+        String[] outputParts = output.split("\n");
+        Assert.assertTrue("The output should contain the encrypted string.", 
+                outputParts.length == 2);
+        String encryptedString = outputParts[1].trim();
+        
+        String[] args2 = {"-d", encryptedString};
+        // Redirect System.out for testing
+        ByteArrayOutputStream outputStream2 = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream2));
+        
+        int exitCode2 = EncryptionUtil.execute(args2);
+        Assert.assertTrue("Expected success.", exitCode2 == AppUtil.EXIT_CODE_NO_ERRORS);
+        
+        String output2 = outputStream2.toString().trim();
+        Assert.assertTrue("The output should contain the decrypted string.", 
+                output2.startsWith("The output string of decryption is:"));
+        
+        String[] outputParts2 = output2.split("\n");
+        Assert.assertTrue("The output should contain the decrypted string.", 
+                outputParts2.length == 2);
+        String decryptedString = outputParts2[1].trim();
+        
+        Assert.assertEquals("The decrypted string should match the original string.", "abc123", decryptedString);
+    }
+    
+    @Test
+    public void testExecuteEncryptionWithKeyfile() {
+        String keyfileName = getProperty("testfiles.dir") + File.separator + "testKeyfile";
+        String[] keyfileArgs = {"-k", keyfileName};
+        
+        // Redirect System.out for testing
+        ByteArrayOutputStream outputStreamKeyfile = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStreamKeyfile));
+        
+        int exitCodeKeyfile = EncryptionUtil.execute(keyfileArgs);
+        Assert.assertTrue("Expected success.", exitCodeKeyfile == AppUtil.EXIT_CODE_NO_ERRORS);
+        
+        String[] args = {"-e", "abc123", keyfileName};
+        // Redirect System.out for testing
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+
+        int exitCode = EncryptionUtil.execute(args);
+        Assert.assertTrue("Expected success.", exitCode == AppUtil.EXIT_CODE_NO_ERRORS);
+
+        String output = outputStream.toString().trim();
+        Assert.assertTrue("The output should contain the encrypted string.", 
+                output.startsWith("The output string of encryption is:"));
+        
+        String[] outputParts = output.split("\n");
+        Assert.assertTrue("The output should contain the encrypted string.", 
+                outputParts.length == 2);
+        String encryptedString = outputParts[1].trim();
+        
+        String[] args2 = {"-d", encryptedString, keyfileName};
+        // Redirect System.out for testing
+        ByteArrayOutputStream outputStream2 = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream2));
+        
+        int exitCode2 = EncryptionUtil.execute(args2);
+        Assert.assertTrue("Expected success.", exitCode2 == AppUtil.EXIT_CODE_NO_ERRORS);
+        
+        String output2 = outputStream2.toString().trim();
+        Assert.assertTrue("The output should contain the decrypted string.", 
+                output2.startsWith("The output string of decryption is:"));
+        
+        String[] outputParts2 = output2.split("\n");
+        Assert.assertTrue("The output should contain the decrypted string.", 
+                outputParts2.length == 2);
+        String decryptedString = outputParts2[1].trim();
+        
+        Assert.assertEquals("The decrypted string should match the original string.", "abc123", decryptedString);
     }
 }
