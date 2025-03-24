@@ -23,9 +23,10 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+
 package com.salesforce.dataloader.security;
 
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,19 +41,16 @@ public class EncryptionUtil {
      * @return bytes for the input text
      */
     public static byte[] textToBytes(String text) {
-        byte[] baBytes = new byte[text.length() / 2];
-        for (int j = 0; j < text.length() / 2; j++) {
-            Integer tmpInteger = Integer.decode(new String("0x" + text.substring(j * 2, (j * 2) + 2)));
-            int tmpValue = tmpInteger.intValue();
-            if (tmpValue > 127) // fix negatives
-            {
-                tmpValue = (tmpValue - 127) * -1;
+        int length = text.length() / 2;
+        byte[] byteArray = new byte[length];
+        for (int i = 0; i < length; i++) {
+            int value = Integer.decode("0x" + text.substring(i * 2, (i * 2) + 2));
+            if (value > 127) {
+                value = (value - 127) * -1;
             }
-            tmpInteger = Integer.valueOf(tmpValue);
-            baBytes[j] = tmpInteger.byteValue();
+            byteArray[i] = (byte) value;
         }
-
-        return baBytes;
+        return byteArray;
     }
 
     /**
@@ -61,141 +59,72 @@ public class EncryptionUtil {
      * @return text for the input bytes
      */
     public static String bytesToText(byte[] bytes) {
-        StringBuffer sb = new StringBuffer(bytes.length * 2);
-        for (int i = 0; i < bytes.length; i++) {
-            int num = bytes[i];
-            if (num < 0) num = 127 + (num * -1); // fix negative back to positive
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            int num = b < 0 ? 127 + (b * -1) : b;
             String hex = Integer.toHexString(num);
             if (hex.length() == 1) {
-                hex = "0" + hex; // ensure 2 digits
+                sb.append('0');
             }
             sb.append(hex);
         }
         return sb.toString();
     }
 
-
     private static void printUsage() {
         String usage = "\nUtility to encrypt a string based on a static or a provided key\n"
-                        + "Options (mutually exclusive - use one at a time): \n"
-                        + "\t-e <plain text> [keyfile]                Encrypt a plain text value using optional keyfile\n"
-                        + "\t-d <encryptText> [keyfile]               Decrypt an encrypted text back to plain text value using optional keyfile\n"
-                        + "\t-k [keyfile]                             Generate keyfile with optional path to keyfile\n"
-                        + "\n keyfile defaults to $HOME(%userprofile% on Windows)/.dataloader/dataLoader.key if not specified";
+                + "Options (mutually exclusive - use one at a time): \n"
+                + "\t-e <plain text> [keyfile]                Encrypt a plain text value using optional keyfile\n"
+                + "\t-d <encryptText> [keyfile]               Decrypt an encrypted text back to plain text value using optional keyfile\n"
+                + "\t-k [keyfile]                             Generate keyfile with optional path to keyfile\n"
+                + "\n keyfile defaults to $HOME(%userprofile% on Windows)/.dataloader/dataLoader.key if not specified";
         System.out.println(usage);
     }
 
     public static void main(String[] args) {
         System.exit(execute(args));
     }
-    
-    public static int execute(String[] args) throws IllegalArgumentException {
-        // args[0] = input data, required
-        // args[1] = key (optional)
+
+    public static int execute(String[] args) {
         try {
             if (args.length < 1) {
                 printUsage();
-                System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
+                return AppUtil.EXIT_CODE_CLIENT_ERROR;
             }
-            // remove all config properties passed through command line
+
             args = removeCommandLineOptions(args);
-    
+
             String operation = "";
-            String[] applicableArgs = Arrays.copyOf(args, args.length);
             for (String arg : args) {
-                if (arg.startsWith("-")) {
-                    if (operation.isBlank()
-                        && (arg.equals("-e") 
-                            || arg.equals("-d") 
-                            || arg.equals("-k"))) {
-                        operation = arg;
-                    } else {
-                        applicableArgs = removeElement(applicableArgs, arg);
-                    }
+                if (arg.startsWith("-") && (arg.equals("-e") || arg.equals("-d") || arg.equals("-k"))) {
+                    operation = arg;
+                    break;
                 }
             }
-            args = applicableArgs;
-            int operationArgIndex = 0;
-            for (String arg : args) {
-                if (arg.equals(operation)) {
-                    break;
-                }
-                operationArgIndex++;
+
+            if (operation.isEmpty()) {
+                throw new IllegalArgumentException("Unsupported operation");
             }
-            if (operation.length() < 2 || operation.charAt(0) != '-') {
+
+            int operationArgIndex = Arrays.asList(args).indexOf(operation);
+            if (operationArgIndex == -1 || (operationArgIndex + 1 >= args.length && !operation.equals("-k"))) {
+                System.out.println("Option '" + operation + "' requires at least one parameter. Please check usage.\n");
                 throw new IllegalArgumentException();
             }
-            // make sure enough arguments are provided
-            if (arrayTooSmall(args, operationArgIndex) && operation.charAt(1) != 'k') {
-                System.out.println("Option '" + operation + "' requires at least one parameter.  Please check usage.\n");
-                throw new IllegalArgumentException();
-            }
-            // advance index to param and save the param value
-            String param = null;
-            switch (operation.charAt(1)) {
-                case 'e':
-                    EncryptionAesUtil enc = new EncryptionAesUtil();
-                    param = args[operationArgIndex+1];
-                    if (!arrayTooSmall(args, operationArgIndex+1)) {
-                        String keyFilename = args[operationArgIndex+2];
-                        try {
-                            enc.setCipherKeyFromFilePath(keyFilename);
-                        } catch (Exception e) {
-                            System.out.println("Error setting the key from file: "
-                                    + keyFilename + ", error: " + e.getMessage());
-                            throw new IllegalArgumentException();
-                        }
-                    }
-                    try {
-                        String encrypted = enc.encryptMsg(param);
-                        System.out.println("The output string of encryption is: \n" + encrypted);
-                    } catch (Exception e) {
-                        System.out.println("Error setting the key: " + e.getMessage());
-                        throw new IllegalArgumentException();
-                    }
-    
+
+            String param = args.length > operationArgIndex + 1 ? args[operationArgIndex + 1] : null;
+            switch (operation) {
+                case "-e":
+                    handleEncryption(param, args, operationArgIndex);
                     break;
-    
-                case 'k':
-                    // optional [Path to key file]
-                    try {
-                        EncryptionAesUtil encAes = new EncryptionAesUtil();
-                        if (operationArgIndex <= args.length - 2 || operationArgIndex <= args.length - 1) {
-                            String filePath = encAes.createKeyFileIfNotExisting(operationArgIndex == args.length - 1 ? null : args[operationArgIndex + 1]);
-                            System.out.println("Keyfile \"" + filePath + "\" was created! ");
-                        } else {
-                            System.out.println("Please provide correct parameters!");
-                            throw new IllegalArgumentException();
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Error occurred:  " + e.getMessage());
-                        throw new IllegalArgumentException();
-                    }
+                case "-d":
+                    handleDecryption(param, args, operationArgIndex);
                     break;
-    
-                case 'd':
-                    EncryptionAesUtil encAes = new EncryptionAesUtil();
-                    String encryptMsg = args[operationArgIndex+1];
-                    if (!arrayTooSmall(args, operationArgIndex+1)) {
-                        String keyFilename = args[operationArgIndex+2];
-                        try {
-                            encAes.setCipherKeyFromFilePath(keyFilename);
-                        } catch (GeneralSecurityException e) {
-                            System.out.println("Failed in decryption: " + e.getMessage() + "\n Make sure using the same keyfile to decrypt.");
-                            throw new IllegalArgumentException();
-                        }
-                    }
-                    try {
-                        String plainText = encAes.decryptMsg(encryptMsg);
-                        System.out.println("The output string of decryption is: \n" + plainText);
-                    } catch (Exception e) {
-                        System.out.println("Failed in decryption: " + e.getMessage() + "\n Make sure using the same keyfile to decrypt.");
-                        throw new IllegalArgumentException();
-                    }
+                case "-k":
+                    handleKeyFileCreation(args, operationArgIndex);
                     break;
-    
                 default:
-                    throw new IllegalArgumentException();
+                    throw new IllegalArgumentException("Unsupported operation");
             }
             return AppUtil.EXIT_CODE_NO_ERRORS;
         } catch (IllegalArgumentException e) {
@@ -204,41 +133,62 @@ public class EncryptionUtil {
         }
     }
 
-    /**
-     * @return true if array is too small to increment the index
-     */
-    public static boolean arrayTooSmall(String[] array, int index) {
-        return (index + 1) > (array.length - 1);
+    private static void handleEncryption(String param, String[] args, int operationArgIndex) {
+        if (param == null) {
+            throw new IllegalArgumentException("Encryption requires a plain text value.");
+        }
+        try {
+            EncryptionAesUtil enc = new EncryptionAesUtil();
+            if (args.length > operationArgIndex + 2) {
+                enc.setCipherKeyFromFilePath(args[operationArgIndex + 2]);
+            }
+            String encrypted = enc.encryptMsg(param);
+            System.out.println("The output string of encryption is: \n" + encrypted);
+        } catch (Exception e) {
+            System.out.println("Error during encryption: " + e.getMessage());
+            throw new IllegalArgumentException();
+        }
     }
-    
+
+    private static void handleDecryption(String param, String[] args, int operationArgIndex) {
+        if (param == null) {
+            throw new IllegalArgumentException("Decryption requires an encrypted text value.");
+        }
+        try {
+            EncryptionAesUtil enc = new EncryptionAesUtil();
+            if (args.length > operationArgIndex + 2) {
+                enc.setCipherKeyFromFilePath(args[operationArgIndex + 2]);
+            }
+            String plainText = enc.decryptMsg(param);
+            System.out.println("The output string of decryption is: \n" + plainText);
+        } catch (Exception e) {
+            System.out.println("Error during decryption: " + e.getMessage());
+            throw new IllegalArgumentException();
+        }
+    }
+
+    private static void handleKeyFileCreation(String[] args, int operationArgIndex) {
+        try {
+            EncryptionAesUtil enc = new EncryptionAesUtil();
+            String filePath = enc.createKeyFileIfNotExisting(args.length > operationArgIndex + 1 ? args[operationArgIndex + 1] : null);
+            System.out.println("Keyfile \"" + filePath + "\" was created!");
+        } catch (Exception e) {
+            System.out.println("Error during key file creation: " + e.getMessage());
+            throw new IllegalArgumentException();
+        }
+    }
+
+    public static boolean arrayTooSmall(String[] array, int index) {
+        return index >= array.length - 1;
+    }
+
     public static String[] removeCommandLineOptions(String[] args) {
         List<String> remainingArgs = new ArrayList<>();
-
         for (String arg : args) {
             if (!arg.contains("=")) {
                 remainingArgs.add(arg);
             }
         }
-
         return remainingArgs.toArray(new String[0]);
-    }
-    
-    private static String[] removeElement(String[] array, String elementToRemove) {
-        int newSize = 0;
-        for (String element : array) {
-            if (!element.equals(elementToRemove)) {
-                newSize++;
-            }
-        }
-
-        String[] newArray = new String[newSize];
-        int newIndex = 0;
-        for (String element : array) {
-            if (!element.equals(elementToRemove)) {
-                newArray[newIndex++] = element;
-            }
-        }
-
-        return newArray;
     }
 }
