@@ -39,6 +39,10 @@ import com.salesforce.dataloader.util.DLLogManager;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -297,5 +301,119 @@ public class EncryptionUtilTest extends ConfigTestBase {
         String decryptedString = outputParts2[1].trim();
         
         Assert.assertEquals("The decrypted string should match the original string.", "abc123", decryptedString);
+    }
+
+    @Test
+    public void testTextToBytesNullInput() {
+        assertThrows(NullPointerException.class, () -> {
+            EncryptionUtil.textToBytes(null);
+        });
+    }
+
+    @Test
+    public void testBytesToTextNullInput() {
+        assertThrows(NullPointerException.class, () -> {
+            EncryptionUtil.bytesToText(null);
+        });
+    }
+
+    @Test
+    public void testTextToBytesEmptyString() {
+        byte[] result = EncryptionUtil.textToBytes("");
+        assertArrayEquals(new byte[0], result);
+    }
+
+    @Test
+    public void testBytesToTextEmptyByteArray() {
+        String result = EncryptionUtil.bytesToText(new byte[0]);
+        assertEquals("", result);
+    }
+
+    @Test
+    public void testTextToBytesInvalidHexCharacters() {
+        assertThrows(NumberFormatException.class, () -> {
+            EncryptionUtil.textToBytes("GHIJKL");
+        });
+    }
+
+    @Test
+    public void testTextToBytesLargeInput() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 10000; i++) {
+            sb.append("A1");
+        }
+        byte[] result = EncryptionUtil.textToBytes(sb.toString());
+        assertEquals(10000, result.length);
+    }
+
+    @Test
+    public void testBytesToTextLargeInput() {
+        byte[] largeInput = new byte[10000];
+        for (int i = 0; i < 10000; i++) {
+            largeInput[i] = (byte) (i % 256);
+        }
+        String result = EncryptionUtil.bytesToText(largeInput);
+        assertEquals(20000, result.length());
+    }
+
+    @Test
+    public void testExecuteNoArguments() {
+        String[] args = {};
+        int result = EncryptionUtil.execute(args);
+        assertEquals(AppUtil.EXIT_CODE_CLIENT_ERROR, result);
+    }
+
+    @Test
+    public void testExecuteEncryptionMissingParameters() {
+        String[] args = {"-e"};
+        int result = EncryptionUtil.execute(args);
+        assertEquals(AppUtil.EXIT_CODE_CLIENT_ERROR, result);
+    }
+
+    @Test
+    public void testExecuteDecryptionMissingParameters() {
+        String[] args = {"-d"};
+        int result = EncryptionUtil.execute(args);
+        assertEquals(AppUtil.EXIT_CODE_CLIENT_ERROR, result);
+    }
+
+    @Test
+    public void testExecuteKeyFileCreationInvalidPath() {
+        String[] args = {"-k", "/invalid/path/to/keyfile"};
+        int result = EncryptionUtil.execute(args);
+        assertEquals(AppUtil.EXIT_CODE_CLIENT_ERROR, result);
+    }
+
+    @Test
+    public void testExecuteValidEncryptionAndDecryptionNoKeyfile() {
+        String[] encryptionArgs = {"-e", "plainText"};
+        // Redirect System.out for testing
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+
+        int encryptionResult = EncryptionUtil.execute(encryptionArgs);
+        assertEquals(AppUtil.EXIT_CODE_NO_ERRORS, encryptionResult);
+        String output = outputStream.toString().trim();
+        String[] encryptionResultParts = output.split("\n");
+        assertEquals(2, encryptionResultParts.length);
+        String encryptedText = encryptionResultParts[1].trim();
+
+        String[] decryptionArgs = {"-d", "encryptedText"};
+        int decryptionResult = EncryptionUtil.execute(decryptionArgs);
+        assertEquals(AppUtil.EXIT_CODE_CLIENT_ERROR, decryptionResult);
+        
+        String[] decryptionArgs2 = {"-d", encryptedText};
+        // Redirect System.out for testing
+        ByteArrayOutputStream outputStream2 = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream2));
+        
+        int decryptionResult2 = EncryptionUtil.execute(decryptionArgs2);
+        assertEquals(AppUtil.EXIT_CODE_NO_ERRORS, decryptionResult2);
+        String output2 = outputStream2.toString().trim();
+        String[] decryptionResultParts2 = output2.split("\n");
+        
+        assertEquals(2, decryptionResultParts2.length);
+        String decryptedText = decryptionResultParts2[1].trim();
+        assertEquals("plainText", decryptedText);
     }
 }
