@@ -18,18 +18,14 @@ usage() {
 test=""
 debug=""
 debugEncryption=""
-doClean="Yes"
 #encryptionFile=${HOME}/.dataloader/dataLoader.key
-encryptionFile=
+encryptionFileFlag=""
 
 failfast="-Dsurefire.skipAfterFailureCount=5"
 
 while getopts ":dDicv:t:f:" flag
 do
   case "${flag}" in
-    c)
-      doClean="Yes"
-      ;;
     d)
       debug="-Dmaven.surefire.debug=-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=0.0.0.0:5005"
       ;;
@@ -40,7 +36,7 @@ do
       test="-Dskip-unit-tests=true -Dtest=com.salesforce.dataloader.${OPTARG}"
       ;;
     f)
-      encryptionFile="${OPTARG}"
+      encryptionFileFlag="-Dtest.encryptionFile=${OPTARG}"
       ;;
     i)
       failfast=""
@@ -62,18 +58,9 @@ if [ "$#" -lt 4 ]; then
 fi 
 
 #echo $@
-if [ ${doClean} == "Yes" ]; then
-    mvn clean
-fi
 
-if [ ! -d ./target ]; then
-    mvn package -Dmaven.test.skip=true
-fi
-
+mvn clean package -Dmaven.test.skip=true
 jarname="$(find ./target -name 'dataloader-[0-9][0-9].[0-9].[0-9].jar' | tail -1)"
-if [ "${jarname}" == "" ]; then
-        mvn package -Dmaven.test.skip=true
-fi
 
 #echo "password = ${4}"
 encryptedPassword="$(java ${debugEncryption} -cp ${jarname} com.salesforce.dataloader.process.DataLoaderRunner run.mode=encrypt -e ${4} ${encryptionFile} | tail -1)"
@@ -92,4 +79,4 @@ done
 #decryptedPassword="$(java ${debugEncryption} -cp ${jarname} com.salesforce.dataloader.process.DataLoaderRunner run.mode=encrypt -d ${encryptedPassword} ${encryptionFile} | tail -1)"
 #echo "decryptedPassword = ${decryptedPassword}"
 
-mvn ${failfast} -Dtest.endpoint=${1} -Dtest.user.default=${2} -Dtest.user.restricted=${3} -Dtest.password=${encryptedPassword} -Dtest.encryptionFile=${encryptionFile} verify ${debug} ${test} ${additionalOptions}
+mvn ${failfast} -Dtest.endpoint=${1} -Dtest.user.default=${2} -Dtest.user.restricted=${3} -Dtest.password=${encryptedPassword} ${encryptionFileFlag} verify ${debug} ${test} ${additionalOptions}
