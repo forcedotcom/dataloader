@@ -23,6 +23,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 package com.salesforce.dataloader.client.transport;
 
 import com.salesforce.dataloader.config.AppConfig;
@@ -30,36 +31,34 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.util.function.Function;
 
-/**
- * Created by rmazzeo on 12/9/15.
- */
 public class SimplePostFactory {
 
-    private static Function<Criteria, SimplePostInterface> constructor = c -> new SimplePostImpl(c.appConfig, c.endpoint, c.pairs);;
+    private static Function<Criteria, SimplePostInterface> constructor = c -> new SimplePostImpl(c.appConfig, c.endpoint, c.pairs);
 
-    public static class Criteria{
+    public static class Criteria {
         public AppConfig appConfig;
         public String endpoint;
         public BasicNameValuePair[] pairs;
     }
 
-    public static Function<Criteria, SimplePostInterface> getConstructor()
-    {
+    public static Function<Criteria, SimplePostInterface> getConstructor() {
         return constructor;
     }
 
-    public static void setConstructor(Function<Criteria, SimplePostInterface> constructor)
-    {
+    public static void setConstructor(Function<Criteria, SimplePostInterface> constructor) {
         SimplePostFactory.constructor = constructor;
     }
 
-    public static SimplePostInterface getInstance(AppConfig appConfig, String endpoint, BasicNameValuePair... pairs){
+    public static SimplePostInterface getInstance(AppConfig appConfig, String endpoint, BasicNameValuePair... pairs) {
+        Criteria criteria = createCriteria(appConfig, endpoint, pairs);
+        return constructor.apply(criteria);
+    }
+
+    private static Criteria createCriteria(AppConfig appConfig, String endpoint, BasicNameValuePair... pairs) {
         Criteria criteria = new Criteria();
         criteria.appConfig = appConfig;
         criteria.endpoint = endpoint;
         criteria.pairs = pairs;
-
-        return constructor.apply(criteria);
-
+        return criteria;
     }
 }
