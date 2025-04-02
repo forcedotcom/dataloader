@@ -1822,19 +1822,24 @@ public class AppConfig {
     }
 
     public void setServerEnvironment(String environment) {
+        String endpoint = getString(PROP_AUTH_ENDPOINT_LEGACY);
+        if (endpoint != null && endpoint.contains("test.salesforce.com")) {
+            environment = SERVER_SB_ENVIRONMENT_VAL;
+        }
         if (environment == null || environment.isBlank()) {
             environment = SERVER_PROD_ENVIRONMENT_VAL;
-        }
-        String[] envArray = getString(PROP_SERVER_ENVIRONMENTS).split(",");
-        boolean isEnvMatch = false;
-        for (String env : envArray) {
-            env = env.strip();
-            if (env.equalsIgnoreCase(environment)) {
-                isEnvMatch = true;
+        } else {
+            String[] envArray = getString(PROP_SERVER_ENVIRONMENTS).split(",");
+            boolean isEnvMatch = false;
+            for (String env : envArray) {
+                env = env.strip();
+                if (env.equalsIgnoreCase(environment)) {
+                    isEnvMatch = true;
+                }
             }
-        }
-        if (!isEnvMatch) {
-            environment = SERVER_PROD_ENVIRONMENT_VAL;
+            if (!isEnvMatch) {
+                environment = SERVER_PROD_ENVIRONMENT_VAL;
+            }
         }
         setValue(PROP_SELECTED_SERVER_ENVIRONMENT, environment);
     }
