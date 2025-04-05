@@ -157,7 +157,8 @@ public abstract class ClientBase<ConnectionType> {
             cc.setCompression(!appConfig.getBoolean(AppConfig.PROP_NO_COMPRESSION));
         }
 
-        if (appConfig.getBoolean(AppConfig.PROP_DEBUG_MESSAGES)) {
+        if (appConfig.getBoolean(AppConfig.PROP_DEBUG_MESSAGES)
+                || appConfig.getBoolean(AppConfig.PROP_WIRE_OUTPUT)) {
             cc.setTraceMessage(true);
             cc.setPrettyPrintXml(true);
             String filename = appConfig.getString(AppConfig.PROP_DEBUG_MESSAGES_FILE);
@@ -175,7 +176,6 @@ public abstract class ClientBase<ConnectionType> {
             cc.setServiceEndpoint(server + PartnerClient.getServicePath()); // Partner SOAP service
             cc.setRestEndpoint(server + BulkV1Client.getServicePath());  // REST service: Bulk v1
         }
-        cc.setTraceMessage(appConfig.getBoolean(AppConfig.PROP_WIRE_OUTPUT));
 
         return cc;
     }
