@@ -277,7 +277,16 @@ public class DataLoaderRunner extends Thread {
         String swtJarPrefix = "swt";
         String swtJarSuffix = "*.jar";
         
-        String osNameStr = getOSName();
+        String osTypeStr = "";
+        if (AppUtil.getOSType() == AppUtil.OSType.WINDOWS) {
+            osTypeStr = "win32";
+        } else if (AppUtil.getOSType() == AppUtil.OSType.MACOSX) {
+            osTypeStr = "mac";
+        } else if (AppUtil.getOSType() == AppUtil.OSType.LINUX) {
+            osTypeStr = "linux";
+        } else {
+            throw new RuntimeException("Unknown OS");
+        }
         String archStr = System.getProperty("os.arch");
 
         if (archStr.toLowerCase().contains("amd")) {
@@ -286,31 +295,10 @@ public class DataLoaderRunner extends Thread {
         
         // e.g. swtwin32_x86_64*.jar or swtmac_aarch64*.jar
         String pathStr = swtJarPrefix 
-                + (skipOSAndArch ? "" : osNameStr + "_" + archStr)
+                + (skipOSAndArch ? "" : osTypeStr + "_" + archStr)
                 + swtJarSuffix;
         
         return pathStr;
-    }
-
-    private static String getOSName() {
-        String osNameProperty = System.getProperty("os.name");
-    
-        if (osNameProperty == null) {
-            throw new RuntimeException("os.name property is not set");
-        }
-        else {
-            osNameProperty = osNameProperty.toLowerCase();
-        }
-    
-        if (osNameProperty.contains("win")) {
-           return "win32";
-        } else if (osNameProperty.contains("mac")) {
-           return "mac";
-        } else if (osNameProperty.contains("linux") || osNameProperty.contains("nix")) {
-           return "linux";
-        } else {
-           throw new RuntimeException("Unknown OS name: " + osNameProperty);
-        }
     }
     
     private static File getSWTJarFileHandleFromWildcard(String parentDirStr, String childFileStr) {
