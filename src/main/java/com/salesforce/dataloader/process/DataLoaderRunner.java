@@ -47,6 +47,7 @@ import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -74,83 +75,105 @@ public class DataLoaderRunner extends Thread {
         HttpTransportImpl.closeHttpClient();
     }
 
-    public static void processArgsForBatchMode(String[] args, Map<String,String> argsMap) {
+    private static void processArgsForBatchMode(String[] args, Map<String, String> argsMap) {
+        validateBatchModeArgs(args, argsMap);
+        setConfigDirIfMissing(argsMap);
+        setProcessNameIfMissing(argsMap);
+    }
+    
+    private static void validateBatchModeArgs(String[] args, Map<String, String> argsMap) {
         if (!argsMap.containsKey(AppConfig.CLI_OPTION_CONFIG_DIR_PROP) && args.length < 2) {
-            // config folder must be specified in the first argument
-            System.err.println(
-                    "Usage: process <configuration folder> [batch process bean id]\n"
-                    + "\n"
-                    + "      configuration folder -- required -- folder that contains configuration files,\n"
-                    + "          i.e. config.properties, process-conf.xml, database-conf.xml\n"
-                    + "\n"
-                    + "      batch process bean id -- optional -- id of a batch process bean in process-conf.xml,\n"
-                    + "          for example:\n"
-                    + "\n"
-                    + "              process ../myconfigdir AccountInsert\n"
-                    + "\n"
-                    + "      If process bean id is not specified, the value of the property process.name in config.properties\n"
-                    + "      will be used to run the process instead of process-conf.xml,\n"
-                    + "          for example:\n"
-                    + "\n"
-                    + "              process ../myconfigdir");
+            System.err.println(getBatchModeUsageMessage());
             System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
         }
+    }
+    
+    private static void setConfigDirIfMissing(Map<String, String> argsMap) {
         if (!argsMap.containsKey(AppConfig.CLI_OPTION_CONFIG_DIR_PROP)
                 && argsMap.get(REMAINING_ARG_KEY_PREFIX + 0) != null) {
             argsMap.put(AppConfig.CLI_OPTION_CONFIG_DIR_PROP, argsMap.get(REMAINING_ARG_KEY_PREFIX + 0));
         }
-        if (!argsMap.containsKey(AppConfig.PROP_PROCESS_NAME) 
+    }
+    
+    private static void setProcessNameIfMissing(Map<String, String> argsMap) {
+        if (!argsMap.containsKey(AppConfig.PROP_PROCESS_NAME)
                 && argsMap.get(REMAINING_ARG_KEY_PREFIX + 1) != null) {
-            // second argument must be process name
             argsMap.put(AppConfig.PROP_PROCESS_NAME, argsMap.get(REMAINING_ARG_KEY_PREFIX + 1));
         }
     }
+    
+    private static String getBatchModeUsageMessage() {
+        return """
+                Usage: process <configuration folder> [batch process bean id]
+    
+                      configuration folder -- required -- folder that contains configuration files,
+                          i.e. config.properties, process-conf.xml, database-conf.xml
+    
+                      batch process bean id -- optional -- id of a batch process bean in process-conf.xml,
+                          for example:
+    
+                              process ../myconfigdir AccountInsert
+    
+                      If process bean id is not specified, the value of the property process.name in config.properties
+                      will be used to run the process instead of process-conf.xml,
+                          for example:
+    
+                              process ../myconfigdir
+                """;
+    }
 
-    public synchronized static Map<String, String> configureRunModeAndGetArgsMap(String[] argArray){
-        Map<String, String> commandArgsMap = new HashMap<String, String>();
+    public synchronized static Map<String, String> configureRunModeAndGetArgsMap(String[] argArray) {
+        Map<String, String> commandArgsMap = new HashMap<>();
         if (argArray == null) {
             return commandArgsMap;
         }
     
-        if (argArray != null) {
-            //Process name=value config setting
-            DataLoaderRunner.remainingArgsCount = 0;
-            Arrays.stream(argArray).forEach(arg ->
-            {
-                String[] nameValuePair = arg.split("=", 2);
-                if (nameValuePair.length == 2) {
-                    if (nameValuePair[0].equalsIgnoreCase(AppConfig.CLI_OPTION_RUN_MODE)) {
-                        AppUtil.setAppRunMode(nameValuePair[1]);
-                    } else {
-                        commandArgsMap.put(nameValuePair[0], nameValuePair[1]);
-                    }
-                } else if (!arg.startsWith("-")) {
-                    commandArgsMap.put(DataLoaderRunner.REMAINING_ARG_KEY_PREFIX + DataLoaderRunner.remainingArgsCount++, arg);
-                }
-            });
-        }
+        parseArguments(argArray, commandArgsMap);
         if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH) {
-            DataLoaderRunner.processArgsForBatchMode(argArray, commandArgsMap);
+            processArgsForBatchMode(argArray, commandArgsMap);
         }
         return commandArgsMap;
+    }
+    
+    private static void parseArguments(String[] argArray, Map<String, String> commandArgsMap) {
+        DataLoaderRunner.remainingArgsCount = 0;
+        Arrays.stream(argArray).forEach(arg -> {
+            String[] nameValuePair = arg.split("=", 2);
+            if (nameValuePair.length == 2) {
+                handleNameValuePair(nameValuePair, commandArgsMap);
+            } else if (!arg.startsWith("-")) {
+                commandArgsMap.put(REMAINING_ARG_KEY_PREFIX + DataLoaderRunner.remainingArgsCount++, arg);
+            }
+        });
+    }
+    
+    private static void handleNameValuePair(String[] nameValuePair, Map<String, String> commandArgsMap) {
+        if (nameValuePair[0].equalsIgnoreCase(AppConfig.CLI_OPTION_RUN_MODE)) {
+            AppUtil.setAppRunMode(nameValuePair[1]);
+        } else {
+            commandArgsMap.put(nameValuePair[0], nameValuePair[1]);
+        }
     }
 
     public static void main(String[] args) {
         try {
-            Map<String, String> argsMap = DataLoaderRunner.configureRunModeAndGetArgsMap(args);
+            Map<String, String> argsMap = configureRunModeAndGetArgsMap(args);
             if (!argsMap.containsKey(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH)) {
                 AppUtil.showBanner();
             }
             runApp(argsMap, args, null);
-            System.exit(exitCode);
         } catch (ExitException ex) {
-            System.exit(ex.getExitCode());
+            exitCode = ex.getExitCode();
         } finally {
-            if (logger != null) {
-                logger.debug("Number of server API invocations = " + HttpTransportImpl.getServerInvocationCount());
-            }
+            logServerInvocationCount();
         }
         System.exit(exitCode);
+    }
+    
+    private static void logServerInvocationCount() {
+        if (logger != null) {
+            logger.debug("Number of server API invocations = " + HttpTransportImpl.getServerInvocationCount());
+        }
     }
     
     public static IProcess runApp(String[] args, ILoaderProgress monitor) {
@@ -196,89 +219,60 @@ public class DataLoaderRunner extends Thread {
     public static void setExitCode(int codeVal) {
         exitCode = codeVal;
     }
-    
-    private static void rerunWithSWTNativeLib(Map<String, String> argsMap, String[] args) {
-        String javaExecutablePath = null;
-        try {
-            javaExecutablePath = ProcessHandle.current()
-                .info()
-                .command()
-                .orElseThrow();
-        } catch (Exception e) {
-            // fail silently
-        }
-        if (javaExecutablePath == null) {
-            javaExecutablePath = System.getProperty("java.home")
-                    + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + "java";
-        }
-        // java command is the first argument
-        ArrayList<String> jvmArgs = new ArrayList<String>(128);
-        logger.debug("java executable path: " + javaExecutablePath);
-        jvmArgs.add(javaExecutablePath);
 
-        // JVM options
-        // set -XstartOnFirstThread for MacOS
-        String osName = System.getProperty("os.name").toLowerCase();
-        if ((osName.contains("mac")) || (osName.startsWith("darwin"))) {
-            jvmArgs.add("-XstartOnFirstThread");
-            logger.debug("added JVM arg -XstartOnFirstThread");
-        }
-        
-        // set JVM arguments
-        // add JVM arguments specified in the command line
-        jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
-        File swtJarFileHandle = getSWTJarFileHandle();
-        if (swtJarFileHandle == null) {
-            logger.error("Unable to find SWT jar for " 
-                    + System.getProperty("os.name") + " : "
-                    + System.getProperty("os.arch"));
-            System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
-        }
-        
-        // set classpath
-        String classpath = System.getProperty("java.class.path");
-        String SWTJarPath = swtJarFileHandle.getAbsolutePath();
-        if (classpath != null && !classpath.isBlank()) {
-            classpath = SWTJarPath + PATH_SEPARATOR + classpath;
-        } else {
-            classpath = SWTJarPath;
-        }
-        jvmArgs.add("-cp");
-        jvmArgs.add(classpath);
-        logger.debug("set java.class.path=" + classpath);
-        
-        // specify name of the class with main method
-        jvmArgs.add(DataLoaderRunner.class.getName());
-        logger.debug("added class to execute - " + DataLoaderRunner.class.getName());
-        
-        // specify application arguments
-        logger.debug("added following arguments:");
-        for (int i = 0; i < args.length; i++) {
-          jvmArgs.add(args[i]);
-          logger.debug("    " + args[i]);
-        }
-        
-        // add the argument to indicate that JAVA_LIB_PATH has the folder containing SWT native libraries
-        jvmArgs.add(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
-        logger.debug("    " + AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
-        
-        // set System proxy info as proxy server defaults
-        String proxyHost = null;
-        int proxyPort = 0;
-        Proxy systemProxy = AppUtil.getSystemHttpsProxy(argsMap);
-        if (systemProxy != null) {
-            InetSocketAddress addr = (InetSocketAddress) systemProxy.address();
-    
-            if (addr != null) {
-                proxyHost = addr.getHostName();
-                proxyPort = addr.getPort();
-                jvmArgs.add(AppConfig.CLI_OPTION_SYSTEM_PROXY_HOST + "=" + proxyHost);
-                jvmArgs.add(AppConfig.CLI_OPTION_SYSTEM_PROXY_PORT + "=" + proxyPort);
-            }
-        }
+    private static void rerunWithSWTNativeLib(Map<String, String> argsMap, String[] args) {
+        String javaExecutablePath = getJavaExecutablePath();
+        List<String> jvmArgs = buildJvmArguments(javaExecutablePath, argsMap, args);
         AppUtil.exec(jvmArgs, null);
     }
     
+    private static String getJavaExecutablePath() {
+        try {
+            return ProcessHandle.current().info().command().orElseThrow();
+        } catch (Exception e) {
+            return System.getProperty("java.home") + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + "java";
+        }
+    }
+    
+    private static List<String> buildJvmArguments(String javaExecutablePath, Map<String, String> argsMap, String[] args) {
+        List<String> jvmArgs = new ArrayList<>();
+        jvmArgs.add(javaExecutablePath);
+        addJvmOptions(jvmArgs);
+        addClasspath(jvmArgs);
+        jvmArgs.add(DataLoaderRunner.class.getName());
+        addApplicationArguments(jvmArgs, args, argsMap);
+        return jvmArgs;
+    }
+    
+    private static void addJvmOptions(List<String> jvmArgs) {
+        if (AppUtil.isRunningOnMacOS()) {
+            jvmArgs.add("-XstartOnFirstThread");
+        }
+        jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
+    }
+    
+    private static void addClasspath(List<String> jvmArgs) {
+        String classpath = System.getProperty("java.class.path");
+        File swtJarFile = getSWTJarFileHandle();
+        if (swtJarFile != null) {
+            classpath = swtJarFile.getAbsolutePath() + PATH_SEPARATOR + classpath;
+        }
+        jvmArgs.add("-cp");
+        jvmArgs.add(classpath);
+    }
+    
+    private static void addApplicationArguments(List<String> jvmArgs, String[] args, Map<String, String> argsMap) {
+        for (String arg : args) {
+            jvmArgs.add(arg);
+        }
+        jvmArgs.add(AppConfig.CLI_OPTION_SWT_NATIVE_LIB_IN_JAVA_LIB_PATH + "=true");
+        Proxy systemProxy = AppUtil.getSystemHttpsProxy(argsMap);
+        if (systemProxy != null && systemProxy.address() instanceof InetSocketAddress) {
+            InetSocketAddress addr = (InetSocketAddress) systemProxy.address();
+            jvmArgs.add(AppConfig.CLI_OPTION_SYSTEM_PROXY_HOST + "=" + addr.getHostName());
+            jvmArgs.add(AppConfig.CLI_OPTION_SYSTEM_PROXY_PORT + "=" + addr.getPort());
+        }
+    }
     private static String constructSwtJarNameFromOSAndArch(boolean skipOSAndArch) {
         String swtJarPrefix = "swt";
         String swtJarSuffix = "*.jar";
@@ -349,41 +343,42 @@ public class DataLoaderRunner extends Thread {
         }
         return null;
     }
-    
-    private static File getSWTJarFileHandle() {
-        String[]parentDirOfSWTDirArray = 
-                    {AppUtil.getDirContainingClassJar(DataLoaderRunner.class)
-                     , "."
-                     , ".."
-                     , LOCAL_SWT_DIR
-                    };
-        Boolean[] skipOSAndArchInFileNameConstructionArray = {Boolean.FALSE, Boolean.TRUE};
-        for (String parentDirOfSwtDir : parentDirOfSWTDirArray) {
-            if (parentDirOfSwtDir == null) {
-                continue;
-            }
-            for (Boolean skipOSAndArchVal : skipOSAndArchInFileNameConstructionArray) {
-                File swtJarFileHandle = getSWTJarFileHandleFromDir(parentDirOfSwtDir, skipOSAndArchVal);
-                if (swtJarFileHandle != null) {
-                    return swtJarFileHandle;
-                }
-                // look into sub-directories
-                swtJarFileHandle = getSWTJarFileHandleFromDir(parentDirOfSwtDir + "/*", skipOSAndArchVal);
-                if (swtJarFileHandle != null) {
-                    return swtJarFileHandle;
-                }
-            }
-        }
 
-        // try to get it from the CLASSPATH
-        Map<String, String>envVars = System.getenv();
-        String classPathStr = envVars.get("CLASSPATH");
-        File swtJarFileHandle = getSWTJarFileFromClassPath(classPathStr);
-        if (swtJarFileHandle != null) {
-            return swtJarFileHandle;
+    private static File getSWTJarFileHandle() {
+        for (String parentDir : getParentDirectories()) {
+            for (boolean skipOSAndArch : new boolean[]{false, true}) {
+                File swtJarFile = searchSWTJarInDirectory(parentDir, skipOSAndArch);
+                if (swtJarFile != null) {
+                    return swtJarFile;
+                }
+            }
         }
-        classPathStr = System.getProperty("java.class.path");
-        return getSWTJarFileFromClassPath(classPathStr);
+        return searchSWTJarInClasspath();
+    }
+    
+    private static String[] getParentDirectories() {
+        return new String[]{
+            AppUtil.getDirContainingClassJar(DataLoaderRunner.class),
+            ".",
+            "..",
+            LOCAL_SWT_DIR
+        };
+    }
+    
+    private static File searchSWTJarInDirectory(String parentDir, boolean skipOSAndArch) {
+        if (parentDir == null) {
+            return null;
+        }
+        File swtJarFile = getSWTJarFileHandleFromDir(parentDir, skipOSAndArch);
+        if (swtJarFile == null) {
+            swtJarFile = getSWTJarFileHandleFromDir(parentDir + "/*", skipOSAndArch);
+        }
+        return swtJarFile;
+    }
+    
+    private static File searchSWTJarInClasspath() {
+        File swtJarFile = getSWTJarFileFromClassPath(System.getenv("CLASSPATH"));
+        return (swtJarFile != null) ? swtJarFile : getSWTJarFileFromClassPath(System.getProperty("java.class.path"));
     }
     
     private static File getSWTJarFileHandleFromDir(String dir, boolean skipOSAndArchVal) {
