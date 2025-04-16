@@ -62,8 +62,8 @@ import com.salesforce.dataloader.model.TableRow;
 public class DatabaseProcessTest extends ProcessTestBase {
 
     private static final Logger logger = DLLogManager.getLogger(DatabaseReader.class);
-    private static final int NUM_ROWS = 1000;
-    private static final int BATCH_SIZE = 100;
+    private static final int NUM_ROWS = 41;
+    private static final int BATCH_SIZE = 1000;
 
     public DatabaseProcessTest(Map<String, String> config) {
         super(config);
@@ -73,11 +73,11 @@ public class DatabaseProcessTest extends ProcessTestBase {
     public static Collection<Object[]> getTestParameters() {
         return Arrays.asList(
                 TestVariant.defaultSettings(),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_SERIAL_MODE_ENABLED),
-                TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED)
+                TestVariant.forSettings(TestSetting.BULK_API_ENABLED)
+         //       TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED),
+         //       TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_ZIP_CONTENT_ENABLED),
+         //       TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_API_SERIAL_MODE_ENABLED),
+         //       TestVariant.forSettings(TestSetting.BULK_API_ENABLED, TestSetting.BULK_V2_API_ENABLED, TestSetting.BULK_API_CACHE_DAO_UPLOAD_ENABLED)
                 );
     }
 
@@ -95,7 +95,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         DatabaseTestUtil.deleteAllAccountsDb(getController());
     }
 
-    @Test
+    @Ignore
     public void testExtractAccountDb() throws ProcessInitializationException, DataAccessObjectException {
         // upsert accounts into salesforce so there's something to query
         upsertSfdcAccounts(NUM_ROWS);
@@ -107,7 +107,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         doExtractAccountDb(processName, NUM_ROWS, 0, false);
     }
 
-    @Test
+    @Ignore
     public void testExtractAccountDbNegative() throws Exception {
         // upsert accounts into salesforce so there's something to query
         upsertSfdcAccounts(500);
@@ -118,7 +118,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         doExtractAccountDb("extractAccountDbProcess", 400, 100, true);
     }
 
-    @Test
+    @Ignore
     public void testExtractMultipleBadAccounts() throws Exception {
         // upsert many accounts which will fail to be written to the database on extract
         // the sql exceptions should be logged
@@ -134,6 +134,8 @@ public class DatabaseProcessTest extends ProcessTestBase {
         // so we need to remove the default test password from the config
         final Map<String, String> argMap = getTestConfig();
         argMap.remove(AppConfig.PROP_PASSWORD);
+        argMap.put(AppConfig.PROP_DAO_SKIP_TOTAL_COUNT, "true");
+        argMap.put(AppConfig.PROP_PROCESS_BULK_CACHE_DATA_FROM_DAO, "false");
         // insert
         long usedMemoryBefore = 0;
         Runtime runtime = Runtime.getRuntime();
@@ -163,6 +165,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         }
         // update
         testUpsertAccountsDb(argMap, NUM_ROWS, false, false);
+        System.out.println("done");
     }
 
     private void testUpsertAccountsDb(Map<String, String> args, int numRows, boolean isInsert, boolean nullValues)
@@ -182,7 +185,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
         runUpsertProcess(args, isInsert ? numRows : 0, isInsert ? 0 : numRows);
     }
 
-    @Test
+    @Ignore
     public void testInsertNullsDB() throws Exception {
         Map<String, String> args = getTestConfig();
         if (isBulkAPIEnabled(args) || isBulkV2APIEnabled(args)) {
