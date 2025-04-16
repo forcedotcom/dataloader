@@ -63,7 +63,7 @@ public class DatabaseProcessTest extends ProcessTestBase {
 
     private static final Logger logger = DLLogManager.getLogger(DatabaseReader.class);
     private static final int NUM_ROWS = 1000;
-    private static final int BATCH_SIZE = 1000;
+    private static final int BATCH_SIZE = 100;
 
     public DatabaseProcessTest(Map<String, String> config) {
         super(config);
