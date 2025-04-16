@@ -30,6 +30,7 @@ import java.util.Date;
 
 import org.apache.logging.log4j.Logger;
 
+import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 
 /**
@@ -102,12 +103,20 @@ public class LoadRateCalculator {
         }
         
         if (totalProcessedRecords > this.totalRecordsAcrossAllJobs) {
-            logger.warn("Calculation Error: Total processed records is greater than total records across all jobs.");
-            Thread.currentThread().getStackTrace();
+            if (AppConfig.getCurrentConfig().getBoolean(AppConfig.PROP_DAO_SKIP_TOTAL_COUNT)) {
+                this.totalRecordsAcrossAllJobs = totalProcessedRecords;
+            } else {
+                // this is a problem. We should not be able to process more records than the
+                // total records across all jobs.
+                logger.warn("Calculation Error: the number of processed records (" 
+                        + totalProcessedRecords 
+                        + ") is greater than total records (" 
+                        + this.totalRecordsAcrossAllJobs
+                        + ") across all jobs");
+            }
         }
         if (remainingTimeInSec < 0) {
             logger.warn("Remaining time calculation error.");
-            Thread.currentThread().getStackTrace();
         }
 
         final long remainingTimeInMinutes = remainingTimeInSec / 60;
