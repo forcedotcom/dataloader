@@ -214,8 +214,10 @@ abstract class AbstractAction implements IAction {
                 || e instanceof ExtractExceptionOnServer
                 || e instanceof LoadExceptionOnServer
                 || e instanceof ConnectionException) {
-            if (numAttempts < this.maxRetries-1 && this.enableRetries) {
-                // loop only if less than MAX_RETRIES
+            if (numAttempts < this.maxRetries-1 
+                    && this.enableRetries
+                    && controller.getAppConfig().getOperationInfo() != OperationInfo.insert) {
+                // loop only if less than MAX_RETRIES and operation is not insert
                 logger.warn("Encountered an error on server when performing "
                         + controller.getAppConfig().getString(AppConfig.PROP_OPERATION) 
                         + " on attempt " 
