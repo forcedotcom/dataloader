@@ -423,7 +423,7 @@ public class HttpTransportImpl implements HttpTransportInterface {
                 && !currentConnectorConfig.getSessionId().isBlank()) {
             String authSessionId = currentConnectorConfig.getSessionId();
             Header authHeaderValForXML = this.httpMethod.getFirstHeader(AUTH_HEADER_FOR_XML);
-            Header authHeaderValForJSON = this.httpMethod.getFirstHeader(AUTH_HEADER_FOR_XML);
+            Header authHeaderValForJSON = this.httpMethod.getFirstHeader(AUTH_HEADER_FOR_JSON);
             
             if (authHeaderValForXML != null) {
                 authSessionId = authHeaderValForXML.getValue();
