@@ -51,7 +51,7 @@
     <dependency>
       <groupId>com.force.api</groupId>
       <artifactId>force-partner-api</artifactId>
-      <version>64.0.0</version>
+      <version>64.0.1</version>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
