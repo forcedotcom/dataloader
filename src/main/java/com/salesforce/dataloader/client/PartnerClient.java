@@ -632,23 +632,26 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     private boolean dologin() throws ConnectionException, ApiFault {
         // Attempt the login giving the user feedback
         logger.info(Messages.getString("Client.sforceLogin")); //$NON-NLS-1$
-        ConnectorConfig cc = getLoginConnectorConfig();
+        String oauthAccessToken = appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN);
+        String serverUrl = appConfig.getAuthEndpointForCurrentEnv();
+        if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
+            serverUrl = appConfig.getString(AppConfig.PROP_OAUTH_INSTANCE_URL);
+        }
+        final ConnectorConfig cc = getLoginConnectorConfig(serverUrl);
         boolean savedIsTraceMessage = cc.isTraceMessage();
         cc.setTraceMessage(false);
-        PartnerConnection conn = Connector.newConnection(cc);
+        // NOTE
+        // Create PartnerConnection instance only once to avoid issues with API restricted editions
+        // such as Professional Edition.
+        final PartnerConnection conn = Connector.newConnection(cc);
         // identify the client as dataloader
         conn.setCallOptions(ClientBase.getClientName(this.appConfig), null);
 
-        String oauthAccessToken = appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN);
         try {
             if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
-                cc = getLoginConnectorConfig(appConfig.getString(AppConfig.PROP_OAUTH_INSTANCE_URL));
-                savedIsTraceMessage = cc.isTraceMessage();
-                cc.setTraceMessage(false);
-                conn = Connector.newConnection(cc);
-                conn = setConfiguredSessionId(conn, oauthAccessToken, null);
+                setConfiguredSessionId(conn, oauthAccessToken, null);
             } else if (appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL) && appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
-                conn = setConfiguredSessionId(conn, appConfig.getString(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID), null);
+                setConfiguredSessionId(conn, appConfig.getString(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID), null);
             } else {
                 setSessionRenewer(conn);
                 loginInternal(conn);
@@ -672,14 +675,13 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         });
     }
 
-    private PartnerConnection setConfiguredSessionId(PartnerConnection conn, String sessionId, GetUserInfoResult userInfo) throws ConnectionException {
+    private void setConfiguredSessionId(PartnerConnection conn, String sessionId, GetUserInfoResult userInfo) throws ConnectionException {
         logger.info("Using manually configured session id to bypass login");
         conn.setSessionHeader(sessionId);
         if (userInfo == null) {
             userInfo = conn.getUserInfo(); // check to make sure we have a good connection
         }
         loginSuccess(conn, getAuthenticationHostDomainUrl(appConfig.getAuthEndpointForCurrentEnv()), userInfo);
-        return conn;
     }
 
     private void loginInternal(final PartnerConnection conn) throws ConnectionException, PasswordExpiredException {
@@ -905,12 +907,11 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     public static String getServicePath() {
         return "/services/Soap/u/" + getAPIVersionForTheSession() + "/";
     }
-
-    private synchronized ConnectorConfig getLoginConnectorConfig() {
-        return getLoginConnectorConfig(appConfig.getAuthEndpointForCurrentEnv());
-    }
     
     private synchronized ConnectorConfig getLoginConnectorConfig(String serverURL) {
+        if (serverURL == null || serverURL.isEmpty()) {
+            serverURL = appConfig.getAuthEndpointForCurrentEnv();
+        }
         this.connectorConfig = getConnectorConfig();
         this.connectorConfig.setAuthEndpoint(serverURL + getServicePath());
         this.connectorConfig.setServiceEndpoint(serverURL + getServicePath());
