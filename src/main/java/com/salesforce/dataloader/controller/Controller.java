@@ -33,6 +33,7 @@ import com.salesforce.dataloader.client.BulkV2Client;
 import com.salesforce.dataloader.client.ClientBase;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.client.CompositeRESTClient;
+import com.salesforce.dataloader.client.LoginClient;
 import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
 import com.salesforce.dataloader.client.transport.HttpTransportImpl;
 import com.salesforce.dataloader.config.AppConfig;
@@ -105,6 +106,7 @@ public class Controller {
     private DataAccessObjectInterface dao;
     private BulkV1Client bulkV1Client;
     private BulkV2Client bulkV2Client;
+    private LoginClient loginClient;
     private PartnerClient partnerClient;
     private CompositeRESTClient restClient;
     private LoaderWindow loaderWindow;
@@ -213,7 +215,7 @@ public class Controller {
     }
 
     private void validateSession() {
-        getPartnerClient().validateSession();
+        getLoginClient().validateSession();
     }
 
     public void setFieldTypes() throws ConnectionException {
@@ -233,7 +235,7 @@ public class Controller {
 
     private boolean connectIfSessionExists(ClientBase<?> clientToLogin) {
         if (!isLoggedIn()) return false;
-        return clientToLogin.connect(getPartnerClient().getSession());
+        return clientToLogin.connect(getLoginClient().getSession());
     }
     
     public static String getAPIVersion() {
@@ -271,12 +273,12 @@ public class Controller {
 
     private boolean login(ClientBase<?> clientToLogin) throws ConnectionException {
         boolean loggedIn = isLoggedIn();
-        if (!loggedIn) loggedIn = getPartnerClient().connect();
-        return loggedIn && clientToLogin.connect(getPartnerClient().getSession());
+        if (!loggedIn) loggedIn = getLoginClient().connect();
+        return loggedIn && clientToLogin.connect(getLoginClient().getSession());
     }
 
     public boolean isLoggedIn() {
-        return getPartnerClient().isLoggedIn();
+        return getLoginClient().isLoggedIn();
     }
 
     private void createDao(String daoTypeStr, String daoNameStr) throws DataAccessObjectInitializationException {
@@ -382,6 +384,11 @@ public class Controller {
         }
         return true;
 
+    }
+   
+    public LoginClient getLoginClient() {
+        if (this.loginClient == null) this.loginClient = new LoginClient(this);
+        return this.loginClient;
     }
     
     public PartnerClient getPartnerClient() {
@@ -527,11 +534,12 @@ public class Controller {
     }
 
     public void logout() {
-        if (this.partnerClient != null) this.partnerClient.logout();
+        if (this.loginClient != null) this.loginClient.logout();
         this.bulkV1Client = null;
         this.partnerClient = null;
         this.bulkV2Client = null;
         this.restClient = null;
+        this.loginClient = null;
         appConfig.setValue(AppConfig.PROP_OAUTH_ACCESSTOKEN, "");
     }
 

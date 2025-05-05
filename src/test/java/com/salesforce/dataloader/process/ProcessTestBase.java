@@ -45,6 +45,7 @@ import org.junit.Before;
 import com.salesforce.dataloader.*;
 import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
+import com.salesforce.dataloader.client.LoginClient;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.client.transport.HttpTransportImpl;
 import com.salesforce.dataloader.config.AppConfig;
@@ -1082,9 +1083,9 @@ public abstract class ProcessTestBase extends ConfigTestBase {
     
     protected BasicDynaClass setupDynaClass(String entity, Collection<String> sfFields) throws ConnectionException {
         getController().getAppConfig().setValue(AppConfig.PROP_ENTITY, entity);
-        PartnerClient client = getController().getPartnerClient();
-        if (!client.isLoggedIn()) {
-            client.connect();
+        LoginClient loginClient = getController().getLoginClient();
+        if (!loginClient.isLoggedIn()) {
+        	loginClient.connect();
         }
 
         getController().setFieldTypes();
