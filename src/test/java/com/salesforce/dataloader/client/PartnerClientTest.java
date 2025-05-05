@@ -68,14 +68,16 @@ public class PartnerClientTest extends ProcessTestBase {
 
     @Test
     public void testPartnerClientConnect() throws Exception {
-        PartnerClient client = new PartnerClient(getController());
+        LoginClient client = new LoginClient(getController());
         assertFalse(getController().getAppConfig().getBoolean(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN));
         boolean connect = client.connect();
         assertTrue(connect);
         assertNotNull(client.getConnection());
-
         client.connect(client.getSession());
-        assertTrue(client.getConnection().getDisableFeedTrackingHeader().isDisableFeedTracking());
+
+        PartnerClient partnerClient = getController().getPartnerClient();
+        partnerClient.connect(client.getSession());
+        assertTrue(partnerClient.getConnection().getDisableFeedTrackingHeader().isDisableFeedTracking());
     }
 
     @Test
@@ -84,7 +86,7 @@ public class PartnerClientTest extends ProcessTestBase {
         String origUserName = appConfig.getString(AppConfig.PROP_USERNAME);
         try {
             appConfig.setValue(AppConfig.PROP_USERNAME, "");
-            PartnerClient client = new PartnerClient(getController());
+            LoginClient client = new LoginClient(getController());
             boolean connect = client.connect();
             assertFalse("Should not connect with empty username", connect);
         } catch (RuntimeException e) {
@@ -104,7 +106,7 @@ public class PartnerClientTest extends ProcessTestBase {
         final String origEndpoint = appConfig.getAuthEndpointForCurrentEnv();
 
         //login normally just to get sessionId and endpoint
-        PartnerClient setupOnlyClient = new PartnerClient(getController());
+        LoginClient setupOnlyClient = new LoginClient(getController());
         setupOnlyClient.connect();
         final String sessionId = setupOnlyClient.getSessionId();
         final String endpoint = setupOnlyClient.getSession().getServer();
@@ -119,7 +121,7 @@ public class PartnerClientTest extends ProcessTestBase {
             appConfig.setAuthEndpointForCurrentEnv(endpoint);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID, sessionId);
 
-            PartnerClient client = new PartnerClient(getController());
+            LoginClient client = new LoginClient(getController());
             assertTrue(client.connect());
         } finally {
             appConfig.setValue(AppConfig.PROP_USERNAME, origUsername);
@@ -140,7 +142,7 @@ public class PartnerClientTest extends ProcessTestBase {
         final String origEndpoint = appConfig.getAuthEndpointForCurrentEnv();
 
         //login normally just to get sessionId and endpoint
-        PartnerClient setupOnlyClient = new PartnerClient(getController());
+        LoginClient setupOnlyClient = new LoginClient(getController());
         setupOnlyClient.connect();
         final String sessionId = setupOnlyClient.getSessionId();
         final String endpoint = setupOnlyClient.getSession().getServer();
@@ -155,7 +157,7 @@ public class PartnerClientTest extends ProcessTestBase {
             appConfig.setAuthEndpointForCurrentEnv(endpoint);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID, sessionId);
 
-            PartnerClient client = new PartnerClient(getController());
+            LoginClient client = new LoginClient(getController());
             client.connect();
             Assert.fail("Should not be able to connect with sfdcInternal=false and no username.");
         } catch (IllegalStateException e) {
@@ -181,7 +183,7 @@ public class PartnerClientTest extends ProcessTestBase {
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL, true);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
 
-            PartnerClient client = new PartnerClient(getController());
+            LoginClient client = new LoginClient(getController());
             assertTrue(client.isSessionValid());
         } finally {
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL, false);
@@ -191,7 +193,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
     @Test
     public void testDisconnect() throws Exception {
-        PartnerClient client = new PartnerClient(getController());
+        LoginClient client = new LoginClient(getController());
 
         client.connect();
         assertTrue(client.isLoggedIn());
