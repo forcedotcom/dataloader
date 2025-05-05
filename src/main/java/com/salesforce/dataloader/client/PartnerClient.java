@@ -215,7 +215,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     private final Map<String, DescribeGlobalSObjectResult> describeGlobalResultsMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     private final Map<String, DescribeSObjectResult> entityFieldDescribesMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     private final Map<String, ReferenceEntitiesDescribeMap> parentDescribeCache = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    public PartnerClient(Controller controller) {
+    private PartnerClient(Controller controller) {
         super(controller, LOG);
     }
 
@@ -801,5 +801,19 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
         return this.referenceEntitiesDescribesMap.getParentField(sObjectFieldName);
     }
+
+	@Override
+	public boolean logout() {
+		instance = null;
+		return true;
+	}
+	
+	private static PartnerClient instance = null;
+	public static PartnerClient getInstance(Controller controller) {
+		if (instance == null || instance.controller != controller) {
+			instance = new PartnerClient(controller);
+		}
+		return instance;
+	}
 
 }

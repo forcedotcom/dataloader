@@ -68,7 +68,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
     @Test
     public void testPartnerClientConnect() throws Exception {
-        LoginClient client = new LoginClient(getController());
+        LoginClient client = LoginClient.getInstance(getController());
         assertFalse(getController().getAppConfig().getBoolean(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN));
         boolean connect = client.connect();
         assertTrue(connect);
@@ -86,7 +86,7 @@ public class PartnerClientTest extends ProcessTestBase {
         String origUserName = appConfig.getString(AppConfig.PROP_USERNAME);
         try {
             appConfig.setValue(AppConfig.PROP_USERNAME, "");
-            LoginClient client = new LoginClient(getController());
+            LoginClient client = LoginClient.getInstance(getController());
             boolean connect = client.connect();
             assertFalse("Should not connect with empty username", connect);
         } catch (RuntimeException e) {
@@ -106,7 +106,7 @@ public class PartnerClientTest extends ProcessTestBase {
         final String origEndpoint = appConfig.getAuthEndpointForCurrentEnv();
 
         //login normally just to get sessionId and endpoint
-        LoginClient setupOnlyClient = new LoginClient(getController());
+        LoginClient setupOnlyClient = LoginClient.getInstance(getController());
         setupOnlyClient.connect();
         final String sessionId = setupOnlyClient.getSessionId();
         final String endpoint = setupOnlyClient.getSession().getServer();
@@ -121,7 +121,7 @@ public class PartnerClientTest extends ProcessTestBase {
             appConfig.setAuthEndpointForCurrentEnv(endpoint);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID, sessionId);
 
-            LoginClient client = new LoginClient(getController());
+            LoginClient client = LoginClient.getInstance(getController());
             assertTrue(client.connect());
         } finally {
             appConfig.setValue(AppConfig.PROP_USERNAME, origUsername);
@@ -142,7 +142,7 @@ public class PartnerClientTest extends ProcessTestBase {
         final String origEndpoint = appConfig.getAuthEndpointForCurrentEnv();
 
         //login normally just to get sessionId and endpoint
-        LoginClient setupOnlyClient = new LoginClient(getController());
+        LoginClient setupOnlyClient = LoginClient.getInstance(getController());
         setupOnlyClient.connect();
         final String sessionId = setupOnlyClient.getSessionId();
         final String endpoint = setupOnlyClient.getSession().getServer();
@@ -157,7 +157,7 @@ public class PartnerClientTest extends ProcessTestBase {
             appConfig.setAuthEndpointForCurrentEnv(endpoint);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID, sessionId);
 
-            LoginClient client = new LoginClient(getController());
+            LoginClient client = LoginClient.getInstance(getController());
             client.connect();
             Assert.fail("Should not be able to connect with sfdcInternal=false and no username.");
         } catch (IllegalStateException e) {
@@ -183,7 +183,7 @@ public class PartnerClientTest extends ProcessTestBase {
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL, true);
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN, true);
 
-            LoginClient client = new LoginClient(getController());
+            LoginClient client = LoginClient.getInstance(getController());
             assertTrue(client.isSessionValid());
         } finally {
             appConfig.setValue(AppConfig.PROP_SFDC_INTERNAL, false);
@@ -193,7 +193,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
     @Test
     public void testDisconnect() throws Exception {
-        LoginClient client = new LoginClient(getController());
+        LoginClient client = LoginClient.getInstance(getController());
 
         client.connect();
         assertTrue(client.isLoggedIn());
@@ -204,14 +204,14 @@ public class PartnerClientTest extends ProcessTestBase {
 
     @Test
     public void testSetEntityDescribe() throws Exception{
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
         assertNotNull(client.getDescribeGlobalResults());
     }
 
     @Test
     public void testDescribeSObjects() throws Exception {
         setMemoryIncreaseThresholds(220);
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
 
         int numDescribes = 0;
         for (String objectType : client.getDescribeGlobalResults().keySet()){
@@ -233,7 +233,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
     @Test
     public void testSetFieldTypes() throws Exception {
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
         client.setFieldTypes();
         assertNotNull(client.getFieldTypes());
     }
@@ -241,7 +241,7 @@ public class PartnerClientTest extends ProcessTestBase {
     @Test
     public void testGetSforceField() throws Exception {
         // test for account name as a default test case
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
         DescribeSObjectResult forceFields = client.describeSObject("account");
         Field[] fields = forceFields.getFields();
         assertNotNull(fields);
@@ -277,7 +277,7 @@ public class PartnerClientTest extends ProcessTestBase {
         beanList.add(sforceObj);
 
         // get the client and make the insert call
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
         SaveResult[] results = client.loadInserts(beanList);
         for (SaveResult result : results) {
             if (!result.getSuccess()) {
@@ -323,7 +323,7 @@ public class PartnerClientTest extends ProcessTestBase {
         getController().getAppConfig().setValue(AppConfig.PROP_NO_COMPRESSION, noCompression);
 
         // get the client and make the insert call
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
         SaveResult[] results = client.loadUpdates(beanList);
         for (SaveResult result : results) {
             if (!result.getSuccess()) {
@@ -358,7 +358,7 @@ public class PartnerClientTest extends ProcessTestBase {
         beanList.add(sforceObj);
 
         // get the client and make the insert call
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
         SaveResult[] results = client.loadUpdates(beanList);
         for (SaveResult result : results) {
             if (result.getSuccess()) {
@@ -523,7 +523,7 @@ public class PartnerClientTest extends ProcessTestBase {
         List<DynaBean> beanList = new ArrayList<DynaBean>();
         beanList.add(sforceObj);
 
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
         UpsertResult[] results = client.loadUpserts(beanList);
         for (UpsertResult result : results) {
             if (result.getSuccess()) {
@@ -558,7 +558,7 @@ public class PartnerClientTest extends ProcessTestBase {
         beanList.add(sforceObj);
 
         // get the client and make the insert call
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
         DeleteResult[] results = client.loadDeletes(beanList);
         for (DeleteResult result : results) {
             if (!result.getSuccess()) {
@@ -593,7 +593,7 @@ public class PartnerClientTest extends ProcessTestBase {
         beanList.add(sforceObj);
 
         // get the client and make the insert call
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
         DeleteResult[] results = client.loadDeletes(beanList);
         for (DeleteResult result : results) {
             if (result.getSuccess()) {
@@ -608,7 +608,7 @@ public class PartnerClientTest extends ProcessTestBase {
         upsertSfdcAccounts(10);
 
         // get the client and make the query call
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
         QueryResult result = client.query("select id from account where " + ACCOUNT_WHERE_CLAUSE);
         SObject[] records = result.getRecords();
         assertNotNull(records);
@@ -634,7 +634,7 @@ public class PartnerClientTest extends ProcessTestBase {
         upsertSfdcAccounts(10);
 
         // get the client and make the query call
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
         QueryResult result = client.query("select id from account where " + ACCOUNT_WHERE_CLAUSE);
         SObject[] records = result.getRecords();
         assertNotNull(records);

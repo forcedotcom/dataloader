@@ -81,7 +81,7 @@ public class LoginClient extends ClientBase<PartnerConnection> {
         }
     };
 
-    public LoginClient(Controller controller) {
+    private LoginClient(Controller controller) {
         super(controller, LOG);
     }
 
@@ -304,6 +304,7 @@ public class LoginClient extends ClientBase<PartnerConnection> {
             // ignore
         } finally {
             disconnect();
+            instance = null;
         }
         return true;
     }
@@ -345,4 +346,16 @@ public class LoginClient extends ClientBase<PartnerConnection> {
         this.connectorConfig.setServiceEndpoint(serverURL + getServicePath());
         return this.connectorConfig;
     }
+    
+    private static LoginClient instance = null;
+    public static LoginClient getInstance(Controller controller) {
+    	if (instance == null || instance.controller != controller) {
+			instance = new LoginClient(controller);
+		}
+    	return instance;
+	}
+    
+    public static boolean isLoginClientInstantiated() {
+		return instance != null;
+	}
 }

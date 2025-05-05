@@ -54,7 +54,7 @@ public class SOQLMapperTest extends ConfigTestBase {
 
     @Before
     public void createSoqlMapper() throws Exception {
-        PartnerClient partnerClient = new PartnerClient(getController());
+        PartnerClient partnerClient = PartnerClient.getInstance(getController());
         soqlMapper = new SOQLMapper(partnerClient, Collections.<String>emptyList(), null, "");
     }
 

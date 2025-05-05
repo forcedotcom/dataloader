@@ -1023,7 +1023,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
         beanList.add(sforceObj);
 
         // get the client and make the insert call
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
         UpsertResult[] results = client.loadUpserts(beanList);
         for (UpsertResult result : results) {
             if (!result.getSuccess()) {
@@ -1060,7 +1060,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
 
         // get the client and make the query call
         String extIdField = getController().getAppConfig().getString(AppConfig.PROP_IDLOOKUP_FIELD);
-        PartnerClient client = new PartnerClient(getController());
+        PartnerClient client = PartnerClient.getInstance(getController());
         // only get the records that have external id set, avoid nulls
         String soql = "select " + extIdField + " from " + entity + " where " + whereClause + " and " + extIdField
                 + " != null";
