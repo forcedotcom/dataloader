@@ -213,5 +213,9 @@ public abstract class ClientBase<ConnectionType> {
     protected String getSessionId() throws NotLoggedInException {
         return getSession().getSessionId();
     }
+    
+    public boolean logout() {
+    	return true;
+    }
 
 }

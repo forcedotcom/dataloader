@@ -106,8 +106,6 @@ public class Controller {
     private DataAccessObjectInterface dao;
     private BulkV1Client bulkV1Client;
     private BulkV2Client bulkV2Client;
-    private LoginClient loginClient;
-    private PartnerClient partnerClient;
     private CompositeRESTClient restClient;
     private LoaderWindow loaderWindow;
     private boolean lastOperationSuccessful = true;
@@ -191,9 +189,6 @@ public class Controller {
     }
     
     public String getAPIInfo() {
-        if (this.partnerClient == null) {
-            return null;
-        }
         String apiTypeStr = "SOAP API";
         if (appConfig.isBulkAPIEnabled()) {
             apiTypeStr = "Bulk API";
@@ -203,7 +198,7 @@ public class Controller {
         }
         String[] args =  {apiTypeStr, PartnerClient.getAPIVersionForTheSession()};
         String apiInfoStr = Labels.getFormattedString("Operation.apiVersion", args);
-        LimitInfo apiLimitInfo = this.partnerClient.getAPILimitInfo();
+        LimitInfo apiLimitInfo = getPartnerClient().getAPILimitInfo();
         if (apiLimitInfo != null) {
             apiInfoStr = Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
                     + "\n"
@@ -387,13 +382,11 @@ public class Controller {
     }
    
     public LoginClient getLoginClient() {
-        if (this.loginClient == null) this.loginClient = new LoginClient(this);
-        return this.loginClient;
+        return LoginClient.getInstance(this);
     }
     
     public PartnerClient getPartnerClient() {
-        if (this.partnerClient == null) this.partnerClient = new PartnerClient(this);
-        return this.partnerClient;
+        return PartnerClient.getInstance(this);
     }
 
     public ClientBase<?> getClient() {
@@ -534,12 +527,12 @@ public class Controller {
     }
 
     public void logout() {
-        if (this.loginClient != null) this.loginClient.logout();
+        getLoginClient().logout();
+        getPartnerClient().logout();
+
         this.bulkV1Client = null;
-        this.partnerClient = null;
         this.bulkV2Client = null;
         this.restClient = null;
-        this.loginClient = null;
         appConfig.setValue(AppConfig.PROP_OAUTH_ACCESSTOKEN, "");
     }
 
