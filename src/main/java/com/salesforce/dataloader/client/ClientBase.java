@@ -38,6 +38,9 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.GetUserInfoResult;
+import com.sforce.soap.partner.fault.ApiFault;
+import com.sforce.soap.partner.fault.LoginFault;
+import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 
 /**
@@ -61,6 +64,48 @@ public abstract class ClientBase<ConnectionType> {
 
     public ConnectionType getConnection() {
         return this.connectionType;
+    }
+    
+
+    protected static interface ClientOperation<RESULT, ARG> {
+        String getName();
+        RESULT run(ARG arg) throws ConnectionException;
+    }
+    
+    protected <R, A> R runOperation(ClientOperation<R, A> op, A arg) throws ConnectionException {
+        logger.debug(Messages.getFormattedString("Client.beginOperation", op.getName())); //$NON-NLS-1$
+        if (!controller.getLoginClient().isSessionValid()) {
+        	controller.getLoginClient().connect();
+        }
+        ConnectionException connectionException = null;
+        try {
+            R result = op.run(arg);
+            if (result == null)
+                logger.info(Messages.getString("Client.resultNull")); //$NON-NLS-1$
+            this.getSession().performedSessionActivity(); // reset session activity timer
+            return result;
+        } catch (ConnectionException ex) {
+            String exceptionMessage = ex.getMessage();
+            if (ex instanceof LoginFault) {
+                LoginFault lf = (LoginFault)ex;
+                exceptionMessage = lf.getExceptionMessage();
+            }
+
+            logger.error(
+                    Messages.getFormattedString(
+                            "Client.operationError", new String[]{op.getName(), exceptionMessage}), ex); //$NON-NLS-1$
+            if (ex instanceof ApiFault) {
+                ApiFault fault = (ApiFault)ex;
+                String faultMessage = fault.getExceptionMessage();
+                logger.error(
+                        Messages.getFormattedString(
+                                "Client.operationError", new String[]{op.getName(), faultMessage}), fault); //$NON-NLS-1$
+
+            }
+            // check retries
+            connectionException = ex;
+        }
+        throw connectionException;
     }
     
     protected void setConnection(ConnectionType connType) {

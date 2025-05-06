@@ -38,7 +38,6 @@ import com.salesforce.dataloader.action.OperationInfo;
  */
 
 import com.salesforce.dataloader.config.AppConfig;
-import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
 import com.salesforce.dataloader.exception.ParameterLoadException;
@@ -51,8 +50,6 @@ import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.PartnerConnection;
-import com.sforce.soap.partner.fault.ApiFault;
-import com.sforce.soap.partner.fault.LoginFault;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 
@@ -68,12 +65,6 @@ import java.util.TreeMap;
 public class SObjectMetaDataClient extends ClientBase<PartnerConnection> {
 
     private static Logger LOG = DLLogManager.getLogger(SObjectMetaDataClient.class);
-
-    private static interface ClientOperation<RESULT, ARG> {
-        String getName();
-
-        RESULT run(ARG arg) throws ConnectionException;
-    }
 
     private final ClientOperation<DescribeGlobalResult, Object> DESCRIBE_GLOBAL_OPERATION = new ClientOperation<DescribeGlobalResult, Object>() {
         @Override
@@ -164,43 +155,6 @@ public class SObjectMetaDataClient extends ClientBase<PartnerConnection> {
     	}
         return conn;
     }
-
-    protected <R, A> R runOperation(ClientOperation<R, A> op, A arg) throws ConnectionException {
-        logger.debug(Messages.getFormattedString("Client.beginOperation", op.getName())); //$NON-NLS-1$
-        if (!controller.getLoginClient().isSessionValid()) {
-        	controller.getLoginClient().connect();
-        }
-        ConnectionException connectionException = null;
-        try {
-            R result = op.run(arg);
-            if (result == null)
-                logger.info(Messages.getString("Client.resultNull")); //$NON-NLS-1$
-            this.getSession().performedSessionActivity(); // reset session activity timer
-            return result;
-        } catch (ConnectionException ex) {
-            String exceptionMessage = ex.getMessage();
-            if (ex instanceof LoginFault) {
-                LoginFault lf = (LoginFault)ex;
-                exceptionMessage = lf.getExceptionMessage();
-            }
-
-            logger.error(
-                    Messages.getFormattedString(
-                            "Client.operationError", new String[]{op.getName(), exceptionMessage}), ex); //$NON-NLS-1$
-            if (ex instanceof ApiFault) {
-                ApiFault fault = (ApiFault)ex;
-                String faultMessage = fault.getExceptionMessage();
-                logger.error(
-                        Messages.getFormattedString(
-                                "Client.operationError", new String[]{op.getName(), faultMessage}), fault); //$NON-NLS-1$
-
-            }
-            // check retries
-            connectionException = ex;
-        }
-        throw connectionException;
-    }
-
 
     public Map<String, DescribeGlobalSObjectResult> getDescribeGlobalResults() {
         if (this.describeGlobalResults == null || !appConfig.getBoolean(AppConfig.PROP_CACHE_DESCRIBE_GLOBAL_RESULTS)) {
@@ -483,5 +437,4 @@ public class SObjectMetaDataClient extends ClientBase<PartnerConnection> {
 		}
 		return instance;
 	}
-
 }

@@ -45,7 +45,6 @@ import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.UndeleteResult;
 import com.sforce.soap.partner.UpsertResult;
 import com.sforce.soap.partner.fault.ApiFault;
-import com.sforce.soap.partner.fault.LoginFault;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
@@ -60,13 +59,6 @@ import java.util.List;
 public class PartnerClient extends ClientBase<PartnerConnection> {
 
     private static Logger LOG = DLLogManager.getLogger(PartnerClient.class);
-
-    private static interface ClientOperation<RESULT, ARG> {
-        String getName();
-
-        RESULT run(ARG arg) throws ConnectionException;
-    }
-
     private final ClientOperation<SaveResult[], SObject[]> INSERT_OPERATION = new ClientOperation<SaveResult[], SObject[]>() {
         @Override
         public String getName() {
@@ -297,41 +289,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
     }
 
-    protected <R, A> R runOperation(ClientOperation<R, A> op, A arg) throws ConnectionException {
-        logger.debug(Messages.getFormattedString("Client.beginOperation", op.getName())); //$NON-NLS-1$
-        if (!controller.getLoginClient().isSessionValid()) {
-        	controller.getLoginClient().connect();
-        }
-        ConnectionException connectionException = null;
-        try {
-            R result = op.run(arg);
-            if (result == null)
-                logger.info(Messages.getString("Client.resultNull")); //$NON-NLS-1$
-            this.getSession().performedSessionActivity(); // reset session activity timer
-            return result;
-        } catch (ConnectionException ex) {
-            String exceptionMessage = ex.getMessage();
-            if (ex instanceof LoginFault) {
-                LoginFault lf = (LoginFault)ex;
-                exceptionMessage = lf.getExceptionMessage();
-            }
-
-            logger.error(
-                    Messages.getFormattedString(
-                            "Client.operationError", new String[]{op.getName(), exceptionMessage}), ex); //$NON-NLS-1$
-            if (ex instanceof ApiFault) {
-                ApiFault fault = (ApiFault)ex;
-                String faultMessage = fault.getExceptionMessage();
-                logger.error(
-                        Messages.getFormattedString(
-                                "Client.operationError", new String[]{op.getName(), faultMessage}), fault); //$NON-NLS-1$
-
-            }
-            // check retries
-            connectionException = ex;
-        }
-        throw connectionException;
-    }
 
     /**
      * @param dynaBeans
