@@ -204,14 +204,14 @@ public class PartnerClientTest extends ProcessTestBase {
 
     @Test
     public void testSetEntityDescribe() throws Exception{
-        PartnerClient client = PartnerClient.getInstance(getController());
+    	SObjectMetaDataClient client = SObjectMetaDataClient.getInstance(getController());
         assertNotNull(client.getDescribeGlobalResults());
     }
 
     @Test
     public void testDescribeSObjects() throws Exception {
         setMemoryIncreaseThresholds(220);
-        PartnerClient client = PartnerClient.getInstance(getController());
+        SObjectMetaDataClient client = SObjectMetaDataClient.getInstance(getController());
 
         int numDescribes = 0;
         for (String objectType : client.getDescribeGlobalResults().keySet()){
@@ -233,7 +233,7 @@ public class PartnerClientTest extends ProcessTestBase {
 
     @Test
     public void testSetFieldTypes() throws Exception {
-        PartnerClient client = PartnerClient.getInstance(getController());
+    	SObjectMetaDataClient client = SObjectMetaDataClient.getInstance(getController());
         client.setFieldTypes();
         assertNotNull(client.getFieldTypes());
     }
@@ -241,7 +241,7 @@ public class PartnerClientTest extends ProcessTestBase {
     @Test
     public void testGetSforceField() throws Exception {
         // test for account name as a default test case
-        PartnerClient client = PartnerClient.getInstance(getController());
+    	SObjectMetaDataClient client = SObjectMetaDataClient.getInstance(getController());
         DescribeSObjectResult forceFields = client.describeSObject("account");
         Field[] fields = forceFields.getFields();
         assertNotNull(fields);

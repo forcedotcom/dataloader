@@ -26,12 +26,11 @@
 
 package com.salesforce.dataloader.mapping;
 
-import com.salesforce.dataloader.client.PartnerClient;
+import com.salesforce.dataloader.client.SObjectMetaDataClient;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.mapping.SOQLInfo.SOQLFieldInfo;
 import com.salesforce.dataloader.mapping.SOQLInfo.SOQLParserException;
 import com.salesforce.dataloader.model.Row;
-import com.salesforce.dataloader.model.TableRow;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.FieldType;
@@ -54,7 +53,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
-import java.util.TreeMap;
 
 import javax.xml.namespace.QName;
 
@@ -93,7 +91,7 @@ public class SOQLMapper extends Mapper {
     private Map<String, String> extractionMap = new LinkedCaseInsensitiveMap<String>();
     private boolean isInitialized = false;
 
-    public SOQLMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
+    public SOQLMapper(SObjectMetaDataClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
         super(client, columnNames, fields, mappingFileName);
     }

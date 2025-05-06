@@ -44,7 +44,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.salesforce.dataloader.action.progress.ILoaderProgress;
-import com.salesforce.dataloader.client.PartnerClient;
+import com.salesforce.dataloader.client.SObjectMetaDataClient;
 import com.salesforce.dataloader.client.SessionInfo;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.LastRunProperties;
@@ -53,7 +53,6 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.dao.DataReaderInterface;
 import com.salesforce.dataloader.dao.DataWriterInterface;
 import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
-import com.salesforce.dataloader.dyna.SObjectReference;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.*;
 import com.salesforce.dataloader.mapping.LoadMapper;
@@ -162,9 +161,9 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         if (this.getConfig().getBoolean(AppConfig.PROP_TRUNCATE_FIELDS)
             && this.getConfig().isRESTAPIEnabled()
             && "update".equalsIgnoreCase(this.getConfig().getString(AppConfig.PROP_OPERATION))) {
-            PartnerClient partnerClient = this.getController().getPartnerClient();
+        	SObjectMetaDataClient client = this.getController().getSObjectMetaDataClient();
             if (cachedFieldAttributesForOperation == null) {
-                cachedFieldAttributesForOperation = partnerClient.getSObjectFieldAttributesForRow(
+                cachedFieldAttributesForOperation = client.getSObjectFieldAttributesForRow(
                                 this.getConfig().getString(AppConfig.PROP_ENTITY), sforceDataRow);
             }
             for (String fieldName : sforceDataRow.getHeader().getColumns()) {
@@ -339,7 +338,6 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
         return (LoadMapper)super.getMapper();
     }
     
-    private static final int NONBREAKING_SPACE_ASCII_VAL = 0xA0;
     private static Controller currentController = null;
     private ArrayList<String> htmlFormattedSforceFieldList = null;
     private ArrayList<String> phoneSforceFieldList = null;
@@ -532,10 +530,10 @@ public abstract class DAOLoadVisitor extends AbstractVisitor implements DAORowVi
             // do nothing
         }
                 
-        PartnerClient partnerClient = this.getController().getPartnerClient();
+        SObjectMetaDataClient client = this.getController().getSObjectMetaDataClient();
         DescribeSObjectResult describeSObjectResult;
         try {
-            describeSObjectResult = partnerClient.describeSObject(this.getConfig().getString(AppConfig.PROP_ENTITY));
+            describeSObjectResult = client.describeSObject(this.getConfig().getString(AppConfig.PROP_ENTITY));
             Field[] fields = describeSObjectResult.getFields();
             for (Field field : fields) {
                 if (field.getName().equalsIgnoreCase(fieldName)) {

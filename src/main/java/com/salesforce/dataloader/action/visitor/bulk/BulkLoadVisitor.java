@@ -322,7 +322,7 @@ public class BulkLoadVisitor extends DAOLoadVisitor {
         String sfdcColumnForBulk = sfdcColumn;
         try {
             ParentIdLookupFieldFormatter relField = new ParentIdLookupFieldFormatter(sfdcColumn);
-            DescribeRefObject parentRef = getController().getPartnerClient().getReferenceDescribes().getParentSObject(sfdcColumn);
+            DescribeRefObject parentRef = getController().getSObjectMetaDataClient().getReferenceDescribes().getParentSObject(sfdcColumn);
             int numParentTypes = 1;
             if (parentRef != null 
                     && parentRef.getChildField() != null

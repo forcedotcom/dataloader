@@ -28,6 +28,7 @@ package com.salesforce.dataloader.mapping;
 
 import com.salesforce.dataloader.ConfigTestBase;
 import com.salesforce.dataloader.client.PartnerClient;
+import com.salesforce.dataloader.client.SObjectMetaDataClient;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.sforce.ws.ConnectionException;
@@ -54,8 +55,8 @@ public class SOQLMapperTest extends ConfigTestBase {
 
     @Before
     public void createSoqlMapper() throws Exception {
-        PartnerClient partnerClient = PartnerClient.getInstance(getController());
-        soqlMapper = new SOQLMapper(partnerClient, Collections.<String>emptyList(), null, "");
+    	SObjectMetaDataClient client = SObjectMetaDataClient.getInstance(getController());
+        soqlMapper = new SOQLMapper(client, Collections.<String>emptyList(), null, "");
     }
 
     @Test
@@ -104,7 +105,7 @@ public class SOQLMapperTest extends ConfigTestBase {
         getController().login();
         List<String> possibleMappingDaoCols = Arrays.asList("NAME", "ID", "Parent.Id",
                 "NumberOfEMPLOYEES");
-        SOQLMapper mapper = new SOQLMapper(getController().getPartnerClient(),
+        SOQLMapper mapper = new SOQLMapper(getController().getSObjectMetaDataClient(),
                 possibleMappingDaoCols, null, null);
         mapper.initSoqlMapping(soql);
         List<String> colsInSoql = mapper.getDaoColumnsForSoql();

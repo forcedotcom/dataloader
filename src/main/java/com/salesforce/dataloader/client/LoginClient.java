@@ -39,6 +39,8 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
 import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.GetUserInfoResult;
+import com.sforce.soap.partner.LimitInfo;
+import com.sforce.soap.partner.LimitInfoHeader_element;
 import com.sforce.soap.partner.LoginResult;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.fault.ApiFault;
@@ -335,6 +337,16 @@ public class LoginClient extends ClientBase<PartnerConnection> {
     
     public static String getServicePath() {
         return "/services/Soap/u/" + getAPIVersionForTheSession() + "/";
+    }
+    
+    public LimitInfo getAPILimitInfo() {
+        LimitInfoHeader_element limitInfoElement = getConnection().getLimitInfoHeader();
+        for (LimitInfo info : limitInfoElement.getLimitInfo()) {
+            if ("API REQUESTS".equalsIgnoreCase(info.getType())) {
+                return info;
+            }
+        }
+        return null;
     }
     
     private synchronized ConnectorConfig getLoginConnectorConfig(String serverURL) {

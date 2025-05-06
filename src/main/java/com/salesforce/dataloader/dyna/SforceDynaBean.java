@@ -383,7 +383,7 @@ public class SforceDynaBean {
                 if (value instanceof SObjectReference) {
                     try {
                         ParentIdLookupFieldFormatter idLookupFieldFormatter = new ParentIdLookupFieldFormatter(fName);
-                        DescribeSObjectResult parentSObjectDescribe = controller.getPartnerClient().describeSObject(idLookupFieldFormatter.getParent().getParentObjectName());
+                        DescribeSObjectResult parentSObjectDescribe = controller.getSObjectMetaDataClient().describeSObject(idLookupFieldFormatter.getParent().getParentObjectName());
                         DynaProperty[] parentDynaProps = createDynaProps(parentSObjectDescribe, controller);
                         BasicDynaClass parentDynaClass = getDynaBeanInstance(parentDynaProps);
                         ArrayList<String> parentLookupFieldList = new ArrayList<String>();
