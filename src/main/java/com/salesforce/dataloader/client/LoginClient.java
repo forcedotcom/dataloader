@@ -64,25 +64,6 @@ public class LoginClient extends ClientBase<PartnerConnection> {
 
     private ConnectorConfig connectorConfig = null;
 
-    private static interface ClientOperation<RESULT, ARG> {
-        String getName();
-
-        RESULT run(ARG arg) throws ConnectionException;
-    }
-
-    private final ClientOperation<LoginResult, PartnerConnection> LOGIN_OPERATION = new ClientOperation<LoginResult, PartnerConnection>() {
-        @Override
-        public String getName() {
-            return "login";
-        }
-
-        @Override
-        public LoginResult run(PartnerConnection client) throws ConnectionException {
-            ConnectorConfig cc = client.getConfig();
-            return client.login(cc.getUsername(), cc.getPassword());
-        }
-    };
-
     private LoginClient(Controller controller) {
         super(controller, LOG);
     }
@@ -101,11 +82,14 @@ public class LoginClient extends ClientBase<PartnerConnection> {
         return true;
     }
     
-    protected <R, A> R runOperation(ClientOperation<R, A> op, A arg) throws ConnectionException {
-        logger.debug(Messages.getFormattedString("Client.beginOperation", op.getName())); //$NON-NLS-1$
+    private static final String LOGIN_OPERATION_NAME = "login";
+    private LoginResult runLoginOperation(PartnerConnection conn) throws ConnectionException {
+        logger.debug(Messages.getFormattedString("Client.beginOperation", LOGIN_OPERATION_NAME)); //$NON-NLS-1$
         ConnectionException connectionException = null;
         try {
-            R result = op.run(arg);
+            ConnectorConfig cc = conn.getConfig();
+            LoginResult result = conn.login(cc.getUsername(), cc.getPassword());
+
             if (result == null)
                 logger.info(Messages.getString("Client.resultNull")); //$NON-NLS-1$
             this.getSession().performedSessionActivity(); // reset session activity timer
@@ -119,13 +103,13 @@ public class LoginClient extends ClientBase<PartnerConnection> {
 
             logger.error(
                     Messages.getFormattedString(
-                            "Client.operationError", new String[]{op.getName(), exceptionMessage}), ex); //$NON-NLS-1$
+                            "Client.operationError", new String[]{LOGIN_OPERATION_NAME, exceptionMessage}), ex); //$NON-NLS-1$
             if (ex instanceof ApiFault) {
                 ApiFault fault = (ApiFault)ex;
                 String faultMessage = fault.getExceptionMessage();
                 logger.error(
                         Messages.getFormattedString(
-                                "Client.operationError", new String[]{op.getName(), faultMessage}), fault); //$NON-NLS-1$
+                                "Client.operationError", new String[]{LOGIN_OPERATION_NAME, faultMessage}), fault); //$NON-NLS-1$
 
             }
             // check retries
@@ -247,7 +231,8 @@ public class LoginClient extends ClientBase<PartnerConnection> {
         cc.setRequestHeader(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getClientIDForCurrentEnv());
         try {
             logger.info(Messages.getMessage(getClass(), "sforceLoginDetail", cc.getAuthEndpoint(), cc.getUsername()));
-            LoginResult loginResult = runOperation(LOGIN_OPERATION, conn);
+            LoginResult loginResult = runLoginOperation(conn);
+
             // if password has expired, throw an exception
             if (loginResult.getPasswordExpired()) {
                 throw new PasswordExpiredException(Messages
