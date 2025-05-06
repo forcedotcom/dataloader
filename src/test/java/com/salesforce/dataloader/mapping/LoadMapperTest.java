@@ -263,7 +263,7 @@ public class LoadMapperTest extends ConfigTestBase {
 
     @Test
     public void testVerifyMappingsAreValidUnknownColumn() throws Exception {
-        LoadMapper loadMapper = new LoadMapper(getController().getPartnerClient(), null, null, null);
+        LoadMapper loadMapper = new LoadMapper(getController().getSObjectMetaDataClient(), null, null, null);
         loadMapper.putMapping(SOURCE_NAMES[0], "non_existing_col_aa");
         try {
             loadMapper.verifyMappingsAreValid();
@@ -281,7 +281,7 @@ public class LoadMapperTest extends ConfigTestBase {
             fields[i].setName(DEST_NAMES[i]);
             fields[i].setType(FieldType.string);       
         }
-        LoadMapper loadMapper = new LoadMapper(getController().getPartnerClient(), null, fields, null);
+        LoadMapper loadMapper = new LoadMapper(getController().getSObjectMetaDataClient(), null, fields, null);
         loadMapper.putMapping(SOURCE_NAMES[0] + "," + SOURCE_NAMES[1],
                DEST_NAMES[0] + "," + DEST_NAMES[1], true);
         TableRow destValueRow = loadMapper.mapData(this.sourceRow, true);

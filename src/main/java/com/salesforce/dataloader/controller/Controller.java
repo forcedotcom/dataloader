@@ -35,6 +35,7 @@ import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.client.CompositeRESTClient;
 import com.salesforce.dataloader.client.LoginClient;
 import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
+import com.salesforce.dataloader.client.SObjectMetaDataClient;
 import com.salesforce.dataloader.client.transport.HttpTransportImpl;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
@@ -198,7 +199,7 @@ public class Controller {
         }
         String[] args =  {apiTypeStr, PartnerClient.getAPIVersionForTheSession()};
         String apiInfoStr = Labels.getFormattedString("Operation.apiVersion", args);
-        LimitInfo apiLimitInfo = getPartnerClient().getAPILimitInfo();
+        LimitInfo apiLimitInfo = getLoginClient().getAPILimitInfo();
         if (apiLimitInfo != null) {
             apiInfoStr = Labels.getFormattedString("Operation.currentAPIUsage", apiLimitInfo.getCurrent())
                     + "\n"
@@ -215,17 +216,17 @@ public class Controller {
 
     public void setFieldTypes() throws ConnectionException {
         validateSession();
-        getPartnerClient().setFieldTypes();
+        getSObjectMetaDataClient().setFieldTypes();
     }
 
     public void setReferenceDescribes() throws ConnectionException {
         validateSession();
-        getPartnerClient().setFieldReferenceDescribes();
+        getSObjectMetaDataClient().setFieldReferenceDescribes();
     }
     
     public void setReferenceDescribes(Collection<String> sfFields) throws ConnectionException {
         validateSession();
-        getPartnerClient().setFieldReferenceDescribes(sfFields);
+        getSObjectMetaDataClient().setFieldReferenceDescribes(sfFields);
     }
 
     private boolean connectIfSessionExists(ClientBase<?> clientToLogin) {
@@ -249,17 +250,17 @@ public class Controller {
 
     public Map<String, DescribeGlobalSObjectResult> getEntityDescribes() {
         validateSession();
-        return getPartnerClient().getDescribeGlobalResults();
+        return getSObjectMetaDataClient().getDescribeGlobalResults();
     }
 
     public DescribeSObjectResult getFieldTypes() {
         validateSession();
-        return getPartnerClient().getFieldTypes();
+        return getSObjectMetaDataClient().getFieldTypes();
     }
 
     public ReferenceEntitiesDescribeMap getReferenceDescribes() {
         validateSession();
-        return getPartnerClient().getReferenceDescribes();
+        return getSObjectMetaDataClient().getReferenceDescribes();
     }
 
     public boolean login() throws ConnectionException {
@@ -317,8 +318,8 @@ public class Controller {
         }
         // Initialize mapping
         this.mapper = getAppConfig().getOperationInfo().isExtraction() ? 
-                new SOQLMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) 
-              : new LoadMapper(getPartnerClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile);
+                new SOQLMapper(getSObjectMetaDataClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile) 
+              : new LoadMapper(getSObjectMetaDataClient(), dao.getColumnNames(), getFieldTypes().getFields(), mappingFile);
 
     }
 
@@ -388,6 +389,10 @@ public class Controller {
     public PartnerClient getPartnerClient() {
         return PartnerClient.getInstance(this);
     }
+    
+    public SObjectMetaDataClient getSObjectMetaDataClient() {
+		return SObjectMetaDataClient.getInstance(this);
+	}
 
     public ClientBase<?> getClient() {
         if (this.appConfig.useBulkAPIForCurrentOperation()) {

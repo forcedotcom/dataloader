@@ -1090,7 +1090,7 @@ public abstract class ProcessTestBase extends ConfigTestBase {
 
         getController().setFieldTypes();
         getController().setReferenceDescribes(sfFields);
-        DynaProperty[] dynaProps = SforceDynaBean.createDynaProps(getController().getPartnerClient().getFieldTypes(), getController());
+        DynaProperty[] dynaProps = SforceDynaBean.createDynaProps(getController().getSObjectMetaDataClient().getFieldTypes(), getController());
         BasicDynaClass dynaClass = SforceDynaBean.getDynaBeanInstance(dynaProps);
         SforceDynaBean.registerConverters(getController().getAppConfig());
         return dynaClass;

@@ -45,11 +45,11 @@ public class ReferenceEntitiesDescribeMap {
 
     private Map<String, DescribeRefObject> referenceEntitiesDescribeMap = new HashMap<String, DescribeRefObject>();
     private static final Logger logger = DLLogManager.getLogger(ReferenceEntitiesDescribeMap.class);
-    private PartnerClient client = null;
+    private SObjectMetaDataClient client = null;
     /**
      * 
      */
-    public ReferenceEntitiesDescribeMap(PartnerClient client) {
+    public ReferenceEntitiesDescribeMap(SObjectMetaDataClient client) {
         this.client = client;
     }
     

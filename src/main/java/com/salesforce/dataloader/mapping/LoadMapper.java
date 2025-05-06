@@ -27,6 +27,7 @@
 package com.salesforce.dataloader.mapping;
 
 import com.salesforce.dataloader.client.PartnerClient;
+import com.salesforce.dataloader.client.SObjectMetaDataClient;
 import com.salesforce.dataloader.exception.MappingInitializationException;
 import com.salesforce.dataloader.model.TableHeader;
 import com.salesforce.dataloader.model.TableRow;
@@ -59,7 +60,7 @@ public class LoadMapper extends Mapper {
     private TableHeader localCompositeRowHeader = null;
     private TableHeader sfdcRowHeader = null;
     
-    public LoadMapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
+    public LoadMapper(SObjectMetaDataClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
         super(client, columnNames, fields, mappingFileName);
     }

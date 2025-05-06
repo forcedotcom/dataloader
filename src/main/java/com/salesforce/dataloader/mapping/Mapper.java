@@ -50,6 +50,7 @@ import com.salesforce.dataloader.util.DLLogManager;
 import com.salesforce.dataloader.client.DescribeRefObject;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.client.ReferenceEntitiesDescribeMap;
+import com.salesforce.dataloader.client.SObjectMetaDataClient;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
 import com.salesforce.dataloader.dyna.ParentSObjectFormatter;
@@ -93,11 +94,11 @@ public abstract class Mapper {
     private final Map<String, String> constants =  new LinkedCaseInsensitiveMap<String>();
 
     protected final Map<String, String> map = new LinkedCaseInsensitiveMap<String>();
-    private final PartnerClient client;
+    private final SObjectMetaDataClient client;
     private final Map<String, String> fields = new LinkedCaseInsensitiveMap<String>();
     protected final String mappingFileName;
 
-    protected Mapper(PartnerClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
+    protected Mapper(SObjectMetaDataClient client, Collection<String> columnNames, Field[] fields, String mappingFileName)
             throws MappingInitializationException {
         this.client = client;
         if (columnNames != null) {
@@ -388,7 +389,7 @@ public abstract class Mapper {
         return this.daoColumnNames.values();
     }
 
-    public PartnerClient getClient() {
+    public SObjectMetaDataClient getClient() {
         return client;
     }
 

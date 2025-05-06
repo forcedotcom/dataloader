@@ -25,9 +25,6 @@
  */
 
 package com.salesforce.dataloader.client;
-
-import com.salesforce.dataloader.action.OperationInfo;
-
 /**
  * The sfdc api client class - implemented using the partner wsdl
  *
@@ -38,21 +35,10 @@ import com.salesforce.dataloader.action.OperationInfo;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
-import com.salesforce.dataloader.dyna.ParentIdLookupFieldFormatter;
 import com.salesforce.dataloader.dyna.SforceDynaBean;
 import com.salesforce.dataloader.exception.ParameterLoadException;
-import com.salesforce.dataloader.exception.RelationshipFormatException;
-import com.salesforce.dataloader.mapping.LoadMapper;
-import com.salesforce.dataloader.model.TableRow;
-import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.DeleteResult;
-import com.sforce.soap.partner.DescribeGlobalResult;
-import com.sforce.soap.partner.DescribeGlobalSObjectResult;
-import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Error;
-import com.sforce.soap.partner.Field;
-import com.sforce.soap.partner.LimitInfo;
-import com.sforce.soap.partner.LimitInfoHeader_element;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.SaveResult;
@@ -69,12 +55,7 @@ import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.util.DLLogManager;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class PartnerClient extends ClientBase<PartnerConnection> {
 
@@ -185,36 +166,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
         }
     };
 
-
-    private final ClientOperation<DescribeGlobalResult, Object> DESCRIBE_GLOBAL_OPERATION = new ClientOperation<DescribeGlobalResult, Object>() {
-        @Override
-        public String getName() {
-            return "describeGlobal";
-        }
-
-        @Override
-        public DescribeGlobalResult run(Object ignored) throws ConnectionException {
-            return getConnection().describeGlobal();
-        }
-    };
-
-    private final ClientOperation<DescribeSObjectResult, String> DESCRIBE_SOBJECT_OPERATION = new ClientOperation<DescribeSObjectResult, String>() {
-        @Override
-        public String getName() {
-            return "describeSObject";
-        }
-
-        @Override
-        public DescribeSObjectResult run(String entity) throws ConnectionException {
-            return getConnection().describeSObject(entity);
-        }
-    };
-
-    private DescribeGlobalResult describeGlobalResults;
-    private ReferenceEntitiesDescribeMap referenceEntitiesDescribesMap = new ReferenceEntitiesDescribeMap(this);
-    private final Map<String, DescribeGlobalSObjectResult> describeGlobalResultsMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    private final Map<String, DescribeSObjectResult> entityFieldDescribesMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    private final Map<String, ReferenceEntitiesDescribeMap> parentDescribeCache = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     private PartnerClient(Controller controller) {
         super(controller, LOG);
     }
@@ -506,189 +457,7 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
             }
         }
     }
-
-    public Map<String, DescribeGlobalSObjectResult> getDescribeGlobalResults() {
-        if (this.describeGlobalResults == null || !appConfig.getBoolean(AppConfig.PROP_CACHE_DESCRIBE_GLOBAL_RESULTS)) {
-            this.describeGlobalResultsMap.clear();
-            try {
-                this.describeGlobalResults = runOperation(DESCRIBE_GLOBAL_OPERATION, null);
-            } catch (ConnectionException e) {
-                logger.error("Failed to get description of sobjects", e.getMessage());
-                return null;
-            }
-        }
-        
-        if (this.describeGlobalResultsMap.isEmpty()) {
-            for (DescribeGlobalSObjectResult res : describeGlobalResults.getSobjects()) {
-                if (res != null) {
-                    if (res.getLabel().startsWith("__MISSING LABEL__")) {
-                        res.setLabel(res.getName());
-                    }
-                    this.describeGlobalResultsMap.put(res.getName(), res);
-                }
-            }
-        }
-        return describeGlobalResultsMap;
-    }
-
-    private Map<String, DescribeSObjectResult> getCachedEntityDescribeMap() {
-        return this.entityFieldDescribesMap;
-    }
-
-    public DescribeSObjectResult getFieldTypes() {
-        String entity = this.appConfig.getString(AppConfig.PROP_ENTITY);
-        try {
-            return describeSObject(entity);
-        } catch (ConnectionException e) {
-            throw new RuntimeException("Unexpected failure describing main entity " + entity, e);
-        }
-    }
-
-    public ReferenceEntitiesDescribeMap getReferenceDescribes() {
-        return referenceEntitiesDescribesMap;
-    }
     
-    public LimitInfo getAPILimitInfo() {
-        LimitInfoHeader_element limitInfoElement = getConnection().getLimitInfoHeader();
-        for (LimitInfo info : limitInfoElement.getLimitInfo()) {
-            if ("API REQUESTS".equalsIgnoreCase(info.getType())) {
-                return info;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Set the map of references to object external id info for current entity
-     *
-     * @throws ConnectionException
-     */
-    public void setFieldReferenceDescribes() throws ConnectionException {
-        if (getFieldTypes() == null) {
-            setFieldTypes();
-        }
-        Collection<String> mappedSFFields = null;
-        if (getDescribeGlobalResults() != null) {
-            String operation = appConfig.getString(AppConfig.PROP_OPERATION);
-            if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH
-                    && operation != null
-                    && !operation.isBlank()
-                    && appConfig.getOperationInfo() != OperationInfo.extract
-                    && appConfig.getOperationInfo() != OperationInfo.extract_all) {
-                // import operation in batch mode
-                LoadMapper mapper = (LoadMapper)controller.getMapper();
-                // call describe only for mapped fields
-                mappedSFFields = mapper.getDestColumns();
-            }
-            setFieldReferenceDescribes(mappedSFFields);
-        }
-    }
-    
-    public void setFieldReferenceDescribes(Collection<String> sfFields) throws ConnectionException {
-        if (appConfig.getBoolean(AppConfig.PROP_CACHE_DESCRIBE_GLOBAL_RESULTS)) {
-            referenceEntitiesDescribesMap = parentDescribeCache.get(appConfig.getString(AppConfig.PROP_ENTITY));
-        } else {
-            referenceEntitiesDescribesMap.clear();
-        }
-        if (referenceEntitiesDescribesMap == null) {
-            referenceEntitiesDescribesMap = new ReferenceEntitiesDescribeMap(this);
-        }
-        if (referenceEntitiesDescribesMap.size() > 0) {
-            return; // use cached value
-        }
-        Field[] entityFields = getFieldTypes().getFields();
-        boolean useMappedLookupRelationshipNamesForRefDescribes = false;
-        ArrayList<String> relFieldsNeedingRefDescribes = new ArrayList<String>();
-        if (sfFields != null && !sfFields.isEmpty()) {
-            useMappedLookupRelationshipNamesForRefDescribes = true;
-            for (String mappedFieldList : sfFields) {
-                String[]mappedFields = mappedFieldList.split(",");
-                for (String field : mappedFields) {
-                    try {
-                        ParentIdLookupFieldFormatter lookupFieldFormatter = new ParentIdLookupFieldFormatter(field);
-                        if (lookupFieldFormatter.getParent() != null
-                            && lookupFieldFormatter.getParentFieldName() != null) {
-                            String relationshipNameInMappedField = lookupFieldFormatter.getParent().getRelationshipName();
-                            if (relationshipNameInMappedField == null) {
-                                useMappedLookupRelationshipNamesForRefDescribes = false;
-                                break;
-                            } else {
-                                relFieldsNeedingRefDescribes.add(relationshipNameInMappedField);
-                            }
-                        }
-                    } catch (RelationshipFormatException e) {
-                     // do not optimize getting lookup field describes
-                        useMappedLookupRelationshipNamesForRefDescribes = false;
-                        break;
-                    }
-                }
-                if (!useMappedLookupRelationshipNamesForRefDescribes) {
-                    relFieldsNeedingRefDescribes.clear();
-                    break;
-                }
-            }
-        }
-
-        for (Field childObjectField : entityFields) {
-            // verify that the sobject field represents a relationship field where
-            // the sobject is a child with one or more parent sobjects.
-            String[] parentObjectNames = childObjectField.getReferenceTo();
-            String relationshipName = childObjectField.getRelationshipName();
-            if (parentObjectNames == null || parentObjectNames.length == 0 || parentObjectNames[0] == null
-                || relationshipName == null || relationshipName.length() == 0
-                || (!childObjectField.isCreateable() && !childObjectField.isUpdateable())) {
-                // parent-child relationship either does not exist or
-                // it is neither modifiable nor updateable.
-                continue;
-            }
-            if (!useMappedLookupRelationshipNamesForRefDescribes
-                || relFieldsNeedingRefDescribes.contains(relationshipName)) {
-                processParentObjectArrayForLookupReferences(parentObjectNames, childObjectField);
-            }
-        }
-        if (appConfig.getBoolean(AppConfig.PROP_CACHE_DESCRIBE_GLOBAL_RESULTS)
-            && sfFields == null) {
-            // got the full list of parents' describes for an sobject
-            parentDescribeCache.put(appConfig.getString(AppConfig.PROP_ENTITY), referenceEntitiesDescribesMap);
-        }
-    }
-    
-    private void processParentObjectArrayForLookupReferences(String[] parentObjectNames, Field childObjectField) throws ConnectionException {
-        for (int parentObjectIndex = 0; parentObjectIndex < parentObjectNames.length; parentObjectIndex++ ) {
-            String parentObjectName = parentObjectNames[parentObjectIndex];
-            processParentObjectForLookupReferences(parentObjectName, childObjectField, parentObjectIndex, parentObjectNames.length);
-        }
-    }
-    
-    private void processParentObjectForLookupReferences(String parentObjectName, Field childObjectField, int parentObjectIndex, int numParentTypes) throws ConnectionException {
-        Field[] parentObjectFields = describeSObject(parentObjectName).getFields();
-        Map<String, Field> parentIdLookupFieldMap = new HashMap<String, Field>();
-        for (Field parentField : parentObjectFields) {
-            processParentFieldForLookupReference(parentField, childObjectField, numParentTypes, parentObjectIndex, numParentTypes, parentIdLookupFieldMap);
-        }
-        if (!parentIdLookupFieldMap.isEmpty()) {
-            DescribeRefObject describeRelationship = new DescribeRefObject(parentObjectName, childObjectField, parentIdLookupFieldMap);
-            referenceEntitiesDescribesMap.put(childObjectField.getRelationshipName(), describeRelationship);
-        }
-    }
-    
-    private void processParentFieldForLookupReference(Field parentField, Field childObjectField, int numParentTypes, int parentObjectIndex, int totalParentObjects, Map<String, Field> parentIdLookupFieldMap) {
-        if (!parentField.isIdLookup()) {
-            return;
-        }
-        parentIdLookupFieldMap.put(parentField.getName(), parentField);
-
-    }
-
-    /**
-     * Gets the sobject describe for the given entity
-     *
-     * @throws ConnectionException
-     */
-    public void setFieldTypes() throws ConnectionException {
-        describeSObject(appConfig.getString(AppConfig.PROP_ENTITY));
-    }
-
     @Override
     public ConnectorConfig getConnectorConfig() {
         ConnectorConfig cc = super.getConnectorConfig();
@@ -698,108 +467,6 @@ public class PartnerClient extends ClientBase<PartnerConnection> {
     
     public static String getServicePath() {
         return "/services/Soap/u/" + getAPIVersionForTheSession() + "/";
-    }
-    /**
-     * This function returns the describe call for an sforce entity
-     *
-     * @return DescribeSObjectResult
-     * @throws ConnectionException
-     */
-
-    public DescribeSObjectResult describeSObject(String entity) throws ConnectionException {
-        DescribeSObjectResult result = null;
-        if (appConfig.getBoolean(AppConfig.PROP_CACHE_DESCRIBE_GLOBAL_RESULTS)) {
-            result = getCachedEntityDescribeMap().get(entity);
-        }
-        if (result == null) {
-            result = runOperation(DESCRIBE_SOBJECT_OPERATION, entity);
-            if (result != null) {
-                getCachedEntityDescribeMap().put(result.getName(), result);
-            }
-        }
-        return result;
-    }
-    
-    public Field[] getSObjectFieldAttributesForRow(String sObjectName, TableRow dataRow) throws ConnectionException {
-        ArrayList<Field> attributesForRow = new ArrayList<Field>();
-        DescribeSObjectResult entityDescribe = describeSObject(sObjectName);
-        for (String headerColumnName : dataRow.getHeader().getColumns()) {
-            Field[] fieldAttributesArray = entityDescribe.getFields();
-            for (Field fieldAttributes : fieldAttributesArray) {
-                if (fieldAttributes.getName().equalsIgnoreCase(headerColumnName)) {
-                    attributesForRow.add(fieldAttributes);
-                }
-            }
-        }
-        return attributesForRow.toArray(new Field[1]);
-    }
-
-    private final Map<String, Field> fieldsByName = new HashMap<String, Field>();
-
-    public Field getField(String sObjectFieldName) {
-        Field field = this.fieldsByName.get(sObjectFieldName);
-        if (field == null) {
-            field = lookupField(sObjectFieldName);
-            this.fieldsByName.put(sObjectFieldName, field);
-        }
-        return field;
-    }
-    
-    public Field getFieldFromRelationshipName(String relationshipName) {
-        for (Field f : getFieldTypes().getFields()) {
-            if (f.getReferenceTo().length > 0) {
-                String relName = f.getRelationshipName();
-                if (relName != null
-                        && !relName.isBlank()
-                        && relName.equalsIgnoreCase(relationshipName)) {
-                    return f;
-                }
-            }
-        }
-        return null;
-    }
-    
-    // sObjectFieldName could be sObject's field name
-    // or a reference to parent sObject's field name in the old or new format.
-    private Field lookupField(String sObjectFieldName) {
-        for (Field f : getFieldTypes().getFields()) {
-            if (sObjectFieldName.equalsIgnoreCase(f.getName()) || sObjectFieldName.equalsIgnoreCase(f.getLabel())) {
-                return f;
-            }
-            ParentIdLookupFieldFormatter parentLookupFieldFormatter = null;
-            try {
-                parentLookupFieldFormatter = new ParentIdLookupFieldFormatter(sObjectFieldName);
-            } catch (RelationshipFormatException ex) {
-                // ignore
-            }
-            if (parentLookupFieldFormatter != null) {
-                if (!parentLookupFieldFormatter.getParent().getRelationshipName().equalsIgnoreCase(f.getRelationshipName())) {
-                    continue;
-                }
-                Field parentField = this.referenceEntitiesDescribesMap.getParentField(sObjectFieldName);
-                if (parentField != null) {
-                    return parentField;
-                }
-                String parentSObjectName = parentLookupFieldFormatter.getParent().getParentObjectName();
-                if (parentSObjectName == null || parentSObjectName.isBlank()) {
-                    parentSObjectName = f.getReferenceTo()[0];
-                }
-                if (parentSObjectName == null || parentSObjectName.isBlank()) {
-                    // something is wrong for a relationship field
-                    logger.error("Field " + f.getName() + " does not have a parent sObject");
-                    continue;
-                }
-                // need to add the relationship mapping to referenceEntitiesDescribesMap
-                try {
-                    processParentObjectForLookupReferences(parentSObjectName, f, 0, 1);
-                } catch (ConnectionException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                return this.referenceEntitiesDescribesMap.getParentField(sObjectFieldName);
-            }
-        }
-        return this.referenceEntitiesDescribesMap.getParentField(sObjectFieldName);
     }
 
 	@Override
