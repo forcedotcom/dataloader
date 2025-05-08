@@ -1,4 +1,4 @@
-#!/bin/bash -f
+#!/bin/zsh -f
 
 usage() {
   echo "Usage: "
