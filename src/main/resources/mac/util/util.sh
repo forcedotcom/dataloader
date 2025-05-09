@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 include () {
     [[ -f "$1" ]] && source "$1"
@@ -9,8 +9,6 @@ initVars() {
     DATALOADER_SHORT_VERSION=$(echo ${DATALOADER_VERSION} | cut -d'.' -f 1)
     MIN_JAVA_VERSION=@@MIN_JAVA_VERSION@@
     include ${HOME}/.profile
-    include ${HOME}/.bash_profile
-    include ${HOME}/.bashrc
     include ${HOME}/.zsh_profile
     include ${HOME}/.zshrc
 }

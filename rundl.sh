@@ -1,9 +1,10 @@
-#!/bin/bash -f
+#!/bin/zsh -f
 
 debug=""
 batchmodeargs=""
 encryptionargs=""
 configdir="salesforce.config.dir=./configs"
+#configdir="./configs"
 while getopts ":dbe:v:" flag
 do
   case "${flag}" in
@@ -11,7 +12,8 @@ do
       debug="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=0.0.0.0:5005,suspend=y"
       ;;
     b)
-      batchmodeargs="run.mode=batch ./configs upsertAccounts"
+#      batchmodeargs="run.mode=batch ./configs upsertAccounts"
+      batchmodeargs="run.mode=batch ./configs extract sfdc.entity=account sfdc.extractionSOQL=select id,name from account dataAccess.name=batchextract.csv"
       configdir=""
       ;;
     e)

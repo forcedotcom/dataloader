@@ -1,4 +1,4 @@
-:; #!/bin/bash #
+:; #!/bin/zsh #
 :; #
 :; DL_INSTALL_ROOT="$(cd "$(dirname "$0")" && pwd -P)" #
 :; source "${DL_INSTALL_ROOT}/util/util.sh" #
