@@ -1,8 +1,8 @@
-:; #!/bin/zsh #
+:; #!/bin/sh #
 :; #
 :; DL_INSTALL_ROOT="$(cd "$(dirname "$0")" && pwd -P)" #
-:; source "${DL_INSTALL_ROOT}/util/util.sh" #
-:; runDataLoader run.mode=install $@  #
+:; . "${DL_INSTALL_ROOT}/util/util.sh" #
+:; runDataLoader run.mode=install "$@" #
 :; exit $? #
 
 @echo off
