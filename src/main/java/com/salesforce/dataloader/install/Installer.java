@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -40,7 +39,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.prefs.Preferences;
-import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
@@ -57,27 +55,6 @@ public class Installer {
 
     private static Logger logger =DLLogManager.getLogger(Installer.class);
     private static String[] OS_SPECIFIC_DL_COMMAND = {"dataloader.bat", "dataloader_console", "dataloader.sh"};
-    private static final int MIN_JAVA_VERSION;
-
-    static {
-        int minVersion = 17; // Default fallback
-        try {
-            Properties props = new Properties();
-            // First try to load version.properties
-            try (InputStream in = Installer.class.getResourceAsStream("/version.properties")) {
-                if (in != null) {
-                    props.load(in);
-                    String versionStr = props.getProperty("min.java.version");
-                    if (versionStr != null) {
-                        minVersion = Integer.parseInt(versionStr.trim());
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.warn("Failed to read min.java.version from properties, using default: " + e.getMessage());
-        }
-        MIN_JAVA_VERSION = minVersion;
-    }
 
     public static void install(Map<String, String> argsmap) {
         int exitCode = AppUtil.EXIT_CODE_NO_ERRORS;
@@ -86,18 +63,6 @@ public class Installer {
         boolean installedInPreviousRun = false;
 
         try {
-            // Check Java version first
-            if (!checkJavaVersion()) {
-                System.out.println("Java " + MIN_JAVA_VERSION + " or later is not installed or DATALOADER_JAVA_HOME environment variable is not set.");
-                System.out.println("For example, download and install Zulu JRE " + MIN_JAVA_VERSION + " or later from here:");
-                System.out.println("    https://www.azul.com/downloads/");
-                System.out.println();
-                System.out.println("After the installation, set DATALOADER_JAVA_HOME environment variable to the value");
-                System.out.println("<full path to the JRE installation folder>");
-                System.out.println();
-                System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
-            }
-
             String installationFolder = ".";
             installationFolder = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation()
                     .toURI()).getParent();
@@ -560,67 +525,6 @@ public class Installer {
             logger.log(level, "Installer :", ex);
         } else {
             ex.printStackTrace();
-        }
-    }
-
-    private static boolean checkJavaVersion() {
-        try {
-            String version = System.getProperty("java.version");
-            if (version == null) {
-                logger.error("Could not determine Java version");
-                return false;
-            }
-
-            // Handle different version formats
-            String[] versionParts = version.split("\\.");
-            int majorVersion;
-            
-            // Handle Java 9+ version format (e.g., "17.0.2")
-            if (versionParts[0].equals("1")) {
-                // Java 8 and earlier format (e.g., "1.8.0_291")
-                majorVersion = Integer.parseInt(versionParts[1]);
-            } else {
-                // Java 9+ format
-                majorVersion = Integer.parseInt(versionParts[0]);
-            }
-
-            if (majorVersion < MIN_JAVA_VERSION) {
-                logger.error("Found Java version " + version + " whereas Data Loader requires Java " + MIN_JAVA_VERSION + " or later.");
-                return false;
-            }
-
-            return true;
-        } catch (Exception e) {
-            logger.error("Error checking Java version: " + e.getMessage());
-            return false;
-        }
-    }
-
-    private static void runDataLoader(String installationDir, String... args) throws IOException, InterruptedException {
-        if (!checkJavaVersion()) {
-            System.out.println("Java " + MIN_JAVA_VERSION + " or later is not installed or DATALOADER_JAVA_HOME environment variable is not set.");
-            System.out.println("For example, download and install Zulu JRE " + MIN_JAVA_VERSION + " or later from here:");
-            System.out.println("    https://www.azul.com/downloads/");
-            System.out.println();
-            System.out.println("After the installation, set DATALOADER_JAVA_HOME environment variable to the value");
-            System.out.println("<full path to the JRE installation folder>");
-            System.out.println();
-            System.exit(-1);
-        }
-
-        ArrayList<String> cmd = new ArrayList<String>();
-        cmd.add("java");
-        cmd.add("-cp");
-        cmd.add("\"" + installationDir + "\\*\"");
-        cmd.add("com.salesforce.dataloader.process.DataLoaderRunner");
-        for (String arg : args) {
-            cmd.add(arg);
-        }
-        
-        int exitVal = AppUtil.exec(cmd, null);
-        logger.debug("Data Loader exited with exit code: " + exitVal);
-        if (exitVal != 0) {
-            System.exit(exitVal);
         }
     }
 }
