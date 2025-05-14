@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -38,6 +39,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.prefs.Preferences;
+import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
@@ -51,11 +54,30 @@ import com.salesforce.dataloader.util.AppUtil;
 public class Installer {
     private static final String USERHOME=System.getProperty("user.home");
     private static final String PATH_SEPARATOR = System.getProperty("file.separator");
-    private static final String CREATE_DEKSTOP_SHORTCUT_ON_WINDOWS = ":createDesktopShortcut";
-    private static final String CREATE_START_MENU_SHORTCUT_ON_WINDOWS = ":createStartMenuShortcut";
 
     private static Logger logger =DLLogManager.getLogger(Installer.class);
     private static String[] OS_SPECIFIC_DL_COMMAND = {"dataloader.bat", "dataloader_console", "dataloader.sh"};
+    private static final int MIN_JAVA_VERSION;
+
+    static {
+        int minVersion = 17; // Default fallback
+        try {
+            Properties props = new Properties();
+            // First try to load version.properties
+            try (InputStream in = Installer.class.getResourceAsStream("/version.properties")) {
+                if (in != null) {
+                    props.load(in);
+                    String versionStr = props.getProperty("min.java.version");
+                    if (versionStr != null) {
+                        minVersion = Integer.parseInt(versionStr.trim());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to read min.java.version from properties, using default: " + e.getMessage());
+        }
+        MIN_JAVA_VERSION = minVersion;
+    }
 
     public static void install(Map<String, String> argsmap) {
         int exitCode = AppUtil.EXIT_CODE_NO_ERRORS;
@@ -64,6 +86,18 @@ public class Installer {
         boolean installedInPreviousRun = false;
 
         try {
+            // Check Java version first
+            if (!checkJavaVersion()) {
+                System.out.println("Java " + MIN_JAVA_VERSION + " or later is not installed or DATALOADER_JAVA_HOME environment variable is not set.");
+                System.out.println("For example, download and install Zulu JRE " + MIN_JAVA_VERSION + " or later from here:");
+                System.out.println("    https://www.azul.com/downloads/");
+                System.out.println();
+                System.out.println("After the installation, set DATALOADER_JAVA_HOME environment variable to the value");
+                System.out.println("<full path to the JRE installation folder>");
+                System.out.println();
+                System.exit(AppUtil.EXIT_CODE_CLIENT_ERROR);
+            }
+
             String installationFolder = ".";
             installationFolder = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation()
                     .toURI()).getParent();
@@ -309,6 +343,31 @@ public class Installer {
         }
     }
     
+    private static String getWindowsDesktopFolder() {
+        try {
+            // Use PowerShell to get the Desktop path which handles custom locations
+            ProcessBuilder pb = new ProcessBuilder("powershell", "-Command", 
+                "[Environment]::GetFolderPath('Desktop')");
+            Process p = pb.start();
+            
+            // Read the output
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String desktopPath = reader.readLine();
+            
+            // Wait for the process to complete
+            int exitCode = p.waitFor();
+            
+            if (exitCode == 0 && desktopPath != null && !desktopPath.trim().isEmpty()) {
+                return desktopPath;
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to get Desktop folder using PowerShell: " + e.getMessage());
+        }
+        
+        // Fallback to default location
+        return System.getenv("USERPROFILE") + "\\Desktop";
+    }
+
     private static void createDesktopShortcut(String installationDir, boolean isPromptNeeded) {
         final String PROMPT = Messages.getMessage(Installer.class, "createDesktopShortcutPrompt");
         final String SUCCESS = Messages.getMessage(Installer.class, "successCreateDesktopShortcut");
@@ -316,7 +375,14 @@ public class Installer {
             createShortcut(isPromptNeeded ? PROMPT : null,
                     new ShortcutCreatorInterface() {
                         public void create() throws Exception {
-                            createShortcutOnWindows(CREATE_DEKSTOP_SHORTCUT_ON_WINDOWS, installationDir);
+                            String desktopDir = getWindowsDesktopFolder();
+                            String shortcutName = "Dataloader " + AppUtil.DATALOADER_VERSION + ".lnk";
+                            String shortcutPath = desktopDir + "\\" + shortcutName;
+                            
+                            executeCommand(installationDir, 
+                                ":CreateShortcut",
+                                "\"" + shortcutPath + "\"",
+                                "\"" + installationDir + "\"");
                         }
             }, SUCCESS);
         } else if (AppUtil.isRunningOnMacOS()) {
@@ -345,6 +411,27 @@ public class Installer {
         }
     }
     
+    private static String getWindowsStartMenuProgramsFolder() {
+        try {
+            // Use WindowsPreferences to access HKEY_CURRENT_USER
+            Preferences userRoot = Preferences.userRoot();
+            Preferences explorerPrefs = userRoot.node("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders");
+            String programsPath = explorerPrefs.get("Programs", null);
+            
+            if (programsPath != null && !programsPath.trim().isEmpty()) {
+                // Expand any environment variables in the path
+                programsPath = programsPath.replace("%USERPROFILE%", System.getenv("USERPROFILE"));
+                programsPath = programsPath.replace("%APPDATA%", System.getenv("APPDATA"));
+                return programsPath;
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to get Start Menu Programs folder from registry: " + e.getMessage());
+        }
+        
+        // Fallback to default location
+        return System.getenv("APPDATA") + "\\Microsoft\\Windows\\Start Menu\\Programs";
+    }
+
     private static void createStartMenuShortcut(String installationDir, boolean isPromptNeeded) {
         final String PROMPT = Messages.getMessage(Installer.class, "createStartMenuShortcutPrompt");
         final String SUCCESS = Messages.getMessage(Installer.class, "successCreateStartMenuShortcut");
@@ -353,10 +440,18 @@ public class Installer {
             createShortcut(isPromptNeeded ? PROMPT : null,
                     new ShortcutCreatorInterface() {
                         public void create() throws Exception {
-                            String APPDATA = System.getenv("APPDATA");
-                            String SALESFORCE_START_MENU_DIR = APPDATA + "\\Microsoft\\Windows\\Start Menu\\Programs\\Salesforce\\" ;
-                            createDir(SALESFORCE_START_MENU_DIR);
-                            createShortcutOnWindows(CREATE_START_MENU_SHORTCUT_ON_WINDOWS, installationDir);
+                            String programsDir = getWindowsStartMenuProgramsFolder();
+                            String salesforceDir = programsDir + "\\Salesforce";
+                            String shortcutName = "Dataloader " + AppUtil.DATALOADER_VERSION + ".lnk";
+                            String shortcutPath = salesforceDir + "\\" + shortcutName;
+                            
+                            // Create the Salesforce directory if it doesn't exist
+                            createDir(salesforceDir);
+                            
+                            executeCommand(installationDir,
+                                ":CreateShortcut",
+                                "\"" + shortcutPath + "\"",
+                                "\"" + installationDir + "\"");
                         }
             }, SUCCESS);
         }
@@ -382,16 +477,18 @@ public class Installer {
         Files.createSymbolicLink(symlinkPath, Paths.get(target));
     }
     
-    private static void createShortcutOnWindows(final String shortcutCommand, String installationDir) throws IOException, InterruptedException {
+    private static int executeCommand(String installationDir, String... args) throws IOException, InterruptedException {
         ArrayList<String> cmd = new ArrayList<String>();
         cmd.add("cmd");
         cmd.add("/c");
         cmd.add("call");
         cmd.add("\"" + installationDir + "\\util\\util.bat\"");
-        cmd.add(shortcutCommand);
-        cmd.add("\"" + installationDir + "\"");
+        for (String arg : args) {
+            cmd.add(arg);
+        }
         int exitVal = AppUtil.exec(cmd, null);
         logger.debug("windows command exited with exit code: " + exitVal);
+        return exitVal;
     }
     
     private static void configureOSSpecificInstallationArtifactsPostCopy(String installationDir) throws IOException {
@@ -463,6 +560,67 @@ public class Installer {
             logger.log(level, "Installer :", ex);
         } else {
             ex.printStackTrace();
+        }
+    }
+
+    private static boolean checkJavaVersion() {
+        try {
+            String version = System.getProperty("java.version");
+            if (version == null) {
+                logger.error("Could not determine Java version");
+                return false;
+            }
+
+            // Handle different version formats
+            String[] versionParts = version.split("\\.");
+            int majorVersion;
+            
+            // Handle Java 9+ version format (e.g., "17.0.2")
+            if (versionParts[0].equals("1")) {
+                // Java 8 and earlier format (e.g., "1.8.0_291")
+                majorVersion = Integer.parseInt(versionParts[1]);
+            } else {
+                // Java 9+ format
+                majorVersion = Integer.parseInt(versionParts[0]);
+            }
+
+            if (majorVersion < MIN_JAVA_VERSION) {
+                logger.error("Found Java version " + version + " whereas Data Loader requires Java " + MIN_JAVA_VERSION + " or later.");
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            logger.error("Error checking Java version: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static void runDataLoader(String installationDir, String... args) throws IOException, InterruptedException {
+        if (!checkJavaVersion()) {
+            System.out.println("Java " + MIN_JAVA_VERSION + " or later is not installed or DATALOADER_JAVA_HOME environment variable is not set.");
+            System.out.println("For example, download and install Zulu JRE " + MIN_JAVA_VERSION + " or later from here:");
+            System.out.println("    https://www.azul.com/downloads/");
+            System.out.println();
+            System.out.println("After the installation, set DATALOADER_JAVA_HOME environment variable to the value");
+            System.out.println("<full path to the JRE installation folder>");
+            System.out.println();
+            System.exit(-1);
+        }
+
+        ArrayList<String> cmd = new ArrayList<String>();
+        cmd.add("java");
+        cmd.add("-cp");
+        cmd.add("\"" + installationDir + "\\*\"");
+        cmd.add("com.salesforce.dataloader.process.DataLoaderRunner");
+        for (String arg : args) {
+            cmd.add(arg);
+        }
+        
+        int exitVal = AppUtil.exec(cmd, null);
+        logger.debug("Data Loader exited with exit code: " + exitVal);
+        if (exitVal != 0) {
+            System.exit(exitVal);
         }
     }
 }
