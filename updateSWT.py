@@ -8,6 +8,7 @@ import urllib.request
 import re
 import argparse
 import atexit
+import tempfile
 
 ####################################################################
 # Prerequisites:
@@ -17,7 +18,7 @@ import atexit
 # - Python requests installed locally. Run 'pip3 install requests'
 #
 # Side-effects:
-# - Zip content extracted in ~/Downloads directory
+# - Zip content extracted in temporary directory
 # - SWT jar files installed in <git clone root>/local-proj-repo subdirectories
 #
 # Follow-on manual steps:
@@ -35,16 +36,14 @@ import atexit
 ####################################################################
 
 LOCAL_REPO_DIR = "./local-proj-repo"
-LOCAL_REPO_SAVE_DIR = "../local-proj-repo-save"
+TEMP_DIR = None
 
 def is_exe(fpath):
     return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
 def cleanupBeforeExit():
-    if os.path.isdir(LOCAL_REPO_SAVE_DIR):
-        # restore local SWT repo before exiting
-        shutil.move(LOCAL_REPO_SAVE_DIR + "/", LOCAL_REPO_DIR)
-        shutil.rmtree(LOCAL_REPO_SAVE_DIR)
+    if TEMP_DIR and os.path.exists(TEMP_DIR):
+        shutil.rmtree(TEMP_DIR)
         
 def exitWithError(errorStr):
     print(errorStr)
@@ -66,28 +65,22 @@ def getSWTDownloadLinkForPlatform(soup, platformString):
 
 def downloadAndExtractZip(url):
     zipfileName = url.split('=',1)[1]
-
-    home = expanduser("~")
-    unzippedDirName = home + "/Downloads/" + zipfileName.removesuffix('.zip') + "/"
-#    print(unzippedDirName)
+    unzippedDirName = os.path.join(TEMP_DIR, zipfileName.removesuffix('.zip'))
 
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html.parser")
     zipURL = soup.find("meta").find_next("a")['href']
-#    print(zipURL)
 
     page = requests.get(zipURL)
     soup = BeautifulSoup(page.content, "html.parser")
     divWithZip = soup.find("div", {"class":"mirror-well"})
     zipURL = divWithZip.find_next("a")['href']
     zipURL = "https://www.eclipse.org/downloads/" + zipURL
-#    print(zipURL)
 
     # navigate the redirect to the actual mirror
     page = requests.get(zipURL)
     soup = BeautifulSoup(page.content, "html.parser")
     zipURL = soup.find('meta', attrs={'http-equiv': 'Refresh'})['content'].split(';')[1].split('=')[1]
-#    print(zipURL)
     
     # delete existing content
     if os.path.exists(unzippedDirName) and os.path.isdir(unzippedDirName):
@@ -97,7 +90,7 @@ def downloadAndExtractZip(url):
     z.extractall(unzippedDirName)
     subprocess.run(["zip", 
                     "-d", 
-                    unzippedDirName + "swt.jar",
+                    unzippedDirName + "/swt.jar",
                     "META-INF/ECLIPSE_.SF",
                     "META-INF/ECLIPSE_.DSA",
                     "META-INF/ECLIPSE_.RSA"])
@@ -107,25 +100,33 @@ def downloadAndExtractZip(url):
 ######## end of downloadAndExtractZip ##########
 
 def installInLocalMavenRepo(unzippedSWTDir, mvnArtifactId, gitCloneRootDir):
-#     command to execute
     swtVersion = unzippedSWTDir.split('-')[1]
-#    print(swtVersion)
 
     if shutil.which("mvn") == None :
         exitWithError("did not find mvn command in the execute path")
-
         
     mavenCommand = "mvn install:install-file " \
-                    + "-Dfile=" + unzippedSWTDir + "swt.jar " \
+                    + "-Dfile=" + unzippedSWTDir + "/swt.jar " \
                     + "-DgroupId=local.swt " \
                     + "-DartifactId=" + mvnArtifactId + " " \
                     + "-Dversion=" + swtVersion + " " \
                     + "-Dpackaging=jar " \
                     + "-Dmaven.repo.local=" + gitCloneRootDir + "/local-proj-repo"
-#    print(mavenCommand)
     subprocess.run(mavenCommand, shell=True)
 
 ######## end of installInLocalMavenRepo  ##########
+
+def getLocalSWTVersion(mvnArtifactId):
+    localSWTVersion = ""
+    artifactPath = os.path.join(LOCAL_REPO_DIR, "local/swt", mvnArtifactId)
+    if os.path.isdir(artifactPath):
+        # Look for version directories (they should be numeric)
+        subdirs = [d for d in os.listdir(artifactPath) 
+                  if os.path.isdir(os.path.join(artifactPath, d))]
+        if subdirs:
+            localSWTVersion = subdirs[0]  # Take the first version directory
+            print(f"Found local version for {mvnArtifactId}: {localSWTVersion}")
+    return localSWTVersion
 
 def updateSWT(mvnArtifactId, downloadPageLabel, gitCloneRootDir, version, forceUpdate):
     URL = "https://download.eclipse.org/eclipse/downloads/"
@@ -133,15 +134,8 @@ def updateSWT(mvnArtifactId, downloadPageLabel, gitCloneRootDir, version, forceU
 
     soup = BeautifulSoup(page.content, "html.parser")
     linkToVersionDownload = ""
-    localSWTVersion = ""
     
-    if os.path.isdir(LOCAL_REPO_SAVE_DIR + "/local/swt/" + mvnArtifactId):
-        # Look for version directories (they should be numeric)
-        subdirs = [d for d in os.listdir(LOCAL_REPO_SAVE_DIR + "/local/swt/" + mvnArtifactId + "/") 
-                  if os.path.isdir(LOCAL_REPO_SAVE_DIR + "/local/swt/" + mvnArtifactId + "/" + d)]
-        if subdirs:
-            localSWTVersion = subdirs[0]  # Take the first version directory
-            print(f"Found local version for {mvnArtifactId}: {localSWTVersion}")
+    localSWTVersion = getLocalSWTVersion(mvnArtifactId)
     
     if version == "" :
         anchorElement = soup.find(id="Latest_Release").find_next("a")
@@ -155,17 +149,12 @@ def updateSWT(mvnArtifactId, downloadPageLabel, gitCloneRootDir, version, forceU
                 break
 
     print(f"Comparing versions - Local: '{localSWTVersion}', Download: '{version}'")
-    if forceUpdate == False \
-        and version.strip() == localSWTVersion.strip() \
-        and os.path.isdir(LOCAL_REPO_SAVE_DIR + "/local/swt/" + mvnArtifactId) :
+    if not forceUpdate and version.strip() == localSWTVersion.strip():
         print(f"Skipping download for {mvnArtifactId} - version {version} already installed")
-        # Move the directory back to LOCAL_REPO_DIR since we're skipping the download
-        shutil.move(LOCAL_REPO_SAVE_DIR + "/local/swt/" + mvnArtifactId + "/", LOCAL_REPO_DIR + "/local/swt/" + mvnArtifactId)
         return
 
     if linkToVersionDownload == "" :
         exitWithError("version " + version + " not found for download")
-        
 
     downloadsPage = URL + linkToVersionDownload
     page = requests.get(downloadsPage)
@@ -190,12 +179,11 @@ arguments = parser.parse_args()
 version = arguments.version
 rootdir = arguments.cloneroot
 forceUpdate = arguments.force
-localSWTVersion = ""
 
-# Save the local SWT repo before proceeding to update
-if os.path.isdir(LOCAL_REPO_DIR):
-    shutil.move(LOCAL_REPO_DIR + "/", LOCAL_REPO_SAVE_DIR)
-    
+# Create temporary directory for downloads
+TEMP_DIR = tempfile.mkdtemp()
+print(f"Created temporary directory: {TEMP_DIR}")
+
 # Windows x86
 updateSWT("swtwin32_x86_64", "Windows (x86 64-bit)", rootdir, version, forceUpdate)
 
@@ -214,9 +202,11 @@ updateSWT("swtlinux_x86_64", "Linux (x86 64-bit)", rootdir, version, forceUpdate
 # Linux ARM
 updateSWT("swtlinux_aarch64", "Linux (ARM 64-bit)", rootdir, version, forceUpdate)
 
-if os.path.isdir(LOCAL_REPO_SAVE_DIR):
-    shutil.rmtree(LOCAL_REPO_SAVE_DIR)
+# Clean up temporary directory
+if os.path.exists(TEMP_DIR):
+    shutil.rmtree(TEMP_DIR)
 
+# Clean up any non-local directories in the local repo
 for subdir in os.listdir(LOCAL_REPO_DIR):
-    if subdir != "local" :
-        shutil.rmtree(LOCAL_REPO_DIR + "/" + subdir)
+    if subdir != "local":
+        shutil.rmtree(os.path.join(LOCAL_REPO_DIR, subdir))
