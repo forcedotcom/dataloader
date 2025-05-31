@@ -136,25 +136,31 @@ def updateSWT(mvnArtifactId, downloadPageLabel, gitCloneRootDir, version, forceU
     localSWTVersion = ""
     
     if os.path.isdir(LOCAL_REPO_SAVE_DIR + "/local/swt/" + mvnArtifactId):
-        subdirs = os.listdir(LOCAL_REPO_SAVE_DIR + "/local/swt/" + mvnArtifactId + "/")
-        for dir in subdirs :
-            localSWTVersion = dir
+        # Look for version directories (they should be numeric)
+        subdirs = [d for d in os.listdir(LOCAL_REPO_SAVE_DIR + "/local/swt/" + mvnArtifactId + "/") 
+                  if os.path.isdir(LOCAL_REPO_SAVE_DIR + "/local/swt/" + mvnArtifactId + "/" + d)]
+        if subdirs:
+            localSWTVersion = subdirs[0]  # Take the first version directory
+            print(f"Found local version for {mvnArtifactId}: {localSWTVersion}")
     
     if version == "" :
         anchorElement = soup.find(id="Latest_Release").find_next("a")
         linkToVersionDownload = anchorElement['href']
         version = anchorElement.text
-        
+        print(f"Found download version: {version}")
     else:
         for link in soup.findAll('a', href=True):
             if version in link.text :
                 linkToVersionDownload = link['href']
                 break
 
+    print(f"Comparing versions - Local: '{localSWTVersion}', Download: '{version}'")
     if forceUpdate == False \
         and version.strip() == localSWTVersion.strip() \
         and os.path.isdir(LOCAL_REPO_SAVE_DIR + "/local/swt/" + mvnArtifactId) :
-        shutil.move(LOCAL_REPO_SAVE_DIR + "/local/swt/" + mvnArtifactId + "/", LOCAL_REPO_DIR+ "/local/swt/" + mvnArtifactId)
+        print(f"Skipping download for {mvnArtifactId} - version {version} already installed")
+        # Move the directory back to LOCAL_REPO_DIR since we're skipping the download
+        shutil.move(LOCAL_REPO_SAVE_DIR + "/local/swt/" + mvnArtifactId + "/", LOCAL_REPO_DIR + "/local/swt/" + mvnArtifactId)
         return
 
     if linkToVersionDownload == "" :
