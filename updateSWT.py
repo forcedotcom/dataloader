@@ -172,7 +172,7 @@ def downloadAndExtractZip(url: str, temp_dir: str) -> str:
 
         return unzippedDirName
     except Exception as e:
-        raise SWTUpdateError(f"Failed to download and extract SWT: {str(e)}")
+        raise SWTUpdateError("Failed to download and extract SWT: %s" % str(e))
 
 def installInLocalMavenRepo(unzippedSWTDir: str, mvnArtifactId: str, gitCloneRootDir: str) -> None:
     """Install SWT jar into local Maven repository.
@@ -205,7 +205,7 @@ def installInLocalMavenRepo(unzippedSWTDir: str, mvnArtifactId: str, gitCloneRoo
         subprocess.run(mavenCommand, check=True, capture_output=True, text=True)
         logger.info("Successfully installed %s version %s", mvnArtifactId, swtVersion)
     except subprocess.CalledProcessError as e:
-        raise SWTUpdateError(f"Failed to install SWT in Maven repo: {e.stderr}")
+        raise SWTUpdateError("Failed to install SWT in Maven repo: %s" % e.stderr)
 
 def getLocalSWTVersion(mvnArtifactId: str) -> str:
     """Get the version of SWT installed in local Maven repository.
@@ -262,7 +262,7 @@ def updateSWT(config: SWTConfig, mvnArtifactId: str, downloadPageLabel: str) -> 
             return
 
         if not linkToVersionDownload:
-            raise VersionNotFoundError(f"Version {config.version} not found for download")
+            raise VersionNotFoundError("Version %s not found for download" % config.version)
 
         downloadsPage = ECLIPSE_DOWNLOAD_URL + linkToVersionDownload
         page = requests.get(downloadsPage)
@@ -273,7 +273,7 @@ def updateSWT(config: SWTConfig, mvnArtifactId: str, downloadPageLabel: str) -> 
         installInLocalMavenRepo(unzippedDir, mvnArtifactId, config.git_clone_root)
         
     except Exception as e:
-        raise SWTUpdateError(f"Failed to update SWT for {mvnArtifactId}: {str(e)}")
+        raise SWTUpdateError("Failed to update SWT for %s: %s" % (mvnArtifactId, str(e)))
 
 def main() -> None:
     """Main entry point for the script."""
