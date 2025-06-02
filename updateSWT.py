@@ -170,7 +170,7 @@ def downloadAndExtractZip(url: str, temp_dir: str) -> str:
         swt_jar = os.path.join(unzippedDirName, "swt.jar")
         for sig_file in SWT_SIGNATURE_FILES:
             try:
-                subprocess.run(["zip", "-d", swt_jar, sig_file],
+                subprocess.run(["/usr/bin/zip", "-d", swt_jar, sig_file],
                              capture_output=True, check=True)
             except subprocess.CalledProcessError as e:
                 # Ignore errors if file doesn't exist in the jar
