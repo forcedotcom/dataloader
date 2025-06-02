@@ -68,6 +68,7 @@ class SWTConfig:
     git_clone_root: str
     temp_dir: Optional[str] = None
 
+
 class SWTUpdateError(Exception):
     """Base exception for SWT update errors."""
     pass
