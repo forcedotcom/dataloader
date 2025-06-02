@@ -98,7 +98,7 @@ def cleanupBeforeExit(config: Optional[SWTConfig] = None) -> None:
         config: SWT configuration containing temp directory path
     """
     if config and config.temp_dir and os.path.exists(config.temp_dir):
-        logger.info(f"Cleaning up temporary directory: {config.temp_dir}")
+        logger.info("Cleaning up temporary directory: %s", config.temp_dir)
         shutil.rmtree(config.temp_dir)
 
 def getSWTDownloadLinkForPlatform(soup: BeautifulSoup, platformString: str) -> str:
@@ -203,7 +203,7 @@ def installInLocalMavenRepo(unzippedSWTDir: str, mvnArtifactId: str, gitCloneRoo
     
     try:
         subprocess.run(mavenCommand, check=True, capture_output=True, text=True)
-        logger.info(f"Successfully installed {mvnArtifactId} version {swtVersion}")
+        logger.info("Successfully installed %s version %s", mvnArtifactId, swtVersion)
     except subprocess.CalledProcessError as e:
         raise SWTUpdateError(f"Failed to install SWT in Maven repo: {e.stderr}")
 
@@ -222,7 +222,7 @@ def getLocalSWTVersion(mvnArtifactId: str) -> str:
                   if os.path.isdir(os.path.join(artifactPath, d))]
         if subdirs:
             version = subdirs[0]
-            logger.info(f"Found local version for {mvnArtifactId}: {version}")
+            logger.info("Found local version for %s: %s", mvnArtifactId, version)
             return version
     return ""
 
@@ -249,16 +249,16 @@ def updateSWT(config: SWTConfig, mvnArtifactId: str, downloadPageLabel: str) -> 
             anchorElement = soup.find(id="Latest_Release").find_next("a")
             linkToVersionDownload = anchorElement['href']
             config.version = anchorElement.text.strip()
-            logger.info(f"Found download version: {config.version}")
+            logger.info("Found download version: %s", config.version)
         else:
             for link in soup.find_all('a', href=True):
                 if config.version in link.text:
                     linkToVersionDownload = link['href']
                     break
 
-        logger.info(f"Comparing versions - Local: '{localSWTVersion}', Download: '{config.version}'")
+        logger.info("Comparing versions - Local: '%s', Download: '%s'", localSWTVersion, config.version)
         if not config.force_update and config.version.strip() == localSWTVersion.strip():
-            logger.info(f"Skipping download for {mvnArtifactId} - version {config.version} already installed")
+            logger.info("Skipping download for %s - version %s already installed", mvnArtifactId, config.version)
             return
 
         if not linkToVersionDownload:
@@ -294,7 +294,7 @@ def main() -> None:
         temp_dir=tempfile.mkdtemp()
     )
     
-    logger.info(f"Created temporary directory: {config.temp_dir}")
+    logger.info("Created temporary directory: %s", config.temp_dir)
     
     try:
         for artifact_id, platform_label in PLATFORM_CONFIGS.items():
@@ -306,7 +306,7 @@ def main() -> None:
                 shutil.rmtree(os.path.join(LOCAL_REPO_DIR, subdir))
                 
     except Exception as e:
-        logger.error(f"Error during SWT update: {str(e)}")
+        logger.error("Error during SWT update: %s", str(e))
         sys.exit(1)
     finally:
         if config.temp_dir and os.path.exists(config.temp_dir):
