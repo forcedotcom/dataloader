@@ -309,9 +309,11 @@ def main() -> None:
     except Exception as e:
         logger.error("Error during SWT update: %s", str(e))
         sys.exit(1)
+
     finally:
         if config.temp_dir and os.path.exists(config.temp_dir):
             shutil.rmtree(config.temp_dir)
+
 
 if __name__ == "__main__":
     config = None
