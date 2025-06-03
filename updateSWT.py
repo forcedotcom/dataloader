@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env bash
+"exec" "${PYTHON_VENV}/bin/python3" "$0" "$@"
 
 import requests
 import zipfile
