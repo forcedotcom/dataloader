@@ -40,7 +40,8 @@ import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.ExitException;
-import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
+import com.salesforce.dataloader.util.OAuthBrowserDeviceLoginRunner;
+import com.salesforce.dataloader.util.OAuthBrowserFlow;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
@@ -98,7 +99,11 @@ public class ProcessRunner implements InitializingBean, IProcess {
 
     private void handleOAuthLogin(AppConfig appConfig) throws OAuthBrowserLoginRunnerException {
         if (requiresOAuthLogin(appConfig)) {
-            doLoginFromBrowser(appConfig);
+        	if (appConfig.getBoolean(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER_DEVICE_OAUTH)) {
+        		doDeviceLoginFromBrowser(appConfig);
+			} else {
+	            doBrowserLogin(appConfig);
+			}
         }
     }
 
@@ -288,9 +293,9 @@ public class ProcessRunner implements InitializingBean, IProcess {
         }
     }
 
-    void doLoginFromBrowser(AppConfig appConfig) throws OAuthBrowserLoginRunnerException {
+    void doDeviceLoginFromBrowser(AppConfig appConfig) throws OAuthBrowserLoginRunnerException {
         try {
-            OAuthBrowserLoginRunner loginRunner = new OAuthBrowserLoginRunner(appConfig, true);
+            OAuthBrowserDeviceLoginRunner loginRunner = new OAuthBrowserDeviceLoginRunner(appConfig, true);
             String verificationURLStr = loginRunner.getVerificationURLStr();
             System.out.println(Labels.getString("OAuthInBrowser.batchModeMessage1"));
             System.out.println(Labels.getString("OAuthInBrowser.batchModeURL") + verificationURLStr);
@@ -302,7 +307,27 @@ public class ProcessRunner implements InitializingBean, IProcess {
         }
     }
 
-    private void waitForLoginCompletion(OAuthBrowserLoginRunner loginRunner) {
+    void doBrowserLogin(AppConfig appConfig) throws OAuthBrowserLoginRunnerException {
+        try {
+            logger.debug("Starting OAuth browser login...");
+            logger.debug("A browser window will open for you to log in to Salesforce.");
+            logger.debug("Please complete your login in the browser window.");
+            
+            OAuthBrowserFlow oauthFlow = new OAuthBrowserFlow(appConfig);
+            boolean success = oauthFlow.performOAuthFlow();
+            
+            if (success) {
+            	logger.debug("OAuth browser login completed successfully!");
+            } else {
+                throw new OAuthBrowserLoginRunnerException("OAuth browser login failed - authentication could not be completed");
+            }
+        } catch (Exception ex) {
+            logger.error("OAuth browser login failed: " + ex.getMessage());
+            throw new OAuthBrowserLoginRunnerException("OAuth browser login failed: " + ex.getMessage());
+        }
+    }
+
+    private void waitForLoginCompletion(OAuthBrowserDeviceLoginRunner loginRunner) {
         while (!loginRunner.isLoginProcessCompleted()) {
             try {
                 Thread.sleep(2000);

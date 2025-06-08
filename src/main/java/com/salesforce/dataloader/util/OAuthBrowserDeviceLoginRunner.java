@@ -40,7 +40,6 @@ import java.util.regex.Pattern;
 
 import org.apache.http.Header;
 import org.apache.http.message.BasicNameValuePair;
-import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -58,9 +57,9 @@ import com.salesforce.dataloader.model.OAuthToken;
 import com.salesforce.dataloader.ui.URLUtil;
 //import com.salesforce.dataloader.ui.UIUtils;
 
-public class OAuthBrowserLoginRunner {
+public class OAuthBrowserDeviceLoginRunner {
     public enum LoginStatus { WAIT, FAIL, SUCCESS };
-    protected static Logger logger = DLLogManager.getLogger(OAuthBrowserLoginRunner.class);
+    protected static Logger logger = DLLogManager.getLogger(OAuthBrowserDeviceLoginRunner.class);
     private static LoginStatus loginResult = LoginStatus.WAIT;
     private String verificationURLStr = null;
     String userCodeStr;
@@ -69,7 +68,7 @@ public class OAuthBrowserLoginRunner {
     AppConfig appConfig;
     Thread checkLoginThread;
 
-    public OAuthBrowserLoginRunner(AppConfig appConfig, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
+    public OAuthBrowserDeviceLoginRunner(AppConfig appConfig, boolean skipUserCodePage) throws IOException, ParameterLoadException, OAuthBrowserLoginRunnerException {
         String origEndpoint = new String(appConfig.getAuthEndpointForCurrentEnv());
         try {
             startBrowserLogin(appConfig, skipUserCodePage);

@@ -31,6 +31,7 @@ import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.model.LoginCriteria;
 import com.salesforce.dataloader.util.ExceptionUtil;
+import com.salesforce.dataloader.util.OAuthBrowserFlow;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.fault.LoginFault;
@@ -89,14 +90,27 @@ public class AuthenticationRunner {
         try {
             authStatusChangeConsumer.accept(Labels.getString("LoginPage.verifyingLogin"));
             logger.info(Labels.getString("LoginPage.verifyingLogin"));
-            if (criteria.getMode() == LoginCriteria.OAuthLogin){
-                if (appConfig.getBoolean(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER)) {
-                    OAuthLoginFromBrowserFlow flow = new OAuthLoginFromBrowserFlow(shell, appConfig);
+            
+                         // Check if browser session login is configured by default
+             if (criteria.getMode() == LoginCriteria.OAuthLogin) {
+                if (appConfig.getBoolean(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER_DEVICE_OAUTH)) {
+                    OAuthDeviceFlow flow = new OAuthDeviceFlow(shell, appConfig);
                     if (!flow.open()) {
                         String message = Labels.getString("LoginPage.invalidLoginOAuthBrowser");
                         authStatusChangeConsumer.accept(message);
                         return;
                     }
+                } else if (appConfig.getBoolean(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER)) {
+                    // Handle proper OAuth browser flow instead of session capture
+                    authStatusChangeConsumer.accept("Starting OAuth browser authentication...");
+                    logger.info("Using OAuth browser authentication mode");
+                    OAuthBrowserFlow oauthFlow = new OAuthBrowserFlow(appConfig);
+                    if (!oauthFlow.performOAuthFlow()) {
+                        String message = "OAuth browser authentication failed. Please try again.";
+                        authStatusChangeConsumer.accept(message);
+                        return;
+                    }
+                    authStatusChangeConsumer.accept("OAuth browser authentication successful.");
                 } else { // OAuth login from Data Loader app
                     boolean hasSecret = !appConfig.getOAuthClientSecretForCurrentEnv().trim().equals("");
                     OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, appConfig) : new OAuthTokenFlow(shell, appConfig);
@@ -118,6 +132,7 @@ public class AuthenticationRunner {
             }            
         } catch (Throwable e) {
             handleError(e, e.getMessage());
+            return;
         }
         // Either OAuth login is successful or 
         // need to perform username and password or session token based auth
