@@ -299,6 +299,7 @@ public class AppConfig {
     public static final String PROP_OAUTH_ACCESSTOKEN = OAUTH_PREFIX + "accesstoken";
     public static final String PROP_OAUTH_REFRESHTOKEN = OAUTH_PREFIX + "refreshtoken";
     public static final String PROP_OAUTH_LOGIN_FROM_BROWSER = OAUTH_PREFIX + "loginfrombrowser";
+    public static final String PROP_OAUTH_LOGIN_FROM_BROWSER_DEVICE_OAUTH = OAUTH_PREFIX + "device.loginfrombrowser";
     public static final String PROP_CLIENTID_PROD_PARTNER = OAUTH_PREFIX 
             + SERVER_PROD_ENVIRONMENT_VAL 
             + "." +  PARTNER_CLIENTID_LITERAL;
@@ -751,6 +752,7 @@ public class AppConfig {
         setDefaultValue(PROP_UPDATE_WITH_EXTERNALID, false);
         setDefaultValue(PROP_DELETE_WITH_EXTERNALID, false);
         setDefaultValue(PROP_OAUTH_LOGIN_FROM_BROWSER, true);
+        setDefaultValue(PROP_OAUTH_LOGIN_FROM_BROWSER_DEVICE_OAUTH, true);
         setDefaultValue(PROP_LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
         setDefaultValue(CLI_OPTION_RUN_MODE, RUN_MODE_UI_VAL);
         setDefaultValue(PROP_SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV, false);

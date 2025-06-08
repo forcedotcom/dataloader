@@ -27,7 +27,7 @@
 package com.salesforce.dataloader.ui;
 
 import com.salesforce.dataloader.config.AppConfig;
-import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
+import com.salesforce.dataloader.util.OAuthBrowserDeviceLoginRunner;
 
 import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
@@ -59,20 +59,20 @@ import java.io.UnsupportedEncodingException;
  * as it does not involve a secret. We use this as our standard login for SF oauth. The disadvantage to this flow is
  * it prompts for authentication and authorization everytime.
  */
-public class OAuthLoginFromBrowserFlow extends Dialog {
-    protected static Logger logger = DLLogManager.getLogger(OAuthLoginFromBrowserFlow.class);
+public class OAuthDeviceFlow extends Dialog {
+    protected static Logger logger = DLLogManager.getLogger(OAuthDeviceFlow.class);
     protected final AppConfig appConfig;
 
-    public OAuthLoginFromBrowserFlow(Shell parent, AppConfig appConfig) {
+    public OAuthDeviceFlow(Shell parent, AppConfig appConfig) {
         super(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.FILL);
         this.appConfig = appConfig;
     }
     
     public boolean open() throws UnsupportedEncodingException {    	
     	final String verificationURLStr;
-    	final OAuthBrowserLoginRunner loginRunner;
+    	final OAuthBrowserDeviceLoginRunner loginRunner;
     	try {
-    	    loginRunner = new OAuthBrowserLoginRunner(appConfig, true);
+    	    loginRunner = new OAuthBrowserDeviceLoginRunner(appConfig, true);
     	    verificationURLStr = loginRunner.getVerificationURLStr();
     	} catch (Exception ex) {
     	    logger.error(ex.getMessage());
@@ -192,6 +192,6 @@ public class OAuthLoginFromBrowserFlow extends Dialog {
             	break;
             }
         }
-        return loginRunner.getLoginStatus() == OAuthBrowserLoginRunner.LoginStatus.SUCCESS;
+        return loginRunner.getLoginStatus() == OAuthBrowserDeviceLoginRunner.LoginStatus.SUCCESS;
     }
 }

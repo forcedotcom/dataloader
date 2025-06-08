@@ -39,7 +39,7 @@ import com.salesforce.dataloader.client.transport.SimplePostFactory;
 import com.salesforce.dataloader.client.transport.SimplePostInterface;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.ParameterLoadException;
-import com.salesforce.dataloader.util.OAuthBrowserLoginRunner;
+import com.salesforce.dataloader.util.OAuthBrowserDeviceLoginRunner;
 
 /*
  * Utility class that handles communication with OAuth service.
@@ -67,7 +67,7 @@ public class OAuthSecretFlowUtil {
         );
         client.post();
         if (client.isSuccessful()) {
-            OAuthBrowserLoginRunner.processSuccessfulLogin(client.getInput(), appConfig);
+            OAuthBrowserDeviceLoginRunner.processSuccessfulLogin(client.getInput(), appConfig);
         }
         return client;
     }
