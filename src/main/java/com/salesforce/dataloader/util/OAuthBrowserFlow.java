@@ -28,6 +28,7 @@ package com.salesforce.dataloader.util;
 
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.exception.ParameterLoadException;
+import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.ui.URLUtil;
 import com.salesforce.dataloader.client.transport.SimplePostFactory;
 import com.salesforce.dataloader.client.transport.SimplePostInterface;
@@ -50,6 +51,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+
 import java.util.Base64;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -306,7 +308,8 @@ public class OAuthBrowserFlow {
                 // Check for error
                 if (params.containsKey("error")) {
                     logger.error("OAuth error: " + params.get("error") + " - " + params.get("error_description"));
-                    sendErrorResponse(exchange, "OAuth authorization failed: " + params.get("error_description"));
+                    String errorMessage = Labels.getFormattedString("OAuthBrowserFlow.error.authFailed", params.get("error_description"));
+                    sendErrorResponse(exchange, errorMessage);
                     authLatch.countDown();
                     return;
                 }
@@ -360,40 +363,14 @@ public class OAuthBrowserFlow {
      * Builds the instructions page HTML.
      */
     private String buildInstructionsPage() {
-        return "<!DOCTYPE html>\n" +
-               "<html>\n" +
-               "<head>\n" +
-               "    <title>OAuth Authorization - Salesforce Data Loader</title>\n" +
-               "    <style>\n" +
-               "        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f4f6f9; }\n" +
-               "        .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }\n" +
-               "        .title { color: #007bff; font-size: 24px; margin-bottom: 20px; }\n" +
-               "        .message { color: #6c757d; font-size: 16px; line-height: 1.5; }\n" +
-               "    </style>\n" +
-               "</head>\n" +
-               "<body>\n" +
-               "    <div class=\"container\">\n" +
-               "        <div class=\"title\">🔐 OAuth Authorization</div>\n" +
-               "        <div class=\"message\">\n" +
-               "            A Salesforce login page should have opened in your browser.<br/><br/>\n" +
-               "            Please complete your login and authorize the Data Loader.<br/>\n" +
-               "            You will be redirected back here automatically after authorization.\n" +
-               "        </div>\n" +
-               "    </div>\n" +
-               "</body>\n" +
-               "</html>";
+        return Labels.getString("OAuthBrowserFlow.instructionsPage");
     }
     
     /**
      * Sends a success response after OAuth completion.
      */
     private void sendSuccessResponse(HttpExchange exchange) throws IOException {
-        String response = "<!DOCTYPE html>\n" +
-                         "<html><head><title>Success</title></head>\n" +
-                         "<body style='font-family:Arial;text-align:center;padding:50px;'>\n" +
-                         "<h1 style='color:green;'>✓ Authorization Successful!</h1>\n" +
-                         "<p>You can now close this browser window and return to Data Loader.</p>\n" +
-                         "</body></html>";
+        String response = Labels.getString("OAuthBrowserFlow.successResponse");
         
         exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
         exchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
@@ -407,12 +384,7 @@ public class OAuthBrowserFlow {
      * Sends an error response.
      */
     private void sendErrorResponse(HttpExchange exchange, String message) throws IOException {
-        String response = "<!DOCTYPE html>\n" +
-                         "<html><head><title>Error</title></head>\n" +
-                         "<body style='font-family:Arial;text-align:center;padding:50px;'>\n" +
-                         "<h1 style='color:red;'>❌ Authorization Failed</h1>\n" +
-                         "<p>" + message + "</p>\n" +
-                         "</body></html>";
+        String response = Labels.getFormattedString("OAuthBrowserFlow.errorResponseTemplate", message);
         
         exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
         exchange.sendResponseHeaders(400, response.getBytes(StandardCharsets.UTF_8).length);
