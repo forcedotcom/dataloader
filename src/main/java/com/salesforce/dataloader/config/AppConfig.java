@@ -300,6 +300,7 @@ public class AppConfig {
     public static final String PROP_OAUTH_REFRESHTOKEN = OAUTH_PREFIX + "refreshtoken";
     public static final String PROP_OAUTH_LOGIN_FROM_BROWSER = OAUTH_PREFIX + "loginfrombrowser";
     public static final String PROP_OAUTH_LOGIN_FROM_BROWSER_DEVICE_OAUTH = OAUTH_PREFIX + "device.loginfrombrowser";
+    public static final String PROP_OAUTH_PKCE_PORT = OAUTH_PREFIX + "pkce.port";
     public static final String PROP_CLIENTID_PROD_PARTNER = OAUTH_PREFIX 
             + SERVER_PROD_ENVIRONMENT_VAL 
             + "." +  PARTNER_CLIENTID_LITERAL;
@@ -753,6 +754,7 @@ public class AppConfig {
         setDefaultValue(PROP_DELETE_WITH_EXTERNALID, false);
         setDefaultValue(PROP_OAUTH_LOGIN_FROM_BROWSER, true);
         setDefaultValue(PROP_OAUTH_LOGIN_FROM_BROWSER_DEVICE_OAUTH, true);
+        setDefaultValue(PROP_OAUTH_PKCE_PORT, DEFAULT_OAUTH_PKCE_PORT);
         setDefaultValue(PROP_LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
         setDefaultValue(CLI_OPTION_RUN_MODE, RUN_MODE_UI_VAL);
         setDefaultValue(PROP_SAVE_BULK_SERVER_LOAD_AND_RAW_RESULTS_IN_CSV, false);
@@ -1800,6 +1802,7 @@ public class AppConfig {
 
     private final List<ConfigListener> listeners = new ArrayList<ConfigListener>();
     public static final int DEFAULT_MAX_SOQL_CHAR_LENGTH = 100000;
+	public static final int DEFAULT_OAUTH_PKCE_PORT = 1717;
 
     public synchronized void addListener(ConfigListener l) {
         listeners.add(l);

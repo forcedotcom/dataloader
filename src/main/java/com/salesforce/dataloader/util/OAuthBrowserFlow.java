@@ -27,11 +27,10 @@
 package com.salesforce.dataloader.util;
 
 import com.salesforce.dataloader.config.AppConfig;
+import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.ui.URLUtil;
-import com.salesforce.dataloader.util.DLLogManager;
 import com.salesforce.dataloader.client.transport.SimplePostFactory;
 import com.salesforce.dataloader.client.transport.SimplePostInterface;
-import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.Logger;
 
@@ -68,7 +67,6 @@ import com.sun.net.httpserver.HttpExchange;
 public class OAuthBrowserFlow {
     private static final Logger logger = DLLogManager.getLogger(OAuthBrowserFlow.class);
     
-    private static final int DEFAULT_PORT = 1717; // Same as Salesforce CLI
     private static final int DEFAULT_TIMEOUT_SECONDS = 300; // 5 minutes
     private static final String REDIRECT_URI_PATH = "/OauthRedirect"; // Same as Salesforce CLI
     
@@ -82,9 +80,13 @@ public class OAuthBrowserFlow {
     private boolean isRunning = false;
     private int port;
     
-    public OAuthBrowserFlow(AppConfig appConfig) {
+    public OAuthBrowserFlow(AppConfig appConfig) throws ParameterLoadException {
         this.appConfig = appConfig;
-        this.port = findAvailablePort();
+		this.port = findAvailablePort();
+		if (this.port == 0) {
+			throw new ParameterLoadException("No available port found for OAuth callback server");
+		}
+		logger.debug("Using port " + this.port + " for OAuth callback server");
     }
     
     /**
@@ -491,26 +493,21 @@ public class OAuthBrowserFlow {
     /**
      * Finds an available port for the callback server.
      */
-    private static int findAvailablePort() {
-        // First try the default port used by Salesforce CLI
-        try (ServerSocket socket = new ServerSocket(DEFAULT_PORT)) {
-            return DEFAULT_PORT;
-        } catch (IOException e) {
-            // If default port is not available, try nearby ports
-            for (int tryPort = DEFAULT_PORT + 1; tryPort < DEFAULT_PORT + 100; tryPort++) {
-                try (ServerSocket socket = new ServerSocket(tryPort)) {
-                    return tryPort;
-                } catch (IOException ignored) {
-                    // Port not available, try next
-                }
-            }
+    private int findAvailablePort() {
+        // First try the configured port (defaults to 1717, same as Salesforce CLI)
+        int preferredPort;
+        try {
+            preferredPort = appConfig.getInt(AppConfig.PROP_OAUTH_PKCE_PORT);
+        } catch (Exception e) {
+            logger.debug("Error reading OAuth PKCE port configuration, using default", e);
+            preferredPort = AppConfig.DEFAULT_OAUTH_PKCE_PORT; // Default fallback
         }
         
-        // If we can't find any port in the preferred range, let the system assign one
-        try (ServerSocket socket = new ServerSocket(0)) {
-            return socket.getLocalPort();
-        } catch (IOException e) {
-            return DEFAULT_PORT; // Fallback
+        try (ServerSocket socket = new ServerSocket(preferredPort)) {
+            return preferredPort;
+        } catch (Exception e) {
+			logger.fatal("PKCE port " + preferredPort + " is not available, searching for another port", e);
         }
+        return 0;
     }
 } 
