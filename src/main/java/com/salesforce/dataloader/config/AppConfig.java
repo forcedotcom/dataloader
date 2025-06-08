@@ -1802,7 +1802,7 @@ public class AppConfig {
 
     private final List<ConfigListener> listeners = new ArrayList<ConfigListener>();
     public static final int DEFAULT_MAX_SOQL_CHAR_LENGTH = 100000;
-	public static final int DEFAULT_OAUTH_PKCE_PORT = 1717;
+	public static final int DEFAULT_OAUTH_PKCE_PORT = 7171;
 
     public synchronized void addListener(ConfigListener l) {
         listeners.add(l);

@@ -494,7 +494,6 @@ public class OAuthBrowserFlow {
      * Finds an available port for the callback server.
      */
     private int findAvailablePort() {
-        // First try the configured port (defaults to 1717, same as Salesforce CLI)
         int preferredPort;
         try {
             preferredPort = appConfig.getInt(AppConfig.PROP_OAUTH_PKCE_PORT);

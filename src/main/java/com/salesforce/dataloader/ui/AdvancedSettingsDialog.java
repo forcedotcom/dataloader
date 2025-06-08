@@ -92,6 +92,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Text textSandboxBulkClientID;
     private Text textWizardWidth;
     private Text textWizardHeight;
+    private Text textOAuthPKCEPort;
 
     private Button buttonShowWelcomeScreen;
     private Button buttonShowLoaderUpgradeScreen;
@@ -795,6 +796,22 @@ public class AdvancedSettingsDialog extends BaseDialog {
         buttonLoginFromBrowser = new Button(restComp, SWT.CHECK);
         buttonLoginFromBrowser.setSelection(doLoginFromBrowser);
         
+        // OAuth PKCE Port
+        createLabel(restComp, null, null, AppConfig.PROP_OAUTH_PKCE_PORT);
+        textOAuthPKCEPort = new Text(restComp, SWT.BORDER);
+        textOAuthPKCEPort.setText(appConfig.getString(AppConfig.PROP_OAUTH_PKCE_PORT));
+        textOAuthPKCEPort.addVerifyListener(new VerifyListener() {
+            @Override
+            public void verifyText(VerifyEvent event) {
+                event.doit = Character.isISOControl(event.character) || Character.isDigit(event.character);
+            }
+        });
+        data = new GridData();
+        textOAuthPKCEPort.setTextLimit(5);
+        data.widthHint = 5 * textSize.x;
+        textOAuthPKCEPort.setLayoutData(data);
+        textOAuthPKCEPort.setToolTipText(Labels.getString("AdvancedSettingsDialog.uiTooltip." + AppConfig.PROP_OAUTH_PKCE_PORT));
+        
         createLabel(restComp, null, null,
                 appConfig.getOAuthEnvironmentPropertyName(AppConfig.SERVER_PROD_ENVIRONMENT_VAL, AppConfig.PARTNER_CLIENTID_LITERAL));
         this.textProductionPartnerClientID = new Text(restComp, SWT.NONE);
@@ -1066,6 +1083,7 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 appConfig.setValue(AppConfig.PROP_BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
                 appConfig.setValue(AppConfig.PROP_BULKV2_API_ENABLED, buttonUseBulkV2Api.getSelection());
                 appConfig.setValue(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER, buttonLoginFromBrowser.getSelection());
+                appConfig.setValue(AppConfig.PROP_OAUTH_PKCE_PORT, textOAuthPKCEPort.getText());
                 appConfig.setValue(AppConfig.PROP_WIZARD_CLOSE_ON_FINISH, buttonCloseWizardOnFinish.getSelection());
                 appConfig.setValue(AppConfig.PROP_WIZARD_WIDTH, textWizardWidth.getText());
                 appConfig.setValue(AppConfig.PROP_WIZARD_HEIGHT, textWizardHeight.getText());
