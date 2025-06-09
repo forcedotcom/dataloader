@@ -62,5 +62,5 @@ exitWithJavaDownloadMessage() {
 runDataLoader() {
     checkJavaVersion
     SCRIPT_DIR=$( cd -- "$( dirname -- "$0" )" >/dev/null 2>&1 && pwd -P )
-    java -cp "${SCRIPT_DIR}/*" com.salesforce.dataloader.process.DataLoaderRunner "$@"
+    java --enable-native-access=ALL-UNNAMED -cp "${SCRIPT_DIR}/*" com.salesforce.dataloader.process.DataLoaderRunner "$@"
 }
