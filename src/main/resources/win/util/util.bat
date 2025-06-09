@@ -53,7 +53,7 @@ EXIT /b %ERRORLEVEL%
     
 :runDataLoader
     CALL :checkJavaVersion
-    java -cp "%~dp0..\*" com.salesforce.dataloader.process.DataLoaderRunner %*
+    java --enable-native-access=ALL-UNNAMED -cp "%~dp0..\*" com.salesforce.dataloader.process.DataLoaderRunner %*
     EXIT /b %ERRORLEVEL%
 
 REM Shortcut files have .lnk extension
