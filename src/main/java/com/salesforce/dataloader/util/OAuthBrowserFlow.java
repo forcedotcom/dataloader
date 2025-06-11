@@ -57,6 +57,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
@@ -215,7 +217,7 @@ public class OAuthBrowserFlow {
      */
     private String buildAuthorizationUrl() throws Exception {
         String baseUrl = appConfig.getAuthEndpointForCurrentEnv();
-        String clientId = appConfig.getClientIDForCurrentEnv();
+        String clientId = appConfig.getEffectiveClientIdForCurrentEnv();
         String redirectUri = "http://localhost:" + port + REDIRECT_URI_PATH;
         
         StringBuilder authUrl = new StringBuilder();
@@ -240,18 +242,31 @@ public class OAuthBrowserFlow {
             
             // Create token request
             String tokenUrl = appConfig.getAuthEndpointForCurrentEnv() + "/services/oauth2/token";
-            String clientId = appConfig.getClientIDForCurrentEnv();
+            String clientId = appConfig.getEffectiveClientIdForCurrentEnv();
+            String clientSecret = appConfig.getEffectiveClientSecretForCurrentEnv();
             String redirectUri = "http://localhost:" + port + REDIRECT_URI_PATH;
             
-            // Make token request using existing HTTP client infrastructure (public client with PKCE)
+            // Build token request parameters
+            List<BasicNameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("grant_type", "authorization_code"));
+            params.add(new BasicNameValuePair("client_id", clientId));
+            params.add(new BasicNameValuePair("code", authorizationCode));
+            params.add(new BasicNameValuePair("redirect_uri", redirectUri));
+            params.add(new BasicNameValuePair("code_verifier", codeVerifier));
+            
+            // Add client secret if using External Client App (confidential client)
+            if (appConfig.isExternalClientAppConfigured() && clientSecret != null && !clientSecret.trim().isEmpty()) {
+                params.add(new BasicNameValuePair("client_secret", clientSecret));
+                logger.debug("Using confidential client (External Client App) with client secret");
+            } else {
+                logger.debug("Using public client (Connected App) with PKCE only");
+            }
+            
+            // Make token request using existing HTTP client infrastructure
             SimplePostInterface client = SimplePostFactory.getInstance(
                 appConfig, 
                 tokenUrl,
-                new BasicNameValuePair("grant_type", "authorization_code"),
-                new BasicNameValuePair("client_id", clientId),
-                new BasicNameValuePair("code", authorizationCode),
-                new BasicNameValuePair("redirect_uri", redirectUri),
-                new BasicNameValuePair("code_verifier", codeVerifier)
+                params.toArray(new BasicNameValuePair[0])
             );
             
             client.post();
@@ -280,7 +295,8 @@ public class OAuthBrowserFlow {
                     appConfig.setValue(AppConfig.PROP_OAUTH_INSTANCE_URL, instanceUrl);
                 }
                 
-                logger.info("OAuth tokens obtained successfully");
+                logger.info("OAuth tokens obtained successfully using " + 
+                    (appConfig.isExternalClientAppConfigured() ? "External Client App" : "Connected App"));
                 return true;
             } else {
                 logger.error("Failed to obtain OAuth tokens: " + response);

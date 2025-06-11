@@ -112,21 +112,43 @@ public class AuthenticationRunner {
                     }
                     authStatusChangeConsumer.accept("OAuth browser authentication successful.");
                 } else { // OAuth login from Data Loader app
-                    boolean hasSecret = !appConfig.getOAuthClientSecretForCurrentEnv().trim().equals("");
-                    OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, appConfig) : new OAuthTokenFlow(shell, appConfig);
-                    if (!flow.open()) {
-                       String message = Labels.getString("LoginPage.invalidLoginOAuth");
-                        if (flow.getStatusCode() == HttpTransportInterface.PROXY_AUTHENTICATION_REQUIRED) {
-                            message = Labels.getFormattedString("LoginPage.proxyError", flow.getReasonPhrase());
-                        }
-    
-                        if (flow.getReasonPhrase() == null) {
-                            logger.info("OAuth login dialog closed without logging in");
-                        } else {
-                            logger.info("Login failed:" + flow.getReasonPhrase());
-                        }
-                        authStatusChangeConsumer.accept(message);
+                    // Check for External Client App configuration first
+                    String ecaValidationMessage = appConfig.validateExternalClientAppConfig();
+                    if (ecaValidationMessage != null) {
+                        authStatusChangeConsumer.accept(ecaValidationMessage);
                         return;
+                    }
+                    
+                    boolean hasSecret = !appConfig.getEffectiveClientSecretForCurrentEnv().trim().equals("");
+                    if (appConfig.isExternalClientAppConfigured()) {
+                        logger.info("Using External Client App for OAuth authentication");
+                        // ECA requires client secret, so use OAuthSecretFlow
+                        OAuthFlow flow = new OAuthSecretFlow(shell, appConfig);
+                        if (!flow.open()) {
+                            String message = Labels.getString("LoginPage.invalidLoginOAuth");
+                            if (flow.getStatusCode() == HttpTransportInterface.PROXY_AUTHENTICATION_REQUIRED) {
+                                message = Labels.getFormattedString("LoginPage.proxyError", flow.getReasonPhrase());
+                            }
+                            authStatusChangeConsumer.accept(message);
+                            return;
+                        }
+                    } else {
+                        logger.info("Using Connected App for OAuth authentication");
+                        OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, appConfig) : new OAuthTokenFlow(shell, appConfig);
+                        if (!flow.open()) {
+                           String message = Labels.getString("LoginPage.invalidLoginOAuth");
+                            if (flow.getStatusCode() == HttpTransportInterface.PROXY_AUTHENTICATION_REQUIRED) {
+                                message = Labels.getFormattedString("LoginPage.proxyError", flow.getReasonPhrase());
+                            }
+        
+                            if (flow.getReasonPhrase() == null) {
+                                logger.info("OAuth login dialog closed without logging in");
+                            } else {
+                                logger.info("Login failed:" + flow.getReasonPhrase());
+                            }
+                            authStatusChangeConsumer.accept(message);
+                            return;
+                        }
                     }
                 }
             }            

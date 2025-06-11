@@ -51,7 +51,7 @@ public class OAuthSecretFlowUtil {
                 "/services/oauth2/authorize"
                 + "?response_type=code"
                 + "&display=popup"
-                + "&" + appConfig.getClientIdNameValuePair()
+                + "&client_id=" + URLEncoder.encode(appConfig.getEffectiveClientIdForCurrentEnv(), StandardCharsets.UTF_8.name())
                 + "&redirect_uri="
                 + URLEncoder.encode(appConfig.getOAuthRedirectURIForCurrentEnv(), StandardCharsets.UTF_8.name());
     }
@@ -61,8 +61,8 @@ public class OAuthSecretFlowUtil {
         SimplePostInterface client = SimplePostFactory.getInstance(appConfig, server,
                 new BasicNameValuePair("grant_type", "authorization_code"),
                 new BasicNameValuePair("code", code),
-                new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getClientIDForCurrentEnv()),
-                new BasicNameValuePair("client_secret", appConfig.getOAuthClientSecretForCurrentEnv()),
+                new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getEffectiveClientIdForCurrentEnv()),
+                new BasicNameValuePair("client_secret", appConfig.getEffectiveClientSecretForCurrentEnv()),
                 new BasicNameValuePair("redirect_uri", appConfig.getOAuthRedirectURIForCurrentEnv())
         );
         client.post();
