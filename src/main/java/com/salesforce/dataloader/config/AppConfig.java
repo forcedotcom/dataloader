@@ -329,6 +329,14 @@ public class AppConfig {
     public static final String PROP_REUSE_CLIENT_CONNECTION = "sfdc.reuseClientConnection";
     public static final String PROP_RICH_TEXT_FIELD_REGEX = "sfdx.richtext.regex";
     
+    // External Client App (ECA) configuration properties
+    public static final String ECA_LITERAL = "eca";
+    public static final String PROP_USE_EXTERNAL_CLIENT_APP = OAUTH_PREFIX + "useExternalClientApp";
+    public static final String PROP_ECA_CLIENT_ID_PROD = OAUTH_PREFIX + SERVER_PROD_ENVIRONMENT_VAL + "." + ECA_LITERAL + "." + CLIENTID_LITERAL;
+    public static final String PROP_ECA_CLIENT_SECRET_PROD = OAUTH_PREFIX + SERVER_PROD_ENVIRONMENT_VAL + "." + ECA_LITERAL + "." + CLIENTSECRET_LITERAL;
+    public static final String PROP_ECA_CLIENT_ID_SANDBOX = OAUTH_PREFIX + SERVER_SB_ENVIRONMENT_VAL + "." + ECA_LITERAL + "." + CLIENTID_LITERAL;
+    public static final String PROP_ECA_CLIENT_SECRET_SANDBOX = OAUTH_PREFIX + SERVER_SB_ENVIRONMENT_VAL + "." + ECA_LITERAL + "." + CLIENTSECRET_LITERAL;
+    
     // salesforce operation parameters
     public static final String PROP_INSERT_NULLS = "sfdc.insertNulls"; //$NON-NLS-1$
     public static final String PROP_ENTITY = "sfdc.entity"; //$NON-NLS-1$
@@ -598,6 +606,8 @@ public class AppConfig {
             PROP_OAUTH_REFRESHTOKEN,
             PROP_OAUTH_CLIENTSECRET_PROD,
             PROP_OAUTH_CLIENTSECRET_SB,
+            PROP_ECA_CLIENT_SECRET_PROD,
+            PROP_ECA_CLIENT_SECRET_SANDBOX,
     };
     
     /**
@@ -1548,7 +1558,7 @@ public class AppConfig {
     public static final String CLIENT_ID_HEADER_NAME="client_id";
     
     public String getClientIdNameValuePair() {
-        return CLIENT_ID_HEADER_NAME + "=" + this.getClientIDForCurrentEnv();
+        return CLIENT_ID_HEADER_NAME + "=" + this.getEffectiveClientIdForCurrentEnv();
     }
 
     /**
@@ -2026,5 +2036,95 @@ public class AppConfig {
     
     public int getMaxBytesInBulkBatch() {
         return isBulkV2APIEnabled() ? AppConfig.currentMaxBulkv2APIImportJobBytes : AppConfig.MAX_BULK_API_IMPORT_BATCH_BYTES;
+    }
+    
+    // External Client App (ECA) helper methods
+    
+    /**
+     * Determines if External Client App is configured and should be used
+     * @return true if ECA is configured with client ID and secret
+     */
+    public boolean isExternalClientAppConfigured() {
+        return getBoolean(PROP_USE_EXTERNAL_CLIENT_APP) && 
+               !isEmpty(getECAClientIdForCurrentEnv()) && 
+               !isEmpty(getECAClientSecretForCurrentEnv());
+    }
+    
+    /**
+     * Gets the External Client App client ID for the current environment
+     * @return ECA client ID or empty string if not configured
+     */
+    public String getECAClientIdForCurrentEnv() {
+        String environment = getString(PROP_SELECTED_SERVER_ENVIRONMENT);
+        if (SERVER_PROD_ENVIRONMENT_VAL.equals(environment)) {
+            return getString(PROP_ECA_CLIENT_ID_PROD);
+        } else {
+            return getString(PROP_ECA_CLIENT_ID_SANDBOX);
+        }
+    }
+    
+    /**
+     * Gets the External Client App client secret for the current environment
+     * @return ECA client secret or empty string if not configured
+     */
+    public String getECAClientSecretForCurrentEnv() {
+        String environment = getString(PROP_SELECTED_SERVER_ENVIRONMENT);
+        if (SERVER_PROD_ENVIRONMENT_VAL.equals(environment)) {
+            return getString(PROP_ECA_CLIENT_SECRET_PROD);
+        } else {
+            return getString(PROP_ECA_CLIENT_SECRET_SANDBOX);
+        }
+    }
+    
+    /**
+     * Gets the effective client ID - ECA if configured, otherwise legacy Connected App
+     * @return client ID for OAuth authentication
+     */
+    public String getEffectiveClientIdForCurrentEnv() {
+        if (isExternalClientAppConfigured()) {
+            return getECAClientIdForCurrentEnv();
+        }
+        return getClientIDForCurrentEnv();
+    }
+    
+    /**
+     * Gets the effective client secret - ECA if configured, otherwise legacy OAuth secret
+     * @return client secret for OAuth authentication (may be empty for public clients)
+     */
+    public String getEffectiveClientSecretForCurrentEnv() {
+        if (isExternalClientAppConfigured()) {
+            return getECAClientSecretForCurrentEnv();
+        }
+        return getOAuthClientSecretForCurrentEnv();
+    }
+    
+    /**
+     * Validates External Client App configuration
+     * @return validation message or null if valid
+     */
+    public String validateExternalClientAppConfig() {
+        if (!getBoolean(PROP_USE_EXTERNAL_CLIENT_APP)) {
+            return null; // Not using ECA, no validation needed
+        }
+        
+        String clientId = getECAClientIdForCurrentEnv();
+        String clientSecret = getECAClientSecretForCurrentEnv();
+        
+        if (isEmpty(clientId)) {
+            return Messages.getMessage(AppConfig.class, "ecaClientIdRequired");
+        }
+        
+        if (isEmpty(clientSecret)) {
+            return Messages.getMessage(AppConfig.class, "ecaClientSecretRequired");
+        }
+        
+        return null; // Valid configuration
+    }
+    
+    /**
+     * Helper method to check if a string is null or empty
+     */
+    private boolean isEmpty(String value) {
+        return value == null || value.trim().isEmpty();
     }
 }

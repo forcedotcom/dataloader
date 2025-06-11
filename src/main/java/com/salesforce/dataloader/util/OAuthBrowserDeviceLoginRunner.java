@@ -98,7 +98,7 @@ public class OAuthBrowserDeviceLoginRunner {
         oAuthTokenURLStr = appConfig.getAuthEndpointForCurrentEnv() + "/services/oauth2/token";
         SimplePostInterface client = SimplePostFactory.getInstance(appConfig, oAuthTokenURLStr,
                new BasicNameValuePair("response_type", "device_code"),
-               new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getClientIDForCurrentEnv()),
+               new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getEffectiveClientIdForCurrentEnv()),
                new BasicNameValuePair("scope", "api")
         );
         client.post();
@@ -199,10 +199,20 @@ public class OAuthBrowserDeviceLoginRunner {
                        // do nothing
                    }
                    elapsedTimeInSec += pollingIntervalInSec;
+                   // Build token request parameters for device flow
+                   List<BasicNameValuePair> tokenParams = new ArrayList<>();
+                   tokenParams.add(new BasicNameValuePair("grant_type", "device"));
+                   tokenParams.add(new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getEffectiveClientIdForCurrentEnv()));
+                   tokenParams.add(new BasicNameValuePair("code", deviceCode));
+                   
+                   // Add client secret if using External Client App (confidential client)
+                   String clientSecret = appConfig.getEffectiveClientSecretForCurrentEnv();
+                   if (appConfig.isExternalClientAppConfigured() && clientSecret != null && !clientSecret.trim().isEmpty()) {
+                       tokenParams.add(new BasicNameValuePair("client_secret", clientSecret));
+                   }
+                   
                    client = SimplePostFactory.getInstance(appConfig, oAuthTokenURLStr,
-                           new BasicNameValuePair("grant_type", "device"),
-                           new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getClientIDForCurrentEnv()),
-                           new BasicNameValuePair("code", deviceCode)
+                           tokenParams.toArray(new BasicNameValuePair[0])
                    );
                    try {
                        client.post();
