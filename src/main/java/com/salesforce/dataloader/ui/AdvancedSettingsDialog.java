@@ -1307,6 +1307,10 @@ public class AdvancedSettingsDialog extends BaseDialog {
         GridData data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         data.grabExcessHorizontalSpace = true;
         l.setLayoutData(data);
+        
+        // Set background color to match parent container
+        l.setBackground(parent.getBackground());
+        
         if (labelKey == null) {
             if (propertyName != null) {
                 l.setText(Labels.getFormattedString("AdvancedSettingsDialog.uiLabel." + propertyName, args));
@@ -1332,6 +1336,9 @@ public class AdvancedSettingsDialog extends BaseDialog {
         GridData data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         data.grabExcessHorizontalSpace = true;
         l.setLayoutData(data);
+        
+        // Set background color to match parent container
+        l.setBackground(parent.getBackground());
         
         String labelLookupKey = labelKey == null ? propertyName : labelKey;
         l.setText(Labels.getFormattedString("AdvancedSettingsDialog.uiLabel." + labelLookupKey, args));
