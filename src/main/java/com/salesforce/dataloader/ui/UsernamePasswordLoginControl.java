@@ -87,6 +87,7 @@ public class UsernamePasswordLoginControl extends Composite {
         });
 
         Text pwdOrSessionIdLabel = new Text(this, SWT.RIGHT | SWT.WRAP | SWT.READ_ONLY);
+        pwdOrSessionIdLabel.setBackground(this.getBackground());
         data = new GridData(GridData.HORIZONTAL_ALIGN_END);
         pwdOrSessionIdLabel.setLayoutData(data);
         data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);

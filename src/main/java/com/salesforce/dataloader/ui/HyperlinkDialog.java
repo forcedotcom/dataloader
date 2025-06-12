@@ -103,7 +103,7 @@ public class HyperlinkDialog extends BaseDialog {
 
         link = new Link(shell, SWT.WRAP | SWT.READ_ONLY);
         link.setForeground(foreground);
-        link.setBackground(background);
+        link.setBackground(shell.getBackground());
         link.setText(this.getMessage()); // two lines
         link.setFont(JFaceResources.getDialogFont());
         FormData messageLabelData = new FormData();
