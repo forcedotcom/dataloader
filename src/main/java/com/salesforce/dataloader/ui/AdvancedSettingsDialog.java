@@ -987,11 +987,13 @@ public class AdvancedSettingsDialog extends BaseDialog {
         createLabel(restComp, "configDir", null, null);
         Text textConfigDirLocation = new Text(restComp, SWT.LEFT | SWT.READ_ONLY);
         textConfigDirLocation.setText(AppConfig.getConfigurationsDir()); //$NON-NLS-1$
+        textConfigDirLocation.setBackground(restComp.getBackground());
 
         createLabel(restComp, "loggingConfigFile", null, null);
         String log4j2ConfFile = LoggingUtil.getLoggingConfigFile();
         Text textLoggingFileName = new Text(restComp, SWT.LEFT | SWT.READ_ONLY);
         textLoggingFileName.setText(log4j2ConfFile); //$NON-NLS-1$
+        textLoggingFileName.setBackground(restComp.getBackground());
         
         createLink(restComp, "loggingLevel", null, null);
         comboLoggingLevelDropdown = new Combo(restComp, SWT.DROP_DOWN);
