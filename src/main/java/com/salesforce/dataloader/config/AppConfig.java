@@ -2045,8 +2045,7 @@ public class AppConfig {
      * @return true if ECA is configured with client ID and secret
      */
     public boolean isExternalClientAppConfigured() {
-        return getBoolean(PROP_USE_EXTERNAL_CLIENT_APP) && 
-               !isEmpty(getECAClientIdForCurrentEnv()) && 
+        return !isEmpty(getECAClientIdForCurrentEnv()) && 
                !isEmpty(getECAClientSecretForCurrentEnv());
     }
     
@@ -2103,13 +2102,15 @@ public class AppConfig {
      * @return validation message or null if valid
      */
     public String validateExternalClientAppConfig() {
-        if (!getBoolean(PROP_USE_EXTERNAL_CLIENT_APP)) {
-            return null; // Not using ECA, no validation needed
-        }
-        
         String clientId = getECAClientIdForCurrentEnv();
         String clientSecret = getECAClientSecretForCurrentEnv();
         
+        // If neither ECA client ID nor secret is configured, no validation needed (using Connected App)
+        if (isEmpty(clientId) && isEmpty(clientSecret)) {
+            return null;
+        }
+        
+        // If only one of the two is configured, that's an error
         if (isEmpty(clientId)) {
             return Messages.getMessage(AppConfig.class, "ecaClientIdRequired");
         }
