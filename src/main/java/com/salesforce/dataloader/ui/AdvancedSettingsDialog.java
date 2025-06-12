@@ -94,6 +94,12 @@ public class AdvancedSettingsDialog extends BaseDialog {
     private Text textWizardHeight;
     private Text textOAuthPKCEPort;
 
+    // ECA (External Client App) fields
+    private Text textECAClientIdProd;
+    private Text textECAClientSecretProd;
+    private Text textECAClientIdSandbox;
+    private Text textECAClientSecretSandbox;
+
     private Button buttonShowWelcomeScreen;
     private Button buttonShowLoaderUpgradeScreen;
     private Button buttonOutputExtractStatus;
@@ -843,6 +849,48 @@ public class AdvancedSettingsDialog extends BaseDialog {
         textSandboxBulkClientID.setLayoutData(data);
         clientId = appConfig.getOAuthEnvironmentString(AppConfig.SERVER_SB_ENVIRONMENT_VAL, AppConfig.BULK_CLIENTID_LITERAL);
         this.textSandboxBulkClientID.setText(clientId);       
+        
+        //////////////////////////////////////////////////
+        // External Client App (ECA) Configuration
+        
+        // Add a separator and header for ECA section
+        Label blankECA = new Label(restComp, SWT.NONE);
+        data = new GridData();
+        data.horizontalSpan = 2;
+        blankECA.setLayoutData(data);
+        
+        // ECA Production Client ID
+        createLabel(restComp, "ECAClientIdProd", null, null);
+        this.textECAClientIdProd = new Text(restComp, SWT.BORDER);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        textECAClientIdProd.setLayoutData(data);
+        String ecaClientId = appConfig.getString(AppConfig.PROP_ECA_CLIENT_ID_PROD);
+        this.textECAClientIdProd.setText(ecaClientId);
+        
+        // ECA Production Client Secret
+        createLabel(restComp, "ECAClientSecretProd", null, null);
+        this.textECAClientSecretProd = new Text(restComp, SWT.BORDER);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        textECAClientSecretProd.setLayoutData(data);
+        String ecaClientSecret = appConfig.getString(AppConfig.PROP_ECA_CLIENT_SECRET_PROD);
+        this.textECAClientSecretProd.setText(ecaClientSecret);
+        
+        // ECA Sandbox Client ID
+        createLabel(restComp, "ECAClientIdSandbox", null, null);
+        this.textECAClientIdSandbox = new Text(restComp, SWT.BORDER);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        textECAClientIdSandbox.setLayoutData(data);
+        ecaClientId = appConfig.getString(AppConfig.PROP_ECA_CLIENT_ID_SANDBOX);
+        this.textECAClientIdSandbox.setText(ecaClientId);
+        
+        // ECA Sandbox Client Secret
+        createLabel(restComp, "ECAClientSecretSandbox", null, null);
+        this.textECAClientSecretSandbox = new Text(restComp, SWT.BORDER);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        textECAClientSecretSandbox.setLayoutData(data);
+        ecaClientSecret = appConfig.getString(AppConfig.PROP_ECA_CLIENT_SECRET_SANDBOX);
+        this.textECAClientSecretSandbox.setText(ecaClientSecret);
+        
         //////////////////////////////////////////////////
         //Row to start At
 
@@ -1126,6 +1174,44 @@ public class AdvancedSettingsDialog extends BaseDialog {
                         getController().logout();
                     }
                 }
+                
+                // Save ECA (External Client App) settings
+                String ecaClientIdVal = textECAClientIdProd.getText();
+                if (ecaClientIdVal != null) {
+                    String currentECAClientIdVal = appConfig.getString(AppConfig.PROP_ECA_CLIENT_ID_PROD);
+                    if (!ecaClientIdVal.equals(currentECAClientIdVal)) {
+                        appConfig.setValue(AppConfig.PROP_ECA_CLIENT_ID_PROD, ecaClientIdVal);
+                        getController().logout();
+                    }
+                }
+                
+                String ecaClientSecretVal = textECAClientSecretProd.getText();
+                if (ecaClientSecretVal != null) {
+                    String currentECAClientSecretVal = appConfig.getString(AppConfig.PROP_ECA_CLIENT_SECRET_PROD);
+                    if (!ecaClientSecretVal.equals(currentECAClientSecretVal)) {
+                        appConfig.setValue(AppConfig.PROP_ECA_CLIENT_SECRET_PROD, ecaClientSecretVal);
+                        getController().logout();
+                    }
+                }
+                
+                ecaClientIdVal = textECAClientIdSandbox.getText();
+                if (ecaClientIdVal != null) {
+                    String currentECAClientIdVal = appConfig.getString(AppConfig.PROP_ECA_CLIENT_ID_SANDBOX);
+                    if (!ecaClientIdVal.equals(currentECAClientIdVal)) {
+                        appConfig.setValue(AppConfig.PROP_ECA_CLIENT_ID_SANDBOX, ecaClientIdVal);
+                        getController().logout();
+                    }
+                }
+                
+                ecaClientSecretVal = textECAClientSecretSandbox.getText();
+                if (ecaClientSecretVal != null) {
+                    String currentECAClientSecretVal = appConfig.getString(AppConfig.PROP_ECA_CLIENT_SECRET_SANDBOX);
+                    if (!ecaClientSecretVal.equals(currentECAClientSecretVal)) {
+                        appConfig.setValue(AppConfig.PROP_ECA_CLIENT_SECRET_SANDBOX, ecaClientSecretVal);
+                        getController().logout();
+                    }
+                }
+                
                 getController().saveConfig();
                 getController().getLoaderWindow().refresh();
                 shell.close();
