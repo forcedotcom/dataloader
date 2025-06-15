@@ -46,6 +46,7 @@ import com.sforce.soap.partner.fault.ApiFault;
 import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
+import com.salesforce.dataloader.ui.URLUtil;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -295,15 +296,34 @@ public class ProcessRunner implements InitializingBean, IProcess {
 
     void doDeviceLoginFromBrowser(AppConfig appConfig) throws OAuthBrowserLoginRunnerException {
         try {
+            logger.debug("Starting OAuth device flow...");
+            if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH) {
+                logger.debug("Running in batch mode - please complete authentication in your browser");
+            } else {
+                logger.debug("A browser window will open for you to log in to Salesforce");
+            }
+            
             OAuthBrowserDeviceLoginRunner loginRunner = new OAuthBrowserDeviceLoginRunner(appConfig, true);
             String verificationURLStr = loginRunner.getVerificationURLStr();
-            System.out.println(Labels.getString("OAuthInBrowser.batchModeMessage1"));
-            System.out.println(Labels.getString("OAuthInBrowser.batchModeURL") + verificationURLStr);
-            System.out.println(Labels.getFormattedString("OAuthInBrowser.batchModeMessage2", loginRunner.getUserCode()));
-            waitForLoginCompletion(loginRunner);
+            logger.info("Please complete the authentication process in your browser");
+            logger.info("Verification URL: " + verificationURLStr);
+            logger.info("User Code: " + loginRunner.getUserCode());
+            
+            // Try to open browser in both UI and batch modes
+            URLUtil.openURL(verificationURLStr);
+            
+            while (!loginRunner.isLoginProcessCompleted()) {
+                Thread.sleep(1000);
+            }
+            
+            if (loginRunner.getLoginStatus() == OAuthBrowserDeviceLoginRunner.LoginStatus.SUCCESS) {
+                logger.debug("OAuth device flow completed successfully!");
+            } else {
+                throw new OAuthBrowserLoginRunnerException("OAuth device flow failed - authentication could not be completed");
+            }
         } catch (Exception ex) {
-            logger.error(ex.getMessage());
-            throw new OAuthBrowserLoginRunnerException(ex.getMessage());
+            logger.error("OAuth device flow failed: " + ex.getMessage());
+            throw new OAuthBrowserLoginRunnerException("OAuth device flow failed: " + ex.getMessage());
         }
     }
 
@@ -324,16 +344,6 @@ public class ProcessRunner implements InitializingBean, IProcess {
         } catch (Exception ex) {
             logger.error("OAuth browser login failed: " + ex.getMessage());
             throw new OAuthBrowserLoginRunnerException("OAuth browser login failed: " + ex.getMessage());
-        }
-    }
-
-    private void waitForLoginCompletion(OAuthBrowserDeviceLoginRunner loginRunner) {
-        while (!loginRunner.isLoginProcessCompleted()) {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                // fail silently
-            }
         }
     }
 }
