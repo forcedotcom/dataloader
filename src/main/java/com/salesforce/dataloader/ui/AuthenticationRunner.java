@@ -34,14 +34,11 @@ import com.salesforce.dataloader.util.ExceptionUtil;
 import com.salesforce.dataloader.util.OAuthBrowserFlow;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.QueryResult;
-import com.sforce.soap.partner.fault.LoginFault;
-import com.sforce.soap.partner.fault.UnexpectedErrorFault;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.bind.XmlObject;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Level;
 import com.salesforce.dataloader.util.DLLogManager;
 
 import org.eclipse.swt.custom.BusyIndicator;
@@ -50,6 +47,15 @@ import org.eclipse.swt.widgets.Shell;
 
 import java.util.Iterator;
 import java.util.function.Consumer;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.net.ServerSocket;
+import com.salesforce.dataloader.oauth.OAuthFlowHandler;
 
 /**
  * AuthenticationRunner is the UI orchestration of logging in.
@@ -86,111 +92,54 @@ public class AuthenticationRunner {
         BusyIndicator.showWhile(Display.getDefault(), new Thread(this::loginAsync));
     }
 
-    private void loginAsync(){
+    private void loginAsync() {
         try {
-            authStatusChangeConsumer.accept(Labels.getString("LoginPage.verifyingLogin"));
-            logger.info(Labels.getString("LoginPage.verifyingLogin"));
-            
-                         // Check if browser session login is configured by default
-             if (criteria.getMode() == LoginCriteria.OAuthLogin) {
-                if (appConfig.getBoolean(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER_DEVICE_OAUTH)) {
-                    OAuthDeviceFlow flow = new OAuthDeviceFlow(shell, appConfig);
-                    if (!flow.open()) {
-                        String message = Labels.getString("LoginPage.invalidLoginOAuthBrowser");
-                        authStatusChangeConsumer.accept(message);
-                        return;
-                    }
-                } else if (appConfig.getBoolean(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER)) {
-                    // Handle proper OAuth browser flow instead of session capture
-                    authStatusChangeConsumer.accept("Starting OAuth browser authentication...");
-                    logger.info("Using OAuth browser authentication mode");
-                    OAuthBrowserFlow oauthFlow = new OAuthBrowserFlow(appConfig);
-                    if (!oauthFlow.performOAuthFlow()) {
-                        String message = "OAuth browser authentication failed. Please try again.";
-                        authStatusChangeConsumer.accept(message);
-                        return;
-                    }
-                    authStatusChangeConsumer.accept("OAuth browser authentication successful.");
-                } else { // OAuth login from Data Loader app
-                    // Check for External Client App configuration first
-                    String ecaValidationMessage = appConfig.validateExternalClientAppConfig();
-                    if (ecaValidationMessage != null) {
-                        authStatusChangeConsumer.accept(ecaValidationMessage);
-                        return;
-                    }
-                    
-                    boolean hasSecret = !appConfig.getEffectiveClientSecretForCurrentEnv().trim().equals("");
-                    if (appConfig.isExternalClientAppConfigured()) {
-                        logger.info("Using External Client App for OAuth authentication");
-                        // ECA requires client secret, so use OAuthSecretFlow
-                        OAuthFlow flow = new OAuthSecretFlow(shell, appConfig);
-                        if (!flow.open()) {
-                            String message = Labels.getString("LoginPage.invalidLoginOAuth");
-                            if (flow.getStatusCode() == HttpTransportInterface.PROXY_AUTHENTICATION_REQUIRED) {
-                                message = Labels.getFormattedString("LoginPage.proxyError", flow.getReasonPhrase());
-                            }
-                            authStatusChangeConsumer.accept(message);
-                            return;
-                        }
-                    } else {
-                        logger.info("Using Connected App for OAuth authentication");
-                        OAuthFlow flow = hasSecret ? new OAuthSecretFlow(shell, appConfig) : new OAuthTokenFlow(shell, appConfig);
-                        if (!flow.open()) {
-                           String message = Labels.getString("LoginPage.invalidLoginOAuth");
-                            if (flow.getStatusCode() == HttpTransportInterface.PROXY_AUTHENTICATION_REQUIRED) {
-                                message = Labels.getFormattedString("LoginPage.proxyError", flow.getReasonPhrase());
-                            }
-        
-                            if (flow.getReasonPhrase() == null) {
-                                logger.info("OAuth login dialog closed without logging in");
-                            } else {
-                                logger.info("Login failed:" + flow.getReasonPhrase());
-                            }
-                            authStatusChangeConsumer.accept(message);
-                            return;
-                        }
-                    }
+            // Check if OAuth is required
+            if (requiresOAuthLogin(appConfig)) {
+                OAuthFlowHandler oauthHandler = new OAuthFlowHandler(appConfig, this::updateStatus, controller);
+                if (oauthHandler.handleOAuthLogin()) {
+                    updateStatus("OAuth login successful");
+                    return;
                 }
-            }            
-        } catch (Throwable e) {
-            handleError(e, e.getMessage());
-            return;
+                updateStatus("OAuth login failed");
+                return;
+            }
+
+            // If OAuth is not required, proceed with username/password login
+            updateStatus("Logging in...");
+            PartnerConnection conn = login();
+            if (conn != null) {
+                updateStatus("Login successful");
+            } else {
+                updateStatus("Login failed");
+            }
+        } catch (Exception e) {
+            logger.error("Login failed", e);
+            updateStatus("Login failed: " + e.getMessage());
         }
-        // Either OAuth login is successful or 
-        // need to perform username and password or session token based auth
+    }
+
+    private void updateStatus(String status) {
+        authStatusChangeConsumer.accept(status);
+    }
+
+    private boolean requiresOAuthLogin(AppConfig config) {
+        return criteria.getMode() == LoginCriteria.OAuthLogin;
+    }
+
+    private PartnerConnection login() {
         try {
             if (controller.login() && controller.getEntityDescribes() != null) {
                 controller.saveConfig();
                 controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession();
-                PartnerConnection conn = controller.getPartnerClient().getConnection();
-                logger.debug("org_id = " + conn.getUserInfo().getOrganizationId());
-                logger.debug("user_id = " + conn.getUserInfo().getUserId());
-                if (logger.getLevel() == Level.DEBUG) { 
-                    // avoid making a remote API call to the server unless log level is DEBUG
-                    logger.debug(getSoqlResultsAsString(
-                            "\nConnected App Information: ",
-                            "SELECT Name, id FROM ConnectedApplication WHERE name like 'Dataloader%'"
-                                    , conn));
-                    logger.debug(getSoqlResultsAsString(
-                            "\nOrg Instance Information:",
-                            "SELECT InstanceName FROM Organization"
-                                    , conn));
-                }
-                authStatusChangeConsumer.accept(Labels.getString("LoginPage.loginSuccessful"));
-            } else {
-                authStatusChangeConsumer.accept(Labels.getString("LoginPage.invalidLoginUsernamePassword"));
+                return controller.getLoginClient().getConnection();
             }
-        } catch (LoginFault lf) {
-            handleError(lf, Labels.getString("LoginPage.invalidLoginUsernamePassword"));
-        } catch (UnexpectedErrorFault e) {
-            handleError(e, e.getExceptionMessage());
-        } catch (ConnectionException e) {
-            // TODO Auto-generated catch block
-            handleError(e, e.getMessage());
-        } 
-
+        } catch (Exception e) {
+            logger.error("Error during username+password login", e);
+        }
+        return null;
     }
-        
+
     private String getSoqlResultsAsString(String prefix, String soql, PartnerConnection conn) throws ConnectionException {
         QueryResult result = conn.query(soql);
         final SObject[] sfdcResults = result.getRecords();
@@ -237,5 +186,16 @@ public class AuthenticationRunner {
             logger.error(message);
         }
         logger.debug("\n" + ExceptionUtil.getStackTraceString(e));
+    }
+
+    private String readErrorResponse(HttpURLConnection conn) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+            return response.toString();
+        }
     }
 }
