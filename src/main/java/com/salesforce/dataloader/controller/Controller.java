@@ -345,6 +345,11 @@ public class Controller {
     }
         
     public void updateLoaderWindowTitleAndCacheUserInfoForTheSession() {
+        // Skip UI updates in batch mode
+        if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH) {
+            return;
+        }
+        
         if (isLoggedIn()) {
             try {
                 ConnectorConfig sessionConfig = getPartnerClient().getConnection().getConfig();

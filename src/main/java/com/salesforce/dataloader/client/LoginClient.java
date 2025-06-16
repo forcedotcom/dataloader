@@ -326,6 +326,9 @@ public class LoginClient extends ClientBase<PartnerConnection> {
     
     public LimitInfo getAPILimitInfo() {
         LimitInfoHeader_element limitInfoElement = getConnection().getLimitInfoHeader();
+        if (limitInfoElement == null || limitInfoElement.getLimitInfo() == null) {
+            return null;
+        }
         for (LimitInfo info : limitInfoElement.getLimitInfo()) {
             if ("API REQUESTS".equalsIgnoreCase(info.getType())) {
                 return info;

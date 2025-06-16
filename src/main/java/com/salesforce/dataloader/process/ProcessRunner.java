@@ -37,7 +37,6 @@ import com.salesforce.dataloader.exception.ControllerInitializationException;
 import com.salesforce.dataloader.exception.OAuthBrowserLoginRunnerException;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
-import com.salesforce.dataloader.ui.Labels;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.ExitException;
 import com.salesforce.dataloader.util.OAuthBrowserDeviceLoginRunner;
@@ -46,9 +45,16 @@ import com.sforce.soap.partner.fault.ApiFault;
 import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
-import com.salesforce.dataloader.ui.URLUtil;
+import com.salesforce.dataloader.oauth.OAuthFlowHandler;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.ServerSocket;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,10 +73,15 @@ public class ProcessRunner implements InitializingBean, IProcess {
 
     private String name;
     private final Map<String, String> configOverrideMap = new HashMap<>();
-    private Controller controller;
+    private final Controller controller;
     private ILoaderProgress monitor;
 
+    public ProcessRunner(Controller controller) {
+        this.controller = controller;
+    }
+
     protected ProcessRunner() {
+        this.controller = null;
     }
 
     public synchronized void run(ILoaderProgress monitor) throws Exception {
@@ -95,13 +106,26 @@ public class ProcessRunner implements InitializingBean, IProcess {
     }
 
     private void initializeController() throws ControllerInitializationException, ParameterLoadException, ConfigInitializationException {
-        controller = Controller.getInstance(getConfigOverrideMap());
+        if (controller == null) {
+            // In batch mode, create a new controller instance
+            Controller newController = Controller.getInstance(getConfigOverrideMap());
+            if (newController == null) {
+                throw new ControllerInitializationException("Failed to initialize controller");
+            }
+            // Use reflection to set the controller field since it's final
+            try {
+                java.lang.reflect.Field field = ProcessRunner.class.getDeclaredField("controller");
+                field.setAccessible(true);
+                field.set(this, newController);
+            } catch (Exception e) {
+                throw new ControllerInitializationException("Failed to set controller: " + e.getMessage());
+            }
+        }
     }
 
     private void handleOAuthLogin(AppConfig appConfig) throws OAuthBrowserLoginRunnerException {
         if (requiresOAuthLogin(appConfig)) {
-        	if (appConfig.getBoolean(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER_DEVICE_OAUTH)) {
-        		doDeviceLoginFromBrowser(appConfig);
+        	if (doDeviceLoginFromBrowser(appConfig)) {
 			} else {
 	            doBrowserLogin(appConfig);
 			}
@@ -145,7 +169,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
     }
 
     private void closeResources() {
-        if (controller.getDao() != null) {
+        if (controller != null && controller.getDao() != null) {
             controller.getDao().close();
         }
     }
@@ -294,36 +318,22 @@ public class ProcessRunner implements InitializingBean, IProcess {
         }
     }
 
-    void doDeviceLoginFromBrowser(AppConfig appConfig) throws OAuthBrowserLoginRunnerException {
+    private boolean doDeviceLoginFromBrowser(AppConfig appConfig) {
+        logger.info("Starting OAuth login from browser");
         try {
-            logger.debug("Starting OAuth device flow...");
-            if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH) {
-                logger.debug("Running in batch mode - please complete authentication in your browser");
-            } else {
-                logger.debug("A browser window will open for you to log in to Salesforce");
+            if (controller == null) {
+                logger.error("Controller is not initialized");
+                return false;
             }
-            
-            OAuthBrowserDeviceLoginRunner loginRunner = new OAuthBrowserDeviceLoginRunner(appConfig, true);
-            String verificationURLStr = loginRunner.getVerificationURLStr();
-            logger.info("Please complete the authentication process in your browser");
-            logger.info("Verification URL: " + verificationURLStr);
-            logger.info("User Code: " + loginRunner.getUserCode());
-            
-            // Try to open browser in both UI and batch modes
-            URLUtil.openURL(verificationURLStr);
-            
-            while (!loginRunner.isLoginProcessCompleted()) {
-                Thread.sleep(1000);
-            }
-            
-            if (loginRunner.getLoginStatus() == OAuthBrowserDeviceLoginRunner.LoginStatus.SUCCESS) {
-                logger.debug("OAuth device flow completed successfully!");
-            } else {
-                throw new OAuthBrowserLoginRunnerException("OAuth device flow failed - authentication could not be completed");
-            }
-        } catch (Exception ex) {
-            logger.error("OAuth device flow failed: " + ex.getMessage());
-            throw new OAuthBrowserLoginRunnerException("OAuth device flow failed: " + ex.getMessage());
+            OAuthFlowHandler oauthHandler = new OAuthFlowHandler(appConfig, status -> {
+                if (status != null) {
+                    logger.info(status);
+                }
+            }, controller);
+            return oauthHandler.handleOAuthLogin();
+        } catch (Exception e) {
+            logger.error("OAuth login failed with error: " + e.getMessage(), e);
+            return false;
         }
     }
 
@@ -333,11 +343,15 @@ public class ProcessRunner implements InitializingBean, IProcess {
             logger.debug("A browser window will open for you to log in to Salesforce.");
             logger.debug("Please complete your login in the browser window.");
             
-            OAuthBrowserFlow oauthFlow = new OAuthBrowserFlow(appConfig);
-            boolean success = oauthFlow.performOAuthFlow();
+            if (controller == null) {
+                throw new OAuthBrowserLoginRunnerException("Controller is not initialized");
+            }
+            
+            OAuthFlowHandler oauthHandler = new OAuthFlowHandler(appConfig, status -> logger.debug(status), controller);
+            boolean success = oauthHandler.handleOAuthLogin();
             
             if (success) {
-            	logger.debug("OAuth browser login completed successfully!");
+                logger.debug("OAuth browser login completed successfully!");
             } else {
                 throw new OAuthBrowserLoginRunnerException("OAuth browser login failed - authentication could not be completed");
             }

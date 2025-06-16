@@ -763,7 +763,7 @@ public class AppConfig {
         setDefaultValue(PROP_UPDATE_WITH_EXTERNALID, false);
         setDefaultValue(PROP_DELETE_WITH_EXTERNALID, false);
         setDefaultValue(PROP_OAUTH_LOGIN_FROM_BROWSER, true);
-        setDefaultValue(PROP_OAUTH_LOGIN_FROM_BROWSER_DEVICE_OAUTH, true);
+        setDefaultValue(PROP_OAUTH_LOGIN_FROM_BROWSER_DEVICE_OAUTH, false);
         setDefaultValue(PROP_OAUTH_PKCE_PORT, DEFAULT_OAUTH_PKCE_PORT);
         setDefaultValue(PROP_LOAD_PRESERVE_WHITESPACE_IN_RICH_TEXT, true);
         setDefaultValue(CLI_OPTION_RUN_MODE, RUN_MODE_UI_VAL);

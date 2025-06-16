@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 # Reset getopts state (important for zsh)
 OPTIND=1
@@ -9,9 +9,11 @@ batchmodeargs=""
 encryptionargs=""
 configdir="salesforce.config.dir=./configs"
 version=""
+keyfile=""
+password=""
 
 # Parse command line options
-while getopts ":dbe:v:" flag; do
+while getopts ":dbe:v:k:D:" flag; do
   case "${flag}" in
     d)
       debug="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=0.0.0.0:5005,suspend=y"
@@ -23,7 +25,28 @@ while getopts ":dbe:v:" flag; do
       configdir=""
       ;;
     e)
-      encryptionargs="run.mode=encrypt"
+      encryptionargs="run.mode=encrypt -e "
+      password="${OPTARG}"
+      # Check if next argument exists and is not another option
+      if [[ $OPTIND -le $# && ${!OPTIND} != -* ]]; then
+        keyfile="${!OPTIND}"
+        ((OPTIND++))
+      fi
+      configdir=""
+      ;;
+    D)
+      encryptionargs="run.mode=encrypt -d "
+      password="${OPTARG}"
+      # Check if next argument exists and is not another option
+      if [[ $OPTIND -le $# && ${!OPTIND} != -* ]]; then
+        keyfile="${!OPTIND}"
+        ((OPTIND++))
+      fi
+      configdir=""
+      ;;
+    k)
+      encryptionargs="run.mode=encrypt -k "
+      keyfile="${OPTARG}"
       configdir=""
       ;;
     v)
@@ -67,4 +90,4 @@ if [[ -n "$debug" ]]; then
 fi
 
 # Execute Data Loader
-exec "${DATALOADER_JAVA_HOME}/bin/java" --enable-native-access=ALL-UNNAMED ${=debug} -cp "${jarname}" com.salesforce.dataloader.process.DataLoaderRunner ${=batchmodeargs} ${=configdir} ${=encryptionargs} "$@"
+${DATALOADER_JAVA_HOME}/bin/java --enable-native-access=ALL-UNNAMED ${debug} -cp "${jarname}" com.salesforce.dataloader.process.DataLoaderRunner ${batchmodeargs} ${configdir} ${encryptionargs} ${password} ${keyfile} $@
