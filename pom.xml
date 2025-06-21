@@ -83,6 +83,12 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
       <version>2.25.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core-config-plugins-processor</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!--
         https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
@@ -356,6 +362,7 @@
           <forceJavacCompilerUse>true</forceJavacCompilerUse>
           <compilerArgs>
             <!-- <arg>-verbose</arg> -->
+            <arg>-proc:none</arg>
           </compilerArgs>
         </configuration>
       </plugin>
