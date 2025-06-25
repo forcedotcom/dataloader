@@ -26,7 +26,7 @@
     <test.redirect>true</test.redirect>
     <test.testfiles.directory>${project.build.testOutputDirectory}/testfiles</test.testfiles.directory>
     <skip-unit-tests>false</skip-unit-tests>
-    <junit.version>5.13.1</junit.version>
+    <junit.version>5.13.2</junit.version>
     <junit.platform.version>1.13.2</junit.platform.version>
   </properties>
 
