@@ -98,7 +98,7 @@ public class OAuthBrowserFlow {
      * 
      * @return true if OAuth flow completed successfully, false otherwise
      */
-    public boolean performOAuthFlow() {
+    public boolean performOAuthFlow() throws com.salesforce.dataloader.exception.ParameterLoadException {
         return performOAuthFlow(DEFAULT_TIMEOUT_SECONDS);
     }
     
@@ -108,7 +108,7 @@ public class OAuthBrowserFlow {
      * @param timeoutSeconds Maximum time to wait for authorization
      * @return true if OAuth flow completed successfully, false otherwise
      */
-    public boolean performOAuthFlow(int timeoutSeconds) {
+    public boolean performOAuthFlow(int timeoutSeconds) throws com.salesforce.dataloader.exception.ParameterLoadException {
         try {
             // Step 1: Generate PKCE parameters
             generatePKCEParameters();
@@ -135,6 +135,9 @@ public class OAuthBrowserFlow {
                 return false;
             }
             
+        } catch (com.salesforce.dataloader.exception.ParameterLoadException e) {
+            // Let ParameterLoadException propagate to handler
+            throw e;
         } catch (Exception e) {
             logger.error("OAuth browser flow failed", e);
             return false;
@@ -236,10 +239,9 @@ public class OAuthBrowserFlow {
     /**
      * Exchanges the authorization code for access and refresh tokens.
      */
-    private boolean exchangeCodeForTokens() {
+    private boolean exchangeCodeForTokens() throws com.salesforce.dataloader.exception.ParameterLoadException {
+        logger.info("Exchanging authorization code for tokens");
         try {
-            logger.info("Exchanging authorization code for tokens");
-            
             // Create token request
             String tokenUrl = appConfig.getAuthEndpointForCurrentEnv() + "/services/oauth2/token";
             String clientId = appConfig.getEffectiveClientIdForCurrentEnv();
@@ -272,8 +274,28 @@ public class OAuthBrowserFlow {
             client.post();
             
             if (!client.isSuccessful()) {
+                String errorResponse = null;
+                try {
+                    ByteArrayOutputStream result = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[1024];
+                    InputStream in = client.getInput();
+                    for (int length; (length = in.read(buffer)) != -1; ) {
+                        result.write(buffer, 0, length);
+                    }
+                    errorResponse = result.toString(StandardCharsets.UTF_8.name());
+                } catch (Exception e) {
+                    // ignore
+                }
                 logger.error("Token exchange failed with status: " + client.getStatusCode() + " - " + client.getReasonPhrase());
                 logErrorResponse(client.getInput());
+                if (errorResponse != null && errorResponse.contains("invalid_client")) {
+                    if (appConfig.isExternalClientAppConfigured() && 
+                        (appConfig.getECAClientSecretForCurrentEnv() == null || appConfig.getECAClientSecretForCurrentEnv().isEmpty())) {
+                        logger.error("External Client App (ECA) is configured, but the client secret (Consumer Secret) is missing in Data Loader configuration. " +
+                                     "Please set the ECA client secret or uncheck 'Require Secret for Web Server Flow' in your Salesforce Connected App.");
+                        throw new com.salesforce.dataloader.exception.ParameterLoadException("Missing ECA client secret for confidential flow.");
+                    }
+                }
                 return false;
             }
             
@@ -302,7 +324,8 @@ public class OAuthBrowserFlow {
                 logger.error("Failed to obtain OAuth tokens: " + response);
                 return false;
             }
-            
+        } catch (com.salesforce.dataloader.exception.ParameterLoadException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Failed to exchange authorization code for tokens", e);
             return false;

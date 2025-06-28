@@ -31,6 +31,7 @@ import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.util.OAuthBrowserDeviceLoginRunner;
 import com.salesforce.dataloader.util.OAuthBrowserFlow;
 import com.salesforce.dataloader.util.DLLogManager;
+import com.salesforce.dataloader.ui.Labels;
 import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -73,17 +74,17 @@ public class OAuthFlowHandler {
         logger.debug("Device login from browser setting: " + deviceLoginFromBrowser);
         logger.debug("Device login from browser enabled: " + deviceLoginFromBrowserEnabled);
 
-        try {
-            // If device login from browser is explicitly enabled, use device flow directly
-            if (deviceLoginFromBrowserEnabled) {
-                logger.info("Device login from browser is enabled, using device flow");
-                return handleDeviceFlow();
-            }
+        // If device login from browser is explicitly enabled, use device flow directly
+        if (deviceLoginFromBrowserEnabled) {
+            logger.info("Device login from browser is enabled, using device flow");
+            return handleDeviceFlow();
+        }
 
-            // If device login from browser is not enabled, try PKCE first
-            logger.debug("Device login from browser is not enabled, checking PKCE support");
-            if (checkPKCESupport()) {
-                logger.info("PKCE is supported by connected app, attempting PKCE flow");
+        // If device login from browser is not enabled, try PKCE first
+        logger.debug("Device login from browser is not enabled, checking PKCE support");
+        if (checkPKCESupport()) {
+            logger.info("PKCE is supported by connected app, attempting PKCE flow");
+            try {
                 OAuthBrowserFlow pkceFlow = new OAuthBrowserFlow(appConfig);
                 if (pkceFlow.performOAuthFlow()) {
                     logger.info("PKCE flow completed successfully");
@@ -101,21 +102,22 @@ public class OAuthFlowHandler {
                         }
                     }
                     return true;
+                } else {
+                    logger.info("PKCE flow did not complete successfully, falling back to device flow");
+                    logger.info("Starting device flow");
+                    return handleDeviceFlow();
                 }
-                logger.info("PKCE flow did not complete successfully, falling back to device flow");
+            } catch (com.salesforce.dataloader.exception.ParameterLoadException e) {
+                logger.error("OAuth flow failed due to configuration error: " + e.getMessage());
+                if (statusConsumer != null) {
+                    statusConsumer.accept(Labels.getFormattedString("OAuthLoginControl.pkceConfigErrorMessage", e.getMessage()));
+                }
+                return false; // Do not attempt device flow
             }
-
-            // If PKCE failed or is not supported, try device flow
-            logger.info("Starting device flow");
-            return handleDeviceFlow();
-
-        } catch (Exception e) {
-            logger.error("OAuth flow failed with unexpected error: " + e.getMessage(), e);
-            if (statusConsumer != null) {
-                statusConsumer.accept("OAuth flow failed. Please try again.");
-            }
-            return false;
         }
+        // If PKCE not supported, try device flow
+        logger.info("Starting device flow");
+        return handleDeviceFlow();
     }
 
     /**
