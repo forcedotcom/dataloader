@@ -69,7 +69,7 @@ public class AuthenticationRunner {
     private final Shell shell;
     private Consumer<String> authStatusChangeConsumer;
     private LoginCriteria criteria;
-
+    private volatile boolean statusSet = false;
 
     public AuthenticationRunner(Shell shell, AppConfig appConfig, Controller controller) {
         this.shell = shell;
@@ -81,8 +81,6 @@ public class AuthenticationRunner {
         return appConfig;
     }
 
-
-
     public void login(LoginCriteria criteria, Consumer<String> messenger) {
         this.authStatusChangeConsumer = messenger;
         this.criteria = criteria;
@@ -93,6 +91,7 @@ public class AuthenticationRunner {
     }
 
     private void loginAsync() {
+        statusSet = false;
         try {
             // Check if OAuth is required
             if (requiresOAuthLogin(appConfig)) {
@@ -101,7 +100,9 @@ public class AuthenticationRunner {
                     updateStatus("OAuth login successful");
                     return;
                 }
-                updateStatus("OAuth login failed");
+                if (!statusSet) {
+                    updateStatus("OAuth login failed");
+                }
                 return;
             }
 
@@ -120,6 +121,7 @@ public class AuthenticationRunner {
     }
 
     private void updateStatus(String status) {
+        statusSet = true;
         authStatusChangeConsumer.accept(status);
     }
 

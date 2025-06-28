@@ -2042,11 +2042,10 @@ public class AppConfig {
     
     /**
      * Determines if External Client App is configured and should be used
-     * @return true if ECA is configured with client ID and secret
+     * @return true if ECA is configured with client ID (secret may be missing for public flows)
      */
     public boolean isExternalClientAppConfigured() {
-        return !isEmpty(getECAClientIdForCurrentEnv()) && 
-               !isEmpty(getECAClientSecretForCurrentEnv());
+        return !isEmpty(getECAClientIdForCurrentEnv());
     }
     
     /**
