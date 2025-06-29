@@ -158,6 +158,13 @@ public class UsernamePasswordLoginControl extends Composite {
         gc.dispose();
         data.heightHint = TEXT_SIZE.y * 3;
         loginStatusLabel.setLayoutData(data);
+
+        // Set tab order: username -> password/sessionId -> environment -> login button
+        if (authUsingSessionId) {
+            this.setTabList(new Control[] { userName, sessionId, envDropdown, loginButton });
+        } else {
+            this.setTabList(new Control[] { userName, password, envDropdown, loginButton });
+        }
     }
 
     private void loginButton_Clicked(Event event) {
@@ -184,5 +191,16 @@ public class UsernamePasswordLoginControl extends Composite {
         }
         loginStatusLabel.setText(statusStr);
         this.loginPage.setPageComplete();
+    }
+
+    /**
+     * Sets keyboard focus to the username field, or password field if username is not empty.
+     */
+    public void focusUsernameField() {
+        if (!authUsingSessionId && userName.getText() != null && !userName.getText().trim().isEmpty() && password != null) {
+            password.setFocus();
+        } else {
+            userName.setFocus();
+        }
     }
 }

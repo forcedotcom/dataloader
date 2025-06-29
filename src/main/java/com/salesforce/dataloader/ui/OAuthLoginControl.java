@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.swt.widgets.Text;
 
 import java.util.ArrayList;
 
@@ -45,8 +46,9 @@ public class OAuthLoginControl extends Composite {
     private LoginPage loginPage;
     protected final Combo environment;
     protected final AuthenticationRunner authRunner;
-    protected final Label loginStatusLabel;
+    protected final Text loginStatusText;
     private final ProgressBar spinner;
+    private final org.eclipse.swt.layout.GridData spinnerGridData;
 
     public OAuthLoginControl(Composite parent, int style, LoginPage loginPage, AuthenticationRunner authRunner) {
         super(parent, style);
@@ -73,29 +75,47 @@ public class OAuthLoginControl extends Composite {
         
         grid.createPadding(1);
         spinner = new ProgressBar(this, SWT.INDETERMINATE);
-        spinner.setLayoutData(grid.createCell(10));
+        spinnerGridData = (org.eclipse.swt.layout.GridData) grid.createCell(10);
+        spinner.setLayoutData(spinnerGridData);
         spinner.setVisible(false);
+        spinnerGridData.heightHint = 24; // Default spinner height
         grid.createPadding(1);
 
-        loginStatusLabel = grid.createLeftLabel(10, "\n\n\n");
+        loginStatusText = new Text(this, SWT.READ_ONLY | SWT.MULTI | SWT.WRAP | SWT.BORDER);
+        loginStatusText.setLayoutData(grid.createCell(10));
+        loginStatusText.setBackground(getBackground());
+        loginStatusText.setText("\n\n\n");
     }
 
     protected void loginButton_Clicked(Event event) {
         loginButton.setEnabled(false); // Disable immediately to indicate progress
         spinner.setVisible(true); // Show spinner
+        spinnerGridData.exclude = false; // Ensure spinner is included in layout
+        spinnerGridData.heightHint = 24; // Reset spinner area to original height
+        spinner.getParent().layout();
         LoginCriteria criteria = new LoginCriteria(LoginCriteria.OAuthLogin);
         criteria.setEnvironment(environment.getText());
         authRunner.login(criteria, this::setLoginStatus);
     }
     private void setLoginStatus(String statusStr) {
-        spinner.setVisible(false); // Hide spinner when login completes
+        // Hide spinner and fully exclude its area if showing an error message, or when login completes
+        boolean isError = statusStr != null && (statusStr.toLowerCase().contains("failed") || statusStr.toLowerCase().contains("error"));
+        spinner.setVisible(false);
+        if (isError) {
+            spinnerGridData.exclude = true; // Exclude spinner from layout
+            spinner.getParent().layout();
+        } else {
+            spinnerGridData.exclude = false;
+        }
         // Only re-enable if not logged in (i.e., login failed or timed out)
         if (this.loginPage.controller.isLoggedIn()) {
             loginButton.setEnabled(false);
         } else {
             loginButton.setEnabled(true);
         }
-        loginStatusLabel.setText(statusStr);
+        loginStatusText.setText(statusStr);
+        loginStatusText.getParent().layout(); // Refresh layout after error message
+        loginStatusText.showSelection(); // Ensure top of message is visible
         loginPage.setPageComplete();
     }
 }
