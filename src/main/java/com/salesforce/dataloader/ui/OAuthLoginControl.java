@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ProgressBar;
 
 import java.util.ArrayList;
 
@@ -45,6 +46,7 @@ public class OAuthLoginControl extends Composite {
     protected final Combo environment;
     protected final AuthenticationRunner authRunner;
     protected final Label loginStatusLabel;
+    private final ProgressBar spinner;
 
     public OAuthLoginControl(Composite parent, int style, LoginPage loginPage, AuthenticationRunner authRunner) {
         super(parent, style);
@@ -69,17 +71,29 @@ public class OAuthLoginControl extends Composite {
         loginButton.addListener(SWT.Selection, this::loginButton_Clicked);
         grid.createPadding(2);
         
+        grid.createPadding(1);
+        spinner = new ProgressBar(this, SWT.INDETERMINATE);
+        spinner.setLayoutData(grid.createCell(10));
+        spinner.setVisible(false);
+        grid.createPadding(1);
+
         loginStatusLabel = grid.createLeftLabel(10, "\n\n\n");
     }
 
     protected void loginButton_Clicked(Event event) {
+        loginButton.setEnabled(false); // Disable immediately to indicate progress
+        spinner.setVisible(true); // Show spinner
         LoginCriteria criteria = new LoginCriteria(LoginCriteria.OAuthLogin);
         criteria.setEnvironment(environment.getText());
         authRunner.login(criteria, this::setLoginStatus);
     }
     private void setLoginStatus(String statusStr) {
+        spinner.setVisible(false); // Hide spinner when login completes
+        // Only re-enable if not logged in (i.e., login failed or timed out)
         if (this.loginPage.controller.isLoggedIn()) {
             loginButton.setEnabled(false);
+        } else {
+            loginButton.setEnabled(true);
         }
         loginStatusLabel.setText(statusStr);
         loginPage.setPageComplete();

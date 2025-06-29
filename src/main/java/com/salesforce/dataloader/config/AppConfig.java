@@ -2127,4 +2127,23 @@ public class AppConfig {
     private boolean isEmpty(String value) {
         return value == null || value.trim().isEmpty();
     }
+
+    public static final String PROP_OAUTH_TIMEOUT_SECONDS = "sfdc.oauth.timeout.seconds";
+    public static final int DEFAULT_OAUTH_TIMEOUT_SECONDS = 30;
+
+    /**
+     * Returns the OAuth timeout in seconds, using the config property if set, otherwise the default.
+     */
+    public int getOAuthTimeoutSeconds() {
+        try {
+            String timeoutStr = getString(PROP_OAUTH_TIMEOUT_SECONDS);
+            if (timeoutStr != null && !timeoutStr.isEmpty()) {
+                int timeout = Integer.parseInt(timeoutStr);
+                if (timeout > 0) return timeout;
+            }
+        } catch (Exception e) {
+            // ignore and use default
+        }
+        return DEFAULT_OAUTH_TIMEOUT_SECONDS;
+    }
 }

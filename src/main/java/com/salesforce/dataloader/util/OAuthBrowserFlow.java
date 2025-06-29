@@ -71,7 +71,6 @@ import com.sun.net.httpserver.HttpExchange;
 public class OAuthBrowserFlow {
     private static final Logger logger = DLLogManager.getLogger(OAuthBrowserFlow.class);
     
-    private static final int DEFAULT_TIMEOUT_SECONDS = 300; // 5 minutes
     private static final String REDIRECT_URI_PATH = "/OauthRedirect"; // Same as Salesforce CLI
     
     private final AppConfig appConfig;
@@ -99,7 +98,8 @@ public class OAuthBrowserFlow {
      * @return true if OAuth flow completed successfully, false otherwise
      */
     public boolean performOAuthFlow() throws com.salesforce.dataloader.exception.ParameterLoadException {
-        return performOAuthFlow(DEFAULT_TIMEOUT_SECONDS);
+        int timeout = appConfig.getOAuthTimeoutSeconds();
+        return performOAuthFlow(timeout);
     }
     
     /**
