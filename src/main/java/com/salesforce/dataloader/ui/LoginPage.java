@@ -162,6 +162,7 @@ public class LoginPage extends OperationPage {
 
     private void selectUnamePwd(Event event) {
         show(unamePwdLoginControl);
+        unamePwdLoginControl.focusUsernameField();
     }
 
     private void selectOAuth(Event event) {
