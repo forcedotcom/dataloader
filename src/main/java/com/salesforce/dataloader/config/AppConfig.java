@@ -2129,7 +2129,7 @@ public class AppConfig {
     }
 
     public static final String PROP_OAUTH_TIMEOUT_SECONDS = "sfdc.oauth.timeout.seconds";
-    public static final int DEFAULT_OAUTH_TIMEOUT_SECONDS = 30;
+    public static final int DEFAULT_OAUTH_TIMEOUT_SECONDS = 60;
 
     /**
      * Returns the OAuth timeout in seconds, using the config property if set, otherwise the default.
