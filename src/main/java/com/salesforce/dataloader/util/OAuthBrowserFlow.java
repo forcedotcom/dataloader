@@ -74,6 +74,7 @@ public class OAuthBrowserFlow {
     private static final String REDIRECT_URI_PATH = "/OauthRedirect"; // Same as Salesforce CLI
     
     private final AppConfig appConfig;
+    private final java.util.function.Consumer<String> statusConsumer;
     private HttpServer server;
     private String authorizationCode;
     private String state;
@@ -82,14 +83,25 @@ public class OAuthBrowserFlow {
     private CountDownLatch authLatch = new CountDownLatch(1);
     private boolean isRunning = false;
     private int port;
+    private final boolean usePkce;
     
     public OAuthBrowserFlow(AppConfig appConfig) throws ParameterLoadException {
+        this(appConfig, true, null);
+    }
+
+    public OAuthBrowserFlow(AppConfig appConfig, boolean usePkce) throws ParameterLoadException {
+        this(appConfig, usePkce, null);
+    }
+
+    public OAuthBrowserFlow(AppConfig appConfig, boolean usePkce, java.util.function.Consumer<String> statusConsumer) throws ParameterLoadException {
         this.appConfig = appConfig;
-		this.port = findAvailablePort();
-		if (this.port == 0) {
-			throw new ParameterLoadException("No available port found for OAuth callback server");
-		}
-		logger.debug("Using port " + this.port + " for OAuth callback server");
+        this.usePkce = usePkce;
+        this.statusConsumer = statusConsumer;
+        this.port = findAvailablePort();
+        if (this.port == 0) {
+            throw new ParameterLoadException("No available port found for OAuth callback server");
+        }
+        logger.debug("Using port " + this.port + " for OAuth callback server");
     }
     
     /**
@@ -110,8 +122,18 @@ public class OAuthBrowserFlow {
      */
     public boolean performOAuthFlow(int timeoutSeconds) throws com.salesforce.dataloader.exception.ParameterLoadException {
         try {
-            // Step 1: Generate PKCE parameters
-            generatePKCEParameters();
+            // Step 1: Generate PKCE parameters if needed
+            if (usePkce) {
+                generatePKCEParameters();
+            } else {
+                // Always generate state for CSRF protection
+                SecureRandom random = new SecureRandom();
+                byte[] stateBytes = new byte[16];
+                random.nextBytes(stateBytes);
+                state = Base64.getUrlEncoder().withoutPadding().encodeToString(stateBytes);
+                codeVerifier = null;
+                codeChallenge = null;
+            }
             
             // Step 2: Start local HTTP server
             startCallbackServer();
@@ -119,6 +141,11 @@ public class OAuthBrowserFlow {
             // Step 3: Build authorization URL
             String authUrl = buildAuthorizationUrl();
             logger.info("Opening browser for OAuth authorization: " + authUrl);
+            logger.info("OAuth client_id: " + appConfig.getEffectiveClientIdForCurrentEnv());
+            logger.info("OAuth redirect_uri: http://localhost:" + port + REDIRECT_URI_PATH);
+            if (statusConsumer != null) {
+                statusConsumer.accept("A browser window has opened for login. If you do not see it, please check your pop-up blocker or open the following URL manually: " + authUrl);
+            }
             
             // Step 4: Open browser
             URLUtil.openURL(authUrl);
@@ -132,6 +159,9 @@ public class OAuthBrowserFlow {
                 return exchangeCodeForTokens();
             } else {
                 logger.warn("OAuth authorization timed out or failed");
+                if (statusConsumer != null) {
+                    statusConsumer.accept("OAuth login timed out. Please complete the login in your browser, or check your network and try again.");
+                }
                 return false;
             }
             
@@ -140,6 +170,9 @@ public class OAuthBrowserFlow {
             throw e;
         } catch (Exception e) {
             logger.error("OAuth browser flow failed", e);
+            if (statusConsumer != null) {
+                statusConsumer.accept("An unexpected error occurred during browser login: " + e.getMessage());
+            }
             return false;
         } finally {
             stopCallbackServer();
@@ -230,8 +263,10 @@ public class OAuthBrowserFlow {
         authUrl.append("&redirect_uri=").append(URLEncoder.encode(redirectUri, StandardCharsets.UTF_8.name()));
         authUrl.append("&scope=").append(URLEncoder.encode("api refresh_token", StandardCharsets.UTF_8.name()));
         authUrl.append("&state=").append(URLEncoder.encode(state, StandardCharsets.UTF_8.name()));
-        authUrl.append("&code_challenge=").append(URLEncoder.encode(codeChallenge, StandardCharsets.UTF_8.name()));
-        authUrl.append("&code_challenge_method=S256");
+        if (usePkce && codeChallenge != null) {
+            authUrl.append("&code_challenge=").append(URLEncoder.encode(codeChallenge, StandardCharsets.UTF_8.name()));
+            authUrl.append("&code_challenge_method=S256");
+        }
         
         return authUrl.toString();
     }
@@ -247,6 +282,7 @@ public class OAuthBrowserFlow {
             String clientId = appConfig.getEffectiveClientIdForCurrentEnv();
             String clientSecret = appConfig.getEffectiveClientSecretForCurrentEnv();
             String redirectUri = "http://localhost:" + port + REDIRECT_URI_PATH;
+            logger.info("Token exchange using client_id: " + clientId + ", redirect_uri: " + redirectUri);
             
             // Build token request parameters
             List<BasicNameValuePair> params = new ArrayList<>();
@@ -254,7 +290,9 @@ public class OAuthBrowserFlow {
             params.add(new BasicNameValuePair("client_id", clientId));
             params.add(new BasicNameValuePair("code", authorizationCode));
             params.add(new BasicNameValuePair("redirect_uri", redirectUri));
-            params.add(new BasicNameValuePair("code_verifier", codeVerifier));
+            if (usePkce && codeVerifier != null) {
+                params.add(new BasicNameValuePair("code_verifier", codeVerifier));
+            }
             
             // Add client secret if using External Client App (confidential client)
             if (appConfig.isExternalClientAppConfigured() && clientSecret != null && !clientSecret.trim().isEmpty()) {
@@ -288,12 +326,10 @@ public class OAuthBrowserFlow {
                 }
                 logger.error("Token exchange failed with status: " + client.getStatusCode() + " - " + client.getReasonPhrase());
                 logErrorResponse(client.getInput());
-                if (errorResponse != null && errorResponse.contains("invalid_client")) {
-                    if (appConfig.isExternalClientAppConfigured() && 
-                        (appConfig.getECAClientSecretForCurrentEnv() == null || appConfig.getECAClientSecretForCurrentEnv().isEmpty())) {
-                        logger.error("External Client App (ECA) is configured, but the client secret (Consumer Secret) is missing in Data Loader configuration. " +
-                                     "Please set the ECA client secret or uncheck 'Require Secret for Web Server Flow' in your Salesforce Connected App.");
-                        throw new com.salesforce.dataloader.exception.ParameterLoadException("Missing ECA client secret for confidential flow.");
+                if (errorResponse != null && errorResponse.contains("invalid_client_id")) {
+                    logger.error("Invalid client ID used: " + clientId);
+                    if (statusConsumer != null) {
+                        statusConsumer.accept("The client ID configured is invalid. Please check your Data Loader settings and Salesforce Connected App configuration. Client ID: " + clientId);
                     }
                 }
                 return false;

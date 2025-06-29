@@ -349,7 +349,7 @@ public class Controller {
         if (AppUtil.getAppRunMode() == AppUtil.APP_RUN_MODE.BATCH) {
             return;
         }
-        
+
         if (isLoggedIn()) {
             try {
                 ConnectorConfig sessionConfig = getPartnerClient().getConnection().getConfig();
@@ -361,7 +361,7 @@ public class Controller {
                 logger.error(e.getMessage());
             }
         } else {
-            this.loaderWindow.updateTitle(null);
+            this.loaderWindow.updateTitle(Labels.getString("LoaderWindow.title"));
         }
     }
     
