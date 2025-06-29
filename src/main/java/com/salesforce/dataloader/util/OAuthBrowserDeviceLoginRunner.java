@@ -60,7 +60,7 @@ import com.salesforce.dataloader.ui.URLUtil;
 public class OAuthBrowserDeviceLoginRunner {
     public enum LoginStatus { WAIT, FAIL, SUCCESS };
     protected static Logger logger = DLLogManager.getLogger(OAuthBrowserDeviceLoginRunner.class);
-    private static LoginStatus loginResult = LoginStatus.WAIT;
+    private volatile LoginStatus loginResult = LoginStatus.WAIT;
     private String verificationURLStr = null;
     String userCodeStr;
     String deviceCode;
@@ -192,75 +192,78 @@ public class OAuthBrowserDeviceLoginRunner {
                int elapsedTimeInSec = 0;
                SimplePostInterface client;
                InputStream in;
-               while (elapsedTimeInSec <= maxPollingTimeInSec) {
-                   try {
-                       Thread.sleep(pollingIntervalInSec * 1000);
-                   } catch (InterruptedException e) {
-                       // do nothing
-                   }
-                   elapsedTimeInSec += pollingIntervalInSec;
-                   // Build token request parameters for device flow
-                   List<BasicNameValuePair> tokenParams = new ArrayList<>();
-                   tokenParams.add(new BasicNameValuePair("grant_type", "device"));
-                   tokenParams.add(new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getEffectiveClientIdForCurrentEnv()));
-                   tokenParams.add(new BasicNameValuePair("code", deviceCode));
-                   
-                   // Add client secret if using External Client App (confidential client)
-                   String clientSecret = appConfig.getEffectiveClientSecretForCurrentEnv();
-                   if (appConfig.isExternalClientAppConfigured() && clientSecret != null && !clientSecret.trim().isEmpty()) {
-                       tokenParams.add(new BasicNameValuePair("client_secret", clientSecret));
-                   }
-                   
-                   client = SimplePostFactory.getInstance(appConfig, oAuthTokenURLStr,
-                           tokenParams.toArray(new BasicNameValuePair[0])
-                   );
-                   try {
-                       client.post();
-                   } catch (ParameterLoadException e) {
-                       logger.error(e.getMessage());;
-                       setLoginStatus(LoginStatus.FAIL);
-                       return;
-                   } catch (IOException e) {
-                       logger.error(e.getMessage());
-                       setLoginStatus(LoginStatus.FAIL);
-                       return;
-                   }
-                   in = client.getInput();
-                   if (client.isSuccessful()) {
+               try {
+                   while (elapsedTimeInSec <= maxPollingTimeInSec && loginResult == LoginStatus.WAIT) {
                        try {
-                           processSuccessfulLogin(client.getInput(), appConfig);
-                       } catch (IOException e) {
+                           Thread.sleep(pollingIntervalInSec * 1000);
+                       } catch (InterruptedException e) {
+                           setLoginStatus(LoginStatus.FAIL);
+                           return;
+                       }
+                       elapsedTimeInSec += pollingIntervalInSec;
+                       // Build token request parameters for device flow
+                       List<BasicNameValuePair> tokenParams = new ArrayList<>();
+                       tokenParams.add(new BasicNameValuePair("grant_type", "device"));
+                       tokenParams.add(new BasicNameValuePair(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getEffectiveClientIdForCurrentEnv()));
+                       tokenParams.add(new BasicNameValuePair("code", deviceCode));
+                       
+                       // Add client secret if using External Client App (confidential client)
+                       String clientSecret = appConfig.getEffectiveClientSecretForCurrentEnv();
+                       if (appConfig.isExternalClientAppConfigured() && clientSecret != null && !clientSecret.trim().isEmpty()) {
+                           tokenParams.add(new BasicNameValuePair("client_secret", clientSecret));
+                       }
+                       
+                       client = SimplePostFactory.getInstance(appConfig, oAuthTokenURLStr,
+                               tokenParams.toArray(new BasicNameValuePair[0])
+                       );
+                       try {
+                           client.post();
+                       } catch (ParameterLoadException | IOException e) {
                            logger.error(e.getMessage());
                            setLoginStatus(LoginStatus.FAIL);
                            return;
                        }
-                       // got the session id => SUCCESSful login
-                       setLoginStatus(LoginStatus.SUCCESS);
-                       return; 
-                   } else { // read the error message and log it
-                       ObjectMapper mapper = new ObjectMapper();
-                       mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-                       try {
-                           Map<?, ?> responseMap = mapper.readValue(in, Map.class);
-                           String errorStr = (String)responseMap.get("error");
-                           String errorDesc = (String)responseMap.get("error_description");
-                           if ("authorization_pending".equalsIgnoreCase(errorStr)) {
-                               // waiting for the user to login
-                               logger.debug(errorStr + " - " + errorDesc);
-                           } else {
-                               // a failure occurred. Exit.
-                               logger.error(errorStr + " - " + errorDesc);
+                       in = client.getInput();
+                       if (client.isSuccessful()) {
+                           try {
+                               processSuccessfulLogin(client.getInput(), appConfig);
+                           } catch (IOException e) {
+                               logger.error(e.getMessage());
                                setLoginStatus(LoginStatus.FAIL);
-                               break;
+                               return;
                            }
-                       } catch (IOException e) {
-                           logger.debug(e.getMessage());
-                           continue;
+                           // got the session id => SUCCESSful login
+                           setLoginStatus(LoginStatus.SUCCESS);
+                           return; 
+                       } else { // read the error message and log it
+                           ObjectMapper mapper = new ObjectMapper();
+                           mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+                           try {
+                               Map<?, ?> responseMap = mapper.readValue(in, Map.class);
+                               String errorStr = (String)responseMap.get("error");
+                               String errorDesc = (String)responseMap.get("error_description");
+                               if ("authorization_pending".equalsIgnoreCase(errorStr)) {
+                                   // waiting for the user to login
+                                   logger.debug(errorStr + " - " + errorDesc);
+                               } else {
+                                   // a failure occurred. Exit.
+                                   logger.error(errorStr + " - " + errorDesc);
+                                   setLoginStatus(LoginStatus.FAIL);
+                                   return;
+                               }
+                           } catch (IOException e) {
+                               logger.debug(e.getMessage());
+                               setLoginStatus(LoginStatus.FAIL);
+                               return;
+                           }
                        }
-                   }
-               } // while loop
-               logger.error("User closed the dialog or timed out waiting for login");
-               setLoginStatus(LoginStatus.FAIL);
+                   } // while loop
+                   logger.error("User closed the dialog or timed out waiting for login");
+                   setLoginStatus(LoginStatus.FAIL);
+               } catch (Exception e) {
+                   logger.error("Unexpected error in device flow polling thread", e);
+                   setLoginStatus(LoginStatus.FAIL);
+               }
            }
        };
        successfulLogincheckerThread.start();
@@ -268,11 +271,11 @@ public class OAuthBrowserDeviceLoginRunner {
    }
    
    private synchronized void setLoginStatus(LoginStatus value) {
-       loginResult = value;
+       this.loginResult = value;
    }
    
    public LoginStatus getLoginStatus() {
-       return loginResult;
+       return this.loginResult;
    }
    
    public String getUserCode() {

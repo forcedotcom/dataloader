@@ -41,7 +41,6 @@ import com.sforce.ws.bind.XmlObject;
 import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.util.DLLogManager;
 
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -56,6 +55,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.net.ServerSocket;
 import com.salesforce.dataloader.oauth.OAuthFlowHandler;
+import com.salesforce.dataloader.ui.Labels;
 
 /**
  * AuthenticationRunner is the UI orchestration of logging in.
@@ -87,7 +87,7 @@ public class AuthenticationRunner {
 
         criteria.updateConfig(appConfig);
 
-        BusyIndicator.showWhile(Display.getDefault(), new Thread(this::loginAsync));
+        new Thread(this::loginAsync).start();
     }
 
     private void loginAsync() {
@@ -110,9 +110,9 @@ public class AuthenticationRunner {
             updateStatus("Logging in...");
             PartnerConnection conn = login();
             if (conn != null) {
-                updateStatus("Login successful");
+                // Success message already set above in asyncExec
             } else {
-                updateStatus("Login failed");
+                updateStatus(Labels.getString("AuthenticationRunner.loginFailedCheckCreds"));
             }
         } catch (Exception e) {
             logger.error("Login failed", e);
@@ -122,7 +122,7 @@ public class AuthenticationRunner {
 
     private void updateStatus(String status) {
         statusSet = true;
-        authStatusChangeConsumer.accept(status);
+        Display.getDefault().asyncExec(() -> authStatusChangeConsumer.accept(status));
     }
 
     private boolean requiresOAuthLogin(AppConfig config) {
@@ -133,7 +133,10 @@ public class AuthenticationRunner {
         try {
             if (controller.login() && controller.getEntityDescribes() != null) {
                 controller.saveConfig();
-                controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession();
+                Display.getDefault().asyncExec(() -> {
+                    controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession();
+                    updateStatus("Login successful");
+                });
                 return controller.getLoginClient().getConnection();
             }
         } catch (Exception e) {
