@@ -361,7 +361,7 @@ public class Controller {
                 logger.error(e.getMessage());
             }
         } else {
-            this.loaderWindow.updateTitle(Labels.getString("LoaderWindow.title"));
+            this.loaderWindow.updateTitle(null);
         }
     }
     

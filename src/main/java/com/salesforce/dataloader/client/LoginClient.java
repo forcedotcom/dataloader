@@ -218,7 +218,18 @@ public class LoginClient extends ClientBase<PartnerConnection> {
     }
 
     private void setConfiguredSessionId(PartnerConnection conn, String sessionId, GetUserInfoResult userInfo) throws ConnectionException {
-        logger.info("Using manually configured session id to bypass login");
+        String flowType = "unknown";
+        if (appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN) != null && appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN).trim().length() > 0) {
+            String lastFlow = appConfig.getLastOAuthFlow();
+            if (lastFlow != null) {
+                flowType = "OAuth " + lastFlow + " Flow";
+            } else {
+                flowType = "OAuth (unknown flow)";
+            }
+        } else if (appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
+            flowType = "SessionId Login";
+        }
+        logger.info("Using session id from " + flowType + " to establish Salesforce session");
         conn.setSessionHeader(sessionId);
         if (userInfo == null) {
             userInfo = conn.getUserInfo(); // check to make sure we have a good connection

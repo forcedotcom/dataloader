@@ -2146,4 +2146,15 @@ public class AppConfig {
         }
         return DEFAULT_OAUTH_TIMEOUT_SECONDS;
     }
+
+    // In-memory property to track the last OAuth flow used (not persisted)
+    private transient String lastOAuthFlow = null;
+
+    public void setLastOAuthFlow(String flow) {
+        this.lastOAuthFlow = flow;
+    }
+
+    public String getLastOAuthFlow() {
+        return this.lastOAuthFlow;
+    }
 }
