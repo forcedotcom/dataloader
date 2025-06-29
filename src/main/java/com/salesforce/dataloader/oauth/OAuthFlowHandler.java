@@ -33,6 +33,7 @@ import com.salesforce.dataloader.util.OAuthBrowserFlow;
 import com.salesforce.dataloader.util.DLLogManager;
 import com.salesforce.dataloader.ui.Labels;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.swt.widgets.Display;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -80,103 +81,131 @@ public class OAuthFlowHandler {
             return handleDeviceFlow();
         }
 
-        // If device login from browser is not enabled, try PKCE first
-        logger.debug("Device login from browser is not enabled, checking PKCE support");
-        if (checkPKCESupport()) {
-            logger.info("PKCE is supported by connected app, attempting PKCE flow");
-            try {
-                OAuthBrowserFlow pkceFlow = new OAuthBrowserFlow(appConfig);
-                if (pkceFlow.performOAuthFlow()) {
-                    logger.info("PKCE flow completed successfully");
-                    // Update controller's login state
+        // Always attempt PKCE flow first
+        logger.info("Attempting PKCE flow first");
+        if (statusConsumer != null) {
+            statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingPKCE"));
+        }
+        try {
+            OAuthBrowserFlow pkceFlow = new OAuthBrowserFlow(appConfig, true, statusConsumer);
+            if (pkceFlow.performOAuthFlow()) {
+                logger.info("PKCE flow completed successfully");
+                if (statusConsumer != null) {
+                    statusConsumer.accept(Labels.getString("OAuthLoginControl.statusPKCESuccess"));
+                }
+                // Update controller's login state
+                if (controller != null) {
+                    try {
+                        if (controller.login()) {
+                            controller.saveConfig();
+                            Display.getDefault().asyncExec(() -> controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession());
+                            return true;
+                        }
+                    } catch (Exception e) {
+                        logger.error("Failed to update controller's login state after PKCE flow", e);
+                        if (statusConsumer != null) {
+                            statusConsumer.accept(Labels.getString("OAuthLoginControl.statusControllerUpdateError"));
+                        }
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                logger.warn("PKCE flow did not complete successfully, attempting browser flow without PKCE");
+                if (statusConsumer != null) {
+                    statusConsumer.accept(Labels.getString("OAuthLoginControl.statusPKCEFailedFallbackBrowser"));
+                }
+                // Fallback: try browser flow without PKCE
+                OAuthBrowserFlow browserFlow = new OAuthBrowserFlow(appConfig, false, statusConsumer);
+                if (browserFlow.performOAuthFlow()) {
+                    logger.info("Browser flow (no PKCE) completed successfully");
+                    if (statusConsumer != null) {
+                        statusConsumer.accept(Labels.getString("OAuthLoginControl.statusBrowserSuccess"));
+                    }
                     if (controller != null) {
                         try {
                             if (controller.login()) {
                                 controller.saveConfig();
-                                controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession();
+                                Display.getDefault().asyncExec(() -> controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession());
                                 return true;
                             }
                         } catch (Exception e) {
-                            logger.error("Failed to update controller's login state", e);
+                            logger.error("Failed to update controller's login state after browser flow", e);
+                            if (statusConsumer != null) {
+                                statusConsumer.accept(Labels.getString("OAuthLoginControl.statusControllerUpdateError"));
+                            }
                             return false;
                         }
                     }
                     return true;
                 } else {
-                    logger.info("PKCE flow did not complete successfully, falling back to device flow");
+                    logger.warn("Browser flow (no PKCE) did not complete successfully, falling back to device flow");
+                    if (statusConsumer != null) {
+                        statusConsumer.accept(Labels.getString("OAuthLoginControl.statusBrowserFailedFallbackDevice"));
+                    }
                     logger.info("Starting device flow");
                     return handleDeviceFlow();
                 }
-            } catch (com.salesforce.dataloader.exception.ParameterLoadException e) {
-                logger.error("OAuth flow failed due to configuration error: " + e.getMessage());
-                if (statusConsumer != null) {
-                    statusConsumer.accept(Labels.getFormattedString("OAuthLoginControl.pkceConfigErrorMessage", e.getMessage()));
-                }
-                return false; // Do not attempt device flow
             }
-        }
-        // If PKCE not supported, try device flow
-        logger.info("Starting device flow");
-        return handleDeviceFlow();
-    }
-
-    /**
-     * Checks if PKCE is supported by the connected app.
-     *
-     * @return true if PKCE is supported, false otherwise
-     */
-    private boolean checkPKCESupport() {
-        try {
-            // Find an available port for PKCE
-            int pkcePort;
-            try (ServerSocket socket = new ServerSocket(0)) {
-                pkcePort = socket.getLocalPort();
-            } catch (Exception e) {
-                logger.error("Failed to find available port for PKCE", e);
+        } catch (com.salesforce.dataloader.exception.ParameterLoadException e) {
+            logger.error("OAuth flow failed due to configuration error: " + e.getMessage(), e);
+            if (statusConsumer != null) {
+                statusConsumer.accept(Labels.getFormattedString("OAuthLoginControl.pkceConfigErrorMessage", e.getMessage()));
+            }
+            return false; // Do not attempt device flow
+        } catch (Exception e) {
+            // Check for known PKCE errors to trigger fallback
+            String msg = e.getMessage();
+            if (msg != null && (msg.contains("unsupported_grant_type") || msg.contains("invalid_grant") || msg.contains("invalid_request") || msg.contains("PKCE") || msg.contains("code_challenge"))) {
+                logger.warn("PKCE not supported or failed with known error, attempting browser flow without PKCE: " + msg);
+                if (statusConsumer != null) {
+                    statusConsumer.accept(Labels.getString("OAuthLoginControl.statusPKCEFailedFallbackBrowser"));
+                }
+                try {
+                    OAuthBrowserFlow browserFlow = new OAuthBrowserFlow(appConfig, false, statusConsumer);
+                    if (browserFlow.performOAuthFlow()) {
+                        logger.info("Browser flow (no PKCE) completed successfully");
+                        if (statusConsumer != null) {
+                            statusConsumer.accept(Labels.getString("OAuthLoginControl.statusBrowserSuccess"));
+                        }
+                        if (controller != null) {
+                            try {
+                                if (controller.login()) {
+                                    controller.saveConfig();
+                                    Display.getDefault().asyncExec(() -> controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession());
+                                    return true;
+                                }
+                            } catch (Exception ex) {
+                                logger.error("Failed to update controller's login state after browser flow", ex);
+                                if (statusConsumer != null) {
+                                    statusConsumer.accept(Labels.getString("OAuthLoginControl.statusControllerUpdateError"));
+                                }
+                                return false;
+                            }
+                        }
+                        return true;
+                    } else {
+                        logger.warn("Browser flow (no PKCE) did not complete successfully, falling back to device flow");
+                        if (statusConsumer != null) {
+                            statusConsumer.accept(Labels.getString("OAuthLoginControl.statusBrowserFailedFallbackDevice"));
+                        }
+                        logger.info("Starting device flow");
+                        return handleDeviceFlow();
+                    }
+                } catch (Exception ex) {
+                    logger.error("Unexpected error during browser OAuth flow: " + ex.getMessage(), ex);
+                    if (statusConsumer != null) {
+                        statusConsumer.accept(Labels.getString("OAuthLoginControl.statusUnexpectedError"));
+                    }
+                    return false;
+                }
+            } else {
+                logger.error("Unexpected error during PKCE/browser OAuth flow: " + e.getMessage(), e);
+                if (statusConsumer != null) {
+                    statusConsumer.accept(Labels.getString("OAuthLoginControl.statusUnexpectedError"));
+                }
                 return false;
             }
-
-            // Check if PKCE is supported by making a test request
-            String testUrl = appConfig.getAuthEndpointForCurrentEnv() + "/services/oauth2/authorize";
-            String clientId = appConfig.getEffectiveClientIdForCurrentEnv();
-            String redirectUri = "http://localhost:" + pkcePort + "/OauthRedirect";
-
-            // Build test URL with PKCE parameters
-            StringBuilder testUrlBuilder = new StringBuilder(testUrl);
-            testUrlBuilder.append("?response_type=code");
-            testUrlBuilder.append("&client_id=").append(URLEncoder.encode(clientId, StandardCharsets.UTF_8.name()));
-            testUrlBuilder.append("&redirect_uri=").append(URLEncoder.encode(redirectUri, StandardCharsets.UTF_8.name()));
-            testUrlBuilder.append("&scope=").append(URLEncoder.encode("api refresh_token", StandardCharsets.UTF_8.name()));
-            testUrlBuilder.append("&code_challenge=test");
-            testUrlBuilder.append("&code_challenge_method=S256");
-
-            // Make a test request with PKCE parameters
-            URL url = new URL(testUrlBuilder.toString());
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(5000);
-
-            try {
-                int responseCode = conn.getResponseCode();
-                // If we get a 400 or 401, PKCE is not supported
-                if (responseCode == 400 || responseCode == 401) {
-                    String errorResponse = readErrorResponse(conn);
-                    if (errorResponse != null && (
-                        errorResponse.contains("redirect_uri_mismatch") ||
-                        errorResponse.contains("invalid_request") ||
-                        errorResponse.contains("unsupported_grant_type"))) {
-                        logger.info("PKCE not supported by connected app (error: " + errorResponse + ")");
-                        return false;
-                    }
-                }
-                return true;
-            } finally {
-                conn.disconnect();
-            }
-        } catch (Exception e) {
-            logger.error("Error checking PKCE support: " + e.getMessage(), e);
-            return false;
         }
     }
 
@@ -212,7 +241,7 @@ public class OAuthFlowHandler {
                     try {
                         if (controller.login()) {
                             controller.saveConfig();
-                            controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession();
+                            Display.getDefault().asyncExec(() -> controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession());
                             return true;
                         }
                     } catch (Exception e) {
