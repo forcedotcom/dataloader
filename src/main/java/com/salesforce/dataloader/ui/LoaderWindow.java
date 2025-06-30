@@ -181,7 +181,7 @@ public class LoaderWindow extends ApplicationWindow {
         shell.setImage(UIUtils.getImageRegistry().get("sfdc_icon"));
     }
 
-    private OperationUIAction getOperationAction(int i) {
+    public OperationUIAction getOperationAction(int i) {
         return this.operationActionsByIndex.get(i);
     }
 

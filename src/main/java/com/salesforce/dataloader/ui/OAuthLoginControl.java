@@ -111,6 +111,8 @@ public class OAuthLoginControl extends Composite {
         // Only re-enable if not logged in (i.e., login failed or timed out)
         if (this.loginPage.controller.isLoggedIn()) {
             loginButton.setEnabled(false);
+            // Advance the wizard after successful login on the UI thread
+            org.eclipse.swt.widgets.Display.getDefault().asyncExec(() -> this.loginPage.setPageComplete());
         } else {
             loginButton.setEnabled(true);
         }
