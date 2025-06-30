@@ -52,6 +52,7 @@ public class LoginPage extends OperationPage {
     private Grid12 grid;
     private Composite control;
     private String nextPageName = DataSelectionPage.class.getSimpleName();
+    private boolean operationLaunched = false;
 
     public LoginPage(Controller controller) {
         super("LoginPage", controller); //$NON-NLS-1$ //$NON-NLS-2$
@@ -189,7 +190,8 @@ public class LoginPage extends OperationPage {
     @Override
     public void setPageComplete() {
         setPageComplete(controller.isLoggedIn());
-        if (controller.isLoggedIn()) {
+        if (controller.isLoggedIn() && !operationLaunched) {
+            operationLaunched = true;
             org.eclipse.swt.widgets.Display.getDefault().asyncExec(() -> {
                 org.eclipse.swt.widgets.Shell shell = getShell();
                 if (shell != null && !shell.isDisposed()) {
