@@ -328,50 +328,18 @@ public class OAuthFlowHandler {
                 new BasicNameValuePair("client_id", appConfig.getEffectiveClientIdForCurrentEnv()),
                 new BasicNameValuePair("code", dummyCode),
                 new BasicNameValuePair("redirect_uri", "http://localhost:7171/OauthRedirect"),
+                new BasicNameValuePair("code_verifier", codeVerifier),
                 new BasicNameValuePair("code_challenge", codeChallenge),
                 new BasicNameValuePair("code_challenge_method", "S256")
             );
             client.post();
-            // Log the full response content, decompressing if needed
             String error = getErrorFromResponse(client);
-            String fullResponse = null;
-            try {
-                InputStream in = client.getInput();
-                if (in != null) {
-                    // Check for gzip encoding
-                    String encoding = null;
-                    try {
-                        encoding = client.getClass().getMethod("getContentEncoding").invoke(client).toString();
-                    } catch (Exception e) {
-                        // ignore, fallback to no encoding
-                    }
-                    InputStream responseStream = in;
-                    if (encoding != null && encoding.toLowerCase().contains("gzip")) {
-                        responseStream = new java.util.zip.GZIPInputStream(in);
-                    }
-                    ByteArrayOutputStream result = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[1024];
-                    for (int length; (length = responseStream.read(buffer)) != -1; ) {
-                        result.write(buffer, 0, length);
-                    }
-                    fullResponse = result.toString(StandardCharsets.UTF_8.name());
-                }
-            } catch (Exception e) {
-                logger.debug("Exception reading PKCE pre-flight response: ", e);
-            }
             logger.info("PKCE pre-flight error response: " + error);
+            String fullResponse = getFullResponse(client);
             logger.info("PKCE pre-flight full response: " + fullResponse);
-            // Only treat as enabled if error is not one of the known negatives
-            if (error != null) {
-                if (error.contains("unsupported_grant_type") ||
-                    error.contains("invalid_client") ||
-                    error.contains("invalid_client_credentials")) {
-                    return false;
-                }
-            }
-            return true;
+            return isFlowEnabledFromError(error);
         } catch (Exception e) {
-            logger.error("Exception during PKCE pre-flight check", e);
+            logger.error("Exception in PKCE pre-flight check", e);
             return false;
         }
     }
@@ -389,16 +357,12 @@ public class OAuthFlowHandler {
             );
             client.post();
             String error = getErrorFromResponse(client);
-            // Only treat as enabled if error is not one of the known negatives
-            if (error != null) {
-                if (error.contains("unsupported_response_type") ||
-                    error.contains("invalid_client") ||
-                    error.contains("invalid_client_credentials")) {
-                    return false;
-                }
-            }
-            return true;
+            logger.info("Browser flow pre-flight error response: " + error);
+            String fullResponse = getFullResponse(client);
+            logger.info("Browser flow pre-flight full response: " + fullResponse);
+            return isFlowEnabledFromError(error);
         } catch (Exception e) {
+            logger.error("Exception in browser flow pre-flight check", e);
             return false;
         }
     }
@@ -414,17 +378,11 @@ public class OAuthFlowHandler {
             client.post();
             String error = getErrorFromResponse(client);
             logger.info("Device flow pre-flight error response: " + error);
-            // Only treat as enabled if error is not one of the known negatives
-            if (error != null) {
-                if (error.contains("unsupported_grant_type") ||
-                    error.contains("invalid_client") ||
-                    error.contains("invalid_client_credentials")) {
-                    return false;
-                }
-            }
-            return true;
+            String fullResponse = getFullResponse(client);
+            logger.info("Device flow pre-flight full response: " + fullResponse);
+            return isFlowEnabledFromError(error);
         } catch (Exception e) {
-            logger.error("Exception during device flow pre-flight check", e);
+            logger.error("Exception in device flow pre-flight check", e);
             return false;
         }
     }
@@ -447,8 +405,41 @@ public class OAuthFlowHandler {
         return null;
     }
 
+    private String getFullResponse(SimplePostInterface client) {
+        try {
+            InputStream in = client.getInput();
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            for (int length; (length = in.read(buffer)) != -1; ) {
+                result.write(buffer, 0, length);
+            }
+            String response = result.toString(StandardCharsets.UTF_8.name());
+            return response;
+        } catch (Exception e) {
+            // ignore
+        }
+        return null;
+    }
+
     private boolean isFlowNotEnabledError(String error) {
         if (error == null) return false;
         return error.contains("unsupported_grant_type") || error.contains("invalid_grant") || error.contains("invalid_request") || error.contains("PKCE") || error.contains("code_challenge");
+    }
+
+    /**
+     * Returns true if the error does NOT indicate the flow is not enabled.
+     */
+    private boolean isFlowEnabledFromError(String error) {
+        if (error != null) {
+            if (error.contains("unsupported_grant_type") ||
+                error.contains("unsupported_response_type") ||
+                error.contains("invalid_client") ||
+                error.contains("invalid_client_credentials") ||
+                error.contains("redirect_uri_mismatch") ||
+                error.contains("invalid_scope")) {
+                return false;
+            }
+        }
+        return true;
     }
 } 
