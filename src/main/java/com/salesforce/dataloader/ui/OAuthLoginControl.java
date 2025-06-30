@@ -49,6 +49,7 @@ public class OAuthLoginControl extends Composite {
     protected final Text loginStatusText;
     private final ProgressBar spinner;
     private final org.eclipse.swt.layout.GridData spinnerGridData;
+    private boolean loginInProgress = false;
 
     public OAuthLoginControl(Composite parent, int style, LoginPage loginPage, AuthenticationRunner authRunner) {
         super(parent, style);
@@ -93,29 +94,34 @@ public class OAuthLoginControl extends Composite {
         spinnerGridData.exclude = false; // Ensure spinner is included in layout
         spinnerGridData.heightHint = 24; // Reset spinner area to original height
         spinner.getParent().layout();
+        loginInProgress = true;
         LoginCriteria criteria = new LoginCriteria(LoginCriteria.OAuthLogin);
         criteria.setEnvironment(environment.getText());
-        authRunner.login(criteria, this::setLoginStatus);
+        authRunner.login(criteria, this::setLoginStatus, this::onLoginFlowComplete);
     }
-    private void setLoginStatus(String statusStr) {
-        // Hide spinner and fully exclude its area if showing an error message, or when login completes
-        boolean isError = statusStr != null && (statusStr.toLowerCase().contains("failed") || statusStr.toLowerCase().contains("error"));
+
+    /**
+     * Called by the flow handler's Runnable after all OAuth flows are complete (success or failure).
+     */
+    public void onLoginFlowComplete() {
+        loginInProgress = false;
         spinner.setVisible(false);
-        if (isError) {
-            spinnerGridData.exclude = true; // Exclude spinner from layout
-            spinner.getParent().layout();
-        } else {
-            spinnerGridData.exclude = false;
-        }
+        spinnerGridData.exclude = true;
+        spinner.getParent().layout();
         // Only re-enable if not logged in (i.e., login failed or timed out)
         if (this.loginPage.controller.isLoggedIn()) {
             loginButton.setEnabled(false);
         } else {
             loginButton.setEnabled(true);
         }
+        loginStatusText.getParent().layout();
+    }
+
+    private void setLoginStatus(String statusStr) {
+        // Always expand the status area for multi-line errors
         loginStatusText.setText(statusStr);
-        loginStatusText.getParent().layout(); // Refresh layout after error message
-        loginStatusText.showSelection(); // Ensure top of message is visible
-        loginPage.setPageComplete();
+        loginStatusText.setTopIndex(0);
+        loginStatusText.getParent().layout();
+        // Do not touch spinner or button here; only in onLoginFlowComplete
     }
 }

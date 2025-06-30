@@ -325,11 +325,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
                 logger.error("Controller is not initialized");
                 return false;
             }
-            OAuthFlowHandler oauthHandler = new OAuthFlowHandler(appConfig, status -> {
-                if (status != null) {
-                    logger.info(status);
-                }
-            }, controller);
+            OAuthFlowHandler oauthHandler = new OAuthFlowHandler(appConfig, (status) -> { if (status != null) logger.info("OAuth status: " + status); }, controller, () -> {});
             return oauthHandler.handleOAuthLogin();
         } catch (Exception e) {
             logger.error("OAuth login failed with error: " + e.getMessage(), e);
@@ -347,7 +343,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
                 throw new OAuthBrowserLoginRunnerException("Controller is not initialized");
             }
             
-            OAuthFlowHandler oauthHandler = new OAuthFlowHandler(appConfig, status -> logger.debug(status), controller);
+            OAuthFlowHandler oauthHandler = new OAuthFlowHandler(appConfig, (status) -> logger.info("OAuth status: " + status), controller, () -> {});
             boolean success = oauthHandler.handleOAuthLogin();
             
             if (success) {

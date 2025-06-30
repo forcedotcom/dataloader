@@ -53,11 +53,13 @@ public class OAuthFlowHandler {
     private final AppConfig appConfig;
     private final Consumer<String> statusConsumer;
     private final Controller controller;
+    private final Runnable loginButtonEnabler;
 
-    public OAuthFlowHandler(AppConfig appConfig, Consumer<String> statusConsumer, Controller controller) {
+    public OAuthFlowHandler(AppConfig appConfig, Consumer<String> statusConsumer, Controller controller, Runnable loginButtonEnabler) {
         this.appConfig = appConfig;
         this.statusConsumer = statusConsumer;
         this.controller = controller;
+        this.loginButtonEnabler = loginButtonEnabler;
     }
 
     /**
@@ -68,6 +70,8 @@ public class OAuthFlowHandler {
      */
     public boolean handleOAuthLogin() {
         logger.info("Starting OAuth flow");
+        // Reset last OAuth flow to PKCE at the start
+        appConfig.setLastOAuthFlow("PKCE");
         
         // Check if device login from browser is explicitly enabled
         String deviceLoginFromBrowser = appConfig.getString(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER_DEVICE_OAUTH);
@@ -99,6 +103,10 @@ public class OAuthFlowHandler {
                         if (controller.login()) {
                             controller.saveConfig();
                             Display.getDefault().asyncExec(() -> controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession());
+                            // Re-enable login button after all flows
+                            if (loginButtonEnabler != null) {
+                                Display.getDefault().asyncExec(loginButtonEnabler);
+                            }
                             return true;
                         }
                     } catch (Exception e) {
@@ -106,8 +114,14 @@ public class OAuthFlowHandler {
                         if (statusConsumer != null) {
                             statusConsumer.accept(Labels.getString("OAuthLoginControl.statusControllerUpdateError"));
                         }
+                        if (loginButtonEnabler != null) {
+                            Display.getDefault().asyncExec(loginButtonEnabler);
+                        }
                         return false;
                     }
+                }
+                if (loginButtonEnabler != null) {
+                    Display.getDefault().asyncExec(loginButtonEnabler);
                 }
                 return true;
             } else {
@@ -116,6 +130,9 @@ public class OAuthFlowHandler {
                     statusConsumer.accept(Labels.getString("OAuthLoginControl.statusPKCEFailedFallbackBrowser"));
                 }
                 // Fallback: try browser flow without PKCE
+                if (statusConsumer != null) {
+                    statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingBrowser"));
+                }
                 OAuthBrowserFlow browserFlow = new OAuthBrowserFlow(appConfig, false, statusConsumer);
                 if (browserFlow.performOAuthFlow()) {
                     logger.info("Browser flow (no PKCE) completed successfully");
@@ -124,9 +141,14 @@ public class OAuthFlowHandler {
                     }
                     if (controller != null) {
                         try {
+                            // Mark browser as last flow
+                            appConfig.setLastOAuthFlow("Browser");
                             if (controller.login()) {
                                 controller.saveConfig();
                                 Display.getDefault().asyncExec(() -> controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession());
+                                if (loginButtonEnabler != null) {
+                                    Display.getDefault().asyncExec(loginButtonEnabler);
+                                }
                                 return true;
                             }
                         } catch (Exception e) {
@@ -134,23 +156,39 @@ public class OAuthFlowHandler {
                             if (statusConsumer != null) {
                                 statusConsumer.accept(Labels.getString("OAuthLoginControl.statusControllerUpdateError"));
                             }
+                            if (loginButtonEnabler != null) {
+                                Display.getDefault().asyncExec(loginButtonEnabler);
+                            }
                             return false;
                         }
+                    }
+                    if (loginButtonEnabler != null) {
+                        Display.getDefault().asyncExec(loginButtonEnabler);
                     }
                     return true;
                 } else {
                     logger.warn("Browser flow (no PKCE) did not complete successfully, falling back to device flow");
                     if (statusConsumer != null) {
                         statusConsumer.accept(Labels.getString("OAuthLoginControl.statusBrowserFailedFallbackDevice"));
+                        statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingDevice"));
                     }
                     logger.info("Starting device flow");
-                    return handleDeviceFlow();
+                    boolean deviceResult = handleDeviceFlow();
+                    // Mark device as last flow
+                    appConfig.setLastOAuthFlow("Device");
+                    if (loginButtonEnabler != null) {
+                        Display.getDefault().asyncExec(loginButtonEnabler);
+                    }
+                    return deviceResult;
                 }
             }
         } catch (com.salesforce.dataloader.exception.ParameterLoadException e) {
             logger.error("OAuth flow failed due to configuration error: " + e.getMessage(), e);
             if (statusConsumer != null) {
                 statusConsumer.accept(Labels.getFormattedString("OAuthLoginControl.pkceConfigErrorMessage", e.getMessage()));
+            }
+            if (loginButtonEnabler != null) {
+                Display.getDefault().asyncExec(loginButtonEnabler);
             }
             return false; // Do not attempt device flow
         } catch (Exception e) {
@@ -160,6 +198,7 @@ public class OAuthFlowHandler {
                 logger.warn("PKCE not supported or failed with known error, attempting browser flow without PKCE: " + msg);
                 if (statusConsumer != null) {
                     statusConsumer.accept(Labels.getString("OAuthLoginControl.statusPKCEFailedFallbackBrowser"));
+                    statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingBrowser"));
                 }
                 try {
                     OAuthBrowserFlow browserFlow = new OAuthBrowserFlow(appConfig, false, statusConsumer);
@@ -170,9 +209,14 @@ public class OAuthFlowHandler {
                         }
                         if (controller != null) {
                             try {
+                                // Mark browser as last flow
+                                appConfig.setLastOAuthFlow("Browser");
                                 if (controller.login()) {
                                     controller.saveConfig();
                                     Display.getDefault().asyncExec(() -> controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession());
+                                    if (loginButtonEnabler != null) {
+                                        Display.getDefault().asyncExec(loginButtonEnabler);
+                                    }
                                     return true;
                                 }
                             } catch (Exception ex) {
@@ -180,22 +224,38 @@ public class OAuthFlowHandler {
                                 if (statusConsumer != null) {
                                     statusConsumer.accept(Labels.getString("OAuthLoginControl.statusControllerUpdateError"));
                                 }
+                                if (loginButtonEnabler != null) {
+                                    Display.getDefault().asyncExec(loginButtonEnabler);
+                                }
                                 return false;
                             }
+                        }
+                        if (loginButtonEnabler != null) {
+                            Display.getDefault().asyncExec(loginButtonEnabler);
                         }
                         return true;
                     } else {
                         logger.warn("Browser flow (no PKCE) did not complete successfully, falling back to device flow");
                         if (statusConsumer != null) {
                             statusConsumer.accept(Labels.getString("OAuthLoginControl.statusBrowserFailedFallbackDevice"));
+                            statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingDevice"));
                         }
                         logger.info("Starting device flow");
-                        return handleDeviceFlow();
+                        boolean deviceResult = handleDeviceFlow();
+                        // Mark device as last flow
+                        appConfig.setLastOAuthFlow("Device");
+                        if (loginButtonEnabler != null) {
+                            Display.getDefault().asyncExec(loginButtonEnabler);
+                        }
+                        return deviceResult;
                     }
                 } catch (Exception ex) {
                     logger.error("Unexpected error during browser OAuth flow: " + ex.getMessage(), ex);
                     if (statusConsumer != null) {
                         statusConsumer.accept(Labels.getString("OAuthLoginControl.statusUnexpectedError"));
+                    }
+                    if (loginButtonEnabler != null) {
+                        Display.getDefault().asyncExec(loginButtonEnabler);
                     }
                     return false;
                 }
@@ -203,6 +263,9 @@ public class OAuthFlowHandler {
                 logger.error("Unexpected error during PKCE/browser OAuth flow: " + e.getMessage(), e);
                 if (statusConsumer != null) {
                     statusConsumer.accept(Labels.getString("OAuthLoginControl.statusUnexpectedError"));
+                }
+                if (loginButtonEnabler != null) {
+                    Display.getDefault().asyncExec(loginButtonEnabler);
                 }
                 return false;
             }

@@ -81,27 +81,42 @@ public class AuthenticationRunner {
         return appConfig;
     }
 
-    public void login(LoginCriteria criteria, Consumer<String> messenger) {
+    public void login(LoginCriteria criteria, Consumer<String> messenger, Runnable onFlowComplete) {
         this.authStatusChangeConsumer = messenger;
         this.criteria = criteria;
 
         criteria.updateConfig(appConfig);
 
-        new Thread(this::loginAsync).start();
+        new Thread(() -> loginAsync(onFlowComplete)).start();
     }
 
-    private void loginAsync() {
+    public void login(LoginCriteria criteria, Consumer<String> messenger) {
+        login(criteria, messenger, null);
+    }
+
+    private void loginAsync(Runnable onFlowComplete) {
         statusSet = false;
         try {
             // Check if OAuth is required
             if (requiresOAuthLogin(appConfig)) {
-                OAuthFlowHandler oauthHandler = new OAuthFlowHandler(appConfig, this::updateStatus, controller);
+                OAuthFlowHandler oauthHandler = new OAuthFlowHandler(appConfig, this::updateStatus, controller, () -> {
+                    updateStatus("");
+                    if (onFlowComplete != null) {
+                        Display.getDefault().asyncExec(onFlowComplete);
+                    }
+                });
                 if (oauthHandler.handleOAuthLogin()) {
                     updateStatus("OAuth login successful");
+                    if (onFlowComplete != null) {
+                        Display.getDefault().asyncExec(onFlowComplete);
+                    }
                     return;
                 }
                 if (!statusSet) {
                     updateStatus("OAuth login failed");
+                }
+                if (onFlowComplete != null) {
+                    Display.getDefault().asyncExec(onFlowComplete);
                 }
                 return;
             }
@@ -117,6 +132,10 @@ public class AuthenticationRunner {
         } catch (Exception e) {
             logger.error("Login failed", e);
             updateStatus("Login failed: " + e.getMessage());
+        } finally {
+            if (onFlowComplete != null) {
+                Display.getDefault().asyncExec(onFlowComplete);
+            }
         }
     }
 
