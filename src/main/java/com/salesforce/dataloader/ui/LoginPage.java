@@ -34,6 +34,8 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.layout.GridLayout;
 
 /**
  * Describe your class here.
@@ -62,6 +64,7 @@ public class LoginPage extends OperationPage {
 
         AppConfig appConfig = controller.getAppConfig();
         control = new Composite(parent, SWT.FILL);
+        control.setLayoutData(new org.eclipse.swt.layout.GridData(org.eclipse.swt.layout.GridData.FILL_BOTH));
         grid = new Grid12(control, 40, false, true);
         authenticator = new AuthenticationRunner(getShell(), appConfig, controller);
 
@@ -119,18 +122,23 @@ public class LoginPage extends OperationPage {
             IWizardPage page = getNextPage();
             if (page != null) {
                 getContainer().showPage(page);
+
+                // Ensure the control is created
+                if (page.getControl() == null || page.getControl().isDisposed()) {
+                    page.createControl(getControl().getParent());
+                }
+
+                // Ensure the next page is fully initialized and laid out
+                if (page instanceof OperationPage) {
+                    OperationPage opPage = (OperationPage) page;
+                    opPage.setupPage(); // Ensure any setup logic is run
+                    opPage.setVisible(true); // Ensure visibility logic is triggered
+                    Composite pageControl = (Composite) opPage.getControl();
+                    if (pageControl != null && !pageControl.isDisposed()) {
+                        pageControl.layout(true, true);
+                    }
+                }
             }
-            // following is a hack to correctly resize the list showing
-            // sObjects in DataSelectionPage on Mac.
-            // --- Start ---
-            setIgnoreBoundsChanges(true);
-            Rectangle shellBounds = this.getShell().getBounds();
-            shellBounds.height++;
-            this.getShell().setBounds(shellBounds);
-            shellBounds.height--;
-            this.getShell().setBounds(shellBounds);
-            setIgnoreBoundsChanges(false);
-            // --- End ----
         }
     }
 
@@ -181,8 +189,23 @@ public class LoginPage extends OperationPage {
     @Override
     public void setPageComplete() {
         setPageComplete(controller.isLoggedIn());
-        if (controller.isLoggedIn()){
-            loadDataSelectionPage(controller);
+        if (controller.isLoggedIn()) {
+            org.eclipse.swt.widgets.Display.getDefault().asyncExec(() -> {
+                org.eclipse.swt.widgets.Shell shell = getShell();
+                if (shell != null && !shell.isDisposed()) {
+                    shell.close();
+                }
+                // Launch the intended operation wizard/dialog
+                com.salesforce.dataloader.action.OperationInfo opInfo = controller.getAppConfig().getOperationInfo();
+                com.salesforce.dataloader.ui.LoaderWindow loaderWindow = com.salesforce.dataloader.ui.LoaderWindow.getApp();
+                if (loaderWindow != null && opInfo != null) {
+                    int dialogIdx = opInfo.getDialogIdx();
+                    org.eclipse.jface.action.Action action = loaderWindow.getOperationAction(dialogIdx);
+                    if (action != null) {
+                        action.run();
+                    }
+                }
+            });
         }
     }
 

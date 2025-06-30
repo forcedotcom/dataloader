@@ -109,7 +109,7 @@ public class OAuthBrowserFlow {
      * 
      * @return true if OAuth flow completed successfully, false otherwise
      */
-    public boolean performOAuthFlow() throws com.salesforce.dataloader.exception.ParameterLoadException {
+    public boolean performOAuthFlow() throws com.salesforce.dataloader.exception.ParameterLoadException, OAuthFlowNotEnabledException {
         int timeout = appConfig.getOAuthTimeoutSeconds();
         return performOAuthFlow(timeout);
     }
@@ -120,7 +120,7 @@ public class OAuthBrowserFlow {
      * @param timeoutSeconds Maximum time to wait for authorization
      * @return true if OAuth flow completed successfully, false otherwise
      */
-    public boolean performOAuthFlow(int timeoutSeconds) throws com.salesforce.dataloader.exception.ParameterLoadException {
+    public boolean performOAuthFlow(int timeoutSeconds) throws com.salesforce.dataloader.exception.ParameterLoadException, OAuthFlowNotEnabledException {
         try {
             // Step 1: Generate PKCE parameters if needed
             if (usePkce) {
@@ -157,6 +157,9 @@ public class OAuthBrowserFlow {
             if (authReceived && authorizationCode != null) {
                 // Step 6: Exchange authorization code for tokens
                 return exchangeCodeForTokens();
+            } else if (authReceived && authorizationCode == null) {
+                // Callback received with error (handled in CallbackHandler)
+                throw new OAuthFlowNotEnabledException("OAuth callback received with error or no code (possible flow not enabled)");
             } else {
                 logger.warn("OAuth authorization timed out or failed");
                 if (statusConsumer != null) {
@@ -167,6 +170,8 @@ public class OAuthBrowserFlow {
             
         } catch (com.salesforce.dataloader.exception.ParameterLoadException e) {
             // Let ParameterLoadException propagate to handler
+            throw e;
+        } catch (OAuthFlowNotEnabledException e) {
             throw e;
         } catch (Exception e) {
             logger.error("OAuth browser flow failed", e);
@@ -274,7 +279,7 @@ public class OAuthBrowserFlow {
     /**
      * Exchanges the authorization code for access and refresh tokens.
      */
-    private boolean exchangeCodeForTokens() throws com.salesforce.dataloader.exception.ParameterLoadException {
+    private boolean exchangeCodeForTokens() throws com.salesforce.dataloader.exception.ParameterLoadException, OAuthFlowNotEnabledException {
         logger.info("Exchanging authorization code for tokens");
         try {
             // Create token request
@@ -332,6 +337,10 @@ public class OAuthBrowserFlow {
                         statusConsumer.accept("The client ID configured is invalid. Please check your Data Loader settings and Salesforce Connected App configuration. Client ID: " + clientId);
                     }
                 }
+                // Detect flow not enabled errors
+                if (errorResponse != null && (errorResponse.contains("unsupported_grant_type") || errorResponse.contains("invalid_grant") || errorResponse.contains("invalid_request") || errorResponse.contains("PKCE") || errorResponse.contains("code_challenge"))) {
+                    throw new OAuthFlowNotEnabledException("OAuth flow not enabled: " + errorResponse);
+                }
                 return false;
             }
             
@@ -362,6 +371,8 @@ public class OAuthBrowserFlow {
             }
         } catch (com.salesforce.dataloader.exception.ParameterLoadException e) {
             throw e;
+        } catch (OAuthFlowNotEnabledException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Failed to exchange authorization code for tokens", e);
             return false;
@@ -385,6 +396,13 @@ public class OAuthBrowserFlow {
                     logger.error("OAuth error: " + params.get("error") + " - " + params.get("error_description"));
                     String errorMessage = Labels.getFormattedString("OAuthBrowserFlow.error.authFailed", params.get("error_description"));
                     sendErrorResponse(exchange, errorMessage);
+                    // If error is a known flow-not-enabled error, propagate
+                    String err = params.get("error");
+                    String desc = params.get("error_description");
+                    if (err != null && (err.contains("unsupported_grant_type") || err.contains("invalid_grant") || err.contains("invalid_request") || (desc != null && (desc.contains("PKCE") || desc.contains("code_challenge"))))) {
+                        // Set authorizationCode to null so performOAuthFlow can detect and throw
+                        authorizationCode = null;
+                    }
                     authLatch.countDown();
                     return;
                 }
