@@ -35,16 +35,10 @@ import com.salesforce.dataloader.ui.Labels;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.widgets.Display;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.ServerSocket;
-import java.net.URL;
-import java.net.URLEncoder;
+
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
-import com.salesforce.dataloader.util.OAuthFlowNotEnabledException;
 import com.salesforce.dataloader.client.transport.SimplePostFactory;
 import com.salesforce.dataloader.client.transport.SimplePostInterface;
 import org.apache.http.message.BasicNameValuePair;
@@ -283,39 +277,6 @@ public class OAuthFlowHandler {
         }
     }
 
-    /**
-     * Reads the error response from an HTTP connection.
-     */
-    private String readErrorResponse(HttpURLConnection conn) {
-        try {
-            InputStream in = conn.getErrorStream();
-            if (in == null) {
-                return null;
-            }
-            StringBuilder response = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-            }
-            return response.toString();
-        } catch (Exception e) {
-            logger.debug("Error reading error response", e);
-            return null;
-        }
-    }
-
-    private boolean isPkceFlowNotEnabledError(String error) {
-        if (error == null) return false;
-        return error.contains("unsupported_grant_type") || error.contains("invalid_grant") || error.contains("invalid_request") || error.contains("PKCE") || error.contains("code_challenge") || error.contains("redirect_uri_mismatch");
-    }
-
-    private boolean isBrowserFlowNotEnabledError(String error) {
-        if (error == null) return false;
-        return error.contains("unsupported_grant_type");
-    }
-
     private boolean isPkceFlowEnabled() {
         try {
             String tokenUrl = appConfig.getAuthEndpointForCurrentEnv() + "/services/oauth2/token";
@@ -337,7 +298,7 @@ public class OAuthFlowHandler {
             logger.info("PKCE pre-flight error response: " + error);
             String fullResponse = getFullResponse(client);
             logger.info("PKCE pre-flight full response: " + fullResponse);
-            return isFlowEnabledFromError(error);
+            return isFlowEnabledFromError(error, fullResponse);
         } catch (Exception e) {
             logger.error("Exception in PKCE pre-flight check", e);
             return false;
@@ -360,7 +321,7 @@ public class OAuthFlowHandler {
             logger.info("Browser flow pre-flight error response: " + error);
             String fullResponse = getFullResponse(client);
             logger.info("Browser flow pre-flight full response: " + fullResponse);
-            return isFlowEnabledFromError(error);
+            return isFlowEnabledFromError(error, fullResponse);
         } catch (Exception e) {
             logger.error("Exception in browser flow pre-flight check", e);
             return false;
@@ -380,7 +341,7 @@ public class OAuthFlowHandler {
             logger.info("Device flow pre-flight error response: " + error);
             String fullResponse = getFullResponse(client);
             logger.info("Device flow pre-flight full response: " + fullResponse);
-            return isFlowEnabledFromError(error);
+            return isFlowEnabledFromError(error, fullResponse);
         } catch (Exception e) {
             logger.error("Exception in device flow pre-flight check", e);
             return false;
@@ -421,15 +382,10 @@ public class OAuthFlowHandler {
         return null;
     }
 
-    private boolean isFlowNotEnabledError(String error) {
-        if (error == null) return false;
-        return error.contains("unsupported_grant_type") || error.contains("invalid_grant") || error.contains("invalid_request") || error.contains("PKCE") || error.contains("code_challenge");
-    }
-
     /**
      * Returns true if the error does NOT indicate the flow is not enabled.
      */
-    private boolean isFlowEnabledFromError(String error) {
+    private boolean isFlowEnabledFromError(String error, String fullResponse) {
         if (error != null) {
             if (error.contains("unsupported_grant_type") ||
                 error.contains("unsupported_response_type") ||
@@ -438,6 +394,13 @@ public class OAuthFlowHandler {
                 error.contains("redirect_uri_mismatch") ||
                 error.contains("invalid_scope")) {
                 return false;
+            }
+            // Additional check for ambiguous invalid_grant
+            if (error.contains("invalid_grant") && error.contains("invalid authorization code")) {
+                if (fullResponse == null || fullResponse.isEmpty() || !fullResponse.contains("refresh_token")) {
+                    logger.warn("OAuth flow pre-flight check received 'invalid_grant: invalid authorization code'. This may indicate missing OAuth scope (e.g., refresh_token) or other misconfiguration in the Connected App.");
+                    return false;
+                }
             }
         }
         return true;
