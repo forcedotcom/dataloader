@@ -60,7 +60,6 @@ public class OperationUIAction extends Action {
         // If not logged in or session is not present, show login dialog immediately
         com.salesforce.dataloader.client.SessionInfo session = controller.getPartnerClient().getSession();
         if (session == null || session.getSessionId() == null || session.getSessionId().isEmpty() || session.getUserInfoResult() == null) {
-            System.out.println("[SessionCheck] No valid session. Showing login dialog immediately.");
             LoaderWizardDialog dlg = new LoaderWizardDialog(shell, new LoginWizard(controller), controller.getAppConfig());
             dlg.open();
             return;
