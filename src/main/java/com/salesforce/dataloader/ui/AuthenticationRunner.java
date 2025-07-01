@@ -31,7 +31,7 @@ import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.model.LoginCriteria;
 import com.salesforce.dataloader.util.ExceptionUtil;
-import com.salesforce.dataloader.util.OAuthBrowserFlow;
+import com.salesforce.dataloader.util.OAuthServerFlow;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.sobject.SObject;

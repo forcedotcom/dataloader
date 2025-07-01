@@ -40,7 +40,7 @@ import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.ExitException;
 import com.salesforce.dataloader.util.OAuthBrowserDeviceLoginRunner;
-import com.salesforce.dataloader.util.OAuthBrowserFlow;
+import com.salesforce.dataloader.util.OAuthServerFlow;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
