@@ -29,7 +29,7 @@ package com.salesforce.dataloader.oauth;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.util.OAuthBrowserDeviceLoginRunner;
-import com.salesforce.dataloader.util.OAuthBrowserFlow;
+import com.salesforce.dataloader.util.OAuthServerFlow;
 import com.salesforce.dataloader.util.DLLogManager;
 import com.salesforce.dataloader.ui.Labels;
 import org.apache.logging.log4j.Logger;
@@ -84,9 +84,9 @@ public class OAuthFlowHandler {
         logger.info("Checking if PKCE flow is enabled in Connected App...");
         boolean pkceEnabled = isPkceFlowEnabled();
         logger.info("PKCE flow enabled: " + pkceEnabled);
-        logger.info("Checking if browser flow is enabled in Connected App...");
-        boolean browserEnabled = isBrowserFlowEnabled();
-        logger.info("Browser flow enabled: " + browserEnabled);
+        logger.info("Checking if server flow is enabled in Connected App...");
+        boolean serverEnabled = isServerFlowEnabled();
+        logger.info("Server flow enabled: " + serverEnabled);
         logger.info("Checking if device flow is enabled in Connected App...");
         boolean deviceEnabled = isDeviceFlowEnabled();
         logger.info("Device flow enabled: " + deviceEnabled);
@@ -97,7 +97,7 @@ public class OAuthFlowHandler {
                 statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingPKCE"));
             }
             try {
-                OAuthBrowserFlow pkceFlow = new OAuthBrowserFlow(appConfig, true, statusConsumer);
+                OAuthServerFlow pkceFlow = new OAuthServerFlow(appConfig, true, statusConsumer);
                 if (pkceFlow.performOAuthFlow()) {
                     logger.info("PKCE flow completed successfully");
                     if (statusConsumer != null) {
@@ -139,23 +139,23 @@ public class OAuthFlowHandler {
                 }
                 return false;
             }
-        } else if (browserEnabled) {
-            logger.info("Browser flow is enabled, launching browser for login");
+        } else if (serverEnabled) {
+            logger.info("Server flow is enabled, launching browser for login");
             if (statusConsumer != null) {
-                statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingBrowser"));
+                statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingServer"));
             }
             try {
-                OAuthBrowserFlow browserFlow = new OAuthBrowserFlow(appConfig, false, statusConsumer);
-                if (browserFlow.performOAuthFlow()) {
-                    logger.info("Browser flow completed successfully");
+                OAuthServerFlow serverFlow = new OAuthServerFlow(appConfig, false, statusConsumer);
+                if (serverFlow.performOAuthFlow()) {
+                    logger.info("Server flow completed successfully");
                     if (statusConsumer != null) {
-                        statusConsumer.accept(Labels.getString("OAuthLoginControl.statusBrowserSuccess"));
+                        statusConsumer.accept(Labels.getString("OAuthLoginControl.statusServerSuccess"));
                     }
                     if (controller != null) {
                         try {
-                            appConfig.setLastOAuthFlow("Browser");
+                            appConfig.setLastOAuthFlow("Server");
                             boolean loginSuccess = controller.login();
-                            logger.info("controller.login() after browser flow returned: " + loginSuccess);
+                            logger.info("controller.login() after server flow returned: " + loginSuccess);
                             if (loginSuccess) {
                                 controller.saveConfig();
                                 Display.getDefault().asyncExec(() -> controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession());
@@ -164,10 +164,10 @@ public class OAuthFlowHandler {
                                 }
                                 return true;
                             } else {
-                                logger.error("controller.login() returned false after browser flow. UI will not advance.");
+                                logger.error("controller.login() returned false after server flow. UI will not advance.");
                             }
                         } catch (Exception e) {
-                            logger.error("Failed to update controller's login state after browser flow", e);
+                            logger.error("Failed to update controller's login state after server flow", e);
                             if (statusConsumer != null) {
                                 statusConsumer.accept(Labels.getString("OAuthLoginControl.statusControllerUpdateError"));
                             }
@@ -183,9 +183,9 @@ public class OAuthFlowHandler {
                     return true;
                 }
             } catch (Exception e) {
-                logger.error("Browser flow failed: " + e.getMessage(), e);
+                logger.error("Server flow failed: " + e.getMessage(), e);
                 if (statusConsumer != null) {
-                    statusConsumer.accept(Labels.getString("OAuthLoginControl.statusBrowserFailedFallbackDevice"));
+                    statusConsumer.accept(Labels.getString("OAuthLoginControl.statusServerFailedFallbackDevice"));
                 }
                 if (loginButtonEnabler != null) {
                     Display.getDefault().asyncExec(loginButtonEnabler);
@@ -305,7 +305,7 @@ public class OAuthFlowHandler {
         }
     }
 
-    private boolean isBrowserFlowEnabled() {
+    private boolean isServerFlowEnabled() {
         try {
             String tokenUrl = appConfig.getAuthEndpointForCurrentEnv() + "/services/oauth2/token";
             // Use dummy code, NO PKCE params
@@ -318,12 +318,12 @@ public class OAuthFlowHandler {
             );
             client.post();
             String error = getErrorFromResponse(client);
-            logger.info("Browser flow pre-flight error response: " + error);
+            logger.info("Server flow pre-flight error response: " + error);
             String fullResponse = getFullResponse(client);
-            logger.info("Browser flow pre-flight full response: " + fullResponse);
+            logger.info("Server flow pre-flight full response: " + fullResponse);
             return isFlowEnabledFromError(error, fullResponse);
         } catch (Exception e) {
-            logger.error("Exception in browser flow pre-flight check", e);
+            logger.error("Exception in server flow pre-flight check", e);
             return false;
         }
     }

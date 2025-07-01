@@ -65,11 +65,11 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
- * OAuth 2.0 Authorization Code Flow with PKCE implementation for browser-based authentication.
+ * OAuth 2.0 Authorization Code Flow with PKCE implementation for server flow authentication.
  * This follows the same pattern as Salesforce CLI for maximum compatibility.
  */
-public class OAuthBrowserFlow {
-    private static final Logger logger = DLLogManager.getLogger(OAuthBrowserFlow.class);
+public class OAuthServerFlow {
+    private static final Logger logger = DLLogManager.getLogger(OAuthServerFlow.class);
     
     private static final String REDIRECT_URI_PATH = "/OauthRedirect"; // Same as Salesforce CLI
     
@@ -85,15 +85,15 @@ public class OAuthBrowserFlow {
     private int port;
     private final boolean usePkce;
     
-    public OAuthBrowserFlow(AppConfig appConfig) throws ParameterLoadException {
+    public OAuthServerFlow(AppConfig appConfig) throws ParameterLoadException {
         this(appConfig, true, null);
     }
 
-    public OAuthBrowserFlow(AppConfig appConfig, boolean usePkce) throws ParameterLoadException {
+    public OAuthServerFlow(AppConfig appConfig, boolean usePkce) throws ParameterLoadException {
         this(appConfig, usePkce, null);
     }
 
-    public OAuthBrowserFlow(AppConfig appConfig, boolean usePkce, java.util.function.Consumer<String> statusConsumer) throws ParameterLoadException {
+    public OAuthServerFlow(AppConfig appConfig, boolean usePkce, java.util.function.Consumer<String> statusConsumer) throws ParameterLoadException {
         this.appConfig = appConfig;
         this.usePkce = usePkce;
         this.statusConsumer = statusConsumer;
@@ -394,7 +394,7 @@ public class OAuthBrowserFlow {
                 // Check for error
                 if (params.containsKey("error")) {
                     logger.error("OAuth error: " + params.get("error") + " - " + params.get("error_description"));
-                    String errorMessage = Labels.getFormattedString("OAuthBrowserFlow.error.authFailed", params.get("error_description"));
+                    String errorMessage = Labels.getFormattedString("OAuthServerFlow.error.authFailed", params.get("error_description"));
                     sendErrorResponse(exchange, errorMessage);
                     // If error is a known flow-not-enabled error, propagate
                     String err = params.get("error");
@@ -456,14 +456,14 @@ public class OAuthBrowserFlow {
      * Builds the instructions page HTML.
      */
     private String buildInstructionsPage() {
-        return Labels.getString("OAuthBrowserFlow.instructionsPage");
+        return Labels.getString("OAuthServerFlow.instructionsPage");
     }
     
     /**
      * Sends a success response after OAuth completion.
      */
     private void sendSuccessResponse(HttpExchange exchange) throws IOException {
-        String response = Labels.getString("OAuthBrowserFlow.successResponse");
+        String response = Labels.getString("OAuthServerFlow.successResponse");
         
         exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
         exchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
@@ -477,7 +477,7 @@ public class OAuthBrowserFlow {
      * Sends an error response.
      */
     private void sendErrorResponse(HttpExchange exchange, String message) throws IOException {
-        String response = Labels.getFormattedString("OAuthBrowserFlow.errorResponseTemplate", message);
+        String response = Labels.getFormattedString("OAuthServerFlow.errorResponseTemplate", message);
         
         exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
         exchange.sendResponseHeaders(400, response.getBytes(StandardCharsets.UTF_8).length);
