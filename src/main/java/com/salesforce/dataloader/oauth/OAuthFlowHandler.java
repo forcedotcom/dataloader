@@ -395,12 +395,9 @@ public class OAuthFlowHandler {
                 error.contains("invalid_scope")) {
                 return false;
             }
-            // Additional check for ambiguous invalid_grant
+            // If the only error is invalid_grant: invalid authorization code, treat as enabled
             if (error.contains("invalid_grant") && error.contains("invalid authorization code")) {
-                if (fullResponse == null || fullResponse.isEmpty() || !fullResponse.contains("refresh_token")) {
-                    logger.warn("OAuth flow pre-flight check received 'invalid_grant: invalid authorization code'. This may indicate missing OAuth scope (e.g., refresh_token) or other misconfiguration in the Connected App.");
-                    return false;
-                }
+                return true;
             }
         }
         return true;
