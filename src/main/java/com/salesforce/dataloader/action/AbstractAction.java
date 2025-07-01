@@ -307,7 +307,13 @@ abstract class AbstractAction implements IAction {
     protected void handleException(Exception e) {
         String errMsg = e.getMessage();
         if (e instanceof ApiFault) {
-            errMsg = ((ApiFault)e).getExceptionMessage();
+            ApiFault apiFault = (ApiFault) e;
+            errMsg = apiFault.getExceptionMessage();
+            if (apiFault.getExceptionCode() != null &&
+                "INVALID_SESSION_ID".equals(apiFault.getExceptionCode().toString())) {
+                getLogger().warn("OAuth session expired (INVALID_SESSION_ID). Logging out user.");
+                getController().logout();
+            }
         } else if (e instanceof AsyncApiException) {
             errMsg = ((AsyncApiException)e).getExceptionMessage();
         }

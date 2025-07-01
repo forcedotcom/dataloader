@@ -266,7 +266,7 @@ public class OAuthServerFlow {
         authUrl.append("?response_type=code");
         authUrl.append("&client_id=").append(URLEncoder.encode(clientId, StandardCharsets.UTF_8.name()));
         authUrl.append("&redirect_uri=").append(URLEncoder.encode(redirectUri, StandardCharsets.UTF_8.name()));
-        authUrl.append("&scope=").append(URLEncoder.encode("api refresh_token", StandardCharsets.UTF_8.name()));
+        authUrl.append("&scope=").append(URLEncoder.encode("api", StandardCharsets.UTF_8.name()));
         authUrl.append("&state=").append(URLEncoder.encode(state, StandardCharsets.UTF_8.name()));
         if (usePkce && codeChallenge != null) {
             authUrl.append("&code_challenge=").append(URLEncoder.encode(codeChallenge, StandardCharsets.UTF_8.name()));
