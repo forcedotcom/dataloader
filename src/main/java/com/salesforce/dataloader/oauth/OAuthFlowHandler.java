@@ -78,6 +78,10 @@ public class OAuthFlowHandler {
 
         if (deviceLoginFromBrowserEnabled) {
             logger.info("Device login from browser is enabled, using device flow");
+            appConfig.setLastOAuthFlow("Device");
+            if (loginButtonEnabler != null) {
+                Display.getDefault().asyncExec(loginButtonEnabler);
+            }
             return handleDeviceFlow();
         }
 
