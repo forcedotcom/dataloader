@@ -298,7 +298,6 @@ public class AppConfig {
     public static final String PROP_SELECTED_SERVER_ENVIRONMENT = OAUTH_PREFIX + "environment";
     public static final String PROP_OAUTH_ACCESSTOKEN = OAUTH_PREFIX + "accesstoken";
     public static final String PROP_OAUTH_REFRESHTOKEN = OAUTH_PREFIX + "refreshtoken";
-    public static final String PROP_OAUTH_LOGIN_FROM_BROWSER = OAUTH_PREFIX + "loginfrombrowser";
     public static final String PROP_OAUTH_LOGIN_FROM_BROWSER_DEVICE_OAUTH = OAUTH_PREFIX + "device.loginfrombrowser";
     public static final String PROP_OAUTH_PKCE_PORT = OAUTH_PREFIX + "pkce.port";
     public static final String PROP_CLIENTID_PROD_PARTNER = OAUTH_PREFIX 
