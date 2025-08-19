@@ -797,11 +797,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
         data.horizontalSpan = 2;
         empty.setLayoutData(data);
         
-        createLabel(restComp, null, null, AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER);
-        boolean doLoginFromBrowser = appConfig.getBoolean(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER);
-        buttonLoginFromBrowser = new Button(restComp, SWT.CHECK);
-        buttonLoginFromBrowser.setSelection(doLoginFromBrowser);
-        
         // OAuth PKCE Port
         createLabel(restComp, null, null, AppConfig.PROP_OAUTH_PKCE_PORT);
         textOAuthPKCEPort = new Text(restComp, SWT.BORDER);
@@ -1132,7 +1127,6 @@ public class AdvancedSettingsDialog extends BaseDialog {
                 appConfig.setValue(AppConfig.PROP_BULK_API_SERIAL_MODE, buttonBulkApiSerialMode.getSelection());
                 appConfig.setValue(AppConfig.PROP_BULK_API_ZIP_CONTENT, buttonBulkApiZipContent.getSelection());
                 appConfig.setValue(AppConfig.PROP_BULKV2_API_ENABLED, buttonUseBulkV2Api.getSelection());
-                appConfig.setValue(AppConfig.PROP_OAUTH_LOGIN_FROM_BROWSER, buttonLoginFromBrowser.getSelection());
                 appConfig.setValue(AppConfig.PROP_OAUTH_PKCE_PORT, textOAuthPKCEPort.getText());
                 appConfig.setValue(AppConfig.PROP_WIZARD_CLOSE_ON_FINISH, buttonCloseWizardOnFinish.getSelection());
                 appConfig.setValue(AppConfig.PROP_WIZARD_WIDTH, textWizardWidth.getText());
