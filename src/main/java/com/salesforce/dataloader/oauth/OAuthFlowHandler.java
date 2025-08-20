@@ -81,18 +81,13 @@ public class OAuthFlowHandler {
             return handleDeviceFlow();
         }
 
-        logger.info("Checking if PKCE flow is enabled in Connected App...");
-        boolean pkceEnabled = isPkceFlowEnabled();
-        logger.info("PKCE flow enabled: " + pkceEnabled);
         logger.info("Checking if device flow is enabled in Connected App...");
         boolean deviceEnabled = isDeviceFlowEnabled();
         logger.info("Device flow enabled: " + deviceEnabled);
 
-        if (pkceEnabled) {
-            logger.info("PKCE flow is enabled, launching browser for PKCE login");
-            if (statusConsumer != null) {
-                statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingPKCE"));
-            }
+        boolean isWebServerFlowSuccessful = handleWebServerFlow(true);
+        
+        if (isWebServerFlowSuccessful) {
             return handleWebServerFlow(true);
         } else if (deviceEnabled) {
             logger.info("Device flow is enabled, launching device flow");
@@ -123,7 +118,21 @@ public class OAuthFlowHandler {
      * @return true if flow was successful, false otherwise
      */
     private boolean handleWebServerFlow(boolean usePKCE) {
+        if (statusConsumer != null) {
+            statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingPKCE"));
+        }
+        
+        logger.info("Checking if PKCE flow is enabled in Connected App...");
+        boolean pkceEnabled = isPkceFlowEnabled();
+        logger.info("PKCE flow enabled: " + pkceEnabled);
+        
+        // short circuit WebServer flow if PKCE pre-flight check fails 
+        if (!pkceEnabled) {
+            return false;
+        }
+        
         try {
+            logger.info("PKCE flow is enabled, launching browser for PKCE login");
             OAuthServerFlow pkceFlow = new OAuthServerFlow(appConfig, usePKCE, statusConsumer);
             if (pkceFlow.performOAuthFlow()) {
                 logger.info("PKCE flow completed successfully");
