@@ -81,14 +81,19 @@ public class OAuthFlowHandler {
             return handleDeviceFlow();
         }
 
+        logger.info("Checking if PKCE flow is enabled in Connected App...");
+        boolean pkceEnabled = isPkceFlowEnabled();
+        logger.info("PKCE flow enabled: " + pkceEnabled);
         logger.info("Checking if device flow is enabled in Connected App...");
         boolean deviceEnabled = isDeviceFlowEnabled();
         logger.info("Device flow enabled: " + deviceEnabled);
     
-        boolean isWebServerFlowSuccessful = handleWebServerFlow(true);
-        
-        if (isWebServerFlowSuccessful) {
-            return true;
+        if (pkceEnabled) {
+            logger.info("PKCE flow is enabled, launching browser for PKCE login");
+            if (statusConsumer != null) {
+                statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingPKCE"));
+            }
+            return handleWebServerFlow(true);
         } else if (deviceEnabled) {
             logger.info("Device flow is enabled, launching device flow");
             if (statusConsumer != null) {
@@ -113,11 +118,12 @@ public class OAuthFlowHandler {
         }
     }
 
+    /**
+     * Handles the WebServer with/without PKCE flow OAuth process.
+     *
+     * @return true if flow was successful, false otherwise
+     */
     private boolean handleWebServerFlow(boolean usePKCE) {
-        logger.info("PKCE flow is enabled, launching browser for PKCE login");
-        if (statusConsumer != null) {
-            statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingPKCE"));
-        }
         try {
             OAuthServerFlow pkceFlow = new OAuthServerFlow(appConfig, usePKCE, statusConsumer);
             if (pkceFlow.performOAuthFlow()) {
@@ -224,6 +230,34 @@ public class OAuthFlowHandler {
         }
     }
 
+    private boolean isPkceFlowEnabled() {
+        try {
+            String tokenUrl = appConfig.getAuthEndpointForCurrentEnv() + "/services/oauth2/token";
+            // Use dummy code and PKCE params
+            String dummyCode = "dummy";
+            String codeVerifier = "dummyverifier";
+            String codeChallenge = "dummychallenge";
+            SimplePostInterface client = SimplePostFactory.getInstance(appConfig, tokenUrl,
+                    new BasicNameValuePair("grant_type", "authorization_code"),
+                    new BasicNameValuePair("client_id", appConfig.getEffectiveClientIdForCurrentEnv()),
+                    new BasicNameValuePair("code", dummyCode),
+                    new BasicNameValuePair("redirect_uri", "http://localhost:7171/OauthRedirect"),
+                    new BasicNameValuePair("code_verifier", codeVerifier),
+                    new BasicNameValuePair("code_challenge", codeChallenge),
+                    new BasicNameValuePair("code_challenge_method", "S256")
+            );
+            client.post();
+            String error = getErrorFromResponse(client);
+            logger.info("PKCE pre-flight error response: " + error);
+            String fullResponse = getFullResponse(client);
+            logger.info("PKCE pre-flight full response: " + fullResponse);
+            return isFlowEnabledFromError(error);
+        } catch (Exception e) {
+            logger.error("Exception in PKCE pre-flight check", e);
+            return false;
+        }
+    }
+    
     private boolean isDeviceFlowEnabled() {
         try {
             String tokenUrl = appConfig.getAuthEndpointForCurrentEnv() + "/services/oauth2/token";
@@ -237,7 +271,7 @@ public class OAuthFlowHandler {
             logger.info("Device flow pre-flight error response: " + error);
             String fullResponse = getFullResponse(client);
             logger.info("Device flow pre-flight full response: " + fullResponse);
-            return isFlowEnabledFromError(error, fullResponse);
+            return isFlowEnabledFromError(error);
         } catch (Exception e) {
             logger.error("Exception in device flow pre-flight check", e);
             return false;
@@ -281,7 +315,7 @@ public class OAuthFlowHandler {
     /**
      * Returns true if the error does NOT indicate the flow is not enabled.
      */
-    private boolean isFlowEnabledFromError(String error, String fullResponse) {
+    private boolean isFlowEnabledFromError(String error) {
         if (error != null) {
             if (error.contains("unsupported_grant_type") ||
                 error.contains("unsupported_response_type") ||
