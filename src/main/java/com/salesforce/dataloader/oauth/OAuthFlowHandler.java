@@ -87,7 +87,7 @@ public class OAuthFlowHandler {
         logger.info("Checking if device flow is enabled in Connected App...");
         boolean deviceEnabled = isDeviceFlowEnabled();
         logger.info("Device flow enabled: " + deviceEnabled);
-    
+
         if (pkceEnabled) {
             logger.info("PKCE flow is enabled, launching browser for PKCE login");
             if (statusConsumer != null) {
@@ -105,8 +105,7 @@ public class OAuthFlowHandler {
                 Display.getDefault().asyncExec(loginButtonEnabler);
             }
             return deviceResult;
-        }
-        else {
+        } else {
             logger.error("None of the supported OAuth flows are enabled in the Connected App");
             if (statusConsumer != null) {
                 statusConsumer.accept(Labels.getString("OAuthLoginControl.statusNoOAuthFlowsEnabled"));
@@ -237,14 +236,14 @@ public class OAuthFlowHandler {
             String dummyCode = "dummy";
             String codeVerifier = "dummyverifier";
             String codeChallenge = "dummychallenge";
-            SimplePostInterface client = SimplePostFactory.getInstance(appConfig, tokenUrl,
-                    new BasicNameValuePair("grant_type", "authorization_code"),
-                    new BasicNameValuePair("client_id", appConfig.getEffectiveClientIdForCurrentEnv()),
-                    new BasicNameValuePair("code", dummyCode),
-                    new BasicNameValuePair("redirect_uri", "http://localhost:7171/OauthRedirect"),
-                    new BasicNameValuePair("code_verifier", codeVerifier),
-                    new BasicNameValuePair("code_challenge", codeChallenge),
-                    new BasicNameValuePair("code_challenge_method", "S256")
+            SimplePostInterface client = SimplePostFactory.getInstance(appConfig, tokenUrl, 
+                new BasicNameValuePair("grant_type", "authorization_code"),
+                new BasicNameValuePair("client_id", appConfig.getEffectiveClientIdForCurrentEnv()),
+                new BasicNameValuePair("code", dummyCode), 
+                new BasicNameValuePair("redirect_uri", "http://localhost:7171/OauthRedirect"),
+                new BasicNameValuePair("code_verifier", codeVerifier),
+                new BasicNameValuePair("code_challenge", codeChallenge),
+                new BasicNameValuePair("code_challenge_method", "S256")
             );
             client.post();
             String error = getErrorFromResponse(client);
