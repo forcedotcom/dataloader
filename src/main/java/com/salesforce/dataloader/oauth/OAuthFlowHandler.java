@@ -26,8 +26,11 @@
 
 package com.salesforce.dataloader.oauth;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.model.OAuthError;
 import com.salesforce.dataloader.util.OAuthBrowserDeviceLoginRunner;
 import com.salesforce.dataloader.util.OAuthServerFlow;
 import com.salesforce.dataloader.util.DLLogManager;
@@ -49,11 +52,16 @@ import java.io.ByteArrayOutputStream;
  */
 public class OAuthFlowHandler {
     private static final Logger logger = DLLogManager.getLogger(OAuthFlowHandler.class);
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final AppConfig appConfig;
     private final Consumer<String> statusConsumer;
     private final Controller controller;
     private final Runnable loginButtonEnabler;
 
+    static {
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+    
     public OAuthFlowHandler(AppConfig appConfig, Consumer<String> statusConsumer, Controller controller, Runnable loginButtonEnabler) {
         this.appConfig = appConfig;
         this.statusConsumer = statusConsumer;
@@ -78,19 +86,14 @@ public class OAuthFlowHandler {
 
         if (deviceLoginFromBrowserEnabled) {
             logger.info("Device login from browser is enabled, using device flow");
-            appConfig.setLastOAuthFlow("Device");
-            if (loginButtonEnabler != null) {
-                Display.getDefault().asyncExec(loginButtonEnabler);
-            }
             return handleDeviceFlow();
         }
-
+        
         logger.info("Checking if device flow is enabled in Connected App...");
         boolean deviceEnabled = isDeviceFlowEnabled();
         logger.info("Device flow enabled: " + deviceEnabled);
 
-        boolean oAuthFlowStatus = handlePKCEFlow();
-        if (!oAuthFlowStatus && deviceEnabled) {
+        if (deviceEnabled) {
             logger.info("Device flow is enabled, launching device flow");
             if (statusConsumer != null) {
                 statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingDevice"));
@@ -102,67 +105,58 @@ public class OAuthFlowHandler {
             }
             return deviceResult;
         } else {
-            logger.error("None of the supported OAuth flows are enabled in the Connected App");
+            logger.info("Attempting Web Server OAuth flow with PKCE");
             if (statusConsumer != null) {
-                statusConsumer.accept(Labels.getString("OAuthLoginControl.statusNoOAuthFlowsEnabled"));
+                statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingPKCE"));
             }
-            if (loginButtonEnabler != null) {
-                Display.getDefault().asyncExec(loginButtonEnabler);
-            }
-            return false;
-        }
-    }
-
-    private boolean handlePKCEFlow() {
-        logger.info("PKCE flow is enabled, launching browser for PKCE login");
-        if (statusConsumer != null) {
-            statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingPKCE"));
-        }
-        try {
-            OAuthServerFlow pkceFlow = new OAuthServerFlow(appConfig, true, statusConsumer);
-            if (pkceFlow.performOAuthFlow()) {
-                logger.info("PKCE flow completed successfully");
-                if (statusConsumer != null) {
-                    statusConsumer.accept(Labels.getString("OAuthLoginControl.statusPKCESuccess"));
-                }
-                if (controller != null) {
-                    try {
-                        if (controller.login()) {
-                            controller.saveConfig();
-                            Display.getDefault().asyncExec(() -> controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession());
+            try {
+                OAuthServerFlow pkceFlow = new OAuthServerFlow(appConfig, true, statusConsumer);
+                if (pkceFlow.performOAuthFlow()) {
+                    logger.info("PKCE flow completed successfully");
+                    if (statusConsumer != null) {
+                        statusConsumer.accept(Labels.getString("OAuthLoginControl.statusPKCESuccess"));
+                    }
+                    if (controller != null) {
+                        try {
+                            if (controller.login()) {
+                                controller.saveConfig();
+                                Display.getDefault().asyncExec(() -> controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession());
+                                if (loginButtonEnabler != null) {
+                                    Display.getDefault().asyncExec(loginButtonEnabler);
+                                }
+                                return true;
+                            }
+                        } catch (Exception e) {
+                            logger.error("Failed to update controller's login state after PKCE flow", e);
+                            if (statusConsumer != null) {
+                                statusConsumer.accept(Labels.getString("OAuthLoginControl.statusControllerUpdateError"));
+                            }
                             if (loginButtonEnabler != null) {
                                 Display.getDefault().asyncExec(loginButtonEnabler);
                             }
-                            return true;
+                            return false;
                         }
-                    } catch (Exception e) {
-                        logger.error("Failed to update controller's login state after PKCE flow", e);
-                        if (statusConsumer != null) {
-                            statusConsumer.accept(Labels.getString("OAuthLoginControl.statusControllerUpdateError"));
-                        }
-                        if (loginButtonEnabler != null) {
-                            Display.getDefault().asyncExec(loginButtonEnabler);
-                        }
-                        return false;
                     }
+                    if (loginButtonEnabler != null) {
+                        Display.getDefault().asyncExec(loginButtonEnabler);
+                    }
+                    return true;
+                }
+            } catch (Exception e) {
+                logger.error("PKCE flow failed: " + e.getMessage(), e);
+                if (statusConsumer != null) {
+                    statusConsumer.accept(Labels.getString("OAuthLoginControl.statusPKCEFailedFallbackBrowser"));
                 }
                 if (loginButtonEnabler != null) {
                     Display.getDefault().asyncExec(loginButtonEnabler);
                 }
-                return true;
+                return false;
             }
-            return false;
-        } catch (Exception e) {
-            logger.error("PKCE flow failed: " + e.getMessage(), e);
-            if (statusConsumer != null) {
-                statusConsumer.accept(Labels.getString("OAuthLoginControl.statusPKCEFailedFallbackBrowser"));
-            }
-            if (loginButtonEnabler != null) {
-                Display.getDefault().asyncExec(loginButtonEnabler);
-            }
-            return false;
         }
+        // Defensive return for compiler
+        return false;
     }
+
     /**
      * Handles the device flow OAuth process.
      *
@@ -232,7 +226,7 @@ public class OAuthFlowHandler {
                 new BasicNameValuePair("scope", "api")
             );
             client.post();
-            String error = getErrorFromResponse(client);
+            OAuthError error = getErrorFromResponse(client);
             logger.info("Device flow pre-flight error response: " + error);
             String fullResponse = getFullResponse(client);
             logger.info("Device flow pre-flight full response: " + fullResponse);
@@ -243,7 +237,7 @@ public class OAuthFlowHandler {
         }
     }
 
-    private String getErrorFromResponse(SimplePostInterface client) {
+    private OAuthError getErrorFromResponse(SimplePostInterface client) {
         try {
             InputStream in = client.getInput();
             ByteArrayOutputStream result = new ByteArrayOutputStream();
@@ -253,7 +247,7 @@ public class OAuthFlowHandler {
             }
             String response = result.toString(StandardCharsets.UTF_8.name());
             if (response.contains("error")) {
-                return response;
+                return OBJECT_MAPPER.reader().readValue(response, OAuthError.class);
             }
         } catch (Exception e) {
             // ignore
@@ -280,19 +274,27 @@ public class OAuthFlowHandler {
     /**
      * Returns true if the error does NOT indicate the flow is not enabled.
      */
-    private boolean isFlowEnabledFromError(String error, String fullResponse) {
-        if (error != null) {
-            if (error.contains("unsupported_grant_type") ||
-                error.contains("unsupported_response_type") ||
-                error.contains("invalid_client") ||
-                error.contains("invalid_client_credentials") ||
-                error.contains("redirect_uri_mismatch") ||
-                error.contains("invalid_scope")) {
+    private boolean isFlowEnabledFromError(OAuthError error, String fullResponse) {
+        if (error != null && error.getError() != null) {
+            if (error.getError().equals("unsupported_grant_type") ||
+                error.getError().equals("unsupported_response_type") ||
+                error.getError().equals("invalid_client") ||
+                error.getError().equals("invalid_client_credentials") ||
+                error.getError().equals("redirect_uri_mismatch") ||
+                error.getError().equals("invalid_scope")) {
                 return false;
             }
-            // If the only error is invalid_grant: invalid authorization code, treat as enabled
-            if (error.contains("invalid_grant") && error.contains("invalid authorization code")) {
-                return true;
+            if (error.getError().equals("invalid_grant")) {
+                String errorDescription = error.getErrorDescription();
+                if (errorDescription != null) {
+                    if (errorDescription.contains("device flow is not enabled for the app")) {
+                        return false;
+                    }
+                    // If the only error is invalid_grant: invalid authorization code, treat as enabled
+                    if (errorDescription.equals("invalid authorization code")) {
+                        return true;
+                    }
+                }
             }
         }
         return true;

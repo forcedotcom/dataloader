@@ -125,7 +125,7 @@ public class ProcessRunner implements InitializingBean, IProcess {
 
     private void handleOAuthLogin(AppConfig appConfig) throws OAuthBrowserLoginRunnerException {
         if (requiresOAuthLogin(appConfig)) {
-            doBrowserLogin(appConfig);
+        	doBrowserLogin(appConfig);
         }
     }
 
