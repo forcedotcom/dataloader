@@ -88,7 +88,7 @@ public class OAuthFlowHandler {
         boolean isWebServerFlowSuccessful = handleWebServerFlow(true);
         
         if (isWebServerFlowSuccessful) {
-            return handleWebServerFlow(true);
+            return true;
         } else if (deviceEnabled) {
             logger.info("Device flow is enabled, launching device flow");
             if (statusConsumer != null) {
