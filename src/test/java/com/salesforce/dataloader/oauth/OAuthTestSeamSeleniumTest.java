@@ -251,13 +251,6 @@ public class OAuthTestSeamSeleniumTest extends ConfigTestBase {
     @Test
     public void testHandleOAuthLoginWithDeviceFlow() throws Exception {
         System.out.println("🧪 Starting clean OAuth flow test...");
-
-        // Set up Selenium to intercept browser calls
-        SeleniumUrlOpener seleniumOpener = new SeleniumUrlOpener(driver);
-        URLUtil.setTestHook(seleniumOpener);
-        assertNotNull("Selenium URL opener should be set", seleniumOpener);
-        
-        // Start OAuth flow in background
         CompletableFuture<Boolean> oauthFuture = CompletableFuture.supplyAsync(() -> {
             try {
                 OAuthFlowHandler oauthHandler = new OAuthFlowHandler(
@@ -351,6 +344,56 @@ public class OAuthTestSeamSeleniumTest extends ConfigTestBase {
         
         System.out.println("🎉 Clean OAuth flow test PASSED!");
         URLUtil.clearTestHook();
+    }
+
+    /**
+     * Test to verify that DataLoader fails when PKCE is disabled and only device flow is enabled.
+     * This represents the scenario before 7 AM on 9/2 when Connected Apps only support device flow.
+     * DL version 64.0.1 only supports PKCE, so this should fail gracefully.
+     */
+    @Test
+    public void testHandleOAuthLoginWithPKCEDisabled() throws Exception {
+        System.out.println("🧪 Testing DataLoader behavior when PKCE is disabled (device flow only)...");
+
+        // Start OAuth flow in background
+        CompletableFuture<Boolean> oauthFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                OAuthFlowHandler oauthHandler = new OAuthFlowHandler(
+                        getController().getAppConfig(),
+                        (status) -> System.out.println("OAuth Status: " + status),
+                        null, // null controller to avoid SWT issues
+                        null  // null runnable to avoid SWT issues
+                );
+                return oauthHandler.handleOAuthLogin();
+            } catch (Exception e) {
+                return false;
+            }
+        });
+        
+        // Wait for OAuth flow to complete (timeout is 60 seconds)
+        System.out.println("⏳ Waiting for OAuth flow to complete...");
+        Boolean oauthResult;
+        try {
+            oauthResult = oauthFuture.get(65, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            oauthResult = false;
+        }
+        
+        // Analyze the OAuth attempt
+        String currentUrl = driver.getCurrentUrl();
+        System.out.println("🔍 OAuth result: " + oauthResult + ", URL: " + currentUrl);
+        
+        // Check what type of OAuth flow was attempted
+        boolean pkceAttempted = currentUrl.contains("oauth2/authorize") && 
+                               (currentUrl.contains("code_challenge") || currentUrl.contains("error="));
+        boolean deviceFlowAttempted = currentUrl.contains("setup/connect");
+        
+        // Main assertions
+        assertTrue("PKCE authorization should have been attempted", pkceAttempted);
+        assertFalse("Device flow should NOT have been attempted", deviceFlowAttempted);
+        assertFalse("OAuth should fail when PKCE is disabled", oauthResult);
+        
+        System.out.println("✅ TEST PASSED: DataLoader attempted PKCE (not device flow) and failed as expected");
     }
 
     /**
