@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Display;
 import java.util.function.Consumer;
 
 /**
- * Utility class to handle OAuth flows (PKCE and Device Flow) for both UI and batch modes.
+ * Utility class to handle OAuth flow (WebServer with Proof Key for Code Exchange(PKCE)) for both UI and batch modes.
  */
 public class OAuthFlowHandler {
     private static final Logger logger = DLLogManager.getLogger(OAuthFlowHandler.class);
@@ -54,8 +54,7 @@ public class OAuthFlowHandler {
     }
 
     /**
-     * Handles the OAuth login process, attempting PKCE flow first if not disabled,
-     * falling back to device flow if PKCE is not supported or fails.
+     * Handles Web Server OAuth flow leveraging Proof Key for Code Exchange(PKCE).
      *
      * @return true if login was successful, false otherwise
      */
