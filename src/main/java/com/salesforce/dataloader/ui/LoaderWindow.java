@@ -119,6 +119,11 @@ public class LoaderWindow extends ApplicationWindow {
     public void dispose() {
         // make sure configuration gets written
         if(this.controller != null) {
+            // Clear metadata client cache and entity selection to prevent stale org data on restart
+            if (this.controller.isLoggedIn()) {
+                this.controller.getSObjectMetaDataClient().logout();
+                this.controller.getAppConfig().setValue(com.salesforce.dataloader.config.AppConfig.PROP_ENTITY, "");
+            }
             controller.saveConfig();
         }
     }

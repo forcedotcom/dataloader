@@ -62,6 +62,11 @@ public class LoginClient extends ClientBase<PartnerConnection> {
 
     private static Logger LOG = DLLogManager.getLogger(LoginClient.class);
 
+    /** Minimum API version where SOAP login is no longer supported (per Salesforce). */
+    private static final double SOAP_LOGIN_REMOVED_IN_VERSION = 65.0;
+    /** API version to use for SOAP login when session version >= 65.0 (per product decision). */
+    private static final String DEFAULT_LOGIN_API_VERSION = "64.0";
+
     private ConnectorConfig connectorConfig = null;
 
     private LoginClient(Controller controller) {
@@ -133,7 +138,8 @@ public class LoginClient extends ClientBase<PartnerConnection> {
         String origEndpoint = new String(appConfig.getAuthEndpointForCurrentEnv());
         try {
             dologin();
-            logger.debug("able to successfully invoke server APIs of version " + getAPIVersionForTheSession());
+            logger.info("Login succeeded using API " + getApiVersionForLogin(getAPIVersionForTheSession())
+                    + ", session API version for operations: " + getAPIVersionForTheSession());
         } catch (UnexpectedErrorFault fault) {
             // attempt login with previous API version
             if (fault.getExceptionCode() == ExceptionCode.UNSUPPORTED_API_VERSION
@@ -331,8 +337,30 @@ public class LoginClient extends ClientBase<PartnerConnection> {
         return cc;
     }
     
+    /**
+     * API version to use for the SOAP login request only.
+     * SOAP login is not supported in API versions >= 65; for those, returns 64.0.
+     * Other operations continue to use the session version unchanged.
+     */
+    public static String getApiVersionForLogin(String currentSessionVersion) {
+        if (currentSessionVersion == null || currentSessionVersion.isEmpty()) {
+            return currentSessionVersion;
+        }
+        try {
+            double version = Double.parseDouble(currentSessionVersion);
+            return version >= SOAP_LOGIN_REMOVED_IN_VERSION ? DEFAULT_LOGIN_API_VERSION : currentSessionVersion;
+        } catch (NumberFormatException e) {
+            LOG.error("Invalid session API version for login: {}", currentSessionVersion, e);
+            throw new IllegalArgumentException("Invalid session API version: " + currentSessionVersion, e);
+        }
+    }
+
     public static String getServicePath() {
-        return "/services/Soap/u/" + getAPIVersionForTheSession() + "/";
+        return getServicePath(getAPIVersionForTheSession());
+    }
+
+    public static String getServicePath(String apiVersion) {
+        return "/services/Soap/u/" + apiVersion + "/";
     }
     
     public LimitInfo getAPILimitInfo() {
@@ -353,8 +381,9 @@ public class LoginClient extends ClientBase<PartnerConnection> {
             serverURL = appConfig.getAuthEndpointForCurrentEnv();
         }
         this.connectorConfig = getConnectorConfig();
-        this.connectorConfig.setAuthEndpoint(serverURL + getServicePath());
-        this.connectorConfig.setServiceEndpoint(serverURL + getServicePath());
+        String loginServicePath = getServicePath(getApiVersionForLogin(getAPIVersionForTheSession()));
+        this.connectorConfig.setAuthEndpoint(serverURL + loginServicePath);
+        this.connectorConfig.setServiceEndpoint(serverURL + loginServicePath);
         return this.connectorConfig;
     }
     

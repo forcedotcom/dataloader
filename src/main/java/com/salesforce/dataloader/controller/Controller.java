@@ -539,11 +539,13 @@ public class Controller {
     public void logout() {
         getLoginClient().logout();
         getPartnerClient().logout();
+        getSObjectMetaDataClient().logout();
 
         this.bulkV1Client = null;
         this.bulkV2Client = null;
         this.restClient = null;
         appConfig.setValue(AppConfig.PROP_OAUTH_ACCESSTOKEN, "");
+        appConfig.setValue(AppConfig.PROP_ENTITY, "");
     }
 
     public boolean attachmentsEnabled() {
