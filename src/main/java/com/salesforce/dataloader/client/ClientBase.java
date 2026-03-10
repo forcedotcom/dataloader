@@ -220,6 +220,8 @@ public abstract class ClientBase<ConnectionType> {
             cc.setAuthEndpoint(server + PartnerClient.getServicePath());
             cc.setServiceEndpoint(server + PartnerClient.getServicePath()); // Partner SOAP service
             cc.setRestEndpoint(server + BulkV1Client.getServicePath());  // REST service: Bulk v1
+            logger.info("Post-login endpoint configured: SOAP=" + PartnerClient.getServicePath()
+                    + ", REST=" + BulkV1Client.getServicePath());
         }
 
         return cc;
@@ -229,7 +231,7 @@ public abstract class ClientBase<ConnectionType> {
         String[] connectURLArray = Connector.END_POINT.split("\\/");
         return connectURLArray[connectURLArray.length-1];
     }
-    
+
     public static String getPreviousAPIVersionInWSC() {
         String currentAPIVersion = getCurrentAPIVersionInWSC();
         String[] versionStrArray = currentAPIVersion.split("\\.");

@@ -26,6 +26,7 @@
 package com.salesforce.dataloader;
 
 import com.salesforce.dataloader.client.BulkV1Client;
+import com.salesforce.dataloader.client.LoginClient;
 import com.salesforce.dataloader.client.PartnerClient;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
@@ -293,8 +294,10 @@ abstract public class TestBase {
         if (!configEndpoint.equals("")) { //$NON-NLS-1$
             try {
                 PartnerClient.setAPIVersionForTheSession(apiVersionStr);
-                bindingConfig.setAuthEndpoint(configEndpoint + PartnerClient.getServicePath());
-                bindingConfig.setServiceEndpoint(configEndpoint + PartnerClient.getServicePath()); // Partner SOAP service
+                String loginVersion = LoginClient.getApiVersionForLogin(apiVersionStr);
+                String loginServicePath = LoginClient.getServicePath(loginVersion);
+                bindingConfig.setAuthEndpoint(configEndpoint + loginServicePath);
+                bindingConfig.setServiceEndpoint(configEndpoint + loginServicePath);
                 bindingConfig.setRestEndpoint(configEndpoint + BulkV1Client.getServicePath());  // REST service: Bulk v1       
                 bindingConfig.setManualLogin(true);
                 // set long timeout for tests with larger data sets
