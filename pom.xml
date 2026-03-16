@@ -20,9 +20,9 @@
     <test.endpoint>https://testendpoint</test.endpoint>
     <test.user.default>admin@org.com</test.user.default>
     <test.user.restricted>standard@org.com</test.user.restricted>
-    <test.password></test.password>
+    <test.password/>
     <!-- use the encrypted password -->
-    <test.encryptionFile></test.encryptionFile>
+    <test.encryptionFile/>
     <test.redirect>true</test.redirect>
     <test.testfiles.directory>${project.build.testOutputDirectory}/testfiles</test.testfiles.directory>
     <skip-unit-tests>false</skip-unit-tests>
@@ -127,7 +127,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-text</artifactId>
-      <version>1.13.1</version>
+      <version>1.14.0</version>
     </dependency>
 
     <!-- Testing dependencies -->
@@ -245,7 +245,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -467,7 +467,7 @@
               <goal>shade</goal>
             </goals>
             <phase>package</phase>
-            <configuration></configuration>
+            <configuration/>
           </execution>
         </executions>
       </plugin>
@@ -487,47 +487,47 @@
             <configuration>
               <target>
                 <copy flatten="true" todir="${basedir}/target/classes/mac/">
-                  <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtmac*/*/*.jar"></fileset>
+                  <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtmac*/*/*.jar"/>
                 </copy>
                 <copy flatten="true" todir="${basedir}/target/classes/win/">
-                  <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtwin*/*/*.jar"></fileset>
+                  <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtwin*/*/*.jar"/>
                 </copy>
                 <copy flatten="true" todir="${basedir}/target/classes/linux/">
-                  <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtlinux*/*/*.jar"></fileset>
+                  <fileset dir="${basedir}/local-proj-repo/local/swt/" includes="swtlinux*/*/*.jar"/>
                 </copy>
 
                 <condition else="zip" property="zipexec" value="7z">
-                  <os family="windows"></os>
+                  <os family="windows"/>
                 </condition>
                 <apply executable="${zipexec}">
-                  <arg value="-d"></arg>
-                  <srcfile></srcfile>
-                  <arg value="META-INF/ECLIPSE_.SF"></arg>
-                  <arg value="META-INF/ECLIPSE_.DSA"></arg>
-                  <arg value="META-INF/ECLIPSE_.RSA"></arg>
+                  <arg value="-d"/>
+                  <srcfile/>
+                  <arg value="META-INF/ECLIPSE_.SF"/>
+                  <arg value="META-INF/ECLIPSE_.DSA"/>
+                  <arg value="META-INF/ECLIPSE_.RSA"/>
                   <fileset dir="${basedir}/target/classes/">
                     <patternset>
-                      <include name="**/*.jar"></include>
+                      <include name="**/*.jar"/>
                     </patternset>
                   </fileset>
                 </apply>
 
-                <mkdir dir="${basedir}/target/zipartifacts"></mkdir>
-                <copy file="${basedir}/release/install/install.command" todir="${basedir}/target/zipartifacts"></copy>
-                <copy file="${basedir}/release/install/install.command" tofile="${basedir}/target/zipartifacts/install.bat"></copy>
-                <copy file="${basedir}/target/classes/mac/util/util.sh" todir="${basedir}/target/zipartifacts/util"></copy>
-                <copy file="${basedir}/target/classes/win/util/util.bat" todir="${basedir}/target/zipartifacts/util"></copy>
+                <mkdir dir="${basedir}/target/zipartifacts"/>
+                <copy file="${basedir}/release/install/install.command" todir="${basedir}/target/zipartifacts"/>
+                <copy file="${basedir}/release/install/install.command" tofile="${basedir}/target/zipartifacts/install.bat"/>
+                <copy file="${basedir}/target/classes/mac/util/util.sh" todir="${basedir}/target/zipartifacts/util"/>
+                <copy file="${basedir}/target/classes/win/util/util.bat" todir="${basedir}/target/zipartifacts/util"/>
 
-                <mkdir dir="${basedir}/target/classes/linux"></mkdir>
-                <copy file="${basedir}/target/classes/mac/dataloader_console" tofile="${basedir}/target/classes/linux/dataloader.sh"></copy>
-                <copy file="${basedir}/target/classes/mac/util/util.sh" todir="${basedir}/target/classes/linux/util"></copy>
+                <mkdir dir="${basedir}/target/classes/linux"/>
+                <copy file="${basedir}/target/classes/mac/dataloader_console" tofile="${basedir}/target/classes/linux/dataloader.sh"/>
+                <copy file="${basedir}/target/classes/mac/util/util.sh" todir="${basedir}/target/classes/linux/util"/>
 
-                <replace dir="${basedir}/target/" token="@@FULL_VERSION@@" value="${project.version}"></replace>
-                <replace dir="${basedir}/target/" token="@@MIN_JAVA_VERSION@@" value="${maven.compiler.release}"></replace>
+                <replace dir="${basedir}/target/" token="@@FULL_VERSION@@" value="${project.version}"/>
+                <replace dir="${basedir}/target/" token="@@MIN_JAVA_VERSION@@" value="${maven.compiler.release}"/>
 
-                <fixcrlf eol="crlf" includes="**/*.bat" srcdir="${basedir}/target/"></fixcrlf>
-                <fixcrlf eof="remove" eol="crlf" includes="**/*.command" srcdir="${basedir}/target/"></fixcrlf>
-                <fixcrlf eof="remove" eol="lf" includes="**/*.sh" srcdir="${basedir}/target/"></fixcrlf>
+                <fixcrlf eol="crlf" includes="**/*.bat" srcdir="${basedir}/target/"/>
+                <fixcrlf eof="remove" eol="crlf" includes="**/*.command" srcdir="${basedir}/target/"/>
+                <fixcrlf eof="remove" eol="lf" includes="**/*.sh" srcdir="${basedir}/target/"/>
               </target>
             </configuration>
           </execution>
@@ -539,10 +539,10 @@
             <phase>package</phase>
             <configuration>
               <target>
-                <delete file="${basedir}/dataloader_v${project.version}.zip"></delete>
-                <copy file="${basedir}/target/dataloader-${project.version}.jar" todir="${basedir}/target/zipartifacts"></copy>
+                <delete file="${basedir}/dataloader_v${project.version}.zip"/>
+                <copy file="${basedir}/target/dataloader-${project.version}.jar" todir="${basedir}/target/zipartifacts"/>
                 <zip destfile="${basedir}/dataloader_v${project.version}.zip" update="true">
-                  <zipfileset dir="${basedir}/target/zipartifacts" dirmode="755" filemode="755"></zipfileset>
+                  <zipfileset dir="${basedir}/target/zipartifacts" dirmode="755" filemode="755"/>
                 </zip>
               </target>
             </configuration>
@@ -555,7 +555,7 @@
             <phase>package</phase>
             <configuration>
               <target>
-                <delete dir="${basedir}/target/classes"></delete>
+                <delete dir="${basedir}/target/classes"/>
               </target>
             </configuration>
           </execution>
