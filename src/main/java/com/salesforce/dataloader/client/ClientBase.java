@@ -136,17 +136,27 @@ public abstract class ClientBase<ConnectionType> {
     public static final String SFORCE_CALL_OPTIONS_HEADER = "Sforce-Call-Options";
 
     public static String getClientName(AppConfig cfg) {
+        return getClientName(cfg.isBulkAPIEnabled(), cfg.isBulkV2APIEnabled(),
+                cfg.isBatchMode(), cfg.isExternalClientAppConfigured(), Controller.APP_VERSION);
+    }
+
+    static String getClientName(boolean bulkAPI, boolean bulkV2API,
+                                boolean batchMode, boolean externalClientApp, String appVersion) {
         String apiType = PARTNER_API_CLIENT_TYPE;
-        final String interfaceType = cfg.isBatchMode() ? BATCH_CLIENT_STRING : UI_CLIENT_STRING;
-        if (cfg.isBulkAPIEnabled()) {
+        if (bulkAPI) {
             apiType = BULK_API_CLIENT_TYPE;
-        }else if (cfg.isBulkV2APIEnabled()) {
+        } else if (bulkV2API) {
             apiType = BULK_V2_API_CLIENT_TYPE;
         }
+
+        String interfaceType = externalClientApp
+                ? ""
+                : (batchMode ? BATCH_CLIENT_STRING : UI_CLIENT_STRING);
+
         return new StringBuilder(32).append(BASE_CLIENT_NAME).append(apiType).append(interfaceType)
                 .append("/")
-                .append(Controller.APP_VERSION)
-                .toString(); //$NON-NLS-1$
+                .append(appVersion)
+                .toString();
     }
     
     public static synchronized String getAPIVersionForTheSession() {

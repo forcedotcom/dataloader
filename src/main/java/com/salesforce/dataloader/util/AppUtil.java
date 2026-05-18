@@ -238,6 +238,10 @@ public class AppUtil {
     public static APP_RUN_MODE getAppRunMode() {
         return appRunMode;
     }
+
+    public static boolean isRunningInBatchMode() {
+        return appRunMode == APP_RUN_MODE.BATCH;
+    }
     
     public static boolean isContentSObject(String sObjectName) {
         return CONTENT_SOBJECT_LIST.contains(sObjectName.toLowerCase());

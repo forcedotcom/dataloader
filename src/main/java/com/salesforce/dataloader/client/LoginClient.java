@@ -245,7 +245,7 @@ public class LoginClient extends ClientBase<PartnerConnection> {
 
     private void loginInternal(final PartnerConnection conn) throws ConnectionException, PasswordExpiredException {
         final ConnectorConfig cc = conn.getConfig();
-        cc.setRequestHeader(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getClientIDForCurrentEnv());
+        cc.setRequestHeader(AppConfig.CLIENT_ID_HEADER_NAME, appConfig.getEffectiveClientIdForCurrentEnv());
         try {
             logger.info(Messages.getMessage(getClass(), "sforceLoginDetail", cc.getAuthEndpoint(), cc.getUsername()));
             LoginResult loginResult = runLoginOperation(conn);
