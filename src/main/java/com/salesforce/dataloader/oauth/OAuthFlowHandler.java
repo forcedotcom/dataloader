@@ -29,6 +29,7 @@ package com.salesforce.dataloader.oauth;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.ui.Labels;
+import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.DLLogManager;
 import com.salesforce.dataloader.util.OAuthServerFlow;
 import org.apache.logging.log4j.Logger;
@@ -51,6 +52,10 @@ public class OAuthFlowHandler {
         this.statusConsumer = statusConsumer;
         this.controller = controller;
         this.loginButtonEnabler = loginButtonEnabler;
+    }
+
+    private boolean shouldRunLoginButtonEnabler() {
+        return loginButtonEnabler != null && !AppUtil.isRunningInBatchMode();
     }
 
     /**
@@ -77,8 +82,10 @@ public class OAuthFlowHandler {
                     try {
                         if (controller.login()) {
                             controller.saveConfig();
-                            Display.getDefault().asyncExec(() -> controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession());
-                            if (loginButtonEnabler != null) {
+                            if (!AppUtil.isRunningInBatchMode()) {
+                                Display.getDefault().asyncExec(() -> controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession());
+                            }
+                            if (shouldRunLoginButtonEnabler()) {
                                 Display.getDefault().asyncExec(loginButtonEnabler);
                             }
                             return true;
@@ -88,13 +95,13 @@ public class OAuthFlowHandler {
                         if (statusConsumer != null) {
                             statusConsumer.accept(Labels.getString("OAuthLoginControl.statusControllerUpdateError"));
                         }
-                        if (loginButtonEnabler != null) {
+                        if (shouldRunLoginButtonEnabler()) {
                             Display.getDefault().asyncExec(loginButtonEnabler);
                         }
                         return false;
                     }
                 }
-                if (loginButtonEnabler != null) {
+                if (shouldRunLoginButtonEnabler()) {
                     Display.getDefault().asyncExec(loginButtonEnabler);
                 }
                 return true;
@@ -111,7 +118,7 @@ public class OAuthFlowHandler {
             if (statusConsumer != null) {
                 statusConsumer.accept(Labels.getString("OAuthLoginControl.statusPKCEFailedFallbackBrowser"));
             }
-            if (loginButtonEnabler != null) {
+            if (shouldRunLoginButtonEnabler()) {
                 Display.getDefault().asyncExec(loginButtonEnabler);
             }
             return false;
