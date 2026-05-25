@@ -34,7 +34,36 @@ import org.apache.logging.log4j.Logger;
    
 public class URLUtil {
     private static Logger logger = DLLogManager.getLogger(URLUtil.class);
+    private static volatile UrlOpener testHook = null;
+
+    /**
+     * Set a test hook for URL opening (used by tests to inject Selenium).
+     * @param opener The UrlOpener implementation to use for tests
+     */
+    public static void setTestHook(UrlOpener opener) {
+        testHook = opener;
+    }
+
+    /**
+     * Clear the test hook to restore normal URL opening behavior.
+     */
+    public static void clearTestHook() {
+        testHook = null;
+    }
+
     public static void openURL(String url) {
+        // Check for test hook first
+        if (testHook != null) {
+            try {
+                logger.debug("Using test hook for URL opening: " + url);
+                testHook.open(url);
+                return;
+            } catch (Exception e) {
+                logger.warn("Test hook failed, falling back to default behavior: " + e.getMessage());
+            }
+        }
+
+        // Default production behavior
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
             try {
