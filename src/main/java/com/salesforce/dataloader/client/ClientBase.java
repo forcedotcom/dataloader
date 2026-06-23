@@ -34,6 +34,7 @@ import com.salesforce.dataloader.client.transport.TransportFactoryImpl;
 import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
+import com.salesforce.dataloader.dao.DataAccessObjectFactory;
 import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.util.AppUtil;
 import com.sforce.soap.partner.Connector;
@@ -137,11 +138,20 @@ public abstract class ClientBase<ConnectionType> {
 
     public static String getClientName(AppConfig cfg) {
         return getClientName(cfg.isBulkAPIEnabled(), cfg.isBulkV2APIEnabled(),
-                cfg.isBatchMode(), cfg.isExternalClientAppConfigured(), Controller.APP_VERSION);
+                cfg.isBatchMode(), cfg.isExternalClientAppConfigured(), Controller.APP_VERSION,
+                cfg.getString(AppConfig.PROP_DAO_TYPE));
     }
 
+    // Kept for source-compatibility with existing tests; delegates to the 6-arg overload below.
     static String getClientName(boolean bulkAPI, boolean bulkV2API,
                                 boolean batchMode, boolean externalClientApp, String appVersion) {
+        return getClientName(bulkAPI, bulkV2API, batchMode, externalClientApp, appVersion, null);
+    }
+
+    // W-22717496: append DAO-type suffix so apusg can measure direct-DB-access usage
+    static String getClientName(boolean bulkAPI, boolean bulkV2API,
+                                boolean batchMode, boolean externalClientApp,
+                                String appVersion, String daoType) {
         String apiType = PARTNER_API_CLIENT_TYPE;
         if (bulkAPI) {
             apiType = BULK_API_CLIENT_TYPE;
@@ -153,10 +163,18 @@ public abstract class ClientBase<ConnectionType> {
                 ? ""
                 : (batchMode ? BATCH_CLIENT_STRING : UI_CLIENT_STRING);
 
-        return new StringBuilder(32).append(BASE_CLIENT_NAME).append(apiType).append(interfaceType)
+        StringBuilder sb = new StringBuilder(32).append(BASE_CLIENT_NAME).append(apiType).append(interfaceType)
                 .append("/")
-                .append(appVersion)
-                .toString();
+                .append(appVersion);
+
+        if (batchMode && daoType != null) {
+            if (DataAccessObjectFactory.DATABASE_READ_TYPE.equalsIgnoreCase(daoType)) {
+                sb.append("/DBR");
+            } else if (DataAccessObjectFactory.DATABASE_WRITE_TYPE.equalsIgnoreCase(daoType)) {
+                sb.append("/DBW");
+            }
+        }
+        return sb.toString();
     }
     
     public static synchronized String getAPIVersionForTheSession() {
@@ -172,7 +190,7 @@ public abstract class ClientBase<ConnectionType> {
         cc.setTransportFactory(new TransportFactoryImpl());
         cc.setSessionId(getSessionId());
         cc.setRequestHeader(SFORCE_CALL_OPTIONS_HEADER,
-                "client=" + ClientBase.getClientName(this.appConfig));      
+                "client=" + ClientBase.getClientName(this.appConfig));
         // set authentication credentials
         // blank username is not acceptible
         String username = appConfig.getString(AppConfig.PROP_USERNAME);
