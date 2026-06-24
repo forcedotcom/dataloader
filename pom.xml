@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.force</groupId>
   <artifactId>dataloader</artifactId>
-  <version>66.0.0</version>
+  <version>67.0.0</version>
   <packaging>jar</packaging>
   <name>Salesforce Data Loader</name>
   <url>https://github.com/forcedotcom/dataloader</url>
@@ -51,7 +51,7 @@
     <dependency>
       <groupId>com.force.api</groupId>
       <artifactId>force-partner-api</artifactId>
-      <version>66.0.0</version>
+      <version>67.0.0</version>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
