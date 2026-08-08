@@ -6,11 +6,19 @@ CALL %*
 EXIT /b %ERRORLEVEL%
 
 :initVars
-    SET DATALOADER_VERSION=@@FULL_VERSION@@
+    SET DATALOADER_VERSION=67.0.0
     FOR /f "tokens=1 delims=." %%a IN ("%DATALOADER_VERSION%") DO (
       SET DATALOADER_SHORT_VERSION=%%a
     )
-    SET MIN_JAVA_VERSION=@@MIN_JAVA_VERSION@@
+    SET MIN_JAVA_VERSION=17
+	rem Set ClassPath for headless win32 compatibility
+    set SWT_VERSION=4.36
+    if /i "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+        set "SWT_JAR=swtwin32_aarch64-%SWT_VERSION%.jar"
+    ) else (
+        set "SWT_JAR=swtwin32_x86_64-%SWT_VERSION%.jar"
+    )
+    set DATALOADER_HEADLESS_CP=%SWT_JAR%;dataloader-%DATALOADER_VERSION%.jar
     EXIT /b 0
 
 :checkJavaVersion
@@ -50,10 +58,15 @@ EXIT /b %ERRORLEVEL%
     echo ^<full path to the JRE installation folder^>
     echo.
     EXIT -1
-    
+
 :runDataLoader
     CALL :checkJavaVersion
     java --enable-native-access=ALL-UNNAMED -cp "%~dp0..\*" com.salesforce.dataloader.process.DataLoaderRunner %*
+    EXIT /b %ERRORLEVEL%
+
+:runDataLoaderHeadless
+    CALL :checkJavaVersion
+    java -Djava.awt.headless=true --enable-native-access=ALL-UNNAMED -cp "%~dp0..\%DATALOADER_HEADLESS_CP%" com.salesforce.dataloader.process.DataLoaderRunner %*
     EXIT /b %ERRORLEVEL%
 
 REM Shortcut files have .lnk extension
