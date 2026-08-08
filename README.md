@@ -125,7 +125,7 @@ See the [testing wiki](https://github.com/forcedotcom/dataloader/wiki/Testing-Da
 
 # Resources
 
-For more information, see the [Salesforce Data Loader Guide](https://na1.salesforce.com/help/doc/en/salesforce_data_loader.pdf).
+For more information, see the [Salesforce Data Loader Guide](https://resources.docs.salesforce.com/latest/latest/en-us/sfdc/pdf/salesforce_data_loader.pdf).
 
 Questions can be directed to the [open source forum](https://developer.salesforce.com/forums?feedtype=RECENT&dc=APIs_and_Integration&criteria=ALLQUESTIONS&#!/feedtype=RECENT&criteria=ALLQUESTIONS&).
 
