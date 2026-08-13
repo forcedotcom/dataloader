@@ -296,6 +296,8 @@ public class AppConfig {
 
     public static final String PROP_SERVER_ENVIRONMENTS = OAUTH_PREFIX + "environments";
     public static final String PROP_SELECTED_SERVER_ENVIRONMENT = OAUTH_PREFIX + "environment";
+    public static final String PROP_OAUTH_FLOW = OAUTH_PREFIX + "flow";
+    public static final String OAUTH_FLOW_CLIENT_CREDENTIALS = "client_credentials";
     public static final String PROP_OAUTH_ACCESSTOKEN = OAUTH_PREFIX + "accesstoken";
     public static final String PROP_OAUTH_REFRESHTOKEN = OAUTH_PREFIX + "refreshtoken";
     public static final String PROP_OAUTH_PKCE_PORT = OAUTH_PREFIX + "pkce.port";
@@ -537,6 +539,7 @@ public class AppConfig {
             PROP_DAO_WRITE_POSTPROCESSOR_SCRIPT,
             */
             PROP_DELETE_WITH_EXTERNALID,
+            PROP_OAUTH_FLOW,
             PROP_OAUTH_ACCESSTOKEN,
             PROP_OAUTH_REFRESHTOKEN,
             PROP_OAUTH_INSTANCE_URL,

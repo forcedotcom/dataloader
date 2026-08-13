@@ -92,6 +92,11 @@ public class AppConfigEdgeTest {
     }
     
     @Test
+    public void testOAuthFlowPropertyIsReadOnly() {
+        assertTrue(AppConfig.isReadOnlyProperty(AppConfig.PROP_OAUTH_FLOW));
+    }
+
+    @Test
     public void testCaseSensitivity() {
         appConfig.setValue("CaseSensitiveProperty", "value");
         assertEquals(appConfig.getString("casesensitiveproperty"), "");
