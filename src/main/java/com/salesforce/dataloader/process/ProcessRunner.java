@@ -39,6 +39,7 @@ import com.salesforce.dataloader.exception.ParameterLoadException;
 import com.salesforce.dataloader.exception.ProcessInitializationException;
 import com.salesforce.dataloader.util.AppUtil;
 import com.salesforce.dataloader.util.ExitException;
+import com.salesforce.dataloader.util.OAuthClientCredentialsFlow;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.salesforce.dataloader.util.DLLogManager;
 import org.apache.logging.log4j.Logger;
@@ -114,14 +115,27 @@ public class ProcessRunner implements InitializingBean, IProcess {
         }
     }
 
-    private void handleOAuthLogin(AppConfig appConfig) throws OAuthBrowserLoginRunnerException {
+    private void handleOAuthLogin(AppConfig appConfig) throws OAuthBrowserLoginRunnerException, ParameterLoadException {
+        String oauthFlow = appConfig.getString(AppConfig.PROP_OAUTH_FLOW);
+        if (AppConfig.OAUTH_FLOW_CLIENT_CREDENTIALS.equalsIgnoreCase(oauthFlow)) {
+            new OAuthClientCredentialsFlow(appConfig).performOAuthFlow();
+            return;
+        }
+        if (oauthFlow != null && !oauthFlow.isBlank()) {
+            throw new ParameterLoadException("Unsupported OAuth flow: " + oauthFlow);
+        }
         if (requiresOAuthLogin(appConfig)) {
-        	doBrowserLogin(appConfig);
+            doBrowserLogin(appConfig);
         }
     }
 
     private boolean requiresOAuthLogin(AppConfig appConfig) {
         return !(appConfig.contains(AppConfig.PROP_USERNAME) && appConfig.contains(AppConfig.PROP_PASSWORD));
+    }
+
+    private static boolean isClientCredentialsFlow(AppConfig appConfig) {
+        return AppConfig.OAUTH_FLOW_CLIENT_CREDENTIALS.equalsIgnoreCase(
+                appConfig.getString(AppConfig.PROP_OAUTH_FLOW));
     }
 
     private void setThreadNameIfNeeded(AppConfig appConfig) {
@@ -294,6 +308,10 @@ public class ProcessRunner implements InitializingBean, IProcess {
             throw new ProcessInitializationException("Configuration not initialized");
         }
         for (String propName : PROP_NAME_ARRAY) {
+            if (isClientCredentialsFlow(appConfig)
+                    && (propName.equals(AppConfig.PROP_USERNAME) || propName.equals(AppConfig.PROP_PASSWORD))) {
+                continue;
+            }
             String propVal = appConfig.getString(propName);
             if (propName.equals(AppConfig.PROP_PASSWORD) && (propVal == null || propVal.isBlank())) {
                 propVal = appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN);
