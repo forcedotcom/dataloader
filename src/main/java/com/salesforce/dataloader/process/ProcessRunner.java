@@ -289,21 +289,55 @@ public class ProcessRunner implements InitializingBean, IProcess {
         return controller;
     }
 
-    private static void validateConfigProperties(AppConfig appConfig) throws ProcessInitializationException {
-        if (appConfig == null) {
-            throw new ProcessInitializationException("Configuration not initialized");
-        }
-        for (String propName : PROP_NAME_ARRAY) {
-            String propVal = appConfig.getString(propName);
-            if (propName.equals(AppConfig.PROP_PASSWORD) && (propVal == null || propVal.isBlank())) {
-                propVal = appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN);
-            }
-            if (propVal == null || propVal.isBlank()) {
-                logger.fatal(Messages.getFormattedString(AppConfig.class.getSimpleName() + ".errorNoRequiredParameter", propName));
-                throw new ParameterLoadException(Messages.getFormattedString(AppConfig.class.getSimpleName() + ".errorNoRequiredParameter", propName));
-            }
-        }
-    }
+	private static void validateConfigProperties(AppConfig appConfig)
+			throws ProcessInitializationException {
+
+		if (appConfig == null) {
+			throw new ProcessInitializationException(
+					"Configuration not initialized");
+		}
+
+		boolean jwtEnabled =
+				appConfig.getBoolean(
+						AppConfig.PROP_OAUTH_USE_JWT);
+
+		for (String propName : PROP_NAME_ARRAY) {
+
+			String propVal =
+					appConfig.getString(propName);
+
+			// JWT authentication does not require a password
+			if (jwtEnabled
+					&& propName.equals(AppConfig.PROP_PASSWORD)) {
+				logger.info("Skipping password validation because JWT authentication is enabled");
+				continue;
+			}
+
+			// Existing OAuth access-token handling
+			if (propName.equals(AppConfig.PROP_PASSWORD)
+					&& (propVal == null || propVal.isBlank())) {
+
+				propVal =
+						appConfig.getString(
+								AppConfig.PROP_OAUTH_ACCESSTOKEN);
+			}
+
+			if (propVal == null || propVal.isBlank()) {
+
+				logger.fatal(
+						Messages.getFormattedString(
+								AppConfig.class.getSimpleName()
+										+ ".errorNoRequiredParameter",
+								propName));
+
+				throw new ParameterLoadException(
+						Messages.getFormattedString(
+								AppConfig.class.getSimpleName()
+										+ ".errorNoRequiredParameter",
+								propName));
+			}
+		}
+	}
 
     void doBrowserLogin(AppConfig appConfig) throws OAuthBrowserLoginRunnerException {
         try {

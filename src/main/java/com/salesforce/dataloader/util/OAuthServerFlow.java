@@ -269,7 +269,7 @@ public class OAuthServerFlow {
         authUrl.append("?response_type=code");
         authUrl.append("&client_id=").append(URLEncoder.encode(clientId, StandardCharsets.UTF_8.name()));
         authUrl.append("&redirect_uri=").append(URLEncoder.encode(redirectUri, StandardCharsets.UTF_8.name()));
-        authUrl.append("&scope=").append(URLEncoder.encode("api", StandardCharsets.UTF_8.name()));
+        authUrl.append("&scope=").append(URLEncoder.encode("api refresh_token", StandardCharsets.UTF_8.name()));
         authUrl.append("&state=").append(URLEncoder.encode(state, StandardCharsets.UTF_8.name()));
         if (usePkce && codeChallenge != null) {
             authUrl.append("&code_challenge=").append(URLEncoder.encode(codeChallenge, StandardCharsets.UTF_8.name()));
@@ -355,11 +355,28 @@ public class OAuthServerFlow {
                 String refreshToken = (String) response.get("refresh_token");
                 String instanceUrl = (String) response.get("instance_url");
                 
+				logger.info("### ACCESS TOKEN PRESENT: "
+					+ (accessToken != null));
+					
+				logger.info("### TOKEN RESPONSE: " + response);
+					
+				logger.info("### REFRESH TOKEN PRESENT: "
+					+ (refreshToken != null));
+					
+				if (refreshToken != null) {
+					logger.info("### REFRESH TOKEN LENGTH: "
+						+ refreshToken.length());
+				}
+				
                 // Configure AppConfig with OAuth tokens
                 appConfig.setValue(AppConfig.PROP_OAUTH_ACCESSTOKEN, accessToken);
                 if (refreshToken != null) {
-                    appConfig.setValue(AppConfig.PROP_OAUTH_REFRESHTOKEN, refreshToken);
-                }
+					logger.info("OAuth refresh token received. Length="
+						+ refreshToken.length());
+
+					appConfig.setValue(AppConfig.PROP_OAUTH_REFRESHTOKEN, refreshToken);
+					appConfig.save();
+				}
                 if (instanceUrl != null) {
                     appConfig.setAuthEndpointForCurrentEnv(instanceUrl);
                     appConfig.setValue(AppConfig.PROP_OAUTH_INSTANCE_URL, instanceUrl);
@@ -382,6 +399,127 @@ public class OAuthServerFlow {
         }
     }
     
+	public String refreshAccessToken(String refreshToken)
+			throws Exception {
+
+		logger.info("Refreshing OAuth access token");
+
+		String tokenUrl =
+			appConfig.getAuthEndpointForCurrentEnv()
+			+ "/services/oauth2/token";
+
+		String clientId =
+			appConfig.getEffectiveClientIdForCurrentEnv();
+
+		String clientSecret =
+			appConfig.getEffectiveClientSecretForCurrentEnv();
+
+		List<BasicNameValuePair> params =
+			new ArrayList<>();
+
+		params.add(new BasicNameValuePair(
+				"grant_type",
+				"refresh_token"));
+
+		params.add(new BasicNameValuePair(
+				"client_id",
+				clientId));
+
+		params.add(new BasicNameValuePair(
+				"refresh_token",
+				refreshToken));
+
+		if (appConfig.isExternalClientAppConfigured()
+				&& clientSecret != null
+				&& !clientSecret.trim().isEmpty()) {
+
+			params.add(new BasicNameValuePair(
+					"client_secret",
+					clientSecret));
+		}
+
+		SimplePostInterface client =
+			SimplePostFactory.getInstance(
+				appConfig,
+				tokenUrl,
+				params.toArray(new BasicNameValuePair[0]));
+				
+		logger.info(
+			"AUTH ENDPOINT="
+			+ appConfig.getAuthEndpointForCurrentEnv());
+
+		logger.info(
+			"TOKEN URL="
+			+ tokenUrl);
+
+		logger.info(
+			"CLIENT ID="
+			+ clientId);
+
+		logger.info(
+			"CLIENT SECRET LENGTH="
+			+ (clientSecret == null ? 0 : clientSecret.length()));
+
+		logger.info(
+			"REFRESH TOKEN="
+			+ refreshToken);
+
+
+
+		client.post();
+
+		if (!client.isSuccessful()) {
+			logger.error("Refresh token request failed with status: "+ client.getStatusCode());
+			logErrorResponse(client.getInput());
+			return null;
+		}
+
+		Map<?, ?> response =
+			parseJsonResponse(client.getInput());
+
+		logger.info("REFRESH RESPONSE=" + response);
+
+		String accessToken = (String) response.get("access_token");
+
+		String newRefreshToken =
+			(String) response.get("refresh_token");
+
+		if (accessToken != null) {
+			appConfig.setValue(
+				AppConfig.PROP_OAUTH_ACCESSTOKEN,
+				accessToken);
+		}
+
+		if (newRefreshToken != null) {
+
+			logger.info(
+				"Updated refresh token received. Length="
+				+ newRefreshToken.length());
+
+			appConfig.setValue(
+				AppConfig.PROP_OAUTH_REFRESHTOKEN,
+				newRefreshToken);
+			appConfig.markDirty();
+			appConfig.save();
+
+			logger.info(
+				"TOKEN BEING WRITTEN="
+				+ newRefreshToken
+			);
+
+			logger.info(
+				"Updated refresh token saved to config");
+			
+			logger.info(
+				"REFRESH TOKEN AFTER SAVE="
+				+ appConfig.getString(
+					AppConfig.PROP_OAUTH_REFRESHTOKEN
+				)
+			);
+		}
+
+		return accessToken;
+	}
     /**
      * Handles the OAuth callback from Salesforce.
      */

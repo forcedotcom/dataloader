@@ -37,6 +37,7 @@ import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
+import com.salesforce.dataloader.util.OAuthServerFlow;
 import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.GetUserInfoResult;
 import com.sforce.soap.partner.LimitInfo;
@@ -50,6 +51,7 @@ import com.sforce.soap.partner.fault.UnexpectedErrorFault;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.SessionRenewer;
+import com.salesforce.dataloader.util.JwtBearerFlow;
 
 import org.apache.logging.log4j.Logger;
 import com.salesforce.dataloader.util.DLLogManager;
@@ -180,6 +182,15 @@ public class LoginClient extends ClientBase<PartnerConnection> {
     private boolean dologin() throws ConnectionException, ApiFault {
         // Attempt the login giving the user feedback
         logger.info(Messages.getString("Client.sforceLogin")); //$NON-NLS-1$
+		String refreshToken =
+			appConfig.getString(AppConfig.PROP_OAUTH_REFRESHTOKEN);
+
+		String secret =
+			appConfig.getEffectiveClientSecretForCurrentEnv();
+
+		if (refreshToken != null) {
+			logger.info("Refresh token length="	+ refreshToken.length());
+		}
         String oauthAccessToken = appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN);
         String serverUrl = appConfig.getAuthEndpointForCurrentEnv();
         if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
@@ -194,19 +205,111 @@ public class LoginClient extends ClientBase<PartnerConnection> {
         final PartnerConnection conn = Connector.newConnection(cc);
         // identify the client as dataloader
         conn.setCallOptions(ClientBase.getClientName(this.appConfig), null);
+		logger.info(
+			"JWT FLAG="
+			+ appConfig.getBoolean(
+			AppConfig.PROP_OAUTH_USE_JWT));
+		
+		logger.info(
+			"JWT USERNAME="
+			+ appConfig.getString(
+				AppConfig.PROP_OAUTH_JWT_USERNAME));	
 
-        try {
-            if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
-                setConfiguredSessionId(conn, oauthAccessToken, null);
-            } else if (appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL) && appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
-                setConfiguredSessionId(conn, appConfig.getString(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID), null);
-            } else {
-                setSessionRenewer(conn);
-                loginInternal(conn);
-            }
-        } catch (Exception ex) {
-            throw ex;
-        } finally {
+		logger.info(
+			"JWT KEY FILE="
+			+ appConfig.getString(
+			AppConfig.PROP_OAUTH_JWT_PRIVATE_KEY));
+			
+
+		// --- NEW: JWT Bearer path ---
+		if (appConfig.getBoolean(AppConfig.PROP_OAUTH_USE_JWT)) {
+			try {
+				logger.info("USING JWT BEARER PATH");
+				JwtBearerFlow jwtFlow = new JwtBearerFlow(appConfig);
+				JwtBearerFlow.TokenResponse tokens = jwtFlow.obtainAccessToken();
+
+				if (tokens != null && tokens.accessToken != null) {
+					// Re-use the existing session-setup method
+					setConfiguredSessionId(conn, tokens.accessToken, null);
+
+					// Optionally store instance URL if returned
+					if (tokens.instanceUrl != null) {
+						appConfig.setValue(AppConfig.PROP_OAUTH_INSTANCE_URL, tokens.instanceUrl);
+						appConfig.markDirty();
+						appConfig.save();
+					}
+					logger.info("JWT authentication succeeded");
+					return true;
+				}
+			} catch (Exception ex) {
+				logger.error("JWT Bearer authentication failed", ex);
+				// fall through or rethrow according to your preference
+			}
+		}
+		// --- END NEW ---
+		
+		try {
+
+			if (refreshToken != null
+					&& refreshToken.trim().length() > 0) {
+
+				try {
+
+					OAuthServerFlow flow =
+							new OAuthServerFlow(appConfig);
+
+					String newAccessToken =
+							flow.refreshAccessToken(
+									refreshToken);
+
+					logger.info("Refreshed token present="
+							+ (newAccessToken != null));
+
+					if (newAccessToken != null) {
+
+						setConfiguredSessionId(
+								conn,
+								newAccessToken,
+								null);
+
+						return true;
+					}
+
+				} catch (Exception ex) {
+
+					logger.error(
+							"Refresh token flow failed",
+							ex);
+				}
+				
+				setSessionRenewer(conn);
+				loginInternal(conn);
+
+			} else if (oauthAccessToken != null
+					&& oauthAccessToken.trim().length() > 0) {
+
+				setConfiguredSessionId(
+						conn,
+						oauthAccessToken,
+						null);
+
+			} else if (appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL)
+					&& appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
+
+				setConfiguredSessionId(
+						conn,
+						appConfig.getString(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID),
+						null);
+
+			} else {
+
+				setSessionRenewer(conn);
+				loginInternal(conn);
+			}
+
+		} catch (Exception ex) {
+			throw ex;
+		} finally {
             cc.setTraceMessage(savedIsTraceMessage);
         }
         return true;
@@ -225,7 +328,12 @@ public class LoginClient extends ClientBase<PartnerConnection> {
 
     private void setConfiguredSessionId(PartnerConnection conn, String sessionId, GetUserInfoResult userInfo) throws ConnectionException {
         String flowType = "unknown";
-        if (appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN) != null && appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN).trim().length() > 0) {
+		   // --- NEW: recognise JWT Bearer ---
+		if ("JWT Bearer".equals(appConfig.getLastOAuthFlow())) {
+			flowType = "JWT Bearer";
+		}
+        // --- END NEW ---
+		else if (appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN) != null && appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN).trim().length() > 0) {
             String lastFlow = appConfig.getLastOAuthFlow();
             if (lastFlow != null) {
                 flowType = "OAuth " + lastFlow + " Flow";
