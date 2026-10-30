@@ -63,16 +63,55 @@ public class OAuthFlowHandler {
      *
      * @return true if login was successful, false otherwise
      */
-    public boolean handleOAuthLogin() {
-        logger.info("Starting OAuth flow");
-        appConfig.setLastOAuthFlow("PKCE");
+	public boolean handleOAuthLogin() {
+		logger.info("Starting OAuth flow");
+		appConfig.setLastOAuthFlow("PKCE");
 
-        logger.info("Attempting OAuth WebServer with PKCE flow, launching browser for login");
+		String refreshToken =
+				appConfig.getString(
+						AppConfig.PROP_OAUTH_REFRESHTOKEN);
+
+		if (refreshToken != null
+				&& !refreshToken.trim().isEmpty()) {
+			logger.info("USING REFRESH TOKEN PATH");
+			logger.info(
+					"Refresh token found, skipping browser login");
+
+			try {
+
+				if (controller != null) {
+
+					if (controller.login()) {
+
+						controller.saveConfig();
+
+						if (!AppUtil.isRunningInBatchMode()) {
+
+							Display.getDefault().asyncExec(
+								() -> controller.updateLoaderWindowTitleAndCacheUserInfoForTheSession());
+
+						}
+
+						return true;
+					}
+				}
+
+			} catch (Exception ex) {
+
+				logger.error(
+						"Refresh token login failed",
+						ex);
+			}
+		}
+
+		logger.info(
+            "Attempting OAuth WebServer with PKCE flow, launching browser for login");
         if (statusConsumer != null) {
             statusConsumer.accept(Labels.getString("OAuthLoginControl.statusAttemptingPKCE"));
         }
         try {
             OAuthServerFlow pkceFlow = new OAuthServerFlow(appConfig, true, statusConsumer);
+			logger.info("USING BROWSER PATH");
             if (pkceFlow.performOAuthFlow()) {
                 logger.info("WebServer with PKCE flow completed successfully");
                 if (statusConsumer != null) {

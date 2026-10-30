@@ -37,6 +37,7 @@ import com.salesforce.dataloader.config.AppConfig;
 import com.salesforce.dataloader.config.Messages;
 import com.salesforce.dataloader.controller.Controller;
 import com.salesforce.dataloader.exception.PasswordExpiredException;
+import com.salesforce.dataloader.util.OAuthServerFlow;
 import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.GetUserInfoResult;
 import com.sforce.soap.partner.LimitInfo;
@@ -180,6 +181,15 @@ public class LoginClient extends ClientBase<PartnerConnection> {
     private boolean dologin() throws ConnectionException, ApiFault {
         // Attempt the login giving the user feedback
         logger.info(Messages.getString("Client.sforceLogin")); //$NON-NLS-1$
+		String refreshToken =
+			appConfig.getString(AppConfig.PROP_OAUTH_REFRESHTOKEN);
+
+		String secret =
+			appConfig.getEffectiveClientSecretForCurrentEnv();
+
+		if (refreshToken != null) {
+			logger.info("Refresh token length="	+ refreshToken.length());
+		}
         String oauthAccessToken = appConfig.getString(AppConfig.PROP_OAUTH_ACCESSTOKEN);
         String serverUrl = appConfig.getAuthEndpointForCurrentEnv();
         if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
@@ -194,19 +204,70 @@ public class LoginClient extends ClientBase<PartnerConnection> {
         final PartnerConnection conn = Connector.newConnection(cc);
         // identify the client as dataloader
         conn.setCallOptions(ClientBase.getClientName(this.appConfig), null);
+		
+		
+		try {
 
-        try {
-            if (oauthAccessToken != null && oauthAccessToken.trim().length() > 0) {
-                setConfiguredSessionId(conn, oauthAccessToken, null);
-            } else if (appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL) && appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
-                setConfiguredSessionId(conn, appConfig.getString(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID), null);
-            } else {
-                setSessionRenewer(conn);
-                loginInternal(conn);
-            }
-        } catch (Exception ex) {
-            throw ex;
-        } finally {
+			if (refreshToken != null
+					&& refreshToken.trim().length() > 0) {
+
+				try {
+
+					OAuthServerFlow flow =
+							new OAuthServerFlow(appConfig);
+
+					String newAccessToken =
+							flow.refreshAccessToken(
+									refreshToken);
+
+					logger.info("Refreshed token present="
+							+ (newAccessToken != null));
+
+					if (newAccessToken != null) {
+
+						setConfiguredSessionId(
+								conn,
+								newAccessToken,
+								null);
+
+						return true;
+					}
+
+				} catch (Exception ex) {
+
+					logger.error(
+							"Refresh token flow failed",
+							ex);
+				}
+				
+				setSessionRenewer(conn);
+				loginInternal(conn);
+
+			} else if (oauthAccessToken != null
+					&& oauthAccessToken.trim().length() > 0) {
+
+				setConfiguredSessionId(
+						conn,
+						oauthAccessToken,
+						null);
+
+			} else if (appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL)
+					&& appConfig.getBoolean(AppConfig.PROP_SFDC_INTERNAL_IS_SESSION_ID_LOGIN)) {
+
+				setConfiguredSessionId(
+						conn,
+						appConfig.getString(AppConfig.PROP_SFDC_INTERNAL_SESSION_ID),
+						null);
+
+			} else {
+
+				setSessionRenewer(conn);
+				loginInternal(conn);
+			}
+
+		} catch (Exception ex) {
+			throw ex;
+		} finally {
             cc.setTraceMessage(savedIsTraceMessage);
         }
         return true;

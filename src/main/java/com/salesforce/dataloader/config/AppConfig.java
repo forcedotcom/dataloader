@@ -538,7 +538,6 @@ public class AppConfig {
             */
             PROP_DELETE_WITH_EXTERNALID,
             PROP_OAUTH_ACCESSTOKEN,
-            PROP_OAUTH_REFRESHTOKEN,
             PROP_OAUTH_INSTANCE_URL,
             PROP_OAUTH_REDIRECT_URI_PROD,
             PROP_OAUTH_REDIRECT_URI_SB,
@@ -1088,6 +1087,7 @@ public class AppConfig {
         }
         FileInputStream in = new FileInputStream(filename);
         try {
+			logger.info("Config file=" + filename);
             load(in);
         } finally {
             in.close();
@@ -1192,7 +1192,9 @@ public class AppConfig {
             removeUnsupportedProperties();
         }
     }
-
+	public void markDirty() {
+		this.inMemoryPropValuesHaveChanged = true;
+	}
     private void decryptAndCacheProperty(Map<?, ?> values, String propertyName) throws ConfigInitializationException {
         @SuppressWarnings("unchecked")
         Map<String, String> propMap = (Map<String, String>)values;
@@ -1207,12 +1209,23 @@ public class AppConfig {
                     return; // do not decrypt an already decrypted value
                 }
             }
-            String propValue = decryptProperty(encrypter, propMap, propertyName, isBatchMode());
-            if (propValue == null) propValue = "";
-            propMap.put(propertyName, propValue);
-            
-            // cache decrypted value
-            propMap.put(propertyName + DECRYPTED_SUFFIX, propValue);
+			String propValue =
+				decryptProperty(
+					encrypter,
+					propMap,
+					propertyName,
+					isBatchMode());
+
+			if (propValue == null) {
+				propValue = "";
+			}
+
+			logger.info(
+				"Decrypted property: " + propertyName
+				+ " length=" + propValue.length());
+
+			propMap.put(propertyName, propValue);
+			propMap.put(propertyName + DECRYPTED_SUFFIX, propValue);
         }
     }
 
